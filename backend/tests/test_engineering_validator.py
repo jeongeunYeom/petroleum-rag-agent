@@ -82,12 +82,12 @@ def test_no_sources_requires_exact_refusal():
     validator = EngineeringValidator()
 
     passed = validator.validate_well_test_answer(
-        "Johansen Formation 값을 알려줘.",
+        "문서에 없는 유전의 생산량을 알려줘.",
         STRICT_REFUSAL,
         retrieved_sources=[],
     )
     failed = validator.validate_well_test_answer(
-        "Johansen Formation 값을 알려줘.",
+        "문서에 없는 유전의 생산량을 알려줘.",
         "주입률은 14,000 m3/day입니다.",
         retrieved_sources=[],
     )

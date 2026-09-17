@@ -46,32 +46,32 @@ def wait_for_task(client: TestClient, task_id: str) -> dict:
     raise AssertionError("Agent task did not finish in time")
 
 
-def write_co2_csv(agent_settings: Settings) -> Path:
-    target = agent_settings.agent_workspace_dir / "co2_result.csv"
+def write_reservoir_csv(agent_settings: Settings) -> Path:
+    target = agent_settings.agent_workspace_dir / "reservoir_result.csv"
     target.write_text(
-        "srco2,trapped_ratio,free_ratio,total_storage_mt\n"
-        "0.10,94.9,5.1,5.2\n"
-        "0.20,88.7,11.3,5.2\n"
-        "0.30,81.2,18.8,5.2\n"
-        "0.40,71.8,28.2,5.2\n",
+        "porosity,permeability,pressure,rate\n"
+        "0.10,120,25,30\n"
+        "0.20,135,24,28\n"
+        "0.30,145,23,26\n"
+        "0.40,160,22,24\n",
         encoding="utf-8",
     )
     return target
 
 
 def write_comparison_csvs(agent_settings: Settings) -> tuple[Path, Path]:
-    first = agent_settings.agent_workspace_dir / "srco2_0.10.csv"
-    second = agent_settings.agent_workspace_dir / "srco2_0.20.csv"
+    first = agent_settings.agent_workspace_dir / "sample_0.10.csv"
+    second = agent_settings.agent_workspace_dir / "sample_0.20.csv"
     first.write_text(
-        "step,trapped_ratio,free_ratio\n"
-        "1,94.0,6.0\n"
-        "2,95.0,5.0\n",
+        "step,permeability,pressure\n"
+        "1,120,25\n"
+        "2,122,24\n",
         encoding="utf-8",
     )
     second.write_text(
-        "step,trapped_ratio,free_ratio\n"
-        "1,88.0,12.0\n"
-        "2,90.0,10.0\n",
+        "step,permeability,pressure\n"
+        "1,135,23\n"
+        "2,137,22\n",
         encoding="utf-8",
     )
     return first, second
@@ -98,7 +98,7 @@ def test_conversation_groups_multiple_tasks_and_restores_them(
 ) -> None:
     created = client.post(
         "/api/agent/conversations",
-        json={"title": "CO2 결과 분석"},
+        json={"title": "저류층 결과 분석"},
     )
     assert created.status_code == 201
     conversation_id = created.json()["conversation_id"]
@@ -127,7 +127,7 @@ def test_conversation_groups_multiple_tasks_and_restores_them(
     restarted_service = AgentService(agent_settings)
     restored = restarted_service.get_conversation(conversation_id)
 
-    assert restored.title == "CO2 결과 분석"
+    assert restored.title == "저류층 결과 분석"
     assert restored.task_count == 2
     assert [task.task_id for task in restored.tasks] == [
         first.json()["task_id"],
@@ -628,17 +628,17 @@ def test_csv_columns_endpoint(
     client: TestClient,
     agent_settings: Settings,
 ) -> None:
-    write_co2_csv(agent_settings)
+    write_reservoir_csv(agent_settings)
 
     response = client.get(
         "/api/agent/csv-columns",
-        params={"path": "co2_result.csv"},
+        params={"path": "reservoir_result.csv"},
     )
 
     assert response.status_code == 200
     assert response.json() == {
-        "path": "co2_result.csv",
-        "columns": ["srco2", "trapped_ratio", "free_ratio", "total_storage_mt"],
+        "path": "reservoir_result.csv",
+        "columns": ["porosity", "permeability", "pressure", "rate"],
     }
 
 
@@ -651,11 +651,11 @@ def test_multi_csv_plan_uses_common_numeric_column(
     response = client.post(
         "/api/agent/plan",
         json={
-            "request": "두 CSV의 포획 비율을 비교해줘.",
-            "target_path": "srco2_0.10.csv",
-            "target_paths": ["srco2_0.10.csv", "srco2_0.20.csv"],
-            "compare_column": "trapped_ratio",
-            "output_path": "results/srco2_comparison.csv",
+            "request": "두 CSV의 투과도를 비교해줘.",
+            "target_path": "sample_0.10.csv",
+            "target_paths": ["sample_0.10.csv", "sample_0.20.csv"],
+            "compare_column": "permeability",
+            "output_path": "results/sample_comparison.csv",
             "permission_level": 3,
         },
     )
@@ -670,18 +670,18 @@ def test_multi_csv_plan_uses_common_numeric_column(
     )
     assert len(read_actions) == 2
     assert run_action["arguments"]["input_paths"] == [
-        "srco2_0.10.csv",
-        "srco2_0.20.csv",
+        "sample_0.10.csv",
+        "sample_0.20.csv",
     ]
-    assert run_action["arguments"]["compare_column"] == "trapped_ratio"
+    assert run_action["arguments"]["compare_column"] == "permeability"
     assert run_action["arguments"]["common_columns"] == [
         "step",
-        "trapped_ratio",
-        "free_ratio",
+        "permeability",
+        "pressure",
     ]
     assert run_action["arguments"]["expected_outputs"] == [
-        "results/srco2_comparison.csv",
-        "results/srco2_comparison.png",
+        "results/sample_comparison.csv",
+        "results/sample_comparison.png",
     ]
     assert "statistics.fmean" in run_action["preview"]
 
@@ -696,8 +696,8 @@ def test_multi_csv_plan_infers_paths_and_korean_column_alias(
         "/api/agent/plan",
         json={
             "request": (
-                "srco2_0.10.csv와 srco2_0.20.csv의 "
-                "포획된 CO₂ 비율을 비교해줘."
+                "sample_0.10.csv와 sample_0.20.csv의 "
+                "투과도를 비교해줘."
             ),
             "permission_level": 3,
         },
@@ -709,10 +709,10 @@ def test_multi_csv_plan_infers_paths_and_korean_column_alias(
         for action in response.json()["actions"]
         if action["tool"] == "run_python"
     )
-    assert run_action["arguments"]["compare_column"] == "trapped_ratio"
+    assert run_action["arguments"]["compare_column"] == "permeability"
     assert run_action["arguments"]["input_paths"] == [
-        "srco2_0.10.csv",
-        "srco2_0.20.csv",
+        "sample_0.10.csv",
+        "sample_0.20.csv",
     ]
 
 
@@ -751,10 +751,10 @@ def test_multi_csv_comparison_executes_and_validates_outputs(
     planned = client.post(
         "/api/agent/plan",
         json={
-            "request": "조건별 trapped_ratio를 비교해줘.",
-            "target_paths": ["srco2_0.10.csv", "srco2_0.20.csv"],
-            "compare_column": "trapped_ratio",
-            "output_path": "results/srco2_comparison.csv",
+            "request": "조건별 permeability를 비교해줘.",
+            "target_paths": ["sample_0.10.csv", "sample_0.20.csv"],
+            "compare_column": "permeability",
+            "output_path": "results/sample_comparison.csv",
             "permission_level": 3,
         },
     )
@@ -771,8 +771,8 @@ def test_multi_csv_comparison_executes_and_validates_outputs(
     assert result["status"] == "completed", result.get("error")
     assert result["validation_passed"] is True
     assert {
-        "results/srco2_comparison.csv",
-        "results/srco2_comparison.png",
+        "results/sample_comparison.csv",
+        "results/sample_comparison.png",
     }.issubset(result["created_files"])
     checks = [
         check
@@ -782,271 +782,30 @@ def test_multi_csv_comparison_executes_and_validates_outputs(
     assert any(check["name"] == "csv_content" and check["passed"] for check in checks)
     assert any(check["name"] == "png_integrity" and check["passed"] for check in checks)
 
-    output = agent_settings.agent_workspace_dir / "results/srco2_comparison.csv"
+    output = agent_settings.agent_workspace_dir / "results/sample_comparison.csv"
     with output.open("r", encoding="utf-8-sig", newline="") as handle:
         rows = list(csv.DictReader(handle))
     assert [row["source_file"] for row in rows] == [
-        "srco2_0.10.csv",
-        "srco2_0.20.csv",
+        "sample_0.10.csv",
+        "sample_0.20.csv",
     ]
-    assert [float(row["mean"]) for row in rows] == [94.5, 89.0]
-
-
-def test_mrst_co2_plan_maps_domain_columns_and_three_outputs(
-    client: TestClient,
-    agent_settings: Settings,
-) -> None:
-    write_co2_csv(agent_settings)
-
-    response = client.post(
-        "/api/agent/plan",
-        json={
-            "request": "MRST CO2 저장 결과를 분석해줘.",
-            "target_path": "co2_result.csv",
-            "analysis_profile": "mrst_co2",
-            "output_path": "results/storage_report.md",
-            "permission_level": 3,
-        },
-    )
-
-    assert response.status_code == 201, response.text
-    task = response.json()
-    run_action = next(
-        action for action in task["actions"] if action["tool"] == "run_python"
-    )
-    assert run_action["arguments"]["analysis_profile"] == "mrst_co2"
-    assert run_action["arguments"]["column_maps"] == {
-        "co2_result.csv": {
-            "srco2": "srco2",
-            "trapped_ratio": "trapped_ratio",
-            "free_ratio": "free_ratio",
-            "total_storage": "total_storage_mt",
-        }
-    }
-    assert run_action["arguments"]["expected_outputs"] == [
-        "results/storage_report.csv",
-        "results/storage_report.png",
-        "results/storage_report.md",
-    ]
-    assert "원본 CSV를 변경하지 않고" in " ".join(task["plan"])
-
-
-def test_mrst_co2_plan_is_inferred_from_domain_analysis_request(
-    client: TestClient,
-    agent_settings: Settings,
-) -> None:
-    write_co2_csv(agent_settings)
-
-    response = client.post(
-        "/api/agent/plan",
-        json={
-            "request": "co2_result.csv의 잔류 포화도별 포획 비율 경향을 분석해줘.",
-            "target_path": "co2_result.csv",
-            "permission_level": 3,
-        },
-    )
-
-    assert response.status_code == 201, response.text
-    run_action = next(
-        action
-        for action in response.json()["actions"]
-        if action["tool"] == "run_python"
-    )
-    assert run_action["arguments"]["analysis_profile"] == "mrst_co2"
-
-
-def test_mrst_co2_direct_ratios_execute_and_validate_all_outputs(
-    client: TestClient,
-    agent_settings: Settings,
-) -> None:
-    write_co2_csv(agent_settings)
-    planned = client.post(
-        "/api/agent/plan",
-        json={
-            "request": "MRST CO2 결과를 전용 분석해줘.",
-            "target_path": "co2_result.csv",
-            "analysis_profile": "mrst_co2",
-            "permission_level": 3,
-        },
-    )
-    assert planned.status_code == 201, planned.text
-    task = planned.json()
-
-    executed = client.post(
-        f"/api/agent/tasks/{task['task_id']}/execute",
-        json={"approved": True},
-    )
-    assert executed.status_code == 200
-    result = wait_for_task(client, task["task_id"])
-
-    assert result["status"] == "completed", result.get("error")
-    assert result["validation_passed"] is True
-    expected = {
-        "results/mrst_co2_analysis.csv",
-        "results/mrst_co2_analysis.png",
-        "results/mrst_co2_analysis.md",
-    }
-    assert expected.issubset(result["created_files"])
-    summary = agent_settings.agent_workspace_dir / "results/mrst_co2_analysis.csv"
-    with summary.open("r", encoding="utf-8-sig", newline="") as handle:
-        rows = list(csv.DictReader(handle))
-    assert float(rows[0]["srco2"]) == pytest.approx(0.1)
-    assert float(rows[0]["trapped_ratio_pct"]) == pytest.approx(94.9)
-    assert float(rows[-1]["free_ratio_pct"]) == pytest.approx(28.2)
-    assert rows[0]["storage_unit"] == "Mt"
-    assert rows[0]["calculation_basis"] == "direct_ratio"
-    report = (
-        agent_settings.agent_workspace_dir / "results/mrst_co2_analysis.md"
-    ).read_text(encoding="utf-8")
-    assert "Pearson r=" in report
-    assert "does not establish causality" in report
-
-
-def test_mrst_co2_derives_ratios_from_amount_columns(
-    client: TestClient,
-    agent_settings: Settings,
-) -> None:
-    (agent_settings.agent_workspace_dir / "mrst_amounts.csv").write_text(
-        "time_years,trapped_co2_mt,free_co2_mt,total_storage_mt\n"
-        "100,4,1,5\n"
-        "200,4.5,0.5,5\n",
-        encoding="utf-8",
-    )
-    planned = client.post(
-        "/api/agent/plan",
-        json={
-            "request": "MRST 저장량 결과를 분석해줘.",
-            "target_path": "mrst_amounts.csv",
-            "analysis_profile": "mrst_co2",
-            "output_path": "results/amount_analysis.md",
-            "permission_level": 3,
-        },
-    )
-    assert planned.status_code == 201, planned.text
-    task = planned.json()
-    client.post(
-        f"/api/agent/tasks/{task['task_id']}/execute",
-        json={"approved": True},
-    )
-    result = wait_for_task(client, task["task_id"])
-    assert result["status"] == "completed", result.get("error")
-
-    summary = agent_settings.agent_workspace_dir / "results/amount_analysis.csv"
-    with summary.open("r", encoding="utf-8-sig", newline="") as handle:
-        rows = list(csv.DictReader(handle))
-    assert [float(row["trapped_ratio_pct"]) for row in rows] == [80.0, 90.0]
-    assert [float(row["free_ratio_pct"]) for row in rows] == [20.0, 10.0]
-    assert all(
-        row["calculation_basis"] == "derived_from_trapped_and_free_amounts"
-        for row in rows
-    )
-
-
-def test_mrst_co2_normalizes_fraction_ratios_to_percent(
-    client: TestClient,
-    agent_settings: Settings,
-) -> None:
-    (agent_settings.agent_workspace_dir / "fraction_ratios.csv").write_text(
-        "srco2,trapped_ratio,free_ratio\n0.1,0.8,0.2\n",
-        encoding="utf-8",
-    )
-    planned = client.post(
-        "/api/agent/plan",
-        json={
-            "request": "MRST CO2 비율을 분석해줘.",
-            "target_path": "fraction_ratios.csv",
-            "analysis_profile": "mrst_co2",
-            "output_path": "results/fractions.md",
-            "permission_level": 3,
-        },
-    )
-    assert planned.status_code == 201, planned.text
-    task = planned.json()
-    client.post(
-        f"/api/agent/tasks/{task['task_id']}/execute",
-        json={"approved": True},
-    )
-    result = wait_for_task(client, task["task_id"])
-    assert result["status"] == "completed", result.get("error")
-
-    with (
-        agent_settings.agent_workspace_dir / "results/fractions.csv"
-    ).open("r", encoding="utf-8-sig", newline="") as handle:
-        row = next(csv.DictReader(handle))
-    assert float(row["trapped_ratio_pct"]) == 80.0
-    assert float(row["free_ratio_pct"]) == 20.0
-
-
-def test_mrst_co2_multiple_files_infer_srco2_from_filenames(
-    client: TestClient,
-    agent_settings: Settings,
-) -> None:
-    for filename, trapped in (("srco2_0.10.csv", 95), ("srco2_0.20.csv", 89)):
-        (agent_settings.agent_workspace_dir / filename).write_text(
-            f"trapped_ratio,free_ratio\n{trapped},{100 - trapped}\n",
-            encoding="utf-8",
-        )
-    planned = client.post(
-        "/api/agent/plan",
-        json={
-            "request": "MRST CO2 조건별 결과를 분석해줘.",
-            "target_paths": ["srco2_0.10.csv", "srco2_0.20.csv"],
-            "analysis_profile": "mrst_co2",
-            "output_path": "results/conditions.md",
-            "permission_level": 3,
-        },
-    )
-    assert planned.status_code == 201, planned.text
-    task = planned.json()
-    client.post(
-        f"/api/agent/tasks/{task['task_id']}/execute",
-        json={"approved": True},
-    )
-    result = wait_for_task(client, task["task_id"])
-    assert result["status"] == "completed", result.get("error")
-
-    with (
-        agent_settings.agent_workspace_dir / "results/conditions.csv"
-    ).open("r", encoding="utf-8-sig", newline="") as handle:
-        rows = list(csv.DictReader(handle))
-    assert [float(row["srco2"]) for row in rows] == [0.1, 0.2]
-
-
-def test_mrst_co2_plan_rejects_csv_without_ratio_or_amount_columns(
-    client: TestClient,
-    agent_settings: Settings,
-) -> None:
-    (agent_settings.agent_workspace_dir / "pressure.csv").write_text(
-        "time_years,pressure_bar\n100,250\n",
-        encoding="utf-8",
-    )
-    response = client.post(
-        "/api/agent/plan",
-        json={
-            "request": "MRST CO2 결과를 분석해줘.",
-            "target_path": "pressure.csv",
-            "analysis_profile": "mrst_co2",
-            "permission_level": 3,
-        },
-    )
-    assert response.status_code == 400
-    assert "trapped/free" in response.json()["detail"]
+    assert [float(row["mean"]) for row in rows] == [121.0, 136.0]
 
 
 def test_scatter_plan_uses_explicit_columns(
     client: TestClient,
     agent_settings: Settings,
 ) -> None:
-    write_co2_csv(agent_settings)
+    write_reservoir_csv(agent_settings)
 
     response = client.post(
         "/api/agent/plan",
         json={
-            "request": "co2_result.csv로 산점도를 만들어줘.",
-            "target_path": "co2_result.csv",
+            "request": "reservoir_result.csv로 산점도를 만들어줘.",
+            "target_path": "reservoir_result.csv",
             "output_path": "results/selected.png",
-            "x_column": "trapped_ratio",
-            "y_column": "free_ratio",
+            "x_column": "permeability",
+            "y_column": "pressure",
             "permission_level": 3,
         },
     )
@@ -1056,27 +815,27 @@ def test_scatter_plan_uses_explicit_columns(
     run_action = next(
         action for action in task["actions"] if action["tool"] == "run_python"
     )
-    assert run_action["arguments"]["x_column"] == "trapped_ratio"
-    assert run_action["arguments"]["y_column"] == "free_ratio"
-    assert "x_name = 'trapped_ratio'" in run_action["preview"]
-    assert "y_name = 'free_ratio'" in run_action["preview"]
-    assert "X축은 trapped_ratio, Y축은 free_ratio" in " ".join(task["plan"])
+    assert run_action["arguments"]["x_column"] == "permeability"
+    assert run_action["arguments"]["y_column"] == "pressure"
+    assert "x_name = 'permeability'" in run_action["preview"]
+    assert "y_name = 'pressure'" in run_action["preview"]
+    assert "X축은 permeability, Y축은 pressure" in " ".join(task["plan"])
 
 
 def test_scatter_plan_infers_korean_column_aliases(
     client: TestClient,
     agent_settings: Settings,
 ) -> None:
-    write_co2_csv(agent_settings)
+    write_reservoir_csv(agent_settings)
 
     response = client.post(
         "/api/agent/plan",
         json={
             "request": (
-                "co2_result.csv에서 포획된 CO₂ 비율과 자유 상태 CO₂ 비율의 "
+                "reservoir_result.csv에서 투과도와 압력의 "
                 "관계를 산점도로 만들어줘."
             ),
-            "target_path": "co2_result.csv",
+            "target_path": "reservoir_result.csv",
             "output_path": "results/inferred.png",
             "permission_level": 3,
         },
@@ -1087,25 +846,25 @@ def test_scatter_plan_infers_korean_column_aliases(
     run_action = next(
         action for action in task["actions"] if action["tool"] == "run_python"
     )
-    assert run_action["arguments"]["x_column"] == "trapped_ratio"
-    assert run_action["arguments"]["y_column"] == "free_ratio"
+    assert run_action["arguments"]["x_column"] == "permeability"
+    assert run_action["arguments"]["y_column"] == "pressure"
 
 
 def test_line_chart_plan_uses_explicit_chart_type(
     client: TestClient,
     agent_settings: Settings,
 ) -> None:
-    write_co2_csv(agent_settings)
+    write_reservoir_csv(agent_settings)
 
     response = client.post(
         "/api/agent/plan",
         json={
             "request": "시간 순서처럼 값의 변화를 그래프로 보여줘.",
-            "target_path": "co2_result.csv",
-            "output_path": "results/trapped_line.png",
+            "target_path": "reservoir_result.csv",
+            "output_path": "results/permeability_line.png",
             "chart_type": "line",
-            "x_column": "srco2",
-            "y_column": "trapped_ratio",
+            "x_column": "porosity",
+            "y_column": "permeability",
             "permission_level": 3,
         },
     )
@@ -1116,8 +875,8 @@ def test_line_chart_plan_uses_explicit_chart_type(
         action for action in task["actions"] if action["tool"] == "run_python"
     )
     assert run_action["arguments"]["chart_type"] == "line"
-    assert run_action["arguments"]["x_column"] == "srco2"
-    assert run_action["arguments"]["y_column"] == "trapped_ratio"
+    assert run_action["arguments"]["x_column"] == "porosity"
+    assert run_action["arguments"]["y_column"] == "permeability"
     assert "plt.plot" in run_action["preview"]
 
 
@@ -1125,16 +884,16 @@ def test_bar_chart_plan_is_inferred_from_korean_request(
     client: TestClient,
     agent_settings: Settings,
 ) -> None:
-    write_co2_csv(agent_settings)
+    write_reservoir_csv(agent_settings)
 
     response = client.post(
         "/api/agent/plan",
         json={
             "request": (
-                "co2_result.csv에서 srco2와 trapped_ratio를 "
+                "reservoir_result.csv에서 porosity와 permeability를 "
                 "막대그래프로 만들어줘."
             ),
-            "target_path": "co2_result.csv",
+            "target_path": "reservoir_result.csv",
             "permission_level": 3,
         },
     )
@@ -1146,8 +905,8 @@ def test_bar_chart_plan_is_inferred_from_korean_request(
         if action["tool"] == "run_python"
     )
     assert run_action["arguments"]["chart_type"] == "bar"
-    assert run_action["arguments"]["x_column"] == "srco2"
-    assert run_action["arguments"]["y_column"] == "trapped_ratio"
+    assert run_action["arguments"]["x_column"] == "porosity"
+    assert run_action["arguments"]["y_column"] == "permeability"
     assert "plt.bar" in run_action["preview"]
 
 
@@ -1155,16 +914,16 @@ def test_histogram_plan_uses_one_numeric_column(
     client: TestClient,
     agent_settings: Settings,
 ) -> None:
-    write_co2_csv(agent_settings)
+    write_reservoir_csv(agent_settings)
 
     response = client.post(
         "/api/agent/plan",
         json={
-            "request": "co2_result.csv의 포획 비율 분포를 보여줘.",
-            "target_path": "co2_result.csv",
-            "output_path": "results/trapped_histogram.png",
+            "request": "reservoir_result.csv의 투과도 분포를 보여줘.",
+            "target_path": "reservoir_result.csv",
+            "output_path": "results/permeability_histogram.png",
             "chart_type": "histogram",
-            "x_column": "trapped_ratio",
+            "x_column": "permeability",
             "permission_level": 3,
         },
     )
@@ -1176,7 +935,7 @@ def test_histogram_plan_uses_one_numeric_column(
         if action["tool"] == "run_python"
     )
     assert run_action["arguments"]["chart_type"] == "histogram"
-    assert run_action["arguments"]["x_column"] == "trapped_ratio"
+    assert run_action["arguments"]["x_column"] == "permeability"
     assert "y_column" not in run_action["arguments"]
     assert "plt.hist" in run_action["preview"]
 
@@ -1185,15 +944,15 @@ def test_scatter_plan_rejects_unknown_column(
     client: TestClient,
     agent_settings: Settings,
 ) -> None:
-    write_co2_csv(agent_settings)
+    write_reservoir_csv(agent_settings)
 
     response = client.post(
         "/api/agent/plan",
         json={
-            "request": "co2_result.csv로 산점도를 만들어줘.",
-            "target_path": "co2_result.csv",
+            "request": "reservoir_result.csv로 산점도를 만들어줘.",
+            "target_path": "reservoir_result.csv",
             "x_column": "missing_column",
-            "y_column": "free_ratio",
+            "y_column": "pressure",
             "permission_level": 3,
         },
     )
@@ -1201,23 +960,23 @@ def test_scatter_plan_rejects_unknown_column(
     assert response.status_code == 400
     detail = response.json()["detail"]
     assert "missing_column" in detail
-    assert "trapped_ratio" in detail
+    assert "permeability" in detail
 
 
 def test_scatter_executes_with_selected_columns(
     client: TestClient,
     agent_settings: Settings,
 ) -> None:
-    write_co2_csv(agent_settings)
+    write_reservoir_csv(agent_settings)
 
     planned = client.post(
         "/api/agent/plan",
         json={
-            "request": "co2_result.csv로 산점도를 만들어줘.",
-            "target_path": "co2_result.csv",
-            "output_path": "results/trapped_vs_free.png",
-            "x_column": "trapped_ratio",
-            "y_column": "free_ratio",
+            "request": "reservoir_result.csv로 산점도를 만들어줘.",
+            "target_path": "reservoir_result.csv",
+            "output_path": "results/permeability_vs_pressure.png",
+            "x_column": "permeability",
+            "y_column": "pressure",
             "permission_level": 3,
         },
     )
@@ -1238,8 +997,8 @@ def test_scatter_executes_with_selected_columns(
         for record in result["validation_records"]
         for check in record["checks"]
     )
-    assert "results/trapped_vs_free.png" in result["created_files"]
-    output = agent_settings.agent_workspace_dir / "results/trapped_vs_free.png"
+    assert "results/permeability_vs_pressure.png" in result["created_files"]
+    output = agent_settings.agent_workspace_dir / "results/permeability_vs_pressure.png"
     assert output.is_file()
     assert output.stat().st_size > 0
 
@@ -1248,16 +1007,16 @@ def test_histogram_executes_and_creates_valid_png(
     client: TestClient,
     agent_settings: Settings,
 ) -> None:
-    write_co2_csv(agent_settings)
+    write_reservoir_csv(agent_settings)
 
     planned = client.post(
         "/api/agent/plan",
         json={
-            "request": "co2_result.csv의 trapped_ratio 히스토그램을 만들어줘.",
-            "target_path": "co2_result.csv",
-            "output_path": "results/trapped_histogram.png",
+            "request": "reservoir_result.csv의 permeability 히스토그램을 만들어줘.",
+            "target_path": "reservoir_result.csv",
+            "output_path": "results/permeability_histogram.png",
             "chart_type": "histogram",
-            "x_column": "trapped_ratio",
+            "x_column": "permeability",
             "permission_level": 3,
         },
     )
@@ -1278,7 +1037,7 @@ def test_histogram_executes_and_creates_valid_png(
         for record in result["validation_records"]
         for check in record["checks"]
     )
-    assert "results/trapped_histogram.png" in result["created_files"]
+    assert "results/permeability_histogram.png" in result["created_files"]
 
 
 @pytest.mark.parametrize("chart_type", ["line", "bar"])
@@ -1287,18 +1046,18 @@ def test_two_axis_chart_types_execute_and_create_valid_png(
     agent_settings: Settings,
     chart_type: str,
 ) -> None:
-    write_co2_csv(agent_settings)
-    output_path = f"results/trapped_{chart_type}.png"
+    write_reservoir_csv(agent_settings)
+    output_path = f"results/reservoir_{chart_type}.png"
 
     planned = client.post(
         "/api/agent/plan",
         json={
-            "request": "srco2에 따른 trapped_ratio 변화를 보여줘.",
-            "target_path": "co2_result.csv",
+            "request": "porosity에 따른 permeability 변화를 보여줘.",
+            "target_path": "reservoir_result.csv",
             "output_path": output_path,
             "chart_type": chart_type,
-            "x_column": "srco2",
-            "y_column": "trapped_ratio",
+            "x_column": "porosity",
+            "y_column": "permeability",
             "permission_level": 3,
         },
     )
@@ -1388,7 +1147,7 @@ def test_edit_creates_backup_after_approval(
             "request": "분석 코드의 그래프 제목을 변경해줘.",
             "target_path": "plot.py",
             "old_text": "Old title",
-            "new_text": "CO2 Storage Ratio",
+            "new_text": "Reservoir Pressure",
             "permission_level": 3,
         },
     )
@@ -1398,7 +1157,7 @@ def test_edit_creates_backup_after_approval(
         action for action in task["actions"] if action["tool"] == "edit_file"
     )
     assert "Old title" in edit_action["preview"]
-    assert "CO2 Storage Ratio" in edit_action["preview"]
+    assert "Reservoir Pressure" in edit_action["preview"]
 
     executed = client.post(
         f"/api/agent/tasks/{task['task_id']}/execute",
@@ -1407,7 +1166,7 @@ def test_edit_creates_backup_after_approval(
     assert executed.status_code == 200
     result = wait_for_task(client, task["task_id"])
     assert result["status"] == "completed"
-    assert target.read_text(encoding="utf-8") == 'title = "CO2 Storage Ratio"\n'
+    assert target.read_text(encoding="utf-8") == 'title = "Reservoir Pressure"\n'
     assert result["backups"]
     backup = agent_settings.data_dir / result["backups"][0]
     assert backup.is_file()
