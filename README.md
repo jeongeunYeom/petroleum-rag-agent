@@ -248,6 +248,13 @@ curl http://127.0.0.1:8000/api/system/checklist
 
 ## 테스트
 
+PDF 업로드부터 ChromaDB 영구 저장, 온톨로지 graph, 문서·청크 수와 페이지 출처까지 확인하는 오프라인 통합 테스트(임베딩과 답변 모델은 테스트용 대체 구현 사용):
+
+```bash
+cd backend
+python -m pytest -q tests/test_pdf_ontology_flow.py
+```
+
 백엔드 Agent 테스트:
 
 ```bash
