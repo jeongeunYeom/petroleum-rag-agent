@@ -42,7 +42,7 @@ def test_relation_graph_includes_aliases_and_chunk_cooccurrence(tmp_path):
         "relation": "alias_of",
         "target": "bottomhole_pressure",
         "source_type": "ontology",
-        "ontology_version": "v0.1",
+        "ontology_version": "v0.2",
     } in edges
     assert any(
         edge["relation"] == "co_occurs_with"

@@ -227,7 +227,7 @@ def test_no_hits_logs_exact_refusal_without_generation(
 
     response = asyncio.run(
         service.answer(
-            "Johansen Formation의 주입률을 알려줘.",
+            "문서에 없는 유전의 생산량을 알려줘.",
             benchmark_id="WT-011",
         )
     )
@@ -334,7 +334,7 @@ def test_strict_refusal_hides_irrelevant_display_sources(tmp_path):
 
     response = asyncio.run(
         service.answer(
-            "Johansen Formation의 주입률을 알려줘."
+            "문서에 없는 유전의 생산량을 알려줘."
         )
     )
 

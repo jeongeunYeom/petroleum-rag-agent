@@ -21,13 +21,15 @@ petroleum-rag-agent의 목표는 단순한 질의응답을 넘어 PDF와 연구 
 - BGE-M3 임베딩과 ChromaDB 영구 저장
 - 질문 유형에 따른 검색 전략 선택
 - 검색 문서에 근거한 답변과 문서·페이지 출처 표시
-- Ontology v0.1 concept metadata와 간단한 relation graph 생성
+- Ontology v0.2 concept metadata와 간단한 relation graph 생성
 - 문서별 relation graph를 `data/ontology/<document_id>.jsonl`에 저장
 - 업로드 완료 후 문서 목록과 Documents/Chunks 상태 자동 갱신
 - RAG 채팅 기록은 새 메시지가 생긴 경우에만 최근 대화 순서 갱신
 - PDF 그림 추출, Vision 모델 분석 및 Figure Note 저장
 - 관련 그림과 Plotly 그래프 표시
 - Figure Review 및 성능 평가 화면
+
+기존에 인덱싱한 문서의 ontology metadata와 graph 파일은 자동으로 갱신되지 않습니다. 변경된 concept 사전을 적용하려면 해당 문서를 다시 인덱싱해야 합니다.
 
 근거가 부족한 경우 모델이 임의로 답하지 않고 다음과 같이 응답하도록 구성합니다.
 

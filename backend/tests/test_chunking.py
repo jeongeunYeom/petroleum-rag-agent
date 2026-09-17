@@ -35,7 +35,7 @@ def test_chunk_pages_adds_ontology_metadata():
 
     metadata = chunks[0]["metadata"]
 
-    assert metadata["ontology_version"] == "v0.1"
+    assert metadata["ontology_version"] == "v0.2"
     assert metadata["domain"] == "petroleum_engineering"
     assert metadata["concept_count"] >= 4
     assert "porosity" in metadata["concepts"]

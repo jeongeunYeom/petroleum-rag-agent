@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 
-ONTOLOGY_VERSION = "v0.1"
+ONTOLOGY_VERSION = "v0.2"
 DOMAIN = "petroleum_engineering"
 
 CONCEPT_SYNONYMS: dict[str, tuple[str, ...]] = {
@@ -37,13 +37,6 @@ CONCEPT_SYNONYMS: dict[str, tuple[str, ...]] = {
         "pc",
         "모세관압",
     ),
-    "co2_storage": (
-        "co2 storage",
-        "co₂ storage",
-        "carbon storage",
-        "geological storage",
-        "지중저장",
-    ),
     "formation_resistivity_factor": (
         "formation resistivity factor",
         "resistivity factor",
@@ -53,14 +46,6 @@ CONCEPT_SYNONYMS: dict[str, tuple[str, ...]] = {
         "fracture pressure",
         "fracture gradient",
         "파쇄압",
-    ),
-    "free_co2": (
-        "free co2",
-        "free co₂",
-        "mobile co2",
-        "mobile co₂",
-        "자유 co2",
-        "자유 co₂",
     ),
     "mud_weight": (
         "mud weight",
@@ -93,23 +78,6 @@ CONCEPT_SYNONYMS: dict[str, tuple[str, ...]] = {
         "radial-flow",
         "방사형 유동",
     ),
-    "residual_co2_saturation": (
-        "residual co2 saturation",
-        "residual co₂ saturation",
-        "residual gas saturation",
-        "srco2",
-        "srco₂",
-        "잔류 co2 포화도",
-        "잔류 co₂ 포화도",
-    ),
-    "trapped_co2": (
-        "trapped co2",
-        "trapped co₂",
-        "residual trapping",
-        "structural trapping",
-        "포획 co2",
-        "포획 co₂",
-    ),
     "water_saturation": (
         "water saturation",
         "sw",
@@ -127,7 +95,6 @@ ALIAS_RELATIONS: tuple[tuple[str, str], ...] = (
     ("bhp", "bottomhole_pressure"),
     ("ppg", "mud_weight"),
     ("sg", "mud_weight"),
-    ("srco2", "residual_co2_saturation"),
     ("sw", "water_saturation"),
 )
 
