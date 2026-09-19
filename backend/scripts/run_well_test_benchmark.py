@@ -781,11 +781,13 @@ def main() -> int:
                     for source in (response.get("web_sources") or [])
                 ]
                 validation = response.get("validation") or {}
-                citation_correctness = not bool(
-                    validation.get("invalid_citations")
-                )
                 unsupported_claim_count = int(
                     validation.get("unsupported_claim_count") or 0
+                )
+                citation_correctness = (
+                    not bool(validation.get("invalid_citations"))
+                    and unsupported_claim_count == 0
+                    and bool(validation.get("valid_citations"))
                 )
             else:
                 final_answer, generation_seconds = direct_ollama_answer(

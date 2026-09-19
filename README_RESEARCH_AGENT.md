@@ -24,7 +24,14 @@ refusal, and detected KB/web conflicts receive a mandatory neutral disclosure.
 The internal retriever independently combines the existing BGE-M3/Chroma dense
 index with the collection's keyword search using Reciprocal Rank Fusion. It
 uses the existing collection read-only; no re-embedding or second knowledge
-base is created. DDGS results are normalized and deduplicated in memory only.
+base is created. Dense-only candidates below a conservative similarity floor
+and sparse candidates without enough literal query overlap are rejected before
+fusion. DDGS results are normalized and deduplicated in memory only.
+
+Generated answers are filtered line by line: uncited claims, unknown IDs, and
+KB/WEB citations placed in the wrong evidence section are removed. A single
+bounded repair pass is attempted when the local model omits citations; failure
+of that optional repair keeps the already-filtered first answer.
 
 ## API
 

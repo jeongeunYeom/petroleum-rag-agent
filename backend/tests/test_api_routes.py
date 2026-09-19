@@ -21,6 +21,7 @@ def test_refactored_routes_are_registered() -> None:
     assert "/api/review/candidates/{candidate_id}/preview" in paths
     assert "/api/review/candidates/{candidate_id}/preview-image" in paths
     assert "/api/review/audit" in paths
+    assert "/api/research/evidence" in paths
 
 
 def test_invalid_evaluation_run_id_returns_404() -> None:
