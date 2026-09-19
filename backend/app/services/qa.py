@@ -1,5 +1,6 @@
 import re
 import time
+import inspect
 from pathlib import Path
 from urllib.parse import quote
 
@@ -95,7 +96,7 @@ Rules:
 2. Do NOT infer from the document title, general petroleum-engineering knowledge, or model memory.
 3. Use the exact refusal "제공된 문서 근거로는 확인할 수 없습니다." only when the retrieved chunks support no substantive part of the question.
 4. For a multi-part question with partial evidence, answer every supported part with citations and state specifically which unsupported subpart cannot be confirmed. Do not refuse the entire question when any substantive part is supported.
-5. Every factual sentence must be supported by a cited source marker like [document, p.page].
+5. Every factual sentence must be supported by a cited source marker like [S1].
 6. Do not mention topics that are not present in the retrieved chunks.
 7. Answer in Korean unless the source terminology is English.
 8. For figure questions, distinguish axis labels from plotted series. Never call x_axis or y_axis a series. Use series_descriptions and trend_summary to describe series behavior.
@@ -139,6 +140,14 @@ class QAService:
         )
         self.engineering_validator = EngineeringValidator()
         self.agent_run_logger = AgentRunLogger(agent_runs_dir)
+        self.last_debug: dict = {}
+
+    async def _chat(self, messages: list[dict[str, str]], model: str) -> str:
+        """Keep lightweight test/local adapters compatible with model-aware clients."""
+        parameters = inspect.signature(self.ollama.chat).parameters
+        if "model" in parameters:
+            return await self.ollama.chat(messages, model=model)
+        return await self.ollama.chat(messages)
 
     def retrieve_evidence(
         self,
@@ -227,6 +236,7 @@ class QAService:
             )
 
         if not prepared["hits"]:
+            refusal_answer = prepared.get("refusal") or STRICT_REFUSAL
             validation = (
                 self.engineering_validator
                 .validate_well_test_answer(
@@ -250,7 +260,7 @@ class QAService:
                     "attempts": [
                         self._attempt_record(
                             1,
-                            STRICT_REFUSAL,
+                            refusal_answer,
                             0.0,
                             validation,
                         )
@@ -264,7 +274,7 @@ class QAService:
                 }
             )
             return ChatResponse(
-                answer=STRICT_REFUSAL,
+                answer=refusal_answer,
                 sources=[],
                 query_type=prepared["query_type"].value,
                 figures=[],
@@ -315,11 +325,15 @@ class QAService:
             }
         )
 
+        answer, cited_sources = self._finalize_source_ids(
+            str(answer or ""),
+            prepared["sources"],
+        )
         is_strict_refusal = (
             str(answer or "").strip() == STRICT_REFUSAL
         )
         display_sources = (
-            [] if is_strict_refusal else prepared["sources"]
+            [] if is_strict_refusal else cited_sources
         )
         display_figures = (
             [] if is_strict_refusal else prepared["figures"]
@@ -359,10 +373,7 @@ class QAService:
 
         for attempt_number in range(1, 4):
             started = time.perf_counter()
-            answer = await self.ollama.chat(
-                messages,
-                model=selected_model,
-            )
+            answer = await self._chat(messages, selected_model)
             elapsed = time.perf_counter() - started
             total_generation_elapsed += elapsed
 
@@ -682,10 +693,7 @@ class QAService:
         answers: list[ModelAnswer] = []
         for model in selected_models:
             started = time.perf_counter()
-            answer = await self.ollama.chat(
-                prepared["messages"],
-                model=model,
-            )
+            answer = await self._chat(prepared["messages"], model)
             elapsed = time.perf_counter() - started
 
             if str(answer or "").strip().startswith(STRICT_REFUSAL):
@@ -723,23 +731,6 @@ class QAService:
         query_type = classify_query(question)
         retrieval_started = time.perf_counter()
 
-        if query_type == QueryType.AGGREGATE_ANALYSIS:
-            aggregate = self._aggregate_response(
-                question,
-                query_type,
-            )
-            return {
-                "aggregate": aggregate,
-                "query_type": query_type,
-                "hits": [],
-                "sources": aggregate.sources,
-                "figures": aggregate.figures,
-                "messages": [],
-                "retrieval_elapsed_seconds": (
-                    time.perf_counter() - retrieval_started
-                ),
-            }
-
         search_question = self._build_search_question(question)
         hits = self._retrieve(
             search_question,
@@ -747,6 +738,15 @@ class QAService:
             top_k or self.settings.top_k,
             original_question=question,
         )
+        if query_type == QueryType.AGGREGATE_ANALYSIS:
+            hits = self._limit_aggregate_context(hits)
+        if self._is_figure_question(question) and not any(
+            self._has_figure_evidence(hit) for hit in hits
+        ):
+            hits = []
+            figure_refusal = "구조화된 그래프 근거를 찾지 못해 확인할 수 없습니다."
+        else:
+            figure_refusal = None
 
         if not hits:
             return {
@@ -756,6 +756,7 @@ class QAService:
                 "sources": [],
                 "figures": [],
                 "messages": [],
+                "refusal": figure_refusal,
                 "retrieval_elapsed_seconds": (
                     time.perf_counter() - retrieval_started
                 ),
@@ -763,7 +764,7 @@ class QAService:
 
         context_blocks = []
         sources = []
-        for hit in hits:
+        for source_index, hit in enumerate(hits, start=1):
             metadata = hit["metadata"]
             score = float(hit.get("score") or 0.0)
             document_name = clean_document_name(
@@ -772,7 +773,8 @@ class QAService:
             page_number = metadata.get("page")
 
             context_blocks.append(
-                f"Source: {document_name} p.{page_number} "
+                f"Source ID: S{source_index}\n"
+                f"Document: {document_name}\nPage: {page_number}\n"
                 f"chunk {hit['id']} score={score:.3f}\n"
                 f"{hit['text']}"
             )
@@ -804,7 +806,14 @@ class QAService:
             "part of this question, answer the supported part "
             "and identify only the unsupported subpart. Use the "
             "full refusal only when no substantive part is "
-            "supported.\n\n"
+            "supported. Cite source IDs as [S1], [S2], and so on.\n\n"
+            + (
+                "Aggregate queries use a limited evidence context; report this limitation "
+                "and do not imply a complete corpus count.\n\n"
+                if query_type == QueryType.AGGREGATE_ANALYSIS
+                else ""
+            )
+            +
             "Retrieved chunks. You must not use any information "
             "outside these chunks:\n"
             + "\n\n---\n\n".join(context_blocks)
@@ -1682,6 +1691,112 @@ class QAService:
         if not text or text.lower() in {"null", "none", "unknown"}:
             return None
         return text
+
+    def _has_figure_evidence(self, hit: dict) -> bool:
+        """Accept only structured Figure Notes backed by an existing image."""
+        text = str(hit.get("text") or "")
+        text = re.sub(r"(?im)^image\s+path\s*:", "image_path:", text)
+        text = re.sub(r"(?im)^image\s+type\s*:", "image_type:", text)
+        for fields in self._figure_note_fields(text):
+            try:
+                confidence = float(fields.get("confidence") or 0.0)
+            except (TypeError, ValueError):
+                continue
+            if confidence < self.settings.figure_note_min_confidence:
+                continue
+            image_type = str(fields.get("image_type") or "").lower()
+            if image_type in {"logo", "decorative", "page_decoration"}:
+                continue
+            raw_path = Path(str(fields.get("image_path") or ""))
+            candidates = [raw_path]
+            if not raw_path.is_absolute():
+                candidates.append(self.settings.figures_dir / raw_path.name)
+            if any(path.is_file() for path in candidates):
+                return True
+        return False
+
+    def _limit_aggregate_context(self, hits: list[dict]) -> list[dict]:
+        limited: list[dict] = []
+        characters = 0
+        for hit in hits:
+            text_length = len(str(hit.get("text") or ""))
+            if len(limited) >= self.settings.aggregate_context_max_chunks:
+                break
+            if limited and characters + text_length > self.settings.aggregate_context_max_characters:
+                break
+            limited.append(hit)
+            characters += text_length
+        self.last_debug.update(
+            {
+                "context_chunks_sent_to_llm": len(limited),
+                "context_characters_sent_to_llm": characters,
+                "dropped_by_context_limit": max(0, len(hits) - len(limited)),
+            }
+        )
+        return limited
+
+    def _finalize_source_ids(
+        self,
+        answer: str,
+        sources: list[Source],
+    ) -> tuple[str, list[Source]]:
+        ordered: list[int] = []
+        for value in re.findall(r"\[S(\d+)\]", answer):
+            index = int(value)
+            if 1 <= index <= len(sources) and index not in ordered:
+                ordered.append(index)
+        if not ordered:
+            self.last_debug["source_id_mapping"] = {}
+            return answer, sources
+
+        mapping = {
+            f"S{old}": f"S{new}"
+            for new, old in enumerate(ordered, start=1)
+        }
+
+        def replace(match: re.Match) -> str:
+            old = f"S{match.group(1)}"
+            return f"[{mapping[old]}]" if old in mapping else ""
+
+        finalized = re.sub(r"\[S(\d+)\]", replace, answer)
+        self.last_debug["source_id_mapping"] = mapping
+        return finalized, [sources[index - 1] for index in ordered]
+
+    @staticmethod
+    def _mud_window_fallback_answer(
+        sources: dict[str, Source],
+    ) -> tuple[str, list[Source]]:
+        usable = [
+            source
+            for source in sources.values()
+            if "table of contents" not in source.excerpt.lower()
+        ]
+        kick = next(
+            (
+                source
+                for source in usable
+                if "pore pressure" in source.excerpt.lower()
+                and any(term in source.excerpt.lower() for term in ("kick", "influx"))
+            ),
+            None,
+        )
+        loss = next(
+            (
+                source
+                for source in usable
+                if "fracture" in source.excerpt.lower()
+                and "lost circulation" in source.excerpt.lower()
+            ),
+            None,
+        )
+        if kick is None or loss is None:
+            return STRICT_REFUSAL, []
+        return (
+            "정수압이 공극압보다 낮으면 influx 또는 kick가 발생할 수 "
+            "있습니다. [S1]\n\n압력이 파쇄압을 넘으면 지층 파괴와 lost "
+            "circulation이 발생할 수 있습니다. [S2]",
+            [kick, loss],
+        )
 
     def _aggregate_response(self, question: str, query_type: QueryType) -> ChatResponse:
         if re.search(r"top\s*\d+|가장 많이|빈도|통계", question.lower()):

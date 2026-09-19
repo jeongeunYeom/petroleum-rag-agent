@@ -61,6 +61,32 @@ class RepairFailOllama:
         raise ExternalServiceError("repair unavailable")
 
 
+class StructuredOllama:
+    def __init__(self, answers):
+        self.answers = iter(answers)
+        self.calls = []
+
+    async def chat_structured(self, messages, schema, model=None):
+        self.calls.append((messages, schema, model))
+        return next(self.answers)
+
+
+class SemanticVectorStore(FakeVectorStore):
+    def embed(self, texts):
+        return [
+            [1.0, 0.0] if "unrelated" in text else [0.0, 1.0]
+            for text in texts
+        ]
+
+
+class QuerySemanticVectorStore(FakeVectorStore):
+    def embed(self, texts):
+        return [
+            [0.0, 1.0] if "mineral trapping" in text else [1.0, 0.0]
+            for text in texts
+        ]
+
+
 def make_agent(
     tmp_path: Path,
     *,
@@ -321,6 +347,146 @@ def test_repair_failure_keeps_safe_first_answer(tmp_path: Path) -> None:
 
     assert response.answer == "Supported claim. [KB1]"
     assert response.validation["repair_error"] == "repair unavailable"
+
+
+def test_structured_output_is_rendered_deterministically(tmp_path: Path) -> None:
+    hit = {
+        "id": "chunk-1",
+        "text": "Porosity is the fraction of pore volume in bulk volume.",
+        "metadata": {"filename": "formation.pdf", "page": 7},
+    }
+    ollama = StructuredOllama(
+        [
+            '{"internal":[{"claim":"Porosity is the fraction of pore volume in '
+            'bulk volume.","citations":["KB1"]}],"external":[],"synthesis":[],'
+            '"limitations":[]}'
+        ]
+    )
+    agent = make_agent(
+        tmp_path,
+        vector_store=FakeVectorStore(dense=[hit]),
+        ollama=ollama,
+    )
+
+    response = asyncio.run(
+        agent.research(ResearchRequest(query="porosity fraction", use_external=False))
+    )
+
+    assert len(ollama.calls) == 1
+    assert response.answer.startswith("1. 내부 지식베이스 근거")
+    assert "[KB1]" in response.answer
+    assert response.answer.endswith("[KB1]")
+    assert response.validation["structured_output"] is True
+
+
+def test_structured_validator_rejects_unsupported_numbers(tmp_path: Path) -> None:
+    agent = make_agent(tmp_path)
+    raw = (
+        '{"internal":['
+        '{"claim":"Measured porosity is 20%.","citations":["KB1"]},'
+        '{"claim":"Measured porosity is 35%.","citations":["KB1"]}],'
+        '"external":[],"synthesis":[],"limitations":[]}'
+    )
+
+    answer, validation, _ = agent.validate_structured_answer(
+        raw,
+        {"KB1": "Measured porosity is 20%."},
+        [],
+    )
+
+    assert "20%" in answer
+    assert "35%" not in answer
+    assert validation["numeric_rejections"] == 1
+    assert validation["valid_citations"] == ["KB1"]
+
+
+def test_structured_validator_rejects_unsupported_units(tmp_path: Path) -> None:
+    agent = make_agent(tmp_path)
+    raw = (
+        '{"internal":[{"claim":"Pressure is 20 psi.","citations":["KB1"]}],'
+        '"external":[],"synthesis":[],"limitations":[]}'
+    )
+
+    answer, validation, _ = agent.validate_structured_answer(
+        raw,
+        {"KB1": "Pressure is 20 MPa."},
+        [],
+    )
+
+    assert "20 psi" not in answer
+    assert validation["unit_rejections"] == 1
+
+    assert not ResearchAgent._units_are_grounded(
+        "Gradient is 1.58 psi/ft.",
+        "Gradient is 1.58 psi/m.",
+    )
+
+
+def test_equation_validation_accepts_only_source_rendering() -> None:
+    evidence = "The simplified equation is\nphi Sw = Rw / Rt."
+
+    assert ResearchAgent._equations_are_grounded(
+        "The simplified equation is phi Sw = Rw / Rt.",
+        evidence,
+    )
+    assert not ResearchAgent._equations_are_grounded(
+        "The equation is Sw^n = a Rw / (phi^m Rt).",
+        "The extracted source says Sw n = a Rw / phi m Rt.",
+    )
+
+
+def test_structured_validator_rejects_semantically_unrelated_claim(tmp_path: Path) -> None:
+    agent = make_agent(tmp_path, vector_store=SemanticVectorStore())
+    raw = (
+        '{"internal":[{"claim":"unrelated statement","citations":["KB1"]}],'
+        '"external":[],"synthesis":[],"limitations":[]}'
+    )
+
+    answer, validation, _ = agent.validate_structured_answer(
+        raw,
+        {"KB1": "Porosity describes pore volume."},
+        [],
+    )
+
+    assert "unrelated statement" not in answer
+    assert validation["semantic_rejections"] == 1
+    assert validation["valid_citations"] == []
+
+
+def test_structured_validator_rejects_claim_unrelated_to_query(tmp_path: Path) -> None:
+    agent = make_agent(tmp_path, vector_store=QuerySemanticVectorStore())
+    raw = (
+        '{"internal":[],"external":[{"claim":"Injection rate is stable.",'
+        '"citations":["WEB1"]}],"synthesis":[],"limitations":[]}'
+    )
+
+    answer, validation, _ = agent.validate_structured_answer(
+        raw,
+        {"WEB1": "Injection rate is stable."},
+        [],
+        "Explain CO2 mineral trapping",
+    )
+
+    assert "Injection rate is stable" not in answer
+    assert validation["semantic_rejections"] == 0
+    assert validation["query_relevance_rejections"] == 1
+
+
+def test_structured_validator_enforces_section_source_type(tmp_path: Path) -> None:
+    agent = make_agent(tmp_path)
+    raw = (
+        '{"internal":[{"claim":"Web-only fact.","citations":["WEB1"]}],'
+        '"external":[],"synthesis":[],"limitations":[]}'
+    )
+
+    answer, validation, _ = agent.validate_structured_answer(
+        raw,
+        {"WEB1": "Web-only fact."},
+        [],
+    )
+
+    assert "Web-only fact" not in answer
+    assert validation["malformed_rejections"] == 1
 
 
 def test_conflicting_internal_and_web_evidence_is_flagged(tmp_path: Path) -> None:

@@ -11,8 +11,9 @@ question -> route query -> BGE-M3/Chroma dense search --+
                   |                                      |
                   +-----> DDGS web search ---------------+-> normalized evidence
                                                          -> conflict checks
-                                                         -> Ollama synthesis
-                                                         -> citation validation
+                                                         -> Ollama JSON claims
+                                                         -> claim/evidence validation
+                                                         -> deterministic answer
 ```
 
 Routing modes are `internal_only`, `external_only`, and `hybrid_research`.
@@ -28,10 +29,15 @@ base is created. Dense-only candidates below a conservative similarity floor
 and sparse candidates without enough literal query overlap are rejected before
 fusion. DDGS results are normalized and deduplicated in memory only.
 
-Generated answers are filtered line by line: uncited claims, unknown IDs, and
-KB/WEB citations placed in the wrong evidence section are removed. A single
-bounded repair pass is attempted when the local model omits citations; failure
-of that optional repair keeps the already-filtered first answer.
+Ollama is constrained to a small JSON schema containing independent claims and
+their evidence IDs. The application, not the model, renders the five answer
+sections and final source list. Before rendering, it rejects unknown IDs,
+KB/WEB citations placed in the wrong section, numbers or units absent from the
+cited text, equations that do not match the source rendering, and claims whose
+BGE-M3 similarity to their cited evidence is below the conservative threshold.
+This intentionally favors precision over recall when PDF extraction makes a
+formula ambiguous. A single bounded repair pass is attempted after rejected or
+malformed claims; failure keeps the already validated first result.
 
 ## API
 
@@ -51,7 +57,7 @@ of that optional repair keeps the already-filtered first answer.
 The response includes the required answer, sources, figures, provenance,
 model, inference flag, and evidence counts. It also includes routing mode,
 retrieval/reasoning/total timing, conflict signals, citation validation, and an
-unsupported-claim count. Structured run logs are written under
+unsupported-claim count and per-check rejection counts. Structured run logs are written under
 `data/agent_runs/research/`; private chain-of-thought is never requested or
 stored.
 
@@ -91,5 +97,9 @@ URLs, citation validation, unsupported claims, and hallucination evaluation.
   final prompt still compares all supplied evidence.
 - DDGS availability and ranking depend on public search backends, so exact web
   results are not reproducible unless captured by the benchmark harness.
+- Semantic validation uses the existing BGE-M3 model. If that model is
+  unavailable, the response explicitly records that the semantic check was
+  skipped while deterministic citation, number, unit, and equation checks still
+  apply.
 - Citation precision and recall require a human-labeled evidence relevance set
   for publication-quality scoring.

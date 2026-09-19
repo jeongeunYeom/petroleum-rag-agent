@@ -35,11 +35,28 @@ class OllamaClient:
         messages: list[dict[str, str]],
         model: str | None = None,
     ) -> str:
+        return await self._chat(messages, model=model)
+
+    async def chat_structured(
+        self,
+        messages: list[dict[str, str]],
+        schema: dict,
+        model: str | None = None,
+    ) -> str:
+        """Ask Ollama to constrain the response to the supplied JSON schema."""
+        return await self._chat(messages, model=model, schema=schema)
+
+    async def _chat(
+        self,
+        messages: list[dict[str, str]],
+        model: str | None = None,
+        schema: dict | None = None,
+    ) -> str:
         payload = {
             "model": model or self.settings.text_model,
             "messages": messages,
             "stream": False,
-            "think" : False,
+            "think": False,
             "keep_alive": "30m",
             "options": {
                 "temperature": self.settings.ollama_temperature,
@@ -47,6 +64,8 @@ class OllamaClient:
                 "num_predict": 1024,
             },
         }
+        if schema is not None:
+            payload["format"] = schema
 
         try:
             async with httpx.AsyncClient(
@@ -63,7 +82,7 @@ class OllamaClient:
                 exc,
                 payload["model"],
             ) from exc
-        
+
         data = response.json()
         message = data.get("message", {})
 

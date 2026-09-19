@@ -67,6 +67,39 @@ OPPOSING_TERMS = (
     ("높", "낮"),
     ("안전", "위험"),
 )
+ANSWER_SECTIONS = ("internal", "external", "synthesis", "limitations")
+STRUCTURED_ANSWER_SCHEMA = {
+    "type": "object",
+    "properties": {
+        section: {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "claim": {"type": "string"},
+                    "citations": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                    },
+                },
+                "required": ["claim", "citations"],
+                "additionalProperties": False,
+            },
+        }
+        for section in ANSWER_SECTIONS
+    },
+    "required": list(ANSWER_SECTIONS),
+    "additionalProperties": False,
+}
+NUMBER_RE = re.compile(r"(?<![A-Za-z])[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:[eE][-+]?\d+)?%?")
+QUANTITY_RE = re.compile(
+    NUMBER_RE.pattern
+    + r"\s*(?:psi/(?:ft|m)|bbl/(?:d|day)|stb/(?:d|day)|scf/(?:d|day)|"
+    r"m\^?3/(?:d|day)|kg/m(?:3|³)|g/cm(?:3|³)|psi|kpa|mpa|gpa|pa|"
+    r"bar|atm|darcy|md|mtpa|ppm|ft|mm|cm|m|in|bbl|stb|scf|m\^?3|cP|°[CF])",
+    re.IGNORECASE,
+)
+EQUATION_RE = re.compile(r"[^.!?\n]{0,80}=[^.!?\n]{0,80}")
 
 
 class ResearchAgent:
@@ -141,12 +174,28 @@ class ResearchAgent:
                 figures,
                 conflicts,
             )
-            raw_answer = await self.ollama.chat(messages, model=request.model)
-            answer, validation, disclosed = self._validated_answer(
-                raw_answer,
-                evidence_ids,
-                conflicts,
-            )
+            evidence_text = self._evidence_text(internal_sources, web_sources, figures)
+            structured_chat = getattr(self.ollama, "chat_structured", None)
+            if callable(structured_chat):
+                raw_answer = await structured_chat(
+                    messages,
+                    STRUCTURED_ANSWER_SCHEMA,
+                    model=request.model,
+                )
+                answer, validation, disclosed = await asyncio.to_thread(
+                    self.validate_structured_answer,
+                    raw_answer,
+                    evidence_text,
+                    conflicts,
+                    request.query,
+                )
+            else:
+                raw_answer = await self.ollama.chat(messages, model=request.model)
+                answer, validation, disclosed = self._validated_answer(
+                    raw_answer,
+                    evidence_ids,
+                    conflicts,
+                )
             repair_attempted = bool(
                 validation["unsupported_claim_count"]
                 or validation["invalid_citations"]
@@ -154,13 +203,35 @@ class ResearchAgent:
             )
             if repair_attempted:
                 try:
-                    repaired = await self.ollama.chat(
-                        self.build_repair_messages(messages, raw_answer, evidence_ids),
-                        model=request.model,
+                    repair_messages = self.build_repair_messages(
+                        messages,
+                        raw_answer,
+                        evidence_ids,
+                        structured=callable(structured_chat),
                     )
-                    repaired_answer, repaired_validation, repaired_disclosed = (
-                        self._validated_answer(repaired, evidence_ids, conflicts)
-                    )
+                    if callable(structured_chat):
+                        repaired = await structured_chat(
+                            repair_messages,
+                            STRUCTURED_ANSWER_SCHEMA,
+                            model=request.model,
+                        )
+                        repaired_answer, repaired_validation, repaired_disclosed = (
+                            await asyncio.to_thread(
+                                self.validate_structured_answer,
+                                repaired,
+                                evidence_text,
+                                conflicts,
+                                request.query,
+                            )
+                        )
+                    else:
+                        repaired = await self.ollama.chat(
+                            repair_messages,
+                            model=request.model,
+                        )
+                        repaired_answer, repaired_validation, repaired_disclosed = (
+                            self._validated_answer(repaired, evidence_ids, conflicts)
+                        )
                     if self._validation_score(
                         repaired_validation
                     ) < self._validation_score(validation):
@@ -521,15 +592,19 @@ class ResearchAgent:
             "change their meaning. Copy equations and numeric values exactly as rendered in the "
             "evidence. If PDF extraction makes an exponent, fraction, symbol, or unit ambiguous, "
             "state that it cannot be transcribed unambiguously instead of reconstructing it. Show "
-            "only concise conclusions, evidence links, calculations, and checks."
+            "only concise conclusions, evidence links, calculations, and checks. "
+            "Return JSON only. Each claim must be independently verifiable from its cited "
+            "evidence. Citations must be raw IDs such as KB1, not bracketed IDs."
         )
         user = (
             f"Question:\n{query}\n\n"
-            "Write the answer in the question's language with exactly these sections:\n"
-            "1. 내부 지식베이스 근거\n2. 외부 검색 근거\n3. 종합 추론\n"
-            "4. 한계 / 불확실성\n5. Sources\n"
-            "If a section has no evidence, say so. For calculations show equation, inputs, units, "
-            "unit validation, and result; never add an uncited constant.\n\n"
+            "Return one JSON object with arrays named internal, external, synthesis, and "
+            "limitations. Every array item must have exactly two fields: claim (a concise "
+            "sentence in the question's language) and citations (supporting evidence IDs). "
+            "Use an empty array when a section has no evidence. Never put web evidence in "
+            "internal or KB/FIG evidence in external. For calculations, make equation, inputs, "
+            "units, unit validation, and result separate cited claims; never add an uncited "
+            "constant.\n\n"
             f"Pre-screened conflict signals:\n{conflict_text}\n\n"
             "Evidence:\n" + "\n\n---\n\n".join(blocks)
         )
@@ -540,8 +615,25 @@ class ResearchAgent:
         original_messages: list[dict[str, str]],
         draft: str,
         valid_ids: set[str],
+        structured: bool = False,
     ) -> list[dict[str, str]]:
-        allowed = ", ".join(f"[{item}]" for item in sorted(valid_ids))
+        allowed = ", ".join(sorted(valid_ids))
+        citation_instruction = (
+            f"Each citations array may contain only these raw IDs: {allowed}. "
+            if structured
+            else (
+                "Every factual or synthesized sentence must end with one or more of "
+                f"these exact citations only: "
+                + ", ".join(f"[{item}]" for item in sorted(valid_ids))
+                + ". "
+            )
+        )
+        output_instruction = (
+            "Return only the corrected JSON object using the original four-array schema and "
+            "raw citation IDs without brackets."
+            if structured
+            else "Return only the corrected answer."
+        )
         return [
             *original_messages,
             {"role": "assistant", "content": draft},
@@ -549,15 +641,293 @@ class ResearchAgent:
                 "role": "user",
                 "content": (
                     "The draft failed citation validation. Rewrite it once without adding facts. "
-                    "Keep the five required sections. Every factual or synthesized sentence must "
-                    f"end with one or more of these exact citations only: {allowed}. "
+                    f"{citation_instruction}"
                     "Delete any claim that cannot be cited. Copy equations, symbols, values, units, "
                     "and petroleum terms exactly from the evidence; if extraction formatting is "
-                    "ambiguous, say so rather than reconstructing it. Return only the corrected "
-                    "answer."
+                    f"ambiguous, say so rather than reconstructing it. {output_instruction}"
                 ),
             },
         ]
+
+    @staticmethod
+    def _evidence_text(
+        internal: list[InternalEvidence],
+        web: list[WebEvidence],
+        figures: list[FigureEvidence],
+    ) -> dict[str, str]:
+        return {
+            **{item.evidence_id: item.excerpt for item in internal},
+            **{item.evidence_id: item.snippet for item in web},
+            **{item.evidence_id: item.excerpt for item in figures},
+        }
+
+    def validate_structured_answer(
+        self,
+        raw_answer: str,
+        evidence_text: dict[str, str],
+        conflicts: list[dict[str, str]],
+        query: str = "",
+    ) -> tuple[str, dict[str, Any], list[str]]:
+        """Validate claim-level provenance before deterministic answer rendering."""
+        try:
+            payload = json.loads(self._strip_json_fence(raw_answer))
+        except (json.JSONDecodeError, TypeError):
+            return self._structured_refusal("structured_output_invalid")
+        if not isinstance(payload, dict):
+            return self._structured_refusal("structured_output_invalid")
+
+        accepted: dict[str, list[tuple[str, list[str]]]] = {
+            section: [] for section in ANSWER_SECTIONS
+        }
+        invalid_ids: set[str] = set()
+        numeric_rejections = 0
+        unit_rejections = 0
+        equation_rejections = 0
+        semantic_rejections = 0
+        query_relevance_rejections = 0
+        malformed_rejections = 0
+        candidates: list[tuple[str, str, list[str], str]] = []
+        for section in ANSWER_SECTIONS:
+            items = payload.get(section)
+            if not isinstance(items, list):
+                malformed_rejections += 1
+                continue
+            for item in items:
+                if not isinstance(item, dict):
+                    malformed_rejections += 1
+                    continue
+                claim = str(item.get("claim") or "").strip()
+                citations = item.get("citations")
+                if not claim or not isinstance(citations, list):
+                    malformed_rejections += 1
+                    continue
+                ids = list(dict.fromkeys(str(value).strip(" []") for value in citations))
+                unknown = {value for value in ids if value not in evidence_text}
+                if unknown or not ids:
+                    invalid_ids.update(unknown)
+                    malformed_rejections += 1
+                    continue
+                if not self._structured_citations_match_section(section, ids):
+                    malformed_rejections += 1
+                    continue
+                evidence = "\n".join(evidence_text[value] for value in ids)
+                if not self._numbers_are_grounded(claim, evidence):
+                    numeric_rejections += 1
+                    continue
+                if not self._units_are_grounded(claim, evidence):
+                    unit_rejections += 1
+                    continue
+                if not self._equations_are_grounded(claim, evidence):
+                    equation_rejections += 1
+                    continue
+                candidates.append((section, claim, ids, evidence))
+
+        similarities, semantic_check_applied = self._semantic_similarities(
+            candidates,
+            query,
+        )
+        for candidate, scores in zip(candidates, similarities, strict=True):
+            section, claim, ids, _ = candidate
+            evidence_similarity, query_similarity = scores
+            if evidence_similarity is not None and evidence_similarity < 0.52:
+                semantic_rejections += 1
+                continue
+            if (
+                section != "limitations"
+                and query_similarity is not None
+                and query_similarity < 0.40
+            ):
+                query_relevance_rejections += 1
+                continue
+            accepted[section].append((claim, ids))
+
+        disclosed = self._add_conflict_claims(accepted, conflicts, evidence_text)
+        answer, used_ids = self._render_structured_answer(accepted, evidence_text)
+        unsupported = (
+            numeric_rejections
+            + unit_rejections
+            + equation_rejections
+            + semantic_rejections
+            + query_relevance_rejections
+            + malformed_rejections
+        )
+        if not used_ids:
+            answer = (
+                "근거는 검색되었지만 구조화된 주장의 출처 정합성을 "
+                "검증하지 못했습니다. 근거 없는 결론을 제공하지 않습니다."
+            )
+        return answer, {
+            "valid_citations": used_ids,
+            "invalid_citations": sorted(invalid_ids),
+            "unsupported_claim_count": unsupported,
+            "numeric_rejections": numeric_rejections,
+            "unit_rejections": unit_rejections,
+            "equation_rejections": equation_rejections,
+            "semantic_rejections": semantic_rejections,
+            "query_relevance_rejections": query_relevance_rejections,
+            "malformed_rejections": malformed_rejections,
+            "semantic_check_skipped": not semantic_check_applied,
+            "structured_output": True,
+            "refused_without_evidence": False,
+        }, disclosed
+
+    @staticmethod
+    def _strip_json_fence(value: str) -> str:
+        value = value.strip()
+        if value.startswith("```"):
+            value = re.sub(r"^```(?:json)?\s*", "", value, flags=re.IGNORECASE)
+            value = re.sub(r"\s*```$", "", value)
+        return value
+
+    @staticmethod
+    def _structured_refusal(
+        reason: str,
+    ) -> tuple[str, dict[str, Any], list[str]]:
+        return (
+            "모델 출력을 구조화된 근거 주장으로 검증하지 못했습니다. "
+            "근거 없는 결론을 제공하지 않습니다.",
+            {
+                "valid_citations": [],
+                "invalid_citations": [],
+                "unsupported_claim_count": 1,
+                "structured_output": True,
+                "structured_error": reason,
+                "refused_without_evidence": False,
+            },
+            [],
+        )
+
+    @staticmethod
+    def _structured_citations_match_section(section: str, citations: list[str]) -> bool:
+        if section == "internal":
+            return all(value.startswith(("KB", "FIG")) for value in citations)
+        if section == "external":
+            return all(value.startswith("WEB") for value in citations)
+        return True
+
+    @staticmethod
+    def _numbers_are_grounded(claim: str, evidence: str) -> bool:
+        normalize = lambda value: value.replace(",", "").replace(" ", "").lower()
+        evidence_numbers = {normalize(value) for value in NUMBER_RE.findall(evidence)}
+        return all(normalize(value) in evidence_numbers for value in NUMBER_RE.findall(claim))
+
+    @staticmethod
+    def _units_are_grounded(claim: str, evidence: str) -> bool:
+        compact_evidence = re.sub(r"[\s,]", "", evidence).casefold()
+        return all(
+            re.sub(r"[\s,]", "", quantity).casefold() in compact_evidence
+            for quantity in QUANTITY_RE.findall(claim)
+        )
+
+    @staticmethod
+    def _equations_are_grounded(claim: str, evidence: str) -> bool:
+        equations = EQUATION_RE.findall(claim)
+        if not equations:
+            return True
+        compact_evidence = re.sub(r"\s+", "", evidence).casefold()
+        for equation in equations:
+            left, right = equation.split("=", 1)
+            left = re.split(
+                r"\b(?:is|as|by)\b|[,;:：]",
+                left,
+                flags=re.IGNORECASE,
+            )[-1]
+            expression = re.sub(r"\s+", "", f"{left}={right}").casefold()
+            if expression not in compact_evidence:
+                return False
+        return True
+
+    def _semantic_similarities(
+        self,
+        candidates: list[tuple[str, str, list[str], str]],
+        query: str,
+    ) -> tuple[list[tuple[float | None, float | None]], bool]:
+        embed = getattr(self.vector_store, "embed", None)
+        if not callable(embed) or not candidates:
+            return [(None, None)] * len(candidates), False
+        texts = ([query] if query else []) + [
+            value for item in candidates for value in (item[1], item[3])
+        ]
+        try:
+            vectors = embed(texts)
+        except Exception:
+            return [(None, None)] * len(candidates), False
+        if len(vectors) != len(texts):
+            return [(None, None)] * len(candidates), False
+        query_vector = vectors[0] if query else None
+        offset = 1 if query else 0
+        scores: list[tuple[float | None, float | None]] = []
+        for index in range(offset, len(vectors), 2):
+            claim_vector, evidence_vector = vectors[index : index + 2]
+            evidence_score = sum(
+                float(left) * float(right)
+                for left, right in zip(claim_vector, evidence_vector)
+            )
+            query_score = (
+                sum(
+                    float(left) * float(right)
+                    for left, right in zip(claim_vector, query_vector)
+                )
+                if query_vector is not None
+                else None
+            )
+            scores.append((evidence_score, query_score))
+        return scores, True
+
+    @staticmethod
+    def _add_conflict_claims(
+        accepted: dict[str, list[tuple[str, list[str]]]],
+        conflicts: list[dict[str, str]],
+        evidence_text: dict[str, str],
+    ) -> list[str]:
+        disclosed: list[str] = []
+        for conflict in conflicts:
+            left, right = str(conflict["left"]), str(conflict["right"])
+            if left not in evidence_text or right not in evidence_text:
+                continue
+            accepted["limitations"].append(
+                (
+                    "내부 근거와 외부 근거에 상충 신호가 있어, 적용 조건이 "
+                    "확인되기 전에는 한쪽을 일반화할 수 없습니다.",
+                    [left, right],
+                )
+            )
+            disclosed.append(f"{left}:{right}")
+        return disclosed
+
+    @staticmethod
+    def _render_structured_answer(
+        accepted: dict[str, list[tuple[str, list[str]]]],
+        evidence_text: dict[str, str],
+    ) -> tuple[str, list[str]]:
+        headings = {
+            "internal": "1. 내부 지식베이스 근거",
+            "external": "2. 외부 검색 근거",
+            "synthesis": "3. 종합 추론",
+            "limitations": "4. 한계 / 불확실성",
+        }
+        missing = {
+            "internal": "내부 지식베이스에서 검증된 주장이 없습니다.",
+            "external": "외부 검색에서 검증된 주장이 없습니다.",
+            "synthesis": "검증된 근거만으로 추가 종합 결론을 내릴 수 없습니다.",
+            "limitations": "추가로 확인된 한계가 없습니다.",
+        }
+        lines: list[str] = []
+        used: set[str] = set()
+        for section in ANSWER_SECTIONS:
+            lines.append(headings[section])
+            items = accepted[section]
+            if not items:
+                lines.append(missing[section])
+            for claim, citations in items:
+                valid = [value for value in citations if value in evidence_text]
+                used.update(valid)
+                suffix = "".join(f"[{value}]" for value in valid)
+                lines.append(f"- {claim} {suffix}")
+            lines.append("")
+        used_ids = sorted(used)
+        lines.extend(["5. Sources", ", ".join(f"[{value}]" for value in used_ids)])
+        return "\n".join(lines).strip(), used_ids
 
     @staticmethod
     def _validated_answer(
