@@ -20,12 +20,12 @@ from app.models.schemas import (
     VisionResponse,
 )
 from app.services.document_processor import DocumentProcessor
+from app.services.hybrid_vector_store import HybridVectorStore as VectorStore
 from app.services.jobs import create_job, get_job, update_job
 from app.services.ollama import OllamaClient
 from app.services.plots import build_plot
 from app.services.qa import QAService
 from app.services.system_status import build_checklist
-from app.services.vector_store import VectorStore
 
 router = APIRouter()
 router.include_router(evaluation_router)

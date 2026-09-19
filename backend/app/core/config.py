@@ -116,6 +116,52 @@ class Settings:
         )
     )
 
+    hybrid_candidate_multiplier: int = field(
+        default_factory=lambda: int(
+            os.getenv("HYBRID_CANDIDATE_MULTIPLIER", "4")
+        )
+    )
+
+    hybrid_rrf_k: int = field(
+        default_factory=lambda: int(
+            os.getenv("HYBRID_RRF_K", "60")
+        )
+    )
+
+    reranker_enabled: bool = field(
+        default_factory=lambda: os.getenv(
+            "RERANKER_ENABLED", "1"
+        ).strip().lower() not in {"0", "false", "no", "off"}
+    )
+
+    reranker_model: str = field(
+        default_factory=lambda: os.getenv(
+            "RERANKER_MODEL", "BAAI/bge-reranker-base"
+        )
+    )
+
+    reranker_model_path: str | None = field(
+        default_factory=lambda: os.getenv("RERANKER_MODEL_PATH") or None
+    )
+
+    reranker_candidate_k: int = field(
+        default_factory=lambda: int(
+            os.getenv("RERANKER_CANDIDATE_K", "24")
+        )
+    )
+
+    reranker_batch_size: int = field(
+        default_factory=lambda: int(
+            os.getenv("RERANKER_BATCH_SIZE", "8")
+        )
+    )
+
+    reranker_max_characters: int = field(
+        default_factory=lambda: int(
+            os.getenv("RERANKER_MAX_CHARACTERS", "4000")
+        )
+    )
+
     ollama_timeout_seconds: float = field(
         default_factory=lambda: float(
             os.getenv("OLLAMA_TIMEOUT_SECONDS", "600")

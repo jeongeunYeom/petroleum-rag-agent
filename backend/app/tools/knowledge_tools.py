@@ -64,13 +64,13 @@ class KnowledgeTools:
         if self._qa_service is None:
             # Keep Agent startup lightweight. Heavy RAG dependencies are loaded
             # only when a knowledge tool is actually executed.
+            from app.services.hybrid_vector_store import HybridVectorStore
             from app.services.ollama import OllamaClient
             from app.services.qa import QAService
-            from app.services.vector_store import VectorStore
 
             self._qa_service = QAService(
                 self.settings,
-                VectorStore(self.settings),
+                HybridVectorStore(self.settings),
                 OllamaClient(self.settings),
             )
         return self._qa_service
