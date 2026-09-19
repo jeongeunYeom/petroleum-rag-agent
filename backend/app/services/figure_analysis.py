@@ -18,8 +18,8 @@ if TYPE_CHECKING:
     from app.services.ollama import OllamaClient
 
 CANDIDATE_SCHEMA_VERSION = 2
-CLASSIFIER_VERSION = "new-upload-vision-classifier-v1"
-ANALYSIS_PROMPT_VERSION = "new-upload-grounding-v1"
+CLASSIFIER_VERSION = "new-upload-one-pass-classifier-v2"
+ANALYSIS_PROMPT_VERSION = "new-upload-one-pass-grounding-v2"
 SERIALIZER_VERSION = "figure-note-v2"
 
 UNKNOWN_TEXT = "확인할 수 없음"
@@ -111,36 +111,38 @@ DIAGRAM_SCHEMA_FIELDS = [
     "legacy_note_backup",
 ]
 
-CLASSIFICATION_PROMPT = """Analyze only what is directly visible in this image.
-Return exactly four concise ASCII English key-value lines:
-image_type: one of graph, chart, table, diagram, schematic, equation, photo, logo, page_decoration, unknown_engineering_figure, unknown
-confidence: a number from 0.0 to 1.0
-readable_labels: true or false
-reason: one short directly visible reason
-Do not infer the subject area. Do not invent labels, axes, or engineering meaning.
-"""
-
 GRAPH_PROMPT = """Analyze only what is directly visible in this graph or chart.
 Return concise ASCII English key-value lines with exactly these keys:
-image_type, confidence, title, analysis, x_axis, x_axis_unit, x_axis_scale, y_axis, y_axis_unit, y_axis_scale, series_count, series_count_verified, series_descriptions, legend, reference_lines, plateau, peak, decline, slope_changes, trend, engineering_meaning.
+image_type, confidence, readable_labels, title, analysis, x_axis, x_axis_unit, x_axis_scale, y_axis, y_axis_unit, y_axis_scale, series_count, series_count_verified, series_descriptions, legend, reference_lines, plateau, peak, decline, slope_changes, trend, engineering_meaning.
 Rules:
 - confidence must be a number from 0.0 to 1.0.
+- readable_labels must be true only when labels can be copied exactly.
 - Use integer series_count or unknown.
 - Use true or false for series_count_verified.
 - Separate multiple list items with semicolons on the same line.
-- Describe each visible series separately, including line style and marker shape only when clearly visible.
+- Count data series before writing. Exclude axes, grid lines, reference lines, and legend samples.
+- Write exactly one series_descriptions item per counted series, including its visible label,
+  line style, marker shape, and trend when readable. Never collapse multiple series into one item.
+- Scan curve labels twice from top to bottom before returning. Every numeric label attached to
+  a curve represents a separate series. series_count must equal the number of description items;
+  otherwise set series_count_verified to false. Check closely spaced labels individually and
+  never assume labels use a regular numeric interval.
 - Distinguish continuous rise, decline, peak, minimum, plateau, and slope changes when visible.
 - Report each axis scale as Linear, Logarithmic, or unknown.
 - If title, axis, unit, legend, numeric value, or engineering meaning is unreadable, write unknown.
+- title means a literal heading printed inside the image, not a title inferred from axes.
+- engineering_meaning must be unknown unless it is explicitly stated in visible text.
+- analysis must be one complete sentence describing the directly visible content; never write unknown.
 - Do not guess series names or engineering meaning.
 - Do not use unfinished phrases.
 """
 
 DIAGRAM_PROMPT = """Analyze only what is directly visible in this engineering diagram or schematic.
 Return concise ASCII English key-value lines with exactly these keys:
-image_type, confidence, title, analysis, components, component_labels, connections, flow_directions, annotations, legend, engineering_meaning.
+image_type, confidence, readable_labels, title, analysis, components, component_labels, connections, flow_directions, annotations, legend, engineering_meaning.
 Rules:
 - confidence must be a number from 0.0 to 1.0.
+- readable_labels must be true only when labels can be copied exactly.
 - Separate multiple list items with semicolons on the same line.
 - Do not invent axes, trends, series, components, labels, or engineering purpose.
 - If a value is unreadable, write unknown.
@@ -148,8 +150,42 @@ Rules:
 
 EQUATION_PROMPT = """Analyze only what is directly visible in this equation image.
 Return concise ASCII English key-value lines with exactly these keys:
-image_type, confidence, title, analysis, equation_text, variables, units, assumptions, engineering_meaning.
+image_type, confidence, readable_labels, title, analysis, equation_text, variables, units, assumptions, engineering_meaning.
 Do not reconstruct unreadable symbols. If uncertain, write unknown.
+"""
+
+ONE_PASS_PROMPT = """Analyze only what is directly visible in this image in one pass.
+First classify it, then extract all applicable visible details in the same response.
+Return concise ASCII English key-value lines with exactly these keys:
+image_type, confidence, readable_labels, reason, title, analysis, x_axis, x_axis_unit,
+x_axis_scale, y_axis, y_axis_unit, y_axis_scale, series_count, series_count_verified,
+series_descriptions, legend, reference_lines, plateau, peak, decline, slope_changes,
+trend, components, component_labels, connections, flow_directions, annotations,
+equation_text, variables, units, assumptions, engineering_meaning.
+Rules:
+- image_type must be one of graph, chart, table, diagram, schematic, equation, photo,
+  logo, page_decoration, unknown_engineering_figure, unknown.
+- confidence must be a number from 0.0 to 1.0.
+- readable_labels must be true only when visible labels can be copied exactly.
+- For graph/chart: count distinct data series before writing; exclude axes, grid lines,
+  reference lines, and legend samples. Use integer series_count or unknown and true/false
+  series_count_verified. Write exactly one semicolon-separated series_descriptions item
+  per counted series with its visible label/style/marker/trend. Never collapse series.
+- For graph/chart: scan curve labels twice from top to bottom. Each numeric curve label is a
+  separate series. series_count must equal the number of description items; otherwise set
+  series_count_verified to false. Check closely spaced labels individually; do not assume a
+  regular numeric interval.
+- For graph/chart: distinguish rise, decline, peak, minimum, plateau, and slope changes;
+  report axis scales as Linear, Logarithmic, or unknown.
+- For diagram/schematic: list each visible component, label, connection, flow direction,
+  and annotation as separate semicolon-separated items.
+- analysis must be one complete sentence describing visible content for every technical
+  figure; never write unknown for analysis.
+- title is only a literal heading printed inside the image. engineering_meaning must be
+  unknown unless explicitly stated in visible text.
+- Write unknown for every unused or unreadable field. Never reconstruct symbols, labels,
+  units, values, series names, or engineering meaning.
+- Do not use Markdown, explanations, or unfinished phrases.
 """
 
 
@@ -253,7 +289,7 @@ _KEY_PATTERN = "|".join(
     )
 )
 KEY_VALUE_BOUNDARY_RE = re.compile(
-    rf"(?:^|[;\n\r])\s*(?:[-*]\s*)?(?P<key>{_KEY_PATTERN})\s*[:：]\s*",
+    rf"(?:^|[;\n\r])\s*(?:[-*]\s*)?(?P<key>{_KEY_PATTERN})\s*[:：=]\s*",
     re.IGNORECASE,
 )
 
@@ -295,7 +331,7 @@ def parse_key_values(text: str) -> dict[str, str]:
     for raw_line in cleaned.splitlines():
         line = raw_line.rstrip()
         match = re.match(
-            r"^\s*(?:[-*]\s*)?([A-Za-z_][A-Za-z0-9_ ]*)\s*[:：]\s*(.*)$",
+            r"^\s*(?:[-*]\s*)?([A-Za-z_][A-Za-z0-9_ ]*)\s*[:：=]\s*(.*)$",
             line,
         )
         if match:
@@ -402,6 +438,16 @@ def prepare_vision_image(image_path: Path) -> tuple[Path, dict[str, Any]]:
     with Image.open(image_path) as image:
         image.load()
         prepared = ImageOps.autocontrast(image.convert("RGB"))
+        original_size = prepared.size
+        scale = min(4.0, 1920 / max(prepared.size)) if max(prepared.size) < 1920 else 1.0
+        if scale > 1.0:
+            prepared = prepared.resize(
+                (
+                    round(prepared.width * scale),
+                    round(prepared.height * scale),
+                ),
+                Image.Resampling.LANCZOS,
+            )
 
     tmp = NamedTemporaryFile(
         prefix=f"{image_path.stem}_vision_",
@@ -414,6 +460,9 @@ def prepare_vision_image(image_path: Path) -> tuple[Path, dict[str, Any]]:
     return tmp_path, {
         "rgb_conversion": True,
         "autocontrast": True,
+        "upscale_factor": round(scale, 4),
+        "original_size": list(original_size),
+        "prepared_size": list(prepared.size),
         "brightness_factor": 1.0,
         "contrast_factor": 1.0,
     }
@@ -567,6 +616,8 @@ def figure_priority(
         "buildup",
         "rft",
         "pressure vs",
+        "versus",
+        "as functions of",
         "delta p",
         "time function",
     )
@@ -625,6 +676,10 @@ def figure_priority(
         score += 75.0
         forced = "graph"
         reasons.append("graph_layout_text_consensus")
+    elif graph_hits >= 1 and edge_density >= 0.08:
+        score += 70.0
+        forced = "graph"
+        reasons.append("graph_caption_edge_consensus")
     elif diagram_hits >= 2 and graph_hits == 0:
         score += 55.0
         forced = "schematic"
@@ -687,7 +742,11 @@ def graph_metadata(
     if confidence == 0.0 and str(fields.get("confidence") or "").strip() not in {"0", "0.0"}:
         errors.append("confidence must be a 0.0-1.0 float")
 
-    analysis = nullable_text(fields.get("analysis"))
+    analysis = nullable_text(
+        fields.get("analysis")
+        or fields.get("trend")
+        or fields.get("series_descriptions")
+    )
     if not analysis:
         errors.append("analysis is required")
 
@@ -948,11 +1007,7 @@ class FigureAnalysisService:
             )
 
         normalized_forced = normalize_classification(forced_classification or "")
-        required_calls = (
-            1
-            if normalized_forced in GRAPH_TYPES | DIAGRAM_TYPES | {"equation"}
-            else 2
-        )
+        required_calls = 1
         if remaining_vision_calls is not None and remaining_vision_calls < required_calls:
             return self._write_review_without_vision(
                 document_name=document_name,
@@ -1042,6 +1097,7 @@ class FigureAnalysisService:
             readable_labels = False
             classification_confidence = 0.0
             classification_text = ""
+            raw_text = ""
 
             if not forced_classification or classification in {"unknown", "unknown_engineering_figure"}:
                 if remaining_vision_calls is not None and remaining_vision_calls < 1:
@@ -1059,8 +1115,8 @@ class FigureAnalysisService:
                 classification_text = (
                     await self.ollama.describe_image(
                         prepared_path,
-                        prompt=CLASSIFICATION_PROMPT,
-                        num_predict=180,
+                        prompt=ONE_PASS_PROMPT,
+                        num_predict=1100,
                     )
                 ).strip()
                 vision_calls += 1
@@ -1068,6 +1124,7 @@ class FigureAnalysisService:
                 classification = normalize_classification(class_fields.get("image_type"))
                 readable_labels = parse_bool(class_fields.get("readable_labels"))
                 classification_confidence = parse_confidence(class_fields.get("confidence"))
+                raw_text = classification_text
             else:
                 # A local preclassifier can safely prioritize a figure type, but it
                 # cannot verify that labels are readable. The detailed Vision call
@@ -1097,7 +1154,18 @@ class FigureAnalysisService:
                     "trend_grounding_passed": False,
                 }
 
-            if remaining_vision_calls is not None and vision_calls >= remaining_vision_calls:
+            parsed_detail = parse_key_values(raw_text)
+            has_detail = bool(
+                parsed_detail.get("analysis")
+                or parsed_detail.get("series_descriptions")
+                or parsed_detail.get("components")
+                or parsed_detail.get("equation_text")
+            )
+            if (
+                not has_detail
+                and remaining_vision_calls is not None
+                and vision_calls >= remaining_vision_calls
+            ):
                 return {
                     "status": "review_required",
                     "classification": classification,
@@ -1111,21 +1179,26 @@ class FigureAnalysisService:
                     "trend_grounding_passed": False,
                 }
 
-            prompt = (
-                GRAPH_PROMPT
-                if classification in GRAPH_TYPES
-                else DIAGRAM_PROMPT
-                if classification in DIAGRAM_TYPES
-                else EQUATION_PROMPT
-            )
-            raw_text = (
-                await self.ollama.describe_image(
-                    prepared_path,
-                    prompt=prompt,
-                    num_predict=900,
+            if not has_detail:
+                prompt = (
+                    GRAPH_PROMPT
+                    if classification in GRAPH_TYPES
+                    else DIAGRAM_PROMPT
+                    if classification in DIAGRAM_TYPES
+                    else EQUATION_PROMPT
                 )
-            ).strip()
-            vision_calls += 1
+                raw_text = (
+                    await self.ollama.describe_image(
+                        prepared_path,
+                        prompt=prompt,
+                        num_predict=1100,
+                    )
+                ).strip()
+                vision_calls += 1
+
+            detailed_fields = parse_key_values(raw_text)
+            if "readable_labels" in detailed_fields:
+                readable_labels = parse_bool(detailed_fields.get("readable_labels"))
 
             if not raw_text:
                 return {

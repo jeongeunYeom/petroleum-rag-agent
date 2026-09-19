@@ -137,7 +137,7 @@ class OllamaClient:
                     image = image.convert("RGB")
 
                 # 너무 큰 이미지는 축소
-                image.thumbnail((1280, 1280))
+                image.thumbnail((1920, 1920))
 
                 buffer = BytesIO()
                 image.save(

@@ -6,7 +6,11 @@ from pathlib import Path
 import asyncio
 from PIL import Image, ImageDraw
 
-from app.services.figure_analysis import FigureAnalysisService
+from app.services.figure_analysis import (
+    FigureAnalysisService,
+    figure_priority,
+    parse_key_values,
+)
 
 
 @dataclass
@@ -124,6 +128,84 @@ def test_valid_graph_is_saved_and_indexable(tmp_path: Path) -> None:
     assert result.candidate["apply_ready"] is True
     assert "x_axis: Time" in result.note_text
     assert "trend_verified: true" in result.note_text
+
+
+def test_unforced_graph_is_classified_and_analyzed_in_one_call(tmp_path: Path) -> None:
+    image_path = tmp_path / "one_pass_p1_fig1.png"
+    make_graph_image(image_path)
+    ollama = FakeOllama(
+        [
+            "\n".join(
+                [
+                    "image_type: graph",
+                    "confidence: 0.96",
+                    "readable_labels: true",
+                    "reason: axes and one marker series are visible",
+                    "title: Pressure response",
+                    "analysis: One marker series rises continuously across the graph.",
+                    "x_axis: Time",
+                    "x_axis_unit: hours",
+                    "x_axis_scale: Linear",
+                    "y_axis: Pressure",
+                    "y_axis_unit: psi",
+                    "y_axis_scale: Linear",
+                    "series_count: 1",
+                    "series_count_verified: true",
+                    "series_descriptions: Circular-marker series rises continuously.",
+                    "legend: unknown",
+                    "reference_lines: unknown",
+                    "plateau: unknown",
+                    "peak: unknown",
+                    "decline: unknown",
+                    "slope_changes: unknown",
+                    "trend: The visible series rises continuously.",
+                    "engineering_meaning: unknown",
+                ]
+            )
+        ]
+    )
+    service = FigureAnalysisService(DummySettings(tmp_path), ollama)  # type: ignore[arg-type]
+
+    result = asyncio.run(
+        service.analyze_figure(
+            document_name="sample.pdf",
+            document_id="abc123",
+            page_number=1,
+            image_index=1,
+            image_path=image_path,
+            remaining_vision_calls=1,
+        )
+    )
+
+    assert result.status == "valid"
+    assert result.vision_calls == 1
+    assert len(ollama.calls) == 1
+    assert result.candidate["analysis_transform"]["upscale_factor"] > 1.0
+
+
+def test_one_pass_parser_and_caption_preclassifier_handle_common_graph_output() -> None:
+    fields = parse_key_values(
+        "image_type=graph; confidence=0.9; readable_labels=true; "
+        "analysis=Seven pressure curves are visible"
+    )
+    priority = figure_priority(
+        {
+            "width": 518,
+            "height": 716,
+            "file_size": 43_971,
+            "aspect_ratio": 518 / 716,
+            "contrast": 47.0,
+            "brightness": 232.0,
+            "edge_density": 0.29,
+            "marker_series_detected": False,
+            "marker_series_score": 0.0,
+        },
+        "Figure 4 Gas density and hydrogen index as functions of pressure and temperature",
+    )
+
+    assert fields["image_type"] == "graph"
+    assert fields["analysis"].startswith("Seven pressure curves")
+    assert priority["forced_classification"] == "graph"
 
 
 def test_unresolved_multiseries_graph_is_held_for_review(tmp_path: Path) -> None:
