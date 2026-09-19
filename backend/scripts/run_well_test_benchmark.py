@@ -420,8 +420,14 @@ def write_csv(
         "figure_count",
         "source_pages",
         "retrieval_seconds",
+        "reasoning_seconds",
         "generation_seconds",
         "total_seconds",
+        "internal_source_count",
+        "external_source_count",
+        "retrieved_web_urls",
+        "citation_correctness",
+        "unsupported_claim_count",
         "initial_required_failures",
         "initial_forbidden_hits",
         "final_required_failures",
@@ -529,7 +535,7 @@ def main() -> int:
     parser.add_argument("--model", default="qwen3:8b")
     parser.add_argument(
         "--mode",
-        choices=("rag", "ollama-direct"),
+        choices=("rag", "research", "ollama-direct"),
         default="rag",
     )
     parser.add_argument(
@@ -538,6 +544,11 @@ def main() -> int:
         help="논문 비교표에 표시할 실험 조건 이름.",
     )
     parser.add_argument("--top-k", type=int, default=None)
+    parser.add_argument(
+        "--use-external",
+        action="store_true",
+        help="research mode에서 DDGS 외부 검색도 사용합니다.",
+    )
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument(
         "--ids",
@@ -609,7 +620,7 @@ def main() -> int:
         return 0
 
     api_base = args.api_url.rstrip("/")
-    if args.mode == "rag":
+    if args.mode in {"rag", "research"}:
         health = http_json(
             "GET",
             f"{api_base}/health",
@@ -656,13 +667,24 @@ def main() -> int:
         before_files = set(
             agent_runs_dir.glob("*.json")
         )
-        request_payload: dict[str, Any] = {
-            "question": question,
-            "model": args.model,
-            "benchmark_id": item_id,
-        }
-        if args.top_k is not None:
-            request_payload["top_k"] = args.top_k
+        if args.mode == "research":
+            request_payload: dict[str, Any] = {
+                "query": question,
+                "model": args.model,
+                "use_internal": True,
+                "use_external": args.use_external,
+            }
+            if args.top_k is not None:
+                request_payload["internal_top_k"] = args.top_k
+                request_payload["external_top_k"] = args.top_k
+        else:
+            request_payload = {
+                "question": question,
+                "model": args.model,
+                "benchmark_id": item_id,
+            }
+            if args.top_k is not None:
+                request_payload["top_k"] = args.top_k
 
         result: dict[str, Any] = {
             "id": item_id,
@@ -724,6 +746,47 @@ def main() -> int:
                 final_validator_passed = record.get("final_passed")
                 final_status = record.get("final_status")
                 agent_run_file = str(run_path)
+                reasoning_seconds = generation_seconds
+                internal_source_count = len(sources)
+                external_source_count = 0
+                retrieved_web_urls = []
+                citation_correctness = None
+                unsupported_claim_count = None
+            elif args.mode == "research":
+                response = http_json(
+                    "POST",
+                    f"{api_base}/research/evidence",
+                    payload=request_payload,
+                    timeout=args.timeout,
+                )
+                final_answer = str(response.get("answer") or "")
+                initial_answer = final_answer
+                sources = response.get("internal_sources") or []
+                figures = response.get("figures") or []
+                attempts = [{"answer": final_answer}]
+                timing = response.get("timing") or {}
+                retrieval_seconds = float(timing.get("retrieval_seconds") or 0.0)
+                reasoning_seconds = float(timing.get("reasoning_seconds") or 0.0)
+                generation_seconds = reasoning_seconds
+                total_seconds = float(timing.get("elapsed_seconds") or 0.0)
+                initial_validator_passed = None
+                final_validator_passed = None
+                final_status = "completed"
+                agent_run_file = "data/agent_runs/research"
+                counts = response.get("evidence_counts") or {}
+                internal_source_count = int(counts.get("internal") or 0)
+                external_source_count = int(counts.get("external") or 0)
+                retrieved_web_urls = [
+                    str(source.get("url") or "")
+                    for source in (response.get("web_sources") or [])
+                ]
+                validation = response.get("validation") or {}
+                citation_correctness = not bool(
+                    validation.get("invalid_citations")
+                )
+                unsupported_claim_count = int(
+                    validation.get("unsupported_claim_count") or 0
+                )
             else:
                 final_answer, generation_seconds = direct_ollama_answer(
                     args.ollama_url,
@@ -736,11 +799,17 @@ def main() -> int:
                 figures = []
                 attempts = [{"answer": final_answer}]
                 retrieval_seconds = 0.0
+                reasoning_seconds = generation_seconds
                 total_seconds = generation_seconds
                 initial_validator_passed = None
                 final_validator_passed = None
                 final_status = "completed"
                 agent_run_file = ""
+                internal_source_count = 0
+                external_source_count = 0
+                retrieved_web_urls = []
+                citation_correctness = None
+                unsupported_claim_count = None
 
             initial_evaluation = (
                 evaluate_benchmark_answer(
@@ -806,8 +875,14 @@ def main() -> int:
                     ),
                     "figure_count": len(figures),
                     "retrieval_seconds": retrieval_seconds,
+                    "reasoning_seconds": reasoning_seconds,
                     "generation_seconds": generation_seconds,
                     "total_seconds": total_seconds,
+                    "internal_source_count": internal_source_count,
+                    "external_source_count": external_source_count,
+                    "retrieved_web_urls": retrieved_web_urls,
+                    "citation_correctness": citation_correctness,
+                    "unsupported_claim_count": unsupported_claim_count,
                     "initial_required_failures": (
                         initial_evaluation
                         .required_failures
@@ -859,8 +934,14 @@ def main() -> int:
                     "figure_count": 0,
                     "source_pages": [],
                     "retrieval_seconds": 0.0,
+                    "reasoning_seconds": 0.0,
                     "generation_seconds": 0.0,
                     "total_seconds": 0.0,
+                    "internal_source_count": 0,
+                    "external_source_count": 0,
+                    "retrieved_web_urls": [],
+                    "citation_correctness": None,
+                    "unsupported_claim_count": None,
                     "initial_required_failures": [],
                     "initial_forbidden_hits": [],
                     "final_required_failures": [],
