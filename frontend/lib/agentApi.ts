@@ -14,6 +14,8 @@ export type AgentToolName =
   | "read_file"
   | "search_knowledge_base"
   | "get_related_figures"
+  | "search_external_web"
+  | "research_with_evidence"
   | "create_file"
   | "edit_file"
   | "run_python";
@@ -118,6 +120,22 @@ export type AgentFilePreview =
   | { path: string; kind: "text"; content: string }
   | { path: string; kind: "csv"; columns: string[]; rows: string[][]; truncated: boolean };
 
+export type EvidenceResearchResult = {
+  query: string;
+  answer: string;
+  internal_sources: Array<Record<string, unknown>>;
+  web_sources: Array<Record<string, unknown>>;
+  figures: Array<Record<string, unknown>>;
+  provenance: Array<Record<string, unknown>>;
+  model: string;
+  inference_used: boolean;
+  evidence_counts?: {
+    internal: number;
+    external: number;
+  };
+  policy?: Record<string, unknown>;
+};
+
 export type AgentRunSummary = Pick<
   AgentTask,
   | "task_id"
@@ -201,6 +219,21 @@ export function getAgentFilePreview(path: string): Promise<AgentFilePreview> {
 export function getAgentFileUrl(path: string, download = false): string {
   const query = new URLSearchParams({ path, download: String(download) });
   return `${API_BASE}/agent/files/content?${query}`;
+}
+
+export function researchWithEvidence(input: {
+  query: string;
+  internal_top_k?: number;
+  external_top_k?: number;
+  use_internal?: boolean;
+  use_external?: boolean;
+  model?: string;
+}): Promise<EvidenceResearchResult> {
+  return requestJson("/research/evidence", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
 }
 
 export function listAgentRuns(limit = 50): Promise<AgentRunList> {

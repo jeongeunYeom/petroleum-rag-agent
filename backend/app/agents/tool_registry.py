@@ -17,6 +17,7 @@ class ToolRegistry:
         self.file_tools = FileTools(settings, permissions)
         self.python_tools = PythonTools(settings, permissions)
         self._knowledge_tools = None
+        self._research_tools = None
 
     def _get_knowledge_tools(self):
         if self._knowledge_tools is None:
@@ -24,6 +25,13 @@ class ToolRegistry:
 
             self._knowledge_tools = KnowledgeTools(self.settings)
         return self._knowledge_tools
+
+    def _get_research_tools(self):
+        if self._research_tools is None:
+            from app.tools.research_tools import ResearchTools
+
+            self._research_tools = ResearchTools(self.settings)
+        return self._research_tools
 
     def execute(self, action: AgentAction, *, task_id: str) -> dict[str, Any]:
         args = action.arguments
@@ -35,6 +43,10 @@ class ToolRegistry:
             return self._get_knowledge_tools().search_knowledge_base(**args)
         if action.tool == AgentToolName.GET_RELATED_FIGURES:
             return self._get_knowledge_tools().get_related_figures(**args)
+        if action.tool == AgentToolName.SEARCH_EXTERNAL_WEB:
+            return self._get_research_tools().search_external_web(**args)
+        if action.tool == AgentToolName.RESEARCH_WITH_EVIDENCE:
+            return self._get_research_tools().research_with_evidence(**args)
         if action.tool == AgentToolName.CREATE_FILE:
             return self.file_tools.create_file(**args)
         if action.tool == AgentToolName.EDIT_FILE:

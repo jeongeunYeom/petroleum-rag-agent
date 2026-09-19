@@ -4,6 +4,7 @@ from fastapi.responses import FileResponse
 
 from app.api.agent_routes import router as agent_router
 from app.api.figure_files import _serve_image, router as figure_files_router
+from app.api.research_routes import router as research_router
 from app.api.routes import router
 from app.core.config import get_settings
 
@@ -21,6 +22,7 @@ app.add_middleware(
 app.include_router(router, prefix="/api")
 app.include_router(figure_files_router, prefix="/api")
 app.include_router(agent_router, prefix="/api")
+app.include_router(research_router, prefix="/api")
 
 
 # Backward-compatible direct-call helpers retained for tests and local scripts.

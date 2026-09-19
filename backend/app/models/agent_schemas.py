@@ -25,6 +25,8 @@ class AgentToolName(str, Enum):
     READ_FILE = "read_file"
     SEARCH_KNOWLEDGE_BASE = "search_knowledge_base"
     GET_RELATED_FIGURES = "get_related_figures"
+    SEARCH_EXTERNAL_WEB = "search_external_web"
+    RESEARCH_WITH_EVIDENCE = "research_with_evidence"
     CREATE_FILE = "create_file"
     EDIT_FILE = "edit_file"
     RUN_PYTHON = "run_python"

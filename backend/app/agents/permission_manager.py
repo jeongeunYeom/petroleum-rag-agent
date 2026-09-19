@@ -46,6 +46,8 @@ _TOOL_LEVELS = {
     AgentToolName.READ_FILE: AgentPermissionLevel.READ_ONLY,
     AgentToolName.SEARCH_KNOWLEDGE_BASE: AgentPermissionLevel.READ_ONLY,
     AgentToolName.GET_RELATED_FIGURES: AgentPermissionLevel.READ_ONLY,
+    AgentToolName.SEARCH_EXTERNAL_WEB: AgentPermissionLevel.READ_ONLY,
+    AgentToolName.RESEARCH_WITH_EVIDENCE: AgentPermissionLevel.READ_ONLY,
     AgentToolName.CREATE_FILE: AgentPermissionLevel.SAFE_CREATE,
     AgentToolName.EDIT_FILE: AgentPermissionLevel.APPROVED_EXECUTION,
     AgentToolName.RUN_PYTHON: AgentPermissionLevel.APPROVED_EXECUTION,
