@@ -23,6 +23,62 @@ if TYPE_CHECKING:
 
 
 SUPPORTED_EXTENSIONS = {".pdf", ".txt", ".png", ".jpg", ".jpeg", ".ppt", ".pptx"}
+DOCUMENT_ID_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+
+
+def delete_document_files(settings: Settings, document_id: str) -> int:
+    """Delete files produced for one indexed document."""
+    if not DOCUMENT_ID_PATTERN.fullmatch(document_id):
+        raise ValueError("Invalid document ID.")
+
+    deleted_files = 0
+    prefixed_directories = [
+        settings.raw_dir,
+        settings.figures_dir,
+        settings.figure_notes_dir,
+        settings.figure_analysis_inputs_dir,
+        settings.data_dir / "figure_display_previews",
+    ]
+    exact_files = [
+        settings.extracted_dir / f"{document_id}.json",
+        settings.ontology_dir / f"{document_id}.jsonl",
+    ]
+
+    for directory in prefixed_directories:
+        root = directory.resolve()
+        if not root.is_dir():
+            continue
+        for path in root.glob(f"{document_id}_*"):
+            resolved = path.resolve()
+            if resolved.parent != root or not resolved.is_file():
+                continue
+            resolved.unlink()
+            deleted_files += 1
+
+    for path in exact_files:
+        if path.is_file():
+            path.unlink()
+            deleted_files += 1
+
+    candidates_root = settings.figure_candidates_dir.resolve()
+    candidate_directory = (candidates_root / document_id).resolve()
+    if (
+        candidate_directory.parent == candidates_root
+        and candidate_directory.is_dir()
+    ):
+        deleted_files += sum(
+            1 for path in candidate_directory.rglob("*") if path.is_file()
+        )
+        shutil.rmtree(candidate_directory)
+
+    metadata_path = settings.metadata_dir / f"{document_id}.json"
+    if metadata_path.is_file():
+        metadata_path.unlink()
+        deleted_files += 1
+
+    return deleted_files
+
+
 class DocumentProcessor:
     def __init__(self, settings: Settings, ollama: OllamaClient):
         self.settings = settings

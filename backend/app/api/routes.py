@@ -19,7 +19,11 @@ from app.models.schemas import (
     UploadResponse,
     VisionResponse,
 )
-from app.services.document_processor import DocumentProcessor
+from app.services.document_processor import (
+    DOCUMENT_ID_PATTERN,
+    DocumentProcessor,
+    delete_document_files,
+)
 from app.services.jobs import create_job, get_job, update_job
 from app.services.ollama import OllamaClient
 from app.services.plots import build_plot
@@ -159,6 +163,28 @@ async def list_documents(
         json.loads(path.read_text(encoding="utf-8"))
         for path in sorted(settings.metadata_dir.glob("*.json"))
     ]
+
+
+@router.delete("/documents/{document_id}")
+async def delete_document(
+    document_id: str,
+    settings: Settings = Depends(get_settings),
+    vector_store: VectorStore = Depends(get_vector_store),
+) -> dict:
+    if not DOCUMENT_ID_PATTERN.fullmatch(document_id):
+        raise HTTPException(status_code=400, detail="Invalid document ID.")
+
+    metadata_path = settings.metadata_dir / f"{document_id}.json"
+    if not metadata_path.is_file():
+        raise HTTPException(status_code=404, detail="Document not found.")
+
+    deleted_chunks = vector_store.delete_document(document_id)
+    deleted_files = delete_document_files(settings, document_id)
+    return {
+        "document_id": document_id,
+        "deleted_chunks": deleted_chunks,
+        "deleted_files": deleted_files,
+    }
 
 
 def _allowed_answer_models(settings: Settings) -> list[str]:

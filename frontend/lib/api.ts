@@ -94,6 +94,12 @@ export type UploadResponse = {
   skipped: boolean;
 };
 
+export type DeleteDocumentResponse = {
+  document_id: string;
+  deleted_chunks: number;
+  deleted_files: number;
+};
+
 export type VisionResponse = {
   filename: string;
   analysis: string;
@@ -134,6 +140,14 @@ export function uploadDocument(
   return requestJson(`/documents/upload?${query}`, {
     method: "POST",
     body: form,
+  });
+}
+
+export function deleteDocument(
+  documentId: string,
+): Promise<DeleteDocumentResponse> {
+  return requestJson(`/documents/${encodeURIComponent(documentId)}`, {
+    method: "DELETE",
   });
 }
 

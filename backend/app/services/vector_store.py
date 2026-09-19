@@ -231,6 +231,15 @@ class VectorStore:
 
             print(f"[임베딩·ChromaDB 저장] {end}/{total}")
 
+    def delete_document(self, document_id: str) -> int:
+        result = self.collection.get(
+            where={"document_id": document_id},
+        )
+        ids = [str(chunk_id) for chunk_id in result.get("ids", [])]
+        if ids:
+            self.collection.delete(ids=ids)
+        return len(ids)
+
     def search(
         self,
         question: str,

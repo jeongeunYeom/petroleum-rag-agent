@@ -620,7 +620,12 @@ export default function Home() {
                   disabled
                 />
               </div>
-              <DocumentInfoPanel refreshKey={knowledgeRefreshKey} />
+              <DocumentInfoPanel
+                refreshKey={knowledgeRefreshKey}
+                onDocumentsChanged={() =>
+                  setKnowledgeRefreshKey((value) => value + 1)
+                }
+              />
             </section>
 
             <section>
