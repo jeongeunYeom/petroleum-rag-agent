@@ -21,6 +21,40 @@ export type ChatResponse = {
   elapsed_seconds?: number | null;
 };
 
+export type ResearchResponse = {
+  answer: string;
+  internal_sources: Array<{
+    evidence_id: string;
+    document: string;
+    page: number | null;
+    chunk_id: string;
+    score: number;
+    excerpt: string;
+  }>;
+  web_sources: Array<{
+    evidence_id: string;
+    title: string;
+    url: string;
+    domain: string;
+    snippet: string;
+    rank: number;
+  }>;
+  figures: Array<{
+    evidence_id: string;
+    document: string;
+    page: number | null;
+    title: string | null;
+    filename: string | null;
+    url: string | null;
+    excerpt: string;
+  }>;
+  model: string;
+  routing_mode: "internal_only" | "external_only" | "hybrid_research";
+  timing: {
+    elapsed_seconds: number;
+  };
+};
+
 export type ModelAnswer = {
   model: string;
   answer: string;
@@ -151,14 +185,19 @@ export function deleteDocument(
   });
 }
 
-export function askQuestion(
-  question: string,
+export function askResearch(
+  query: string,
   model = "qwen3:8b",
-): Promise<ChatResponse> {
-  return requestJson("/chat", {
+): Promise<ResearchResponse> {
+  return requestJson("/research/evidence", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ question, model }),
+    body: JSON.stringify({
+      query,
+      model,
+      use_internal: true,
+      use_external: true,
+    }),
   });
 }
 

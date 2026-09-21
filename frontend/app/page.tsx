@@ -2,9 +2,10 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import {
+  API_BASE,
   analyzeImage,
   askComparison,
-  askQuestion,
+  askResearch,
   ChatCompareResponse,
   ChatResponse,
   createUploadJob,
@@ -38,6 +39,15 @@ type FigureReference = {
 
 type ChatResponseWithFigures = ChatResponse & {
   figures?: FigureReference[];
+  webSources?: Array<{
+    evidence_id: string;
+    title: string;
+    url: string;
+    domain: string;
+    snippet: string;
+    rank: number;
+  }>;
+  routingMode?: "internal_only" | "external_only" | "hybrid_research";
 };
 
 type ChatCompareResponseWithFigures = Omit<
@@ -53,11 +63,13 @@ type AnswerMode =
   | "compare";
 
 
-const API_BASE_URL = (
-  process.env.NEXT_PUBLIC_API_URL ??
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "http://127.0.0.1:8000/api"
-).replace(/\/$/, "");
+const API_BASE_URL = API_BASE;
+
+const ROUTING_LABELS = {
+  internal_only: "내부 문서 검색",
+  external_only: "외부 웹 검색",
+  hybrid_research: "내부 + 외부 통합 검색",
+} as const;
 
 function resolveFigureUrl(value: string): string {
   if (/^https?:\/\//i.test(value)) {
@@ -514,12 +526,38 @@ export default function Home() {
           comparison: result,
         };
       } else {
-        const result = (await askQuestion(
+        const research = await askResearch(
           submittedQuestion,
           answerMode,
-        )) as ChatResponseWithFigures;
+        );
+        const result: ChatResponseWithFigures = {
+          answer: research.answer,
+          sources: research.internal_sources.map((source) => ({
+            document: source.document,
+            page: source.page,
+            chunk_id: source.chunk_id,
+            score: source.score,
+            excerpt: source.excerpt,
+          })),
+          model: research.model,
+          elapsed_seconds: research.timing.elapsed_seconds,
+          query_type: research.routing_mode,
+          figures: research.figures.flatMap((figure) =>
+            figure.filename && figure.url
+              ? [{
+                  document: figure.document,
+                  page: figure.page,
+                  title: figure.title,
+                  filename: figure.filename,
+                  url: figure.url,
+                }]
+              : [],
+          ),
+          webSources: research.web_sources,
+          routingMode: research.routing_mode,
+        };
 
-        sourceCount = result.sources?.length ?? 0;
+        sourceCount = result.sources.length + research.web_sources.length;
         assistantMessage = {
           id: crypto.randomUUID(),
           role: "assistant",
@@ -855,6 +893,7 @@ export default function Home() {
               const response = message.response ?? comparison;
               const sourceCount = response?.sources?.length ?? 0;
               const figures = response?.figures ?? [];
+              const webSources = message.response?.webSources ?? [];
 
               return (
                 <div key={message.id} className="flex gap-3">
@@ -904,10 +943,15 @@ export default function Home() {
                     ) : (
                       <>
                         {message.response?.model && (
-                          <div className="mb-3 flex items-center gap-2 text-xs text-slate-500">
+                          <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
                             <span className="rounded-full bg-indigo-50 px-3 py-1 font-semibold text-indigo-700">
                               {message.response.model}
                             </span>
+                            {message.response.routingMode && (
+                              <span className="rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-700">
+                                {ROUTING_LABELS[message.response.routingMode]}
+                              </span>
+                            )}
                             {message.response.elapsed_seconds != null && (
                               <span>
                                 {message.response.elapsed_seconds.toFixed(2)}s
@@ -1079,6 +1123,37 @@ export default function Home() {
                               </li>
                             );
                           })}
+                        </ul>
+                      </div>
+                    )}
+
+                    {webSources.length > 0 && (
+                      <div className="mt-5 border-t border-slate-100 pt-4">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                          External sources
+                        </h3>
+                        <ul className="mt-2 space-y-2">
+                          {webSources.map((source) => (
+                            <li
+                              key={`${message.id}:${source.evidence_id}`}
+                              className="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-3"
+                            >
+                              <a
+                                href={source.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="font-semibold text-emerald-800 underline decoration-emerald-300 underline-offset-2"
+                              >
+                                {source.title}
+                              </a>
+                              <span className="ml-2 text-[11px] text-slate-400">
+                                {source.domain}
+                              </span>
+                              <p className="mt-2 text-xs leading-5 text-slate-600">
+                                {source.snippet}
+                              </p>
+                            </li>
+                          ))}
                         </ul>
                       </div>
                     )}
