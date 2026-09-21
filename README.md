@@ -114,6 +114,8 @@ pnpm dev
 `hybrid_rerank`는 `RERANKER_MODEL`을 최초 요청 때 지연 로딩합니다. 기본값은 `BAAI/bge-reranker-base`입니다.
 오프라인 모드에서 사용하려면 해당 모델을 Hugging Face 캐시에 먼저 받아 두어야 합니다.
 
+Research 답변은 retrieval mode와 무관하게 claim 단위 Well Test 규칙을 통과해야 합니다. Wellbore storage의 unit-slope/pressure-derivative overlap, radial-flow derivative plateau, linear-flow `+1/2`, spherical-flow `-1/2`, late-time boundary/recharge의 조건부 unit-slope를 구분합니다. 질문에 잘못된 전제가 있으면 이를 명시적으로 반박해야 하며, citation의 공학적 의미가 claim과 일치하지 않거나 근거가 상충하는데 단정하면 해당 claim을 제거하고 최대 2회까지만 재작성합니다.
+
 ## 테스트
 
 ```powershell
@@ -163,7 +165,7 @@ python backend/scripts/compare_benchmark_runs.py `
   data/evaluation/<hybrid_rerank.json>
 ```
 
-결과 JSON/CSV에는 retrieval mode, 답변 정확도, hallucination rate, citation correctness, retrieval recall, 평균 retrieval/전체 시간이 기록됩니다.
+결과 JSON/CSV에는 retrieval mode, 답변 정확도, hallucination rate, citation correctness, retrieval recall, engineering contradiction count, false-premise correction success, unsupported engineering claim count, 평균 retrieval/전체 시간이 기록됩니다.
 
 ## 안전 범위
 

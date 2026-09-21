@@ -301,6 +301,10 @@ def build_summary(
         completed,
         "citation_correctness",
     )
+    false_premise_rows = rows_with_value(
+        completed,
+        "false_premise_correction_success",
+    )
 
     return {
         "questions_total": len(results),
@@ -323,6 +327,21 @@ def build_summary(
         "citation_correctness_rate": ratio(
             count_true(citation_rows, "citation_correctness"),
             len(citation_rows),
+        ),
+        "engineering_contradiction_count": sum(
+            int(row.get("engineering_contradiction_count") or 0)
+            for row in completed
+        ),
+        "unsupported_engineering_claim_count": sum(
+            int(row.get("unsupported_engineering_claim_count") or 0)
+            for row in completed
+        ),
+        "false_premise_correction_success_rate": ratio(
+            count_true(
+                false_premise_rows,
+                "false_premise_correction_success",
+            ),
+            len(false_premise_rows),
         ),
         "initial_benchmark_pass_rate": ratio(
             count_true(completed, "initial_benchmark_passed"),
@@ -437,6 +456,10 @@ def write_csv(
         "retrieved_web_urls",
         "citation_correctness",
         "unsupported_claim_count",
+        "engineering_contradiction_count",
+        "false_premise_detected",
+        "false_premise_correction_success",
+        "unsupported_engineering_claim_count",
         "initial_required_failures",
         "initial_forbidden_hits",
         "final_required_failures",
@@ -817,6 +840,16 @@ def main() -> int:
                 citation_correctness = (
                     not bool(validation.get("invalid_citations"))
                     and unsupported_claim_count == 0
+                    and int(
+                        validation.get("engineering_contradiction_count") or 0
+                    ) == 0
+                    and int(
+                        validation.get("unsupported_engineering_claim_count") or 0
+                    ) == 0
+                    and not (
+                        validation.get("false_premise_detected")
+                        and not validation.get("false_premise_corrected")
+                    )
                     and bool(validation.get("valid_citations"))
                 )
             else:
@@ -915,6 +948,18 @@ def main() -> int:
                     "retrieved_web_urls": retrieved_web_urls,
                     "citation_correctness": citation_correctness,
                     "unsupported_claim_count": unsupported_claim_count,
+                    "engineering_contradiction_count": (
+                        final_evaluation.engineering_contradiction_count
+                    ),
+                    "false_premise_detected": (
+                        final_evaluation.false_premise_detected
+                    ),
+                    "false_premise_correction_success": (
+                        final_evaluation.false_premise_correction_success
+                    ),
+                    "unsupported_engineering_claim_count": (
+                        final_evaluation.unsupported_engineering_claim_count
+                    ),
                     "retrieval_mode": (
                         retrieval_mode
                         if args.mode == "research"

@@ -546,6 +546,88 @@ def test_structured_validator_rejects_claim_unrelated_to_query(tmp_path: Path) -
     assert validation["query_relevance_rejections"] == 1
 
 
+def test_structured_validator_rejects_wrong_flow_regime_attribution(
+    tmp_path: Path,
+) -> None:
+    agent = make_agent(tmp_path)
+    raw = (
+        '{"internal":[{"claim":"Radial flow has a unit-slope pressure '
+        'derivative.","citations":["KB1"]}],"external":[],"synthesis":[],'
+        '"limitations":[]}'
+    )
+
+    answer, validation, _ = agent.validate_structured_answer(
+        raw,
+        {"KB1": "Radial flow has a horizontal constant derivative plateau."},
+        [],
+        "Describe radial flow.",
+    )
+
+    assert "unit-slope pressure" not in answer
+    assert validation["engineering_contradiction_count"] == 1
+    assert validation["unsupported_engineering_claim_count"] == 0
+    assert validation["engineering_validation_reasons"][0]["rule_id"] == (
+        "WT-REGIME-CONTRADICTION"
+    )
+
+
+def test_structured_false_premise_correction_passes(tmp_path: Path) -> None:
+    agent = make_agent(tmp_path)
+    raw = (
+        '{"internal":[{"claim":"No. Radial flow does not have unit-slope; '
+        'its derivative is a horizontal constant plateau.","citations":["KB1"]}],'
+        '"external":[],"synthesis":[],"limitations":[]}'
+    )
+
+    answer, validation, _ = agent.validate_structured_answer(
+        raw,
+        {"KB1": "Radial flow has a horizontal constant derivative plateau."},
+        [],
+        "Radial flow pressure and derivative overlap with unit-slope. Correct?",
+    )
+
+    assert "horizontal constant plateau" in answer
+    assert validation["false_premise_detected"] is True
+    assert validation["false_premise_corrected"] is True
+
+
+def test_engineering_repair_is_bounded_and_receives_structured_reasons(
+    tmp_path: Path,
+) -> None:
+    hit = {
+        "id": "chunk-1",
+        "text": "Radial flow has a horizontal constant derivative plateau.",
+        "metadata": {"filename": "welltest.pdf", "page": 219},
+    }
+    invalid = (
+        '{"internal":[{"claim":"Radial flow has a unit-slope pressure '
+        'derivative.","citations":["KB1"]}],"external":[],"synthesis":[],'
+        '"limitations":[]}'
+    )
+    ollama = StructuredOllama([invalid, invalid, invalid])
+    agent = make_agent(
+        tmp_path,
+        vector_store=FakeVectorStore(dense=[hit]),
+        ollama=ollama,
+    )
+
+    response = asyncio.run(
+        agent.research(
+            ResearchRequest(
+                query="Radial flow derivative is unit-slope. Correct?",
+                use_external=False,
+            )
+        )
+    )
+
+    assert len(ollama.calls) == 3
+    assert response.validation["repair_attempts"] == 2
+    assert response.validation["engineering_contradiction_count"] == 1
+    repair_prompt = ollama.calls[1][0][-1]["content"]
+    assert "WT-REGIME-CONTRADICTION" in repair_prompt
+    assert "private chain-of-thought" in repair_prompt
+
+
 def test_structured_validator_enforces_section_source_type(tmp_path: Path) -> None:
     agent = make_agent(tmp_path)
     raw = (

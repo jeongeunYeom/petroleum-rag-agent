@@ -24,6 +24,9 @@ def payload(
             "answer_accuracy": accuracy,
             "hallucination_rate": hallucination_rate,
             "citation_correctness_rate": 0.9,
+            "engineering_contradiction_count": 1,
+            "false_premise_correction_success_rate": 0.8,
+            "unsupported_engineering_claim_count": 2,
             "exact_refusal_rate": 1.0,
             "retrieval_document_recall_at_k": 0.8,
             "retrieval_page_recall_at_k": 0.7,
@@ -49,6 +52,8 @@ def test_builds_paper_comparison_and_baseline_deltas():
     assert comparison["rows"][1]["answer_accuracy_delta_vs_baseline"] == pytest.approx(0.3)
     assert comparison["rows"][1]["hallucination_rate_delta_vs_baseline"] == pytest.approx(-0.2)
     assert comparison["rows"][1]["retrieval_mode"] == "hybrid"
+    assert comparison["rows"][1]["engineering_contradiction_count"] == 1
+    assert comparison["rows"][1]["false_premise_correction_success_rate"] == 0.8
 
 
 def test_rejects_different_question_counts():

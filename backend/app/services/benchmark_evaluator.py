@@ -5,6 +5,8 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
+from app.services.engineering_validator import EngineeringValidator
+
 
 STRICT_REFUSAL = "제공된 문서 근거로는 확인할 수 없습니다."
 REVIEW_REQUIRED_TEXT = "사람의 검토가 필요합니다."
@@ -42,6 +44,10 @@ class BenchmarkEvaluation:
     forbidden_hits: list[str]
     source_pages: list[int]
     source_documents: list[str]
+    engineering_contradiction_count: int
+    false_premise_detected: bool
+    false_premise_correction_success: bool | None
+    unsupported_engineering_claim_count: int
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -184,6 +190,39 @@ def evaluate_benchmark_answer(
         stripped_answer,
     )
 
+    engineering_validator = EngineeringValidator()
+    evidence_text = "\n".join(
+        str(source.get("excerpt") or source.get("snippet") or "")
+        for source in source_list
+    ).strip()
+    engineering_contradiction_count = 0
+    unsupported_engineering_claim_count = 0
+    for sentence in _sentence_chunks(stripped_answer):
+        engineering = engineering_validator.validate_claim(
+            sentence,
+            evidence_text,
+            require_evidence_support=bool(evidence_text),
+        )
+        engineering_contradiction_count += (
+            engineering.engineering_contradiction_count
+        )
+        unsupported_engineering_claim_count += (
+            engineering.unsupported_engineering_claim_count
+        )
+
+    question = str(item.get("question") or "")
+    (
+        false_premise_detected,
+        false_premise_corrected,
+        _,
+    ) = engineering_validator.false_premise_correction(
+        question,
+        stripped_answer,
+    )
+    false_premise_correction_success = (
+        false_premise_corrected if false_premise_detected else None
+    )
+
     expected_document = item.get("expected_document")
     if expected_document:
         expected_key = normalize_document(
@@ -212,12 +251,20 @@ def evaluate_benchmark_answer(
         behavior_passed
         and not required_failures
         and not forbidden_hits
+        and engineering_contradiction_count == 0
+        and unsupported_engineering_claim_count == 0
+        and false_premise_correction_success is not False
     )
     passed = (
         answer_passed
         and expected_document_hit is not False
     )
-    hallucination_detected = bool(forbidden_hits) or (
+    hallucination_detected = (
+        bool(forbidden_hits)
+        or engineering_contradiction_count > 0
+        or unsupported_engineering_claim_count > 0
+        or false_premise_correction_success is False
+    ) or (
         expected_behavior == "refuse" and not behavior_passed
     )
 
@@ -232,4 +279,10 @@ def evaluate_benchmark_answer(
         forbidden_hits=forbidden_hits,
         source_pages=source_pages,
         source_documents=source_documents,
+        engineering_contradiction_count=engineering_contradiction_count,
+        false_premise_detected=false_premise_detected,
+        false_premise_correction_success=false_premise_correction_success,
+        unsupported_engineering_claim_count=(
+            unsupported_engineering_claim_count
+        ),
     )

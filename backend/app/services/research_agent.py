@@ -22,6 +22,7 @@ from app.models.research_schemas import (
     ResearchTiming,
     WebEvidence,
 )
+from app.services.engineering_validator import EngineeringValidator
 
 
 LATEST_RE = re.compile(
@@ -118,6 +119,7 @@ class ResearchAgent:
         self.web_searcher = web_searcher or self._ddgs_search
         self.log_dir = settings.agent_runs_dir / "research"
         self._reranker: Any = None
+        self.engineering_validator = EngineeringValidator()
 
     @staticmethod
     def route_query(query: str, use_internal: bool, use_external: bool) -> str:
@@ -196,19 +198,25 @@ class ResearchAgent:
                     raw_answer,
                     evidence_ids,
                     conflicts,
+                    query=request.query,
+                    evidence_text=evidence_text,
                 )
-            repair_attempted = bool(
-                validation["unsupported_claim_count"]
-                or validation["invalid_citations"]
-                or not validation["valid_citations"]
-            )
-            if repair_attempted:
+            repair_attempts = 0
+            repair_error: str | None = None
+            latest_draft = raw_answer
+            latest_validation = validation
+            while (
+                self._validation_requires_repair(validation)
+                and repair_attempts < 2
+            ):
+                repair_attempts += 1
                 try:
                     repair_messages = self.build_repair_messages(
                         messages,
-                        raw_answer,
+                        latest_draft,
                         evidence_ids,
                         structured=callable(structured_chat),
+                        validation=latest_validation,
                     )
                     if callable(structured_chat):
                         repaired = await structured_chat(
@@ -231,8 +239,16 @@ class ResearchAgent:
                             model=request.model,
                         )
                         repaired_answer, repaired_validation, repaired_disclosed = (
-                            self._validated_answer(repaired, evidence_ids, conflicts)
+                            self._validated_answer(
+                                repaired,
+                                evidence_ids,
+                                conflicts,
+                                query=request.query,
+                                evidence_text=evidence_text,
+                            )
                         )
+                    latest_draft = repaired
+                    latest_validation = repaired_validation
                     if self._validation_score(
                         repaired_validation
                     ) < self._validation_score(validation):
@@ -240,9 +256,13 @@ class ResearchAgent:
                         validation = repaired_validation
                         disclosed = repaired_disclosed
                 except ExternalServiceError as exc:
-                    validation["repair_error"] = exc.user_message
+                    repair_error = exc.user_message
+                    break
+            if repair_error:
+                validation["repair_error"] = repair_error
             validation["conflict_disclosures_added"] = disclosed
-            validation["repair_attempted"] = repair_attempted
+            validation["repair_attempted"] = repair_attempts > 0
+            validation["repair_attempts"] = repair_attempts
             inference_used = True
         else:
             answer = (
@@ -255,6 +275,12 @@ class ResearchAgent:
                 "unsupported_claim_count": 0,
                 "refused_without_evidence": True,
                 "repair_attempted": False,
+                "repair_attempts": 0,
+                "engineering_contradiction_count": 0,
+                "unsupported_engineering_claim_count": 0,
+                "false_premise_detected": False,
+                "false_premise_corrected": True,
+                "engineering_validation_reasons": [],
             }
             inference_used = False
         reasoning_seconds = time.perf_counter() - reasoning_started
@@ -676,6 +702,7 @@ class ResearchAgent:
         draft: str,
         valid_ids: set[str],
         structured: bool = False,
+        validation: dict[str, Any] | None = None,
     ) -> list[dict[str, str]]:
         allowed = ", ".join(sorted(valid_ids))
         citation_instruction = (
@@ -694,13 +721,38 @@ class ResearchAgent:
             if structured
             else "Return only the corrected answer."
         )
+        validation = validation or {}
+        failure_report = {
+            "invalid_citations": validation.get("invalid_citations") or [],
+            "unsupported_claim_count": int(
+                validation.get("unsupported_claim_count") or 0
+            ),
+            "engineering_contradiction_count": int(
+                validation.get("engineering_contradiction_count") or 0
+            ),
+            "unsupported_engineering_claim_count": int(
+                validation.get("unsupported_engineering_claim_count") or 0
+            ),
+            "false_premise_detected": bool(
+                validation.get("false_premise_detected")
+            ),
+            "false_premise_corrected": bool(
+                validation.get("false_premise_corrected", True)
+            ),
+            "engineering_validation_reasons": (
+                validation.get("engineering_validation_reasons") or []
+            ),
+        }
         return [
             *original_messages,
             {"role": "assistant", "content": draft},
             {
                 "role": "user",
                 "content": (
-                    "The draft failed citation validation. Rewrite it once without adding facts. "
+                    "The draft failed bounded claim validation. Rewrite it without adding facts. "
+                    "Treat each structured failure below as a rule to fix; do not provide or "
+                    "store private chain-of-thought.\n"
+                    f"Validation failures:\n{json.dumps(failure_report, ensure_ascii=False)}\n"
                     f"{citation_instruction}"
                     "Delete any claim that cannot be cited. Copy equations, symbols, values, units, "
                     "and petroleum terms exactly from the evidence; if extraction formatting is "
@@ -746,6 +798,9 @@ class ResearchAgent:
         semantic_rejections = 0
         query_relevance_rejections = 0
         malformed_rejections = 0
+        engineering_contradiction_count = 0
+        unsupported_engineering_claim_count = 0
+        engineering_validation_reasons: list[dict[str, str]] = []
         candidates: list[tuple[str, str, list[str], str]] = []
         for section in ANSWER_SECTIONS:
             items = payload.get(section)
@@ -780,6 +835,36 @@ class ResearchAgent:
                 if not self._equations_are_grounded(claim, evidence):
                     equation_rejections += 1
                     continue
+                evidence_conflict = any(
+                    bool(
+                        set(ids)
+                        & {
+                            str(conflict.get("left") or ""),
+                            str(conflict.get("right") or ""),
+                        }
+                    )
+                    for conflict in conflicts
+                )
+                engineering = self.engineering_validator.validate_claim(
+                    claim,
+                    evidence,
+                    evidence_conflict=evidence_conflict,
+                )
+                if not engineering.passed:
+                    engineering_contradiction_count += (
+                        engineering.engineering_contradiction_count
+                    )
+                    unsupported_engineering_claim_count += (
+                        engineering.unsupported_engineering_claim_count
+                    )
+                    engineering_validation_reasons.extend(
+                        {
+                            **reason,
+                            "citations": ",".join(ids),
+                        }
+                        for reason in engineering.reasons
+                    )
+                    continue
                 candidates.append((section, claim, ids, evidence))
 
         similarities, semantic_check_applied = self._semantic_similarities(
@@ -803,6 +888,12 @@ class ResearchAgent:
 
         disclosed = self._add_conflict_claims(accepted, conflicts, evidence_text)
         answer, used_ids = self._render_structured_answer(accepted, evidence_text)
+        (
+            false_premise_detected,
+            false_premise_corrected,
+            false_premise_reasons,
+        ) = self.engineering_validator.false_premise_correction(query, answer)
+        engineering_validation_reasons.extend(false_premise_reasons)
         unsupported = (
             numeric_rejections
             + unit_rejections
@@ -826,6 +917,13 @@ class ResearchAgent:
             "semantic_rejections": semantic_rejections,
             "query_relevance_rejections": query_relevance_rejections,
             "malformed_rejections": malformed_rejections,
+            "engineering_contradiction_count": engineering_contradiction_count,
+            "unsupported_engineering_claim_count": (
+                unsupported_engineering_claim_count
+            ),
+            "false_premise_detected": false_premise_detected,
+            "false_premise_corrected": false_premise_corrected,
+            "engineering_validation_reasons": engineering_validation_reasons,
             "semantic_check_skipped": not semantic_check_applied,
             "structured_output": True,
             "refused_without_evidence": False,
@@ -850,6 +948,11 @@ class ResearchAgent:
                 "valid_citations": [],
                 "invalid_citations": [],
                 "unsupported_claim_count": 1,
+                "engineering_contradiction_count": 0,
+                "unsupported_engineering_claim_count": 0,
+                "false_premise_detected": False,
+                "false_premise_corrected": True,
+                "engineering_validation_reasons": [],
                 "structured_output": True,
                 "structured_error": reason,
                 "refused_without_evidence": False,
@@ -989,28 +1092,114 @@ class ResearchAgent:
         lines.extend(["5. Sources", ", ".join(f"[{value}]" for value in used_ids)])
         return "\n".join(lines).strip(), used_ids
 
-    @staticmethod
     def _validated_answer(
+        self,
         answer: str,
         evidence_ids: set[str],
         conflicts: list[dict[str, str]],
+        *,
+        query: str = "",
+        evidence_text: dict[str, str] | None = None,
     ) -> tuple[str, dict[str, Any], list[str]]:
-        disclosed_answer, disclosed = ResearchAgent.ensure_conflicts_disclosed(
+        disclosed_answer, disclosed = self.ensure_conflicts_disclosed(
             answer,
             conflicts,
         )
-        validated, validation = ResearchAgent.validate_answer(
+        validated, validation = self.validate_answer(
             disclosed_answer,
             evidence_ids,
+        )
+        evidence_text = evidence_text or {}
+        kept_lines: list[str] = []
+        reasons: list[dict[str, str]] = []
+        contradictions = 0
+        unsupported = 0
+        for line in validated.splitlines():
+            ids = EVIDENCE_ID_RE.findall(line)
+            if not ids or self._is_answer_structure(line.strip()):
+                kept_lines.append(line)
+                continue
+            evidence = "\n".join(evidence_text.get(item, "") for item in ids)
+            evidence_conflict = any(
+                bool(
+                    set(ids)
+                    & {
+                        str(conflict.get("left") or ""),
+                        str(conflict.get("right") or ""),
+                    }
+                )
+                for conflict in conflicts
+            )
+            result = self.engineering_validator.validate_claim(
+                line,
+                evidence,
+                evidence_conflict=evidence_conflict,
+            )
+            if result.passed:
+                kept_lines.append(line)
+                continue
+            contradictions += result.engineering_contradiction_count
+            unsupported += result.unsupported_engineering_claim_count
+            reasons.extend(
+                {**reason, "citations": ",".join(ids)}
+                for reason in result.reasons
+            )
+
+        validated = "\n".join(kept_lines).strip()
+        valid_citations = sorted(
+            set(EVIDENCE_ID_RE.findall(validated)) & evidence_ids
+        )
+        validated = self._replace_sources_section(validated, valid_citations)
+        if not valid_citations:
+            validated = (
+                "근거는 검색되었지만 공학적 의미와 인용의 정합성을 "
+                "검증하지 못했습니다. 근거 없는 결론을 제공하지 않습니다."
+            )
+        detected, corrected, false_reasons = (
+            self.engineering_validator.false_premise_correction(query, validated)
+        )
+        reasons.extend(false_reasons)
+        validation.update(
+            {
+                "valid_citations": valid_citations,
+                "engineering_contradiction_count": contradictions,
+                "unsupported_engineering_claim_count": unsupported,
+                "false_premise_detected": detected,
+                "false_premise_corrected": corrected,
+                "engineering_validation_reasons": reasons,
+            }
         )
         return validated, validation, disclosed
 
     @staticmethod
-    def _validation_score(validation: dict[str, Any]) -> tuple[int, int, int]:
+    def _validation_score(
+        validation: dict[str, Any],
+    ) -> tuple[int, int, int, int, int]:
+        false_premise_failure = int(
+            bool(validation.get("false_premise_detected"))
+            and not bool(validation.get("false_premise_corrected"))
+        )
         return (
             0 if validation.get("valid_citations") else 1,
+            false_premise_failure
+            + int(validation.get("engineering_contradiction_count") or 0),
+            int(validation.get("unsupported_engineering_claim_count") or 0),
             int(validation.get("unsupported_claim_count") or 0),
             len(validation.get("invalid_citations") or []),
+        )
+
+    @staticmethod
+    def _validation_requires_repair(validation: dict[str, Any]) -> bool:
+        return bool(
+            validation.get("unsupported_claim_count")
+            or validation.get("invalid_citations")
+            or not validation.get("valid_citations")
+            or validation.get("engineering_contradiction_count")
+            or validation.get("unsupported_engineering_claim_count")
+            or (
+                validation.get("false_premise_detected")
+                and not validation.get("false_premise_corrected")
+            )
         )
 
     @staticmethod

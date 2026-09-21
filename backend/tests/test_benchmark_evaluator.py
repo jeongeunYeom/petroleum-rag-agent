@@ -285,3 +285,79 @@ def test_wt007_real_appraisal_misassignment_still_fails():
 
     assert result.passed is False
     assert result.forbidden_hits
+
+
+def test_engineering_metrics_detect_false_premise_agreement():
+    item = {
+        "question": (
+            "Radial flow pressure and derivative overlap with unit-slope. Correct?"
+        ),
+        "expected_behavior": "answer",
+        "required_patterns": [],
+        "forbidden_patterns": [],
+    }
+    result = evaluate_benchmark_answer(
+        item,
+        "Correct. Radial flow pressure and derivative overlap with unit-slope.",
+        sources=[
+            {
+                "excerpt": (
+                    "Radial flow has a horizontal constant derivative plateau."
+                )
+            }
+        ],
+    )
+
+    assert result.answer_passed is False
+    assert result.engineering_contradiction_count >= 1
+    assert result.false_premise_detected is True
+    assert result.false_premise_correction_success is False
+
+
+def test_engineering_metrics_accept_false_premise_correction():
+    item = {
+        "question": (
+            "Radial flow pressure and derivative overlap with unit-slope. Correct?"
+        ),
+        "expected_behavior": "answer",
+        "required_patterns": [],
+        "forbidden_patterns": [],
+    }
+    result = evaluate_benchmark_answer(
+        item,
+        (
+            "No. Radial flow does not have unit-slope; its derivative is a "
+            "horizontal constant plateau."
+        ),
+        sources=[
+            {
+                "excerpt": (
+                    "Radial flow has a horizontal constant derivative plateau."
+                )
+            }
+        ],
+    )
+
+    assert result.answer_passed is True
+    assert result.engineering_contradiction_count == 0
+    assert result.false_premise_correction_success is True
+    assert result.unsupported_engineering_claim_count == 0
+
+
+def test_engineering_metrics_count_unsupported_citation_meaning():
+    item = {
+        "question": "What is the spherical-flow derivative slope?",
+        "expected_behavior": "answer",
+        "required_patterns": [],
+        "forbidden_patterns": [],
+    }
+    result = evaluate_benchmark_answer(
+        item,
+        "Spherical flow has a derivative slope = -1/2.",
+        sources=[
+            {"excerpt": "Linear flow has a derivative slope = +1/2."}
+        ],
+    )
+
+    assert result.answer_passed is False
+    assert result.unsupported_engineering_claim_count == 1
