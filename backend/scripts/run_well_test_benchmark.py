@@ -297,6 +297,10 @@ def build_summary(
         figure_rows,
         "figure_retrieval_hit",
     )
+    citation_rows = rows_with_value(
+        completed,
+        "citation_correctness",
+    )
 
     return {
         "questions_total": len(results),
@@ -315,6 +319,10 @@ def build_summary(
         "hallucination_rate": ratio(
             count_true(completed, "hallucination_detected"),
             len(completed),
+        ),
+        "citation_correctness_rate": ratio(
+            count_true(citation_rows, "citation_correctness"),
+            len(citation_rows),
         ),
         "initial_benchmark_pass_rate": ratio(
             count_true(completed, "initial_benchmark_passed"),
@@ -402,6 +410,7 @@ def write_csv(
         "concept_group",
         "condition",
         "mode",
+        "retrieval_mode",
         "model",
         "expected_behavior",
         "initial_answer_passed",
@@ -539,6 +548,12 @@ def main() -> int:
         default="rag",
     )
     parser.add_argument(
+        "--retrieval-mode",
+        choices=("legacy", "hybrid", "hybrid_rerank"),
+        default="",
+        help="research 응답의 RETRIEVAL_MODE를 검증하고 결과에 기록합니다.",
+    )
+    parser.add_argument(
         "--condition",
         default="",
         help="논문 비교표에 표시할 실험 조건 이름.",
@@ -574,6 +589,8 @@ def main() -> int:
         action="store_true",
     )
     args = parser.parse_args()
+    if args.retrieval_mode and args.mode != "research":
+        parser.error("--retrieval-mode requires --mode research")
 
     benchmark_path = Path(args.benchmark).resolve()
     raw_benchmark_items = read_json(benchmark_path)
@@ -601,6 +618,8 @@ def main() -> int:
 
     print(f"benchmark={benchmark_path}")
     print(f"mode={args.mode}")
+    if args.retrieval_mode:
+        print(f"retrieval_mode={args.retrieval_mode}")
     print(f"model={args.model}")
     print(f"questions={len(items)}")
     print(
@@ -694,6 +713,7 @@ def main() -> int:
             "question": question,
             "condition": args.condition or f"{args.model}-{args.mode}",
             "mode": args.mode,
+            "retrieval_mode": args.retrieval_mode or None,
             "model": args.model,
             "expected_behavior": item.get(
                 "expected_behavior"
@@ -759,6 +779,16 @@ def main() -> int:
                     payload=request_payload,
                     timeout=args.timeout,
                 )
+                retrieval_mode = str(response.get("retrieval_mode") or "").strip()
+                if retrieval_mode not in {"legacy", "hybrid", "hybrid_rerank"}:
+                    raise RuntimeError(
+                        "Research response did not contain a valid retrieval_mode."
+                    )
+                if args.retrieval_mode and retrieval_mode != args.retrieval_mode:
+                    raise RuntimeError(
+                        "Backend retrieval mode mismatch: "
+                        f"expected {args.retrieval_mode}, got {retrieval_mode}"
+                    )
                 final_answer = str(response.get("answer") or "")
                 initial_answer = final_answer
                 sources = response.get("internal_sources") or []
@@ -885,6 +915,11 @@ def main() -> int:
                     "retrieved_web_urls": retrieved_web_urls,
                     "citation_correctness": citation_correctness,
                     "unsupported_claim_count": unsupported_claim_count,
+                    "retrieval_mode": (
+                        retrieval_mode
+                        if args.mode == "research"
+                        else None
+                    ),
                     "initial_required_failures": (
                         initial_evaluation
                         .required_failures
@@ -962,6 +997,27 @@ def main() -> int:
         if args.pause_seconds > 0:
             time.sleep(args.pause_seconds)
 
+    observed_retrieval_modes = sorted(
+        {
+            str(result["retrieval_mode"])
+            for result in results
+            if result.get("retrieval_mode")
+            and result.get("infrastructure_error") is None
+        }
+    )
+    if len(observed_retrieval_modes) > 1:
+        raise RuntimeError("One benchmark run returned multiple retrieval modes.")
+    run_retrieval_mode = (
+        observed_retrieval_modes[0]
+        if observed_retrieval_modes
+        else args.retrieval_mode or None
+    )
+    run_condition = args.condition or f"{args.model}-{args.mode}"
+    if args.mode == "research" and run_retrieval_mode:
+        run_condition = f"{run_condition}-{run_retrieval_mode}"
+    for result in results:
+        result["condition"] = run_condition
+
     summary = build_summary(results)
     elapsed = time.perf_counter() - overall_started
 
@@ -972,8 +1028,9 @@ def main() -> int:
         "created_at": datetime.now(
             timezone.utc
         ).isoformat(),
-        "condition": args.condition or f"{args.model}-{args.mode}",
+        "condition": run_condition,
         "mode": args.mode,
+        "retrieval_mode": run_retrieval_mode,
         "model": args.model,
         "api_url": api_base,
         "ollama_url": args.ollama_url.rstrip("/"),

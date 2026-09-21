@@ -11,19 +11,28 @@ from app.core.config import Settings
 from app.core.error_mapping import ExternalServiceError
 from app.models.research_schemas import ResearchRequest
 from app.services.research_agent import ResearchAgent
+from app.services.vector_store import VectorStore
 
 
 class FakeVectorStore:
-    def __init__(self, dense=None, sparse=None):
+    def __init__(self, dense=None, sparse=None, bm25=None):
         self.dense = dense or []
         self.sparse = sparse or []
+        self.bm25 = bm25 or []
+        self.calls = []
         self.write_attempted = False
 
     def search(self, query: str, top_k: int):
+        self.calls.append("dense")
         return self.dense[:top_k]
 
     def keyword_search(self, query: str, top_k: int):
+        self.calls.append("keyword")
         return self.sparse[:top_k]
+
+    def bm25_search(self, query: str, top_k: int):
+        self.calls.append("bm25")
+        return self.bm25[:top_k]
 
     def add_chunks(self, chunks):
         self.write_attempted = True
@@ -93,10 +102,12 @@ def make_agent(
     vector_store=None,
     ollama=None,
     web_searcher=None,
+    retrieval_mode="legacy",
 ) -> ResearchAgent:
     settings = Settings(
         data_dir=tmp_path / "data",
         agent_workspace_dir=tmp_path / "workspace",
+        retrieval_mode=retrieval_mode,
     )
     return ResearchAgent(
         settings,
@@ -106,6 +117,69 @@ def make_agent(
     )
 
 
+def test_retrieval_modes_switch_only_the_internal_retriever(tmp_path: Path) -> None:
+    dense = [{"id": "dense", "text": "wellbore storage", "metadata": {}}]
+    keyword = [{"id": "keyword", "text": "wellbore storage", "metadata": {}}]
+    bm25 = [{"id": "bm25", "text": "wellbore storage", "metadata": {}}]
+
+    legacy_store = FakeVectorStore(dense=dense, sparse=keyword, bm25=bm25)
+    legacy = make_agent(tmp_path, vector_store=legacy_store)
+    assert legacy.search_knowledge_base("wellbore storage", 2)
+    assert legacy_store.calls == ["dense", "keyword"]
+
+    hybrid_store = FakeVectorStore(dense=dense, sparse=keyword, bm25=bm25)
+    hybrid = make_agent(
+        tmp_path,
+        vector_store=hybrid_store,
+        retrieval_mode="hybrid",
+    )
+    assert hybrid.search_knowledge_base("wellbore storage", 2)
+    assert hybrid_store.calls == ["dense", "bm25"]
+
+
+def test_hybrid_rerank_uses_cross_encoder_scores(tmp_path: Path) -> None:
+    hits = [
+        {"id": "first", "text": "wellbore storage first", "metadata": {}},
+        {"id": "second", "text": "wellbore storage second", "metadata": {}},
+    ]
+    agent = make_agent(
+        tmp_path,
+        vector_store=FakeVectorStore(dense=hits, bm25=hits),
+        retrieval_mode="hybrid_rerank",
+    )
+
+    class FakeReranker:
+        def predict(self, pairs, **kwargs):
+            assert len(pairs) == 2
+            return [0.1, 0.9]
+
+    agent._reranker = FakeReranker()
+    result = agent.search_knowledge_base("wellbore storage", 2)
+
+    assert [hit["id"] for hit in result] == ["second", "first"]
+    assert result[0]["reranker_score"] == pytest.approx(0.9)
+
+
+def test_bm25_search_ranks_existing_chroma_documents_without_writes() -> None:
+    class Collection:
+        def get(self, **kwargs):
+            return {
+                "ids": ["best", "partial", "other"],
+                "documents": [
+                    "Wellbore storage storage controls early time pressure.",
+                    "Wellbore pressure response.",
+                    "Porosity and permeability.",
+                ],
+                "metadatas": [{}, {}, {}],
+            }
+
+    store = VectorStore.__new__(VectorStore)
+    store.collection = Collection()
+
+    result = store.bm25_search("wellbore storage", 2)
+
+    assert [hit["id"] for hit in result] == ["best", "partial"]
+    assert result[0]["keyword_score"] > result[1]["keyword_score"]
 def test_external_search_normalizes_and_deduplicates_urls(tmp_path: Path) -> None:
     raw = [
         {
@@ -710,8 +784,10 @@ def test_research_api_contract(tmp_path: Path) -> None:
         "model",
         "inference_used",
         "evidence_counts",
+        "retrieval_mode",
     ):
         assert field in body
     assert body["routing_mode"] == "internal_only"
+    assert body["retrieval_mode"] == "legacy"
     assert body["evidence_counts"] == {"internal": 1, "external": 0}
     assert body["timing"]["elapsed_seconds"] >= 0

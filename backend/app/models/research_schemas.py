@@ -3,6 +3,9 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 
+RetrievalMode = Literal["legacy", "hybrid", "hybrid_rerank"]
+
+
 class ResearchRequest(BaseModel):
     query: str = Field(min_length=1, max_length=4000)
     internal_top_k: int = Field(default=5, ge=1, le=20)
@@ -83,6 +86,7 @@ class ResearchResponse(BaseModel):
     inference_used: bool
     evidence_counts: EvidenceCounts
     routing_mode: Literal["internal_only", "external_only", "hybrid_research"]
+    retrieval_mode: RetrievalMode
     timing: ResearchTiming
     conflicts: list[dict[str, str]] = Field(default_factory=list)
     validation: dict[str, Any] = Field(default_factory=dict)

@@ -103,6 +103,17 @@ pnpm dev
 
 외부 검색은 DDGS를 사용하며 별도 API 키가 필요하지 않습니다. 검색 결과와 순위는 공개 검색 서비스 상태에 따라 달라질 수 있습니다. 외부 결과는 답변 근거로만 사용하며 ChromaDB에 저장하지 않습니다.
 
+내부 Retrieval은 `.env`의 `RETRIEVAL_MODE`로 선택합니다. 기존 ChromaDB를 그대로 읽으며 재인덱싱하지 않습니다.
+
+| 값 | 내부 Retrieval |
+|---|---|
+| `legacy` | Dense + 기존 keyword + RRF |
+| `hybrid` | BGE-M3 dense + BM25 + RRF |
+| `hybrid_rerank` | BGE-M3 dense + BM25 + RRF + CrossEncoder |
+
+`hybrid_rerank`는 `RERANKER_MODEL`을 최초 요청 때 지연 로딩합니다. 기본값은 `BAAI/bge-reranker-base`입니다.
+오프라인 모드에서 사용하려면 해당 모델을 Hugging Face 캐시에 먼저 받아 두어야 합니다.
+
 ## 테스트
 
 ```powershell
@@ -125,6 +136,34 @@ Well Test benchmark 질문은 `evaluation/well_test_agent_benchmark.json`에 있
 ```powershell
 python backend/scripts/run_well_test_benchmark.py --dry-run
 ```
+
+Retrieval mode별 비교는 백엔드를 각 모드로 다시 시작한 뒤 같은 조건으로 실행합니다. 첫 번째 터미널에서:
+
+```powershell
+$env:RETRIEVAL_MODE="legacy"       # hybrid, hybrid_rerank로 반복
+cd backend
+uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+두 번째 터미널의 저장소 루트에서:
+
+```powershell
+python backend/scripts/run_well_test_benchmark.py `
+  --mode research `
+  --retrieval-mode legacy `
+  --model qwen3:8b
+```
+
+세 실행 결과를 한 표로 합칩니다.
+
+```powershell
+python backend/scripts/compare_benchmark_runs.py `
+  data/evaluation/<legacy.json> `
+  data/evaluation/<hybrid.json> `
+  data/evaluation/<hybrid_rerank.json>
+```
+
+결과 JSON/CSV에는 retrieval mode, 답변 정확도, hallucination rate, citation correctness, retrieval recall, 평균 retrieval/전체 시간이 기록됩니다.
 
 ## 안전 범위
 

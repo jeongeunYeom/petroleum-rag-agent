@@ -50,6 +50,7 @@ export type ResearchResponse = {
   }>;
   model: string;
   routing_mode: "internal_only" | "external_only" | "hybrid_research";
+  retrieval_mode: "legacy" | "hybrid" | "hybrid_rerank";
   timing: {
     elapsed_seconds: number;
   };

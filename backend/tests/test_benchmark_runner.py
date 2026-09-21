@@ -19,6 +19,7 @@ def test_summary_exposes_paper_metrics():
             "initial_answer_passed": False,
             "final_answer_passed": True,
             "hallucination_detected": False,
+            "citation_correctness": True,
             "rewrite_success": True,
             "expected_document_hit": True,
             "preferred_page_hit": True,
@@ -41,6 +42,7 @@ def test_summary_exposes_paper_metrics():
             "initial_answer_passed": False,
             "final_answer_passed": False,
             "hallucination_detected": True,
+            "citation_correctness": False,
             "rewrite_success": False,
             "expected_document_hit": None,
             "preferred_page_hit": None,
@@ -58,7 +60,9 @@ def test_summary_exposes_paper_metrics():
     assert summary["answer_accuracy"] == 0.5
     assert summary["initial_answer_accuracy"] == 0.0
     assert summary["hallucination_rate"] == 0.5
+    assert summary["citation_correctness_rate"] == 0.5
     assert summary["retrieval_document_recall_at_k"] == 1.0
+    assert summary["average_retrieval_seconds"] == 0.75
     assert summary["average_total_seconds"] == 2.25
     assert summary["category_metrics"]["flow_regime"]["answer_accuracy"] == 1.0
 

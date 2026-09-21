@@ -2,6 +2,7 @@ import math
 import logging
 import os
 import re
+from collections import Counter
 from typing import Any
 
 os.environ.setdefault("ANONYMIZED_TELEMETRY", "False")
@@ -387,6 +388,70 @@ class VectorStore:
             reverse=True,
         )[:top_k]
 
+    def bm25_search(self, question: str, top_k: int) -> list[dict[str, Any]]:
+        data = self.collection.get(include=["documents", "metadatas"])
+        query_tokens = list(
+            dict.fromkeys(
+                self._bm25_tokens(" ".join(expand_query_terms(question)))
+            )
+        )
+        if not query_tokens:
+            return []
+
+        rows: list[tuple[str, str, dict[str, Any], int, Counter[str]]] = []
+        document_frequencies = Counter()
+        total_length = 0
+        ids = data.get("ids", [])
+        documents = data.get("documents", [])
+        metadatas = data.get("metadatas", [])
+
+        for chunk_id, document, metadata in zip(ids, documents, metadatas):
+            text = str(document or "")
+            tokens = self._bm25_tokens(text)
+            total_length += len(tokens)
+            counts = Counter(tokens)
+            matched = Counter({token: counts[token] for token in query_tokens if counts[token]})
+            if matched:
+                document_frequencies.update(matched.keys())
+                rows.append((str(chunk_id), text, metadata or {}, len(tokens), matched))
+
+        document_count = len(ids)
+        if not rows or document_count == 0:
+            return []
+
+        average_length = total_length / document_count or 1.0
+        k1 = 1.5
+        b = 0.75
+        hits: list[dict[str, Any]] = []
+        for chunk_id, text, metadata, length, counts in rows:
+            score = 0.0
+            for token, frequency in counts.items():
+                frequency_in_documents = document_frequencies[token]
+                inverse_document_frequency = math.log(
+                    1
+                    + (document_count - frequency_in_documents + 0.5)
+                    / (frequency_in_documents + 0.5)
+                )
+                denominator = frequency + k1 * (
+                    1 - b + b * length / average_length
+                )
+                score += inverse_document_frequency * frequency * (k1 + 1) / denominator
+            hits.append(
+                {
+                    "id": chunk_id,
+                    "text": text,
+                    "metadata": metadata,
+                    "distance": None,
+                    "keyword_score": score,
+                }
+            )
+
+        return sorted(
+            hits,
+            key=lambda item: float(item["keyword_score"]),
+            reverse=True,
+        )[:top_k]
+
     def aggregate_keyword_search(
         self,
         question: str,
@@ -653,6 +718,15 @@ class VectorStore:
 
     def _keyword_tokens(self, question: str) -> list[str]:
         return expand_query_terms(question)
+
+    @staticmethod
+    def _bm25_tokens(text: str) -> list[str]:
+        return [
+            token.lower()
+            for token in re.findall(r"[A-Za-z0-9]+|[가-힣]+", text)
+            if token.lower() not in ENGLISH_STOPWORDS
+            and token not in KOREAN_STOPWORDS
+        ]
 
     def _keyword_score(
         self,

@@ -8,9 +8,18 @@ from dotenv import load_dotenv
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 ENV_FILE = PROJECT_ROOT / ".env"
+RETRIEVAL_MODES = {"legacy", "hybrid", "hybrid_rerank"}
 
 # Load local environment variables from the project .env when present.
 load_dotenv(ENV_FILE)
+
+
+def resolve_retrieval_mode(value: str | None = None) -> str:
+    mode = (value or os.getenv("RETRIEVAL_MODE", "legacy")).strip().lower()
+    if mode not in RETRIEVAL_MODES:
+        choices = "|".join(sorted(RETRIEVAL_MODES))
+        raise ValueError(f"RETRIEVAL_MODE must be one of {choices}")
+    return mode
 
 
 def _resolve_project_path(value: str | None, default: str) -> Path:
@@ -79,6 +88,15 @@ class Settings:
 
     embedding_model_path: str | None = field(
         default_factory=lambda: os.getenv("EMBEDDING_MODEL_PATH") or None
+    )
+
+    retrieval_mode: str = field(default_factory=resolve_retrieval_mode)
+
+    reranker_model: str = field(
+        default_factory=lambda: os.getenv(
+            "RERANKER_MODEL",
+            "BAAI/bge-reranker-base",
+        )
     )
 
     collection_name: str = field(

@@ -117,6 +117,7 @@ class ResearchAgent:
         self.ollama = ollama
         self.web_searcher = web_searcher or self._ddgs_search
         self.log_dir = settings.agent_runs_dir / "research"
+        self._reranker: Any = None
 
     @staticmethod
     def route_query(query: str, use_internal: bool, use_external: bool) -> str:
@@ -274,6 +275,7 @@ class ResearchAgent:
                 external=len(web_sources),
             ),
             routing_mode=mode,
+            retrieval_mode=self.settings.retrieval_mode,
             timing=ResearchTiming(
                 retrieval_seconds=round(retrieval_seconds, 6),
                 reasoning_seconds=round(reasoning_seconds, 6),
@@ -298,7 +300,11 @@ class ResearchAgent:
 
         candidate_count = min(top_k * 4, 80)
         dense = self.vector_store.search(query, candidate_count)
-        sparse = self.vector_store.keyword_search(query, candidate_count)
+        sparse = (
+            self.vector_store.keyword_search(query, candidate_count)
+            if self.settings.retrieval_mode == "legacy"
+            else self.vector_store.bm25_search(query, candidate_count)
+        )
         merged: dict[str, dict[str, Any]] = {}
         rrf_k = 60
         for channel, hits in (("dense", dense), ("sparse", sparse)):
@@ -320,6 +326,8 @@ class ResearchAgent:
             key=lambda item: float(item.get("rrf_score") or 0.0),
             reverse=True,
         )
+        if self.settings.retrieval_mode == "hybrid_rerank":
+            ranked = self._rerank_hits(query, ranked)
         selected = ranked[:top_k]
         if FIGURE_RE.search(query) and not any(
             self._is_figure_hit(
@@ -342,6 +350,51 @@ class ResearchAgent:
             if figure is not None and selected:
                 selected[-1] = figure
         return selected
+
+    def _rerank_hits(
+        self,
+        query: str,
+        hits: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        if not hits:
+            return hits
+        try:
+            scores = self._get_reranker().predict(
+                [(query, str(hit.get("text") or "")) for hit in hits],
+                batch_size=16,
+                show_progress_bar=False,
+            )
+        except Exception as exc:
+            raise ExternalServiceError(
+                "CrossEncoder reranker를 불러오거나 실행하지 못했습니다. "
+                "RERANKER_MODEL 설정과 모델 설치 상태를 확인해 주세요.",
+                str(exc),
+            ) from exc
+
+        reranked: list[dict[str, Any]] = []
+        for hit, score in zip(hits, scores):
+            item = dict(hit)
+            item["reranker_score"] = float(
+                score.item() if hasattr(score, "item") else score
+            )
+            reranked.append(item)
+        return sorted(
+            reranked,
+            key=lambda item: float(item["reranker_score"]),
+            reverse=True,
+        )
+
+    def _get_reranker(self) -> Any:
+        if self._reranker is None:
+            from sentence_transformers import CrossEncoder
+
+            device = getattr(self.vector_store, "embedding_device", None)
+            options = {"device": device} if device else {}
+            self._reranker = CrossEncoder(
+                self.settings.reranker_model,
+                **options,
+            )
+        return self._reranker
 
     def _passes_similarity_threshold(self, hit: dict[str, Any]) -> bool:
         distance = hit.get("distance")
@@ -475,7 +528,14 @@ class ResearchAgent:
                     document=document,
                     page=page,
                     chunk_id=str(hit.get("id") or ""),
-                    score=round(float(hit.get("rrf_score") or 0.0), 8),
+                    score=round(
+                        float(
+                            hit.get("reranker_score")
+                            if hit.get("reranker_score") is not None
+                            else hit.get("rrf_score") or 0.0
+                        ),
+                        8,
+                    ),
                     excerpt=text[:2000],
                 )
             )

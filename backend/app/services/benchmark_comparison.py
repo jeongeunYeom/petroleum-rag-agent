@@ -7,11 +7,13 @@ from typing import Any, Iterable, Mapping
 COMPARISON_METRICS = (
     "answer_accuracy",
     "hallucination_rate",
+    "citation_correctness_rate",
     "exact_refusal_rate",
     "retrieval_document_recall_at_k",
     "retrieval_page_recall_at_k",
     "figure_answer_accuracy",
     "figure_retrieval_accuracy",
+    "average_retrieval_seconds",
     "average_total_seconds",
 )
 
@@ -96,6 +98,7 @@ def _comparison_row(payload: Mapping[str, Any], condition: str) -> dict[str, Any
     row: dict[str, Any] = {
         "condition": condition,
         "mode": payload.get("mode") or "rag",
+        "retrieval_mode": payload.get("retrieval_mode"),
         "model": payload.get("model"),
         "run_id": payload.get("run_id"),
         "question_count": payload.get("question_count"),
