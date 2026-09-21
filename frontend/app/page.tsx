@@ -17,6 +17,13 @@ import { PlotPanel } from "@/components/PlotPanel";
 import { SystemStatusPanel } from "@/components/SystemStatusPanel";
 import { MarkdownMath } from "@/components/MarkdownMath";
 import { AppIconRail, MobileModeTabs } from "@/components/AppNavigation";
+import {
+  type AgentTask,
+  createAgentPlan,
+  executeAgentTask,
+  getAgentFileUrl,
+  getAgentTask,
+} from "@/lib/agentApi";
 
 
 type FigureReference = {
@@ -119,6 +126,8 @@ type ChatMessage = {
   content: string;
   response?: ChatResponseWithFigures;
   comparison?: ChatCompareResponseWithFigures;
+  agentTask?: AgentTask;
+  agentError?: string;
 };
 
 type SavedChat = {
@@ -177,6 +186,25 @@ function serializeChatMessages(messages: ChatMessage[]): string {
   return JSON.stringify(messages);
 }
 
+function agentStatusClass(status: AgentTask["status"]): string {
+  if (status === "completed") return "bg-emerald-100 text-emerald-700";
+  if (status === "failed") return "bg-red-100 text-red-700";
+  if (status === "running") return "bg-amber-100 text-amber-700";
+  if (status === "canceled") return "bg-slate-200 text-slate-600";
+  return "bg-sky-100 text-sky-700";
+}
+
+async function waitForAgentTask(taskId: string): Promise<AgentTask> {
+  for (let attempt = 0; attempt < 600; attempt += 1) {
+    const task = await getAgentTask(taskId);
+    if (["completed", "failed", "canceled"].includes(task.status)) {
+      return task;
+    }
+    await new Promise((resolve) => window.setTimeout(resolve, 500));
+  }
+  return getAgentTask(taskId);
+}
+
 export default function Home() {
   const [documentFiles, setDocumentFiles] = useState<File[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -193,6 +221,7 @@ export default function Home() {
   const [knowledgeRefreshKey, setKnowledgeRefreshKey] = useState(0);
   const [selectedFigure, setSelectedFigure] = useState<FigureReference | null>(null);
   const [answerMode, setAnswerMode] = useState<AnswerMode>("qwen3:8b");
+  const [agentBusyTaskId, setAgentBusyTaskId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedFigure) {
@@ -439,9 +468,33 @@ export default function Home() {
     setBusy(true);
     setStatus(
       answerMode === "compare"
-        ? "한 번 검색한 동일 근거로 Qwen3와 Gemma4를 순차 비교 중..."
-        : `검색 후 ${answerMode}에 질문 중...`,
+        ? "RAG 비교 답변과 Agent 작업 계획을 함께 실행 중..."
+        : `RAG + ${answerMode} 답변과 Agent 작업을 함께 실행 중...`,
     );
+
+    const previousAgentTask = [...messages]
+      .reverse()
+      .find((message) => message.agentTask?.conversation_id)
+      ?.agentTask;
+    const agentPromise = createAgentPlan({
+      request: submittedQuestion,
+      research_mode: true,
+      conversation_id: previousAgentTask?.conversation_id ?? undefined,
+      permission_level: 3,
+    }).then(async (planned) => {
+      if (planned.status === "failed" || planned.requires_approval) {
+        return planned;
+      }
+      await executeAgentTask(planned.task_id, false);
+      return waitForAgentTask(planned.task_id);
+    })
+      .then((task) => ({ task, error: undefined as string | undefined }))
+      .catch((error) => ({
+        task: undefined,
+        error: error instanceof Error
+          ? error.message
+          : "Agent 작업을 시작하지 못했습니다.",
+      }));
 
     try {
       let assistantMessage: ChatMessage;
@@ -475,18 +528,27 @@ export default function Home() {
         };
       }
 
+      const agentOutcome = await agentPromise;
+      assistantMessage.agentTask = agentOutcome.task;
+      assistantMessage.agentError = agentOutcome.error;
+
       setMessages((previous) => [
         ...previous,
         assistantMessage,
       ]);
       setStatus(
-        sourceCount
-          ? "동일한 검색 근거를 사용해 답변을 생성했습니다."
-          : "관련 문서 청크를 찾지 못했습니다.",
+        assistantMessage.agentError || assistantMessage.agentTask?.status === "failed"
+          ? "RAG 답변은 완료했지만 Agent 작업을 확인해야 합니다."
+          : assistantMessage.agentTask?.requires_approval
+          ? "RAG 답변 완료 · Agent 작업은 실행 승인을 기다립니다."
+          : sourceCount
+            ? "RAG 답변과 Agent 도구 실행을 완료했습니다."
+            : "Agent 실행은 완료했지만 관련 문서 청크를 찾지 못했습니다.",
       );
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Question failed";
+      const agentOutcome = await agentPromise;
 
       setMessages((previous) => [
         ...previous,
@@ -494,11 +556,46 @@ export default function Home() {
           id: crypto.randomUUID(),
           role: "assistant",
           content: `오류: ${errorMessage}`,
+          agentTask: agentOutcome.task,
+          agentError: agentOutcome.error,
         },
       ]);
       setStatus(errorMessage);
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function approveAgentTask(messageId: string, task: AgentTask) {
+    setAgentBusyTaskId(task.task_id);
+    setStatus("승인된 Agent 작업을 실행 중...");
+    try {
+      await executeAgentTask(task.task_id, true);
+      const completed = await waitForAgentTask(task.task_id);
+      setMessages((current) =>
+        current.map((message) =>
+          message.id === messageId
+            ? { ...message, agentTask: completed, agentError: undefined }
+            : message,
+        ),
+      );
+      setStatus(
+        completed.status === "completed"
+          ? "Agent가 승인된 작업과 결과 검증을 완료했습니다."
+          : `Agent 작업 ${completed.status}: ${completed.error ?? "확인 필요"}`,
+      );
+    } catch (error) {
+      const message = error instanceof Error
+        ? error.message
+        : "Agent 작업 실행에 실패했습니다.";
+      setMessages((current) =>
+        current.map((item) =>
+          item.id === messageId ? { ...item, agentError: message } : item,
+        ),
+      );
+      setStatus(message);
+    } finally {
+      setAgentBusyTaskId(null);
     }
   }
 
@@ -734,10 +831,10 @@ export default function Home() {
                 </div>
                 <div className="max-w-[86%] rounded-3xl rounded-tl-md bg-white px-5 py-4 text-sm leading-7 text-slate-700 shadow-sm ring-1 ring-slate-200">
                   <p className="font-semibold text-slate-900">
-                    Petroleum RAG Agent가 준비됐어.
+                    통합 Petroleum Research Agent가 준비됐어.
                   </p>
                   <p className="mt-2">
-                    왼쪽에서 PDF/TXT/PPT 자료를 업로드한 뒤, 아래 입력창에 질문하면 검색된 문서 근거를 바탕으로 답변해.
+                    연구 목표를 입력하면 RAG + LLM이 근거 답변을 만들고, Agent가 필요한 도구를 계획·실행해.
                   </p>
                 </div>
               </div>
@@ -820,6 +917,68 @@ export default function Home() {
                         )}
                         <MarkdownMath content={message.content} />
                       </>
+                    )}
+
+                    {message.agentTask && (
+                      <section className="mt-5 rounded-2xl border border-indigo-100 bg-indigo-50/60 p-4 text-xs leading-5">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <h3 className="font-bold text-slate-900">Agent 실행</h3>
+                          <span className={`rounded-full px-2.5 py-1 font-bold ${agentStatusClass(message.agentTask.status)}`}>
+                            {message.agentTask.status}
+                          </span>
+                        </div>
+                        <ol className="mt-3 list-decimal space-y-1 pl-4 text-slate-600">
+                          {message.agentTask.plan.map((step) => (
+                            <li key={step}>{step}</li>
+                          ))}
+                        </ol>
+                        <p className="mt-3 text-slate-500">
+                          도구: {message.agentTask.required_tools.join(", ") || "없음"}
+                          {message.agentTask.tools_used.length > 0
+                            ? ` · 실행됨: ${message.agentTask.tools_used.join(", ")}`
+                            : ""}
+                        </p>
+                        {message.agentTask.created_files.length > 0 && (
+                          <div className="mt-3 space-y-1">
+                            <p className="font-bold text-slate-700">생성 파일</p>
+                            {message.agentTask.created_files.map((path) => (
+                              <a
+                                key={path}
+                                href={getAgentFileUrl(path)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="block text-indigo-700 underline"
+                              >
+                                {path}
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                        {message.agentTask.status === "planned" &&
+                          message.agentTask.requires_approval && (
+                            <button
+                              type="button"
+                              disabled={agentBusyTaskId !== null}
+                              onClick={() => void approveAgentTask(message.id, message.agentTask!)}
+                              className="mt-3 rounded-xl bg-indigo-600 px-4 py-2 font-bold text-white disabled:opacity-40"
+                            >
+                              {agentBusyTaskId === message.agentTask.task_id
+                                ? "실행 중..."
+                                : "Agent 작업 승인 및 실행"}
+                            </button>
+                          )}
+                        {message.agentTask.error && (
+                          <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-red-700">
+                            {message.agentTask.error}
+                          </p>
+                        )}
+                      </section>
+                    )}
+
+                    {message.agentError && (
+                      <p className="mt-4 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-700">
+                        Agent 오류: {message.agentError}
+                      </p>
                     )}
 
 
@@ -970,7 +1129,7 @@ export default function Home() {
             <span className="pb-2 text-slate-400">＋</span>
             <textarea
               className="max-h-40 min-h-[36px] flex-1 resize-none bg-transparent py-2 text-sm outline-none placeholder:text-slate-400"
-              placeholder="Message Petroleum RAG Agent..."
+              placeholder="연구 목표 또는 질문을 입력하세요..."
               value={question}
               onChange={(event) => setQuestion(event.target.value)}
               onKeyDown={(event) => {
@@ -988,7 +1147,7 @@ export default function Home() {
               ↑
             </button>
           </div>
-          <p className="mt-2 text-center text-[11px] text-slate-400">Petroleum RAG Agent can make mistakes. Check retrieved sources and page numbers.</p>
+          <p className="mt-2 text-center text-[11px] text-slate-400">RAG 근거와 Agent 실행 결과를 함께 확인하세요. 파일 변경·코드 실행은 승인 후 진행됩니다.</p>
         </form>
       </section>
 

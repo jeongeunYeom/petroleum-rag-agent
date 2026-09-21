@@ -79,6 +79,7 @@ export type AgentTask = {
 
 export type AgentPlanInput = {
   request: string;
+  research_mode?: boolean;
   conversation_id?: string;
   target_path?: string;
   target_paths?: string[];

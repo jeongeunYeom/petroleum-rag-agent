@@ -257,7 +257,7 @@ class AgentPlanner:
                 ],
             )
 
-        if self._looks_like_knowledge_search(lowered):
+        if request.research_mode or self._looks_like_knowledge_search(lowered):
             return PlannedTask(
                 plan=[
                     "질문에서 문헌 검색에 사용할 핵심 용어를 확인합니다.",

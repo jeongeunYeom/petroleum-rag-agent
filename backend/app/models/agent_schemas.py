@@ -49,6 +49,7 @@ class AgentAction(BaseModel):
 
 class AgentPlanRequest(BaseModel):
     request: str = Field(min_length=1, max_length=4000)
+    research_mode: bool = False
     conversation_id: str | None = Field(default=None, pattern=r"^CV-[A-Z0-9-]+$")
     target_path: str | None = Field(default=None, max_length=500)
     target_paths: list[Annotated[str, Field(max_length=500)]] = Field(

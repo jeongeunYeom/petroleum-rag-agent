@@ -154,6 +154,22 @@ def test_plan_without_conversation_creates_one_automatically(client: TestClient)
     assert detail.json()["title"] == "새 자동 대화를 시작해줘."
 
 
+def test_research_mode_routes_general_goal_to_rag_tool(client: TestClient) -> None:
+    response = client.post(
+        "/api/agent/plan",
+        json={
+            "request": "공극률이 생산성에 미치는 영향을 분석해줘.",
+            "research_mode": True,
+            "permission_level": 1,
+        },
+    )
+
+    assert response.status_code == 201
+    task = response.json()
+    assert task["required_tools"] == ["search_knowledge_base"]
+    assert task["requires_approval"] is False
+
+
 def test_conversation_list_is_newest_first(client: TestClient) -> None:
     first = client.post(
         "/api/agent/conversations",

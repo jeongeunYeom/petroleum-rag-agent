@@ -4,8 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
-  { href: "/", icon: "⌂", label: "RAG 채팅", match: (path: string) => path === "/" },
-  { href: "/agent", icon: "✦", label: "Agent 작업", match: (path: string) => path.startsWith("/agent") },
+  { href: "/", icon: "✦", label: "통합 Research Agent", match: (path: string) => path === "/" },
   { href: "/review", icon: "▧", label: "Figure Review", match: (path: string) => path.startsWith("/review") },
   { href: "/evaluation", icon: "◫", label: "평가", match: (path: string) => path.startsWith("/evaluation") },
 ];
@@ -54,7 +53,7 @@ export function MobileModeTabs() {
 
   return (
     <nav className="flex items-center rounded-xl bg-slate-100 p-1 md:hidden" aria-label="작업 모드">
-      {NAV_ITEMS.slice(0, 2).map((item) => {
+      {NAV_ITEMS.slice(0, 1).map((item) => {
         const active = item.match(pathname);
         return (
           <Link
