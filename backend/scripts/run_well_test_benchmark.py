@@ -305,6 +305,10 @@ def build_summary(
         completed,
         "false_premise_correction_success",
     )
+    engineering_validation_rows = rows_with_value(
+        completed,
+        "engineering_validation_passed",
+    )
 
     return {
         "questions_total": len(results),
@@ -336,12 +340,31 @@ def build_summary(
             int(row.get("unsupported_engineering_claim_count") or 0)
             for row in completed
         ),
+        "average_engineering_contradiction_count": mean_field(
+            completed,
+            "engineering_contradiction_count",
+        ),
+        "average_unsupported_engineering_claim_count": mean_field(
+            completed,
+            "unsupported_engineering_claim_count",
+        ),
         "false_premise_correction_success_rate": ratio(
             count_true(
                 false_premise_rows,
                 "false_premise_correction_success",
             ),
             len(false_premise_rows),
+        ),
+        "engineering_validation_pass_rate": ratio(
+            count_true(
+                engineering_validation_rows,
+                "engineering_validation_passed",
+            ),
+            len(engineering_validation_rows),
+        ),
+        "average_repair_attempts": mean_field(
+            completed,
+            "repair_attempts",
         ),
         "initial_benchmark_pass_rate": ratio(
             count_true(completed, "initial_benchmark_passed"),
@@ -441,6 +464,7 @@ def write_csv(
         "final_benchmark_passed",
         "rewrite_success",
         "attempts",
+        "repair_attempts",
         "final_status",
         "expected_document_hit",
         "preferred_page_hit",
@@ -460,6 +484,7 @@ def write_csv(
         "false_premise_detected",
         "false_premise_correction_success",
         "unsupported_engineering_claim_count",
+        "engineering_validation_passed",
         "initial_required_failures",
         "initial_forbidden_hits",
         "final_required_failures",
@@ -743,6 +768,12 @@ def main() -> int:
             ),
             "infrastructure_error": None,
         }
+        repair_attempts = 0
+        api_engineering_contradictions: int | None = None
+        api_unsupported_engineering: int | None = None
+        api_false_premise_detected: bool | None = None
+        api_false_premise_corrected: bool | None = None
+        api_engineering_validation_passed: bool | None = None
 
         try:
             if args.mode == "rag":
@@ -795,6 +826,12 @@ def main() -> int:
                 retrieved_web_urls = []
                 citation_correctness = None
                 unsupported_claim_count = None
+                repair_attempts = max(len(attempts) - 1, 0)
+                api_engineering_validation_passed = (
+                    bool(final_validator_passed)
+                    if final_validator_passed is not None
+                    else None
+                )
             elif args.mode == "research":
                 response = http_json(
                     "POST",
@@ -834,6 +871,24 @@ def main() -> int:
                     for source in (response.get("web_sources") or [])
                 ]
                 validation = response.get("validation") or {}
+                repair_attempts = int(validation.get("repair_attempts") or 0)
+                api_engineering_contradictions = int(
+                    validation.get("engineering_contradiction_count") or 0
+                )
+                api_unsupported_engineering = int(
+                    validation.get("unsupported_engineering_claim_count") or 0
+                )
+                api_false_premise_detected = bool(
+                    validation.get("false_premise_detected")
+                )
+                api_false_premise_corrected = (
+                    bool(validation.get("false_premise_corrected"))
+                    if api_false_premise_detected
+                    else None
+                )
+                api_engineering_validation_passed = bool(
+                    validation.get("engineering_validation_passed")
+                )
                 unsupported_claim_count = int(
                     validation.get("unsupported_claim_count") or 0
                 )
@@ -925,6 +980,7 @@ def main() -> int:
                         and final_evaluation.passed
                     ),
                     "attempts": len(attempts),
+                    "repair_attempts": repair_attempts,
                     "final_status": final_status,
                     "expected_document_hit": (
                         final_evaluation
@@ -949,16 +1005,34 @@ def main() -> int:
                     "citation_correctness": citation_correctness,
                     "unsupported_claim_count": unsupported_claim_count,
                     "engineering_contradiction_count": (
-                        final_evaluation.engineering_contradiction_count
+                        api_engineering_contradictions
+                        if api_engineering_contradictions is not None
+                        else final_evaluation.engineering_contradiction_count
                     ),
                     "false_premise_detected": (
-                        final_evaluation.false_premise_detected
+                        api_false_premise_detected
+                        if api_false_premise_detected is not None
+                        else final_evaluation.false_premise_detected
                     ),
                     "false_premise_correction_success": (
-                        final_evaluation.false_premise_correction_success
+                        api_false_premise_corrected
+                        if api_false_premise_detected is not None
+                        else final_evaluation.false_premise_correction_success
                     ),
                     "unsupported_engineering_claim_count": (
-                        final_evaluation.unsupported_engineering_claim_count
+                        api_unsupported_engineering
+                        if api_unsupported_engineering is not None
+                        else final_evaluation.unsupported_engineering_claim_count
+                    ),
+                    "engineering_validation_passed": (
+                        api_engineering_validation_passed
+                        if api_engineering_validation_passed is not None
+                        else bool(
+                            final_evaluation.engineering_contradiction_count == 0
+                            and final_evaluation.unsupported_engineering_claim_count == 0
+                            and final_evaluation.false_premise_correction_success
+                            is not False
+                        )
                     ),
                     "retrieval_mode": (
                         retrieval_mode
@@ -1009,6 +1083,7 @@ def main() -> int:
                     "final_benchmark_passed": None,
                     "rewrite_success": False,
                     "attempts": 0,
+                    "repair_attempts": 0,
                     "final_status": "infrastructure_error",
                     "expected_document_hit": None,
                     "preferred_page_hit": None,
@@ -1024,6 +1099,11 @@ def main() -> int:
                     "retrieved_web_urls": [],
                     "citation_correctness": None,
                     "unsupported_claim_count": None,
+                    "engineering_contradiction_count": None,
+                    "false_premise_detected": None,
+                    "false_premise_correction_success": None,
+                    "unsupported_engineering_claim_count": None,
+                    "engineering_validation_passed": None,
                     "initial_required_failures": [],
                     "initial_forbidden_hits": [],
                     "final_required_failures": [],

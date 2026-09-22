@@ -1,7 +1,12 @@
+import csv
+import json
+
 from scripts.run_well_test_benchmark import (
     build_summary,
     direct_ollama_answer,
     figure_retrieval_hit,
+    write_csv,
+    write_json,
 )
 
 
@@ -23,6 +28,8 @@ def test_summary_exposes_paper_metrics():
             "engineering_contradiction_count": 0,
             "false_premise_correction_success": True,
             "unsupported_engineering_claim_count": 0,
+            "repair_attempts": 1,
+            "engineering_validation_passed": True,
             "rewrite_success": True,
             "expected_document_hit": True,
             "preferred_page_hit": True,
@@ -49,6 +56,8 @@ def test_summary_exposes_paper_metrics():
             "engineering_contradiction_count": 2,
             "false_premise_correction_success": False,
             "unsupported_engineering_claim_count": 1,
+            "repair_attempts": 2,
+            "engineering_validation_passed": False,
             "rewrite_success": False,
             "expected_document_hit": None,
             "preferred_page_hit": None,
@@ -70,10 +79,48 @@ def test_summary_exposes_paper_metrics():
     assert summary["engineering_contradiction_count"] == 2
     assert summary["false_premise_correction_success_rate"] == 0.5
     assert summary["unsupported_engineering_claim_count"] == 1
+    assert summary["average_engineering_contradiction_count"] == 1.0
+    assert summary["average_unsupported_engineering_claim_count"] == 0.5
+    assert summary["engineering_validation_pass_rate"] == 0.5
+    assert summary["average_repair_attempts"] == 1.5
     assert summary["retrieval_document_recall_at_k"] == 1.0
     assert summary["average_retrieval_seconds"] == 0.75
     assert summary["average_total_seconds"] == 2.25
     assert summary["category_metrics"]["flow_regime"]["answer_accuracy"] == 1.0
+
+
+def test_engineering_metrics_are_written_to_json_and_csv(tmp_path):
+    row = {
+        "id": "WT-002",
+        "engineering_contradiction_count": 1,
+        "false_premise_detected": True,
+        "false_premise_correction_success": False,
+        "unsupported_engineering_claim_count": 2,
+        "repair_attempts": 2,
+        "engineering_validation_passed": False,
+    }
+    json_path = tmp_path / "result.json"
+    csv_path = tmp_path / "result.csv"
+
+    write_json(json_path, {"results": [row]})
+    write_csv(csv_path, [row])
+
+    json_row = json.loads(json_path.read_text(encoding="utf-8"))["results"][0]
+    with csv_path.open(encoding="utf-8-sig", newline="") as handle:
+        csv_row = next(csv.DictReader(handle))
+
+    for field in (
+        "engineering_contradiction_count",
+        "false_premise_detected",
+        "false_premise_correction_success",
+        "unsupported_engineering_claim_count",
+        "repair_attempts",
+        "engineering_validation_passed",
+    ):
+        assert field in json_row
+        assert field in csv_row
+    assert csv_row["repair_attempts"] == "2"
+    assert csv_row["engineering_validation_passed"] == "False"
 
 
 def test_figure_retrieval_requires_a_preferred_page_hit():

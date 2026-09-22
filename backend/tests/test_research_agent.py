@@ -125,7 +125,9 @@ def test_retrieval_modes_switch_only_the_internal_retriever(tmp_path: Path) -> N
     legacy_store = FakeVectorStore(dense=dense, sparse=keyword, bm25=bm25)
     legacy = make_agent(tmp_path, vector_store=legacy_store)
     assert legacy.search_knowledge_base("wellbore storage", 2)
-    assert legacy_store.calls == ["dense", "keyword"]
+    assert legacy_store.calls == [
+        "dense", "keyword", "dense", "keyword", "dense", "keyword"
+    ]
 
     hybrid_store = FakeVectorStore(dense=dense, sparse=keyword, bm25=bm25)
     hybrid = make_agent(
@@ -134,7 +136,22 @@ def test_retrieval_modes_switch_only_the_internal_retriever(tmp_path: Path) -> N
         retrieval_mode="hybrid",
     )
     assert hybrid.search_knowledge_base("wellbore storage", 2)
-    assert hybrid_store.calls == ["dense", "bm25"]
+    assert hybrid_store.calls == [
+        "dense", "bm25", "dense", "bm25", "dense", "bm25"
+    ]
+
+
+def test_well_test_query_expansion_is_retrieval_only() -> None:
+    expanded = ResearchAgent.expand_engineering_retrieval_query(
+        "Is radial flow unit-slope?"
+    )
+
+    assert "wellbore storage" in expanded
+    assert "pressure derivative overlap" in expanded
+    assert "horizontal constant derivative plateau" in expanded
+    assert ResearchAgent.expand_engineering_retrieval_query("CO2 storage") == (
+        "CO2 storage"
+    )
 
 
 def test_hybrid_rerank_uses_cross_encoder_scores(tmp_path: Path) -> None:
@@ -574,21 +591,90 @@ def test_structured_validator_rejects_wrong_flow_regime_attribution(
 def test_structured_false_premise_correction_passes(tmp_path: Path) -> None:
     agent = make_agent(tmp_path)
     raw = (
-        '{"internal":[{"claim":"No. Radial flow does not have unit-slope; '
-        'its derivative is a horizontal constant plateau.","citations":["KB1"]}],'
+        '{"internal":['
+        '{"claim":"The premise is incorrect: radial flow does not have unit-slope.",'
+        '"citations":["KB1"]},'
+        '{"claim":"Radial flow pressure and derivative do not overlap.",'
+        '"citations":["KB1"]},'
+        '{"claim":"Wellbore storage pressure and derivative overlap on a unit-slope line.",'
+        '"citations":["KB1"]},'
+        '{"claim":"Radial flow has a horizontal constant derivative plateau.",'
+        '"citations":["KB1"]}],'
         '"external":[],"synthesis":[],"limitations":[]}'
     )
 
     answer, validation, _ = agent.validate_structured_answer(
         raw,
-        {"KB1": "Radial flow has a horizontal constant derivative plateau."},
+        {
+            "KB1": (
+                "Wellbore storage pressure and pressure derivative overlap on a "
+                "unit-slope line. Radial flow has a horizontal constant "
+                "pressure-derivative plateau."
+            )
+        },
         [],
         "Radial flow pressure and derivative overlap with unit-slope. Correct?",
     )
 
-    assert "horizontal constant plateau" in answer
+    assert "horizontal constant derivative plateau" in answer
     assert validation["false_premise_detected"] is True
     assert validation["false_premise_corrected"] is True
+    assert validation["engineering_validation_passed"] is True
+
+
+def test_validator_guided_repair_corrects_engineering_claim(tmp_path: Path) -> None:
+    evidence = (
+        "Wellbore storage pressure and pressure derivative overlap on a unit-slope "
+        "line. Radial flow has a horizontal constant pressure-derivative plateau."
+    )
+    hit = {
+        "id": "chunk-1",
+        "text": evidence,
+        "metadata": {"filename": "welltest.pdf", "page": 219},
+    }
+    invalid = (
+        '{"internal":[{"claim":"Radial flow has a unit-slope pressure '
+        'derivative.","citations":["KB1"]}],"external":[],"synthesis":[],'
+        '"limitations":[]}'
+    )
+    corrected = (
+        '{"internal":['
+        '{"claim":"The premise is incorrect: radial flow does not have unit-slope.",'
+        '"citations":["KB1"]},'
+        '{"claim":"Radial flow pressure and derivative do not overlap.",'
+        '"citations":["KB1"]},'
+        '{"claim":"Wellbore storage pressure and derivative overlap on a unit-slope line.",'
+        '"citations":["KB1"]},'
+        '{"claim":"Radial flow has a horizontal constant derivative plateau.",'
+        '"citations":["KB1"]}],'
+        '"external":[],"synthesis":[],"limitations":[]}'
+    )
+    ollama = StructuredOllama([invalid, corrected])
+    agent = make_agent(
+        tmp_path,
+        vector_store=FakeVectorStore(dense=[hit]),
+        ollama=ollama,
+    )
+
+    response = asyncio.run(
+        agent.research(
+            ResearchRequest(
+                query=(
+                    "Radial flow pressure and derivative overlap with unit-slope. "
+                    "Correct?"
+                ),
+                use_external=False,
+            )
+        )
+    )
+
+    assert len(ollama.calls) == 2
+    assert "premise is incorrect" in response.answer
+    assert "Wellbore storage" in response.answer
+    assert "horizontal constant derivative plateau" in response.answer
+    assert response.validation["repair_attempts"] == 1
+    assert response.validation["engineering_validation_passed"] is True
+    assert response.validation["false_premise_corrected"] is True
 
 
 def test_engineering_repair_is_bounded_and_receives_structured_reasons(
@@ -623,9 +709,21 @@ def test_engineering_repair_is_bounded_and_receives_structured_reasons(
     assert len(ollama.calls) == 3
     assert response.validation["repair_attempts"] == 2
     assert response.validation["engineering_contradiction_count"] == 1
+    assert "교정하지 못했습니다" in response.answer
+    assert response.validation["engineering_validation_passed"] is False
+    assert response.validation["safe_refusal_after_repair"] is True
     repair_prompt = ollama.calls[1][0][-1]["content"]
     assert "WT-REGIME-CONTRADICTION" in repair_prompt
     assert "private chain-of-thought" in repair_prompt
+    for field in (
+        "rule_id",
+        "failed_claim",
+        "failure_reason",
+        "relevant_evidence_ids",
+        "expected_engineering_relation",
+    ):
+        assert field in repair_prompt
+    assert "horizontal/constant pressure-derivative plateau" in repair_prompt
 
 
 def test_structured_validator_enforces_section_source_type(tmp_path: Path) -> None:

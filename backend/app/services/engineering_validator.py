@@ -45,7 +45,7 @@ class ValidationResult:
 @dataclass
 class ClaimValidationResult:
     passed: bool
-    reasons: list[dict[str, str]] = field(default_factory=list)
+    reasons: list[dict[str, Any]] = field(default_factory=list)
     engineering_contradiction_count: int = 0
     unsupported_engineering_claim_count: int = 0
 
@@ -57,6 +57,7 @@ _REGIME_PATTERNS = {
     ),
     "radial": re.compile(
         r"(?:infinite[- ]?acting\s+)?radial\s*flow|"
+        r"middle[- ]?time(?:\s+region)?|\bmtr\b|중기|"
         r"방사\s*유동|방사형",
         re.IGNORECASE,
     ),
@@ -65,7 +66,7 @@ _REGIME_PATTERNS = {
         re.IGNORECASE,
     ),
     "spherical": re.compile(
-        r"spherical\s*flow|구형\s*유동",
+        r"spherical\s*flow|구형\s*유동|지구형\s*흐름",
         re.IGNORECASE,
     ),
     "boundary": re.compile(
@@ -97,11 +98,13 @@ _FEATURE_PATTERNS = {
         re.IGNORECASE,
     ),
     "overlap": re.compile(
-        r"overlap|coincid|겹(?:치|쳐|친|침|칩니다)",
+        r"overlap|overlay|coincid|lie\s+on\s+top|겹(?:치|쳐|친|침|칩니다)",
         re.IGNORECASE,
     ),
     "plateau": re.compile(
         r"plateau|horizontal|constant\s+plateau|zero[- ]?slope|"
+        r"derivative\s+(?:becomes?|becoming|is)\s+constant|"
+        r"constant\s+(?:pressure\s*)?derivative|"
         r"평탄|수평|일정한?\s*(?:값|구간|도함수)|기울기\s*0",
         re.IGNORECASE,
     ),
@@ -130,6 +133,21 @@ _REGIME_LABELS = {
     "linear": "linear flow",
     "spherical": "spherical flow",
     "boundary": "late-time boundary/recharge behavior",
+}
+
+_EXPECTED_RELATIONS = {
+    "wellbore_storage": (
+        "wellbore storage -> pressure and pressure derivative overlap on a "
+        "unit-slope line"
+    ),
+    "radial": (
+        "infinite-acting radial flow -> horizontal/constant pressure-derivative plateau"
+    ),
+    "linear": "linear flow -> +1/2 pressure-derivative slope",
+    "spherical": "spherical flow -> -1/2 pressure-derivative slope",
+    "boundary": (
+        "late-time closed-boundary/recharge behavior -> conditional unit-slope response"
+    ),
 }
 
 _UNCERTAINTY_RE = re.compile(
@@ -175,7 +193,7 @@ class EngineeringValidator:
             for item in evidence_pairs
             if not item["negated"]
         }
-        reasons: list[dict[str, str]] = []
+        reasons: list[dict[str, Any]] = []
         contradictions = 0
         unsupported = 0
 
@@ -192,6 +210,7 @@ class EngineeringValidator:
                             f"{_FEATURE_LABELS[feature]}, which conflicts with "
                             "the diagnostic-derivative rule."
                         ),
+                        _EXPECTED_RELATIONS[regime],
                     )
                 )
                 continue
@@ -210,6 +229,7 @@ class EngineeringValidator:
                             "Boundary unit-slope must be qualified as a possible "
                             "late-time closed-boundary or recharge response."
                         ),
+                        _EXPECTED_RELATIONS[regime],
                     )
                 )
                 continue
@@ -229,11 +249,13 @@ class EngineeringValidator:
                             f"the {_REGIME_LABELS[regime]} / "
                             f"{_FEATURE_LABELS[feature]} attribution."
                         ),
+                        _EXPECTED_RELATIONS[regime],
                     )
                 )
 
         local_evidence_conflict = self._has_regime_conflict(
-            positive_evidence_pairs
+            positive_evidence_pairs,
+            {regime for regime, _feature in positive_claim_pairs},
         )
         if (
             positive_claim_pairs
@@ -249,6 +271,10 @@ class EngineeringValidator:
                     (
                         "The cited evidence contains a conflict, but the claim "
                         "states one engineering interpretation without qualification."
+                    ),
+                    (
+                        "Conflicting evidence -> report both supported interpretations "
+                        "and avoid an unconditional engineering conclusion"
                     ),
                 )
             )
@@ -274,6 +300,7 @@ class EngineeringValidator:
                 "regime": regime,
                 "incorrect_feature": feature,
                 "expected_feature": expected,
+                "expected_engineering_relation": _EXPECTED_RELATIONS[regime],
                 "message": (
                     f"The question attributes {_FEATURE_LABELS[feature]} to "
                     f"{_REGIME_LABELS[regime]}; the diagnostic rule expects "
@@ -296,6 +323,11 @@ class EngineeringValidator:
 
         pairs = self._regime_feature_pairs(answer)
         normalized_answer = self._normalize(answer)
+        positive_pairs = {
+            (item["regime"], item["feature"])
+            for item in pairs
+            if not item["negated"]
+        }
         failures: list[dict[str, str]] = []
         for premise in premises:
             regime = premise["regime"]
@@ -318,7 +350,19 @@ class EngineeringValidator:
                 and _REGIME_PATTERNS[regime].search(normalized_answer)
                 and _NEGATION_RE.search(normalized_answer)
             )
-            if not ((rejected or general_rejection) and corrected):
+            comparison_completed = bool(
+                regime != "radial"
+                or incorrect not in {"unit_slope", "overlap"}
+                or {
+                    ("wellbore_storage", "unit_slope"),
+                    ("wellbore_storage", "overlap"),
+                }.issubset(positive_pairs)
+            )
+            if not (
+                (rejected or general_rejection)
+                and corrected
+                and comparison_completed
+            ):
                 failures.append(
                     {
                         **premise,
@@ -326,11 +370,27 @@ class EngineeringValidator:
                             f"The answer must explicitly reject the "
                             f"{_REGIME_LABELS[regime]} / "
                             f"{_FEATURE_LABELS[incorrect]} premise and replace it "
-                            f"with {_FEATURE_LABELS[expected]}."
+                            f"with {_FEATURE_LABELS[expected]}. For the radial-flow "
+                            "false premise, also state the wellbore-storage "
+                            "pressure/derivative overlap and unit-slope relation."
                         ),
+                        "failed_claim": question,
                     }
                 )
         return True, not failures, failures
+
+    @staticmethod
+    def regimes_in_text(value: str) -> set[str]:
+        normalized = EngineeringValidator._normalize(value)
+        return {
+            regime
+            for regime, pattern in _REGIME_PATTERNS.items()
+            if pattern.search(normalized)
+        }
+
+    @staticmethod
+    def expected_relation(regime: str) -> str:
+        return _EXPECTED_RELATIONS.get(regime, "")
 
     def validate_well_test_answer(
         self,
@@ -797,13 +857,13 @@ class EngineeringValidator:
             re.search(
                 r"(wellbore\s*storage|유정\s*저장|웰보어\s*스토리지)"
                 r".{0,220}(pressure|압력).{0,120}"
-                r"(derivative|미분|도함수).{0,100}(overlap|coincid|겹)",
+                r"(derivative|미분|도함수).{0,100}(overlap|overlay|coincid|lie\s+on\s+top|겹)",
                 answer,
                 re.IGNORECASE,
             )
             or re.search(
                 r"(pressure|압력).{0,120}(derivative|미분|도함수).{0,100}"
-                r"(overlap|coincid|겹).{0,220}"
+                r"(overlap|overlay|coincid|lie\s+on\s+top|겹).{0,220}"
                 r"(wellbore\s*storage|유정\s*저장|웰보어\s*스토리지)",
                 answer,
                 re.IGNORECASE,
@@ -853,7 +913,25 @@ class EngineeringValidator:
             for item in re.split(r"(?<=[.!?])\s+|[\n]+", normalized)
             if item.strip()
         ]
-        for segment in segments:
+        regime_start = (
+            r"(?:wellbore\s*storage|유정\s*저장|웰보어\s*스토리지|"
+            r"(?:infinite[- ]?acting\s+)?radial\s*flow|방사\s*유동|방사형|"
+            r"linear\s*flow|선형\s*유동|spherical\s*flow|구형\s*유동|"
+            r"지구형\s*흐름|boundary|closed\s+boundary|no[- ]?flow\s+boundary|"
+            r"recharge|경계|재충전)"
+        )
+        clauses = [
+            clause.strip()
+            for segment in segments
+            for clause in re.split(
+                rf"[,;]\s*(?=(?:(?:and|while|whereas)\s+)?{regime_start}|"
+                rf"(?:but|however)\b[^,;]{{0,80}}{regime_start})",
+                segment,
+                flags=re.IGNORECASE,
+            )
+            if clause.strip()
+        ]
+        for segment in clauses:
             regimes = [
                 (name, match)
                 for name, pattern in _REGIME_PATTERNS.items()
@@ -863,8 +941,26 @@ class EngineeringValidator:
                 continue
             for feature, pattern in _FEATURE_PATTERNS.items():
                 for match in pattern.finditer(segment):
+                    attributable_regimes = [
+                        item
+                        for item in regimes
+                        if not (
+                            match.start() < item[1].start()
+                            and re.search(
+                                r"\b(?:if|presence\s+of|affected\s+by|obscured\s+by|"
+                                r"distorted\s+by|transition\s+from)\b",
+                                segment[
+                                    max(match.end(), item[1].start() - 70) :
+                                    item[1].start()
+                                ],
+                                re.IGNORECASE,
+                            )
+                        )
+                    ]
+                    if not attributable_regimes:
+                        continue
                     nearest_regime, regime_match = min(
-                        regimes,
+                        attributable_regimes,
                         key=lambda item: abs(
                             ((item[1].start() + item[1].end()) / 2)
                             - ((match.start() + match.end()) / 2)
@@ -874,7 +970,18 @@ class EngineeringValidator:
                         {
                             "regime": nearest_regime,
                             "feature": feature,
-                            "negated": cls._feature_is_negated(segment, match),
+                            "negated": (
+                                cls._feature_is_negated(segment, match)
+                                or bool(
+                                    re.search(
+                                        r"\bpremise\b.{0,240}\b"
+                                        r"(?:incorrect|false|wrong)\b|"
+                                        r"(?:전제|주장).{0,240}(?:틀|잘못)",
+                                        segment,
+                                        re.IGNORECASE,
+                                    )
+                                )
+                            ),
                             "distance": abs(regime_match.start() - match.start()),
                         }
                     )
@@ -886,7 +993,7 @@ class EngineeringValidator:
         after = value[match.end() : match.end() + 22]
         english_before = re.search(
             r"(?:\bnot\b|\bno\b|\bnever\b|does\s+not|is\s+not)\s*"
-            r"(?:the\s+|a\s+|an\s+)?[^,;:.]{0,12}$",
+            r"(?:the\s+|a\s+|an\s+)?[^,;:.]{0,40}$",
             before,
             re.IGNORECASE,
         )
@@ -896,7 +1003,7 @@ class EngineeringValidator:
             re.IGNORECASE,
         )
         corrective_after = re.search(
-            r"^\s*(?:is\s+)?(?:incorrect|false)",
+            r"^[^,;:.]{0,70}(?:\bis\s+)?(?:incorrect|false|wrong|틀|잘못)",
             after,
             re.IGNORECASE,
         )
@@ -913,8 +1020,13 @@ class EngineeringValidator:
         }[regime]
 
     @staticmethod
-    def _has_regime_conflict(pairs: set[tuple[str, str]]) -> bool:
+    def _has_regime_conflict(
+        pairs: set[tuple[str, str]],
+        relevant_regimes: set[str] | None = None,
+    ) -> bool:
         for regime, expected in _EXPECTED_FEATURES.items():
+            if relevant_regimes is not None and regime not in relevant_regimes:
+                continue
             observed = {
                 feature
                 for pair_regime, feature in pairs
@@ -932,12 +1044,14 @@ class EngineeringValidator:
         category: str,
         claim: str,
         message: str,
-    ) -> dict[str, str]:
+        expected_relation: str = "",
+    ) -> dict[str, Any]:
         return {
             "rule_id": rule_id,
             "category": category,
             "claim": claim,
             "message": message,
+            "expected_engineering_relation": expected_relation,
         }
 
     @staticmethod

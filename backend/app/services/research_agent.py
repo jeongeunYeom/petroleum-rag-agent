@@ -101,6 +101,17 @@ QUANTITY_RE = re.compile(
     re.IGNORECASE,
 )
 EQUATION_RE = re.compile(r"[^.!?\n]{0,80}=[^.!?\n]{0,80}")
+WELL_TEST_QUERY_RE = re.compile(
+    r"well\s*test|wellbore\s*storage|pressure\s*derivative|radial\s*flow|"
+    r"linear\s*flow|spherical\s*flow|unit[- ]?slope|plateau|boundary|recharge|"
+    r"type\s*curve|log[- ]?log|semilog|유정\s*저장|압력\s*(?:미분|도함수)|"
+    r"방사\s*유동|선형\s*유동|구형\s*유동|단위\s*기울기|경계|재충전",
+    re.IGNORECASE,
+)
+SAFE_REPAIR_REFUSAL = (
+    "공학 검증을 통과하는 답변으로 교정하지 못했습니다. "
+    "근거 없는 결론을 제공하지 않습니다."
+)
 
 
 class ResearchAgent:
@@ -140,6 +151,7 @@ class ResearchAgent:
             request.use_internal,
             request.use_external,
         )
+        retrieval_query = self.expand_engineering_retrieval_query(request.query)
         retrieval_started = time.perf_counter()
         internal_task = (
             asyncio.to_thread(
@@ -153,7 +165,7 @@ class ResearchAgent:
         web_task = (
             asyncio.to_thread(
                 self.search_external_web,
-                request.query,
+                retrieval_query,
                 request.external_top_k,
             )
             if mode in {"external_only", "hybrid_research"}
@@ -258,11 +270,21 @@ class ResearchAgent:
                 except ExternalServiceError as exc:
                     repair_error = exc.user_message
                     break
+            if (
+                repair_attempts == 2
+                and not self._final_answer_usable(validation)
+            ):
+                answer = SAFE_REPAIR_REFUSAL
+                validation["valid_citations"] = []
+                validation["safe_refusal_after_repair"] = True
             if repair_error:
                 validation["repair_error"] = repair_error
             validation["conflict_disclosures_added"] = disclosed
             validation["repair_attempted"] = repair_attempts > 0
             validation["repair_attempts"] = repair_attempts
+            validation["engineering_validation_passed"] = (
+                self._engineering_validation_passed(validation)
+            )
             inference_used = True
         else:
             answer = (
@@ -281,6 +303,7 @@ class ResearchAgent:
                 "false_premise_detected": False,
                 "false_premise_corrected": True,
                 "engineering_validation_reasons": [],
+                "engineering_validation_passed": False,
             }
             inference_used = False
         reasoning_seconds = time.perf_counter() - reasoning_started
@@ -317,6 +340,72 @@ class ResearchAgent:
     async def _empty_async() -> list:
         return []
 
+    @staticmethod
+    def expand_engineering_retrieval_query(query: str) -> str:
+        """Add diagnostic vocabulary for retrieval only, never answer generation."""
+        query = query.strip()
+        if not query or not WELL_TEST_QUERY_RE.search(query):
+            return query
+
+        lower = query.casefold()
+        terms = ["pressure derivative"]
+        if re.search(
+            r"wellbore|radial|unit[- ]?slope|overlap|plateau|log[- ]?log|"
+            r"semilog|type\s*curve|유정\s*저장|방사\s*유동|단위\s*기울기|겹|평탄",
+            lower,
+            re.IGNORECASE,
+        ):
+            terms.extend(
+                [
+                    "wellbore storage",
+                    "unit slope",
+                    "pressure derivative overlap",
+                    "radial flow",
+                    "horizontal constant derivative plateau",
+                ]
+            )
+        if re.search(r"linear\s*flow|선형\s*유동", lower, re.IGNORECASE):
+            terms.extend(["linear flow", "+1/2 derivative slope"])
+        if re.search(r"spherical\s*flow|구형\s*유동", lower, re.IGNORECASE):
+            terms.extend(["spherical flow", "-1/2 derivative slope"])
+        if re.search(r"boundary|recharge|경계|재충전", lower, re.IGNORECASE):
+            terms.extend(["boundary effects", "late-time conditional unit slope"])
+
+        additions = [term for term in terms if term.casefold() not in lower]
+        return " ".join([query, *dict.fromkeys(additions)])
+
+    @staticmethod
+    def engineering_retrieval_queries(query: str) -> list[str]:
+        """Return narrow relation queries so one long expansion cannot dilute recall."""
+        query = query.strip()
+        if not query or not WELL_TEST_QUERY_RE.search(query):
+            return [query]
+
+        lower = query.casefold()
+        variants = [query]
+        if re.search(
+            r"wellbore|radial|unit[- ]?slope|overlap|plateau|log[- ]?log|"
+            r"semilog|type\s*curve|유정\s*저장|방사\s*유동|단위\s*기울기|겹|평탄",
+            lower,
+            re.IGNORECASE,
+        ):
+            variants.extend(
+                [
+                    (
+                        "wellbore storage pressure and pressure derivative "
+                        "overlap unit slope diagonal"
+                    ),
+                    "radial flow indicated by horizontal derivative",
+                ]
+            )
+        if re.search(r"linear\s*flow|선형\s*유동", lower, re.IGNORECASE):
+            variants.append("linear flow positive one half pressure derivative slope")
+        if re.search(r"spherical\s*flow|구형\s*유동", lower, re.IGNORECASE):
+            variants.append("spherical flow negative one half pressure derivative slope")
+        if re.search(r"boundary|recharge|경계|재충전", lower, re.IGNORECASE):
+            variants.append("late time boundary recharge conditional unit slope")
+        return list(dict.fromkeys(variants))
+
     def search_knowledge_base(self, query: str, top_k: int) -> list[dict[str, Any]]:
         query = query.strip()
         if not query:
@@ -325,28 +414,42 @@ class ResearchAgent:
             raise ValueError("top_k must be between 1 and 20")
 
         candidate_count = min(top_k * 4, 80)
-        dense = self.vector_store.search(query, candidate_count)
-        sparse = (
-            self.vector_store.keyword_search(query, candidate_count)
-            if self.settings.retrieval_mode == "legacy"
-            else self.vector_store.bm25_search(query, candidate_count)
-        )
+        query_variants = self.engineering_retrieval_queries(query)
         merged: dict[str, dict[str, Any]] = {}
         rrf_k = 60
-        for channel, hits in (("dense", dense), ("sparse", sparse)):
-            for rank, hit in enumerate(hits, start=1):
-                if channel == "dense" and not self._passes_similarity_threshold(hit):
-                    continue
-                if channel == "sparse" and not self._passes_lexical_gate(query, hit):
-                    continue
-                chunk_id = str(hit.get("id") or "")
-                if not chunk_id:
-                    continue
-                item = merged.setdefault(chunk_id, dict(hit))
-                item["rrf_score"] = float(item.get("rrf_score") or 0.0) + 1 / (
-                    rrf_k + rank
+        for query_index, retrieval_query in enumerate(query_variants):
+            channels = [
+                ("dense", self.vector_store.search(retrieval_query, candidate_count))
+            ]
+            sparse = (
+                self.vector_store.keyword_search(
+                    retrieval_query,
+                    candidate_count,
                 )
-                item[f"{channel}_rank"] = rank
+                if self.settings.retrieval_mode == "legacy"
+                else self.vector_store.bm25_search(
+                    retrieval_query,
+                    candidate_count,
+                )
+            )
+            channels.append(("sparse", sparse))
+            for channel, hits in channels:
+                for rank, hit in enumerate(hits, start=1):
+                    if channel == "dense" and not self._passes_similarity_threshold(hit):
+                        continue
+                    if channel == "sparse" and not self._passes_lexical_gate(
+                        retrieval_query,
+                        hit,
+                    ):
+                        continue
+                    chunk_id = str(hit.get("id") or "")
+                    if not chunk_id:
+                        continue
+                    item = merged.setdefault(chunk_id, dict(hit))
+                    item["rrf_score"] = float(item.get("rrf_score") or 0.0) + 1 / (
+                        rrf_k + rank
+                    )
+                    item[f"{channel}_q{query_index}_rank"] = rank
         ranked = sorted(
             merged.values(),
             key=lambda item: float(item.get("rrf_score") or 0.0),
@@ -664,6 +767,38 @@ class ResearchAgent:
             for item in figures
         )
         conflict_text = json.dumps(conflicts, ensure_ascii=False)
+        false_premise = bool(
+            EngineeringValidator().detect_false_premises(query)
+        )
+        false_premise_instruction = (
+            "The question contains a false Well Test premise. The first claim must "
+            "explicitly say that the premise is incorrect, identify the incorrect "
+            "attribution, then give the supported wellbore-storage relation and the "
+            "supported radial-flow relation with citations. Do not answer with a bare "
+            "refusal when the supplied evidence supports the correction. "
+            if false_premise
+            else ""
+        )
+        required_regimes = EngineeringValidator.regimes_in_text(query)
+        if re.search(r"unit[- ]?slope|단위\s*기울기", query, re.IGNORECASE):
+            required_regimes.add("wellbore_storage")
+        if re.search(r"plateau|평탄|수평", query, re.IGNORECASE):
+            required_regimes.add("radial")
+        if false_premise:
+            required_regimes.update({"wellbore_storage", "radial"})
+        required_relations = [
+            EngineeringValidator.expected_relation(regime)
+            for regime in sorted(required_regimes)
+            if EngineeringValidator.expected_relation(regime)
+        ]
+        relation_instruction = (
+            "When the supplied evidence supports them, the answer is incomplete unless "
+            "it states each of these question-required relations as a separate cited claim: "
+            + "; ".join(required_relations)
+            + ". "
+            if required_relations
+            else ""
+        )
         system = (
             "You are an evidence-bound petroleum engineering research agent. "
             "Use only the supplied evidence; model memory is not evidence. "
@@ -680,7 +815,10 @@ class ResearchAgent:
             "state that it cannot be transcribed unambiguously instead of reconstructing it. Show "
             "only concise conclusions, evidence links, calculations, and checks. "
             "Return JSON only. Each claim must be independently verifiable from its cited "
-            "evidence. Citations must be raw IDs such as KB1, not bracketed IDs."
+            "evidence. Citations must be raw IDs such as KB1, not bracketed IDs. "
+            "Keep claims limited to the flow regimes and distinctions asked about; do not add "
+            "other regimes merely because they occur in retrieved text. "
+            f"{false_premise_instruction}{relation_instruction}"
         )
         user = (
             f"Question:\n{query}\n\n"
@@ -722,27 +860,41 @@ class ResearchAgent:
             else "Return only the corrected answer."
         )
         validation = validation or {}
-        failure_report = {
-            "invalid_citations": validation.get("invalid_citations") or [],
-            "unsupported_claim_count": int(
-                validation.get("unsupported_claim_count") or 0
-            ),
-            "engineering_contradiction_count": int(
-                validation.get("engineering_contradiction_count") or 0
-            ),
-            "unsupported_engineering_claim_count": int(
-                validation.get("unsupported_engineering_claim_count") or 0
-            ),
-            "false_premise_detected": bool(
-                validation.get("false_premise_detected")
-            ),
-            "false_premise_corrected": bool(
-                validation.get("false_premise_corrected", True)
-            ),
-            "engineering_validation_reasons": (
-                validation.get("engineering_validation_reasons") or []
-            ),
-        }
+        directives = []
+        for reason in validation.get("engineering_validation_reasons") or []:
+            evidence_ids = reason.get("relevant_evidence_ids") or reason.get(
+                "citations"
+            ) or []
+            if isinstance(evidence_ids, str):
+                evidence_ids = [
+                    item for item in evidence_ids.split(",") if item
+                ]
+            directives.append(
+                {
+                    "rule_id": reason.get("rule_id") or "WT-VALIDATION",
+                    "failed_claim": reason.get("failed_claim")
+                    or reason.get("claim")
+                    or "",
+                    "failure_reason": reason.get("message") or "",
+                    "relevant_evidence_ids": evidence_ids,
+                    "expected_engineering_relation": reason.get(
+                        "expected_engineering_relation"
+                    )
+                    or "",
+                }
+            )
+        if not directives:
+            directives.append(
+                {
+                    "rule_id": "CITATION-VALIDATION",
+                    "failed_claim": "",
+                    "failure_reason": (
+                        "One or more claims lacked valid claim-level evidence."
+                    ),
+                    "relevant_evidence_ids": sorted(valid_ids),
+                    "expected_engineering_relation": "Use only relations stated in the evidence.",
+                }
+            )
         return [
             *original_messages,
             {"role": "assistant", "content": draft},
@@ -750,9 +902,16 @@ class ResearchAgent:
                 "role": "user",
                 "content": (
                     "The draft failed bounded claim validation. Rewrite it without adding facts. "
-                    "Treat each structured failure below as a rule to fix; do not provide or "
-                    "store private chain-of-thought.\n"
-                    f"Validation failures:\n{json.dumps(failure_report, ensure_ascii=False)}\n"
+                    "Apply the correction directives below without providing or storing private "
+                    "chain-of-thought. If WT-FALSE-PREMISE is present, explicitly reject the "
+                    "premise first, explain the incorrect attribution, and state the supported "
+                    "wellbore-storage and radial-flow relations with citations.\n"
+                    f"Correction directives:\n{json.dumps(directives, ensure_ascii=False)}\n"
+                    "For every directive that has both an expected engineering relation and "
+                    "relevant evidence IDs, include a concise corrected claim stating that "
+                    "relation and cite one of those IDs. Do not replace supported corrections "
+                    "with empty arrays or a generic refusal. Do not introduce an equation unless "
+                    "a directive specifically requires it. "
                     f"{citation_instruction}"
                     "Delete any claim that cannot be cited. Copy equations, symbols, values, units, "
                     "and petroleum terms exactly from the evidence; if extraction formatting is "
@@ -772,6 +931,106 @@ class ResearchAgent:
             **{item.evidence_id: item.snippet for item in web},
             **{item.evidence_id: item.excerpt for item in figures},
         }
+
+    def _relevant_evidence_ids(
+        self,
+        reason: dict[str, Any],
+        evidence_text: dict[str, str],
+    ) -> list[str]:
+        regimes = {str(reason.get("regime") or "")}
+        if reason.get("rule_id") == "WT-FALSE-PREMISE" and "radial" in regimes:
+            regimes.add("wellbore_storage")
+        regimes.discard("")
+        relations = [
+            self.engineering_validator.expected_relation(regime)
+            for regime in regimes
+            if self.engineering_validator.expected_relation(regime)
+        ]
+        supported = [
+            evidence_id
+            for evidence_id, text in evidence_text.items()
+            if any(
+                self.engineering_validator.validate_claim(
+                    relation,
+                    text,
+                ).passed
+                for relation in relations
+            )
+        ]
+        if supported:
+            return supported
+        relevant = [
+            evidence_id
+            for evidence_id, text in evidence_text.items()
+            if regimes & self.engineering_validator.regimes_in_text(text)
+        ]
+        return relevant or sorted(evidence_text)
+
+    def _answer_coverage_reasons(
+        self,
+        query: str,
+        answer: str,
+        evidence_text: dict[str, str],
+    ) -> list[dict[str, Any]]:
+        result = self.engineering_validator.validate_well_test_answer(
+            query,
+            answer,
+            retrieved_sources=[
+                {"excerpt": excerpt} for excerpt in evidence_text.values()
+            ],
+        )
+        reasons: list[dict[str, Any]] = []
+        seen: set[str] = set()
+        coverage_messages = {
+            "WT-WBS-001": (
+                "The answer does not state that wellbore-storage pressure and "
+                "pressure derivative overlap."
+            ),
+            "WT-WBS-002": (
+                "The answer does not connect wellbore storage to unit slope."
+            ),
+            "WT-RADIAL-003": (
+                "The answer does not state the radial-flow pressure-derivative plateau."
+            ),
+            "WT-RADIAL-004": (
+                "The answer does not attribute the pressure-derivative plateau to radial flow."
+            ),
+            "WT-UNIT-001": (
+                "The answer does not explain unit slope using the wellbore-storage overlap."
+            ),
+        }
+        for rule_id in result.rule_ids:
+            if rule_id not in coverage_messages or rule_id in seen:
+                continue
+            seen.add(rule_id)
+            message = coverage_messages[rule_id]
+            regime = ""
+            if "WBS" in rule_id or "UNIT" in rule_id:
+                regime = "wellbore_storage"
+            elif "RADIAL" in rule_id:
+                regime = "radial"
+            elif "LINEAR" in rule_id:
+                regime = "linear"
+            elif "SPHERICAL" in rule_id:
+                regime = "spherical"
+            elif "BOUNDARY" in rule_id:
+                regime = "boundary"
+            reason = {
+                "rule_id": rule_id,
+                "category": "engineering_answer_coverage",
+                "regime": regime,
+                "failed_claim": query,
+                "message": message,
+                "expected_engineering_relation": (
+                    self.engineering_validator.expected_relation(regime)
+                ),
+            }
+            reason["relevant_evidence_ids"] = self._relevant_evidence_ids(
+                reason,
+                evidence_text,
+            )
+            reasons.append(reason)
+        return reasons
 
     def validate_structured_answer(
         self,
@@ -800,7 +1059,7 @@ class ResearchAgent:
         malformed_rejections = 0
         engineering_contradiction_count = 0
         unsupported_engineering_claim_count = 0
-        engineering_validation_reasons: list[dict[str, str]] = []
+        engineering_validation_reasons: list[dict[str, Any]] = []
         candidates: list[tuple[str, str, list[str], str]] = []
         for section in ANSWER_SECTIONS:
             items = payload.get(section)
@@ -825,7 +1084,7 @@ class ResearchAgent:
                 if not self._structured_citations_match_section(section, ids):
                     malformed_rejections += 1
                     continue
-                evidence = "\n".join(evidence_text[value] for value in ids)
+                evidence = ".\n".join(evidence_text[value] for value in ids)
                 if not self._numbers_are_grounded(claim, evidence):
                     numeric_rejections += 1
                     continue
@@ -860,7 +1119,7 @@ class ResearchAgent:
                     engineering_validation_reasons.extend(
                         {
                             **reason,
-                            "citations": ",".join(ids),
+                            "relevant_evidence_ids": ids,
                         }
                         for reason in engineering.reasons
                     )
@@ -888,12 +1147,28 @@ class ResearchAgent:
 
         disclosed = self._add_conflict_claims(accepted, conflicts, evidence_text)
         answer, used_ids = self._render_structured_answer(accepted, evidence_text)
+        coverage_reasons = self._answer_coverage_reasons(
+            query,
+            answer,
+            evidence_text,
+        )
+        engineering_validation_reasons.extend(coverage_reasons)
+        unsupported_engineering_claim_count += len(coverage_reasons)
         (
             false_premise_detected,
             false_premise_corrected,
             false_premise_reasons,
         ) = self.engineering_validator.false_premise_correction(query, answer)
-        engineering_validation_reasons.extend(false_premise_reasons)
+        engineering_validation_reasons.extend(
+            {
+                **reason,
+                "relevant_evidence_ids": self._relevant_evidence_ids(
+                    reason,
+                    evidence_text,
+                ),
+            }
+            for reason in false_premise_reasons
+        )
         unsupported = (
             numeric_rejections
             + unit_rejections
@@ -924,6 +1199,14 @@ class ResearchAgent:
             "false_premise_detected": false_premise_detected,
             "false_premise_corrected": false_premise_corrected,
             "engineering_validation_reasons": engineering_validation_reasons,
+            "engineering_validation_passed": bool(
+                engineering_contradiction_count == 0
+                and unsupported_engineering_claim_count == 0
+                and (
+                    not false_premise_detected
+                    or false_premise_corrected
+                )
+            ),
             "semantic_check_skipped": not semantic_check_applied,
             "structured_output": True,
             "refused_without_evidence": False,
@@ -953,6 +1236,7 @@ class ResearchAgent:
                 "false_premise_detected": False,
                 "false_premise_corrected": True,
                 "engineering_validation_reasons": [],
+                "engineering_validation_passed": False,
                 "structured_output": True,
                 "structured_error": reason,
                 "refused_without_evidence": False,
@@ -1111,7 +1395,7 @@ class ResearchAgent:
         )
         evidence_text = evidence_text or {}
         kept_lines: list[str] = []
-        reasons: list[dict[str, str]] = []
+        reasons: list[dict[str, Any]] = []
         contradictions = 0
         unsupported = 0
         for line in validated.splitlines():
@@ -1119,7 +1403,7 @@ class ResearchAgent:
             if not ids or self._is_answer_structure(line.strip()):
                 kept_lines.append(line)
                 continue
-            evidence = "\n".join(evidence_text.get(item, "") for item in ids)
+            evidence = ".\n".join(evidence_text.get(item, "") for item in ids)
             evidence_conflict = any(
                 bool(
                     set(ids)
@@ -1141,7 +1425,7 @@ class ResearchAgent:
             contradictions += result.engineering_contradiction_count
             unsupported += result.unsupported_engineering_claim_count
             reasons.extend(
-                {**reason, "citations": ",".join(ids)}
+                {**reason, "relevant_evidence_ids": ids}
                 for reason in result.reasons
             )
 
@@ -1155,10 +1439,26 @@ class ResearchAgent:
                 "근거는 검색되었지만 공학적 의미와 인용의 정합성을 "
                 "검증하지 못했습니다. 근거 없는 결론을 제공하지 않습니다."
             )
+        coverage_reasons = self._answer_coverage_reasons(
+            query,
+            validated,
+            evidence_text,
+        )
+        reasons.extend(coverage_reasons)
+        unsupported += len(coverage_reasons)
         detected, corrected, false_reasons = (
             self.engineering_validator.false_premise_correction(query, validated)
         )
-        reasons.extend(false_reasons)
+        reasons.extend(
+            {
+                **reason,
+                "relevant_evidence_ids": self._relevant_evidence_ids(
+                    reason,
+                    evidence_text,
+                ),
+            }
+            for reason in false_reasons
+        )
         validation.update(
             {
                 "valid_citations": valid_citations,
@@ -1167,6 +1467,11 @@ class ResearchAgent:
                 "false_premise_detected": detected,
                 "false_premise_corrected": corrected,
                 "engineering_validation_reasons": reasons,
+                "engineering_validation_passed": bool(
+                    contradictions == 0
+                    and unsupported == 0
+                    and (not detected or corrected)
+                ),
             }
         )
         return validated, validation, disclosed
@@ -1197,6 +1502,31 @@ class ResearchAgent:
             or validation.get("engineering_contradiction_count")
             or validation.get("unsupported_engineering_claim_count")
             or (
+                validation.get("false_premise_detected")
+                and not validation.get("false_premise_corrected")
+            )
+        )
+
+    @staticmethod
+    def _engineering_validation_passed(validation: dict[str, Any]) -> bool:
+        return bool(
+            not validation.get("safe_refusal_after_repair")
+            and
+            not validation.get("engineering_contradiction_count")
+            and not validation.get("unsupported_engineering_claim_count")
+            and not (
+                validation.get("false_premise_detected")
+                and not validation.get("false_premise_corrected")
+            )
+        )
+
+    @staticmethod
+    def _final_answer_usable(validation: dict[str, Any]) -> bool:
+        return bool(
+            validation.get("valid_citations")
+            and not validation.get("engineering_contradiction_count")
+            and not validation.get("unsupported_engineering_claim_count")
+            and not (
                 validation.get("false_premise_detected")
                 and not validation.get("false_premise_corrected")
             )

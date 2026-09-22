@@ -326,13 +326,16 @@ def test_engineering_metrics_accept_false_premise_correction():
     result = evaluate_benchmark_answer(
         item,
         (
-            "No. Radial flow does not have unit-slope; its derivative is a "
-            "horizontal constant plateau."
+            "No. Radial flow does not have unit-slope and its pressure and "
+            "derivative do not overlap. Wellbore storage pressure and derivative "
+            "overlap on a unit-slope line. Radial flow derivative is a horizontal "
+            "constant plateau."
         ),
         sources=[
             {
                 "excerpt": (
-                    "Radial flow has a horizontal constant derivative plateau."
+                    "Wellbore storage pressure and derivative overlap on a unit-slope "
+                    "line. Radial flow has a horizontal constant derivative plateau."
                 )
             }
         ],

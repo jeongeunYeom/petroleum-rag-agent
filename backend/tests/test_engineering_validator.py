@@ -306,8 +306,10 @@ def test_false_premise_explicit_correction_passes():
     detected, corrected, reasons = EngineeringValidator().false_premise_correction(
         "In radial flow, pressure and derivative overlap with unit-slope. Correct?",
         (
-            "No. Radial flow does not have unit-slope; its pressure derivative "
-            "is a horizontal constant plateau."
+            "No. Radial flow does not have unit-slope and its pressure and "
+            "derivative do not overlap. Wellbore storage pressure and derivative "
+            "overlap on a unit-slope line. Radial flow pressure derivative is a "
+            "horizontal constant plateau."
         ),
     )
 
@@ -352,3 +354,48 @@ def test_boundary_unit_slope_requires_late_time_or_conditional_context():
 
     assert result.passed is False
     assert result.reasons[0]["rule_id"] == "WT-BOUNDARY-CONTEXT"
+
+
+def test_negated_radial_unit_slope_is_not_treated_as_positive_claim():
+    result = EngineeringValidator().validate_claim(
+        (
+            "Radial flow pressure and derivative do not follow the same unit-slope "
+            "line, but the derivative is horizontal."
+        ),
+        "On the diagnostic plot, radial flow is indicated by a horizontal derivative.",
+    )
+
+    assert result.passed is True
+
+
+def test_quoted_false_premise_rejection_is_not_a_positive_attribution():
+    result = EngineeringValidator().validate_claim(
+        (
+            "The premise that radial-flow pressure and derivative both follow a "
+            "unit-slope line is incorrect. Radial flow has a horizontal derivative."
+        ),
+        "Radial flow is indicated by a horizontal derivative.",
+    )
+
+    assert result.passed is True
+
+
+def test_boundary_context_does_not_attribute_plateau_to_boundary_flow():
+    result = EngineeringValidator().validate_claim(
+        "The interpretation of a radial-flow plateau may be affected by boundary effects.",
+        "Radial flow is indicated by a horizontal derivative before boundary effects.",
+    )
+
+    assert result.engineering_contradiction_count == 0
+
+
+def test_unrelated_regime_detail_does_not_create_evidence_conflict():
+    result = EngineeringValidator().validate_claim(
+        "Radial flow is indicated by a horizontal derivative.",
+        (
+            "Radial flow is indicated by a horizontal derivative. "
+            "Volumetric flow can produce a unit-slope response."
+        ),
+    )
+
+    assert result.passed is True
