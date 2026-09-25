@@ -668,6 +668,26 @@ def test_irrelevant_figure_is_not_forced_into_results(tmp_path: Path) -> None:
     assert [hit["id"] for hit in hits] == ["text"]
 
 
+def test_empty_figure_channel_preserves_existing_ranked_hits(tmp_path: Path) -> None:
+    figure_from_normal_retrieval = {
+        "id": "existing-figure",
+        "text": (
+            "[Extracted figure notes] pressure graph "
+            "image_path: existing.png"
+        ),
+        "metadata": {"page": 12},
+    }
+    store = FakeVectorStore(
+        dense=[figure_from_normal_retrieval],
+        sparse=[figure_from_normal_retrieval],
+    )
+    agent = make_agent(tmp_path, vector_store=store)
+
+    hits = agent.search_knowledge_base("pressure graph", 3)
+
+    assert [hit["id"] for hit in hits] == ["existing-figure"]
+
+
 def test_external_evidence_is_never_written_to_chroma(tmp_path: Path) -> None:
     store = FakeVectorStore()
     agent = make_agent(

@@ -517,6 +517,8 @@ class ResearchAgent:
             return ranked[:top_k]
 
         figures = self._search_figure_channel(query, candidate_count)
+        if not figures:
+            return ranked[:top_k]
         figure_budget = min(2, top_k, len(figures))
         selected_figures = figures[:figure_budget]
         figure_ids = {str(hit.get("id") or "") for hit in selected_figures}

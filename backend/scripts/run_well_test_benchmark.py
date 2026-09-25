@@ -786,6 +786,24 @@ def figure_numeric_required(item: dict[str, Any]) -> bool:
     return re.search(r"\d+\\?\.\d+", text) is not None
 
 
+def require_nonempty_knowledge_base(checklist: dict[str, Any]) -> None:
+    checks = checklist.get("checks") or {}
+    knowledge_base = checklist.get("knowledge_base") or {}
+    data_dir = str((checks.get("data_dir") or {}).get("path") or "unknown")
+    vector_db_dir = str((checks.get("chroma") or {}).get("path") or "unknown")
+    documents = int(knowledge_base.get("documents") or 0)
+    chunks = int(knowledge_base.get("chunks") or 0)
+    print(f"resolved_data_dir={data_dir}")
+    print(f"resolved_vector_db_dir={vector_db_dir}")
+    print(f"knowledge_base_documents={documents}")
+    print(f"knowledge_base_chunks={chunks}")
+    if chunks == 0:
+        raise RuntimeError(
+            "ERROR: knowledge base collection is empty. "
+            "Set DATA_DIR to the existing indexed data directory before benchmarking."
+        )
+
+
 def direct_ollama_answer(
     ollama_url: str,
     *,
@@ -964,6 +982,12 @@ def main() -> int:
             "backend_status="
             f"{health.get('status', 'unknown')}"
         )
+        checklist = http_json(
+            "GET",
+            f"{api_base}/system/checklist",
+            timeout=30.0,
+        )
+        require_nonempty_knowledge_base(checklist)
     else:
         tags = http_json(
             "GET",

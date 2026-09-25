@@ -1,12 +1,15 @@
 import csv
 import json
 
+import pytest
+
 from scripts.run_well_test_benchmark import (
     benchmark_evaluation_fields,
     build_summary,
     direct_ollama_answer,
     correct_figure_number_hit,
     figure_retrieval_hit,
+    require_nonempty_knowledge_base,
     reevaluate_saved_benchmark,
     write_csv,
     write_json,
@@ -200,6 +203,23 @@ def test_correct_figure_number_hit_requires_each_requested_figure():
         item,
         [{"figure_number": "Figure 2"}],
     ) is False
+
+
+def test_benchmark_fails_fast_for_empty_knowledge_base(capsys):
+    checklist = {
+        "checks": {
+            "data_dir": {"path": "C:/clone/data"},
+            "chroma": {"path": "C:/clone/data/vector_db"},
+        },
+        "knowledge_base": {"documents": 0, "chunks": 0},
+    }
+
+    with pytest.raises(RuntimeError, match="knowledge base collection is empty"):
+        require_nonempty_knowledge_base(checklist)
+
+    output = capsys.readouterr().out
+    assert "resolved_data_dir=C:/clone/data" in output
+    assert "knowledge_base_chunks=0" in output
 
 
 def test_direct_ollama_answer_uses_chat_endpoint(monkeypatch):
