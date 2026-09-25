@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import re
 import statistics
 import sys
 import time
@@ -298,6 +299,22 @@ def build_summary(
         figure_rows,
         "figure_retrieval_hit",
     )
+    figure_number_rows = rows_with_value(
+        figure_rows,
+        "correct_figure_number_hit",
+    )
+    figure_page_rows = rows_with_value(
+        figure_rows,
+        "correct_figure_page_hit",
+    )
+    figure_numeric_rows = rows_with_value(
+        figure_rows,
+        "figure_numeric_support_pass",
+    )
+    figure_citation_rows = rows_with_value(
+        figure_rows,
+        "figure_citation_correctness",
+    )
     citation_rows = rows_with_value(
         completed,
         "citation_correctness",
@@ -424,6 +441,27 @@ def build_summary(
             count_true(figure_retrieval_rows, "figure_retrieval_hit"),
             len(figure_retrieval_rows),
         ),
+        "figure_required_count": len(figure_rows),
+        "figure_hit_count": count_true(
+            figure_retrieval_rows,
+            "figure_retrieval_hit",
+        ),
+        "correct_figure_number_hit_rate": ratio(
+            count_true(figure_number_rows, "correct_figure_number_hit"),
+            len(figure_number_rows),
+        ),
+        "correct_figure_page_hit_rate": ratio(
+            count_true(figure_page_rows, "correct_figure_page_hit"),
+            len(figure_page_rows),
+        ),
+        "figure_numeric_support_pass_rate": ratio(
+            count_true(figure_numeric_rows, "figure_numeric_support_pass"),
+            len(figure_numeric_rows),
+        ),
+        "figure_citation_correctness_rate": ratio(
+            count_true(figure_citation_rows, "figure_citation_correctness"),
+            len(figure_citation_rows),
+        ),
         "average_attempts": mean_field(completed, "attempts"),
         "average_retrieval_seconds": mean_field(
             completed,
@@ -477,6 +515,12 @@ def write_csv(
         "preferred_page_hit",
         "figure_retrieval_hit",
         "figure_count",
+        "figure_required",
+        "figure_hit",
+        "correct_figure_number_hit",
+        "correct_figure_page_hit",
+        "figure_numeric_support_pass",
+        "figure_citation_correctness",
         "source_pages",
         "retrieval_seconds",
         "reasoning_seconds",
@@ -686,6 +730,60 @@ def figure_retrieval_hit(
         except (TypeError, ValueError):
             continue
     return bool(preferred_pages.intersection(figure_pages))
+
+
+def expected_figure_numbers(item: dict[str, Any]) -> set[str]:
+    text = " ".join(
+        [
+            str(item.get("question") or ""),
+            *(str(value) for value in item.get("required_concepts") or []),
+            *(str(value) for value in item.get("required_patterns") or []),
+        ]
+    )
+    return {
+        match.group(1)
+        for match in re.finditer(
+            r"figure(?:\\s\*|\s)*([0-9]+[A-Za-z]?)",
+            text,
+            re.IGNORECASE,
+        )
+    }
+
+
+def correct_figure_number_hit(
+    item: dict[str, Any],
+    figures: list[dict[str, Any]],
+) -> bool | None:
+    if item.get("question_type") != "figure":
+        return None
+    expected = expected_figure_numbers(item)
+    if not expected:
+        return None
+    observed = {
+        match.group(1)
+        for figure in figures
+        if (
+            match := re.search(
+                r"figure\s*([0-9]+[A-Za-z]?)",
+                str(figure.get("figure_number") or ""),
+                re.IGNORECASE,
+            )
+        )
+    }
+    return expected.issubset(observed)
+
+
+def figure_numeric_required(item: dict[str, Any]) -> bool:
+    if item.get("question_type") != "figure":
+        return False
+    text = " ".join(
+        str(value)
+        for value in [
+            *(item.get("required_concepts") or []),
+            *(item.get("required_patterns") or []),
+        ]
+    )
+    return re.search(r"\d+\\?\.\d+", text) is not None
 
 
 def direct_ollama_answer(
@@ -943,6 +1041,8 @@ def main() -> int:
         api_false_premise_detected: bool | None = None
         api_false_premise_corrected: bool | None = None
         api_engineering_validation_passed: bool | None = None
+        api_figure_numeric_support_pass: bool | None = None
+        api_figure_citation_correctness: bool | None = None
 
         try:
             if args.mode == "rag":
@@ -1058,6 +1158,12 @@ def main() -> int:
                 api_engineering_validation_passed = bool(
                     validation.get("engineering_validation_passed")
                 )
+                api_figure_numeric_support_pass = bool(
+                    validation.get("figure_numeric_support_pass")
+                )
+                api_figure_citation_correctness = bool(
+                    validation.get("figure_citation_correctness")
+                )
                 unsupported_claim_count = int(
                     validation.get("unsupported_claim_count") or 0
                 )
@@ -1114,6 +1220,8 @@ def main() -> int:
                     sources=sources,
                 )
             )
+            figure_hit = figure_retrieval_hit(item, figures)
+            figure_required = item.get("question_type") == "figure"
 
             result.update(
                 {
@@ -1159,11 +1267,25 @@ def main() -> int:
                         final_evaluation
                         .preferred_page_hit
                     ),
-                    "figure_retrieval_hit": figure_retrieval_hit(
+                    "figure_retrieval_hit": figure_hit,
+                    "figure_count": len(figures),
+                    "figure_required": figure_required,
+                    "figure_hit": figure_hit,
+                    "correct_figure_number_hit": correct_figure_number_hit(
                         item,
                         figures,
                     ),
-                    "figure_count": len(figures),
+                    "correct_figure_page_hit": figure_hit,
+                    "figure_numeric_support_pass": (
+                        api_figure_numeric_support_pass
+                        if figure_numeric_required(item)
+                        else None
+                    ),
+                    "figure_citation_correctness": (
+                        api_figure_citation_correctness
+                        if figure_required
+                        else None
+                    ),
                     "retrieval_seconds": retrieval_seconds,
                     "reasoning_seconds": reasoning_seconds,
                     "generation_seconds": generation_seconds,
@@ -1253,6 +1375,12 @@ def main() -> int:
                     "preferred_page_hit": None,
                     "figure_retrieval_hit": None,
                     "figure_count": 0,
+                    "figure_required": item.get("question_type") == "figure",
+                    "figure_hit": None,
+                    "correct_figure_number_hit": None,
+                    "correct_figure_page_hit": None,
+                    "figure_numeric_support_pass": None,
+                    "figure_citation_correctness": None,
                     "source_pages": [],
                     "retrieval_seconds": 0.0,
                     "reasoning_seconds": 0.0,

@@ -1,4 +1,5 @@
 import asyncio
+import json
 from pathlib import Path
 
 import pytest
@@ -15,10 +16,21 @@ from app.services.vector_store import VectorStore
 
 
 class FakeVectorStore:
-    def __init__(self, dense=None, sparse=None, bm25=None):
+    def __init__(
+        self,
+        dense=None,
+        sparse=None,
+        bm25=None,
+        figures=None,
+        figure_sparse=None,
+        figure_bm25=None,
+    ):
         self.dense = dense or []
         self.sparse = sparse or []
         self.bm25 = bm25 or []
+        self.figures = figures or []
+        self.figure_sparse = figure_sparse or []
+        self.figure_bm25 = figure_bm25 or []
         self.calls = []
         self.write_attempted = False
 
@@ -33,6 +45,18 @@ class FakeVectorStore:
     def bm25_search(self, query: str, top_k: int):
         self.calls.append("bm25")
         return self.bm25[:top_k]
+
+    def search_figures(self, query: str, top_k: int):
+        self.calls.append("figure_dense")
+        return self.figures[:top_k]
+
+    def keyword_search_figures(self, query: str, top_k: int):
+        self.calls.append("figure_keyword")
+        return self.figure_sparse[:top_k]
+
+    def bm25_search_figures(self, query: str, top_k: int):
+        self.calls.append("figure_bm25")
+        return self.figure_bm25[:top_k]
 
     def add_chunks(self, chunks):
         self.write_attempted = True
@@ -197,6 +221,53 @@ def test_bm25_search_ranks_existing_chroma_documents_without_writes() -> None:
 
     assert [hit["id"] for hit in result] == ["best", "partial"]
     assert result[0]["keyword_score"] > result[1]["keyword_score"]
+
+
+def test_vector_store_figure_search_filters_existing_collection() -> None:
+    class Collection:
+        def __init__(self):
+            self.query_args = []
+            self.get_args = []
+
+        def query(self, **kwargs):
+            self.query_args.append(kwargs)
+            return {
+                "ids": [["fig"]],
+                "documents": [["[Extracted figure notes] pressure gradient"]],
+                "metadatas": [[{"page": 440}]],
+                "distances": [[0.1]],
+            }
+
+        def get(self, **kwargs):
+            self.get_args.append(kwargs)
+            return {
+                "ids": ["fig"],
+                "documents": ["[Extracted figure notes] pressure gradient"],
+                "metadatas": [{"page": 440}],
+            }
+
+    store = VectorStore.__new__(VectorStore)
+    store.collection = Collection()
+    store.embed = lambda texts: [[0.1, 0.2]]
+
+    dense = store.search_figures("RFT pressure gradient", 3)
+    sparse = store.bm25_search_figures("RFT pressure gradient", 3)
+
+    assert dense[0]["id"] == "fig"
+    assert sparse[0]["id"] == "fig"
+    expected_markers = {
+        "[Extracted figure notes]",
+        "[Figure Note Metadata]",
+        "image_path:",
+    }
+    assert {
+        call["where_document"]["$contains"]
+        for call in store.collection.query_args
+    } == expected_markers
+    assert {
+        call["where_document"]["$contains"]
+        for call in store.collection.get_args
+    } == expected_markers
 def test_external_search_normalizes_and_deduplicates_urls(tmp_path: Path) -> None:
     raw = [
         {
@@ -255,10 +326,18 @@ def test_rrf_fusion_preserves_separate_kb_web_and_figure_ids(tmp_path: Path) -> 
     }
     figure_hit = {
         "id": "figure-1",
-        "text": "[Extracted Figure Notes]\ntitle: Saturation trend\nimage_path: fig_10.png",
+        "text": (
+            "[Extracted Figure Notes]\ntitle: Residual trapping saturation trend\n"
+            "image_path: fig_10.png"
+        ),
         "metadata": {"filename": "storage.pdf", "page": 10, "chunk_type": "figure_note"},
     }
-    store = FakeVectorStore(dense=[text_hit, figure_hit], sparse=[text_hit])
+    store = FakeVectorStore(
+        dense=[text_hit, figure_hit],
+        sparse=[text_hit],
+        figures=[figure_hit],
+        figure_sparse=[figure_hit],
+    )
     agent = make_agent(
         tmp_path,
         vector_store=store,
@@ -340,12 +419,253 @@ def test_figure_query_keeps_a_figure_candidate(tmp_path: Path) -> None:
     }
     agent = make_agent(
         tmp_path,
-        vector_store=FakeVectorStore(dense=[*text_hits, figure_hit]),
+        vector_store=FakeVectorStore(
+            dense=[*text_hits, figure_hit],
+            figures=[figure_hit],
+            figure_sparse=[figure_hit],
+        ),
     )
 
     hits = agent.search_knowledge_base("pressure graph", 2)
 
     assert [hit["id"] for hit in hits] == ["text-0", "figure-late"]
+
+
+def test_figure_question_runs_independent_figure_channels(tmp_path: Path) -> None:
+    figure = {
+        "id": "fig-2",
+        "text": (
+            "[Extracted figure notes]\nFigure 2: [Figure Note Metadata] "
+            "title: Appraisal Well RFT Survey image_path: appraisal.png "
+            "reference_lines: 0.34 psi/ft"
+        ),
+        "metadata": {"document": "well-test.pdf", "page": 440},
+    }
+    store = FakeVectorStore(figures=[figure], figure_bm25=[figure])
+    agent = make_agent(tmp_path, vector_store=store, retrieval_mode="hybrid")
+
+    hits = agent.search_knowledge_base(
+        "Figure 2 Appraisal Well RFT pressure gradient",
+        5,
+    )
+
+    assert [hit["id"] for hit in hits] == ["fig-2"]
+    assert "figure_dense" in store.calls
+    assert "figure_bm25" in store.calls
+
+
+def test_non_figure_question_does_not_run_or_force_figure_channel(tmp_path: Path) -> None:
+    text = {
+        "id": "text",
+        "text": "Porosity is pore volume divided by bulk volume.",
+        "metadata": {},
+    }
+    irrelevant_figure = {
+        "id": "fig",
+        "text": "[Extracted figure notes] porosity chart image_path: porosity.png",
+        "metadata": {},
+    }
+    store = FakeVectorStore(
+        dense=[text],
+        sparse=[text],
+        figures=[irrelevant_figure],
+        figure_sparse=[irrelevant_figure],
+    )
+    agent = make_agent(tmp_path, vector_store=store)
+
+    hits = agent.search_knowledge_base("Define porosity", 3)
+
+    assert [hit["id"] for hit in hits] == ["text"]
+    assert "figure_dense" not in store.calls
+
+
+def test_normalization_keeps_figure_2_and_figure_3_metadata_separate(tmp_path: Path) -> None:
+    hit = {
+        "id": "rft-page",
+        "text": (
+            "[Extracted figure notes]\n"
+            "Figure 2: [Figure Note Metadata] title: Appraisal Well RFT Survey "
+            "image_path: appraisal.png reference_lines: 0.34 psi/ft\n"
+            "Figure 3: [Figure Note Metadata] title: RFT Survey after Significant Production "
+            "image_path: production.png reference_lines: 0.29 psi/ft"
+        ),
+        "metadata": {"document": "well-test.pdf", "page": 440},
+    }
+    agent = make_agent(tmp_path)
+
+    _, figures = agent.normalize_internal_evidence([hit])
+
+    assert [item.figure_number for item in figures] == ["Figure 2", "Figure 3"]
+    assert [item.filename for item in figures] == ["appraisal.png", "production.png"]
+    assert "0.29" not in figures[0].excerpt
+    assert "0.34" not in figures[1].excerpt
+
+
+@pytest.mark.parametrize(
+    ("claim", "citation"),
+    [
+        ("Figure 3 reports 0.34 psi/ft.", "FIG1"),
+        ("Figure 2 reports 0.29 psi/ft.", "FIG2"),
+    ],
+)
+def test_validator_rejects_numeric_attribution_to_wrong_figure(
+    tmp_path: Path,
+    claim: str,
+    citation: str,
+) -> None:
+    agent = make_agent(tmp_path)
+    raw = json.dumps(
+        {
+            "internal": [{"claim": claim, "citations": [citation]}],
+            "external": [],
+            "synthesis": [],
+            "limitations": [],
+        }
+    )
+    evidence = {
+        "FIG1": "figure=Figure 2\ntitle=Appraisal Well RFT Survey\n0.34 psi/ft",
+        "FIG2": (
+            "figure=Figure 3\ntitle=RFT Survey after Significant Production\n"
+            "0.29 psi/ft 0.37 psi/ft 0.42 psi/ft"
+        ),
+    }
+
+    answer, validation, _ = agent.validate_structured_answer(
+        raw,
+        evidence,
+        [],
+        "Compare Figure 2 and Figure 3 pressure gradient",
+    )
+
+    assert claim not in answer
+    assert validation["figure_association_rejections"] == 1
+
+
+def test_figure_numeric_claim_requires_figure_citation(tmp_path: Path) -> None:
+    agent = make_agent(tmp_path)
+    raw = json.dumps(
+        {
+            "internal": [
+                {
+                    "claim": "Figure 2 reports 0.34 psi/ft.",
+                    "citations": ["KB1"],
+                }
+            ],
+            "external": [],
+            "synthesis": [],
+            "limitations": [],
+        }
+    )
+
+    _, validation, _ = agent.validate_structured_answer(
+        raw,
+        {"KB1": "Figure 2 reports 0.34 psi/ft."},
+        [],
+        "What pressure gradient is displayed in Figure 2?",
+    )
+
+    assert validation["figure_citation_rejections"] == 1
+    assert validation["figure_citation_correctness"] is False
+
+
+def test_figure_axis_and_series_are_validated_separately(tmp_path: Path) -> None:
+    agent = make_agent(tmp_path)
+    evidence = {
+        "FIG1": (
+            "figure=Figure 8\nx_axis: elapsed time\ny_axis: pressure change\n"
+            "series_descriptions: pressure and pressure derivative"
+        )
+    }
+    correct = json.dumps(
+        {
+            "internal": [
+                {
+                    "claim": (
+                        "Figure 8 uses elapsed time on the x-axis; pressure and pressure "
+                        "derivative are plotted series."
+                    ),
+                    "citations": ["FIG1"],
+                }
+            ],
+            "external": [],
+            "synthesis": [],
+            "limitations": [],
+        }
+    )
+    wrong = correct.replace(
+        "uses elapsed time on the x-axis; pressure and pressure derivative are plotted series",
+        "x-axis is a pressure series",
+    )
+
+    answer, validation, _ = agent.validate_structured_answer(
+        correct,
+        evidence,
+        [],
+        "In Figure 8 identify the x-axis and pressure derivative series",
+    )
+    wrong_answer, wrong_validation, _ = agent.validate_structured_answer(
+        wrong,
+        evidence,
+        [],
+        "In Figure 8 identify the x-axis and pressure derivative series",
+    )
+
+    assert "elapsed time" in answer
+    assert validation["figure_association_rejections"] == 0
+    assert "x-axis is a pressure series" not in wrong_answer
+    assert wrong_validation["figure_association_rejections"] == 1
+
+
+def test_supercharged_figure_question_prefers_direct_point_treatment(tmp_path: Path) -> None:
+    direct = {
+        "id": "direct",
+        "text": (
+            "[Extracted figure notes]\nFigure 2: title: Appraisal Well RFT Survey "
+            "supercharged points shown as open circles were excluded image_path: rft.png"
+        ),
+        "metadata": {"page": 440},
+    }
+    generic = {
+        "id": "generic",
+        "text": "[Extracted figure notes] pressure chart image_path: generic.png",
+        "metadata": {"page": 10},
+    }
+    store = FakeVectorStore(
+        figures=[generic, direct],
+        figure_bm25=[direct, generic],
+    )
+    agent = make_agent(tmp_path, vector_store=store, retrieval_mode="hybrid")
+
+    hits = agent.search_knowledge_base(
+        "How were supercharged points identified or excluded in the RFT Figure?",
+        5,
+    )
+
+    assert [hit["id"] for hit in hits] == ["direct"]
+
+
+def test_irrelevant_figure_is_not_forced_into_results(tmp_path: Path) -> None:
+    text = {
+        "id": "text",
+        "text": "Pressure transient interpretation uses diagnostic plots.",
+        "metadata": {},
+    }
+    irrelevant = {
+        "id": "irrelevant",
+        "text": "[Extracted figure notes] porosity map image_path: porosity.png",
+        "metadata": {},
+    }
+    store = FakeVectorStore(
+        dense=[text],
+        sparse=[text],
+        figures=[irrelevant],
+        figure_sparse=[irrelevant],
+    )
+    agent = make_agent(tmp_path, vector_store=store)
+
+    hits = agent.search_knowledge_base("pressure graph", 3)
+
+    assert [hit["id"] for hit in hits] == ["text"]
 
 
 def test_external_evidence_is_never_written_to_chroma(tmp_path: Path) -> None:

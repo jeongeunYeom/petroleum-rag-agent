@@ -30,6 +30,7 @@ import {
 type FigureReference = {
   document: string;
   page?: number | null;
+  figure_number?: string | null;
   title?: string | null;
   image_type?: string | null;
   filename: string;
@@ -547,6 +548,7 @@ export default function Home() {
               ? [{
                   document: figure.document,
                   page: figure.page,
+                  figure_number: figure.figure_number,
                   title: figure.title,
                   filename: figure.filename,
                   url: figure.url,
@@ -1050,7 +1052,9 @@ export default function Home() {
 
                               <div className="border-t border-slate-200 px-3 py-2">
                                 <p className="truncate text-xs font-semibold text-slate-800">
-                                  {figure.title ?? "Retrieved figure"}
+                                  {[figure.figure_number, figure.title]
+                                    .filter(Boolean)
+                                    .join(" · ") || "Retrieved figure"}
                                 </p>
                                 <p className="mt-1 truncate text-[11px] text-slate-500">
                                   {figure.document}

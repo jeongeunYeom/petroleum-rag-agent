@@ -36,7 +36,20 @@ COMPARE_RE = re.compile(
     r"|비교|교재|핸드북|내부\s*(?:자료|문서|지식)",
     re.IGNORECASE,
 )
-FIGURE_RE = re.compile(r"graph|plot|figure|chart|curve|그래프|도표|그림", re.IGNORECASE)
+FIGURE_RE = re.compile(
+    r"graph|plot|figure|chart|curve|type\s*curve|\brft\b|x[- ]?axis|y[- ]?axis|"
+    r"pressure\s*gradient|supercharg(?:ed|ing)|그래프|도표|그림|플롯|축|곡선|"
+    r"압력\s*(?:기울기|구배)",
+    re.IGNORECASE,
+)
+FIGURE_NUMBER_RE = re.compile(r"\bfigure\s*([0-9]+[A-Za-z]?)\b", re.IGNORECASE)
+FIGURE_NOTE_MARKER_RE = re.compile(r"\[extracted figure notes\]", re.IGNORECASE)
+FIGURE_DERIVED_CLAIM_RE = re.compile(
+    r"\bfigure\s*\d+|x[- ]?axis|y[- ]?axis|\baxis\b|\blegend\b|\bseries\b|"
+    r"pressure\s*gradient|supercharg(?:ed|ing)|그래프|도표|그림|플롯|축|범례|계열|"
+    r"압력\s*(?:기울기|구배)",
+    re.IGNORECASE,
+)
 SOURCE_DETAIL_REQUEST_RE = re.compile(
     r"(?:문서명|파일명|문서|출처).{0,20}(?:페이지|page)|"
     r"(?:페이지|page).{0,20}(?:문서명|파일명|문서|출처)|"
@@ -309,6 +322,10 @@ class ResearchAgent:
                 "false_premise_corrected": True,
                 "engineering_validation_reasons": [],
                 "engineering_validation_passed": False,
+                "figure_citation_rejections": 0,
+                "figure_association_rejections": 0,
+                "figure_citation_correctness": False,
+                "figure_numeric_support_pass": False,
             }
             inference_used = False
         answer = self.render_requested_source_details(
@@ -418,6 +435,33 @@ class ResearchAgent:
             variants.append("late time boundary recharge conditional unit slope")
         return list(dict.fromkeys(variants))
 
+    @staticmethod
+    def figure_retrieval_queries(query: str) -> list[str]:
+        """Expand figure identity and metadata terms without supplying answer values."""
+        query = query.strip()
+        if not query or not FIGURE_RE.search(query):
+            return []
+        lower = query.casefold()
+        variants = [query]
+        if re.search(r"\brft\b|pressure\s*gradient|supercharg|압력\s*(?:기울기|구배)", lower):
+            variants.append("RFT pressure depth Figure Note Metadata pressure gradient")
+        if re.search(r"appraisal|생산\s*전|figure\s*2", lower):
+            variants.append("Appraisal Well RFT Survey Figure 2 pressure gradient")
+        if re.search(r"significant\s*production|생산\s*(?:후|이후)|figure\s*3", lower):
+            variants.append(
+                "RFT Survey after Significant Production Figure 3 pressure gradient"
+            )
+        if re.search(r"supercharg|open\s*circles?|제외|제거", lower):
+            variants.append(
+                "supercharged points RFT Figure open circle excluded eliminated removed"
+            )
+        if re.search(r"type\s*curve|x[- ]?axis|y[- ]?axis|\baxis\b|축|계열|series", lower):
+            variants.append(
+                "type curve Figure Note Metadata x_axis y_axis legend "
+                "pressure series pressure derivative series"
+            )
+        return list(dict.fromkeys(variants))
+
     def search_knowledge_base(self, query: str, top_k: int) -> list[dict[str, Any]]:
         query = query.strip()
         if not query:
@@ -469,28 +513,147 @@ class ResearchAgent:
         )
         if self.settings.retrieval_mode == "hybrid_rerank":
             ranked = self._rerank_hits(query, ranked)
-        selected = ranked[:top_k]
-        if FIGURE_RE.search(query) and not any(
-            self._is_figure_hit(
+        if not FIGURE_RE.search(query):
+            return ranked[:top_k]
+
+        figures = self._search_figure_channel(query, candidate_count)
+        figure_budget = min(2, top_k, len(figures))
+        selected_figures = figures[:figure_budget]
+        figure_ids = {str(hit.get("id") or "") for hit in selected_figures}
+        selected_text = [
+            hit for hit in ranked
+            if str(hit.get("id") or "") not in figure_ids
+            and not self._is_figure_hit(
                 str(hit.get("text") or ""),
                 hit.get("metadata") or {},
             )
-            for hit in selected
+        ][: max(top_k - figure_budget, 0)]
+        return [*selected_text, *selected_figures]
+
+    def _search_figure_channel(
+        self,
+        query: str,
+        candidate_count: int,
+    ) -> list[dict[str, Any]]:
+        merged: dict[str, dict[str, Any]] = {}
+        rrf_k = 60
+        for query_index, retrieval_query in enumerate(
+            self.figure_retrieval_queries(query)
         ):
-            figure = next(
+            channels = [
                 (
-                    hit
-                    for hit in ranked[top_k:]
-                    if self._is_figure_hit(
-                        str(hit.get("text") or ""),
-                        hit.get("metadata") or {},
-                    )
-                ),
-                None,
+                    "figure_dense",
+                    self.vector_store.search_figures(
+                        retrieval_query,
+                        candidate_count,
+                    ),
+                )
+            ]
+            sparse = (
+                self.vector_store.keyword_search_figures(
+                    retrieval_query,
+                    candidate_count,
+                )
+                if self.settings.retrieval_mode == "legacy"
+                else self.vector_store.bm25_search_figures(
+                    retrieval_query,
+                    candidate_count,
+                )
             )
-            if figure is not None and selected:
-                selected[-1] = figure
-        return selected
+            channels.append(("figure_sparse", sparse))
+            for channel, hits in channels:
+                for rank, hit in enumerate(hits, start=1):
+                    relevance = self._figure_relevance_score(query, hit)
+                    if relevance <= 0:
+                        continue
+                    chunk_id = str(hit.get("id") or "")
+                    if not chunk_id:
+                        continue
+                    item = merged.setdefault(chunk_id, dict(hit))
+                    item["figure_channel"] = True
+                    item["figure_relevance_score"] = max(
+                        relevance,
+                        float(item.get("figure_relevance_score") or 0.0),
+                    )
+                    item["figure_rrf_score"] = float(
+                        item.get("figure_rrf_score") or 0.0
+                    ) + 1 / (rrf_k + rank)
+                    item[f"{channel}_q{query_index}_rank"] = rank
+        return sorted(
+            merged.values(),
+            key=lambda item: (
+                float(item.get("figure_relevance_score") or 0.0),
+                float(item.get("figure_rrf_score") or 0.0),
+            ),
+            reverse=True,
+        )
+
+    @classmethod
+    def _figure_relevance_score(
+        cls,
+        query: str,
+        hit: dict[str, Any],
+    ) -> float:
+        text = str(hit.get("text") or "")
+        metadata = hit.get("metadata") or {}
+        if not cls._is_figure_hit(text, metadata):
+            return 0.0
+        searchable = " ".join(
+            str(value or "")
+            for value in (
+                text,
+                metadata.get("document"),
+                metadata.get("filename"),
+                metadata.get("title"),
+                metadata.get("figure_number"),
+                metadata.get("image_path"),
+            )
+        ).casefold()
+        lower = query.casefold()
+        score = 0.0
+        requested_numbers = set(FIGURE_NUMBER_RE.findall(query))
+        found_number = cls._figure_number(text, metadata)
+        if requested_numbers:
+            if found_number and found_number.casefold() in {
+                value.casefold() for value in requested_numbers
+            }:
+                score += 2.0
+            elif found_number:
+                return 0.0
+        if "appraisal" in lower and "appraisal well rft survey" in searchable:
+            score += 1.5
+        if (
+            re.search(r"significant\s*production|생산\s*(?:후|이후)", lower)
+            and "after significant production" in searchable
+        ):
+            score += 1.5
+        if re.search(r"\brft\b|pressure\s*gradient|supercharg", lower):
+            if re.search(r"\brft\b|pressure\s*gradient|supercharg", searchable):
+                score += 1.0
+            else:
+                return 0.0
+        if re.search(r"type\s*curve|x[- ]?axis|y[- ]?axis|\baxis\b|축|계열|series", lower):
+            if re.search(
+                r"type\s*curve|x_axis|y_axis|x[- ]?axis|y[- ]?axis|"
+                r"series_descriptions|pressure\s*derivative|legend",
+                searchable,
+            ):
+                score += 1.0
+            else:
+                return 0.0
+        if re.search(r"supercharg|open\s*circles?|제외|제거", lower):
+            if not re.search(r"supercharg", searchable):
+                return 0.0
+            score += 1.0
+            if re.search(r"exclude|eliminat|remove|open\s*circles?", searchable):
+                score += 0.5
+        query_tokens = {
+            token.casefold()
+            for token in re.findall(r"[A-Za-z][A-Za-z0-9_-]*|[가-힣]{2,}", query)
+            if token.casefold() not in RETRIEVAL_STOPWORDS
+        }
+        score += min(1.0, sum(token in searchable for token in query_tokens) / 2)
+        return score
 
     def _rerank_hits(
         self,
@@ -650,18 +813,29 @@ class ResearchAgent:
             )
             page = self._optional_int(metadata.get("page"))
             if self._is_figure_hit(text, metadata):
-                filename = self._figure_filename(text, metadata)
-                figures.append(
-                    FigureEvidence(
-                        evidence_id=f"FIG{len(figures) + 1}",
-                        document=document,
-                        page=page,
-                        title=self._figure_title(text, metadata),
-                        filename=filename,
-                        url=(f"/api/figures/{quote(filename, safe='')}" if filename else None),
-                        excerpt=text[:2000],
+                blocks = self._figure_note_blocks(text, metadata)
+                for figure_number, excerpt in blocks:
+                    filename = self._figure_filename(excerpt, metadata)
+                    figures.append(
+                        FigureEvidence(
+                            evidence_id=f"FIG{len(figures) + 1}",
+                            document=document,
+                            page=page,
+                            figure_number=(
+                                f"Figure {figure_number}"
+                                if figure_number
+                                else None
+                            ),
+                            title=self._figure_title(excerpt, metadata),
+                            filename=filename,
+                            url=(
+                                f"/api/figures/{quote(filename, safe='')}"
+                                if filename
+                                else None
+                            ),
+                            excerpt=excerpt[:2000],
+                        )
                     )
-                )
                 continue
             sources.append(
                 InternalEvidence(
@@ -698,18 +872,64 @@ class ResearchAgent:
             if value:
                 return Path(value).name
         match = re.search(
-            r"(?:image_path|filename)\s*:\s*([^\r\n]+\.(?:png|jpe?g|webp))",
+            r"(?:image_path|filename)\s*:\s*([^\s\r\n]+\.(?:png|jpe?g|webp))",
             text,
             re.IGNORECASE,
         )
         return Path(match.group(1).strip()).name if match else None
+
+    @classmethod
+    def _figure_note_blocks(
+        cls,
+        text: str,
+        metadata: dict[str, Any],
+    ) -> list[tuple[str | None, str]]:
+        marker = FIGURE_NOTE_MARKER_RE.search(text)
+        note_text = text[marker.end() :] if marker else text
+        matches = list(
+            re.finditer(
+                r"(?im)(?:^|\n)\s*figure\s+([0-9]+[A-Za-z]?)\s*:\s*",
+                note_text,
+            )
+        )
+        if not matches:
+            return [(cls._figure_number(text, metadata), text)]
+        if len(matches) == 1:
+            return [(matches[0].group(1), text)]
+        blocks = []
+        for index, match in enumerate(matches):
+            end = matches[index + 1].start() if index + 1 < len(matches) else len(note_text)
+            blocks.append((match.group(1), note_text[match.start() : end].strip()))
+        return blocks
+
+    @staticmethod
+    def _figure_number(text: str, metadata: dict[str, Any]) -> str | None:
+        value = str(metadata.get("figure_number") or "").strip()
+        match = FIGURE_NUMBER_RE.search(value)
+        if match:
+            return match.group(1)
+        if value and re.fullmatch(r"[0-9]+[A-Za-z]?", value):
+            return value
+        note_marker = FIGURE_NOTE_MARKER_RE.search(text)
+        note_text = text[note_marker.end() :] if note_marker else text
+        match = re.search(
+            r"(?im)(?:^|\n)\s*figure\s+([0-9]+[A-Za-z]?)\s*:",
+            note_text,
+        )
+        return match.group(1) if match else None
 
     @staticmethod
     def _figure_title(text: str, metadata: dict[str, Any]) -> str | None:
         title = str(metadata.get("title") or "").strip()
         if title:
             return title
-        match = re.search(r"^title\s*:\s*(.+)$", text, re.IGNORECASE | re.MULTILINE)
+        match = re.search(
+            r"(?:^|\s)title\s*:\s*(.+?)"
+            r"(?=\s+(?:analysis|x_axis|y_axis|series_descriptions|trend_summary|"
+            r"image_path|image_type|confidence|engineering_meaning|reference_lines)\s*:|$)",
+            text,
+            re.IGNORECASE | re.DOTALL,
+        )
         return match.group(1).strip() if match else None
 
     @staticmethod
@@ -775,7 +995,9 @@ class ResearchAgent:
             for item in web
         )
         blocks.extend(
-            f"[{item.evidence_id}] FIGURE | {item.document} | page={item.page}\n{item.excerpt}"
+            f"[{item.evidence_id}] FIGURE | document={item.document} | page={item.page} | "
+            f"figure={item.figure_number or 'unknown'} | title={item.title or 'unknown'} | "
+            f"filename={item.filename or 'unknown'}\n{item.excerpt}"
             for item in figures
         )
         conflict_text = json.dumps(conflicts, ensure_ascii=False)
@@ -830,6 +1052,11 @@ class ResearchAgent:
             "evidence. Citations must be raw IDs such as KB1, not bracketed IDs. "
             "Keep claims limited to the flow regimes and distinctions asked about; do not add "
             "other regimes merely because they occur in retrieved text. "
+            "For figure-derived claims, preserve the displayed figure number, page, axes, legend, "
+            "series, values, and units exactly. Never combine values or series from different FIG "
+            "blocks. A figure-derived numeric, axis, legend, series, or point-treatment claim must "
+            "cite its FIG ID; a KB citation alone is insufficient. If the matching FIG block does "
+            "not explicitly support a requested value or interpretation, report that limitation. "
             f"{false_premise_instruction}{relation_instruction}"
         )
         user = (
@@ -941,7 +1168,15 @@ class ResearchAgent:
         return {
             **{item.evidence_id: item.excerpt for item in internal},
             **{item.evidence_id: item.snippet for item in web},
-            **{item.evidence_id: item.excerpt for item in figures},
+            **{
+                item.evidence_id: (
+                    f"figure={item.figure_number or 'unknown'}\n"
+                    f"title={item.title or 'unknown'}\n"
+                    f"document={item.document}\npage={item.page}\n"
+                    f"filename={item.filename or 'unknown'}\n{item.excerpt}"
+                )
+                for item in figures
+            },
         }
 
     def _relevant_evidence_ids(
@@ -1069,6 +1304,8 @@ class ResearchAgent:
         semantic_rejections = 0
         query_relevance_rejections = 0
         malformed_rejections = 0
+        figure_citation_rejections = 0
+        figure_association_rejections = 0
         engineering_contradiction_count = 0
         unsupported_engineering_claim_count = 0
         engineering_validation_reasons: list[dict[str, Any]] = []
@@ -1095,6 +1332,52 @@ class ResearchAgent:
                     continue
                 if not self._structured_citations_match_section(section, ids):
                     malformed_rejections += 1
+                    continue
+                figure_required = self._claim_requires_figure_citation(query, claim)
+                figure_ids = [value for value in ids if value.startswith("FIG")]
+                if figure_required and not figure_ids:
+                    figure_citation_rejections += 1
+                    engineering_validation_reasons.append(
+                        {
+                            "rule_id": "FIG-CITATION-001",
+                            "category": "figure_citation",
+                            "failed_claim": claim,
+                            "message": (
+                                "A figure-derived claim requires a FIG citation; "
+                                "KB-only support is not sufficient."
+                            ),
+                            "relevant_evidence_ids": sorted(
+                                value for value in evidence_text if value.startswith("FIG")
+                            ),
+                            "expected_engineering_relation": (
+                                "Cite the specific FIG evidence that directly contains the value, "
+                                "axis, legend, series, or point treatment."
+                            ),
+                        }
+                    )
+                    continue
+                if figure_required and not self._figure_claim_matches_evidence(
+                    claim,
+                    figure_ids,
+                    evidence_text,
+                ):
+                    figure_association_rejections += 1
+                    engineering_validation_reasons.append(
+                        {
+                            "rule_id": "FIG-ASSOCIATION-001",
+                            "category": "figure_association",
+                            "failed_claim": claim,
+                            "message": (
+                                "The cited FIG evidence does not directly support this figure "
+                                "number, numeric value, axis, series, or point treatment."
+                            ),
+                            "relevant_evidence_ids": figure_ids,
+                            "expected_engineering_relation": (
+                                "Keep each claim attached to the matching figure metadata and "
+                                "copy only values explicitly present in that FIG block."
+                            ),
+                        }
+                    )
                     continue
                 evidence = ".\n".join(evidence_text[value] for value in ids)
                 if not self._numbers_are_grounded(claim, evidence):
@@ -1188,6 +1471,8 @@ class ResearchAgent:
             + semantic_rejections
             + query_relevance_rejections
             + malformed_rejections
+            + figure_citation_rejections
+            + figure_association_rejections
         )
         if not used_ids:
             answer = (
@@ -1204,6 +1489,15 @@ class ResearchAgent:
             "semantic_rejections": semantic_rejections,
             "query_relevance_rejections": query_relevance_rejections,
             "malformed_rejections": malformed_rejections,
+            "figure_citation_rejections": figure_citation_rejections,
+            "figure_association_rejections": figure_association_rejections,
+            "figure_citation_correctness": bool(
+                figure_citation_rejections == 0
+                and figure_association_rejections == 0
+            ),
+            "figure_numeric_support_pass": bool(
+                figure_association_rejections == 0
+            ),
             "engineering_contradiction_count": engineering_contradiction_count,
             "unsupported_engineering_claim_count": (
                 unsupported_engineering_claim_count
@@ -1214,6 +1508,8 @@ class ResearchAgent:
             "engineering_validation_passed": bool(
                 engineering_contradiction_count == 0
                 and unsupported_engineering_claim_count == 0
+                and figure_citation_rejections == 0
+                and figure_association_rejections == 0
                 and (
                     not false_premise_detected
                     or false_premise_corrected
@@ -1249,6 +1545,10 @@ class ResearchAgent:
                 "false_premise_corrected": True,
                 "engineering_validation_reasons": [],
                 "engineering_validation_passed": False,
+                "figure_citation_rejections": 0,
+                "figure_association_rejections": 0,
+                "figure_citation_correctness": False,
+                "figure_numeric_support_pass": False,
                 "structured_output": True,
                 "structured_error": reason,
                 "refused_without_evidence": False,
@@ -1263,6 +1563,87 @@ class ResearchAgent:
         if section == "external":
             return all(value.startswith("WEB") for value in citations)
         return True
+
+    @staticmethod
+    def _claim_requires_figure_citation(query: str, claim: str) -> bool:
+        if not FIGURE_RE.search(query):
+            return False
+        return bool(
+            FIGURE_DERIVED_CLAIM_RE.search(claim)
+            or QUANTITY_RE.search(claim)
+            or re.search(r"\b0\.\d+\b", claim)
+        )
+
+    @classmethod
+    def _figure_claim_matches_evidence(
+        cls,
+        claim: str,
+        figure_ids: list[str],
+        evidence_text: dict[str, str],
+    ) -> bool:
+        if not figure_ids:
+            return False
+        figure_evidence = {
+            value: evidence_text[value]
+            for value in figure_ids
+            if value in evidence_text
+        }
+        if not figure_evidence:
+            return False
+
+        mentioned = list(FIGURE_NUMBER_RE.finditer(claim))
+        for index, match in enumerate(mentioned):
+            number = match.group(1)
+            matching_text = "\n".join(
+                text
+                for text in figure_evidence.values()
+                if re.search(
+                    rf"(?im)^figure=figure\s*{re.escape(number)}\s*$",
+                    text,
+                )
+            )
+            if not matching_text:
+                return False
+            end = mentioned[index + 1].start() if index + 1 < len(mentioned) else len(claim)
+            segment = claim[match.end() : end]
+            if not cls._figure_segment_is_grounded(segment, matching_text):
+                return False
+
+        combined = "\n".join(figure_evidence.values())
+        if not mentioned and not cls._figure_segment_is_grounded(claim, combined):
+            return False
+        return True
+
+    @staticmethod
+    def _figure_segment_is_grounded(segment: str, evidence: str) -> bool:
+        if re.search(
+            r"(?:x[- ]?axis|y[- ]?axis|x축|y축).{0,16}"
+            r"(?:is|are|은|는).{0,16}(?:series|계열)",
+            segment,
+            re.IGNORECASE,
+        ):
+            return False
+        evidence_compact = re.sub(r"[\s,]", "", evidence).casefold()
+        for quantity in QUANTITY_RE.findall(segment):
+            if re.sub(r"[\s,]", "", quantity).casefold() not in evidence_compact:
+                return False
+        for value in NUMBER_RE.findall(segment):
+            if re.sub(r"[\s,]", "", value).casefold() not in evidence_compact:
+                return False
+        required_groups = []
+        if re.search(r"x[- ]?axis|x축", segment, re.IGNORECASE):
+            required_groups.append(r"x_axis|x[- ]?axis|x축")
+        if re.search(r"y[- ]?axis|y축", segment, re.IGNORECASE):
+            required_groups.append(r"y_axis|y[- ]?axis|y축")
+        if re.search(r"pressure\s*derivative|압력\s*(?:미분|도함수)", segment, re.IGNORECASE):
+            required_groups.append(r"pressure\s*derivative|압력\s*(?:미분|도함수)")
+        if re.search(r"supercharg", segment, re.IGNORECASE):
+            required_groups.append(r"supercharg")
+        if re.search(r"exclude|eliminat|remove|제외|제거", segment, re.IGNORECASE):
+            required_groups.append(r"exclude|eliminat|remove|제외|제거")
+        if re.search(r"open\s*circles?|빈\s*원|열린\s*원", segment, re.IGNORECASE):
+            required_groups.append(r"open\s*circles?|빈\s*원|열린\s*원")
+        return all(re.search(pattern, evidence, re.IGNORECASE) for pattern in required_groups)
 
     @staticmethod
     def _numbers_are_grounded(claim: str, evidence: str) -> bool:
@@ -1410,11 +1791,49 @@ class ResearchAgent:
         reasons: list[dict[str, Any]] = []
         contradictions = 0
         unsupported = 0
+        figure_citation_rejections = 0
+        figure_association_rejections = 0
         for line in validated.splitlines():
             ids = EVIDENCE_ID_RE.findall(line)
             if not ids or self._is_answer_structure(line.strip()):
                 kept_lines.append(line)
                 continue
+            if self._claim_requires_figure_citation(query, line):
+                figure_ids = [value for value in ids if value.startswith("FIG")]
+                if not figure_ids:
+                    figure_citation_rejections += 1
+                    reasons.append(
+                        {
+                            "rule_id": "FIG-CITATION-001",
+                            "failed_claim": line,
+                            "message": "A figure-derived claim requires a FIG citation.",
+                            "relevant_evidence_ids": sorted(
+                                value for value in evidence_text if value.startswith("FIG")
+                            ),
+                            "expected_engineering_relation": (
+                                "Cite the FIG block that directly supports the claim."
+                            ),
+                        }
+                    )
+                    continue
+                if not self._figure_claim_matches_evidence(
+                    line,
+                    figure_ids,
+                    evidence_text,
+                ):
+                    figure_association_rejections += 1
+                    reasons.append(
+                        {
+                            "rule_id": "FIG-ASSOCIATION-001",
+                            "failed_claim": line,
+                            "message": "The cited FIG block does not directly support the claim.",
+                            "relevant_evidence_ids": figure_ids,
+                            "expected_engineering_relation": (
+                                "Keep values and semantics attached to the matching figure."
+                            ),
+                        }
+                    )
+                    continue
             evidence = ".\n".join(evidence_text.get(item, "") for item in ids)
             evidence_conflict = any(
                 bool(
@@ -1479,9 +1898,20 @@ class ResearchAgent:
                 "false_premise_detected": detected,
                 "false_premise_corrected": corrected,
                 "engineering_validation_reasons": reasons,
+                "figure_citation_rejections": figure_citation_rejections,
+                "figure_association_rejections": figure_association_rejections,
+                "figure_citation_correctness": bool(
+                    figure_citation_rejections == 0
+                    and figure_association_rejections == 0
+                ),
+                "figure_numeric_support_pass": bool(
+                    figure_association_rejections == 0
+                ),
                 "engineering_validation_passed": bool(
                     contradictions == 0
                     and unsupported == 0
+                    and figure_citation_rejections == 0
+                    and figure_association_rejections == 0
                     and (not detected or corrected)
                 ),
             }
@@ -1502,7 +1932,9 @@ class ResearchAgent:
             + int(validation.get("engineering_contradiction_count") or 0),
             int(validation.get("unsupported_engineering_claim_count") or 0),
             int(validation.get("unsupported_claim_count") or 0),
-            len(validation.get("invalid_citations") or []),
+            len(validation.get("invalid_citations") or [])
+            + int(validation.get("figure_citation_rejections") or 0)
+            + int(validation.get("figure_association_rejections") or 0),
         )
 
     @staticmethod
@@ -1513,6 +1945,8 @@ class ResearchAgent:
             or not validation.get("valid_citations")
             or validation.get("engineering_contradiction_count")
             or validation.get("unsupported_engineering_claim_count")
+            or validation.get("figure_citation_rejections")
+            or validation.get("figure_association_rejections")
             or (
                 validation.get("false_premise_detected")
                 and not validation.get("false_premise_corrected")
@@ -1526,6 +1960,8 @@ class ResearchAgent:
             and
             not validation.get("engineering_contradiction_count")
             and not validation.get("unsupported_engineering_claim_count")
+            and not validation.get("figure_citation_rejections")
+            and not validation.get("figure_association_rejections")
             and not (
                 validation.get("false_premise_detected")
                 and not validation.get("false_premise_corrected")
@@ -1538,6 +1974,8 @@ class ResearchAgent:
             validation.get("valid_citations")
             and not validation.get("engineering_contradiction_count")
             and not validation.get("unsupported_engineering_claim_count")
+            and not validation.get("figure_citation_rejections")
+            and not validation.get("figure_association_rejections")
             and not (
                 validation.get("false_premise_detected")
                 and not validation.get("false_premise_corrected")
@@ -1769,7 +2207,11 @@ class ResearchAgent:
                 evidence_id=item.evidence_id,
                 source_type="figure",
                 locator=f"{item.document}:page:{item.page}",
-                metadata={"filename": item.filename},
+                metadata={
+                    "figure_number": item.figure_number,
+                    "title": item.title,
+                    "filename": item.filename,
+                },
             )
             for item in figures
         )

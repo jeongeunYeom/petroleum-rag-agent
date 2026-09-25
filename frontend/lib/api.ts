@@ -43,6 +43,7 @@ export type ResearchResponse = {
     evidence_id: string;
     document: string;
     page: number | null;
+    figure_number: string | null;
     title: string | null;
     filename: string | null;
     url: string | null;

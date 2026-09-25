@@ -130,6 +130,12 @@ HIGH_VALUE_MARKERS = (
     "formation resistivity factor",
 )
 
+FIGURE_DOCUMENT_MARKERS = (
+    "[Extracted figure notes]",
+    "[Figure Note Metadata]",
+    "image_path:",
+)
+
 
 def _contains_term(text: str, term: str) -> bool:
     escaped = re.escape(term.lower())
@@ -252,6 +258,44 @@ class VectorStore:
             n_results=top_k,
         )
         return self._query_result_to_hits(result)
+
+    def search_figures(
+        self,
+        question: str,
+        top_k: int,
+    ) -> list[dict[str, Any]]:
+        """Dense-search only the already indexed Figure Note chunks."""
+        query_embedding = self.embed([question])[0]
+        merged: dict[str, dict[str, Any]] = {}
+        for marker in FIGURE_DOCUMENT_MARKERS:
+            result = self.collection.query(
+                query_embeddings=[query_embedding],
+                n_results=top_k,
+                where_document={"$contains": marker},
+            )
+            for hit in self._query_result_to_hits(result):
+                chunk_id = str(hit.get("id") or "")
+                current = merged.get(chunk_id)
+                hit_distance = (
+                    float(hit["distance"])
+                    if hit.get("distance") is not None
+                    else 1.0
+                )
+                current_distance = (
+                    float(current["distance"])
+                    if current is not None and current.get("distance") is not None
+                    else 1.0
+                )
+                if current is None or hit_distance < current_distance:
+                    merged[chunk_id] = hit
+        return sorted(
+            merged.values(),
+            key=lambda item: (
+                float(item["distance"])
+                if item.get("distance") is not None
+                else 1.0
+            ),
+        )[:top_k]
 
     def hybrid_search(
         self,
@@ -388,8 +432,76 @@ class VectorStore:
             reverse=True,
         )[:top_k]
 
+    def keyword_search_figures(
+        self,
+        question: str,
+        top_k: int,
+    ) -> list[dict[str, Any]]:
+        data = self._figure_data()
+        tokens = self._keyword_tokens(question)
+        if not tokens:
+            return []
+        hits = []
+        for chunk_id, document, metadata in zip(
+            data.get("ids", []),
+            data.get("documents", []),
+            data.get("metadatas", []),
+        ):
+            text = str(document or "")
+            score = self._keyword_score(text, tokens, metadata or {}, None)
+            if score > 0:
+                hits.append(
+                    {
+                        "id": str(chunk_id),
+                        "text": text,
+                        "metadata": metadata or {},
+                        "distance": None,
+                        "keyword_score": score,
+                    }
+                )
+        return sorted(
+            hits,
+            key=lambda item: float(item.get("keyword_score") or 0.0),
+            reverse=True,
+        )[:top_k]
+
     def bm25_search(self, question: str, top_k: int) -> list[dict[str, Any]]:
         data = self.collection.get(include=["documents", "metadatas"])
+        return self._bm25_search_data(question, top_k, data)
+
+    def bm25_search_figures(
+        self,
+        question: str,
+        top_k: int,
+    ) -> list[dict[str, Any]]:
+        data = self._figure_data()
+        return self._bm25_search_data(question, top_k, data)
+
+    def _figure_data(self) -> dict[str, list[Any]]:
+        rows: dict[str, tuple[str, dict[str, Any]]] = {}
+        for marker in FIGURE_DOCUMENT_MARKERS:
+            data = self.collection.get(
+                where_document={"$contains": marker},
+                include=["documents", "metadatas"],
+            )
+            for chunk_id, document, metadata in zip(
+                data.get("ids", []),
+                data.get("documents", []),
+                data.get("metadatas", []),
+            ):
+                rows[str(chunk_id)] = (str(document or ""), metadata or {})
+        return {
+            "ids": list(rows),
+            "documents": [value[0] for value in rows.values()],
+            "metadatas": [value[1] for value in rows.values()],
+        }
+
+    def _bm25_search_data(
+        self,
+        question: str,
+        top_k: int,
+        data: dict[str, Any],
+    ) -> list[dict[str, Any]]:
         query_tokens = list(
             dict.fromkeys(
                 self._bm25_tokens(" ".join(expand_query_terms(question)))

@@ -5,6 +5,7 @@ from scripts.run_well_test_benchmark import (
     benchmark_evaluation_fields,
     build_summary,
     direct_ollama_answer,
+    correct_figure_number_hit,
     figure_retrieval_hit,
     reevaluate_saved_benchmark,
     write_csv,
@@ -134,6 +135,71 @@ def test_figure_retrieval_requires_a_preferred_page_hit():
     assert figure_retrieval_hit(item, [{"page": 220}]) is False
     assert figure_retrieval_hit(item, []) is False
     assert figure_retrieval_hit({"question_type": "text"}, []) is None
+
+
+def test_figure_metrics_are_written_and_summarized(tmp_path):
+    row = {
+        "id": "WT-009",
+        "category": "figure_mixing",
+        "question_type": "figure",
+        "expected_behavior": "answer",
+        "infrastructure_error": None,
+        "initial_benchmark_passed": False,
+        "final_benchmark_passed": True,
+        "initial_answer_passed": False,
+        "final_answer_passed": True,
+        "hallucination_detected": False,
+        "figure_required": True,
+        "figure_hit": True,
+        "figure_retrieval_hit": True,
+        "correct_figure_number_hit": True,
+        "correct_figure_page_hit": True,
+        "figure_numeric_support_pass": True,
+        "figure_citation_correctness": True,
+    }
+    csv_path = tmp_path / "figures.csv"
+
+    write_csv(csv_path, [row])
+    summary = build_summary([row])
+
+    with csv_path.open(encoding="utf-8-sig", newline="") as handle:
+        csv_row = next(csv.DictReader(handle))
+    for field in (
+        "figure_required",
+        "figure_hit",
+        "correct_figure_number_hit",
+        "correct_figure_page_hit",
+        "figure_numeric_support_pass",
+        "figure_citation_correctness",
+    ):
+        assert csv_row[field] == "True"
+    assert summary["figure_required_count"] == 1
+    assert summary["figure_hit_count"] == 1
+    assert summary["correct_figure_number_hit_rate"] == 1.0
+    assert summary["correct_figure_page_hit_rate"] == 1.0
+    assert summary["figure_numeric_support_pass_rate"] == 1.0
+    assert summary["figure_citation_correctness_rate"] == 1.0
+
+
+def test_correct_figure_number_hit_requires_each_requested_figure():
+    item = {
+        "question_type": "figure",
+        "question": "Compare Figure 2 and Figure 3.",
+        "required_concepts": [],
+        "required_patterns": [],
+    }
+
+    assert correct_figure_number_hit(
+        item,
+        [
+            {"figure_number": "Figure 2"},
+            {"figure_number": "Figure 3"},
+        ],
+    ) is True
+    assert correct_figure_number_hit(
+        item,
+        [{"figure_number": "Figure 2"}],
+    ) is False
 
 
 def test_direct_ollama_answer_uses_chat_endpoint(monkeypatch):

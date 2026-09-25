@@ -51,6 +51,7 @@ class FigureEvidence(BaseModel):
     evidence_id: str
     document: str
     page: int | None = None
+    figure_number: str | None = None
     title: str | None = None
     filename: str | None = None
     url: str | None = None
