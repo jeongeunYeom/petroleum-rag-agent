@@ -4,8 +4,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Iterable, Mapping
 
-
-STRICT_REFUSAL = "제공된 문서 근거로는 확인할 수 없습니다."
+from app.services.refusal_policy import STRICT_REFUSAL
 
 _DASH_TRANSLATION = str.maketrans(
     {

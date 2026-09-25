@@ -17,6 +17,7 @@ from app.services.engineering_validator import (
     EngineeringValidator,
     ValidationResult,
 )
+from app.services.refusal_policy import STRICT_REFUSAL
 from app.services.ollama import OllamaClient
 from app.services.figure_preview import FigurePreviewService
 from app.services.query_router import QueryType, classify_query
@@ -59,7 +60,6 @@ RFT_ZONE_DETAIL_RE = re.compile(
     r"supercharged\s*points?|double\s*pretest\s*sequence",
     re.IGNORECASE,
 )
-STRICT_REFUSAL = "제공된 문서 근거로는 확인할 수 없습니다."
 TYPE_CURVE_INTENT_RE = re.compile(
     r"type\s*curve|wellbore\s*storage|radial\s*flow|derivative\s*plateau|"
     r"middle[-\s]*time\s*region|\bmtr\b|unit[-\s]*slope|타입\s*커브|"
@@ -90,11 +90,11 @@ TYPE_CURVE_EVIDENCE_TERMS = (
 )
 
 
-SYSTEM_PROMPT = """You are a strict evidence-only petroleum engineering RAG agent.
+SYSTEM_PROMPT = f"""You are a strict evidence-only petroleum engineering RAG agent.
 Rules:
 1. Use ONLY the retrieved chunks provided in the prompt.
 2. Do NOT infer from the document title, general petroleum-engineering knowledge, or model memory.
-3. Use the exact refusal "제공된 문서 근거로는 확인할 수 없습니다." only when the retrieved chunks support no substantive part of the question.
+3. Use the exact refusal "{STRICT_REFUSAL}" only when the retrieved chunks support no substantive part of the question.
 4. For a multi-part question with partial evidence, answer every supported part with citations and state specifically which unsupported subpart cannot be confirmed. Do not refuse the entire question when any substantive part is supported.
 5. Every factual sentence must be supported by a cited source marker like [S1].
 6. Do not mention topics that are not present in the retrieved chunks.
@@ -1805,7 +1805,7 @@ class QAService:
                 "보내지 않고 Python 기반 전체 chunk 스캔/빈도 분석 함수로 처리해야 합니다."
             )
         else:
-            message = "제공된 문서 근거로는 확인할 수 없습니다."
+            message = STRICT_REFUSAL
         return ChatResponse(answer=message, sources=[], query_type=query_type.value)
 
     def _preview(self, text: str, limit: int = 700) -> str:

@@ -6,10 +6,11 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 from app.services.engineering_validator import EngineeringValidator
+from app.services.refusal_policy import STRICT_REFUSAL, is_safe_refusal
 
 
-STRICT_REFUSAL = "제공된 문서 근거로는 확인할 수 없습니다."
 REVIEW_REQUIRED_TEXT = "사람의 검토가 필요합니다."
+_EVIDENCE_ID_RE = re.compile(r"\[((?:KB|WEB|FIG)\d+)\]", re.IGNORECASE)
 
 _DASH_TRANSLATION = str.maketrans(
     {
@@ -113,6 +114,15 @@ def _sentence_chunks(value: str) -> list[str]:
     ]
 
 
+def _attach_trailing_citations(value: str) -> str:
+    return re.sub(
+        r"([.!?])\s+((?:\[(?:KB|WEB|FIG)\d+\]\s*)+)",
+        r" \2\1 ",
+        value,
+        flags=re.IGNORECASE,
+    )
+
+
 def _required_failures(
     patterns: Iterable[str],
     answer: str,
@@ -167,17 +177,18 @@ def evaluate_benchmark_answer(
     )
     stripped_answer = str(answer or "").strip()
 
+    safe_refusal = is_safe_refusal(stripped_answer)
     if expected_behavior == "refuse":
-        behavior_passed = stripped_answer == STRICT_REFUSAL
+        behavior_passed = safe_refusal
     elif expected_behavior == "partial_answer":
         behavior_passed = (
-            stripped_answer != STRICT_REFUSAL
+            not safe_refusal
             and REVIEW_REQUIRED_TEXT not in stripped_answer
         )
     else:
         behavior_passed = (
             bool(stripped_answer)
-            and stripped_answer != STRICT_REFUSAL
+            and not safe_refusal
             and REVIEW_REQUIRED_TEXT not in stripped_answer
         )
 
@@ -191,18 +202,49 @@ def evaluate_benchmark_answer(
     )
 
     engineering_validator = EngineeringValidator()
-    evidence_text = "\n".join(
+    evidence_by_id = {
+        str(source.get("evidence_id") or "").upper(): str(
+            source.get("excerpt") or source.get("snippet") or ""
+        )
+        for source in source_list
+        if str(source.get("evidence_id") or "").strip()
+    }
+    all_evidence = "\n".join(
         str(source.get("excerpt") or source.get("snippet") or "")
         for source in source_list
     ).strip()
     engineering_contradiction_count = 0
     unsupported_engineering_claim_count = 0
-    for sentence in _sentence_chunks(stripped_answer):
-        engineering = engineering_validator.validate_claim(
-            sentence,
-            evidence_text,
-            require_evidence_support=bool(evidence_text),
-        )
+    for sentence in _sentence_chunks(_attach_trailing_citations(stripped_answer)):
+        cited_ids = [value.upper() for value in _EVIDENCE_ID_RE.findall(sentence)]
+        cited_evidence = [
+            evidence_by_id[value]
+            for value in cited_ids
+            if value in evidence_by_id
+        ]
+        if cited_evidence:
+            candidates = [
+                engineering_validator.validate_claim(
+                    sentence,
+                    evidence,
+                    require_evidence_support=True,
+                )
+                for evidence in cited_evidence
+            ]
+            engineering = min(
+                candidates,
+                key=lambda result: (
+                    len(result.reasons),
+                    result.engineering_contradiction_count,
+                    result.unsupported_engineering_claim_count,
+                ),
+            )
+        else:
+            engineering = engineering_validator.validate_claim(
+                sentence,
+                all_evidence,
+                require_evidence_support=bool(all_evidence),
+            )
         engineering_contradiction_count += (
             engineering.engineering_contradiction_count
         )

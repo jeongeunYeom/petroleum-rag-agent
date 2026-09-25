@@ -23,6 +23,7 @@ from app.models.research_schemas import (
     WebEvidence,
 )
 from app.services.engineering_validator import EngineeringValidator
+from app.services.refusal_policy import NO_EVIDENCE_REFUSAL
 
 
 LATEST_RE = re.compile(
@@ -36,6 +37,13 @@ COMPARE_RE = re.compile(
     re.IGNORECASE,
 )
 FIGURE_RE = re.compile(r"graph|plot|figure|chart|curve|그래프|도표|그림", re.IGNORECASE)
+SOURCE_DETAIL_REQUEST_RE = re.compile(
+    r"(?:문서명|파일명|문서|출처).{0,20}(?:페이지|page)|"
+    r"(?:페이지|page).{0,20}(?:문서명|파일명|문서|출처)|"
+    r"(?:document|source|file(?:name)?).{0,20}page|"
+    r"page.{0,20}(?:document|source|file(?:name)?)",
+    re.IGNORECASE,
+)
 CITATION_RE = re.compile(r"\[(?:KB|WEB|FIG)\d+\]")
 EVIDENCE_ID_RE = re.compile(r"(?<![A-Za-z0-9])(?:KB|WEB|FIG)\d+(?![A-Za-z0-9])")
 TRACKING_QUERY_KEYS = {"fbclid", "gclid", "ref", "source"}
@@ -287,10 +295,7 @@ class ResearchAgent:
             )
             inference_used = True
         else:
-            answer = (
-                "확인 가능한 내부 또는 외부 근거를 찾지 못했습니다. "
-                "근거 없이 답을 추측하지 않습니다."
-            )
+            answer = NO_EVIDENCE_REFUSAL
             validation = {
                 "valid_citations": [],
                 "invalid_citations": [],
@@ -306,6 +311,13 @@ class ResearchAgent:
                 "engineering_validation_passed": False,
             }
             inference_used = False
+        answer = self.render_requested_source_details(
+            answer,
+            request.query,
+            internal_sources,
+            web_sources,
+            figures,
+        )
         reasoning_seconds = time.perf_counter() - reasoning_started
         elapsed_seconds = time.perf_counter() - started
 
@@ -1656,6 +1668,48 @@ class ResearchAgent:
             if ResearchAgent._answer_section(line.strip()) == "sources":
                 sources = ", ".join(f"[{item}]" for item in valid_citations)
                 return "\n".join([*lines[: index + 1], sources]).strip()
+        return answer
+
+    @staticmethod
+    def render_requested_source_details(
+        answer: str,
+        query: str,
+        internal: list[InternalEvidence],
+        web: list[WebEvidence],
+        figures: list[FigureEvidence],
+    ) -> str:
+        """Expand cited source IDs only when the user requests source locations."""
+        if not SOURCE_DETAIL_REQUEST_RE.search(query):
+            return answer
+
+        cited = {value.upper() for value in EVIDENCE_ID_RE.findall(answer)}
+        details: dict[str, str] = {}
+        for item in [*internal, *figures]:
+            if item.evidence_id not in cited:
+                continue
+            locator = f"[{item.evidence_id}] {item.document}"
+            if item.page is not None:
+                locator += f", p.{item.page}"
+            details[item.evidence_id] = locator
+        for item in web:
+            if item.evidence_id in cited:
+                details[item.evidence_id] = f"[{item.evidence_id}] {item.url}"
+        if not details:
+            return answer
+
+        lines = answer.splitlines()
+        for index, line in enumerate(lines):
+            if ResearchAgent._answer_section(line.strip()) == "sources":
+                ordered = sorted(
+                    details,
+                    key=lambda value: (
+                        re.sub(r"\d+$", "", value),
+                        int(re.search(r"\d+$", value).group()),
+                    ),
+                )
+                return "\n".join(
+                    [*lines[: index + 1], *(details[value] for value in ordered)]
+                ).strip()
         return answer
 
     @staticmethod

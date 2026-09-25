@@ -9,7 +9,7 @@ from pydantic import ValidationError
 from app.api.research_routes import get_research_agent, router as research_router
 from app.core.config import Settings
 from app.core.error_mapping import ExternalServiceError
-from app.models.research_schemas import ResearchRequest
+from app.models.research_schemas import InternalEvidence, ResearchRequest
 from app.services.research_agent import ResearchAgent
 from app.services.vector_store import VectorStore
 
@@ -897,6 +897,73 @@ def test_valid_citation_on_removed_invalid_line_is_not_counted() -> None:
 
     assert "유효한 evidence ID를 검증하지 못했습니다" in answer
     assert validation["valid_citations"] == []
+
+
+def test_requested_source_details_use_retrieved_document_and_page() -> None:
+    answer = "Supported claim. [KB1]\n5. Sources\n[KB1]"
+    source = InternalEvidence(
+        evidence_id="KB1",
+        document="Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+        page=219,
+        chunk_id="chunk-1",
+        score=0.9,
+        excerpt="Supported claim.",
+    )
+
+    rendered = ResearchAgent.render_requested_source_details(
+        answer,
+        "문서명과 페이지를 표시해줘",
+        [source],
+        [],
+        [],
+    )
+
+    assert "[KB1] Heriot-Watt_University_-_Well_Test_Analysis.pdf, p.219" in rendered
+
+
+def test_requested_source_details_do_not_invent_missing_page() -> None:
+    answer = "Supported claim. [KB1]\n5. Sources\n[KB1]"
+    source = InternalEvidence(
+        evidence_id="KB1",
+        document="source.pdf",
+        page=None,
+        chunk_id="chunk-1",
+        score=0.9,
+        excerpt="Supported claim.",
+    )
+
+    rendered = ResearchAgent.render_requested_source_details(
+        answer,
+        "document and page를 표시해줘",
+        [source],
+        [],
+        [],
+    )
+
+    assert rendered.endswith("[KB1] source.pdf")
+    assert "p." not in rendered
+
+
+def test_general_question_keeps_compact_source_ids() -> None:
+    answer = "Supported claim. [KB1]\n5. Sources\n[KB1]"
+    source = InternalEvidence(
+        evidence_id="KB1",
+        document="source.pdf",
+        page=7,
+        chunk_id="chunk-1",
+        score=0.9,
+        excerpt="Supported claim.",
+    )
+
+    rendered = ResearchAgent.render_requested_source_details(
+        answer,
+        "이 내용을 설명해줘",
+        [source],
+        [],
+        [],
+    )
+
+    assert rendered == answer
 
 
 def test_prompt_treats_retrieved_text_as_untrusted(tmp_path: Path) -> None:

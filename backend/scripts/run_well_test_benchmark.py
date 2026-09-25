@@ -21,13 +21,14 @@ if str(BACKEND_ROOT) not in sys.path:
 
 from app.core.config import get_settings  # noqa: E402
 from app.services.benchmark_evaluator import (  # noqa: E402
-    STRICT_REFUSAL,
+    BenchmarkEvaluation,
     evaluate_benchmark_answer,
 )
 from app.services.benchmark_suite import (  # noqa: E402
     build_benchmark_manifest,
     materialize_benchmark_items,
 )
+from app.services.refusal_policy import is_safe_refusal  # noqa: E402
 
 
 def utc_run_id() -> str:
@@ -267,10 +268,10 @@ def build_summary(
         for row in completed
         if row.get("expected_behavior") == "refuse"
     ]
-    exact_refusals = sum(
+    accepted_refusals = sum(
         1
         for row in refusal_rows
-        if row.get("final_answer") == STRICT_REFUSAL
+        if is_safe_refusal(str(row.get("final_answer") or ""))
     )
 
     page_rows = rows_with_value(
@@ -404,7 +405,11 @@ def build_summary(
             len(validator_false_positive_rows),
         ),
         "exact_refusal_rate": ratio(
-            exact_refusals,
+            accepted_refusals,
+            len(refusal_rows),
+        ),
+        "safe_refusal_rate": ratio(
+            accepted_refusals,
             len(refusal_rows),
         ),
         "preferred_page_hit_rate": page_recall,
@@ -455,6 +460,8 @@ def write_csv(
         "retrieval_mode",
         "model",
         "expected_behavior",
+        "initial_behavior_passed",
+        "final_behavior_passed",
         "initial_answer_passed",
         "final_answer_passed",
         "hallucination_detected",
@@ -485,6 +492,14 @@ def write_csv(
         "false_premise_correction_success",
         "unsupported_engineering_claim_count",
         "engineering_validation_passed",
+        "agent_citation_correctness",
+        "agent_engineering_contradiction_count",
+        "agent_false_premise_detected",
+        "agent_false_premise_correction_success",
+        "agent_unsupported_engineering_claim_count",
+        "agent_engineering_validation_passed",
+        "benchmark_evaluation_source",
+        "citation_evaluation_source",
         "initial_required_failures",
         "initial_forbidden_hits",
         "final_required_failures",
@@ -515,11 +530,140 @@ def write_csv(
             )
 
 
+def reevaluate_saved_benchmark(
+    saved_path: Path,
+    *,
+    benchmark_fallback: Path | None = None,
+    run_id: str | None = None,
+) -> tuple[Path, Path, dict[str, Any]]:
+    """Re-run only deterministic evaluation over a saved benchmark payload."""
+    saved_path = saved_path.resolve()
+    payload = read_json(saved_path)
+    if not isinstance(payload, dict) or not isinstance(payload.get("results"), list):
+        raise RuntimeError("Saved benchmark JSON must contain a results list.")
+
+    benchmark_value = str(payload.get("benchmark_file") or "").strip()
+    benchmark_path = Path(benchmark_value) if benchmark_value else Path()
+    if not benchmark_path.is_file() and benchmark_fallback is not None:
+        benchmark_path = benchmark_fallback.resolve()
+    if not benchmark_path.is_file():
+        raise RuntimeError("Benchmark definition file was not found for re-evaluation.")
+
+    raw_items = read_json(benchmark_path)
+    if not isinstance(raw_items, list):
+        raise RuntimeError("Benchmark JSON must contain a list.")
+    items = materialize_benchmark_items(raw_items)
+    items_by_id = {str(item["id"]): item for item in items}
+
+    results: list[dict[str, Any]] = []
+    for saved_row in payload["results"]:
+        row = dict(saved_row)
+        item_id = str(row.get("id") or "")
+        item = items_by_id.get(item_id)
+        if item is None:
+            raise RuntimeError(f"Benchmark item not found for saved row: {item_id}")
+        initial_answer = str(row.get("initial_answer") or row.get("final_answer") or "")
+        final_answer = str(row.get("final_answer") or "")
+        sources = row.get("sources") or []
+
+        row.setdefault(
+            "agent_engineering_contradiction_count",
+            row.get("engineering_contradiction_count"),
+        )
+        row.setdefault(
+            "agent_unsupported_engineering_claim_count",
+            row.get("unsupported_engineering_claim_count"),
+        )
+        row.setdefault(
+            "agent_false_premise_detected",
+            row.get("false_premise_detected"),
+        )
+        row.setdefault(
+            "agent_false_premise_correction_success",
+            row.get("false_premise_correction_success"),
+        )
+        row.setdefault(
+            "agent_engineering_validation_passed",
+            row.get("engineering_validation_passed"),
+        )
+        row.setdefault("agent_citation_correctness", row.get("citation_correctness"))
+        row["citation_evaluation_source"] = "saved_agent_validation"
+
+        initial = evaluate_benchmark_answer(item, initial_answer, sources=sources)
+        final = evaluate_benchmark_answer(item, final_answer, sources=sources)
+        row.update(benchmark_evaluation_fields(initial, final))
+        row["reevaluated"] = True
+        results.append(row)
+
+    reevaluation_run_id = run_id or utc_run_id()
+    original_condition = str(payload.get("condition") or "").strip()
+    output = {
+        **payload,
+        "run_id": reevaluation_run_id,
+        "original_run_id": payload.get("run_id"),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "condition": f"{original_condition}-reevaluated".strip("-"),
+        "benchmark_file": str(benchmark_path),
+        "reevaluated_from": str(saved_path),
+        "question_count": len(results),
+        "summary": build_summary(results),
+        "results": results,
+    }
+    stem = f"{saved_path.stem}_reevaluated_{reevaluation_run_id}"
+    json_path = saved_path.with_name(f"{stem}.json")
+    csv_path = saved_path.with_name(f"{stem}.csv")
+    write_json(json_path, output)
+    write_csv(csv_path, results)
+    return json_path, csv_path, output
+
+
 def print_rate(label: str, value: float | None) -> None:
     if value is None:
         print(f"{label}=n/a")
     else:
         print(f"{label}={value:.3f}")
+
+
+def benchmark_evaluation_fields(
+    initial: BenchmarkEvaluation,
+    final: BenchmarkEvaluation,
+) -> dict[str, Any]:
+    """Return row fields derived from one benchmark evaluator only."""
+    engineering_passed = bool(
+        final.engineering_contradiction_count == 0
+        and final.unsupported_engineering_claim_count == 0
+        and final.false_premise_correction_success is not False
+    )
+    return {
+        "initial_behavior_passed": initial.behavior_passed,
+        "final_behavior_passed": final.behavior_passed,
+        "initial_answer_passed": initial.answer_passed,
+        "final_answer_passed": final.answer_passed,
+        "hallucination_detected": final.hallucination_detected,
+        "initial_benchmark_passed": initial.passed,
+        "final_benchmark_passed": final.passed,
+        "rewrite_success": not initial.passed and final.passed,
+        "expected_document_hit": final.expected_document_hit,
+        "preferred_page_hit": final.preferred_page_hit,
+        "engineering_contradiction_count": (
+            final.engineering_contradiction_count
+        ),
+        "false_premise_detected": final.false_premise_detected,
+        "false_premise_correction_success": (
+            final.false_premise_correction_success
+        ),
+        "unsupported_engineering_claim_count": (
+            final.unsupported_engineering_claim_count
+        ),
+        "engineering_validation_passed": engineering_passed,
+        "initial_required_failures": initial.required_failures,
+        "initial_forbidden_hits": initial.forbidden_hits,
+        "final_required_failures": final.required_failures,
+        "final_forbidden_hits": final.forbidden_hits,
+        "initial_benchmark_evaluation": initial.to_dict(),
+        "final_benchmark_evaluation": final.to_dict(),
+        "benchmark_evaluation_source": "benchmark_evaluator",
+    }
 
 
 def figure_retrieval_hit(
@@ -636,7 +780,32 @@ def main() -> int:
         "--fail-on-benchmark-failure",
         action="store_true",
     )
+    parser.add_argument(
+        "--reevaluate",
+        default="",
+        help=(
+            "Re-evaluate a saved benchmark JSON without backend, retrieval, "
+            "or Ollama calls."
+        ),
+    )
     args = parser.parse_args()
+    if args.reevaluate:
+        json_path, csv_path, payload = reevaluate_saved_benchmark(
+            Path(args.reevaluate),
+            benchmark_fallback=Path(args.benchmark),
+        )
+        print("BENCHMARK_REEVALUATED=True")
+        print(f"json={json_path}")
+        print(f"csv={csv_path}")
+        for label in (
+            "answer_accuracy",
+            "hallucination_rate",
+            "citation_correctness_rate",
+            "exact_refusal_rate",
+            "final_benchmark_pass_rate",
+        ):
+            print_rate(label, payload["summary"].get(label))
+        return 0
     if args.retrieval_mode and args.mode != "research":
         parser.error("--retrieval-mode requires --mode research")
 
@@ -1003,36 +1172,25 @@ def main() -> int:
                     "external_source_count": external_source_count,
                     "retrieved_web_urls": retrieved_web_urls,
                     "citation_correctness": citation_correctness,
+                    "agent_citation_correctness": citation_correctness,
+                    "citation_evaluation_source": (
+                        "agent_validation"
+                        if citation_correctness is not None
+                        else None
+                    ),
                     "unsupported_claim_count": unsupported_claim_count,
-                    "engineering_contradiction_count": (
+                    "agent_engineering_contradiction_count": (
                         api_engineering_contradictions
-                        if api_engineering_contradictions is not None
-                        else final_evaluation.engineering_contradiction_count
                     ),
-                    "false_premise_detected": (
-                        api_false_premise_detected
-                        if api_false_premise_detected is not None
-                        else final_evaluation.false_premise_detected
-                    ),
-                    "false_premise_correction_success": (
+                    "agent_false_premise_detected": api_false_premise_detected,
+                    "agent_false_premise_correction_success": (
                         api_false_premise_corrected
-                        if api_false_premise_detected is not None
-                        else final_evaluation.false_premise_correction_success
                     ),
-                    "unsupported_engineering_claim_count": (
+                    "agent_unsupported_engineering_claim_count": (
                         api_unsupported_engineering
-                        if api_unsupported_engineering is not None
-                        else final_evaluation.unsupported_engineering_claim_count
                     ),
-                    "engineering_validation_passed": (
+                    "agent_engineering_validation_passed": (
                         api_engineering_validation_passed
-                        if api_engineering_validation_passed is not None
-                        else bool(
-                            final_evaluation.engineering_contradiction_count == 0
-                            and final_evaluation.unsupported_engineering_claim_count == 0
-                            and final_evaluation.false_premise_correction_success
-                            is not False
-                        )
                     ),
                     "retrieval_mode": (
                         retrieval_mode
@@ -1057,6 +1215,12 @@ def main() -> int:
                     ),
                     "agent_run_file": agent_run_file,
                 }
+            )
+            result.update(
+                benchmark_evaluation_fields(
+                    initial_evaluation,
+                    final_evaluation,
+                )
             )
 
             print(

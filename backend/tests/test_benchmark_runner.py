@@ -2,12 +2,16 @@ import csv
 import json
 
 from scripts.run_well_test_benchmark import (
+    benchmark_evaluation_fields,
     build_summary,
     direct_ollama_answer,
     figure_retrieval_hit,
+    reevaluate_saved_benchmark,
     write_csv,
     write_json,
 )
+from app.services.benchmark_evaluator import evaluate_benchmark_answer
+from app.services.refusal_policy import NO_EVIDENCE_REFUSAL
 
 
 def test_summary_exposes_paper_metrics():
@@ -170,3 +174,95 @@ def test_direct_ollama_answer_uses_chat_endpoint(monkeypatch):
         },
         "timeout": 12.0,
     }
+
+
+def test_runner_fields_match_benchmark_evaluator():
+    item = {
+        "expected_behavior": "answer",
+        "required_patterns": [],
+        "forbidden_patterns": [],
+    }
+    evaluation = evaluate_benchmark_answer(
+        item,
+        "Radial flow has a horizontal derivative plateau. [KB1]",
+        sources=[
+            {
+                "evidence_id": "KB1",
+                "excerpt": "Radial flow has a horizontal derivative plateau.",
+            }
+        ],
+    )
+
+    row = benchmark_evaluation_fields(evaluation, evaluation)
+
+    assert row["final_answer_passed"] == evaluation.answer_passed
+    assert row["final_benchmark_passed"] == evaluation.passed
+    assert row["hallucination_detected"] == evaluation.hallucination_detected
+    assert row["engineering_contradiction_count"] == 0
+    assert row["unsupported_engineering_claim_count"] == 0
+
+
+def test_saved_benchmark_reevaluation_is_offline_and_preserves_input(
+    tmp_path,
+    monkeypatch,
+):
+    benchmark_items = [
+        {
+            "id": f"WT-{index:03d}",
+            "category": "refusal",
+            "question": f"unsupported question {index}",
+            "expected_behavior": "refuse",
+            "preferred_pages": [],
+            "required_patterns": [],
+            "forbidden_patterns": [],
+        }
+        for index in range(1, 31)
+    ]
+    benchmark_path = tmp_path / "benchmark.json"
+    write_json(benchmark_path, benchmark_items)
+    source = tmp_path / "saved.json"
+    rows = [
+        {
+            "id": item["id"],
+            "question": item["question"],
+            "category": "refusal",
+            "question_type": "hallucination",
+            "expected_behavior": "refuse",
+            "infrastructure_error": None,
+            "initial_answer": NO_EVIDENCE_REFUSAL,
+            "final_answer": NO_EVIDENCE_REFUSAL,
+            "sources": [],
+            "citation_correctness": False,
+        }
+        for item in benchmark_items
+    ]
+    write_json(
+        source,
+        {
+            "run_id": "original",
+            "condition": "saved",
+            "benchmark_file": str(benchmark_path),
+            "results": rows,
+        },
+    )
+    original_bytes = source.read_bytes()
+    monkeypatch.setattr(
+        "scripts.run_well_test_benchmark.http_json",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            AssertionError("network must not be called")
+        ),
+    )
+
+    json_path, csv_path, payload = reevaluate_saved_benchmark(
+        source,
+        run_id="reeval",
+    )
+
+    assert source.read_bytes() == original_bytes
+    assert json_path != source
+    assert json_path.exists() and csv_path.exists()
+    assert payload["results"][0]["id"] == rows[0]["id"]
+    assert payload["results"][0]["final_answer"] == rows[0]["final_answer"]
+    assert payload["results"][0]["sources"] == rows[0]["sources"]
+    assert payload["summary"]["answer_accuracy"] == 1.0
+    assert payload["summary"]["exact_refusal_rate"] == 1.0

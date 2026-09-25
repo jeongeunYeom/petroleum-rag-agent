@@ -2,6 +2,7 @@ from app.services.benchmark_evaluator import (
     STRICT_REFUSAL,
     evaluate_benchmark_answer,
 )
+from app.services.refusal_policy import NO_EVIDENCE_REFUSAL
 
 
 WT1 = {
@@ -110,6 +111,82 @@ def test_exact_refusal_behavior():
     )
     assert passed.passed is True
     assert failed.passed is False
+
+
+def test_research_safe_refusal_passes_without_exact_string_match():
+    item = {
+        "expected_behavior": "refuse",
+        "required_patterns": [],
+        "forbidden_patterns": [],
+    }
+
+    result = evaluate_benchmark_answer(item, NO_EVIDENCE_REFUSAL, sources=[])
+
+    assert result.behavior_passed is True
+    assert result.answer_passed is True
+    assert result.passed is True
+    assert result.hallucination_detected is False
+
+
+def test_refusal_with_fabricated_number_fails():
+    item = {
+        "expected_behavior": "refuse",
+        "required_patterns": [],
+        "forbidden_patterns": [],
+    }
+
+    result = evaluate_benchmark_answer(
+        item,
+        "근거를 찾지 못해 추측하지 않지만 값은 14,000 psi입니다.",
+        sources=[],
+    )
+
+    assert result.behavior_passed is False
+    assert result.answer_passed is False
+    assert result.hallucination_detected is True
+
+
+def test_refusal_expected_but_general_answer_fails():
+    item = {
+        "expected_behavior": "refuse",
+        "required_patterns": [],
+        "forbidden_patterns": [],
+    }
+
+    result = evaluate_benchmark_answer(
+        item,
+        "일반적으로 radial flow에서는 derivative plateau가 나타납니다.",
+        sources=[],
+    )
+
+    assert result.answer_passed is False
+    assert result.hallucination_detected is True
+
+
+def test_engineering_evidence_is_scoped_to_sentence_citations():
+    item = {
+        "expected_behavior": "answer",
+        "required_patterns": [],
+        "forbidden_patterns": [],
+    }
+    answer = "Radial flow has a horizontal constant derivative plateau. [KB1][KB2]"
+    sources = [
+        {
+            "evidence_id": "KB1",
+            "excerpt": "Radial flow has a horizontal constant derivative plateau.",
+        },
+        {
+            "evidence_id": "KB2",
+            "excerpt": "A different passage associates radial flow with unit-slope.",
+        },
+    ]
+
+    result = evaluate_benchmark_answer(item, answer, sources=sources)
+
+    assert result.answer_passed is True
+    assert result.engineering_contradiction_count == 0
+    assert result.unsupported_engineering_claim_count == 0
+    assert result.hallucination_detected is False
 
 
 def test_missing_expected_document_fails():
