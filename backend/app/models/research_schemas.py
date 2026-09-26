@@ -13,6 +13,8 @@ class ResearchRequest(BaseModel):
     use_internal: bool = True
     use_external: bool = True
     model: str = Field(default="qwen3:8b", min_length=1, max_length=100)
+    temperature: float | None = Field(default=None, ge=0, le=2)
+    seed: int | None = Field(default=None, ge=0)
 
     @field_validator("query", "model")
     @classmethod

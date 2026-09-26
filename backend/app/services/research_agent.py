@@ -234,11 +234,20 @@ class ResearchAgent:
             )
             evidence_text = self._evidence_text(internal_sources, web_sources, figures)
             structured_chat = getattr(self.ollama, "chat_structured", None)
+            generation_options = {
+                key: value
+                for key, value in {
+                    "temperature": request.temperature,
+                    "seed": request.seed,
+                }.items()
+                if value is not None
+            }
             if callable(structured_chat):
                 raw_answer = await structured_chat(
                     messages,
                     STRUCTURED_ANSWER_SCHEMA,
                     model=request.model,
+                    **generation_options,
                 )
                 answer, validation, disclosed = await asyncio.to_thread(
                     self.validate_structured_answer,
@@ -248,7 +257,11 @@ class ResearchAgent:
                     request.query,
                 )
             else:
-                raw_answer = await self.ollama.chat(messages, model=request.model)
+                raw_answer = await self.ollama.chat(
+                    messages,
+                    model=request.model,
+                    **generation_options,
+                )
                 answer, validation, disclosed = self._validated_answer(
                     raw_answer,
                     evidence_ids,
@@ -278,6 +291,7 @@ class ResearchAgent:
                             repair_messages,
                             STRUCTURED_ANSWER_SCHEMA,
                             model=request.model,
+                            **generation_options,
                         )
                         repaired_answer, repaired_validation, repaired_disclosed = (
                             await asyncio.to_thread(
@@ -292,6 +306,7 @@ class ResearchAgent:
                         repaired = await self.ollama.chat(
                             repair_messages,
                             model=request.model,
+                            **generation_options,
                         )
                         repaired_answer, repaired_validation, repaired_disclosed = (
                             self._validated_answer(
@@ -317,9 +332,16 @@ class ResearchAgent:
                 repair_attempts == 2
                 and not self._final_answer_usable(validation)
             ):
-                answer = SAFE_REPAIR_REFUSAL
-                validation["valid_citations"] = []
-                validation["safe_refusal_after_repair"] = True
+                fallback = self._grounded_false_premise_fallback(
+                    request.query,
+                    evidence_text,
+                )
+                if fallback is not None:
+                    answer, validation = fallback
+                else:
+                    answer = SAFE_REPAIR_REFUSAL
+                    validation["valid_citations"] = []
+                    validation["safe_refusal_after_repair"] = True
             if repair_error:
                 validation["repair_error"] = repair_error
             validation["conflict_disclosures_added"] = disclosed
@@ -1755,6 +1777,90 @@ class ResearchAgent:
             if regimes & self.engineering_validator.regimes_in_text(text)
         ]
         return relevant or sorted(evidence_text)
+
+    def _grounded_false_premise_fallback(
+        self,
+        query: str,
+        evidence_text: dict[str, str],
+    ) -> tuple[str, dict[str, Any]] | None:
+        premises = self.engineering_validator.detect_false_premises(query)
+        if not premises:
+            return None
+
+        regimes = [str(item.get("regime") or "") for item in premises]
+        if any(
+            regime == "radial"
+            and item.get("incorrect_feature") in {"unit_slope", "overlap"}
+            for regime, item in zip(regimes, premises)
+        ):
+            regimes.insert(0, "wellbore_storage")
+
+        grounded: list[tuple[str, str]] = []
+        for regime in dict.fromkeys(regimes):
+            relation = self.engineering_validator.expected_relation(regime)
+            evidence_id = next(
+                (
+                    evidence_id
+                    for evidence_id, text in sorted(evidence_text.items())
+                    if evidence_id.startswith(("KB", "FIG"))
+                    if self.engineering_validator.validate_claim(
+                        relation,
+                        text,
+                        require_evidence_support=True,
+                    ).passed
+                ),
+                None,
+            )
+            if not relation or not evidence_id:
+                return None
+            grounded.append((relation, evidence_id))
+
+        citation_ids = sorted({evidence_id for _, evidence_id in grounded})
+        answer = "\n".join(
+            [
+                "1. 내부 지식베이스 근거",
+                f"- 해당 전제는 정확하지 않습니다. [{citation_ids[0]}]",
+                *[
+                    f"- {relation}. [{evidence_id}]"
+                    for relation, evidence_id in grounded
+                ],
+                "",
+                "2. 외부 검색 근거",
+                "외부 검색에서 검증된 주장이 없습니다.",
+                "",
+                "3. 종합 추론",
+                "검증된 관계만으로 잘못된 전제를 교정했습니다.",
+                "",
+                "4. 한계 / 불확실성",
+                "추가로 확인된 한계가 없습니다.",
+                "",
+                "5. Sources",
+                ", ".join(f"[{evidence_id}]" for evidence_id in citation_ids),
+            ]
+        )
+        detected, corrected, reasons = (
+            self.engineering_validator.false_premise_correction(query, answer)
+        )
+        if not detected or not corrected:
+            return None
+        return answer, {
+            "valid_citations": citation_ids,
+            "invalid_citations": [],
+            "unsupported_claim_count": 0,
+            "engineering_contradiction_count": 0,
+            "unsupported_engineering_claim_count": 0,
+            "false_premise_detected": True,
+            "false_premise_corrected": True,
+            "engineering_validation_reasons": reasons,
+            "engineering_validation_passed": True,
+            "figure_citation_rejections": 0,
+            "figure_association_rejections": 0,
+            "figure_citation_correctness": True,
+            "figure_numeric_support_pass": True,
+            "structured_output": True,
+            "refused_without_evidence": False,
+            "deterministic_false_premise_fallback": True,
+        }
 
     def _answer_coverage_reasons(
         self,

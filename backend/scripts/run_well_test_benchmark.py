@@ -528,6 +528,8 @@ def write_csv(
         "mode",
         "retrieval_mode",
         "model",
+        "temperature",
+        "seed",
         "expected_behavior",
         "initial_behavior_passed",
         "final_behavior_passed",
@@ -586,6 +588,7 @@ def write_csv(
         "initial_forbidden_hits",
         "final_required_failures",
         "final_forbidden_hits",
+        "benchmark_rule_failure_type",
         "infrastructure_error",
         "question",
         "final_answer",
@@ -674,6 +677,13 @@ def reevaluate_saved_benchmark(
         initial = evaluate_benchmark_answer(item, initial_answer, sources=sources)
         final = evaluate_benchmark_answer(item, final_answer, sources=sources)
         row.update(benchmark_evaluation_fields(initial, final))
+        row["benchmark_rule_failure_type"] = benchmark_rule_failure_types(
+            final,
+            citation_correctness=row.get("citation_correctness"),
+            engineering_validation_passed=row.get(
+                "agent_engineering_validation_passed"
+            ),
+        )
         row["reevaluated"] = True
         results.append(row)
 
@@ -746,6 +756,31 @@ def benchmark_evaluation_fields(
         "final_benchmark_evaluation": final.to_dict(),
         "benchmark_evaluation_source": "benchmark_evaluator",
     }
+
+
+def benchmark_rule_failure_types(
+    evaluation: BenchmarkEvaluation,
+    *,
+    citation_correctness: bool | None,
+    engineering_validation_passed: bool | None,
+) -> list[str]:
+    failures: list[str] = []
+    if evaluation.forbidden_hits:
+        failures.append("forbidden_pattern")
+    if evaluation.required_failures:
+        failures.append("required_pattern")
+    if evaluation.expected_document_hit is False:
+        failures.append("retrieval")
+    if citation_correctness is False:
+        failures.append("citation")
+    if (
+        engineering_validation_passed is False
+        or evaluation.engineering_contradiction_count
+        or evaluation.unsupported_engineering_claim_count
+        or evaluation.false_premise_correction_success is False
+    ):
+        failures.append("engineering_validator")
+    return failures
 
 
 def figure_retrieval_hit(
@@ -876,16 +911,29 @@ def direct_ollama_answer(
     model: str,
     question: str,
     timeout: float,
+    temperature: float | None = None,
+    seed: int | None = None,
 ) -> tuple[str, float]:
     started = time.perf_counter()
+    options = {
+        key: value
+        for key, value in {
+            "temperature": temperature,
+            "seed": seed,
+        }.items()
+        if value is not None
+    }
+    payload: dict[str, Any] = {
+        "model": model,
+        "stream": False,
+        "messages": [{"role": "user", "content": question}],
+    }
+    if options:
+        payload["options"] = options
     response = http_json(
         "POST",
         f"{ollama_url.rstrip('/')}/api/chat",
-        payload={
-            "model": model,
-            "stream": False,
-            "messages": [{"role": "user", "content": question}],
-        },
+        payload=payload,
         timeout=timeout,
     )
     answer = str((response.get("message") or {}).get("content") or "")
@@ -916,6 +964,8 @@ def main() -> int:
         ),
     )
     parser.add_argument("--model", default="qwen3:8b")
+    parser.add_argument("--temperature", type=float, default=None)
+    parser.add_argument("--seed", type=int, default=None)
     parser.add_argument(
         "--mode",
         choices=("rag", "research", "ollama-direct"),
@@ -990,6 +1040,10 @@ def main() -> int:
         return 0
     if args.retrieval_mode and args.mode != "research":
         parser.error("--retrieval-mode requires --mode research")
+    if args.mode == "rag" and (
+        args.temperature is not None or args.seed is not None
+    ):
+        parser.error("--temperature/--seed require --mode research or ollama-direct")
 
     benchmark_path = Path(args.benchmark).resolve()
     raw_benchmark_items = read_json(benchmark_path)
@@ -1020,6 +1074,8 @@ def main() -> int:
     if args.retrieval_mode:
         print(f"retrieval_mode={args.retrieval_mode}")
     print(f"model={args.model}")
+    print(f"temperature={args.temperature}")
+    print(f"seed={args.seed}")
     print(f"questions={len(items)}")
     print(
         "question_types="
@@ -1101,6 +1157,10 @@ def main() -> int:
             if args.top_k is not None:
                 request_payload["internal_top_k"] = args.top_k
                 request_payload["external_top_k"] = args.top_k
+            if args.temperature is not None:
+                request_payload["temperature"] = args.temperature
+            if args.seed is not None:
+                request_payload["seed"] = args.seed
         else:
             request_payload = {
                 "question": question,
@@ -1120,6 +1180,8 @@ def main() -> int:
             "mode": args.mode,
             "retrieval_mode": args.retrieval_mode or None,
             "model": args.model,
+            "temperature": args.temperature,
+            "seed": args.seed,
             "expected_behavior": item.get(
                 "expected_behavior"
             ),
@@ -1282,6 +1344,8 @@ def main() -> int:
                     model=args.model,
                     question=question,
                     timeout=args.timeout,
+                    temperature=args.temperature,
+                    seed=args.seed,
                 )
                 initial_answer = final_answer
                 sources = []
@@ -1455,6 +1519,15 @@ def main() -> int:
                     final_evaluation,
                 )
             )
+            result["benchmark_rule_failure_type"] = (
+                benchmark_rule_failure_types(
+                    final_evaluation,
+                    citation_correctness=citation_correctness,
+                    engineering_validation_passed=(
+                        api_engineering_validation_passed
+                    ),
+                )
+            )
 
             print(
                 "  initial="
@@ -1518,6 +1591,7 @@ def main() -> int:
                     "initial_forbidden_hits": [],
                     "final_required_failures": [],
                     "final_forbidden_hits": [],
+                    "benchmark_rule_failure_type": ["infrastructure"],
                     "final_answer": "",
                     "agent_run_file": "",
                 }
@@ -1567,6 +1641,8 @@ def main() -> int:
         "mode": args.mode,
         "retrieval_mode": run_retrieval_mode,
         "model": args.model,
+        "temperature": args.temperature,
+        "seed": args.seed,
         "api_url": api_base,
         "ollama_url": args.ollama_url.rstrip("/"),
         "question_count": len(items),

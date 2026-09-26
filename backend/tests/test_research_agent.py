@@ -99,8 +99,8 @@ class StructuredOllama:
         self.answers = iter(answers)
         self.calls = []
 
-    async def chat_structured(self, messages, schema, model=None):
-        self.calls.append((messages, schema, model))
+    async def chat_structured(self, messages, schema, model=None, **options):
+        self.calls.append((messages, schema, model, options))
         return next(self.answers)
 
 
@@ -1256,6 +1256,94 @@ def test_engineering_repair_is_bounded_and_receives_structured_reasons(
     ):
         assert field in repair_prompt
     assert "horizontal/constant pressure-derivative plateau" in repair_prompt
+
+
+def test_grounded_false_premise_fallback_after_two_failed_repairs(
+    tmp_path: Path,
+) -> None:
+    evidence = (
+        "Wellbore storage pressure and pressure derivative overlap on a unit-slope "
+        "line. Radial flow has a horizontal constant pressure-derivative plateau."
+    )
+    hit = {
+        "id": "chunk-1",
+        "text": evidence,
+        "metadata": {"filename": "welltest.pdf", "page": 219},
+    }
+    invalid = (
+        '{"internal":[{"claim":"Radial flow has a unit-slope pressure '
+        'derivative.","citations":["KB1"]}],"external":[],"synthesis":[],'
+        '"limitations":[]}'
+    )
+    ollama = StructuredOllama([invalid, invalid, invalid])
+    agent = make_agent(
+        tmp_path,
+        vector_store=FakeVectorStore(dense=[hit]),
+        ollama=ollama,
+    )
+
+    response = asyncio.run(
+        agent.research(
+            ResearchRequest(
+                query="Radial flow pressure and derivative overlap with unit-slope. Correct?",
+                use_external=False,
+            )
+        )
+    )
+
+    assert response.validation["deterministic_false_premise_fallback"] is True
+    assert response.validation["false_premise_corrected"] is True
+    assert response.validation["repair_attempts"] == 2
+    assert "정확하지 않습니다. [KB1]" in response.answer
+    assert "wellbore storage" in response.answer
+    assert "radial flow" in response.answer
+    assert "[KB1]" in response.answer
+
+
+def test_false_premise_fallback_requires_cited_support(tmp_path: Path) -> None:
+    agent = make_agent(tmp_path)
+    query = "Radial flow derivative is unit-slope. Correct?"
+
+    assert agent._grounded_false_premise_fallback(query, {}) is None
+    assert agent._grounded_false_premise_fallback(
+        query,
+        {"KB1": "Radial flow has a horizontal constant derivative plateau."},
+    ) is None
+
+
+def test_benchmark_generation_options_reach_every_ollama_call(
+    tmp_path: Path,
+) -> None:
+    evidence = "Radial flow has a horizontal constant pressure-derivative plateau."
+    hit = {
+        "id": "chunk-1",
+        "text": evidence,
+        "metadata": {"filename": "welltest.pdf", "page": 219},
+    }
+    valid = (
+        '{"internal":[{"claim":"Radial flow has a horizontal constant pressure-'
+        'derivative plateau.","citations":["KB1"]}],"external":[],'
+        '"synthesis":[],"limitations":[]}'
+    )
+    ollama = StructuredOllama([valid])
+    agent = make_agent(
+        tmp_path,
+        vector_store=FakeVectorStore(dense=[hit]),
+        ollama=ollama,
+    )
+
+    asyncio.run(
+        agent.research(
+            ResearchRequest(
+                query="Describe radial flow.",
+                use_external=False,
+                temperature=0,
+                seed=42,
+            )
+        )
+    )
+
+    assert ollama.calls[0][3] == {"temperature": 0.0, "seed": 42}
 
 
 def test_structured_validator_enforces_section_source_type(tmp_path: Path) -> None:

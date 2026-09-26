@@ -32,6 +32,13 @@ _NEGATION_RE = re.compile(
     re.IGNORECASE,
 )
 
+_ENGINEERING_REGIME_RULE_RE = re.compile(
+    r"radial|wellbore|storage|linear|spherical|boundary|recharge|방사|저장|선형|구형|경계"
+)
+_ENGINEERING_FEATURE_RULE_RE = re.compile(
+    r"unit|slope|plateau|horizontal|constant|overlap|derivative|기울기|평탄|수평|겹|도함수|미분"
+)
+
 
 @dataclass
 class BenchmarkEvaluation:
@@ -114,6 +121,25 @@ def _sentence_chunks(value: str) -> list[str]:
     ]
 
 
+def _claim_chunks(value: str) -> list[str]:
+    """Split contrast and transition clauses before forbidden-rule matching."""
+    boundaries = re.compile(
+        r"\s*(?:,\s*)?(?:"
+        r"\bwhile\b|\bwhereas\b|\bbut\b|\bhowever\b|"
+        r"\bin\s+contrast\b|\bon\s+the\s+other\s+hand\b|"
+        r"\bafter\b|\bfollowing\b|\bonce\b|"
+        r"반면|하지만|그러나|그와\s*달리|이후|뒤(?:에|에는)?"
+        r")\s*",
+        re.IGNORECASE,
+    )
+    return [
+        clause.strip(" ,")
+        for sentence in _sentence_chunks(value)
+        for clause in boundaries.split(sentence)
+        if clause.strip(" ,")
+    ]
+
+
 def _attach_trailing_citations(value: str) -> str:
     return re.sub(
         r"([.!?])\s+((?:\[(?:KB|WEB|FIG)\d+\]\s*)+)",
@@ -145,9 +171,10 @@ def _forbidden_hits(
     answer: str,
 ) -> list[str]:
     hits: list[str] = []
+    engineering_validator = EngineeringValidator()
 
     for pattern in patterns:
-        for sentence in _sentence_chunks(answer):
+        for sentence in _claim_chunks(answer):
             if re.search(
                 pattern,
                 sentence,
@@ -155,6 +182,15 @@ def _forbidden_hits(
             ) is None:
                 continue
             if _NEGATION_RE.search(sentence):
+                continue
+            if (
+                _ENGINEERING_REGIME_RULE_RE.search(pattern)
+                and _ENGINEERING_FEATURE_RULE_RE.search(pattern)
+                and engineering_validator.validate_claim(
+                    sentence,
+                    require_evidence_support=False,
+                ).engineering_contradiction_count == 0
+            ):
                 continue
             hits.append(pattern)
             break

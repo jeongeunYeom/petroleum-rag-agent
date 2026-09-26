@@ -5,6 +5,7 @@ import pytest
 
 from scripts.run_well_test_benchmark import (
     benchmark_evaluation_fields,
+    benchmark_rule_failure_types,
     build_summary,
     direct_ollama_answer,
     correct_figure_number_hit,
@@ -297,6 +298,81 @@ def test_direct_ollama_answer_uses_chat_endpoint(monkeypatch):
         },
         "timeout": 12.0,
     }
+
+
+def test_direct_ollama_answer_forwards_deterministic_options(monkeypatch):
+    captured = {}
+
+    def fake_http_json(method, url, *, payload=None, timeout=0):
+        captured["payload"] = payload
+        return {"message": {"content": "stable"}}
+
+    monkeypatch.setattr(
+        "scripts.run_well_test_benchmark.http_json",
+        fake_http_json,
+    )
+
+    direct_ollama_answer(
+        "http://localhost:11434",
+        model="qwen3:8b",
+        question="What is radial flow?",
+        timeout=12.0,
+        temperature=0,
+        seed=42,
+    )
+
+    assert captured["payload"]["options"] == {
+        "temperature": 0,
+        "seed": 42,
+    }
+
+
+def test_generation_options_and_rule_diagnostics_are_written(tmp_path):
+    row = {
+        "id": "WT-001",
+        "temperature": 0,
+        "seed": 42,
+        "benchmark_rule_failure_type": ["forbidden_pattern"],
+    }
+    json_path = tmp_path / "options.json"
+    csv_path = tmp_path / "options.csv"
+
+    write_json(json_path, {"temperature": 0, "seed": 42, "results": [row]})
+    write_csv(csv_path, [row])
+
+    payload = json.loads(json_path.read_text(encoding="utf-8"))
+    with csv_path.open(encoding="utf-8-sig", newline="") as handle:
+        csv_row = next(csv.DictReader(handle))
+    assert payload["temperature"] == 0
+    assert payload["seed"] == 42
+    assert csv_row["temperature"] == "0"
+    assert csv_row["seed"] == "42"
+    assert "forbidden_pattern" in csv_row["benchmark_rule_failure_type"]
+
+
+def test_benchmark_rule_failure_types_separate_evaluator_failures():
+    item = {
+        "expected_behavior": "answer",
+        "expected_document": "expected.pdf",
+        "required_patterns": ["plateau"],
+        "forbidden_patterns": ["unit-slope"],
+    }
+    evaluation = evaluate_benchmark_answer(
+        item,
+        "unit-slope",
+        sources=[{"document": "wrong.pdf"}],
+    )
+
+    assert benchmark_rule_failure_types(
+        evaluation,
+        citation_correctness=False,
+        engineering_validation_passed=True,
+    ) == [
+        "forbidden_pattern",
+        "required_pattern",
+        "retrieval",
+        "citation",
+    ]
 
 
 def test_runner_fields_match_benchmark_evaluator():

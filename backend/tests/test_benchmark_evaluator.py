@@ -91,6 +91,109 @@ def test_negated_correction_does_not_trigger_forbidden():
     assert result.forbidden_hits == []
 
 
+def test_contrast_clause_does_not_cross_trigger_forbidden():
+    answer = (
+        "Wellbore storage pressure and derivative overlap on a unit-slope line, "
+        "while radial flow has a horizontal constant derivative plateau."
+    )
+
+    result = evaluate_benchmark_answer(WT1, answer, sources=SOURCES)
+
+    assert result.forbidden_hits == []
+    assert result.hallucination_detected is False
+
+
+def test_shared_contrast_preamble_uses_nearest_regime_attribution():
+    answer = (
+        "Wellbore storage and radial flow can be distinguished on the pressure "
+        "derivative plot: wellbore storage shows a unit-slope line, while radial "
+        "flow shows a horizontal derivative plateau."
+    )
+
+    result = evaluate_benchmark_answer(WT1, answer, sources=SOURCES)
+
+    assert result.forbidden_hits == []
+
+
+def test_radial_unit_slope_claim_still_triggers_forbidden():
+    result = evaluate_benchmark_answer(
+        WT1,
+        "Radial flow pressure follows a unit-slope line.",
+        sources=SOURCES,
+    )
+
+    assert result.forbidden_hits
+
+
+def test_plateau_transition_is_not_wellbore_storage_attribution():
+    item = {
+        "expected_behavior": "answer",
+        "required_patterns": [],
+        "forbidden_patterns": [
+            r"(plateau|horizontal).{0,160}(wellbore\s*storage)"
+        ],
+    }
+
+    transition = evaluate_benchmark_answer(
+        item,
+        "The plateau begins after the wellbore storage period ends.",
+    )
+    attribution = evaluate_benchmark_answer(
+        item,
+        "The plateau is a wellbore storage response.",
+    )
+
+    assert transition.forbidden_hits == []
+    assert attribution.forbidden_hits
+
+
+def test_supercharging_removal_vocabulary_and_unrelated_claim():
+    item = {
+        "expected_behavior": "answer",
+        "required_patterns": [
+            r"supercharg",
+            r"eliminat|discriminat(?:e|ed)\s*out|exclude|remove",
+        ],
+        "forbidden_patterns": [r"equipment\s*failure|sensor\s*failure"],
+    }
+
+    eliminated = evaluate_benchmark_answer(
+        item,
+        "Two supercharged points were eliminated from consideration.",
+    )
+    discriminated = evaluate_benchmark_answer(
+        item,
+        "Supercharged points were discriminated out.",
+    )
+    unrelated = evaluate_benchmark_answer(
+        item,
+        "Supercharged points indicate sensor failure.",
+    )
+
+    assert eliminated.answer_passed is True
+    assert discriminated.answer_passed is True
+    assert unrelated.answer_passed is False
+
+
+def test_varied_gradient_wording_satisfies_rft_semantics():
+    item = {
+        "expected_behavior": "answer",
+        "required_patterns": [
+            r"(?:multiple|several|varied|range\s+of).{0,60}gradients?"
+        ],
+        "forbidden_patterns": [],
+    }
+
+    assert evaluate_benchmark_answer(
+        item,
+        "Production data show a more varied gradient pattern.",
+    ).answer_passed is True
+    assert evaluate_benchmark_answer(
+        item,
+        "Production data show a range of gradients.",
+    ).answer_passed is True
+
+
 def test_exact_refusal_behavior():
     item = {
         "expected_behavior": "refuse",
