@@ -8,6 +8,7 @@ from scripts.run_well_test_benchmark import (
     build_summary,
     direct_ollama_answer,
     correct_figure_number_hit,
+    figure_numeric_coverage,
     figure_retrieval_hit,
     require_nonempty_knowledge_base,
     reevaluate_saved_benchmark,
@@ -158,7 +159,13 @@ def test_figure_metrics_are_written_and_summarized(tmp_path):
         "correct_figure_number_hit": True,
         "correct_figure_page_hit": True,
         "figure_numeric_support_pass": True,
+        "figure_required_numeric_coverage": 1.0,
+        "figure_required_numeric_complete": True,
         "figure_citation_correctness": True,
+        "text_preferred_page_hit": False,
+        "figure_preferred_page_hit": True,
+        "unified_preferred_page_hit": True,
+        "figure_vision_calls": 1,
     }
     csv_path = tmp_path / "figures.csv"
 
@@ -170,17 +177,23 @@ def test_figure_metrics_are_written_and_summarized(tmp_path):
     for field in (
         "figure_required",
         "figure_hit",
-        "correct_figure_number_hit",
-        "correct_figure_page_hit",
-        "figure_numeric_support_pass",
-        "figure_citation_correctness",
-    ):
-        assert csv_row[field] == "True"
+            "correct_figure_number_hit",
+            "correct_figure_page_hit",
+            "figure_numeric_support_pass",
+            "figure_required_numeric_complete",
+            "figure_citation_correctness",
+        ):
+            assert csv_row[field] == "True"
+    assert csv_row["figure_required_numeric_coverage"] == "1.0"
     assert summary["figure_required_count"] == 1
     assert summary["figure_hit_count"] == 1
     assert summary["correct_figure_number_hit_rate"] == 1.0
     assert summary["correct_figure_page_hit_rate"] == 1.0
     assert summary["figure_numeric_support_pass_rate"] == 1.0
+    assert summary["average_figure_required_numeric_coverage"] == 1.0
+    assert summary["figure_required_numeric_complete_rate"] == 1.0
+    assert summary["unified_retrieval_page_recall_at_k"] == 1.0
+    assert summary["average_figure_vision_calls"] == 1.0
     assert summary["figure_citation_correctness_rate"] == 1.0
 
 
@@ -203,6 +216,30 @@ def test_correct_figure_number_hit_requires_each_requested_figure():
         item,
         [{"figure_number": "Figure 2"}],
     ) is False
+
+
+def test_figure_required_numeric_coverage_is_answer_completeness_only():
+    item = {
+        "question_type": "figure",
+        "required_concepts": [
+            "0.29 psi/ft",
+            "0.37 psi/ft",
+            "0.42 psi/ft",
+        ],
+        "required_patterns": [],
+    }
+
+    coverage, complete = figure_numeric_coverage(
+        item,
+        "The visible values are 0.29 psi/ft and 0.37 psi/ft.",
+    )
+
+    assert coverage == pytest.approx(2 / 3)
+    assert complete is False
+    assert figure_numeric_coverage(
+        item,
+        "0.29, 0.37, and 0.42 psi/ft are visible.",
+    ) == (1.0, True)
 
 
 def test_benchmark_fails_fast_for_empty_knowledge_base(capsys):

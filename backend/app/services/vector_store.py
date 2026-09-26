@@ -247,6 +247,55 @@ class VectorStore:
             self.collection.delete(ids=ids)
         return len(ids)
 
+    def get_page_context(
+        self,
+        document: str,
+        page: int,
+        *,
+        adjacent: bool = False,
+    ) -> str:
+        """Return caption/body text only; Figure notes stay separately structured."""
+        data = self.collection.get(
+            where={"document": document},
+            include=["documents", "metadatas"],
+        )
+        wanted = {page - 1, page + 1} if adjacent else {page}
+        rows = sorted(
+            (
+                (str(text or ""), metadata or {})
+                for text, metadata in zip(
+                    data.get("documents") or [],
+                    data.get("metadatas") or [],
+                )
+                if metadata and metadata.get("page") in wanted
+            ),
+            key=lambda row: int(row[1].get("chunk_index") or 0),
+        )
+        parts: list[str] = []
+        for text, _ in rows:
+            metadata_lines = sum(
+                bool(re.search(rf"(?im)^\s*{key}\s*:", text))
+                for key in (
+                    "reference_lines",
+                    "plateaus",
+                    "slope_changes",
+                    "trend_summary",
+                    "vision_model",
+                    "created_at",
+                )
+            )
+            if "[Extracted figure notes]" not in text and metadata_lines >= 2:
+                continue
+            body = re.split(
+                r"\[\s*extracted\s+f(?:igure\s+notes)?",
+                text,
+                maxsplit=1,
+                flags=re.IGNORECASE,
+            )[0].strip()
+            if body and body not in parts:
+                parts.append(body)
+        return "\n".join(parts)[:6000]
+
     def search(
         self,
         question: str,

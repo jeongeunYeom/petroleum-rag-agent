@@ -311,6 +311,18 @@ def build_summary(
         figure_rows,
         "figure_numeric_support_pass",
     )
+    figure_numeric_coverage_rows = rows_with_value(
+        figure_rows,
+        "figure_required_numeric_coverage",
+    )
+    figure_numeric_complete_rows = rows_with_value(
+        figure_rows,
+        "figure_required_numeric_complete",
+    )
+    unified_page_rows = rows_with_value(
+        completed,
+        "unified_preferred_page_hit",
+    )
     figure_citation_rows = rows_with_value(
         figure_rows,
         "figure_citation_correctness",
@@ -433,6 +445,10 @@ def build_summary(
         "expected_document_hit_rate": document_recall,
         "retrieval_document_recall_at_k": document_recall,
         "retrieval_page_recall_at_k": page_recall,
+        "unified_retrieval_page_recall_at_k": ratio(
+            count_true(unified_page_rows, "unified_preferred_page_hit"),
+            len(unified_page_rows),
+        ),
         "figure_answer_accuracy": ratio(
             count_true(figure_rows, "final_answer_passed"),
             len(figure_rows),
@@ -458,11 +474,26 @@ def build_summary(
             count_true(figure_numeric_rows, "figure_numeric_support_pass"),
             len(figure_numeric_rows),
         ),
+        "average_figure_required_numeric_coverage": mean_field(
+            figure_numeric_coverage_rows,
+            "figure_required_numeric_coverage",
+        ),
+        "figure_required_numeric_complete_rate": ratio(
+            count_true(
+                figure_numeric_complete_rows,
+                "figure_required_numeric_complete",
+            ),
+            len(figure_numeric_complete_rows),
+        ),
         "figure_citation_correctness_rate": ratio(
             count_true(figure_citation_rows, "figure_citation_correctness"),
             len(figure_citation_rows),
         ),
         "average_attempts": mean_field(completed, "attempts"),
+        "average_figure_vision_calls": mean_field(
+            completed,
+            "figure_vision_calls",
+        ),
         "average_retrieval_seconds": mean_field(
             completed,
             "retrieval_seconds",
@@ -513,6 +544,9 @@ def write_csv(
         "final_status",
         "expected_document_hit",
         "preferred_page_hit",
+        "text_preferred_page_hit",
+        "figure_preferred_page_hit",
+        "unified_preferred_page_hit",
         "figure_retrieval_hit",
         "figure_count",
         "figure_required",
@@ -520,7 +554,11 @@ def write_csv(
         "correct_figure_number_hit",
         "correct_figure_page_hit",
         "figure_numeric_support_pass",
+        "figure_required_numeric_coverage",
+        "figure_required_numeric_complete",
         "figure_citation_correctness",
+        "figure_vision_calls",
+        "figures",
         "source_pages",
         "retrieval_seconds",
         "reasoning_seconds",
@@ -784,6 +822,34 @@ def figure_numeric_required(item: dict[str, Any]) -> bool:
         ]
     )
     return re.search(r"\d+\\?\.\d+", text) is not None
+
+
+def required_figure_numeric_values(item: dict[str, Any]) -> set[str]:
+    if item.get("question_type") != "figure":
+        return set()
+    text = " ".join(
+        str(value)
+        for value in [
+            *(item.get("required_concepts") or []),
+            *(item.get("required_patterns") or []),
+        ]
+    )
+    return {
+        f"{whole}.{fraction}"
+        for whole, fraction in re.findall(r"(\d+)\\?\.(\d+)", text)
+    }
+
+
+def figure_numeric_coverage(
+    item: dict[str, Any],
+    answer: str,
+) -> tuple[float | None, bool | None]:
+    required = required_figure_numeric_values(item)
+    if not required:
+        return None, None
+    observed = set(re.findall(r"(?<!\d)\d+\.\d+(?!\d)", answer))
+    coverage = len(required & observed) / len(required)
+    return coverage, coverage == 1.0
 
 
 def require_nonempty_knowledge_base(checklist: dict[str, Any]) -> None:
@@ -1067,6 +1133,7 @@ def main() -> int:
         api_engineering_validation_passed: bool | None = None
         api_figure_numeric_support_pass: bool | None = None
         api_figure_citation_correctness: bool | None = None
+        figure_vision_calls = 0
 
         try:
             if args.mode == "rag":
@@ -1188,6 +1255,9 @@ def main() -> int:
                 api_figure_citation_correctness = bool(
                     validation.get("figure_citation_correctness")
                 )
+                figure_vision_calls = int(
+                    validation.get("figure_vision_calls") or 0
+                )
                 unsupported_claim_count = int(
                     validation.get("unsupported_claim_count") or 0
                 )
@@ -1246,12 +1316,23 @@ def main() -> int:
             )
             figure_hit = figure_retrieval_hit(item, figures)
             figure_required = item.get("question_type") == "figure"
+            numeric_coverage, numeric_complete = figure_numeric_coverage(
+                item,
+                final_answer,
+            )
+            text_page_hit = final_evaluation.preferred_page_hit
+            unified_page_hit = (
+                bool(text_page_hit or figure_hit)
+                if text_page_hit is not None or figure_hit is not None
+                else None
+            )
 
             result.update(
                 {
                     "initial_answer": initial_answer,
                     "final_answer": final_answer,
                     "sources": sources,
+                    "figures": figures,
                     "source_pages": (
                         final_evaluation.source_pages
                     ),
@@ -1291,6 +1372,9 @@ def main() -> int:
                         final_evaluation
                         .preferred_page_hit
                     ),
+                    "text_preferred_page_hit": text_page_hit,
+                    "figure_preferred_page_hit": figure_hit,
+                    "unified_preferred_page_hit": unified_page_hit,
                     "figure_retrieval_hit": figure_hit,
                     "figure_count": len(figures),
                     "figure_required": figure_required,
@@ -1305,11 +1389,14 @@ def main() -> int:
                         if figure_numeric_required(item)
                         else None
                     ),
+                    "figure_required_numeric_coverage": numeric_coverage,
+                    "figure_required_numeric_complete": numeric_complete,
                     "figure_citation_correctness": (
                         api_figure_citation_correctness
                         if figure_required
                         else None
                     ),
+                    "figure_vision_calls": figure_vision_calls,
                     "retrieval_seconds": retrieval_seconds,
                     "reasoning_seconds": reasoning_seconds,
                     "generation_seconds": generation_seconds,
@@ -1397,6 +1484,9 @@ def main() -> int:
                     "final_status": "infrastructure_error",
                     "expected_document_hit": None,
                     "preferred_page_hit": None,
+                    "text_preferred_page_hit": None,
+                    "figure_preferred_page_hit": None,
+                    "unified_preferred_page_hit": None,
                     "figure_retrieval_hit": None,
                     "figure_count": 0,
                     "figure_required": item.get("question_type") == "figure",
@@ -1404,7 +1494,11 @@ def main() -> int:
                     "correct_figure_number_hit": None,
                     "correct_figure_page_hit": None,
                     "figure_numeric_support_pass": None,
+                    "figure_required_numeric_coverage": None,
+                    "figure_required_numeric_complete": None,
                     "figure_citation_correctness": None,
+                    "figure_vision_calls": 0,
+                    "figures": [],
                     "source_pages": [],
                     "retrieval_seconds": 0.0,
                     "reasoning_seconds": 0.0,

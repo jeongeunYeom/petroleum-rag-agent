@@ -53,9 +53,21 @@ class FigureEvidence(BaseModel):
     page: int | None = None
     figure_number: str | None = None
     title: str | None = None
+    image_index: int | None = None
     filename: str | None = None
+    image_path: str | None = None
     url: str | None = None
     excerpt: str
+    source_note: str = ""
+    related_page_text: str = ""
+    x_axis: str | None = None
+    x_axis_unit: str | None = None
+    y_axis: str | None = None
+    y_axis_unit: str | None = None
+    series_count: int | None = None
+    series_descriptions: list[str] = Field(default_factory=list)
+    legend: list[str] = Field(default_factory=list)
+    quantities: list[dict[str, str]] = Field(default_factory=list)
 
 
 class ProvenanceRecord(BaseModel):

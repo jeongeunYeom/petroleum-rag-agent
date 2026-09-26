@@ -23,6 +23,12 @@ from app.models.research_schemas import (
     WebEvidence,
 )
 from app.services.engineering_validator import EngineeringValidator
+from app.services.figure_analysis import (
+    FigureAnalysisService,
+    normalize_list,
+    nullable_text,
+    parse_key_values,
+)
 from app.services.refusal_policy import NO_EVIDENCE_REFUSAL
 
 
@@ -42,7 +48,10 @@ FIGURE_RE = re.compile(
     r"압력\s*(?:기울기|구배)",
     re.IGNORECASE,
 )
-FIGURE_NUMBER_RE = re.compile(r"\bfigure\s*([0-9]+[A-Za-z]?)\b", re.IGNORECASE)
+FIGURE_NUMBER_RE = re.compile(
+    r"(?<![A-Za-z0-9])figure\s*([0-9]+[A-Za-z]?)(?![A-Za-z0-9])",
+    re.IGNORECASE,
+)
 FIGURE_NOTE_MARKER_RE = re.compile(r"\[extracted figure notes\]", re.IGNORECASE)
 FIGURE_DERIVED_CLAIM_RE = re.compile(
     r"\bfigure\s*\d+|x[- ]?axis|y[- ]?axis|\baxis\b|\blegend\b|\bseries\b|"
@@ -129,6 +138,14 @@ WELL_TEST_QUERY_RE = re.compile(
     r"방사\s*유동|선형\s*유동|구형\s*유동|단위\s*기울기|경계|재충전",
     re.IGNORECASE,
 )
+VISIBLE_QUANTITY_RE = re.compile(
+    r"(?<![A-Za-z0-9.])(?P<value>[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?)\s*"
+    r"(?P<unit>psi\s*(?:/|per)\s*(?:ft|m)|bbl\s*(?:/|per)\s*(?:d|day)|"
+    r"stb\s*(?:/|per)\s*(?:d|day)|scf\s*(?:/|per)\s*(?:d|day)|"
+    r"psi|kpa|mpa|gpa|pa|bar|atm|darcy|md|ppm|ft|mm|cm|m|in|"
+    r"bbl|stb|scf|hr|hrs|hour|hours|cp|°[cf])\b",
+    re.IGNORECASE,
+)
 SAFE_REPAIR_REFUSAL = (
     "공학 검증을 통과하는 답변으로 교정하지 못했습니다. "
     "근거 없는 결론을 제공하지 않습니다."
@@ -152,6 +169,7 @@ class ResearchAgent:
         self.log_dir = settings.agent_runs_dir / "research"
         self._reranker: Any = None
         self.engineering_validator = EngineeringValidator()
+        self.figure_analyzer = FigureAnalysisService(settings, ollama)
 
     @staticmethod
     def route_query(query: str, use_internal: bool, use_external: bool) -> str:
@@ -194,6 +212,10 @@ class ResearchAgent:
         )
         raw_internal, web_sources = await asyncio.gather(internal_task, web_task)
         internal_sources, figures = self.normalize_internal_evidence(raw_internal)
+        figures, figure_vision_calls = await self.enrich_figure_evidence(
+            request.query,
+            figures,
+        )
         retrieval_seconds = time.perf_counter() - retrieval_started
         conflicts = self.detect_conflicts(internal_sources, web_sources)
         evidence_ids = {
@@ -303,6 +325,7 @@ class ResearchAgent:
             validation["conflict_disclosures_added"] = disclosed
             validation["repair_attempted"] = repair_attempts > 0
             validation["repair_attempts"] = repair_attempts
+            validation["figure_vision_calls"] = figure_vision_calls
             validation["engineering_validation_passed"] = (
                 self._engineering_validation_passed(validation)
             )
@@ -326,6 +349,7 @@ class ResearchAgent:
                 "figure_association_rejections": 0,
                 "figure_citation_correctness": False,
                 "figure_numeric_support_pass": False,
+                "figure_vision_calls": figure_vision_calls,
             }
             inference_used = False
         answer = self.render_requested_source_details(
@@ -647,7 +671,10 @@ class ResearchAgent:
             if not re.search(r"supercharg", searchable):
                 return 0.0
             score += 1.0
-            if re.search(r"exclude|eliminat|remove|open\s*circles?", searchable):
+            if re.search(
+                r"exclude|eliminat|discriminat|remove|open\s*circles?",
+                searchable,
+            ):
                 score += 0.5
         query_tokens = {
             token.casefold()
@@ -815,9 +842,46 @@ class ResearchAgent:
             )
             page = self._optional_int(metadata.get("page"))
             if self._is_figure_hit(text, metadata):
+                related_page_text = self._related_page_text(
+                    document,
+                    page,
+                    text,
+                )
                 blocks = self._figure_note_blocks(text, metadata)
-                for figure_number, excerpt in blocks:
+                for note_number, excerpt in blocks:
+                    fields = parse_key_values(excerpt)
+                    image_path = str(
+                        fields.get("image_path")
+                        or metadata.get("image_path")
+                        or ""
+                    ).strip() or None
                     filename = self._figure_filename(excerpt, metadata)
+                    title = nullable_text(fields.get("title")) or self._figure_title(
+                        excerpt,
+                        metadata,
+                    )
+                    figure_number = self._resolve_figure_number(
+                        note_number=note_number,
+                        note_text=excerpt,
+                        metadata=metadata,
+                        title=title,
+                        page_text=related_page_text,
+                    )
+                    if not figure_number:
+                        adjacent = self._page_context(document, page, adjacent=True)
+                        figure_number = self._resolve_figure_number(
+                            note_number=note_number,
+                            note_text=excerpt,
+                            metadata=metadata,
+                            title=title,
+                            page_text=adjacent,
+                        )
+                        if adjacent:
+                            related_page_text = "\n".join(
+                                value
+                                for value in (related_page_text, adjacent)
+                                if value
+                            )[:5000]
                     figures.append(
                         FigureEvidence(
                             evidence_id=f"FIG{len(figures) + 1}",
@@ -828,14 +892,30 @@ class ResearchAgent:
                                 if figure_number
                                 else None
                             ),
-                            title=self._figure_title(excerpt, metadata),
+                            title=title,
+                            image_index=self._optional_int(fields.get("image_index")),
                             filename=filename,
+                            image_path=image_path,
                             url=(
                                 f"/api/figures/{quote(filename, safe='')}"
                                 if filename
                                 else None
                             ),
                             excerpt=excerpt[:2000],
+                            source_note=excerpt[:4000],
+                            related_page_text=related_page_text[:4000],
+                            x_axis=nullable_text(fields.get("x_axis")),
+                            x_axis_unit=nullable_text(fields.get("x_axis_unit")),
+                            y_axis=nullable_text(fields.get("y_axis")),
+                            y_axis_unit=nullable_text(fields.get("y_axis_unit")),
+                            series_count=self._optional_int(fields.get("series_count")),
+                            series_descriptions=normalize_list(
+                                fields.get("series_descriptions")
+                            ),
+                            legend=normalize_list(fields.get("legend")),
+                            quantities=self._extract_quantities(
+                                f"{excerpt}\n{related_page_text}"
+                            ),
                         )
                     )
                 continue
@@ -857,6 +937,410 @@ class ResearchAgent:
                 )
             )
         return sources, figures
+
+    def _related_page_text(
+        self,
+        document: str,
+        page: int | None,
+        fallback: str,
+    ) -> str:
+        context = self._page_context(document, page)
+        if not context:
+            context = fallback
+        marker = FIGURE_NOTE_MARKER_RE.search(context)
+        return (context[: marker.start()] if marker else context).strip()[:4000]
+
+    def _page_context(
+        self,
+        document: str,
+        page: int | None,
+        *,
+        adjacent: bool = False,
+    ) -> str:
+        getter = getattr(self.vector_store, "get_page_context", None)
+        if page is None or not callable(getter):
+            return ""
+        try:
+            return str(getter(document, page, adjacent=adjacent) or "")
+        except Exception:
+            return ""
+
+    @classmethod
+    def _resolve_figure_number(
+        cls,
+        *,
+        note_number: str | None,
+        note_text: str,
+        metadata: dict[str, Any],
+        title: str | None,
+        page_text: str,
+    ) -> str | None:
+        explicit = str(metadata.get("figure_number") or "").strip()
+        match = FIGURE_NUMBER_RE.search(explicit)
+        if match:
+            return match.group(1)
+        if explicit and re.fullmatch(r"[0-9]+[A-Za-z]?", explicit):
+            return explicit
+        match = re.search(
+            r"(?im)^\s*figure[_ ]number\s*:\s*(?:figure\s*)?([0-9]+[A-Za-z]?)\s*$",
+            note_text,
+        )
+        if match:
+            return match.group(1)
+
+        captions = cls._figure_captions(page_text)
+        if title and captions:
+            title_tokens = cls._identity_tokens(title)
+            ranked = sorted(
+                (
+                    (len(title_tokens & cls._identity_tokens(caption)), number)
+                    for number, caption in captions
+                ),
+                reverse=True,
+            )
+            if ranked and ranked[0][0] >= min(2, len(title_tokens)):
+                return ranked[0][1]
+        if len(captions) == 1:
+            return captions[0][0]
+
+        image_index = cls._optional_int(
+            parse_key_values(note_text).get("image_index")
+        )
+        legacy_wrapper = bool(
+            note_number
+            and image_index is not None
+            and str(image_index).casefold() == note_number.casefold()
+            and "[figure note metadata]" in note_text.casefold()
+        )
+        return note_number if note_number and not legacy_wrapper else None
+
+    @staticmethod
+    def _identity_tokens(value: str) -> set[str]:
+        ignored = {"figure", "graph", "survey", "well", "the", "from"}
+        return {
+            token.casefold()
+            for token in re.findall(r"[A-Za-z][A-Za-z0-9-]*|[가-힣]{2,}", value)
+            if len(token) > 2 and token.casefold() not in ignored
+        }
+
+    @staticmethod
+    def _figure_captions(text: str) -> list[tuple[str, str]]:
+        clean = FIGURE_NOTE_MARKER_RE.split(str(text or ""), maxsplit=1)[0]
+        matches = list(FIGURE_NUMBER_RE.finditer(clean))
+        captions: list[tuple[str, str]] = []
+        for index, match in enumerate(matches):
+            end = matches[index + 1].start() if index + 1 < len(matches) else len(clean)
+            caption = re.sub(r"\s+", " ", clean[match.end() : end]).strip(" :-\n")
+            captions.append((match.group(1), caption[:180]))
+        return captions
+
+    @staticmethod
+    def _extract_quantities(text: str) -> list[dict[str, str]]:
+        values: list[dict[str, str]] = []
+        seen: set[tuple[str, str]] = set()
+        for match in VISIBLE_QUANTITY_RE.finditer(text):
+            value = match.group("value").replace(",", "")
+            unit = re.sub(r"\s+", " ", match.group("unit")).strip()
+            unit = re.sub(r"\s*(?:per|/)\s*", "/", unit, flags=re.IGNORECASE)
+            key = (value, unit.casefold())
+            if key not in seen:
+                seen.add(key)
+                values.append({"value": value, "unit": unit})
+        return values
+
+    async def enrich_figure_evidence(
+        self,
+        query: str,
+        figures: list[FigureEvidence],
+    ) -> tuple[list[FigureEvidence], int]:
+        if not figures or not FIGURE_RE.search(query):
+            return figures, 0
+
+        cache: dict[str, str] = {}
+        calls = 0
+        figures, calls = await self._add_caption_companions(
+            query,
+            figures,
+            cache,
+            calls,
+        )
+        ranked = sorted(
+            range(len(figures)),
+            key=lambda index: self._figure_query_score(query, figures[index]),
+            reverse=True,
+        )
+        for index in ranked:
+            if calls >= 2:
+                break
+            figure = figures[index]
+            if not self._vision_needed(query, figure):
+                continue
+            path = self._figure_path(figure)
+            if path is None:
+                continue
+            raw, used = await self._focused_vision(path, query, cache)
+            calls += used
+            if raw:
+                figures[index] = self._merge_vision_fields(figure, raw)
+        return figures, calls
+
+    async def _add_caption_companions(
+        self,
+        query: str,
+        figures: list[FigureEvidence],
+        cache: dict[str, str],
+        calls: int,
+    ) -> tuple[list[FigureEvidence], int]:
+        represented = {
+            match.group(1)
+            for item in figures
+            if item.figure_number
+            if (match := FIGURE_NUMBER_RE.search(item.figure_number))
+        }
+        requested = set(FIGURE_NUMBER_RE.findall(query))
+        query_tokens = self._identity_tokens(query)
+        seen_paths = {
+            str(path.resolve()).casefold()
+            for item in figures
+            if (path := self._figure_path(item)) is not None
+        }
+        captions: list[tuple[FigureEvidence, str, str]] = []
+        for item in figures:
+            for number, caption in self._figure_captions(item.related_page_text):
+                title_match = len(query_tokens & self._identity_tokens(caption)) >= 2
+                if number not in represented and (
+                    number in requested or title_match
+                ):
+                    captions.append((item, number, caption))
+
+        for source, number, caption in captions:
+            if calls >= 2:
+                break
+            for path in self._sibling_image_candidates(source, seen_paths):
+                raw, used = await self._focused_vision(path, query, cache)
+                calls += used
+                seen_paths.add(str(path.resolve()).casefold())
+                if not raw:
+                    continue
+                fields = parse_key_values(raw)
+                visible_identity = " ".join(
+                    str(fields.get(key) or "") for key in ("title", "analysis")
+                )
+                caption_tokens = self._identity_tokens(caption)
+                if caption_tokens and len(
+                    caption_tokens & self._identity_tokens(visible_identity)
+                ) < min(2, len(caption_tokens)):
+                    continue
+                figures.append(
+                    FigureEvidence(
+                        evidence_id=f"FIG{len(figures) + 1}",
+                        document=source.document,
+                        page=source.page,
+                        figure_number=f"Figure {number}",
+                        title=nullable_text(fields.get("title")) or caption or None,
+                        image_index=self._image_index_from_path(path),
+                        filename=path.name,
+                        image_path=str(path),
+                        url=f"/api/figures/{quote(path.name, safe='')}",
+                        excerpt=raw[:2000],
+                        source_note=raw[:4000],
+                        related_page_text=source.related_page_text,
+                        x_axis=nullable_text(fields.get("x_axis")),
+                        x_axis_unit=nullable_text(fields.get("x_axis_unit")),
+                        y_axis=nullable_text(fields.get("y_axis")),
+                        y_axis_unit=nullable_text(fields.get("y_axis_unit")),
+                        series_count=self._optional_int(fields.get("series_count")),
+                        series_descriptions=normalize_list(
+                            fields.get("series_descriptions")
+                        ),
+                        legend=normalize_list(fields.get("legend")),
+                        quantities=self._extract_quantities(raw),
+                    )
+                )
+                represented.add(number)
+                break
+        return figures, calls
+
+    def _sibling_image_candidates(
+        self,
+        figure: FigureEvidence,
+        seen_paths: set[str],
+    ) -> list[Path]:
+        if figure.page is None or not figure.filename:
+            return []
+        marker = f"_p{figure.page}_fig"
+        if marker not in figure.filename:
+            return []
+        prefix = figure.filename.split(marker, 1)[0]
+        candidates = [
+            path
+            for path in self.settings.figures_dir.glob(f"{prefix}{marker}*")
+            if path.is_file()
+            and path.stat().st_size >= 15_000
+            and str(path.resolve()).casefold() not in seen_paths
+        ]
+        return sorted(candidates, key=lambda path: path.stat().st_size, reverse=True)
+
+    async def _focused_vision(
+        self,
+        path: Path,
+        query: str,
+        cache: dict[str, str],
+    ) -> tuple[str, int]:
+        key = str(path.resolve()).casefold()
+        if key in cache:
+            return cache[key], 0
+        prompt = self._focused_vision_prompt(query)
+        try:
+            raw = await self.figure_analyzer.extract_focused(path, prompt)
+        except Exception:
+            raw = ""
+        cache[key] = raw
+        return raw, 1
+
+    @staticmethod
+    def _focused_vision_prompt(query: str) -> str:
+        if re.search(r"supercharg|제외|제거|open\s*circle", query, re.IGNORECASE):
+            task = (
+                "Report only visible indications of supercharged points and how they "
+                "are marked or excluded."
+            )
+        elif re.search(
+            r"x[- ]?axis|y[- ]?axis|type\s*curve|축|계열|series|derivative|미분",
+            query,
+            re.IGNORECASE,
+        ):
+            task = (
+                "Report only visible x-axis, y-axis, units, pressure series, and "
+                "pressure derivative series."
+            )
+        else:
+            task = (
+                "Read only the visible numeric pressure gradients and their units. "
+                "Scan the entire image from top to bottom twice and list every literal "
+                "number followed by psi/ft; do not stop after the first two labels."
+            )
+        return (
+            f"{task} Do not infer missing values. Also report the literal title or figure "
+            "label only if visible. Return ASCII key-value lines using only: title, "
+            "analysis, x_axis, x_axis_unit, y_axis, y_axis_unit, series_count, "
+            "series_descriptions, legend, reference_lines."
+        )
+
+    @classmethod
+    def _vision_needed(cls, query: str, figure: FigureEvidence) -> bool:
+        combined = " ".join(
+            [
+                figure.source_note,
+                figure.related_page_text,
+                *figure.series_descriptions,
+                *figure.legend,
+            ]
+        )
+        requested_figures = FIGURE_NUMBER_RE.findall(query)
+        numeric = bool(
+            re.search(
+                r"gradient|구배|기울기|수치|모두|all|빠짐없이|\brft\b.{0,80}(?:compare|비교)|비교",
+                query,
+                re.IGNORECASE,
+            )
+            or (
+                len(requested_figures) >= 2
+                and re.search(r"\brft\b", query, re.IGNORECASE)
+            )
+        )
+        axes = bool(
+            re.search(
+                r"x[- ]?axis|y[- ]?axis|type\s*curve|축|계열|series|derivative|미분",
+                query,
+                re.IGNORECASE,
+            )
+        )
+        supercharged = bool(re.search(r"supercharg|제외|제거", query, re.IGNORECASE))
+        return bool(
+            (numeric and not figure.quantities)
+            or (
+                axes
+                and (
+                    not figure.x_axis
+                    or not figure.y_axis
+                    or "derivative" not in combined.casefold()
+                )
+            )
+            or (
+                supercharged
+                and not re.search(
+                    r"supercharg.{0,180}(?:exclude|eliminat|discriminat|remove|제외|제거)|"
+                    r"(?:exclude|eliminat|discriminat|remove|제외|제거).{0,180}supercharg",
+                    combined,
+                    re.IGNORECASE,
+                )
+            )
+        )
+
+    @classmethod
+    def _figure_query_score(cls, query: str, figure: FigureEvidence) -> int:
+        searchable = " ".join(
+            value
+            for value in (
+                figure.figure_number,
+                figure.title,
+                figure.related_page_text,
+            )
+            if value
+        )
+        return len(cls._identity_tokens(query) & cls._identity_tokens(searchable))
+
+    def _figure_path(self, figure: FigureEvidence) -> Path | None:
+        candidates = [figure.image_path]
+        if figure.filename:
+            candidates.append(str(self.settings.figures_dir / figure.filename))
+        for value in candidates:
+            if value and (path := Path(value)).is_file():
+                return path
+        return None
+
+    @staticmethod
+    def _image_index_from_path(path: Path) -> int | None:
+        match = re.search(r"_fig(\d+)(?:\.[^.]+)$", path.name, re.IGNORECASE)
+        return int(match.group(1)) if match else None
+
+    @classmethod
+    def _merge_vision_fields(
+        cls,
+        figure: FigureEvidence,
+        raw: str,
+    ) -> FigureEvidence:
+        fields = parse_key_values(raw)
+        quantities = [*figure.quantities]
+        seen = {(item["value"], item["unit"].casefold()) for item in quantities}
+        for item in cls._extract_quantities(raw):
+            key = (item["value"], item["unit"].casefold())
+            if key not in seen:
+                seen.add(key)
+                quantities.append(item)
+        return figure.model_copy(
+            update={
+                "title": nullable_text(fields.get("title")) or figure.title,
+                "x_axis": nullable_text(fields.get("x_axis")) or figure.x_axis,
+                "x_axis_unit": nullable_text(fields.get("x_axis_unit"))
+                or figure.x_axis_unit,
+                "y_axis": nullable_text(fields.get("y_axis")) or figure.y_axis,
+                "y_axis_unit": nullable_text(fields.get("y_axis_unit"))
+                or figure.y_axis_unit,
+                "series_count": cls._optional_int(fields.get("series_count"))
+                or figure.series_count,
+                "series_descriptions": normalize_list(
+                    fields.get("series_descriptions")
+                )
+                or figure.series_descriptions,
+                "legend": normalize_list(fields.get("legend")) or figure.legend,
+                "quantities": quantities,
+                "source_note": (
+                    f"{figure.source_note}\n[Focused vision extraction]\n{raw}"
+                )[:6000],
+            }
+        )
 
     @staticmethod
     def _is_figure_hit(text: str, metadata: dict[str, Any]) -> bool:
@@ -897,7 +1381,7 @@ class ResearchAgent:
         if not matches:
             return [(cls._figure_number(text, metadata), text)]
         if len(matches) == 1:
-            return [(matches[0].group(1), text)]
+            return [(matches[0].group(1), note_text[matches[0].start() :].strip())]
         blocks = []
         for index, match in enumerate(matches):
             end = matches[index + 1].start() if index + 1 < len(matches) else len(note_text)
@@ -918,7 +1402,17 @@ class ResearchAgent:
             r"(?im)(?:^|\n)\s*figure\s+([0-9]+[A-Za-z]?)\s*:",
             note_text,
         )
-        return match.group(1) if match else None
+        if not match:
+            return None
+        fields = parse_key_values(note_text)
+        image_index = ResearchAgent._optional_int(fields.get("image_index"))
+        if (
+            image_index is not None
+            and str(image_index).casefold() == match.group(1).casefold()
+            and "[figure note metadata]" in note_text.casefold()
+        ):
+            return None
+        return match.group(1)
 
     @staticmethod
     def _figure_title(text: str, metadata: dict[str, Any]) -> str | None:
@@ -997,9 +1491,7 @@ class ResearchAgent:
             for item in web
         )
         blocks.extend(
-            f"[{item.evidence_id}] FIGURE | document={item.document} | page={item.page} | "
-            f"figure={item.figure_number or 'unknown'} | title={item.title or 'unknown'} | "
-            f"filename={item.filename or 'unknown'}\n{item.excerpt}"
+            ResearchAgent._figure_structured_text(item)
             for item in figures
         )
         conflict_text = json.dumps(conflicts, ensure_ascii=False)
@@ -1059,6 +1551,16 @@ class ResearchAgent:
             "blocks. A figure-derived numeric, axis, legend, series, or point-treatment claim must "
             "cite its FIG ID; a KB citation alone is insufficient. If the matching FIG block does "
             "not explicitly support a requested value or interpretation, report that limitation. "
+            "A FIG evidence ID is not a printed figure number: FIG1 does not mean Figure 1 and "
+            "FIG2 does not mean Figure 2. State Figure N only when figure_number is resolved; "
+            "never infer it from an evidence ID or image_index. Treat the STRUCTURED fields as "
+            "direct evidence. If the question asks for all values, review every visible_quantities "
+            "entry in every relevant FIG block, copy all available values, and explicitly say when "
+            "the evidence does not contain the rest; never invent a value for completeness. "
+            "When point_treatment directly states that supercharged points were eliminated, "
+            "excluded, or discriminated out, report that literal treatment with the same FIG "
+            "citation; do not replace it with an uncited general explanation. Ignore unrelated "
+            "FIG blocks and do not add negative claims about fields the question did not ask for. "
             f"{false_premise_instruction}{relation_instruction}"
         )
         user = (
@@ -1074,6 +1576,50 @@ class ResearchAgent:
             "Evidence:\n" + "\n\n---\n\n".join(blocks)
         )
         return [{"role": "system", "content": system}, {"role": "user", "content": user}]
+
+    @staticmethod
+    def _figure_structured_text(item: FigureEvidence) -> str:
+        quantities = [
+            f"{quantity.get('value')} {quantity.get('unit')}".strip()
+            for quantity in item.quantities
+        ]
+        structured = {
+            "figure_number": item.figure_number or "unknown",
+            "title": item.title or "unknown",
+            "image_index": item.image_index,
+            "filename": item.filename,
+            "image_path": item.image_path,
+            "x_axis": item.x_axis,
+            "x_axis_unit": item.x_axis_unit,
+            "y_axis": item.y_axis,
+            "y_axis_unit": item.y_axis_unit,
+            "series_count": item.series_count,
+            "series": item.series_descriptions,
+            "legend": item.legend,
+            "visible_quantities": quantities,
+            "point_treatment": ResearchAgent._point_treatment(item),
+        }
+        return (
+            f"[{item.evidence_id}] FIGURE | document={item.document} | page={item.page}\n"
+            f"[{item.evidence_id} STRUCTURED]\n"
+            f"{json.dumps(structured, ensure_ascii=False, indent=2)}\n"
+            f"RAW FIGURE NOTE:\n{item.source_note or item.excerpt}\n"
+            f"RELATED PAGE TEXT:\n{item.related_page_text or 'unknown'}"
+        )
+
+    @staticmethod
+    def _point_treatment(item: FigureEvidence) -> list[str]:
+        text = f"{item.source_note}\n{item.related_page_text}"
+        return [
+            sentence.strip()
+            for sentence in re.split(r"(?<=[.!?])\s+|\n+", text)
+            if re.search(r"supercharg", sentence, re.IGNORECASE)
+            and re.search(
+                r"exclude|eliminat|discriminat|remove|open\s*circle|제외|제거",
+                sentence,
+                re.IGNORECASE,
+            )
+        ][:4]
 
     @staticmethod
     def build_repair_messages(
@@ -1171,12 +1717,7 @@ class ResearchAgent:
             **{item.evidence_id: item.excerpt for item in internal},
             **{item.evidence_id: item.snippet for item in web},
             **{
-                item.evidence_id: (
-                    f"figure={item.figure_number or 'unknown'}\n"
-                    f"title={item.title or 'unknown'}\n"
-                    f"document={item.document}\npage={item.page}\n"
-                    f"filename={item.filename or 'unknown'}\n{item.excerpt}"
-                )
+                item.evidence_id: ResearchAgent._figure_structured_text(item)
                 for item in figures
             },
         }
@@ -1430,11 +1971,25 @@ class ResearchAgent:
         for candidate, scores in zip(candidates, similarities, strict=True):
             section, claim, ids, _ = candidate
             evidence_similarity, query_similarity = scores
-            if evidence_similarity is not None and evidence_similarity < 0.52:
+            figure_ids = [value for value in ids if value.startswith("FIG")]
+            deterministic_figure_support = bool(
+                figure_ids
+                and self._figure_claim_matches_evidence(
+                    claim,
+                    figure_ids,
+                    evidence_text,
+                )
+            )
+            if (
+                not deterministic_figure_support
+                and evidence_similarity is not None
+                and evidence_similarity < 0.52
+            ):
                 semantic_rejections += 1
                 continue
             if (
-                section != "limitations"
+                not deterministic_figure_support
+                and section != "limitations"
                 and query_similarity is not None
                 and query_similarity < 0.40
             ):
@@ -1600,7 +2155,8 @@ class ResearchAgent:
                 text
                 for text in figure_evidence.values()
                 if re.search(
-                    rf"(?im)^figure=figure\s*{re.escape(number)}\s*$",
+                    rf"(?im)(?:^figure=|[\"']figure_number[\"']\s*:\s*[\"'])"
+                    rf"figure\s*{re.escape(number)}(?:\s*$|[\"'])",
                     text,
                 )
             )
@@ -1625,6 +2181,16 @@ class ResearchAgent:
             re.IGNORECASE,
         ):
             return False
+        if re.search(
+            r"equipment\s*failure|sensor\s*failure|장비\s*고장|센서\s*고장",
+            segment,
+            re.IGNORECASE,
+        ) and not re.search(
+            r"equipment\s*failure|sensor\s*failure|장비\s*고장|센서\s*고장",
+            evidence,
+            re.IGNORECASE,
+        ):
+            return False
         evidence_compact = re.sub(r"[\s,]", "", evidence).casefold()
         for quantity in QUANTITY_RE.findall(segment):
             if re.sub(r"[\s,]", "", quantity).casefold() not in evidence_compact:
@@ -1641,8 +2207,14 @@ class ResearchAgent:
             required_groups.append(r"pressure\s*derivative|압력\s*(?:미분|도함수)")
         if re.search(r"supercharg", segment, re.IGNORECASE):
             required_groups.append(r"supercharg")
-        if re.search(r"exclude|eliminat|remove|제외|제거", segment, re.IGNORECASE):
-            required_groups.append(r"exclude|eliminat|remove|제외|제거")
+        if re.search(
+            r"exclude|eliminat|discriminat|remove|제외|제거",
+            segment,
+            re.IGNORECASE,
+        ):
+            required_groups.append(
+                r"exclude|eliminat|discriminat|remove|제외|제거"
+            )
         if re.search(r"open\s*circles?|빈\s*원|열린\s*원", segment, re.IGNORECASE):
             required_groups.append(r"open\s*circles?|빈\s*원|열린\s*원")
         return all(re.search(pattern, evidence, re.IGNORECASE) for pattern in required_groups)
@@ -2212,7 +2784,14 @@ class ResearchAgent:
                 metadata={
                     "figure_number": item.figure_number,
                     "title": item.title,
+                    "image_index": item.image_index,
                     "filename": item.filename,
+                    "x_axis": item.x_axis,
+                    "x_axis_unit": item.x_axis_unit,
+                    "y_axis": item.y_axis,
+                    "y_axis_unit": item.y_axis_unit,
+                    "series_count": item.series_count,
+                    "quantities": item.quantities,
                 },
             )
             for item in figures

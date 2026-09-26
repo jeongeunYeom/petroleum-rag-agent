@@ -10,7 +10,7 @@ from pydantic import ValidationError
 from app.api.research_routes import get_research_agent, router as research_router
 from app.core.config import Settings
 from app.core.error_mapping import ExternalServiceError
-from app.models.research_schemas import InternalEvidence, ResearchRequest
+from app.models.research_schemas import FigureEvidence, InternalEvidence, ResearchRequest
 from app.services.research_agent import ResearchAgent
 from app.services.vector_store import VectorStore
 
@@ -499,6 +499,198 @@ def test_normalization_keeps_figure_2_and_figure_3_metadata_separate(tmp_path: P
     assert [item.filename for item in figures] == ["appraisal.png", "production.png"]
     assert "0.29" not in figures[0].excerpt
     assert "0.34" not in figures[1].excerpt
+
+
+def test_legacy_image_index_is_not_used_as_figure_number(tmp_path: Path) -> None:
+    hit = {
+        "id": "legacy-note",
+        "text": (
+            "[Extracted figure notes]\nFigure 2: [Figure Note Metadata]\n"
+            "image_index: 2\nimage_path: type_curve.png\ntitle: Log-Log Plot"
+        ),
+        "metadata": {"document": "well-test.pdf", "page": 263},
+    }
+
+    _, figures = make_agent(tmp_path).normalize_internal_evidence([hit])
+
+    assert figures[0].evidence_id == "FIG1"
+    assert figures[0].image_index == 2
+    assert figures[0].figure_number is None
+
+
+def test_figure_number_resolves_from_related_page_caption(tmp_path: Path) -> None:
+    class ContextStore(FakeVectorStore):
+        def get_page_context(self, document, page, *, adjacent=False):
+            return "Figure 2 Appraisal Well RFT Survey\nFigure 3 RFT Survey after Significant Production"
+
+    hit = {
+        "id": "production",
+        "text": (
+            "[Extracted figure notes]\nFigure 2: [Figure Note Metadata]\n"
+            "image_index: 2\nimage_path: production.png\n"
+            "title: RFT Survey after Significant Production"
+        ),
+        "metadata": {"document": "well-test.pdf", "page": 440},
+    }
+
+    _, figures = make_agent(
+        tmp_path,
+        vector_store=ContextStore(),
+    ).normalize_internal_evidence([hit])
+
+    assert figures[0].figure_number == "Figure 3"
+    assert "Figure 2 Appraisal" in figures[0].related_page_text
+
+
+def test_figure_note_fields_and_quantities_are_structured(tmp_path: Path) -> None:
+    hit = {
+        "id": "figure",
+        "text": (
+            "Figure 8 Type curve\n[Extracted figure notes]\n"
+            "Figure 1: [Figure Note Metadata]\nimage_index: 1\n"
+            "image_path: curve.png\ntitle: Type Curve\n"
+            "x_axis: elapsed time\nx_axis_unit: hr\n"
+            "y_axis: pressure response\ny_axis_unit: psi\nseries_count: 2\n"
+            "series_descriptions:\n  - pressure\n  - pressure derivative\n"
+            "legend: pressure; pressure derivative\nreference_lines: 0.34 psi/ft"
+        ),
+        "metadata": {"document": "well-test.pdf", "page": 8},
+    }
+
+    _, figures = make_agent(tmp_path).normalize_internal_evidence([hit])
+    figure = figures[0]
+
+    assert figure.figure_number == "Figure 8"
+    assert figure.x_axis == "elapsed time"
+    assert figure.x_axis_unit == "hr"
+    assert figure.y_axis == "pressure response"
+    assert figure.series_count == 2
+    assert figure.series_descriptions == ["pressure", "pressure derivative"]
+    assert figure.quantities == [{"value": "0.34", "unit": "psi/ft"}]
+
+
+def test_focused_vision_runs_only_for_missing_fields_and_is_cached(tmp_path: Path) -> None:
+    image = tmp_path / "data" / "figures" / "doc_p1_fig2.png"
+    image.parent.mkdir(parents=True)
+    image.write_bytes(b"image")
+    agent = make_agent(tmp_path)
+
+    class Analyzer:
+        def __init__(self):
+            self.calls = 0
+
+        async def extract_focused(self, path, prompt):
+            self.calls += 1
+            return "analysis: gradient 0.34 psi/ft\nreference_lines: 0.34 psi/ft"
+
+    analyzer = Analyzer()
+    agent.figure_analyzer = analyzer
+    figures = [
+        FigureEvidence(
+            evidence_id=f"FIG{index}",
+            document="well-test.pdf",
+            page=1,
+            filename=image.name,
+            image_path=str(image),
+            excerpt="",
+        )
+        for index in (1, 2)
+    ]
+
+    enriched, calls = asyncio.run(
+        agent.enrich_figure_evidence("RFT pressure gradient를 모두 알려줘", figures)
+    )
+
+    assert calls == 1
+    assert analyzer.calls == 1
+    assert enriched[0].quantities == [{"value": "0.34", "unit": "psi/ft"}]
+    assert enriched[1].quantities == enriched[0].quantities
+
+    already_complete = [
+        enriched[0].model_copy(update={"quantities": [{"value": "0.34", "unit": "psi/ft"}]})
+    ]
+    _, second_calls = asyncio.run(
+        agent.enrich_figure_evidence("RFT pressure gradient", already_complete)
+    )
+    assert second_calls == 0
+
+
+def test_focused_vision_is_bounded_to_two_unique_figures(tmp_path: Path) -> None:
+    agent = make_agent(tmp_path)
+
+    class Analyzer:
+        async def extract_focused(self, path, prompt):
+            return "analysis: 1.0 psi/ft"
+
+    agent.figure_analyzer = Analyzer()
+    figures = []
+    for index in range(3):
+        image = tmp_path / "data" / "figures" / f"doc_p1_fig{index + 2}.png"
+        image.parent.mkdir(parents=True, exist_ok=True)
+        image.write_bytes(b"image")
+        figures.append(
+            FigureEvidence(
+                evidence_id=f"FIG{index + 1}",
+                document="well-test.pdf",
+                page=1,
+                filename=image.name,
+                image_path=str(image),
+                excerpt="",
+            )
+        )
+
+    _, calls = asyncio.run(
+        agent.enrich_figure_evidence("모든 pressure gradient", figures)
+    )
+
+    assert calls == 2
+
+
+def test_supercharged_elimination_is_supported_but_failure_cause_is_not(
+    tmp_path: Path,
+) -> None:
+    agent = make_agent(tmp_path)
+    evidence = {
+        "FIG1": (
+            '"figure_number": "Figure 5"\n'
+            "supercharged points were discriminated out and eliminated from consideration"
+        )
+    }
+    supported = json.dumps(
+        {
+            "internal": [
+                {
+                    "claim": "Figure 5 says supercharged points were eliminated from consideration.",
+                    "citations": ["FIG1"],
+                }
+            ],
+            "external": [],
+            "synthesis": [],
+            "limitations": [],
+        }
+    )
+    unsupported = supported.replace(
+        "says supercharged points were eliminated from consideration",
+        "says sensor failure caused supercharging",
+    )
+
+    answer, validation, _ = agent.validate_structured_answer(
+        supported,
+        evidence,
+        [],
+        "How were supercharged points eliminated in Figure 5?",
+    )
+    wrong_answer, wrong_validation, _ = agent.validate_structured_answer(
+        unsupported,
+        evidence,
+        [],
+        "How were supercharged points eliminated in Figure 5?",
+    )
+
+    assert "eliminated from consideration" in answer
+    assert validation["figure_association_rejections"] == 0
+    assert "sensor failure" not in wrong_answer
+    assert wrong_validation["figure_association_rejections"] == 1
 
 
 @pytest.mark.parametrize(
