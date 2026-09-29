@@ -5,9 +5,12 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
+from app.services.engineering_validator import EngineeringValidator
+from app.services.refusal_policy import STRICT_REFUSAL, is_safe_refusal
 
-STRICT_REFUSAL = "제공된 문서 근거로는 확인할 수 없습니다."
+
 REVIEW_REQUIRED_TEXT = "사람의 검토가 필요합니다."
+_EVIDENCE_ID_RE = re.compile(r"\[((?:KB|WEB|FIG)\d+)\]", re.IGNORECASE)
 
 _DASH_TRANSLATION = str.maketrans(
     {
@@ -29,6 +32,13 @@ _NEGATION_RE = re.compile(
     re.IGNORECASE,
 )
 
+_ENGINEERING_REGIME_RULE_RE = re.compile(
+    r"radial|wellbore|storage|linear|spherical|boundary|recharge|방사|저장|선형|구형|경계"
+)
+_ENGINEERING_FEATURE_RULE_RE = re.compile(
+    r"unit|slope|plateau|horizontal|constant|overlap|derivative|기울기|평탄|수평|겹|도함수|미분"
+)
+
 
 @dataclass
 class BenchmarkEvaluation:
@@ -42,6 +52,10 @@ class BenchmarkEvaluation:
     forbidden_hits: list[str]
     source_pages: list[int]
     source_documents: list[str]
+    engineering_contradiction_count: int
+    false_premise_detected: bool
+    false_premise_correction_success: bool | None
+    unsupported_engineering_claim_count: int
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -107,6 +121,34 @@ def _sentence_chunks(value: str) -> list[str]:
     ]
 
 
+def _claim_chunks(value: str) -> list[str]:
+    """Split contrast and transition clauses before forbidden-rule matching."""
+    boundaries = re.compile(
+        r"\s*(?:,\s*)?(?:"
+        r"\bwhile\b|\bwhereas\b|\bbut\b|\bhowever\b|"
+        r"\bin\s+contrast\b|\bon\s+the\s+other\s+hand\b|"
+        r"\bafter\b|\bfollowing\b|\bonce\b|"
+        r"반면|하지만|그러나|그와\s*달리|이후|뒤(?:에|에는)?"
+        r")\s*",
+        re.IGNORECASE,
+    )
+    return [
+        clause.strip(" ,")
+        for sentence in _sentence_chunks(value)
+        for clause in boundaries.split(sentence)
+        if clause.strip(" ,")
+    ]
+
+
+def _attach_trailing_citations(value: str) -> str:
+    return re.sub(
+        r"([.!?])\s+((?:\[(?:KB|WEB|FIG)\d+\]\s*)+)",
+        r" \2\1 ",
+        value,
+        flags=re.IGNORECASE,
+    )
+
+
 def _required_failures(
     patterns: Iterable[str],
     answer: str,
@@ -129,9 +171,10 @@ def _forbidden_hits(
     answer: str,
 ) -> list[str]:
     hits: list[str] = []
+    engineering_validator = EngineeringValidator()
 
     for pattern in patterns:
-        for sentence in _sentence_chunks(answer):
+        for sentence in _claim_chunks(answer):
             if re.search(
                 pattern,
                 sentence,
@@ -139,6 +182,15 @@ def _forbidden_hits(
             ) is None:
                 continue
             if _NEGATION_RE.search(sentence):
+                continue
+            if (
+                _ENGINEERING_REGIME_RULE_RE.search(pattern)
+                and _ENGINEERING_FEATURE_RULE_RE.search(pattern)
+                and engineering_validator.validate_claim(
+                    sentence,
+                    require_evidence_support=False,
+                ).engineering_contradiction_count == 0
+            ):
                 continue
             hits.append(pattern)
             break
@@ -161,17 +213,18 @@ def evaluate_benchmark_answer(
     )
     stripped_answer = str(answer or "").strip()
 
+    safe_refusal = is_safe_refusal(stripped_answer)
     if expected_behavior == "refuse":
-        behavior_passed = stripped_answer == STRICT_REFUSAL
+        behavior_passed = safe_refusal
     elif expected_behavior == "partial_answer":
         behavior_passed = (
-            stripped_answer != STRICT_REFUSAL
+            not safe_refusal
             and REVIEW_REQUIRED_TEXT not in stripped_answer
         )
     else:
         behavior_passed = (
             bool(stripped_answer)
-            and stripped_answer != STRICT_REFUSAL
+            and not safe_refusal
             and REVIEW_REQUIRED_TEXT not in stripped_answer
         )
 
@@ -182,6 +235,70 @@ def evaluate_benchmark_answer(
     forbidden_hits = _forbidden_hits(
         item.get("forbidden_patterns") or [],
         stripped_answer,
+    )
+
+    engineering_validator = EngineeringValidator()
+    evidence_by_id = {
+        str(source.get("evidence_id") or "").upper(): str(
+            source.get("excerpt") or source.get("snippet") or ""
+        )
+        for source in source_list
+        if str(source.get("evidence_id") or "").strip()
+    }
+    all_evidence = "\n".join(
+        str(source.get("excerpt") or source.get("snippet") or "")
+        for source in source_list
+    ).strip()
+    engineering_contradiction_count = 0
+    unsupported_engineering_claim_count = 0
+    for sentence in _sentence_chunks(_attach_trailing_citations(stripped_answer)):
+        cited_ids = [value.upper() for value in _EVIDENCE_ID_RE.findall(sentence)]
+        cited_evidence = [
+            evidence_by_id[value]
+            for value in cited_ids
+            if value in evidence_by_id
+        ]
+        if cited_evidence:
+            candidates = [
+                engineering_validator.validate_claim(
+                    sentence,
+                    evidence,
+                    require_evidence_support=True,
+                )
+                for evidence in cited_evidence
+            ]
+            engineering = min(
+                candidates,
+                key=lambda result: (
+                    len(result.reasons),
+                    result.engineering_contradiction_count,
+                    result.unsupported_engineering_claim_count,
+                ),
+            )
+        else:
+            engineering = engineering_validator.validate_claim(
+                sentence,
+                all_evidence,
+                require_evidence_support=bool(all_evidence),
+            )
+        engineering_contradiction_count += (
+            engineering.engineering_contradiction_count
+        )
+        unsupported_engineering_claim_count += (
+            engineering.unsupported_engineering_claim_count
+        )
+
+    question = str(item.get("question") or "")
+    (
+        false_premise_detected,
+        false_premise_corrected,
+        _,
+    ) = engineering_validator.false_premise_correction(
+        question,
+        stripped_answer,
+    )
+    false_premise_correction_success = (
+        false_premise_corrected if false_premise_detected else None
     )
 
     expected_document = item.get("expected_document")
@@ -212,12 +329,20 @@ def evaluate_benchmark_answer(
         behavior_passed
         and not required_failures
         and not forbidden_hits
+        and engineering_contradiction_count == 0
+        and unsupported_engineering_claim_count == 0
+        and false_premise_correction_success is not False
     )
     passed = (
         answer_passed
         and expected_document_hit is not False
     )
-    hallucination_detected = bool(forbidden_hits) or (
+    hallucination_detected = (
+        bool(forbidden_hits)
+        or engineering_contradiction_count > 0
+        or unsupported_engineering_claim_count > 0
+        or false_premise_correction_success is False
+    ) or (
         expected_behavior == "refuse" and not behavior_passed
     )
 
@@ -232,4 +357,10 @@ def evaluate_benchmark_answer(
         forbidden_hits=forbidden_hits,
         source_pages=source_pages,
         source_documents=source_documents,
+        engineering_contradiction_count=engineering_contradiction_count,
+        false_premise_detected=false_premise_detected,
+        false_premise_correction_success=false_premise_correction_success,
+        unsupported_engineering_claim_count=(
+            unsupported_engineering_claim_count
+        ),
     )

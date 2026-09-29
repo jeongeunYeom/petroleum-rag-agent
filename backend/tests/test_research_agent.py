@@ -1,4 +1,5 @@
 import asyncio
+import json
 from pathlib import Path
 
 import pytest
@@ -9,21 +10,53 @@ from pydantic import ValidationError
 from app.api.research_routes import get_research_agent, router as research_router
 from app.core.config import Settings
 from app.core.error_mapping import ExternalServiceError
-from app.models.research_schemas import ResearchRequest
+from app.models.research_schemas import FigureEvidence, InternalEvidence, ResearchRequest
 from app.services.research_agent import ResearchAgent
+from app.services.vector_store import VectorStore
 
 
 class FakeVectorStore:
-    def __init__(self, dense=None, sparse=None):
+    def __init__(
+        self,
+        dense=None,
+        sparse=None,
+        bm25=None,
+        figures=None,
+        figure_sparse=None,
+        figure_bm25=None,
+    ):
         self.dense = dense or []
         self.sparse = sparse or []
+        self.bm25 = bm25 or []
+        self.figures = figures or []
+        self.figure_sparse = figure_sparse or []
+        self.figure_bm25 = figure_bm25 or []
+        self.calls = []
         self.write_attempted = False
 
     def search(self, query: str, top_k: int):
+        self.calls.append("dense")
         return self.dense[:top_k]
 
     def keyword_search(self, query: str, top_k: int):
+        self.calls.append("keyword")
         return self.sparse[:top_k]
+
+    def bm25_search(self, query: str, top_k: int):
+        self.calls.append("bm25")
+        return self.bm25[:top_k]
+
+    def search_figures(self, query: str, top_k: int):
+        self.calls.append("figure_dense")
+        return self.figures[:top_k]
+
+    def keyword_search_figures(self, query: str, top_k: int):
+        self.calls.append("figure_keyword")
+        return self.figure_sparse[:top_k]
+
+    def bm25_search_figures(self, query: str, top_k: int):
+        self.calls.append("figure_bm25")
+        return self.figure_bm25[:top_k]
 
     def add_chunks(self, chunks):
         self.write_attempted = True
@@ -66,8 +99,8 @@ class StructuredOllama:
         self.answers = iter(answers)
         self.calls = []
 
-    async def chat_structured(self, messages, schema, model=None):
-        self.calls.append((messages, schema, model))
+    async def chat_structured(self, messages, schema, model=None, **options):
+        self.calls.append((messages, schema, model, options))
         return next(self.answers)
 
 
@@ -93,10 +126,13 @@ def make_agent(
     vector_store=None,
     ollama=None,
     web_searcher=None,
+    retrieval_mode="legacy",
 ) -> ResearchAgent:
     settings = Settings(
         data_dir=tmp_path / "data",
         agent_workspace_dir=tmp_path / "workspace",
+        retrieval_mode=retrieval_mode,
+        web_fetch_enabled=False,
     )
     return ResearchAgent(
         settings,
@@ -106,12 +142,139 @@ def make_agent(
     )
 
 
+def test_retrieval_modes_switch_only_the_internal_retriever(tmp_path: Path) -> None:
+    dense = [{"id": "dense", "text": "wellbore storage", "metadata": {}}]
+    keyword = [{"id": "keyword", "text": "wellbore storage", "metadata": {}}]
+    bm25 = [{"id": "bm25", "text": "wellbore storage", "metadata": {}}]
+
+    legacy_store = FakeVectorStore(dense=dense, sparse=keyword, bm25=bm25)
+    legacy = make_agent(tmp_path, vector_store=legacy_store)
+    assert legacy.search_knowledge_base("wellbore storage", 2)
+    assert legacy_store.calls == [
+        "dense", "keyword", "dense", "keyword", "dense", "keyword"
+    ]
+
+    hybrid_store = FakeVectorStore(dense=dense, sparse=keyword, bm25=bm25)
+    hybrid = make_agent(
+        tmp_path,
+        vector_store=hybrid_store,
+        retrieval_mode="hybrid",
+    )
+    assert hybrid.search_knowledge_base("wellbore storage", 2)
+    assert hybrid_store.calls == [
+        "dense", "bm25", "dense", "bm25", "dense", "bm25"
+    ]
+
+
+def test_well_test_query_expansion_is_retrieval_only() -> None:
+    expanded = ResearchAgent.expand_engineering_retrieval_query(
+        "Is radial flow unit-slope?"
+    )
+
+    assert "wellbore storage" in expanded
+    assert "pressure derivative overlap" in expanded
+    assert "horizontal constant derivative plateau" in expanded
+    assert ResearchAgent.expand_engineering_retrieval_query("CO2 storage") == (
+        "CO2 storage"
+    )
+
+
+def test_hybrid_rerank_uses_cross_encoder_scores(tmp_path: Path) -> None:
+    hits = [
+        {"id": "first", "text": "wellbore storage first", "metadata": {}},
+        {"id": "second", "text": "wellbore storage second", "metadata": {}},
+    ]
+    agent = make_agent(
+        tmp_path,
+        vector_store=FakeVectorStore(dense=hits, bm25=hits),
+        retrieval_mode="hybrid_rerank",
+    )
+
+    class FakeReranker:
+        def predict(self, pairs, **kwargs):
+            assert len(pairs) == 2
+            return [0.1, 0.9]
+
+    agent._reranker = FakeReranker()
+    result = agent.search_knowledge_base("wellbore storage", 2)
+
+    assert [hit["id"] for hit in result] == ["second", "first"]
+    assert result[0]["reranker_score"] == pytest.approx(0.9)
+
+
+def test_bm25_search_ranks_existing_chroma_documents_without_writes() -> None:
+    class Collection:
+        def get(self, **kwargs):
+            return {
+                "ids": ["best", "partial", "other"],
+                "documents": [
+                    "Wellbore storage storage controls early time pressure.",
+                    "Wellbore pressure response.",
+                    "Porosity and permeability.",
+                ],
+                "metadatas": [{}, {}, {}],
+            }
+
+    store = VectorStore.__new__(VectorStore)
+    store.collection = Collection()
+
+    result = store.bm25_search("wellbore storage", 2)
+
+    assert [hit["id"] for hit in result] == ["best", "partial"]
+    assert result[0]["keyword_score"] > result[1]["keyword_score"]
+
+
+def test_vector_store_figure_search_filters_existing_collection() -> None:
+    class Collection:
+        def __init__(self):
+            self.query_args = []
+            self.get_args = []
+
+        def query(self, **kwargs):
+            self.query_args.append(kwargs)
+            return {
+                "ids": [["fig"]],
+                "documents": [["[Extracted figure notes] pressure gradient"]],
+                "metadatas": [[{"page": 440}]],
+                "distances": [[0.1]],
+            }
+
+        def get(self, **kwargs):
+            self.get_args.append(kwargs)
+            return {
+                "ids": ["fig"],
+                "documents": ["[Extracted figure notes] pressure gradient"],
+                "metadatas": [{"page": 440}],
+            }
+
+    store = VectorStore.__new__(VectorStore)
+    store.collection = Collection()
+    store.embed = lambda texts: [[0.1, 0.2]]
+
+    dense = store.search_figures("RFT pressure gradient", 3)
+    sparse = store.bm25_search_figures("RFT pressure gradient", 3)
+
+    assert dense[0]["id"] == "fig"
+    assert sparse[0]["id"] == "fig"
+    expected_markers = {
+        "[Extracted figure notes]",
+        "[Figure Note Metadata]",
+        "image_path:",
+    }
+    assert {
+        call["where_document"]["$contains"]
+        for call in store.collection.query_args
+    } == expected_markers
+    assert {
+        call["where_document"]["$contains"]
+        for call in store.collection.get_args
+    } == expected_markers
 def test_external_search_normalizes_and_deduplicates_urls(tmp_path: Path) -> None:
     raw = [
         {
             "title": "Paper A",
             "href": "https://Example.com/paper/?utm_source=test#abstract",
-            "body": "Result A",
+            "body": "CO2 storage result A",
         },
         {
             "title": "Duplicate",
@@ -121,7 +284,7 @@ def test_external_search_normalizes_and_deduplicates_urls(tmp_path: Path) -> Non
         {
             "title": "Paper B",
             "url": "https://journal.test/b?z=2&a=1",
-            "snippet": "Result B",
+            "snippet": "CO2 storage result B",
         },
         {
             "title": "Paper B duplicate",
@@ -164,10 +327,18 @@ def test_rrf_fusion_preserves_separate_kb_web_and_figure_ids(tmp_path: Path) -> 
     }
     figure_hit = {
         "id": "figure-1",
-        "text": "[Extracted Figure Notes]\ntitle: Saturation trend\nimage_path: fig_10.png",
+        "text": (
+            "[Extracted Figure Notes]\ntitle: Residual trapping saturation trend\n"
+            "image_path: fig_10.png"
+        ),
         "metadata": {"filename": "storage.pdf", "page": 10, "chunk_type": "figure_note"},
     }
-    store = FakeVectorStore(dense=[text_hit, figure_hit], sparse=[text_hit])
+    store = FakeVectorStore(
+        dense=[text_hit, figure_hit],
+        sparse=[text_hit],
+        figures=[figure_hit],
+        figure_sparse=[figure_hit],
+    )
     agent = make_agent(
         tmp_path,
         vector_store=store,
@@ -249,12 +420,465 @@ def test_figure_query_keeps_a_figure_candidate(tmp_path: Path) -> None:
     }
     agent = make_agent(
         tmp_path,
-        vector_store=FakeVectorStore(dense=[*text_hits, figure_hit]),
+        vector_store=FakeVectorStore(
+            dense=[*text_hits, figure_hit],
+            figures=[figure_hit],
+            figure_sparse=[figure_hit],
+        ),
     )
 
     hits = agent.search_knowledge_base("pressure graph", 2)
 
     assert [hit["id"] for hit in hits] == ["text-0", "figure-late"]
+
+
+def test_figure_question_runs_independent_figure_channels(tmp_path: Path) -> None:
+    figure = {
+        "id": "fig-2",
+        "text": (
+            "[Extracted figure notes]\nFigure 2: [Figure Note Metadata] "
+            "title: Appraisal Well RFT Survey image_path: appraisal.png "
+            "reference_lines: 0.34 psi/ft"
+        ),
+        "metadata": {"document": "well-test.pdf", "page": 440},
+    }
+    store = FakeVectorStore(figures=[figure], figure_bm25=[figure])
+    agent = make_agent(tmp_path, vector_store=store, retrieval_mode="hybrid")
+
+    hits = agent.search_knowledge_base(
+        "Figure 2 Appraisal Well RFT pressure gradient",
+        5,
+    )
+
+    assert [hit["id"] for hit in hits] == ["fig-2"]
+    assert "figure_dense" in store.calls
+    assert "figure_bm25" in store.calls
+
+
+def test_non_figure_question_does_not_run_or_force_figure_channel(tmp_path: Path) -> None:
+    text = {
+        "id": "text",
+        "text": "Porosity is pore volume divided by bulk volume.",
+        "metadata": {},
+    }
+    irrelevant_figure = {
+        "id": "fig",
+        "text": "[Extracted figure notes] porosity chart image_path: porosity.png",
+        "metadata": {},
+    }
+    store = FakeVectorStore(
+        dense=[text],
+        sparse=[text],
+        figures=[irrelevant_figure],
+        figure_sparse=[irrelevant_figure],
+    )
+    agent = make_agent(tmp_path, vector_store=store)
+
+    hits = agent.search_knowledge_base("Define porosity", 3)
+
+    assert [hit["id"] for hit in hits] == ["text"]
+    assert "figure_dense" not in store.calls
+
+
+def test_normalization_keeps_figure_2_and_figure_3_metadata_separate(tmp_path: Path) -> None:
+    hit = {
+        "id": "rft-page",
+        "text": (
+            "[Extracted figure notes]\n"
+            "Figure 2: [Figure Note Metadata] title: Appraisal Well RFT Survey "
+            "image_path: appraisal.png reference_lines: 0.34 psi/ft\n"
+            "Figure 3: [Figure Note Metadata] title: RFT Survey after Significant Production "
+            "image_path: production.png reference_lines: 0.29 psi/ft"
+        ),
+        "metadata": {"document": "well-test.pdf", "page": 440},
+    }
+    agent = make_agent(tmp_path)
+
+    _, figures = agent.normalize_internal_evidence([hit])
+
+    assert [item.figure_number for item in figures] == ["Figure 2", "Figure 3"]
+    assert [item.filename for item in figures] == ["appraisal.png", "production.png"]
+    assert "0.29" not in figures[0].excerpt
+    assert "0.34" not in figures[1].excerpt
+
+
+def test_legacy_image_index_is_not_used_as_figure_number(tmp_path: Path) -> None:
+    hit = {
+        "id": "legacy-note",
+        "text": (
+            "[Extracted figure notes]\nFigure 2: [Figure Note Metadata]\n"
+            "image_index: 2\nimage_path: type_curve.png\ntitle: Log-Log Plot"
+        ),
+        "metadata": {"document": "well-test.pdf", "page": 263},
+    }
+
+    _, figures = make_agent(tmp_path).normalize_internal_evidence([hit])
+
+    assert figures[0].evidence_id == "FIG1"
+    assert figures[0].image_index == 2
+    assert figures[0].figure_number is None
+
+
+def test_figure_number_resolves_from_related_page_caption(tmp_path: Path) -> None:
+    class ContextStore(FakeVectorStore):
+        def get_page_context(self, document, page, *, adjacent=False):
+            return "Figure 2 Appraisal Well RFT Survey\nFigure 3 RFT Survey after Significant Production"
+
+    hit = {
+        "id": "production",
+        "text": (
+            "[Extracted figure notes]\nFigure 2: [Figure Note Metadata]\n"
+            "image_index: 2\nimage_path: production.png\n"
+            "title: RFT Survey after Significant Production"
+        ),
+        "metadata": {"document": "well-test.pdf", "page": 440},
+    }
+
+    _, figures = make_agent(
+        tmp_path,
+        vector_store=ContextStore(),
+    ).normalize_internal_evidence([hit])
+
+    assert figures[0].figure_number == "Figure 3"
+    assert "Figure 2 Appraisal" in figures[0].related_page_text
+
+
+def test_figure_note_fields_and_quantities_are_structured(tmp_path: Path) -> None:
+    hit = {
+        "id": "figure",
+        "text": (
+            "Figure 8 Type curve\n[Extracted figure notes]\n"
+            "Figure 1: [Figure Note Metadata]\nimage_index: 1\n"
+            "image_path: curve.png\ntitle: Type Curve\n"
+            "x_axis: elapsed time\nx_axis_unit: hr\n"
+            "y_axis: pressure response\ny_axis_unit: psi\nseries_count: 2\n"
+            "series_descriptions:\n  - pressure\n  - pressure derivative\n"
+            "legend: pressure; pressure derivative\nreference_lines: 0.34 psi/ft"
+        ),
+        "metadata": {"document": "well-test.pdf", "page": 8},
+    }
+
+    _, figures = make_agent(tmp_path).normalize_internal_evidence([hit])
+    figure = figures[0]
+
+    assert figure.figure_number == "Figure 8"
+    assert figure.x_axis == "elapsed time"
+    assert figure.x_axis_unit == "hr"
+    assert figure.y_axis == "pressure response"
+    assert figure.series_count == 2
+    assert figure.series_descriptions == ["pressure", "pressure derivative"]
+    assert figure.quantities == [{"value": "0.34", "unit": "psi/ft"}]
+
+
+def test_focused_vision_runs_only_for_missing_fields_and_is_cached(tmp_path: Path) -> None:
+    image = tmp_path / "data" / "figures" / "doc_p1_fig2.png"
+    image.parent.mkdir(parents=True)
+    image.write_bytes(b"image")
+    agent = make_agent(tmp_path)
+
+    class Analyzer:
+        def __init__(self):
+            self.calls = 0
+
+        async def extract_focused(self, path, prompt):
+            self.calls += 1
+            return "analysis: gradient 0.34 psi/ft\nreference_lines: 0.34 psi/ft"
+
+    analyzer = Analyzer()
+    agent.figure_analyzer = analyzer
+    figures = [
+        FigureEvidence(
+            evidence_id=f"FIG{index}",
+            document="well-test.pdf",
+            page=1,
+            filename=image.name,
+            image_path=str(image),
+            excerpt="",
+        )
+        for index in (1, 2)
+    ]
+
+    enriched, calls = asyncio.run(
+        agent.enrich_figure_evidence("RFT pressure gradient를 모두 알려줘", figures)
+    )
+
+    assert calls == 1
+    assert analyzer.calls == 1
+    assert enriched[0].quantities == [{"value": "0.34", "unit": "psi/ft"}]
+    assert enriched[1].quantities == enriched[0].quantities
+
+    already_complete = [
+        enriched[0].model_copy(update={"quantities": [{"value": "0.34", "unit": "psi/ft"}]})
+    ]
+    _, second_calls = asyncio.run(
+        agent.enrich_figure_evidence("RFT pressure gradient", already_complete)
+    )
+    assert second_calls == 0
+
+
+def test_focused_vision_is_bounded_to_two_unique_figures(tmp_path: Path) -> None:
+    agent = make_agent(tmp_path)
+
+    class Analyzer:
+        async def extract_focused(self, path, prompt):
+            return "analysis: 1.0 psi/ft"
+
+    agent.figure_analyzer = Analyzer()
+    figures = []
+    for index in range(3):
+        image = tmp_path / "data" / "figures" / f"doc_p1_fig{index + 2}.png"
+        image.parent.mkdir(parents=True, exist_ok=True)
+        image.write_bytes(b"image")
+        figures.append(
+            FigureEvidence(
+                evidence_id=f"FIG{index + 1}",
+                document="well-test.pdf",
+                page=1,
+                filename=image.name,
+                image_path=str(image),
+                excerpt="",
+            )
+        )
+
+    _, calls = asyncio.run(
+        agent.enrich_figure_evidence("모든 pressure gradient", figures)
+    )
+
+    assert calls == 2
+
+
+def test_supercharged_elimination_is_supported_but_failure_cause_is_not(
+    tmp_path: Path,
+) -> None:
+    agent = make_agent(tmp_path)
+    evidence = {
+        "FIG1": (
+            '"figure_number": "Figure 5"\n'
+            "supercharged points were discriminated out and eliminated from consideration"
+        )
+    }
+    supported = json.dumps(
+        {
+            "internal": [
+                {
+                    "claim": "Figure 5 says supercharged points were eliminated from consideration.",
+                    "citations": ["FIG1"],
+                }
+            ],
+            "external": [],
+            "synthesis": [],
+            "limitations": [],
+        }
+    )
+    unsupported = supported.replace(
+        "says supercharged points were eliminated from consideration",
+        "says sensor failure caused supercharging",
+    )
+
+    answer, validation, _ = agent.validate_structured_answer(
+        supported,
+        evidence,
+        [],
+        "How were supercharged points eliminated in Figure 5?",
+    )
+    wrong_answer, wrong_validation, _ = agent.validate_structured_answer(
+        unsupported,
+        evidence,
+        [],
+        "How were supercharged points eliminated in Figure 5?",
+    )
+
+    assert "eliminated from consideration" in answer
+    assert validation["figure_association_rejections"] == 0
+    assert "sensor failure" not in wrong_answer
+    assert wrong_validation["figure_association_rejections"] == 1
+
+
+@pytest.mark.parametrize(
+    ("claim", "citation"),
+    [
+        ("Figure 3 reports 0.34 psi/ft.", "FIG1"),
+        ("Figure 2 reports 0.29 psi/ft.", "FIG2"),
+    ],
+)
+def test_validator_rejects_numeric_attribution_to_wrong_figure(
+    tmp_path: Path,
+    claim: str,
+    citation: str,
+) -> None:
+    agent = make_agent(tmp_path)
+    raw = json.dumps(
+        {
+            "internal": [{"claim": claim, "citations": [citation]}],
+            "external": [],
+            "synthesis": [],
+            "limitations": [],
+        }
+    )
+    evidence = {
+        "FIG1": "figure=Figure 2\ntitle=Appraisal Well RFT Survey\n0.34 psi/ft",
+        "FIG2": (
+            "figure=Figure 3\ntitle=RFT Survey after Significant Production\n"
+            "0.29 psi/ft 0.37 psi/ft 0.42 psi/ft"
+        ),
+    }
+
+    answer, validation, _ = agent.validate_structured_answer(
+        raw,
+        evidence,
+        [],
+        "Compare Figure 2 and Figure 3 pressure gradient",
+    )
+
+    assert claim not in answer
+    assert validation["figure_association_rejections"] == 1
+
+
+def test_figure_numeric_claim_requires_figure_citation(tmp_path: Path) -> None:
+    agent = make_agent(tmp_path)
+    raw = json.dumps(
+        {
+            "internal": [
+                {
+                    "claim": "Figure 2 reports 0.34 psi/ft.",
+                    "citations": ["KB1"],
+                }
+            ],
+            "external": [],
+            "synthesis": [],
+            "limitations": [],
+        }
+    )
+
+    _, validation, _ = agent.validate_structured_answer(
+        raw,
+        {"KB1": "Figure 2 reports 0.34 psi/ft."},
+        [],
+        "What pressure gradient is displayed in Figure 2?",
+    )
+
+    assert validation["figure_citation_rejections"] == 1
+    assert validation["figure_citation_correctness"] is False
+
+
+def test_figure_axis_and_series_are_validated_separately(tmp_path: Path) -> None:
+    agent = make_agent(tmp_path)
+    evidence = {
+        "FIG1": (
+            "figure=Figure 8\nx_axis: elapsed time\ny_axis: pressure change\n"
+            "series_descriptions: pressure and pressure derivative"
+        )
+    }
+    correct = json.dumps(
+        {
+            "internal": [
+                {
+                    "claim": (
+                        "Figure 8 uses elapsed time on the x-axis; pressure and pressure "
+                        "derivative are plotted series."
+                    ),
+                    "citations": ["FIG1"],
+                }
+            ],
+            "external": [],
+            "synthesis": [],
+            "limitations": [],
+        }
+    )
+    wrong = correct.replace(
+        "uses elapsed time on the x-axis; pressure and pressure derivative are plotted series",
+        "x-axis is a pressure series",
+    )
+
+    answer, validation, _ = agent.validate_structured_answer(
+        correct,
+        evidence,
+        [],
+        "In Figure 8 identify the x-axis and pressure derivative series",
+    )
+    wrong_answer, wrong_validation, _ = agent.validate_structured_answer(
+        wrong,
+        evidence,
+        [],
+        "In Figure 8 identify the x-axis and pressure derivative series",
+    )
+
+    assert "elapsed time" in answer
+    assert validation["figure_association_rejections"] == 0
+    assert "x-axis is a pressure series" not in wrong_answer
+    assert wrong_validation["figure_association_rejections"] == 1
+
+
+def test_supercharged_figure_question_prefers_direct_point_treatment(tmp_path: Path) -> None:
+    direct = {
+        "id": "direct",
+        "text": (
+            "[Extracted figure notes]\nFigure 2: title: Appraisal Well RFT Survey "
+            "supercharged points shown as open circles were excluded image_path: rft.png"
+        ),
+        "metadata": {"page": 440},
+    }
+    generic = {
+        "id": "generic",
+        "text": "[Extracted figure notes] pressure chart image_path: generic.png",
+        "metadata": {"page": 10},
+    }
+    store = FakeVectorStore(
+        figures=[generic, direct],
+        figure_bm25=[direct, generic],
+    )
+    agent = make_agent(tmp_path, vector_store=store, retrieval_mode="hybrid")
+
+    hits = agent.search_knowledge_base(
+        "How were supercharged points identified or excluded in the RFT Figure?",
+        5,
+    )
+
+    assert [hit["id"] for hit in hits] == ["direct"]
+
+
+def test_irrelevant_figure_is_not_forced_into_results(tmp_path: Path) -> None:
+    text = {
+        "id": "text",
+        "text": "Pressure transient interpretation uses diagnostic plots.",
+        "metadata": {},
+    }
+    irrelevant = {
+        "id": "irrelevant",
+        "text": "[Extracted figure notes] porosity map image_path: porosity.png",
+        "metadata": {},
+    }
+    store = FakeVectorStore(
+        dense=[text],
+        sparse=[text],
+        figures=[irrelevant],
+        figure_sparse=[irrelevant],
+    )
+    agent = make_agent(tmp_path, vector_store=store)
+
+    hits = agent.search_knowledge_base("pressure graph", 3)
+
+    assert [hit["id"] for hit in hits] == ["text"]
+
+
+def test_empty_figure_channel_preserves_existing_ranked_hits(tmp_path: Path) -> None:
+    figure_from_normal_retrieval = {
+        "id": "existing-figure",
+        "text": (
+            "[Extracted figure notes] pressure graph "
+            "image_path: existing.png"
+        ),
+        "metadata": {"page": 12},
+    }
+    store = FakeVectorStore(
+        dense=[figure_from_normal_retrieval],
+        sparse=[figure_from_normal_retrieval],
+    )
+    agent = make_agent(tmp_path, vector_store=store)
+
+    hits = agent.search_knowledge_base("pressure graph", 3)
+
+    assert [hit["id"] for hit in hits] == ["existing-figure"]
 
 
 def test_external_evidence_is_never_written_to_chroma(tmp_path: Path) -> None:
@@ -264,7 +888,11 @@ def test_external_evidence_is_never_written_to_chroma(tmp_path: Path) -> None:
         vector_store=store,
         ollama=FakeOllama("외부 근거입니다. [WEB1]"),
         web_searcher=lambda query, limit: [
-            {"title": "Research", "url": "https://example.org/a", "snippet": "Recent result"}
+            {
+                "title": "Research",
+                "url": "https://example.org/a",
+                "snippet": "Recent CO2 research result",
+            }
         ],
     )
     request = ResearchRequest(query="latest CO2 research", use_internal=False)
@@ -472,6 +1100,257 @@ def test_structured_validator_rejects_claim_unrelated_to_query(tmp_path: Path) -
     assert validation["query_relevance_rejections"] == 1
 
 
+def test_structured_validator_rejects_wrong_flow_regime_attribution(
+    tmp_path: Path,
+) -> None:
+    agent = make_agent(tmp_path)
+    raw = (
+        '{"internal":[{"claim":"Radial flow has a unit-slope pressure '
+        'derivative.","citations":["KB1"]}],"external":[],"synthesis":[],'
+        '"limitations":[]}'
+    )
+
+    answer, validation, _ = agent.validate_structured_answer(
+        raw,
+        {"KB1": "Radial flow has a horizontal constant derivative plateau."},
+        [],
+        "Describe radial flow.",
+    )
+
+    assert "unit-slope pressure" not in answer
+    assert validation["engineering_contradiction_count"] == 1
+    assert validation["unsupported_engineering_claim_count"] == 0
+    assert validation["engineering_validation_reasons"][0]["rule_id"] == (
+        "WT-REGIME-CONTRADICTION"
+    )
+
+
+def test_structured_false_premise_correction_passes(tmp_path: Path) -> None:
+    agent = make_agent(tmp_path)
+    raw = (
+        '{"internal":['
+        '{"claim":"The premise is incorrect: radial flow does not have unit-slope.",'
+        '"citations":["KB1"]},'
+        '{"claim":"Radial flow pressure and derivative do not overlap.",'
+        '"citations":["KB1"]},'
+        '{"claim":"Wellbore storage pressure and derivative overlap on a unit-slope line.",'
+        '"citations":["KB1"]},'
+        '{"claim":"Radial flow has a horizontal constant derivative plateau.",'
+        '"citations":["KB1"]}],'
+        '"external":[],"synthesis":[],"limitations":[]}'
+    )
+
+    answer, validation, _ = agent.validate_structured_answer(
+        raw,
+        {
+            "KB1": (
+                "Wellbore storage pressure and pressure derivative overlap on a "
+                "unit-slope line. Radial flow has a horizontal constant "
+                "pressure-derivative plateau."
+            )
+        },
+        [],
+        "Radial flow pressure and derivative overlap with unit-slope. Correct?",
+    )
+
+    assert "horizontal constant derivative plateau" in answer
+    assert validation["false_premise_detected"] is True
+    assert validation["false_premise_corrected"] is True
+    assert validation["engineering_validation_passed"] is True
+
+
+def test_validator_guided_repair_corrects_engineering_claim(tmp_path: Path) -> None:
+    evidence = (
+        "Wellbore storage pressure and pressure derivative overlap on a unit-slope "
+        "line. Radial flow has a horizontal constant pressure-derivative plateau."
+    )
+    hit = {
+        "id": "chunk-1",
+        "text": evidence,
+        "metadata": {"filename": "welltest.pdf", "page": 219},
+    }
+    invalid = (
+        '{"internal":[{"claim":"Radial flow has a unit-slope pressure '
+        'derivative.","citations":["KB1"]}],"external":[],"synthesis":[],'
+        '"limitations":[]}'
+    )
+    corrected = (
+        '{"internal":['
+        '{"claim":"The premise is incorrect: radial flow does not have unit-slope.",'
+        '"citations":["KB1"]},'
+        '{"claim":"Radial flow pressure and derivative do not overlap.",'
+        '"citations":["KB1"]},'
+        '{"claim":"Wellbore storage pressure and derivative overlap on a unit-slope line.",'
+        '"citations":["KB1"]},'
+        '{"claim":"Radial flow has a horizontal constant derivative plateau.",'
+        '"citations":["KB1"]}],'
+        '"external":[],"synthesis":[],"limitations":[]}'
+    )
+    ollama = StructuredOllama([invalid, corrected])
+    agent = make_agent(
+        tmp_path,
+        vector_store=FakeVectorStore(dense=[hit]),
+        ollama=ollama,
+    )
+
+    response = asyncio.run(
+        agent.research(
+            ResearchRequest(
+                query=(
+                    "Radial flow pressure and derivative overlap with unit-slope. "
+                    "Correct?"
+                ),
+                use_external=False,
+            )
+        )
+    )
+
+    assert len(ollama.calls) == 2
+    assert "premise is incorrect" in response.answer
+    assert "Wellbore storage" in response.answer
+    assert "horizontal constant derivative plateau" in response.answer
+    assert response.validation["repair_attempts"] == 1
+    assert response.validation["engineering_validation_passed"] is True
+    assert response.validation["false_premise_corrected"] is True
+
+
+def test_engineering_repair_is_bounded_and_receives_structured_reasons(
+    tmp_path: Path,
+) -> None:
+    hit = {
+        "id": "chunk-1",
+        "text": "Radial flow has a horizontal constant derivative plateau.",
+        "metadata": {"filename": "welltest.pdf", "page": 219},
+    }
+    invalid = (
+        '{"internal":[{"claim":"Radial flow has a unit-slope pressure '
+        'derivative.","citations":["KB1"]}],"external":[],"synthesis":[],'
+        '"limitations":[]}'
+    )
+    ollama = StructuredOllama([invalid, invalid, invalid])
+    agent = make_agent(
+        tmp_path,
+        vector_store=FakeVectorStore(dense=[hit]),
+        ollama=ollama,
+    )
+
+    response = asyncio.run(
+        agent.research(
+            ResearchRequest(
+                query="Radial flow derivative is unit-slope. Correct?",
+                use_external=False,
+            )
+        )
+    )
+
+    assert len(ollama.calls) == 3
+    assert response.validation["repair_attempts"] == 2
+    assert response.validation["engineering_contradiction_count"] == 1
+    assert "교정하지 못했습니다" in response.answer
+    assert response.validation["engineering_validation_passed"] is False
+    assert response.validation["safe_refusal_after_repair"] is True
+    repair_prompt = ollama.calls[1][0][-1]["content"]
+    assert "WT-REGIME-CONTRADICTION" in repair_prompt
+    assert "private chain-of-thought" in repair_prompt
+    for field in (
+        "rule_id",
+        "failed_claim",
+        "failure_reason",
+        "relevant_evidence_ids",
+        "expected_engineering_relation",
+    ):
+        assert field in repair_prompt
+    assert "horizontal/constant pressure-derivative plateau" in repair_prompt
+
+
+def test_grounded_false_premise_fallback_after_two_failed_repairs(
+    tmp_path: Path,
+) -> None:
+    evidence = (
+        "Wellbore storage pressure and pressure derivative overlap on a unit-slope "
+        "line. Radial flow has a horizontal constant pressure-derivative plateau."
+    )
+    hit = {
+        "id": "chunk-1",
+        "text": evidence,
+        "metadata": {"filename": "welltest.pdf", "page": 219},
+    }
+    invalid = (
+        '{"internal":[{"claim":"Radial flow has a unit-slope pressure '
+        'derivative.","citations":["KB1"]}],"external":[],"synthesis":[],'
+        '"limitations":[]}'
+    )
+    ollama = StructuredOllama([invalid, invalid, invalid])
+    agent = make_agent(
+        tmp_path,
+        vector_store=FakeVectorStore(dense=[hit]),
+        ollama=ollama,
+    )
+
+    response = asyncio.run(
+        agent.research(
+            ResearchRequest(
+                query="Radial flow pressure and derivative overlap with unit-slope. Correct?",
+                use_external=False,
+            )
+        )
+    )
+
+    assert response.validation["deterministic_false_premise_fallback"] is True
+    assert response.validation["false_premise_corrected"] is True
+    assert response.validation["repair_attempts"] == 2
+    assert "정확하지 않습니다. [KB1]" in response.answer
+    assert "wellbore storage" in response.answer
+    assert "radial flow" in response.answer
+    assert "[KB1]" in response.answer
+
+
+def test_false_premise_fallback_requires_cited_support(tmp_path: Path) -> None:
+    agent = make_agent(tmp_path)
+    query = "Radial flow derivative is unit-slope. Correct?"
+
+    assert agent._grounded_false_premise_fallback(query, {}) is None
+    assert agent._grounded_false_premise_fallback(
+        query,
+        {"KB1": "Radial flow has a horizontal constant derivative plateau."},
+    ) is None
+
+
+def test_benchmark_generation_options_reach_every_ollama_call(
+    tmp_path: Path,
+) -> None:
+    evidence = "Radial flow has a horizontal constant pressure-derivative plateau."
+    hit = {
+        "id": "chunk-1",
+        "text": evidence,
+        "metadata": {"filename": "welltest.pdf", "page": 219},
+    }
+    valid = (
+        '{"internal":[{"claim":"Radial flow has a horizontal constant pressure-'
+        'derivative plateau.","citations":["KB1"]}],"external":[],'
+        '"synthesis":[],"limitations":[]}'
+    )
+    ollama = StructuredOllama([valid])
+    agent = make_agent(
+        tmp_path,
+        vector_store=FakeVectorStore(dense=[hit]),
+        ollama=ollama,
+    )
+
+    asyncio.run(
+        agent.research(
+            ResearchRequest(
+                query="Describe radial flow.",
+                use_external=False,
+                temperature=0,
+                seed=42,
+            )
+        )
+    )
+
+    assert ollama.calls[0][3] == {"temperature": 0.0, "seed": 42}
+
+
 def test_structured_validator_enforces_section_source_type(tmp_path: Path) -> None:
     agent = make_agent(tmp_path)
     raw = (
@@ -645,6 +1524,73 @@ def test_valid_citation_on_removed_invalid_line_is_not_counted() -> None:
     assert validation["valid_citations"] == []
 
 
+def test_requested_source_details_use_retrieved_document_and_page() -> None:
+    answer = "Supported claim. [KB1]\n5. Sources\n[KB1]"
+    source = InternalEvidence(
+        evidence_id="KB1",
+        document="Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+        page=219,
+        chunk_id="chunk-1",
+        score=0.9,
+        excerpt="Supported claim.",
+    )
+
+    rendered = ResearchAgent.render_requested_source_details(
+        answer,
+        "문서명과 페이지를 표시해줘",
+        [source],
+        [],
+        [],
+    )
+
+    assert "[KB1] Heriot-Watt_University_-_Well_Test_Analysis.pdf, p.219" in rendered
+
+
+def test_requested_source_details_do_not_invent_missing_page() -> None:
+    answer = "Supported claim. [KB1]\n5. Sources\n[KB1]"
+    source = InternalEvidence(
+        evidence_id="KB1",
+        document="source.pdf",
+        page=None,
+        chunk_id="chunk-1",
+        score=0.9,
+        excerpt="Supported claim.",
+    )
+
+    rendered = ResearchAgent.render_requested_source_details(
+        answer,
+        "document and page를 표시해줘",
+        [source],
+        [],
+        [],
+    )
+
+    assert rendered.endswith("[KB1] source.pdf")
+    assert "p." not in rendered
+
+
+def test_general_question_keeps_compact_source_ids() -> None:
+    answer = "Supported claim. [KB1]\n5. Sources\n[KB1]"
+    source = InternalEvidence(
+        evidence_id="KB1",
+        document="source.pdf",
+        page=7,
+        chunk_id="chunk-1",
+        score=0.9,
+        excerpt="Supported claim.",
+    )
+
+    rendered = ResearchAgent.render_requested_source_details(
+        answer,
+        "이 내용을 설명해줘",
+        [source],
+        [],
+        [],
+    )
+
+    assert rendered == answer
+
+
 def test_prompt_treats_retrieved_text_as_untrusted(tmp_path: Path) -> None:
     from app.models.research_schemas import InternalEvidence
 
@@ -710,8 +1656,10 @@ def test_research_api_contract(tmp_path: Path) -> None:
         "model",
         "inference_used",
         "evidence_counts",
+        "retrieval_mode",
     ):
         assert field in body
     assert body["routing_mode"] == "internal_only"
+    assert body["retrieval_mode"] == "legacy"
     assert body["evidence_counts"] == {"internal": 1, "external": 0}
     assert body["timing"]["elapsed_seconds"] >= 0

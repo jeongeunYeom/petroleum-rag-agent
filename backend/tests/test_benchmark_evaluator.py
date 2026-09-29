@@ -2,6 +2,7 @@ from app.services.benchmark_evaluator import (
     STRICT_REFUSAL,
     evaluate_benchmark_answer,
 )
+from app.services.refusal_policy import NO_EVIDENCE_REFUSAL
 
 
 WT1 = {
@@ -90,6 +91,109 @@ def test_negated_correction_does_not_trigger_forbidden():
     assert result.forbidden_hits == []
 
 
+def test_contrast_clause_does_not_cross_trigger_forbidden():
+    answer = (
+        "Wellbore storage pressure and derivative overlap on a unit-slope line, "
+        "while radial flow has a horizontal constant derivative plateau."
+    )
+
+    result = evaluate_benchmark_answer(WT1, answer, sources=SOURCES)
+
+    assert result.forbidden_hits == []
+    assert result.hallucination_detected is False
+
+
+def test_shared_contrast_preamble_uses_nearest_regime_attribution():
+    answer = (
+        "Wellbore storage and radial flow can be distinguished on the pressure "
+        "derivative plot: wellbore storage shows a unit-slope line, while radial "
+        "flow shows a horizontal derivative plateau."
+    )
+
+    result = evaluate_benchmark_answer(WT1, answer, sources=SOURCES)
+
+    assert result.forbidden_hits == []
+
+
+def test_radial_unit_slope_claim_still_triggers_forbidden():
+    result = evaluate_benchmark_answer(
+        WT1,
+        "Radial flow pressure follows a unit-slope line.",
+        sources=SOURCES,
+    )
+
+    assert result.forbidden_hits
+
+
+def test_plateau_transition_is_not_wellbore_storage_attribution():
+    item = {
+        "expected_behavior": "answer",
+        "required_patterns": [],
+        "forbidden_patterns": [
+            r"(plateau|horizontal).{0,160}(wellbore\s*storage)"
+        ],
+    }
+
+    transition = evaluate_benchmark_answer(
+        item,
+        "The plateau begins after the wellbore storage period ends.",
+    )
+    attribution = evaluate_benchmark_answer(
+        item,
+        "The plateau is a wellbore storage response.",
+    )
+
+    assert transition.forbidden_hits == []
+    assert attribution.forbidden_hits
+
+
+def test_supercharging_removal_vocabulary_and_unrelated_claim():
+    item = {
+        "expected_behavior": "answer",
+        "required_patterns": [
+            r"supercharg",
+            r"eliminat|discriminat(?:e|ed)\s*out|exclude|remove",
+        ],
+        "forbidden_patterns": [r"equipment\s*failure|sensor\s*failure"],
+    }
+
+    eliminated = evaluate_benchmark_answer(
+        item,
+        "Two supercharged points were eliminated from consideration.",
+    )
+    discriminated = evaluate_benchmark_answer(
+        item,
+        "Supercharged points were discriminated out.",
+    )
+    unrelated = evaluate_benchmark_answer(
+        item,
+        "Supercharged points indicate sensor failure.",
+    )
+
+    assert eliminated.answer_passed is True
+    assert discriminated.answer_passed is True
+    assert unrelated.answer_passed is False
+
+
+def test_varied_gradient_wording_satisfies_rft_semantics():
+    item = {
+        "expected_behavior": "answer",
+        "required_patterns": [
+            r"(?:multiple|several|varied|range\s+of).{0,60}gradients?"
+        ],
+        "forbidden_patterns": [],
+    }
+
+    assert evaluate_benchmark_answer(
+        item,
+        "Production data show a more varied gradient pattern.",
+    ).answer_passed is True
+    assert evaluate_benchmark_answer(
+        item,
+        "Production data show a range of gradients.",
+    ).answer_passed is True
+
+
 def test_exact_refusal_behavior():
     item = {
         "expected_behavior": "refuse",
@@ -110,6 +214,82 @@ def test_exact_refusal_behavior():
     )
     assert passed.passed is True
     assert failed.passed is False
+
+
+def test_research_safe_refusal_passes_without_exact_string_match():
+    item = {
+        "expected_behavior": "refuse",
+        "required_patterns": [],
+        "forbidden_patterns": [],
+    }
+
+    result = evaluate_benchmark_answer(item, NO_EVIDENCE_REFUSAL, sources=[])
+
+    assert result.behavior_passed is True
+    assert result.answer_passed is True
+    assert result.passed is True
+    assert result.hallucination_detected is False
+
+
+def test_refusal_with_fabricated_number_fails():
+    item = {
+        "expected_behavior": "refuse",
+        "required_patterns": [],
+        "forbidden_patterns": [],
+    }
+
+    result = evaluate_benchmark_answer(
+        item,
+        "근거를 찾지 못해 추측하지 않지만 값은 14,000 psi입니다.",
+        sources=[],
+    )
+
+    assert result.behavior_passed is False
+    assert result.answer_passed is False
+    assert result.hallucination_detected is True
+
+
+def test_refusal_expected_but_general_answer_fails():
+    item = {
+        "expected_behavior": "refuse",
+        "required_patterns": [],
+        "forbidden_patterns": [],
+    }
+
+    result = evaluate_benchmark_answer(
+        item,
+        "일반적으로 radial flow에서는 derivative plateau가 나타납니다.",
+        sources=[],
+    )
+
+    assert result.answer_passed is False
+    assert result.hallucination_detected is True
+
+
+def test_engineering_evidence_is_scoped_to_sentence_citations():
+    item = {
+        "expected_behavior": "answer",
+        "required_patterns": [],
+        "forbidden_patterns": [],
+    }
+    answer = "Radial flow has a horizontal constant derivative plateau. [KB1][KB2]"
+    sources = [
+        {
+            "evidence_id": "KB1",
+            "excerpt": "Radial flow has a horizontal constant derivative plateau.",
+        },
+        {
+            "evidence_id": "KB2",
+            "excerpt": "A different passage associates radial flow with unit-slope.",
+        },
+    ]
+
+    result = evaluate_benchmark_answer(item, answer, sources=sources)
+
+    assert result.answer_passed is True
+    assert result.engineering_contradiction_count == 0
+    assert result.unsupported_engineering_claim_count == 0
+    assert result.hallucination_detected is False
 
 
 def test_missing_expected_document_fails():
@@ -285,3 +465,82 @@ def test_wt007_real_appraisal_misassignment_still_fails():
 
     assert result.passed is False
     assert result.forbidden_hits
+
+
+def test_engineering_metrics_detect_false_premise_agreement():
+    item = {
+        "question": (
+            "Radial flow pressure and derivative overlap with unit-slope. Correct?"
+        ),
+        "expected_behavior": "answer",
+        "required_patterns": [],
+        "forbidden_patterns": [],
+    }
+    result = evaluate_benchmark_answer(
+        item,
+        "Correct. Radial flow pressure and derivative overlap with unit-slope.",
+        sources=[
+            {
+                "excerpt": (
+                    "Radial flow has a horizontal constant derivative plateau."
+                )
+            }
+        ],
+    )
+
+    assert result.answer_passed is False
+    assert result.engineering_contradiction_count >= 1
+    assert result.false_premise_detected is True
+    assert result.false_premise_correction_success is False
+
+
+def test_engineering_metrics_accept_false_premise_correction():
+    item = {
+        "question": (
+            "Radial flow pressure and derivative overlap with unit-slope. Correct?"
+        ),
+        "expected_behavior": "answer",
+        "required_patterns": [],
+        "forbidden_patterns": [],
+    }
+    result = evaluate_benchmark_answer(
+        item,
+        (
+            "No. Radial flow does not have unit-slope and its pressure and "
+            "derivative do not overlap. Wellbore storage pressure and derivative "
+            "overlap on a unit-slope line. Radial flow derivative is a horizontal "
+            "constant plateau."
+        ),
+        sources=[
+            {
+                "excerpt": (
+                    "Wellbore storage pressure and derivative overlap on a unit-slope "
+                    "line. Radial flow has a horizontal constant derivative plateau."
+                )
+            }
+        ],
+    )
+
+    assert result.answer_passed is True
+    assert result.engineering_contradiction_count == 0
+    assert result.false_premise_correction_success is True
+    assert result.unsupported_engineering_claim_count == 0
+
+
+def test_engineering_metrics_count_unsupported_citation_meaning():
+    item = {
+        "question": "What is the spherical-flow derivative slope?",
+        "expected_behavior": "answer",
+        "required_patterns": [],
+        "forbidden_patterns": [],
+    }
+    result = evaluate_benchmark_answer(
+        item,
+        "Spherical flow has a derivative slope = -1/2.",
+        sources=[
+            {"excerpt": "Linear flow has a derivative slope = +1/2."}
+        ],
+    )
+
+    assert result.answer_passed is False
+    assert result.unsupported_engineering_claim_count == 1

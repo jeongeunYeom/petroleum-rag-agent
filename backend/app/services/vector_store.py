@@ -2,6 +2,7 @@ import math
 import logging
 import os
 import re
+from collections import Counter
 from typing import Any
 
 os.environ.setdefault("ANONYMIZED_TELEMETRY", "False")
@@ -129,6 +130,12 @@ HIGH_VALUE_MARKERS = (
     "formation resistivity factor",
 )
 
+FIGURE_DOCUMENT_MARKERS = (
+    "[Extracted figure notes]",
+    "[Figure Note Metadata]",
+    "image_path:",
+)
+
 
 def _contains_term(text: str, term: str) -> bool:
     escaped = re.escape(term.lower())
@@ -240,6 +247,55 @@ class VectorStore:
             self.collection.delete(ids=ids)
         return len(ids)
 
+    def get_page_context(
+        self,
+        document: str,
+        page: int,
+        *,
+        adjacent: bool = False,
+    ) -> str:
+        """Return caption/body text only; Figure notes stay separately structured."""
+        data = self.collection.get(
+            where={"document": document},
+            include=["documents", "metadatas"],
+        )
+        wanted = {page - 1, page + 1} if adjacent else {page}
+        rows = sorted(
+            (
+                (str(text or ""), metadata or {})
+                for text, metadata in zip(
+                    data.get("documents") or [],
+                    data.get("metadatas") or [],
+                )
+                if metadata and metadata.get("page") in wanted
+            ),
+            key=lambda row: int(row[1].get("chunk_index") or 0),
+        )
+        parts: list[str] = []
+        for text, _ in rows:
+            metadata_lines = sum(
+                bool(re.search(rf"(?im)^\s*{key}\s*:", text))
+                for key in (
+                    "reference_lines",
+                    "plateaus",
+                    "slope_changes",
+                    "trend_summary",
+                    "vision_model",
+                    "created_at",
+                )
+            )
+            if "[Extracted figure notes]" not in text and metadata_lines >= 2:
+                continue
+            body = re.split(
+                r"\[\s*extracted\s+f(?:igure\s+notes)?",
+                text,
+                maxsplit=1,
+                flags=re.IGNORECASE,
+            )[0].strip()
+            if body and body not in parts:
+                parts.append(body)
+        return "\n".join(parts)[:6000]
+
     def search(
         self,
         question: str,
@@ -251,6 +307,44 @@ class VectorStore:
             n_results=top_k,
         )
         return self._query_result_to_hits(result)
+
+    def search_figures(
+        self,
+        question: str,
+        top_k: int,
+    ) -> list[dict[str, Any]]:
+        """Dense-search only the already indexed Figure Note chunks."""
+        query_embedding = self.embed([question])[0]
+        merged: dict[str, dict[str, Any]] = {}
+        for marker in FIGURE_DOCUMENT_MARKERS:
+            result = self.collection.query(
+                query_embeddings=[query_embedding],
+                n_results=top_k,
+                where_document={"$contains": marker},
+            )
+            for hit in self._query_result_to_hits(result):
+                chunk_id = str(hit.get("id") or "")
+                current = merged.get(chunk_id)
+                hit_distance = (
+                    float(hit["distance"])
+                    if hit.get("distance") is not None
+                    else 1.0
+                )
+                current_distance = (
+                    float(current["distance"])
+                    if current is not None and current.get("distance") is not None
+                    else 1.0
+                )
+                if current is None or hit_distance < current_distance:
+                    merged[chunk_id] = hit
+        return sorted(
+            merged.values(),
+            key=lambda item: (
+                float(item["distance"])
+                if item.get("distance") is not None
+                else 1.0
+            ),
+        )[:top_k]
 
     def hybrid_search(
         self,
@@ -384,6 +478,138 @@ class VectorStore:
             key=lambda item: float(
                 item.get("keyword_score") or 0.0
             ),
+            reverse=True,
+        )[:top_k]
+
+    def keyword_search_figures(
+        self,
+        question: str,
+        top_k: int,
+    ) -> list[dict[str, Any]]:
+        data = self._figure_data()
+        tokens = self._keyword_tokens(question)
+        if not tokens:
+            return []
+        hits = []
+        for chunk_id, document, metadata in zip(
+            data.get("ids", []),
+            data.get("documents", []),
+            data.get("metadatas", []),
+        ):
+            text = str(document or "")
+            score = self._keyword_score(text, tokens, metadata or {}, None)
+            if score > 0:
+                hits.append(
+                    {
+                        "id": str(chunk_id),
+                        "text": text,
+                        "metadata": metadata or {},
+                        "distance": None,
+                        "keyword_score": score,
+                    }
+                )
+        return sorted(
+            hits,
+            key=lambda item: float(item.get("keyword_score") or 0.0),
+            reverse=True,
+        )[:top_k]
+
+    def bm25_search(self, question: str, top_k: int) -> list[dict[str, Any]]:
+        data = self.collection.get(include=["documents", "metadatas"])
+        return self._bm25_search_data(question, top_k, data)
+
+    def bm25_search_figures(
+        self,
+        question: str,
+        top_k: int,
+    ) -> list[dict[str, Any]]:
+        data = self._figure_data()
+        return self._bm25_search_data(question, top_k, data)
+
+    def _figure_data(self) -> dict[str, list[Any]]:
+        rows: dict[str, tuple[str, dict[str, Any]]] = {}
+        for marker in FIGURE_DOCUMENT_MARKERS:
+            data = self.collection.get(
+                where_document={"$contains": marker},
+                include=["documents", "metadatas"],
+            )
+            for chunk_id, document, metadata in zip(
+                data.get("ids", []),
+                data.get("documents", []),
+                data.get("metadatas", []),
+            ):
+                rows[str(chunk_id)] = (str(document or ""), metadata or {})
+        return {
+            "ids": list(rows),
+            "documents": [value[0] for value in rows.values()],
+            "metadatas": [value[1] for value in rows.values()],
+        }
+
+    def _bm25_search_data(
+        self,
+        question: str,
+        top_k: int,
+        data: dict[str, Any],
+    ) -> list[dict[str, Any]]:
+        query_tokens = list(
+            dict.fromkeys(
+                self._bm25_tokens(" ".join(expand_query_terms(question)))
+            )
+        )
+        if not query_tokens:
+            return []
+
+        rows: list[tuple[str, str, dict[str, Any], int, Counter[str]]] = []
+        document_frequencies = Counter()
+        total_length = 0
+        ids = data.get("ids", [])
+        documents = data.get("documents", [])
+        metadatas = data.get("metadatas", [])
+
+        for chunk_id, document, metadata in zip(ids, documents, metadatas):
+            text = str(document or "")
+            tokens = self._bm25_tokens(text)
+            total_length += len(tokens)
+            counts = Counter(tokens)
+            matched = Counter({token: counts[token] for token in query_tokens if counts[token]})
+            if matched:
+                document_frequencies.update(matched.keys())
+                rows.append((str(chunk_id), text, metadata or {}, len(tokens), matched))
+
+        document_count = len(ids)
+        if not rows or document_count == 0:
+            return []
+
+        average_length = total_length / document_count or 1.0
+        k1 = 1.5
+        b = 0.75
+        hits: list[dict[str, Any]] = []
+        for chunk_id, text, metadata, length, counts in rows:
+            score = 0.0
+            for token, frequency in counts.items():
+                frequency_in_documents = document_frequencies[token]
+                inverse_document_frequency = math.log(
+                    1
+                    + (document_count - frequency_in_documents + 0.5)
+                    / (frequency_in_documents + 0.5)
+                )
+                denominator = frequency + k1 * (
+                    1 - b + b * length / average_length
+                )
+                score += inverse_document_frequency * frequency * (k1 + 1) / denominator
+            hits.append(
+                {
+                    "id": chunk_id,
+                    "text": text,
+                    "metadata": metadata,
+                    "distance": None,
+                    "keyword_score": score,
+                }
+            )
+
+        return sorted(
+            hits,
+            key=lambda item: float(item["keyword_score"]),
             reverse=True,
         )[:top_k]
 
@@ -653,6 +879,15 @@ class VectorStore:
 
     def _keyword_tokens(self, question: str) -> list[str]:
         return expand_query_terms(question)
+
+    @staticmethod
+    def _bm25_tokens(text: str) -> list[str]:
+        return [
+            token.lower()
+            for token in re.findall(r"[A-Za-z0-9]+|[가-힣]+", text)
+            if token.lower() not in ENGLISH_STOPWORDS
+            and token not in KOREAN_STOPWORDS
+        ]
 
     def _keyword_score(
         self,

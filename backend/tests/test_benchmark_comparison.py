@@ -6,10 +6,16 @@ from app.services.benchmark_comparison import (
 )
 
 
-def payload(condition: str, accuracy: float, hallucination_rate: float) -> dict:
+def payload(
+    condition: str,
+    accuracy: float,
+    hallucination_rate: float,
+    retrieval_mode: str = "legacy",
+) -> dict:
     return {
         "condition": condition,
         "mode": "rag",
+        "retrieval_mode": retrieval_mode,
         "model": "qwen3:8b",
         "run_id": condition,
         "question_count": 32,
@@ -17,11 +23,20 @@ def payload(condition: str, accuracy: float, hallucination_rate: float) -> dict:
         "summary": {
             "answer_accuracy": accuracy,
             "hallucination_rate": hallucination_rate,
+            "citation_correctness_rate": 0.9,
+            "engineering_contradiction_count": 1,
+            "average_engineering_contradiction_count": 0.2,
+            "false_premise_correction_success_rate": 0.8,
+            "unsupported_engineering_claim_count": 2,
+            "average_unsupported_engineering_claim_count": 0.4,
+            "engineering_validation_pass_rate": 0.8,
+            "average_repair_attempts": 1.2,
             "exact_refusal_rate": 1.0,
             "retrieval_document_recall_at_k": 0.8,
             "retrieval_page_recall_at_k": 0.7,
             "figure_answer_accuracy": 0.75,
             "figure_retrieval_accuracy": 0.66,
+            "average_retrieval_seconds": 0.8,
             "average_total_seconds": 3.2,
             "infrastructure_errors": 0,
         },
@@ -32,7 +47,7 @@ def test_builds_paper_comparison_and_baseline_deltas():
     comparison = build_benchmark_comparison(
         [
             payload("qwen3_baseline", 0.5, 0.3),
-            payload("qwen3_rag", 0.8, 0.1),
+            payload("qwen3_rag", 0.8, 0.1, "hybrid"),
         ]
     )
 
@@ -40,6 +55,11 @@ def test_builds_paper_comparison_and_baseline_deltas():
     assert comparison["question_count"] == 32
     assert comparison["rows"][1]["answer_accuracy_delta_vs_baseline"] == pytest.approx(0.3)
     assert comparison["rows"][1]["hallucination_rate_delta_vs_baseline"] == pytest.approx(-0.2)
+    assert comparison["rows"][1]["retrieval_mode"] == "hybrid"
+    assert comparison["rows"][1]["engineering_contradiction_count"] == 1
+    assert comparison["rows"][1]["false_premise_correction_success_rate"] == 0.8
+    assert comparison["rows"][1]["engineering_validation_pass_rate"] == 0.8
+    assert comparison["rows"][1]["average_repair_attempts"] == 1.2
 
 
 def test_rejects_different_question_counts():

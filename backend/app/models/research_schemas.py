@@ -3,6 +3,9 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 
+RetrievalMode = Literal["legacy", "hybrid", "hybrid_rerank"]
+
+
 class ResearchRequest(BaseModel):
     query: str = Field(min_length=1, max_length=4000)
     internal_top_k: int = Field(default=5, ge=1, le=20)
@@ -10,6 +13,8 @@ class ResearchRequest(BaseModel):
     use_internal: bool = True
     use_external: bool = True
     model: str = Field(default="qwen3:8b", min_length=1, max_length=100)
+    temperature: float | None = Field(default=None, ge=0, le=2)
+    seed: int | None = Field(default=None, ge=0)
 
     @field_validator("query", "model")
     @classmethod
@@ -42,16 +47,54 @@ class WebEvidence(BaseModel):
     domain: str
     snippet: str
     rank: int
+    fetched: bool = False
+    evidence_kind: Literal[
+        "fetched_page", "fetched_pdf", "search_snippet_fallback"
+    ] = "search_snippet_fallback"
+    content_type: str | None = None
+    passage: str | None = None
+    passage_index: int | None = None
+    heading: str | None = None
+    fetch_status: str | None = None
+    search_snippet: str | None = None
+    published_date: str | None = None
+    modified_date: str | None = None
+    http_last_modified: str | None = None
+    source_category: str | None = None
+    authority_score: float | None = None
+    primary_source: bool | None = None
+    published_date_source: str | None = None
+    modified_date_source: str | None = None
+    doi: str | None = None
+    relevance_score: float | None = None
+    source_quality_score: float | None = None
+    recency_score: float | None = None
+    primary_source_score: float | None = None
+    final_rank_score: float | None = None
+    ranking_reason: list[str] = Field(default_factory=list)
 
 
 class FigureEvidence(BaseModel):
     evidence_id: str
     document: str
     page: int | None = None
+    figure_number: str | None = None
     title: str | None = None
+    image_index: int | None = None
     filename: str | None = None
+    image_path: str | None = None
     url: str | None = None
     excerpt: str
+    source_note: str = ""
+    related_page_text: str = ""
+    x_axis: str | None = None
+    x_axis_unit: str | None = None
+    y_axis: str | None = None
+    y_axis_unit: str | None = None
+    series_count: int | None = None
+    series_descriptions: list[str] = Field(default_factory=list)
+    legend: list[str] = Field(default_factory=list)
+    quantities: list[dict[str, str]] = Field(default_factory=list)
 
 
 class ProvenanceRecord(BaseModel):
@@ -70,6 +113,9 @@ class ResearchTiming(BaseModel):
     retrieval_seconds: float
     reasoning_seconds: float
     elapsed_seconds: float
+    web_search_seconds: float = 0.0
+    web_fetch_seconds: float = 0.0
+    web_passage_ranking_seconds: float = 0.0
 
 
 class ResearchResponse(BaseModel):
@@ -83,6 +129,7 @@ class ResearchResponse(BaseModel):
     inference_used: bool
     evidence_counts: EvidenceCounts
     routing_mode: Literal["internal_only", "external_only", "hybrid_research"]
+    retrieval_mode: RetrievalMode
     timing: ResearchTiming
     conflicts: list[dict[str, str]] = Field(default_factory=list)
     validation: dict[str, Any] = Field(default_factory=dict)

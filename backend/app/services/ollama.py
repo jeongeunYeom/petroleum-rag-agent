@@ -34,23 +34,40 @@ class OllamaClient:
         self,
         messages: list[dict[str, str]],
         model: str | None = None,
+        temperature: float | None = None,
+        seed: int | None = None,
     ) -> str:
-        return await self._chat(messages, model=model)
+        return await self._chat(
+            messages,
+            model=model,
+            temperature=temperature,
+            seed=seed,
+        )
 
     async def chat_structured(
         self,
         messages: list[dict[str, str]],
         schema: dict,
         model: str | None = None,
+        temperature: float | None = None,
+        seed: int | None = None,
     ) -> str:
         """Ask Ollama to constrain the response to the supplied JSON schema."""
-        return await self._chat(messages, model=model, schema=schema)
+        return await self._chat(
+            messages,
+            model=model,
+            schema=schema,
+            temperature=temperature,
+            seed=seed,
+        )
 
     async def _chat(
         self,
         messages: list[dict[str, str]],
         model: str | None = None,
         schema: dict | None = None,
+        temperature: float | None = None,
+        seed: int | None = None,
     ) -> str:
         payload = {
             "model": model or self.settings.text_model,
@@ -59,11 +76,17 @@ class OllamaClient:
             "think": False,
             "keep_alive": "30m",
             "options": {
-                "temperature": self.settings.ollama_temperature,
+                "temperature": (
+                    self.settings.ollama_temperature
+                    if temperature is None
+                    else temperature
+                ),
                 "num_ctx": 8192,
                 "num_predict": 1024,
             },
         }
+        if seed is not None:
+            payload["options"]["seed"] = seed
         if schema is not None:
             payload["format"] = schema
 

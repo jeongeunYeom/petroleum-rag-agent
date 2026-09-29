@@ -1,3 +1,5 @@
+import pytest
+
 from app.services.engineering_validator import (
     EngineeringValidator,
     STRICT_REFUSAL,
@@ -243,3 +245,157 @@ def test_fracture_omission_is_blocked():
     )
     assert result.passed is False
     assert "WT-FRACTURE-001" in result.rule_ids
+
+
+@pytest.mark.parametrize(
+    ("claim", "evidence"),
+    [
+        (
+            "Wellbore storage has unit-slope pressure and derivative overlap.",
+            "Wellbore storage has unit-slope pressure and derivative overlap.",
+        ),
+        (
+            "Infinite-acting radial flow has a horizontal constant derivative plateau.",
+            "Infinite-acting radial flow has a horizontal constant derivative plateau.",
+        ),
+        (
+            "Spherical flow has a derivative slope = -1/2.",
+            "Spherical flow has a derivative slope = -1/2.",
+        ),
+        (
+            "Linear flow has a derivative slope = +1/2.",
+            "Linear flow has a derivative slope = +1/2.",
+        ),
+        (
+            "Late-time boundary behavior may show a unit-slope response.",
+            "Late-time boundary behavior may show a unit-slope response.",
+        ),
+    ],
+)
+def test_claim_level_flow_regime_rules_pass(claim, evidence):
+    result = EngineeringValidator().validate_claim(claim, evidence)
+
+    assert result.passed is True
+    assert result.engineering_contradiction_count == 0
+    assert result.unsupported_engineering_claim_count == 0
+
+
+def test_claim_level_radial_unit_slope_fails_even_with_similar_evidence():
+    result = EngineeringValidator().validate_claim(
+        "Radial flow has a unit-slope pressure derivative.",
+        "Radial flow has a horizontal constant derivative plateau, not unit-slope.",
+    )
+
+    assert result.passed is False
+    assert result.engineering_contradiction_count == 1
+    assert result.reasons[0]["rule_id"] == "WT-REGIME-CONTRADICTION"
+
+
+def test_false_premise_agreement_fails():
+    detected, corrected, reasons = EngineeringValidator().false_premise_correction(
+        "In radial flow, pressure and derivative overlap with unit-slope. Correct?",
+        "Correct. Radial flow pressure and derivative overlap with unit-slope.",
+    )
+
+    assert detected is True
+    assert corrected is False
+    assert reasons
+
+
+def test_false_premise_explicit_correction_passes():
+    detected, corrected, reasons = EngineeringValidator().false_premise_correction(
+        "In radial flow, pressure and derivative overlap with unit-slope. Correct?",
+        (
+            "No. Radial flow does not have unit-slope and its pressure and "
+            "derivative do not overlap. Wellbore storage pressure and derivative "
+            "overlap on a unit-slope line. Radial flow pressure derivative is a "
+            "horizontal constant plateau."
+        ),
+    )
+
+    assert detected is True
+    assert corrected is True
+    assert reasons == []
+
+
+def test_conflicting_engineering_evidence_blocks_overconfident_claim():
+    result = EngineeringValidator().validate_claim(
+        "Spherical flow definitely has a derivative slope = -1/2.",
+        (
+            "Source A says spherical flow has slope = -1/2. "
+            "Source B says spherical flow has slope = +1/2."
+        ),
+    )
+
+    assert result.passed is False
+    assert result.unsupported_engineering_claim_count == 1
+    assert any(
+        reason["rule_id"] == "WT-EVIDENCE-CONFLICT"
+        for reason in result.reasons
+    )
+
+
+def test_citation_with_reversed_engineering_meaning_is_unsupported():
+    result = EngineeringValidator().validate_claim(
+        "Spherical flow has a derivative slope = -1/2.",
+        "Linear flow has a derivative slope = +1/2.",
+    )
+
+    assert result.passed is False
+    assert result.unsupported_engineering_claim_count == 1
+    assert result.reasons[0]["rule_id"] == "WT-CITATION-MEANING"
+
+
+def test_boundary_unit_slope_requires_late_time_or_conditional_context():
+    result = EngineeringValidator().validate_claim(
+        "Boundary behavior always has unit-slope.",
+        "Boundary behavior always has unit-slope.",
+    )
+
+    assert result.passed is False
+    assert result.reasons[0]["rule_id"] == "WT-BOUNDARY-CONTEXT"
+
+
+def test_negated_radial_unit_slope_is_not_treated_as_positive_claim():
+    result = EngineeringValidator().validate_claim(
+        (
+            "Radial flow pressure and derivative do not follow the same unit-slope "
+            "line, but the derivative is horizontal."
+        ),
+        "On the diagnostic plot, radial flow is indicated by a horizontal derivative.",
+    )
+
+    assert result.passed is True
+
+
+def test_quoted_false_premise_rejection_is_not_a_positive_attribution():
+    result = EngineeringValidator().validate_claim(
+        (
+            "The premise that radial-flow pressure and derivative both follow a "
+            "unit-slope line is incorrect. Radial flow has a horizontal derivative."
+        ),
+        "Radial flow is indicated by a horizontal derivative.",
+    )
+
+    assert result.passed is True
+
+
+def test_boundary_context_does_not_attribute_plateau_to_boundary_flow():
+    result = EngineeringValidator().validate_claim(
+        "The interpretation of a radial-flow plateau may be affected by boundary effects.",
+        "Radial flow is indicated by a horizontal derivative before boundary effects.",
+    )
+
+    assert result.engineering_contradiction_count == 0
+
+
+def test_unrelated_regime_detail_does_not_create_evidence_conflict():
+    result = EngineeringValidator().validate_claim(
+        "Radial flow is indicated by a horizontal derivative.",
+        (
+            "Radial flow is indicated by a horizontal derivative. "
+            "Volumetric flow can produce a unit-slope response."
+        ),
+    )
+
+    assert result.passed is True

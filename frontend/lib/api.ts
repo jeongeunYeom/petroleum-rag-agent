@@ -38,11 +38,35 @@ export type ResearchResponse = {
     domain: string;
     snippet: string;
     rank: number;
+    fetched?: boolean;
+    evidence_kind?: "fetched_page" | "fetched_pdf" | "search_snippet_fallback";
+    content_type?: string | null;
+    passage?: string | null;
+    passage_index?: number | null;
+    heading?: string | null;
+    fetch_status?: string | null;
+    search_snippet?: string | null;
+    published_date?: string | null;
+    modified_date?: string | null;
+    http_last_modified?: string | null;
+    source_category?: string | null;
+    authority_score?: number | null;
+    primary_source?: boolean | null;
+    published_date_source?: string | null;
+    modified_date_source?: string | null;
+    doi?: string | null;
+    relevance_score?: number | null;
+    source_quality_score?: number | null;
+    recency_score?: number | null;
+    primary_source_score?: number | null;
+    final_rank_score?: number | null;
+    ranking_reason?: string[];
   }>;
   figures: Array<{
     evidence_id: string;
     document: string;
     page: number | null;
+    figure_number: string | null;
     title: string | null;
     filename: string | null;
     url: string | null;
@@ -50,6 +74,7 @@ export type ResearchResponse = {
   }>;
   model: string;
   routing_mode: "internal_only" | "external_only" | "hybrid_research";
+  retrieval_mode: "legacy" | "hybrid" | "hybrid_rerank";
   timing: {
     elapsed_seconds: number;
   };

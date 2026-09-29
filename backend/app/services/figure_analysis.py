@@ -243,22 +243,31 @@ def generator_git_commit() -> str:
 
 
 KEY_VALUE_KEYS = {
+    "document_name",
+    "document_id",
+    "page_number",
+    "image_index",
+    "image_path",
     "image_type",
     "confidence",
     "readable_labels",
     "reason",
     "title",
+    "title_verified",
     "analysis",
     "x_axis",
     "x_axis_unit",
     "x_axis_scale",
+    "x_axis_verified",
     "y_axis",
     "y_axis_unit",
     "y_axis_scale",
+    "y_axis_verified",
     "series_count",
     "series_count_verified",
     "series_descriptions",
     "legend",
+    "legend_verified",
     "reference_lines",
     "plateau",
     "plateaus",
@@ -269,7 +278,12 @@ KEY_VALUE_KEYS = {
     "slope_changes",
     "trend",
     "trend_summary",
+    "trend_verified",
     "engineering_meaning",
+    "engineering_meaning_verified",
+    "vision_model",
+    "created_at",
+    "legacy_note_backup",
     "components",
     "component_labels",
     "connections",
@@ -978,6 +992,23 @@ class FigureAnalysisService:
         page_text: str = "",
     ) -> dict[str, Any]:
         return figure_priority(image_metrics(image_path), page_text)
+
+    async def extract_focused(self, image_path: Path, prompt: str) -> str:
+        """Read only query-required visible fields without changing indexed notes."""
+        prepared_path, _ = prepare_vision_image(image_path)
+        try:
+            with Image.open(prepared_path) as prepared:
+                if prepared.height > prepared.width * 1.2:
+                    prepared.rotate(-90, expand=True).save(prepared_path)
+            return (
+                await self.ollama.describe_image(
+                    prepared_path,
+                    prompt=prompt,
+                    num_predict=500,
+                )
+            ).strip()
+        finally:
+            prepared_path.unlink(missing_ok=True)
 
     async def analyze_figure(
         self,

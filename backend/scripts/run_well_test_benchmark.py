@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import re
 import statistics
 import sys
 import time
@@ -21,13 +22,14 @@ if str(BACKEND_ROOT) not in sys.path:
 
 from app.core.config import get_settings  # noqa: E402
 from app.services.benchmark_evaluator import (  # noqa: E402
-    STRICT_REFUSAL,
+    BenchmarkEvaluation,
     evaluate_benchmark_answer,
 )
 from app.services.benchmark_suite import (  # noqa: E402
     build_benchmark_manifest,
     materialize_benchmark_items,
 )
+from app.services.refusal_policy import is_safe_refusal  # noqa: E402
 
 
 def utc_run_id() -> str:
@@ -267,10 +269,10 @@ def build_summary(
         for row in completed
         if row.get("expected_behavior") == "refuse"
     ]
-    exact_refusals = sum(
+    accepted_refusals = sum(
         1
         for row in refusal_rows
-        if row.get("final_answer") == STRICT_REFUSAL
+        if is_safe_refusal(str(row.get("final_answer") or ""))
     )
 
     page_rows = rows_with_value(
@@ -297,6 +299,46 @@ def build_summary(
         figure_rows,
         "figure_retrieval_hit",
     )
+    figure_number_rows = rows_with_value(
+        figure_rows,
+        "correct_figure_number_hit",
+    )
+    figure_page_rows = rows_with_value(
+        figure_rows,
+        "correct_figure_page_hit",
+    )
+    figure_numeric_rows = rows_with_value(
+        figure_rows,
+        "figure_numeric_support_pass",
+    )
+    figure_numeric_coverage_rows = rows_with_value(
+        figure_rows,
+        "figure_required_numeric_coverage",
+    )
+    figure_numeric_complete_rows = rows_with_value(
+        figure_rows,
+        "figure_required_numeric_complete",
+    )
+    unified_page_rows = rows_with_value(
+        completed,
+        "unified_preferred_page_hit",
+    )
+    figure_citation_rows = rows_with_value(
+        figure_rows,
+        "figure_citation_correctness",
+    )
+    citation_rows = rows_with_value(
+        completed,
+        "citation_correctness",
+    )
+    false_premise_rows = rows_with_value(
+        completed,
+        "false_premise_correction_success",
+    )
+    engineering_validation_rows = rows_with_value(
+        completed,
+        "engineering_validation_passed",
+    )
 
     return {
         "questions_total": len(results),
@@ -315,6 +357,44 @@ def build_summary(
         "hallucination_rate": ratio(
             count_true(completed, "hallucination_detected"),
             len(completed),
+        ),
+        "citation_correctness_rate": ratio(
+            count_true(citation_rows, "citation_correctness"),
+            len(citation_rows),
+        ),
+        "engineering_contradiction_count": sum(
+            int(row.get("engineering_contradiction_count") or 0)
+            for row in completed
+        ),
+        "unsupported_engineering_claim_count": sum(
+            int(row.get("unsupported_engineering_claim_count") or 0)
+            for row in completed
+        ),
+        "average_engineering_contradiction_count": mean_field(
+            completed,
+            "engineering_contradiction_count",
+        ),
+        "average_unsupported_engineering_claim_count": mean_field(
+            completed,
+            "unsupported_engineering_claim_count",
+        ),
+        "false_premise_correction_success_rate": ratio(
+            count_true(
+                false_premise_rows,
+                "false_premise_correction_success",
+            ),
+            len(false_premise_rows),
+        ),
+        "engineering_validation_pass_rate": ratio(
+            count_true(
+                engineering_validation_rows,
+                "engineering_validation_passed",
+            ),
+            len(engineering_validation_rows),
+        ),
+        "average_repair_attempts": mean_field(
+            completed,
+            "repair_attempts",
         ),
         "initial_benchmark_pass_rate": ratio(
             count_true(completed, "initial_benchmark_passed"),
@@ -354,13 +434,21 @@ def build_summary(
             len(validator_false_positive_rows),
         ),
         "exact_refusal_rate": ratio(
-            exact_refusals,
+            accepted_refusals,
+            len(refusal_rows),
+        ),
+        "safe_refusal_rate": ratio(
+            accepted_refusals,
             len(refusal_rows),
         ),
         "preferred_page_hit_rate": page_recall,
         "expected_document_hit_rate": document_recall,
         "retrieval_document_recall_at_k": document_recall,
         "retrieval_page_recall_at_k": page_recall,
+        "unified_retrieval_page_recall_at_k": ratio(
+            count_true(unified_page_rows, "unified_preferred_page_hit"),
+            len(unified_page_rows),
+        ),
         "figure_answer_accuracy": ratio(
             count_true(figure_rows, "final_answer_passed"),
             len(figure_rows),
@@ -369,7 +457,43 @@ def build_summary(
             count_true(figure_retrieval_rows, "figure_retrieval_hit"),
             len(figure_retrieval_rows),
         ),
+        "figure_required_count": len(figure_rows),
+        "figure_hit_count": count_true(
+            figure_retrieval_rows,
+            "figure_retrieval_hit",
+        ),
+        "correct_figure_number_hit_rate": ratio(
+            count_true(figure_number_rows, "correct_figure_number_hit"),
+            len(figure_number_rows),
+        ),
+        "correct_figure_page_hit_rate": ratio(
+            count_true(figure_page_rows, "correct_figure_page_hit"),
+            len(figure_page_rows),
+        ),
+        "figure_numeric_support_pass_rate": ratio(
+            count_true(figure_numeric_rows, "figure_numeric_support_pass"),
+            len(figure_numeric_rows),
+        ),
+        "average_figure_required_numeric_coverage": mean_field(
+            figure_numeric_coverage_rows,
+            "figure_required_numeric_coverage",
+        ),
+        "figure_required_numeric_complete_rate": ratio(
+            count_true(
+                figure_numeric_complete_rows,
+                "figure_required_numeric_complete",
+            ),
+            len(figure_numeric_complete_rows),
+        ),
+        "figure_citation_correctness_rate": ratio(
+            count_true(figure_citation_rows, "figure_citation_correctness"),
+            len(figure_citation_rows),
+        ),
         "average_attempts": mean_field(completed, "attempts"),
+        "average_figure_vision_calls": mean_field(
+            completed,
+            "figure_vision_calls",
+        ),
         "average_retrieval_seconds": mean_field(
             completed,
             "retrieval_seconds",
@@ -402,8 +526,13 @@ def write_csv(
         "concept_group",
         "condition",
         "mode",
+        "retrieval_mode",
         "model",
+        "temperature",
+        "seed",
         "expected_behavior",
+        "initial_behavior_passed",
+        "final_behavior_passed",
         "initial_answer_passed",
         "final_answer_passed",
         "hallucination_detected",
@@ -413,11 +542,25 @@ def write_csv(
         "final_benchmark_passed",
         "rewrite_success",
         "attempts",
+        "repair_attempts",
         "final_status",
         "expected_document_hit",
         "preferred_page_hit",
+        "text_preferred_page_hit",
+        "figure_preferred_page_hit",
+        "unified_preferred_page_hit",
         "figure_retrieval_hit",
         "figure_count",
+        "figure_required",
+        "figure_hit",
+        "correct_figure_number_hit",
+        "correct_figure_page_hit",
+        "figure_numeric_support_pass",
+        "figure_required_numeric_coverage",
+        "figure_required_numeric_complete",
+        "figure_citation_correctness",
+        "figure_vision_calls",
+        "figures",
         "source_pages",
         "retrieval_seconds",
         "reasoning_seconds",
@@ -428,10 +571,24 @@ def write_csv(
         "retrieved_web_urls",
         "citation_correctness",
         "unsupported_claim_count",
+        "engineering_contradiction_count",
+        "false_premise_detected",
+        "false_premise_correction_success",
+        "unsupported_engineering_claim_count",
+        "engineering_validation_passed",
+        "agent_citation_correctness",
+        "agent_engineering_contradiction_count",
+        "agent_false_premise_detected",
+        "agent_false_premise_correction_success",
+        "agent_unsupported_engineering_claim_count",
+        "agent_engineering_validation_passed",
+        "benchmark_evaluation_source",
+        "citation_evaluation_source",
         "initial_required_failures",
         "initial_forbidden_hits",
         "final_required_failures",
         "final_forbidden_hits",
+        "benchmark_rule_failure_type",
         "infrastructure_error",
         "question",
         "final_answer",
@@ -458,11 +615,172 @@ def write_csv(
             )
 
 
+def reevaluate_saved_benchmark(
+    saved_path: Path,
+    *,
+    benchmark_fallback: Path | None = None,
+    run_id: str | None = None,
+) -> tuple[Path, Path, dict[str, Any]]:
+    """Re-run only deterministic evaluation over a saved benchmark payload."""
+    saved_path = saved_path.resolve()
+    payload = read_json(saved_path)
+    if not isinstance(payload, dict) or not isinstance(payload.get("results"), list):
+        raise RuntimeError("Saved benchmark JSON must contain a results list.")
+
+    benchmark_value = str(payload.get("benchmark_file") or "").strip()
+    benchmark_path = Path(benchmark_value) if benchmark_value else Path()
+    if not benchmark_path.is_file() and benchmark_fallback is not None:
+        benchmark_path = benchmark_fallback.resolve()
+    if not benchmark_path.is_file():
+        raise RuntimeError("Benchmark definition file was not found for re-evaluation.")
+
+    raw_items = read_json(benchmark_path)
+    if not isinstance(raw_items, list):
+        raise RuntimeError("Benchmark JSON must contain a list.")
+    items = materialize_benchmark_items(raw_items)
+    items_by_id = {str(item["id"]): item for item in items}
+
+    results: list[dict[str, Any]] = []
+    for saved_row in payload["results"]:
+        row = dict(saved_row)
+        item_id = str(row.get("id") or "")
+        item = items_by_id.get(item_id)
+        if item is None:
+            raise RuntimeError(f"Benchmark item not found for saved row: {item_id}")
+        initial_answer = str(row.get("initial_answer") or row.get("final_answer") or "")
+        final_answer = str(row.get("final_answer") or "")
+        sources = row.get("sources") or []
+
+        row.setdefault(
+            "agent_engineering_contradiction_count",
+            row.get("engineering_contradiction_count"),
+        )
+        row.setdefault(
+            "agent_unsupported_engineering_claim_count",
+            row.get("unsupported_engineering_claim_count"),
+        )
+        row.setdefault(
+            "agent_false_premise_detected",
+            row.get("false_premise_detected"),
+        )
+        row.setdefault(
+            "agent_false_premise_correction_success",
+            row.get("false_premise_correction_success"),
+        )
+        row.setdefault(
+            "agent_engineering_validation_passed",
+            row.get("engineering_validation_passed"),
+        )
+        row.setdefault("agent_citation_correctness", row.get("citation_correctness"))
+        row["citation_evaluation_source"] = "saved_agent_validation"
+
+        initial = evaluate_benchmark_answer(item, initial_answer, sources=sources)
+        final = evaluate_benchmark_answer(item, final_answer, sources=sources)
+        row.update(benchmark_evaluation_fields(initial, final))
+        row["benchmark_rule_failure_type"] = benchmark_rule_failure_types(
+            final,
+            citation_correctness=row.get("citation_correctness"),
+            engineering_validation_passed=row.get(
+                "agent_engineering_validation_passed"
+            ),
+        )
+        row["reevaluated"] = True
+        results.append(row)
+
+    reevaluation_run_id = run_id or utc_run_id()
+    original_condition = str(payload.get("condition") or "").strip()
+    output = {
+        **payload,
+        "run_id": reevaluation_run_id,
+        "original_run_id": payload.get("run_id"),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "condition": f"{original_condition}-reevaluated".strip("-"),
+        "benchmark_file": str(benchmark_path),
+        "reevaluated_from": str(saved_path),
+        "question_count": len(results),
+        "summary": build_summary(results),
+        "results": results,
+    }
+    stem = f"{saved_path.stem}_reevaluated_{reevaluation_run_id}"
+    json_path = saved_path.with_name(f"{stem}.json")
+    csv_path = saved_path.with_name(f"{stem}.csv")
+    write_json(json_path, output)
+    write_csv(csv_path, results)
+    return json_path, csv_path, output
+
+
 def print_rate(label: str, value: float | None) -> None:
     if value is None:
         print(f"{label}=n/a")
     else:
         print(f"{label}={value:.3f}")
+
+
+def benchmark_evaluation_fields(
+    initial: BenchmarkEvaluation,
+    final: BenchmarkEvaluation,
+) -> dict[str, Any]:
+    """Return row fields derived from one benchmark evaluator only."""
+    engineering_passed = bool(
+        final.engineering_contradiction_count == 0
+        and final.unsupported_engineering_claim_count == 0
+        and final.false_premise_correction_success is not False
+    )
+    return {
+        "initial_behavior_passed": initial.behavior_passed,
+        "final_behavior_passed": final.behavior_passed,
+        "initial_answer_passed": initial.answer_passed,
+        "final_answer_passed": final.answer_passed,
+        "hallucination_detected": final.hallucination_detected,
+        "initial_benchmark_passed": initial.passed,
+        "final_benchmark_passed": final.passed,
+        "rewrite_success": not initial.passed and final.passed,
+        "expected_document_hit": final.expected_document_hit,
+        "preferred_page_hit": final.preferred_page_hit,
+        "engineering_contradiction_count": (
+            final.engineering_contradiction_count
+        ),
+        "false_premise_detected": final.false_premise_detected,
+        "false_premise_correction_success": (
+            final.false_premise_correction_success
+        ),
+        "unsupported_engineering_claim_count": (
+            final.unsupported_engineering_claim_count
+        ),
+        "engineering_validation_passed": engineering_passed,
+        "initial_required_failures": initial.required_failures,
+        "initial_forbidden_hits": initial.forbidden_hits,
+        "final_required_failures": final.required_failures,
+        "final_forbidden_hits": final.forbidden_hits,
+        "initial_benchmark_evaluation": initial.to_dict(),
+        "final_benchmark_evaluation": final.to_dict(),
+        "benchmark_evaluation_source": "benchmark_evaluator",
+    }
+
+
+def benchmark_rule_failure_types(
+    evaluation: BenchmarkEvaluation,
+    *,
+    citation_correctness: bool | None,
+    engineering_validation_passed: bool | None,
+) -> list[str]:
+    failures: list[str] = []
+    if evaluation.forbidden_hits:
+        failures.append("forbidden_pattern")
+    if evaluation.required_failures:
+        failures.append("required_pattern")
+    if evaluation.expected_document_hit is False:
+        failures.append("retrieval")
+    if citation_correctness is False:
+        failures.append("citation")
+    if (
+        engineering_validation_passed is False
+        or evaluation.engineering_contradiction_count
+        or evaluation.unsupported_engineering_claim_count
+        or evaluation.false_premise_correction_success is False
+    ):
+        failures.append("engineering_validator")
+    return failures
 
 
 def figure_retrieval_hit(
@@ -487,22 +805,135 @@ def figure_retrieval_hit(
     return bool(preferred_pages.intersection(figure_pages))
 
 
+def expected_figure_numbers(item: dict[str, Any]) -> set[str]:
+    text = " ".join(
+        [
+            str(item.get("question") or ""),
+            *(str(value) for value in item.get("required_concepts") or []),
+            *(str(value) for value in item.get("required_patterns") or []),
+        ]
+    )
+    return {
+        match.group(1)
+        for match in re.finditer(
+            r"figure(?:\\s\*|\s)*([0-9]+[A-Za-z]?)",
+            text,
+            re.IGNORECASE,
+        )
+    }
+
+
+def correct_figure_number_hit(
+    item: dict[str, Any],
+    figures: list[dict[str, Any]],
+) -> bool | None:
+    if item.get("question_type") != "figure":
+        return None
+    expected = expected_figure_numbers(item)
+    if not expected:
+        return None
+    observed = {
+        match.group(1)
+        for figure in figures
+        if (
+            match := re.search(
+                r"figure\s*([0-9]+[A-Za-z]?)",
+                str(figure.get("figure_number") or ""),
+                re.IGNORECASE,
+            )
+        )
+    }
+    return expected.issubset(observed)
+
+
+def figure_numeric_required(item: dict[str, Any]) -> bool:
+    if item.get("question_type") != "figure":
+        return False
+    text = " ".join(
+        str(value)
+        for value in [
+            *(item.get("required_concepts") or []),
+            *(item.get("required_patterns") or []),
+        ]
+    )
+    return re.search(r"\d+\\?\.\d+", text) is not None
+
+
+def required_figure_numeric_values(item: dict[str, Any]) -> set[str]:
+    if item.get("question_type") != "figure":
+        return set()
+    text = " ".join(
+        str(value)
+        for value in [
+            *(item.get("required_concepts") or []),
+            *(item.get("required_patterns") or []),
+        ]
+    )
+    return {
+        f"{whole}.{fraction}"
+        for whole, fraction in re.findall(r"(\d+)\\?\.(\d+)", text)
+    }
+
+
+def figure_numeric_coverage(
+    item: dict[str, Any],
+    answer: str,
+) -> tuple[float | None, bool | None]:
+    required = required_figure_numeric_values(item)
+    if not required:
+        return None, None
+    observed = set(re.findall(r"(?<!\d)\d+\.\d+(?!\d)", answer))
+    coverage = len(required & observed) / len(required)
+    return coverage, coverage == 1.0
+
+
+def require_nonempty_knowledge_base(checklist: dict[str, Any]) -> None:
+    checks = checklist.get("checks") or {}
+    knowledge_base = checklist.get("knowledge_base") or {}
+    data_dir = str((checks.get("data_dir") or {}).get("path") or "unknown")
+    vector_db_dir = str((checks.get("chroma") or {}).get("path") or "unknown")
+    documents = int(knowledge_base.get("documents") or 0)
+    chunks = int(knowledge_base.get("chunks") or 0)
+    print(f"resolved_data_dir={data_dir}")
+    print(f"resolved_vector_db_dir={vector_db_dir}")
+    print(f"knowledge_base_documents={documents}")
+    print(f"knowledge_base_chunks={chunks}")
+    if chunks == 0:
+        raise RuntimeError(
+            "ERROR: knowledge base collection is empty. "
+            "Set DATA_DIR to the existing indexed data directory before benchmarking."
+        )
+
+
 def direct_ollama_answer(
     ollama_url: str,
     *,
     model: str,
     question: str,
     timeout: float,
+    temperature: float | None = None,
+    seed: int | None = None,
 ) -> tuple[str, float]:
     started = time.perf_counter()
+    options = {
+        key: value
+        for key, value in {
+            "temperature": temperature,
+            "seed": seed,
+        }.items()
+        if value is not None
+    }
+    payload: dict[str, Any] = {
+        "model": model,
+        "stream": False,
+        "messages": [{"role": "user", "content": question}],
+    }
+    if options:
+        payload["options"] = options
     response = http_json(
         "POST",
         f"{ollama_url.rstrip('/')}/api/chat",
-        payload={
-            "model": model,
-            "stream": False,
-            "messages": [{"role": "user", "content": question}],
-        },
+        payload=payload,
         timeout=timeout,
     )
     answer = str((response.get("message") or {}).get("content") or "")
@@ -533,10 +964,18 @@ def main() -> int:
         ),
     )
     parser.add_argument("--model", default="qwen3:8b")
+    parser.add_argument("--temperature", type=float, default=None)
+    parser.add_argument("--seed", type=int, default=None)
     parser.add_argument(
         "--mode",
         choices=("rag", "research", "ollama-direct"),
         default="rag",
+    )
+    parser.add_argument(
+        "--retrieval-mode",
+        choices=("legacy", "hybrid", "hybrid_rerank"),
+        default="",
+        help="research 응답의 RETRIEVAL_MODE를 검증하고 결과에 기록합니다.",
     )
     parser.add_argument(
         "--condition",
@@ -573,7 +1012,38 @@ def main() -> int:
         "--fail-on-benchmark-failure",
         action="store_true",
     )
+    parser.add_argument(
+        "--reevaluate",
+        default="",
+        help=(
+            "Re-evaluate a saved benchmark JSON without backend, retrieval, "
+            "or Ollama calls."
+        ),
+    )
     args = parser.parse_args()
+    if args.reevaluate:
+        json_path, csv_path, payload = reevaluate_saved_benchmark(
+            Path(args.reevaluate),
+            benchmark_fallback=Path(args.benchmark),
+        )
+        print("BENCHMARK_REEVALUATED=True")
+        print(f"json={json_path}")
+        print(f"csv={csv_path}")
+        for label in (
+            "answer_accuracy",
+            "hallucination_rate",
+            "citation_correctness_rate",
+            "exact_refusal_rate",
+            "final_benchmark_pass_rate",
+        ):
+            print_rate(label, payload["summary"].get(label))
+        return 0
+    if args.retrieval_mode and args.mode != "research":
+        parser.error("--retrieval-mode requires --mode research")
+    if args.mode == "rag" and (
+        args.temperature is not None or args.seed is not None
+    ):
+        parser.error("--temperature/--seed require --mode research or ollama-direct")
 
     benchmark_path = Path(args.benchmark).resolve()
     raw_benchmark_items = read_json(benchmark_path)
@@ -601,7 +1071,11 @@ def main() -> int:
 
     print(f"benchmark={benchmark_path}")
     print(f"mode={args.mode}")
+    if args.retrieval_mode:
+        print(f"retrieval_mode={args.retrieval_mode}")
     print(f"model={args.model}")
+    print(f"temperature={args.temperature}")
+    print(f"seed={args.seed}")
     print(f"questions={len(items)}")
     print(
         "question_types="
@@ -630,6 +1104,12 @@ def main() -> int:
             "backend_status="
             f"{health.get('status', 'unknown')}"
         )
+        checklist = http_json(
+            "GET",
+            f"{api_base}/system/checklist",
+            timeout=30.0,
+        )
+        require_nonempty_knowledge_base(checklist)
     else:
         tags = http_json(
             "GET",
@@ -677,6 +1157,10 @@ def main() -> int:
             if args.top_k is not None:
                 request_payload["internal_top_k"] = args.top_k
                 request_payload["external_top_k"] = args.top_k
+            if args.temperature is not None:
+                request_payload["temperature"] = args.temperature
+            if args.seed is not None:
+                request_payload["seed"] = args.seed
         else:
             request_payload = {
                 "question": question,
@@ -694,12 +1178,24 @@ def main() -> int:
             "question": question,
             "condition": args.condition or f"{args.model}-{args.mode}",
             "mode": args.mode,
+            "retrieval_mode": args.retrieval_mode or None,
             "model": args.model,
+            "temperature": args.temperature,
+            "seed": args.seed,
             "expected_behavior": item.get(
                 "expected_behavior"
             ),
             "infrastructure_error": None,
         }
+        repair_attempts = 0
+        api_engineering_contradictions: int | None = None
+        api_unsupported_engineering: int | None = None
+        api_false_premise_detected: bool | None = None
+        api_false_premise_corrected: bool | None = None
+        api_engineering_validation_passed: bool | None = None
+        api_figure_numeric_support_pass: bool | None = None
+        api_figure_citation_correctness: bool | None = None
+        figure_vision_calls = 0
 
         try:
             if args.mode == "rag":
@@ -752,6 +1248,12 @@ def main() -> int:
                 retrieved_web_urls = []
                 citation_correctness = None
                 unsupported_claim_count = None
+                repair_attempts = max(len(attempts) - 1, 0)
+                api_engineering_validation_passed = (
+                    bool(final_validator_passed)
+                    if final_validator_passed is not None
+                    else None
+                )
             elif args.mode == "research":
                 response = http_json(
                     "POST",
@@ -759,6 +1261,16 @@ def main() -> int:
                     payload=request_payload,
                     timeout=args.timeout,
                 )
+                retrieval_mode = str(response.get("retrieval_mode") or "").strip()
+                if retrieval_mode not in {"legacy", "hybrid", "hybrid_rerank"}:
+                    raise RuntimeError(
+                        "Research response did not contain a valid retrieval_mode."
+                    )
+                if args.retrieval_mode and retrieval_mode != args.retrieval_mode:
+                    raise RuntimeError(
+                        "Backend retrieval mode mismatch: "
+                        f"expected {args.retrieval_mode}, got {retrieval_mode}"
+                    )
                 final_answer = str(response.get("answer") or "")
                 initial_answer = final_answer
                 sources = response.get("internal_sources") or []
@@ -781,12 +1293,49 @@ def main() -> int:
                     for source in (response.get("web_sources") or [])
                 ]
                 validation = response.get("validation") or {}
+                repair_attempts = int(validation.get("repair_attempts") or 0)
+                api_engineering_contradictions = int(
+                    validation.get("engineering_contradiction_count") or 0
+                )
+                api_unsupported_engineering = int(
+                    validation.get("unsupported_engineering_claim_count") or 0
+                )
+                api_false_premise_detected = bool(
+                    validation.get("false_premise_detected")
+                )
+                api_false_premise_corrected = (
+                    bool(validation.get("false_premise_corrected"))
+                    if api_false_premise_detected
+                    else None
+                )
+                api_engineering_validation_passed = bool(
+                    validation.get("engineering_validation_passed")
+                )
+                api_figure_numeric_support_pass = bool(
+                    validation.get("figure_numeric_support_pass")
+                )
+                api_figure_citation_correctness = bool(
+                    validation.get("figure_citation_correctness")
+                )
+                figure_vision_calls = int(
+                    validation.get("figure_vision_calls") or 0
+                )
                 unsupported_claim_count = int(
                     validation.get("unsupported_claim_count") or 0
                 )
                 citation_correctness = (
                     not bool(validation.get("invalid_citations"))
                     and unsupported_claim_count == 0
+                    and int(
+                        validation.get("engineering_contradiction_count") or 0
+                    ) == 0
+                    and int(
+                        validation.get("unsupported_engineering_claim_count") or 0
+                    ) == 0
+                    and not (
+                        validation.get("false_premise_detected")
+                        and not validation.get("false_premise_corrected")
+                    )
                     and bool(validation.get("valid_citations"))
                 )
             else:
@@ -795,6 +1344,8 @@ def main() -> int:
                     model=args.model,
                     question=question,
                     timeout=args.timeout,
+                    temperature=args.temperature,
+                    seed=args.seed,
                 )
                 initial_answer = final_answer
                 sources = []
@@ -827,12 +1378,25 @@ def main() -> int:
                     sources=sources,
                 )
             )
+            figure_hit = figure_retrieval_hit(item, figures)
+            figure_required = item.get("question_type") == "figure"
+            numeric_coverage, numeric_complete = figure_numeric_coverage(
+                item,
+                final_answer,
+            )
+            text_page_hit = final_evaluation.preferred_page_hit
+            unified_page_hit = (
+                bool(text_page_hit or figure_hit)
+                if text_page_hit is not None or figure_hit is not None
+                else None
+            )
 
             result.update(
                 {
                     "initial_answer": initial_answer,
                     "final_answer": final_answer,
                     "sources": sources,
+                    "figures": figures,
                     "source_pages": (
                         final_evaluation.source_pages
                     ),
@@ -862,6 +1426,7 @@ def main() -> int:
                         and final_evaluation.passed
                     ),
                     "attempts": len(attempts),
+                    "repair_attempts": repair_attempts,
                     "final_status": final_status,
                     "expected_document_hit": (
                         final_evaluation
@@ -871,11 +1436,31 @@ def main() -> int:
                         final_evaluation
                         .preferred_page_hit
                     ),
-                    "figure_retrieval_hit": figure_retrieval_hit(
+                    "text_preferred_page_hit": text_page_hit,
+                    "figure_preferred_page_hit": figure_hit,
+                    "unified_preferred_page_hit": unified_page_hit,
+                    "figure_retrieval_hit": figure_hit,
+                    "figure_count": len(figures),
+                    "figure_required": figure_required,
+                    "figure_hit": figure_hit,
+                    "correct_figure_number_hit": correct_figure_number_hit(
                         item,
                         figures,
                     ),
-                    "figure_count": len(figures),
+                    "correct_figure_page_hit": figure_hit,
+                    "figure_numeric_support_pass": (
+                        api_figure_numeric_support_pass
+                        if figure_numeric_required(item)
+                        else None
+                    ),
+                    "figure_required_numeric_coverage": numeric_coverage,
+                    "figure_required_numeric_complete": numeric_complete,
+                    "figure_citation_correctness": (
+                        api_figure_citation_correctness
+                        if figure_required
+                        else None
+                    ),
+                    "figure_vision_calls": figure_vision_calls,
                     "retrieval_seconds": retrieval_seconds,
                     "reasoning_seconds": reasoning_seconds,
                     "generation_seconds": generation_seconds,
@@ -884,7 +1469,31 @@ def main() -> int:
                     "external_source_count": external_source_count,
                     "retrieved_web_urls": retrieved_web_urls,
                     "citation_correctness": citation_correctness,
+                    "agent_citation_correctness": citation_correctness,
+                    "citation_evaluation_source": (
+                        "agent_validation"
+                        if citation_correctness is not None
+                        else None
+                    ),
                     "unsupported_claim_count": unsupported_claim_count,
+                    "agent_engineering_contradiction_count": (
+                        api_engineering_contradictions
+                    ),
+                    "agent_false_premise_detected": api_false_premise_detected,
+                    "agent_false_premise_correction_success": (
+                        api_false_premise_corrected
+                    ),
+                    "agent_unsupported_engineering_claim_count": (
+                        api_unsupported_engineering
+                    ),
+                    "agent_engineering_validation_passed": (
+                        api_engineering_validation_passed
+                    ),
+                    "retrieval_mode": (
+                        retrieval_mode
+                        if args.mode == "research"
+                        else None
+                    ),
                     "initial_required_failures": (
                         initial_evaluation
                         .required_failures
@@ -903,6 +1512,21 @@ def main() -> int:
                     ),
                     "agent_run_file": agent_run_file,
                 }
+            )
+            result.update(
+                benchmark_evaluation_fields(
+                    initial_evaluation,
+                    final_evaluation,
+                )
+            )
+            result["benchmark_rule_failure_type"] = (
+                benchmark_rule_failure_types(
+                    final_evaluation,
+                    citation_correctness=citation_correctness,
+                    engineering_validation_passed=(
+                        api_engineering_validation_passed
+                    ),
+                )
             )
 
             print(
@@ -929,11 +1553,25 @@ def main() -> int:
                     "final_benchmark_passed": None,
                     "rewrite_success": False,
                     "attempts": 0,
+                    "repair_attempts": 0,
                     "final_status": "infrastructure_error",
                     "expected_document_hit": None,
                     "preferred_page_hit": None,
+                    "text_preferred_page_hit": None,
+                    "figure_preferred_page_hit": None,
+                    "unified_preferred_page_hit": None,
                     "figure_retrieval_hit": None,
                     "figure_count": 0,
+                    "figure_required": item.get("question_type") == "figure",
+                    "figure_hit": None,
+                    "correct_figure_number_hit": None,
+                    "correct_figure_page_hit": None,
+                    "figure_numeric_support_pass": None,
+                    "figure_required_numeric_coverage": None,
+                    "figure_required_numeric_complete": None,
+                    "figure_citation_correctness": None,
+                    "figure_vision_calls": 0,
+                    "figures": [],
                     "source_pages": [],
                     "retrieval_seconds": 0.0,
                     "reasoning_seconds": 0.0,
@@ -944,10 +1582,16 @@ def main() -> int:
                     "retrieved_web_urls": [],
                     "citation_correctness": None,
                     "unsupported_claim_count": None,
+                    "engineering_contradiction_count": None,
+                    "false_premise_detected": None,
+                    "false_premise_correction_success": None,
+                    "unsupported_engineering_claim_count": None,
+                    "engineering_validation_passed": None,
                     "initial_required_failures": [],
                     "initial_forbidden_hits": [],
                     "final_required_failures": [],
                     "final_forbidden_hits": [],
+                    "benchmark_rule_failure_type": ["infrastructure"],
                     "final_answer": "",
                     "agent_run_file": "",
                 }
@@ -962,6 +1606,27 @@ def main() -> int:
         if args.pause_seconds > 0:
             time.sleep(args.pause_seconds)
 
+    observed_retrieval_modes = sorted(
+        {
+            str(result["retrieval_mode"])
+            for result in results
+            if result.get("retrieval_mode")
+            and result.get("infrastructure_error") is None
+        }
+    )
+    if len(observed_retrieval_modes) > 1:
+        raise RuntimeError("One benchmark run returned multiple retrieval modes.")
+    run_retrieval_mode = (
+        observed_retrieval_modes[0]
+        if observed_retrieval_modes
+        else args.retrieval_mode or None
+    )
+    run_condition = args.condition or f"{args.model}-{args.mode}"
+    if args.mode == "research" and run_retrieval_mode:
+        run_condition = f"{run_condition}-{run_retrieval_mode}"
+    for result in results:
+        result["condition"] = run_condition
+
     summary = build_summary(results)
     elapsed = time.perf_counter() - overall_started
 
@@ -972,9 +1637,12 @@ def main() -> int:
         "created_at": datetime.now(
             timezone.utc
         ).isoformat(),
-        "condition": args.condition or f"{args.model}-{args.mode}",
+        "condition": run_condition,
         "mode": args.mode,
+        "retrieval_mode": run_retrieval_mode,
         "model": args.model,
+        "temperature": args.temperature,
+        "seed": args.seed,
         "api_url": api_base,
         "ollama_url": args.ollama_url.rstrip("/"),
         "question_count": len(items),

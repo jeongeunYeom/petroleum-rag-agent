@@ -8,9 +8,18 @@ from dotenv import load_dotenv
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 ENV_FILE = PROJECT_ROOT / ".env"
+RETRIEVAL_MODES = {"legacy", "hybrid", "hybrid_rerank"}
 
 # Load local environment variables from the project .env when present.
 load_dotenv(ENV_FILE)
+
+
+def resolve_retrieval_mode(value: str | None = None) -> str:
+    mode = (value or os.getenv("RETRIEVAL_MODE", "legacy")).strip().lower()
+    if mode not in RETRIEVAL_MODES:
+        choices = "|".join(sorted(RETRIEVAL_MODES))
+        raise ValueError(f"RETRIEVAL_MODE must be one of {choices}")
+    return mode
 
 
 def _resolve_project_path(value: str | None, default: str) -> Path:
@@ -79,6 +88,51 @@ class Settings:
 
     embedding_model_path: str | None = field(
         default_factory=lambda: os.getenv("EMBEDDING_MODEL_PATH") or None
+    )
+
+    retrieval_mode: str = field(default_factory=resolve_retrieval_mode)
+
+    web_fetch_enabled: bool = field(
+        default_factory=lambda: os.getenv("WEB_FETCH_ENABLED", "1") == "1"
+    )
+
+    web_fetch_timeout_seconds: float = field(
+        default_factory=lambda: float(os.getenv("WEB_FETCH_TIMEOUT_SECONDS", "15"))
+    )
+
+    web_fetch_max_bytes: int = field(
+        default_factory=lambda: int(os.getenv("WEB_FETCH_MAX_BYTES", "5000000"))
+    )
+
+    web_fetch_max_redirects: int = field(
+        default_factory=lambda: int(os.getenv("WEB_FETCH_MAX_REDIRECTS", "5"))
+    )
+
+    web_fetch_concurrency: int = field(
+        default_factory=lambda: int(os.getenv("WEB_FETCH_CONCURRENCY", "3"))
+    )
+
+    web_research_timeout_seconds: float = field(
+        default_factory=lambda: float(os.getenv("WEB_RESEARCH_TIMEOUT_SECONDS", "25"))
+    )
+
+    web_max_fetch_results: int = field(
+        default_factory=lambda: int(os.getenv("WEB_MAX_FETCH_RESULTS", "5"))
+    )
+
+    web_passage_max_chars: int = field(
+        default_factory=lambda: int(os.getenv("WEB_PASSAGE_MAX_CHARS", "1500"))
+    )
+
+    web_passage_min_relevance: float = field(
+        default_factory=lambda: float(os.getenv("WEB_PASSAGE_MIN_RELEVANCE", "0.20"))
+    )
+
+    reranker_model: str = field(
+        default_factory=lambda: os.getenv(
+            "RERANKER_MODEL",
+            "BAAI/bge-reranker-base",
+        )
     )
 
     collection_name: str = field(

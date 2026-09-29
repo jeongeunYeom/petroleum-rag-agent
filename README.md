@@ -101,7 +101,26 @@ pnpm dev
 - 최신·현재 동향 질문: 외부 웹 검색
 - 내부 자료와 최신 연구 비교: 내부 + 외부 통합 검색
 
-외부 검색은 DDGS를 사용하며 별도 API 키가 필요하지 않습니다. 검색 결과와 순위는 공개 검색 서비스 상태에 따라 달라질 수 있습니다. 외부 결과는 답변 근거로만 사용하며 ChromaDB에 저장하지 않습니다.
+외부 검색은 DDGS를 URL discovery에 사용한 뒤, 안전성 검사를 통과한 HTML/PDF를 직접 열어 본문을 추출하고 질문 관련 passage만 WEB 근거로 사용합니다. 페이지 fetch가 모두 실패한 경우에만 검색 snippet을 별도 fallback provenance로 표시합니다. 외부 결과는 요청 중에만 사용하며 ChromaDB에 저장하지 않습니다.
+
+```text
+DDGS discovery -> safe fetch -> content extraction -> passage ranking -> WEB evidence
+```
+
+fetch는 기본 5개 URL을 최대 3개씩 병렬 처리하며 URL당 최대 5 MB, 15초, 전체 Web Research 25초로 제한됩니다. BGE-M3와 lexical 점수를 결합해 관련도 `0.20` 미만 passage를 제외합니다. Web Research v2는 `DDGS discovery → safe concurrent fetch → extraction → relevance filtering → source/date metadata → quality + recency + primary-source ranking → WEB evidence` 순서로 동작합니다. 최신·역사·일반 기술·비교 질문을 구분하고, relevance가 비슷할 때 날짜가 명시된 최신 자료와 공식·1차 기술 자료를 우선합니다. Source authority는 순위 신호일 뿐, 내용이 참이라는 보증이 아닙니다. `.env`의 `WEB_FETCH_*`, `WEB_RESEARCH_TIMEOUT_SECONDS`, `WEB_MAX_FETCH_RESULTS`, `WEB_PASSAGE_*`로 조정할 수 있습니다.
+
+내부 Retrieval은 `.env`의 `RETRIEVAL_MODE`로 선택합니다. 기존 ChromaDB를 그대로 읽으며 재인덱싱하지 않습니다.
+
+| 값 | 내부 Retrieval |
+|---|---|
+| `legacy` | Dense + 기존 keyword + RRF |
+| `hybrid` | BGE-M3 dense + BM25 + RRF |
+| `hybrid_rerank` | BGE-M3 dense + BM25 + RRF + CrossEncoder |
+
+`hybrid_rerank`는 `RERANKER_MODEL`을 최초 요청 때 지연 로딩합니다. 기본값은 `BAAI/bge-reranker-base`입니다.
+오프라인 모드에서 사용하려면 해당 모델을 Hugging Face 캐시에 먼저 받아 두어야 합니다.
+
+Research 답변은 retrieval mode와 무관하게 claim 단위 Well Test 규칙을 통과해야 합니다. Wellbore storage의 unit-slope/pressure-derivative overlap, radial-flow derivative plateau, linear-flow `+1/2`, spherical-flow `-1/2`, late-time boundary/recharge의 조건부 unit-slope를 구분합니다. 질문에 잘못된 전제가 있으면 이를 명시적으로 반박해야 하며, citation의 공학적 의미가 claim과 일치하지 않거나 근거가 상충하는데 단정하면 해당 claim을 제거하고 최대 2회까지만 재작성합니다.
 
 ## 테스트
 
@@ -125,6 +144,34 @@ Well Test benchmark 질문은 `evaluation/well_test_agent_benchmark.json`에 있
 ```powershell
 python backend/scripts/run_well_test_benchmark.py --dry-run
 ```
+
+Retrieval mode별 비교는 백엔드를 각 모드로 다시 시작한 뒤 같은 조건으로 실행합니다. 첫 번째 터미널에서:
+
+```powershell
+$env:RETRIEVAL_MODE="legacy"       # hybrid, hybrid_rerank로 반복
+cd backend
+uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+두 번째 터미널의 저장소 루트에서:
+
+```powershell
+python backend/scripts/run_well_test_benchmark.py `
+  --mode research `
+  --retrieval-mode legacy `
+  --model qwen3:8b
+```
+
+세 실행 결과를 한 표로 합칩니다.
+
+```powershell
+python backend/scripts/compare_benchmark_runs.py `
+  data/evaluation/<legacy.json> `
+  data/evaluation/<hybrid.json> `
+  data/evaluation/<hybrid_rerank.json>
+```
+
+결과 JSON/CSV에는 retrieval mode, 답변 정확도, hallucination rate, citation correctness, retrieval recall, engineering contradiction count, false-premise correction success, unsupported engineering claim count, 평균 retrieval/전체 시간이 기록됩니다.
 
 ## 안전 범위
 
