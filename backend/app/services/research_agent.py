@@ -191,6 +191,12 @@ class ResearchAgent:
 
     async def research(self, request: ResearchRequest) -> ResearchResponse:
         started = time.perf_counter()
+        engineering_domains = self.engineering_validator.engineering_domains(
+            request.query
+        )
+        engineering_validators = (
+            self.engineering_validator.engineering_validator_names(request.query)
+        )
         mode = self.route_query(
             request.query,
             request.use_internal,
@@ -380,6 +386,8 @@ class ResearchAgent:
                 "figure_vision_calls": figure_vision_calls,
             }
             inference_used = False
+        validation["engineering_domains_detected"] = engineering_domains
+        validation["engineering_validators_used"] = engineering_validators
         validation["web_research"] = web_result.stats
         answer = self.render_requested_source_details(
             answer,
@@ -1562,15 +1570,23 @@ class ResearchAgent:
             for item in figures
         )
         conflict_text = json.dumps(conflicts, ensure_ascii=False)
-        false_premise = bool(
-            EngineeringValidator().detect_false_premises(query)
+        false_premises = EngineeringValidator().detect_false_premises(query)
+        false_premise = bool(false_premises)
+        well_test_false_premise = any(
+            item.get("domain") == "well_test" for item in false_premises
         )
         false_premise_instruction = (
-            "The question contains a false Well Test premise. The first claim must "
+            "The question contains a false engineering premise. The first claim must "
             "explicitly say that the premise is incorrect, identify the incorrect "
-            "attribution, then give the supported wellbore-storage relation and the "
-            "supported radial-flow relation with citations. Do not answer with a bare "
-            "refusal when the supplied evidence supports the correction. "
+            "relationship, and give the evidence-supported correction with citations. "
+            + (
+                "For a Well Test premise, state the supported wellbore-storage and "
+                "radial-flow relations. "
+                if well_test_false_premise
+                else ""
+            )
+            + "Do not answer with a bare refusal when the supplied evidence supports "
+            "the correction. "
             if false_premise
             else ""
         )
@@ -2104,6 +2120,7 @@ class ResearchAgent:
                 engineering = self.engineering_validator.validate_claim(
                     claim,
                     evidence,
+                    query=query,
                     evidence_conflict=evidence_conflict,
                 )
                 if not engineering.passed:
@@ -2581,6 +2598,7 @@ class ResearchAgent:
             result = self.engineering_validator.validate_claim(
                 line,
                 evidence,
+                query=query,
                 evidence_conflict=evidence_conflict,
             )
             if result.passed:

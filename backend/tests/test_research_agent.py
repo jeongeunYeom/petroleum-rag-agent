@@ -166,6 +166,37 @@ def test_retrieval_modes_switch_only_the_internal_retriever(tmp_path: Path) -> N
     ]
 
 
+@pytest.mark.parametrize(
+    "query,domains,validators",
+    [
+        ("공극률과 투과도의 차이", ["reservoir"], ["ReservoirValidator"]),
+        (
+            "pressure transient test에서 permeability를 추정",
+            ["well_test", "reservoir"],
+            ["WellTestValidator", "ReservoirValidator"],
+        ),
+        ("summarize the project", [], []),
+    ],
+)
+def test_research_validation_metadata_reports_routed_engineering_domains(
+    tmp_path: Path,
+    query: str,
+    domains: list[str],
+    validators: list[str],
+) -> None:
+    response = asyncio.run(
+        make_agent(tmp_path).research(
+            ResearchRequest(
+                query=query,
+                use_internal=True,
+                use_external=False,
+            )
+        )
+    )
+    assert response.validation["engineering_domains_detected"] == domains
+    assert response.validation["engineering_validators_used"] == validators
+
+
 def test_well_test_query_expansion_is_retrieval_only() -> None:
     expanded = ResearchAgent.expand_engineering_retrieval_query(
         "Is radial flow unit-slope?"

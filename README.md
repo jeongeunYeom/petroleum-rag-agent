@@ -120,7 +120,17 @@ fetch는 기본 5개 URL을 최대 3개씩 병렬 처리하며 URL당 최대 5 M
 `hybrid_rerank`는 `RERANKER_MODEL`을 최초 요청 때 지연 로딩합니다. 기본값은 `BAAI/bge-reranker-base`입니다.
 오프라인 모드에서 사용하려면 해당 모델을 Hugging Face 캐시에 먼저 받아 두어야 합니다.
 
-Research 답변은 retrieval mode와 무관하게 claim 단위 Well Test 규칙을 통과해야 합니다. Wellbore storage의 unit-slope/pressure-derivative overlap, radial-flow derivative plateau, linear-flow `+1/2`, spherical-flow `-1/2`, late-time boundary/recharge의 조건부 unit-slope를 구분합니다. 질문에 잘못된 전제가 있으면 이를 명시적으로 반박해야 하며, citation의 공학적 의미가 claim과 일치하지 않거나 근거가 상충하는데 단정하면 해당 claim을 제거하고 최대 2회까지만 재작성합니다.
+Research 답변은 retrieval mode와 무관하게 claim 단위 공학 검증을 통과해야 합니다. 질의에 따라 registry가 Well Test와 Reservoir validator를 하나 이상 선택하고, 각 validator의 이슈를 domain과 rule code가 보존된 상태로 합칩니다.
+
+```text
+Query -> Engineering Validator Registry
+          |-- Well Test
+          `-- Reservoir
+```
+
+Well Test validator는 wellbore storage의 unit-slope/pressure-derivative overlap, radial-flow derivative plateau, linear-flow `+1/2`, spherical-flow `-1/2`, late-time boundary/recharge의 조건부 unit-slope를 구분합니다. Reservoir validator는 porosity, permeability, saturation, Darcy-flow 방향, formation-volume factor, material balance와 대표 drive mechanism의 명백한 모순을 검사합니다. 질문에 잘못된 전제가 있으면 이를 명시적으로 반박해야 하며, citation의 공학적 의미가 claim과 일치하지 않거나 근거가 상충하는데 단정하면 해당 claim을 제거하고 최대 2회까지만 재작성합니다.
+
+Validator는 답변의 사실 근거가 아니라 consistency/contradiction guard입니다. 최종 claim은 계속 KB, WEB 또는 FIG evidence로 뒷받침되어야 합니다. 향후 Drilling, Petrophysics, Production validator도 같은 registry에 추가할 수 있지만 현재 구현 범위에는 포함하지 않습니다.
 
 ## 테스트
 
