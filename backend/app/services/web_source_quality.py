@@ -41,10 +41,20 @@ class QueryIntent(str, Enum):
     COMPARISON = "comparison"
 
 
+class YearConstraintType(str, Enum):
+    EXACT = "exact"
+    SINCE = "since"
+    AS_OF = "as_of"
+
+
 @dataclass(frozen=True)
 class YearConstraint:
     year: int
-    since: bool = False
+    constraint_type: YearConstraintType = YearConstraintType.EXACT
+
+    @property
+    def since(self) -> bool:
+        return self.constraint_type is YearConstraintType.SINCE
 
 
 @dataclass(frozen=True)
@@ -160,15 +170,42 @@ class WebSourceQualityEvaluator:
 
     @staticmethod
     def parse_year_constraint(query: str) -> YearConstraint | None:
+        as_of = re.search(
+            r"(?:as\s+of\s*)(20\d{2})|"
+            r"(20\d{2})(?:년)?\s*(?:기준|현재)",
+            query,
+            re.IGNORECASE,
+        )
+        if as_of:
+            return YearConstraint(
+                int(as_of.group(1) or as_of.group(2)),
+                YearConstraintType.AS_OF,
+            )
         since = re.search(
-            r"(?:since|after|from)\s*(20\d{2})|(20\d{2})\s*(?:이후|부터)",
+            r"(?:since|after|from)\s*(20\d{2})|"
+            r"(20\d{2})(?:년)?\s*(?:이후|부터)",
             query,
             re.IGNORECASE,
         )
         if since:
-            return YearConstraint(int(since.group(1) or since.group(2)), True)
-        years = re.findall(r"(?<!\d)(20\d{2})(?!\d)", query)
-        return YearConstraint(int(years[0]), False) if len(set(years)) == 1 else None
+            return YearConstraint(
+                int(since.group(1) or since.group(2)),
+                YearConstraintType.SINCE,
+            )
+        exact = re.search(
+            r"(?:published\s+in|from\s+the\s+year)\s*(20\d{2})|"
+            r"(20\d{2})(?:년(?:에)?)?\s*(?:발표|출판|게재)(?:된|한)?|"
+            r"(20\d{2})(?:년)?\s*(?:SPE\s*)?"
+            r"(?:논문|연구|paper|papers|study|studies|publication)",
+            query,
+            re.IGNORECASE,
+        )
+        if exact:
+            return YearConstraint(
+                int(next(value for value in exact.groups() if value)),
+                YearConstraintType.EXACT,
+            )
+        return None
 
     def extract_html_metadata(
         self,
@@ -350,16 +387,26 @@ class WebSourceQualityEvaluator:
         if intent is QueryIntent.HISTORICAL:
             return 0.0
         current = today or date.today()
-        value = self.normalize_date(published_date or modified_date, today=current)
+        raw_date = published_date or modified_date
+        reference = current
+        if constraint and constraint.constraint_type is YearConstraintType.AS_OF:
+            as_of_year = min(constraint.year, current.year)
+            source_year = re.search(r"(?<!\d)(?:18|19|20)\d{2}(?!\d)", raw_date or "")
+            if source_year and int(source_year.group()) > as_of_year:
+                return 0.0
+            if as_of_year < current.year:
+                reference = date(as_of_year, 12, 31)
+        value = self.normalize_date(raw_date, today=current)
         if value is None:
             return 0.25
         published = date.fromisoformat(value)
         if constraint:
-            if constraint.since:
+            if constraint.constraint_type is YearConstraintType.SINCE:
                 return 1.0 if published.year >= constraint.year else 0.0
-            distance = abs(published.year - constraint.year)
-            return 1.0 if distance == 0 else 0.5 if distance == 1 else 0.0
-        age = max(0.0, (current - published).days / 365.25)
+            if constraint.constraint_type is YearConstraintType.EXACT:
+                distance = abs(published.year - constraint.year)
+                return 1.0 if distance == 0 else 0.5 if distance == 1 else 0.0
+        age = max(0.0, (reference - published).days / 365.25)
         if age <= 1:
             return 1.0
         if age <= 2:

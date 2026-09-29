@@ -8,7 +8,11 @@ import pytest
 
 from app.core.config import Settings
 from app.services.web_research import WebCandidate, WebResearchService
-from app.services.web_source_quality import QueryIntent, WebSourceQualityEvaluator
+from app.services.web_source_quality import (
+    QueryIntent,
+    WebSourceQualityEvaluator,
+    YearConstraintType,
+)
 
 
 EVALUATOR = WebSourceQualityEvaluator()
@@ -30,12 +34,38 @@ def test_query_intent(query: str, expected: QueryIntent) -> None:
 
 
 @pytest.mark.parametrize(
-    "query,year,since",
-    [("2023 SPE 논문", 2023, False), ("since 2020 CCS", 2020, True), ("2020 이후 연구", 2020, True)],
+    "query,year,constraint_type",
+    [
+        ("2026년 기준 최신 기술", 2026, YearConstraintType.AS_OF),
+        ("as of 2026 latest monitoring", 2026, YearConstraintType.AS_OF),
+        ("2026년 현재 CCS", 2026, YearConstraintType.AS_OF),
+        ("2026 현재 CCS", 2026, YearConstraintType.AS_OF),
+        ("2023년 논문", 2023, YearConstraintType.EXACT),
+        ("2023년에 발표된 연구", 2023, YearConstraintType.EXACT),
+        ("2023년에 발표된 CO2 storage monitoring 연구를 찾아줘.", 2023, YearConstraintType.EXACT),
+        ("published in 2023", 2023, YearConstraintType.EXACT),
+        ("from the year 2023", 2023, YearConstraintType.EXACT),
+        ("since 2020 CCS", 2020, YearConstraintType.SINCE),
+        ("2020 이후 연구", 2020, YearConstraintType.SINCE),
+        ("2020년부터 연구", 2020, YearConstraintType.SINCE),
+    ],
 )
-def test_year_constraint(query: str, year: int, since: bool) -> None:
+def test_year_constraint(
+    query: str, year: int, constraint_type: YearConstraintType
+) -> None:
     constraint = EVALUATOR.parse_year_constraint(query)
-    assert constraint and (constraint.year, constraint.since) == (year, since)
+    assert constraint and (constraint.year, constraint.constraint_type) == (
+        year,
+        constraint_type,
+    )
+
+
+@pytest.mark.parametrize(
+    "query",
+    ["CO2 storage projects operating in 2023", "2023 production data", "2010년까지 well testing의 발전 역사"],
+)
+def test_year_without_publication_constraint_returns_none(query: str) -> None:
+    assert EVALUATOR.parse_year_constraint(query) is None
 
 
 @pytest.mark.parametrize(
@@ -127,6 +157,44 @@ def test_recency_policy_and_explicit_year() -> None:
     assert historical == 0
     assert EVALUATOR.recency_score(QueryIntent.GENERAL_TECHNICAL, "2021-01-01", constraint=constraint, today=TODAY) == 1
     assert EVALUATOR.recency_score(QueryIntent.GENERAL_TECHNICAL, "2019-01-01", constraint=constraint, today=TODAY) == 0
+
+
+def test_as_of_recency_uses_query_reference_year() -> None:
+    constraint = EVALUATOR.parse_year_constraint("2026년 기준 최신 기술")
+    scores = [
+        EVALUATOR.recency_score(
+            QueryIntent.LATEST,
+            published,
+            constraint=constraint,
+            today=TODAY,
+        )
+        for published in ("2026-01-01", "2025-01-01", "2024-01-01", "2020-01-01")
+    ]
+    assert scores[0] > scores[1] > scores[2] > scores[3]
+    assert EVALUATOR.recency_score(
+        QueryIntent.LATEST,
+        "2027-01-01",
+        constraint=constraint,
+        today=TODAY,
+    ) == 0
+
+
+def test_exact_and_since_recency_constraints() -> None:
+    exact = EVALUATOR.parse_year_constraint("published in 2023")
+    since = EVALUATOR.parse_year_constraint("since 2020")
+    assert EVALUATOR.recency_score(QueryIntent.LATEST, "2023-05-01", constraint=exact, today=TODAY) == 1
+    assert EVALUATOR.recency_score(QueryIntent.LATEST, "2020-01-01", constraint=since, today=TODAY) == 1
+    assert EVALUATOR.recency_score(QueryIntent.LATEST, "2019-12-31", constraint=since, today=TODAY) == 0
+
+
+def test_historical_intent_disables_as_of_recency() -> None:
+    constraint = EVALUATOR.parse_year_constraint("as of 2019")
+    assert EVALUATOR.recency_score(
+        QueryIntent.HISTORICAL,
+        "2019-01-01",
+        constraint=constraint,
+        today=TODAY,
+    ) == 0
 
 
 def _rank(url: str, title: str, relevance: float, published: str | None, search_rank: int = 1):
