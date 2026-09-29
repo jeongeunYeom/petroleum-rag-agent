@@ -132,6 +132,7 @@ def make_agent(
         data_dir=tmp_path / "data",
         agent_workspace_dir=tmp_path / "workspace",
         retrieval_mode=retrieval_mode,
+        web_fetch_enabled=False,
     )
     return ResearchAgent(
         settings,

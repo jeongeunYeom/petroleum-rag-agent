@@ -101,7 +101,13 @@ pnpm dev
 - 최신·현재 동향 질문: 외부 웹 검색
 - 내부 자료와 최신 연구 비교: 내부 + 외부 통합 검색
 
-외부 검색은 DDGS를 사용하며 별도 API 키가 필요하지 않습니다. 검색 결과와 순위는 공개 검색 서비스 상태에 따라 달라질 수 있습니다. 외부 결과는 답변 근거로만 사용하며 ChromaDB에 저장하지 않습니다.
+외부 검색은 DDGS를 URL discovery에 사용한 뒤, 안전성 검사를 통과한 HTML/PDF를 직접 열어 본문을 추출하고 질문 관련 passage만 WEB 근거로 사용합니다. 페이지 fetch가 모두 실패한 경우에만 검색 snippet을 별도 fallback provenance로 표시합니다. 외부 결과는 요청 중에만 사용하며 ChromaDB에 저장하지 않습니다.
+
+```text
+DDGS discovery -> safe fetch -> content extraction -> passage ranking -> WEB evidence
+```
+
+fetch는 기본 5개 URL, URL당 최대 5 MB, 15초로 제한됩니다. `.env`의 `WEB_FETCH_*`, `WEB_MAX_FETCH_RESULTS`, `WEB_PASSAGE_MAX_CHARS`로 조정할 수 있습니다.
 
 내부 Retrieval은 `.env`의 `RETRIEVAL_MODE`로 선택합니다. 기존 ChromaDB를 그대로 읽으며 재인덱싱하지 않습니다.
 

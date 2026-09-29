@@ -47,6 +47,19 @@ class WebEvidence(BaseModel):
     domain: str
     snippet: str
     rank: int
+    fetched: bool = False
+    evidence_kind: Literal[
+        "fetched_page", "fetched_pdf", "search_snippet_fallback"
+    ] = "search_snippet_fallback"
+    content_type: str | None = None
+    passage: str | None = None
+    passage_index: int | None = None
+    heading: str | None = None
+    fetch_status: str | None = None
+    search_snippet: str | None = None
+    published_date: str | None = None
+    modified_date: str | None = None
+    http_last_modified: str | None = None
 
 
 class FigureEvidence(BaseModel):
@@ -88,6 +101,9 @@ class ResearchTiming(BaseModel):
     retrieval_seconds: float
     reasoning_seconds: float
     elapsed_seconds: float
+    web_search_seconds: float = 0.0
+    web_fetch_seconds: float = 0.0
+    web_passage_ranking_seconds: float = 0.0
 
 
 class ResearchResponse(BaseModel):

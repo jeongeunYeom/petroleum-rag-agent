@@ -38,6 +38,14 @@ export type ResearchResponse = {
     domain: string;
     snippet: string;
     rank: number;
+    fetched?: boolean;
+    evidence_kind?: "fetched_page" | "fetched_pdf" | "search_snippet_fallback";
+    content_type?: string | null;
+    passage?: string | null;
+    passage_index?: number | null;
+    heading?: string | null;
+    fetch_status?: string | null;
+    search_snippet?: string | null;
   }>;
   figures: Array<{
     evidence_id: string;
