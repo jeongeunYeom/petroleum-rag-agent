@@ -97,7 +97,11 @@ def test_malformed_and_far_future_dates_are_ignored() -> None:
 
 def test_http_last_modified_is_not_publication_date(tmp_path: Path) -> None:
     service = WebResearchService(
-        Settings(data_dir=tmp_path / "data", agent_workspace_dir=tmp_path / "workspace"),
+        Settings(
+            data_dir=tmp_path / "data",
+            agent_workspace_dir=tmp_path / "workspace",
+            web_fetch_enabled=True,
+        ),
         transport=httpx.MockTransport(
             lambda request: httpx.Response(
                 200,
@@ -187,6 +191,7 @@ def test_publication_dedupe(
         Settings(
             data_dir=tmp_path / "data",
             agent_workspace_dir=tmp_path / "workspace",
+            web_fetch_enabled=True,
             web_passage_min_relevance=0.01,
         ),
         transport=httpx.MockTransport(handler),
@@ -215,6 +220,7 @@ def test_paywalled_relevant_snippet_can_fill_remaining_results(tmp_path: Path) -
         Settings(
             data_dir=tmp_path / "data",
             agent_workspace_dir=tmp_path / "workspace",
+            web_fetch_enabled=True,
             web_passage_min_relevance=0.01,
         ),
         transport=httpx.MockTransport(handler),
