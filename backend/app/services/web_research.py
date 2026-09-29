@@ -16,6 +16,13 @@ import httpx
 
 from app.core.config import Settings
 from app.models.research_schemas import WebEvidence
+from app.services.web_source_quality import (
+    QueryIntent,
+    SourceQuality,
+    WebRankScore,
+    WebSourceQualityEvaluator,
+    YearConstraint,
+)
 
 
 SUPPORTED_CONTENT_TYPES = {"text/html", "text/plain", "application/pdf"}
@@ -62,6 +69,10 @@ class FetchResult:
     published_date: str | None = None
     modified_date: str | None = None
     http_last_modified: str | None = None
+    published_date_source: str | None = None
+    modified_date_source: str | None = None
+    doi: str | None = None
+    metadata: dict[str, str] = field(default_factory=dict)
 
     @property
     def succeeded(self) -> bool:
@@ -91,6 +102,13 @@ class WebResearchResult:
                 "web_passages_rejected_low_relevance": 0,
                 "web_sources_with_usable_passage": 0,
                 "web_evidence_count": 0,
+                "web_query_intent": "general_technical",
+                "web_sources_scored": 0,
+                "web_sources_with_date": 0,
+                "web_primary_sources": 0,
+                "web_source_categories": {},
+                "web_doi_count": 0,
+                "web_duplicate_publications_removed": 0,
                 "web_search_seconds": 0.0,
                 "web_fetch_seconds": 0.0,
                 "web_passage_ranking_seconds": 0.0,
@@ -212,6 +230,7 @@ class WebResearchService:
         self.embedder = embedder
         self.transport = transport
         self.resolver = resolver or self._resolve_host
+        self.source_evaluator = WebSourceQualityEvaluator()
 
     async def research_async(
         self,
@@ -221,6 +240,9 @@ class WebResearchService:
     ) -> WebResearchResult:
         result = WebResearchResult.empty()
         stats = result.stats
+        intent = self.source_evaluator.classify_intent(query)
+        year_constraint = self.source_evaluator.parse_year_constraint(query)
+        stats["web_query_intent"] = intent.value
         stats["web_candidates_discovered"] = len(candidates)
         concurrency = max(1, self.settings.web_fetch_concurrency)
         budget = max(0.01, self.settings.web_research_timeout_seconds)
@@ -315,50 +337,49 @@ class WebResearchService:
         ranking_started = time.perf_counter()
         remaining = budget - (time.perf_counter() - fetch_started)
         if successes and remaining > 0:
-            ranking_task = asyncio.to_thread(self._rank_fetches, query, successes, True)
+            ranking_task = asyncio.to_thread(
+                self._rank_fetches, query, successes, True, intent, year_constraint
+            )
             try:
-                ranked, rejected, best_scores = await asyncio.wait_for(
+                ranked, rejected, best_scores, source_debug = await asyncio.wait_for(
                     ranking_task,
                     timeout=remaining,
                 )
             except TimeoutError:
-                ranked, rejected, best_scores = self._rank_fetches(
-                    query,
-                    successes,
-                    False,
+                ranked, rejected, best_scores, source_debug = self._rank_fetches(
+                    query, successes, False, intent, year_constraint
                 )
         else:
-            ranked, rejected, best_scores = self._rank_fetches(
-                query,
-                successes,
-                False,
+            ranked, rejected, best_scores, source_debug = self._rank_fetches(
+                query, successes, False, intent, year_constraint
             )
         stats["web_passages_rejected_low_relevance"] = rejected
         for source in stats["sources"]:
             source["best_passage_score"] = best_scores.get(source["url"])
+            source.update(source_debug.get(source["url"], {}))
         stats["web_passage_ranking_seconds"] = round(
             time.perf_counter() - ranking_started, 6
         )
 
         if ranked:
             domain_counts: dict[str, int] = {}
-            selected: list[tuple[float, WebCandidate, FetchResult, Passage]] = []
+            publication_urls: dict[str, str] = {}
+            selected: list[tuple[float, WebCandidate, FetchResult, Passage, SourceQuality, WebRankScore]] = []
             for item in ranked:
                 domain = item[1].domain
                 if domain_counts.get(domain, 0) >= 2:
                     continue
+                doi = item[4].doi
+                if doi and doi in publication_urls and publication_urls[doi] != item[1].url:
+                    stats["web_duplicate_publications_removed"] += 1
+                    continue
                 selected.append(item)
                 domain_counts[domain] = domain_counts.get(domain, 0) + 1
+                if doi:
+                    publication_urls[doi] = item[1].url
                 if len(selected) >= max_results:
                     break
-            if len(selected) < min(max_results, len(ranked)):
-                for item in ranked:
-                    if item in selected:
-                        continue
-                    selected.append(item)
-                    if len(selected) >= max_results:
-                        break
-            for _, candidate, fetched, passage in selected:
+            for _, candidate, fetched, passage, source_quality, rank_score in selected:
                 kind = "fetched_pdf" if fetched.content_type == "application/pdf" else "fetched_page"
                 result.evidence.append(
                     WebEvidence(
@@ -379,22 +400,76 @@ class WebResearchService:
                         published_date=fetched.published_date,
                         modified_date=fetched.modified_date,
                         http_last_modified=fetched.http_last_modified,
+                        source_category=source_quality.category,
+                        authority_score=source_quality.authority_score,
+                        primary_source=source_quality.primary_source,
+                        published_date_source=fetched.published_date_source,
+                        modified_date_source=fetched.modified_date_source,
+                        doi=source_quality.doi,
+                        relevance_score=rank_score.relevance_score,
+                        source_quality_score=rank_score.source_quality_score,
+                        recency_score=rank_score.recency_score,
+                        primary_source_score=rank_score.primary_source_score,
+                        final_rank_score=rank_score.final_score,
+                        ranking_reason=list(rank_score.ranking_reason),
                     )
                 )
                 for source in stats["sources"]:
                     if source["url"] == candidate.url:
                         source["selected_passage_count"] += 1
                         break
-        if not result.evidence:
+        if len(result.evidence) < max_results:
             fallback_domains: dict[str, int] = {}
+            for item in result.evidence:
+                fallback_domains[item.domain] = fallback_domains.get(item.domain, 0) + 1
+            publication_urls = {
+                item.doi: item.url for item in result.evidence if item.doi
+            }
+            fallbacks: list[tuple[float, WebCandidate, FetchResult, SourceQuality, WebRankScore, Any]] = []
             for candidate in unique_candidates:
                 fetched = fetches.get(candidate.url)
                 if (
                     fetched is None
                     or fetched.succeeded
                     or not self.snippet_relevant(query, candidate.search_snippet)
-                    or fallback_domains.get(candidate.domain, 0) >= 2
                 ):
+                    continue
+                if result.evidence and fetched.failure_reason not in {
+                    "http_401",
+                    "http_403",
+                }:
+                    continue
+                metadata = self.source_evaluator.extract_text_metadata(
+                    f"{candidate.title}\n{candidate.search_snippet}"
+                )
+                source_quality = self.source_evaluator.evaluate_source(
+                    url=candidate.url,
+                    title=candidate.title,
+                    text=candidate.search_snippet,
+                    doi=metadata.doi,
+                )
+                query_tokens = self._tokens(query)
+                relevance = len(query_tokens & self._tokens(candidate.search_snippet)) / max(1, len(query_tokens))
+                recency = self.source_evaluator.recency_score(
+                    intent, metadata.published_date, constraint=year_constraint
+                )
+                rank_score = self.source_evaluator.rank(
+                    intent=intent,
+                    relevance_score=relevance,
+                    source=source_quality,
+                    recency_score=recency,
+                    search_rank=candidate.search_rank,
+                    published_date=metadata.published_date,
+                )
+                fallbacks.append((rank_score.final_score, candidate, fetched, source_quality, rank_score, metadata))
+            for _, candidate, fetched, source_quality, rank_score, metadata in sorted(
+                fallbacks, key=lambda item: item[0], reverse=True
+            ):
+                if fallback_domains.get(candidate.domain, 0) >= 2:
+                    continue
+                doi = source_quality.doi
+                if doi and doi in publication_urls and publication_urls[doi] != candidate.url:
+                    stats["web_duplicate_publications_removed"] += 1
                     continue
                 result.evidence.append(
                     WebEvidence(
@@ -408,14 +483,42 @@ class WebResearchService:
                         evidence_kind="search_snippet_fallback",
                         fetch_status=fetched.status if fetched else "not_attempted",
                         search_snippet=candidate.search_snippet,
+                        published_date=metadata.published_date,
+                        published_date_source=metadata.published_date_source,
+                        source_category=source_quality.category,
+                        authority_score=source_quality.authority_score,
+                        primary_source=source_quality.primary_source,
+                        doi=source_quality.doi,
+                        relevance_score=rank_score.relevance_score,
+                        source_quality_score=rank_score.source_quality_score,
+                        recency_score=rank_score.recency_score,
+                        primary_source_score=rank_score.primary_source_score,
+                        final_rank_score=rank_score.final_score,
+                        ranking_reason=list(rank_score.ranking_reason),
                     )
                 )
+                debug = self._source_debug(
+                    candidate, fetched, source_quality, rank_score
+                )
+                existing = next(
+                    (
+                        source
+                        for source in stats["sources"]
+                        if source["url"] == candidate.url
+                    ),
+                    None,
+                )
+                if existing is None:
+                    stats["sources"].append(debug)
+                else:
+                    existing.update(debug)
                 fallback_domains[candidate.domain] = (
                     fallback_domains.get(candidate.domain, 0) + 1
                 )
+                if doi:
+                    publication_urls[doi] = candidate.url
                 if len(result.evidence) >= max_results:
                     break
-            stats["web_snippet_fallback_count"] = len(result.evidence)
         stats["web_passages_selected"] = sum(item.fetched for item in result.evidence)
         stats["web_sources_with_usable_passage"] = len(
             {item.url for item in result.evidence if item.fetched}
@@ -425,6 +528,18 @@ class WebResearchService:
             for item in result.evidence
         )
         stats["web_evidence_count"] = len(result.evidence)
+        stats["web_sources_scored"] = len(
+            {source["url"] for source in stats["sources"] if source.get("final_score") is not None}
+        )
+        stats["web_sources_with_date"] = len({item.url for item in result.evidence if item.published_date})
+        stats["web_primary_sources"] = len({item.url for item in result.evidence if item.primary_source is True})
+        categories: dict[str, int] = {}
+        unique_sources = {item.url: item for item in result.evidence}.values()
+        for item in unique_sources:
+            category = item.source_category or "unknown"
+            categories[category] = categories.get(category, 0) + 1
+        stats["web_source_categories"] = categories
+        stats["web_doi_count"] = len({item.doi for item in result.evidence if item.doi})
         return result
 
     def research(
@@ -537,8 +652,8 @@ class WebResearchService:
             }
         )
 
-    @staticmethod
     def extract(
+        self,
         data: bytes,
         content_type: str,
         url: str,
@@ -560,7 +675,18 @@ class WebResearchService:
                             break
                 if not blocks:
                     return FetchResult(url, "failed", content_type, failure_reason="empty_pdf")
-                return FetchResult(url, "fetched", content_type, blocks=blocks)
+                metadata = self.source_evaluator.extract_text_metadata(
+                    "\n".join(value for _, value in blocks)
+                )
+                return FetchResult(
+                    url,
+                    "fetched",
+                    content_type,
+                    blocks=blocks,
+                    published_date=metadata.published_date,
+                    published_date_source=metadata.published_date_source,
+                    doi=metadata.doi,
+                )
             except Exception as exc:
                 return FetchResult(
                     url,
@@ -572,12 +698,16 @@ class WebResearchService:
         if content_type == "text/plain":
             clean = _clean_text(text)
             blocks = [(None, clean)] if clean else []
+            metadata = self.source_evaluator.extract_text_metadata(text)
             return FetchResult(
                 url,
                 "fetched" if blocks else "failed",
                 content_type,
                 blocks=blocks,
                 failure_reason=None if blocks else "empty_text",
+                published_date=metadata.published_date,
+                published_date_source=metadata.published_date_source,
+                doi=metadata.doi,
             )
         parser = _HTMLTextExtractor()
         try:
@@ -585,6 +715,7 @@ class WebResearchService:
         except Exception:
             pass
         blocks = parser.blocks()
+        metadata = self.source_evaluator.extract_html_metadata(text)
         return FetchResult(
             url,
             "fetched" if blocks else "failed",
@@ -592,8 +723,12 @@ class WebResearchService:
             title=parser.title or None,
             blocks=blocks,
             failure_reason=None if blocks else "empty_html",
-            published_date=parser.published_date,
-            modified_date=parser.modified_date,
+            published_date=metadata.published_date,
+            modified_date=metadata.modified_date,
+            published_date_source=metadata.published_date_source,
+            modified_date_source=metadata.modified_date_source,
+            doi=metadata.doi,
+            metadata=metadata.values,
         )
 
     def chunk_passages(self, blocks: list[tuple[str | None, str]]) -> list[Passage]:
@@ -635,10 +770,13 @@ class WebResearchService:
         query: str,
         fetches: list[tuple[WebCandidate, FetchResult]],
         use_semantic: bool,
+        intent: QueryIntent = QueryIntent.GENERAL_TECHNICAL,
+        year_constraint: YearConstraint | None = None,
     ) -> tuple[
-        list[tuple[float, WebCandidate, FetchResult, Passage]],
+        list[tuple[float, WebCandidate, FetchResult, Passage, SourceQuality, WebRankScore]],
         int,
         dict[str, float],
+        dict[str, dict[str, Any]],
     ]:
         query_tokens = self._tokens(query)
         rows: list[tuple[WebCandidate, FetchResult, Passage, float]] = []
@@ -665,11 +803,9 @@ class WebResearchService:
             except Exception:
                 pass
 
-        by_url: dict[
-            str,
-            list[tuple[float, WebCandidate, FetchResult, Passage]],
-        ] = {}
+        by_url: dict[str, list[tuple[float, WebCandidate, FetchResult, Passage, SourceQuality, WebRankScore]]] = {}
         best_scores: dict[str, float] = {}
+        source_debug: dict[str, dict[str, Any]] = {}
         rejected = 0
         threshold = self.settings.web_passage_min_relevance
         for (candidate, fetched, passage, lexical), semantic_score in zip(rows, semantic):
@@ -684,19 +820,66 @@ class WebResearchService:
                 best_scores.get(candidate.url, float("-inf")),
                 score,
             )
+            source = self.source_evaluator.evaluate_source(
+                url=fetched.url,
+                title=fetched.title or candidate.title,
+                text=passage.text,
+                metadata=fetched.metadata,
+                doi=fetched.doi,
+            )
+            recency = self.source_evaluator.recency_score(
+                intent,
+                fetched.published_date,
+                fetched.modified_date,
+                year_constraint,
+            )
+            rank_score = self.source_evaluator.rank(
+                intent=intent,
+                relevance_score=score,
+                source=source,
+                recency_score=recency,
+                search_rank=candidate.search_rank,
+                published_date=fetched.published_date,
+            )
+            combined = rank_score.final_score
+            previous = source_debug.get(candidate.url)
+            if previous is None or score > previous["relevance_score"]:
+                source_debug[candidate.url] = self._source_debug(
+                    candidate, fetched, source, rank_score
+                )
             if score < threshold:
                 rejected += 1
                 continue
-            combined = score + 1 / (60 + candidate.search_rank)
             by_url.setdefault(candidate.url, []).append(
-                (combined, candidate, fetched, scored)
+                (combined, candidate, fetched, scored, source, rank_score)
             )
 
-        ranked: list[tuple[float, WebCandidate, FetchResult, Passage]] = []
+        ranked: list[tuple[float, WebCandidate, FetchResult, Passage, SourceQuality, WebRankScore]] = []
         for items in by_url.values():
             ranked.extend(sorted(items, key=lambda item: item[0], reverse=True)[:2])
         ranked.sort(key=lambda item: item[0], reverse=True)
-        return ranked, rejected, best_scores
+        return ranked, rejected, best_scores, source_debug
+
+    @staticmethod
+    def _source_debug(
+        candidate: WebCandidate,
+        fetched: FetchResult,
+        source: SourceQuality,
+        rank_score: WebRankScore,
+    ) -> dict[str, Any]:
+        return {
+            "url": candidate.url,
+            "domain": candidate.domain,
+            "category": source.category,
+            "published_date": fetched.published_date,
+            "published_date_source": fetched.published_date_source,
+            "authority_score": source.authority_score,
+            "recency_score": rank_score.recency_score,
+            "primary_source": source.primary_source,
+            "doi": source.doi,
+            "relevance_score": rank_score.relevance_score,
+            "final_score": rank_score.final_score,
+        }
 
     def rank_passages(self, query: str, passages: list[Passage]) -> list[Passage]:
         if not passages:

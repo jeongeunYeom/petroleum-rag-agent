@@ -46,6 +46,21 @@ export type ResearchResponse = {
     heading?: string | null;
     fetch_status?: string | null;
     search_snippet?: string | null;
+    published_date?: string | null;
+    modified_date?: string | null;
+    http_last_modified?: string | null;
+    source_category?: string | null;
+    authority_score?: number | null;
+    primary_source?: boolean | null;
+    published_date_source?: string | null;
+    modified_date_source?: string | null;
+    doi?: string | null;
+    relevance_score?: number | null;
+    source_quality_score?: number | null;
+    recency_score?: number | null;
+    primary_source_score?: number | null;
+    final_rank_score?: number | null;
+    ranking_reason?: string[];
   }>;
   figures: Array<{
     evidence_id: string;

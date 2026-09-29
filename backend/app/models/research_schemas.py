@@ -60,6 +60,18 @@ class WebEvidence(BaseModel):
     published_date: str | None = None
     modified_date: str | None = None
     http_last_modified: str | None = None
+    source_category: str | None = None
+    authority_score: float | None = None
+    primary_source: bool | None = None
+    published_date_source: str | None = None
+    modified_date_source: str | None = None
+    doi: str | None = None
+    relevance_score: float | None = None
+    source_quality_score: float | None = None
+    recency_score: float | None = None
+    primary_source_score: float | None = None
+    final_rank_score: float | None = None
+    ranking_reason: list[str] = Field(default_factory=list)
 
 
 class FigureEvidence(BaseModel):

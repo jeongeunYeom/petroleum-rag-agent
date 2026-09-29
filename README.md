@@ -107,7 +107,7 @@ pnpm dev
 DDGS discovery -> safe fetch -> content extraction -> passage ranking -> WEB evidence
 ```
 
-fetch는 기본 5개 URL을 최대 3개씩 병렬 처리하며 URL당 최대 5 MB, 15초, 전체 Web Research 25초로 제한됩니다. BGE-M3와 lexical 점수를 결합해 관련도 `0.20` 미만 passage를 제외합니다. `.env`의 `WEB_FETCH_*`, `WEB_RESEARCH_TIMEOUT_SECONDS`, `WEB_MAX_FETCH_RESULTS`, `WEB_PASSAGE_*`로 조정할 수 있습니다.
+fetch는 기본 5개 URL을 최대 3개씩 병렬 처리하며 URL당 최대 5 MB, 15초, 전체 Web Research 25초로 제한됩니다. BGE-M3와 lexical 점수를 결합해 관련도 `0.20` 미만 passage를 제외합니다. Web Research v2는 `DDGS discovery → safe concurrent fetch → extraction → relevance filtering → source/date metadata → quality + recency + primary-source ranking → WEB evidence` 순서로 동작합니다. 최신·역사·일반 기술·비교 질문을 구분하고, relevance가 비슷할 때 날짜가 명시된 최신 자료와 공식·1차 기술 자료를 우선합니다. Source authority는 순위 신호일 뿐, 내용이 참이라는 보증이 아닙니다. `.env`의 `WEB_FETCH_*`, `WEB_RESEARCH_TIMEOUT_SECONDS`, `WEB_MAX_FETCH_RESULTS`, `WEB_PASSAGE_*`로 조정할 수 있습니다.
 
 내부 Retrieval은 `.env`의 `RETRIEVAL_MODE`로 선택합니다. 기존 ChromaDB를 그대로 읽으며 재인덱싱하지 않습니다.
 
