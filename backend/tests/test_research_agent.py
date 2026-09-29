@@ -274,7 +274,7 @@ def test_external_search_normalizes_and_deduplicates_urls(tmp_path: Path) -> Non
         {
             "title": "Paper A",
             "href": "https://Example.com/paper/?utm_source=test#abstract",
-            "body": "Result A",
+            "body": "CO2 storage result A",
         },
         {
             "title": "Duplicate",
@@ -284,7 +284,7 @@ def test_external_search_normalizes_and_deduplicates_urls(tmp_path: Path) -> Non
         {
             "title": "Paper B",
             "url": "https://journal.test/b?z=2&a=1",
-            "snippet": "Result B",
+            "snippet": "CO2 storage result B",
         },
         {
             "title": "Paper B duplicate",
@@ -888,7 +888,11 @@ def test_external_evidence_is_never_written_to_chroma(tmp_path: Path) -> None:
         vector_store=store,
         ollama=FakeOllama("외부 근거입니다. [WEB1]"),
         web_searcher=lambda query, limit: [
-            {"title": "Research", "url": "https://example.org/a", "snippet": "Recent result"}
+            {
+                "title": "Research",
+                "url": "https://example.org/a",
+                "snippet": "Recent CO2 research result",
+            }
         ],
     )
     request = ResearchRequest(query="latest CO2 research", use_internal=False)

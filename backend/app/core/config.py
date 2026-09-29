@@ -108,12 +108,24 @@ class Settings:
         default_factory=lambda: int(os.getenv("WEB_FETCH_MAX_REDIRECTS", "5"))
     )
 
+    web_fetch_concurrency: int = field(
+        default_factory=lambda: int(os.getenv("WEB_FETCH_CONCURRENCY", "3"))
+    )
+
+    web_research_timeout_seconds: float = field(
+        default_factory=lambda: float(os.getenv("WEB_RESEARCH_TIMEOUT_SECONDS", "25"))
+    )
+
     web_max_fetch_results: int = field(
         default_factory=lambda: int(os.getenv("WEB_MAX_FETCH_RESULTS", "5"))
     )
 
     web_passage_max_chars: int = field(
         default_factory=lambda: int(os.getenv("WEB_PASSAGE_MAX_CHARS", "1500"))
+    )
+
+    web_passage_min_relevance: float = field(
+        default_factory=lambda: float(os.getenv("WEB_PASSAGE_MIN_RELEVANCE", "0.20"))
     )
 
     reranker_model: str = field(

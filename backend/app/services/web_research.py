@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import ipaddress
 import math
 import re
@@ -80,10 +81,16 @@ class WebResearchResult:
                 "web_fetch_attempted": 0,
                 "web_fetch_succeeded": 0,
                 "web_fetch_failed": 0,
+                "web_fetch_cancelled": 0,
+                "web_fetch_concurrency": 0,
+                "web_research_timeout_seconds": 0.0,
                 "web_pdf_fetched": 0,
                 "web_html_fetched": 0,
                 "web_snippet_fallback_count": 0,
                 "web_passages_selected": 0,
+                "web_passages_rejected_low_relevance": 0,
+                "web_sources_with_usable_passage": 0,
+                "web_evidence_count": 0,
                 "web_search_seconds": 0.0,
                 "web_fetch_seconds": 0.0,
                 "web_passage_ranking_seconds": 0.0,
@@ -198,7 +205,7 @@ class WebResearchService:
         settings: Settings,
         *,
         embedder: Callable[[list[str]], Any] | None = None,
-        transport: httpx.BaseTransport | None = None,
+        transport: httpx.AsyncBaseTransport | None = None,
         resolver: Callable[[str, int], list[str]] | None = None,
     ) -> None:
         self.settings = settings
@@ -206,7 +213,7 @@ class WebResearchService:
         self.transport = transport
         self.resolver = resolver or self._resolve_host
 
-    def research(
+    async def research_async(
         self,
         query: str,
         candidates: list[WebCandidate],
@@ -215,37 +222,78 @@ class WebResearchService:
         result = WebResearchResult.empty()
         stats = result.stats
         stats["web_candidates_discovered"] = len(candidates)
+        concurrency = max(1, self.settings.web_fetch_concurrency)
+        budget = max(0.01, self.settings.web_research_timeout_seconds)
+        stats["web_fetch_concurrency"] = concurrency
+        stats["web_research_timeout_seconds"] = budget
         if not candidates:
             return result
 
+        unique_candidates = list({item.url: item for item in candidates}.values())
+        selected_candidates = unique_candidates[: max(0, self.settings.web_max_fetch_results)]
+        fetches: dict[str, FetchResult] = {}
         fetch_started = time.perf_counter()
-        fetches: list[tuple[WebCandidate, FetchResult]] = []
-        cache: dict[str, FetchResult] = {}
-        selected_candidates = candidates[: max(0, self.settings.web_max_fetch_results)]
         if self.settings.web_fetch_enabled:
-            with httpx.Client(
+            semaphore = asyncio.Semaphore(concurrency)
+
+            async def fetch_one(candidate: WebCandidate) -> FetchResult:
+                async with semaphore:
+                    stats["web_fetch_attempted"] += 1
+                    return await self.fetch(client, candidate.url)
+
+            async with httpx.AsyncClient(
                 timeout=self.settings.web_fetch_timeout_seconds,
                 follow_redirects=False,
                 transport=self.transport,
                 headers={"User-Agent": "PetroleumResearchAgent/1.0 (+local research)"},
             ) as client:
-                for candidate in selected_candidates:
-                    stats["web_fetch_attempted"] += 1
-                    fetched = cache.get(candidate.url)
-                    if fetched is None:
-                        fetched = self.fetch(client, candidate.url)
-                        cache[candidate.url] = fetched
-                    fetches.append((candidate, fetched))
+                tasks = {
+                    asyncio.create_task(fetch_one(candidate)): candidate
+                    for candidate in selected_candidates
+                }
+                done, pending = await asyncio.wait(tasks, timeout=budget)
+                for task in done:
+                    candidate = tasks[task]
+                    try:
+                        fetches[candidate.url] = task.result()
+                    except Exception as exc:
+                        fetches[candidate.url] = FetchResult(
+                            candidate.url,
+                            "failed",
+                            failure_reason=type(exc).__name__,
+                        )
+                for task in pending:
+                    task.cancel()
+                if pending:
+                    await asyncio.gather(*pending, return_exceptions=True)
+                stats["web_fetch_cancelled"] = len(pending)
+                for task in pending:
+                    candidate = tasks[task]
+                    fetches[candidate.url] = FetchResult(
+                        candidate.url,
+                        "cancelled",
+                        failure_reason="web_research_timeout",
+                    )
+        else:
+            fetches = {
+                item.url: FetchResult(
+                    item.url,
+                    "disabled",
+                    failure_reason="fetch_disabled",
+                )
+                for item in selected_candidates
+            }
         stats["web_fetch_seconds"] = round(time.perf_counter() - fetch_started, 6)
 
-        for candidate, fetched in fetches:
+        for candidate in selected_candidates:
+            fetched = fetches[candidate.url]
             if fetched.succeeded:
                 stats["web_fetch_succeeded"] += 1
                 if fetched.content_type == "application/pdf":
                     stats["web_pdf_fetched"] += 1
                 elif fetched.content_type == "text/html":
                     stats["web_html_fetched"] += 1
-            else:
+            elif fetched.status not in {"cancelled", "disabled"}:
                 stats["web_fetch_failed"] += 1
             stats["sources"].append(
                 {
@@ -253,20 +301,41 @@ class WebResearchService:
                     "domain": candidate.domain,
                     "fetch_status": fetched.status,
                     "content_type": fetched.content_type,
+                    "best_passage_score": None,
                     "selected_passage_count": 0,
                     "failure_reason": fetched.failure_reason,
                 }
             )
 
-        successes = [(candidate, fetched) for candidate, fetched in fetches if fetched.succeeded]
+        successes = [
+            (candidate, fetches[candidate.url])
+            for candidate in selected_candidates
+            if fetches[candidate.url].succeeded
+        ]
         ranking_started = time.perf_counter()
-        ranked: list[tuple[float, WebCandidate, FetchResult, Passage]] = []
-        for candidate, fetched in successes:
-            passages = self.chunk_passages(fetched.blocks)
-            for passage in self.rank_passages(query, passages)[:2]:
-                candidate_weight = 1 / (60 + candidate.search_rank)
-                ranked.append((passage.score + candidate_weight, candidate, fetched, passage))
-        ranked.sort(key=lambda item: item[0], reverse=True)
+        remaining = budget - (time.perf_counter() - fetch_started)
+        if successes and remaining > 0:
+            ranking_task = asyncio.to_thread(self._rank_fetches, query, successes, True)
+            try:
+                ranked, rejected, best_scores = await asyncio.wait_for(
+                    ranking_task,
+                    timeout=remaining,
+                )
+            except TimeoutError:
+                ranked, rejected, best_scores = self._rank_fetches(
+                    query,
+                    successes,
+                    False,
+                )
+        else:
+            ranked, rejected, best_scores = self._rank_fetches(
+                query,
+                successes,
+                False,
+            )
+        stats["web_passages_rejected_low_relevance"] = rejected
+        for source in stats["sources"]:
+            source["best_passage_score"] = best_scores.get(source["url"])
         stats["web_passage_ranking_seconds"] = round(
             time.perf_counter() - ranking_started, 6
         )
@@ -316,9 +385,16 @@ class WebResearchService:
                     if source["url"] == candidate.url:
                         source["selected_passage_count"] += 1
                         break
-        else:
-            for candidate in candidates:
-                if not candidate.search_snippet:
+        if not result.evidence:
+            fallback_domains: dict[str, int] = {}
+            for candidate in unique_candidates:
+                fetched = fetches.get(candidate.url)
+                if (
+                    fetched is None
+                    or fetched.succeeded
+                    or not self.snippet_relevant(query, candidate.search_snippet)
+                    or fallback_domains.get(candidate.domain, 0) >= 2
+                ):
                     continue
                 result.evidence.append(
                     WebEvidence(
@@ -330,22 +406,42 @@ class WebResearchService:
                         rank=candidate.search_rank,
                         fetched=False,
                         evidence_kind="search_snippet_fallback",
-                        fetch_status=("disabled" if not self.settings.web_fetch_enabled else "failed"),
+                        fetch_status=fetched.status if fetched else "not_attempted",
                         search_snippet=candidate.search_snippet,
                     )
+                )
+                fallback_domains[candidate.domain] = (
+                    fallback_domains.get(candidate.domain, 0) + 1
                 )
                 if len(result.evidence) >= max_results:
                     break
             stats["web_snippet_fallback_count"] = len(result.evidence)
         stats["web_passages_selected"] = sum(item.fetched for item in result.evidence)
+        stats["web_sources_with_usable_passage"] = len(
+            {item.url for item in result.evidence if item.fetched}
+        )
+        stats["web_snippet_fallback_count"] = sum(
+            item.evidence_kind == "search_snippet_fallback"
+            for item in result.evidence
+        )
+        stats["web_evidence_count"] = len(result.evidence)
         return result
 
-    def fetch(self, client: httpx.Client, url: str) -> FetchResult:
+    def research(
+        self,
+        query: str,
+        candidates: list[WebCandidate],
+        max_results: int,
+    ) -> WebResearchResult:
+        """Compatibility wrapper for existing non-async callers and tests."""
+        return asyncio.run(self.research_async(query, candidates, max_results))
+
+    async def fetch(self, client: httpx.AsyncClient, url: str) -> FetchResult:
         current = url
         try:
             for redirect_count in range(self.settings.web_fetch_max_redirects + 1):
-                self.validate_url(current)
-                with client.stream("GET", current) as response:
+                await asyncio.to_thread(self.validate_url, current)
+                async with client.stream("GET", current) as response:
                     if response.status_code in {301, 302, 303, 307, 308}:
                         location = response.headers.get("location")
                         if not location:
@@ -377,7 +473,7 @@ class WebResearchService:
                             failure_reason="too_large",
                         )
                     data = bytearray()
-                    for chunk in response.iter_bytes():
+                    async for chunk in response.aiter_bytes():
                         data.extend(chunk)
                         if len(data) > self.settings.web_fetch_max_bytes:
                             return FetchResult(
@@ -386,7 +482,8 @@ class WebResearchService:
                                 content_type=content_type,
                                 failure_reason="too_large",
                             )
-                    result = self.extract(
+                    result = await asyncio.to_thread(
+                        self.extract,
                         bytes(data),
                         content_type,
                         current,
@@ -533,6 +630,74 @@ class WebResearchService:
             passages.append(Passage(len(passages), current, current_heading))
         return passages
 
+    def _rank_fetches(
+        self,
+        query: str,
+        fetches: list[tuple[WebCandidate, FetchResult]],
+        use_semantic: bool,
+    ) -> tuple[
+        list[tuple[float, WebCandidate, FetchResult, Passage]],
+        int,
+        dict[str, float],
+    ]:
+        query_tokens = self._tokens(query)
+        rows: list[tuple[WebCandidate, FetchResult, Passage, float]] = []
+        for candidate, fetched in fetches:
+            for passage in self.chunk_passages(fetched.blocks):
+                lexical = len(query_tokens & self._tokens(passage.text)) / max(
+                    1, len(query_tokens)
+                )
+                rows.append((candidate, fetched, passage, lexical))
+
+        semantic = [0.0] * len(rows)
+        if use_semantic and self.embedder is not None and rows:
+            try:
+                indexes = sorted(
+                    range(len(rows)),
+                    key=lambda index: rows[index][3],
+                    reverse=True,
+                )[:8]
+                vectors = self.embedder(
+                    [query, *[rows[index][2].text for index in indexes]]
+                )
+                for index, vector in zip(indexes, vectors[1:]):
+                    semantic[index] = max(0.0, self._cosine(vectors[0], vector))
+            except Exception:
+                pass
+
+        by_url: dict[
+            str,
+            list[tuple[float, WebCandidate, FetchResult, Passage]],
+        ] = {}
+        best_scores: dict[str, float] = {}
+        rejected = 0
+        threshold = self.settings.web_passage_min_relevance
+        for (candidate, fetched, passage, lexical), semantic_score in zip(rows, semantic):
+            score = 0.7 * semantic_score + 0.3 * lexical
+            scored = Passage(
+                passage.index,
+                passage.text,
+                passage.heading,
+                score,
+            )
+            best_scores[candidate.url] = max(
+                best_scores.get(candidate.url, float("-inf")),
+                score,
+            )
+            if score < threshold:
+                rejected += 1
+                continue
+            combined = score + 1 / (60 + candidate.search_rank)
+            by_url.setdefault(candidate.url, []).append(
+                (combined, candidate, fetched, scored)
+            )
+
+        ranked: list[tuple[float, WebCandidate, FetchResult, Passage]] = []
+        for items in by_url.values():
+            ranked.extend(sorted(items, key=lambda item: item[0], reverse=True)[:2])
+        ranked.sort(key=lambda item: item[0], reverse=True)
+        return ranked, rejected, best_scores
+
     def rank_passages(self, query: str, passages: list[Passage]) -> list[Passage]:
         if not passages:
             return []
@@ -555,7 +720,7 @@ class WebResearchService:
                     [query, *[passages[index].text for index in semantic_indexes]]
                 )
                 for index, vector in zip(semantic_indexes, vectors[1:]):
-                    semantic[index] = self._cosine(vectors[0], vector)
+                    semantic[index] = max(0.0, self._cosine(vectors[0], vector))
             except Exception:
                 pass
         ranked = [
@@ -571,6 +736,11 @@ class WebResearchService:
             for token in TOKEN_RE.findall(text)
             if token.casefold() not in STOPWORDS
         }
+
+    @classmethod
+    def snippet_relevant(cls, query: str, snippet: str) -> bool:
+        query_tokens = cls._tokens(query)
+        return bool(query_tokens & cls._tokens(snippet))
 
     @staticmethod
     def _cosine(left: Any, right: Any) -> float:

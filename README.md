@@ -107,7 +107,7 @@ pnpm dev
 DDGS discovery -> safe fetch -> content extraction -> passage ranking -> WEB evidence
 ```
 
-fetch는 기본 5개 URL, URL당 최대 5 MB, 15초로 제한됩니다. `.env`의 `WEB_FETCH_*`, `WEB_MAX_FETCH_RESULTS`, `WEB_PASSAGE_MAX_CHARS`로 조정할 수 있습니다.
+fetch는 기본 5개 URL을 최대 3개씩 병렬 처리하며 URL당 최대 5 MB, 15초, 전체 Web Research 25초로 제한됩니다. BGE-M3와 lexical 점수를 결합해 관련도 `0.20` 미만 passage를 제외합니다. `.env`의 `WEB_FETCH_*`, `WEB_RESEARCH_TIMEOUT_SECONDS`, `WEB_MAX_FETCH_RESULTS`, `WEB_PASSAGE_*`로 조정할 수 있습니다.
 
 내부 Retrieval은 `.env`의 `RETRIEVAL_MODE`로 선택합니다. 기존 ChromaDB를 그대로 읽으며 재인덱싱하지 않습니다.
 

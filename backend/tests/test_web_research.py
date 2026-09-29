@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
+import time
 
 import fitz
 import httpx
@@ -12,6 +13,7 @@ from app.models.research_schemas import InternalEvidence, ResearchRequest
 from app.services.research_agent import ResearchAgent
 from app.services.web_research import (
     UnsafeUrlError,
+    Passage,
     WebCandidate,
     WebResearchService,
 )
@@ -28,20 +30,30 @@ def settings(tmp_path: Path, **overrides) -> Settings:
         "web_fetch_timeout_seconds": 1,
         "web_fetch_max_bytes": 10_000,
         "web_fetch_max_redirects": 2,
+        "web_fetch_concurrency": 3,
+        "web_research_timeout_seconds": 1,
         "web_max_fetch_results": 5,
         "web_passage_max_chars": 500,
+        "web_passage_min_relevance": 0.20,
     }
     values.update(overrides)
     return Settings(**values)
 
 
 def candidate(url: str = "https://example.com/article") -> WebCandidate:
-    return WebCandidate("Example", url, "example.com", "Search snippet", 1)
+    return WebCandidate(
+        "Example",
+        url,
+        "example.com",
+        "Storage pressure monitoring search snippet",
+        1,
+    )
 
 
-def service(tmp_path: Path, handler, **overrides) -> WebResearchService:
+def service(tmp_path: Path, handler, *, embedder=None, **overrides) -> WebResearchService:
     return WebResearchService(
         settings(tmp_path, **overrides),
+        embedder=embedder,
         transport=httpx.MockTransport(handler),
         resolver=lambda host, port: PUBLIC_IP,
     )
@@ -268,6 +280,234 @@ def test_duplicate_candidate_url_is_fetched_once(tmp_path: Path) -> None:
     assert calls == 1
 
 
+def test_fetch_concurrency_is_bounded_and_not_sequential(tmp_path: Path) -> None:
+    active = 0
+    peak = 0
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal active, peak
+        active += 1
+        peak = max(peak, active)
+        await asyncio.sleep(0.03)
+        active -= 1
+        return httpx.Response(
+            200,
+            headers={"content-type": "text/plain"},
+            text="Pressure monitoring evidence describes pressure monitoring methods.",
+        )
+
+    web = service(tmp_path, handler, web_fetch_concurrency=3)
+    candidates = [
+        WebCandidate(
+            f"Source {index}",
+            f"https://source{index}.example/article",
+            f"source{index}.example",
+            "Pressure monitoring snippet",
+            index + 1,
+        )
+        for index in range(5)
+    ]
+    started = time.perf_counter()
+    result = asyncio.run(web.research_async("pressure monitoring", candidates, 5))
+    elapsed = time.perf_counter() - started
+
+    assert peak == 3
+    assert elapsed < 0.14
+    assert result.stats["web_fetch_concurrency"] == 3
+    assert result.stats["web_fetch_succeeded"] == 5
+
+
+def test_one_fetch_timeout_does_not_hide_other_success(tmp_path: Path) -> None:
+    async def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.host == "slow.example":
+            raise httpx.ReadTimeout("slow", request=request)
+        return httpx.Response(
+            200,
+            headers={"content-type": "text/plain"},
+            text="Pressure derivative analysis identifies pressure derivative behavior.",
+        )
+
+    web = service(tmp_path, handler)
+    result = asyncio.run(
+        web.research_async(
+            "pressure derivative",
+            [
+                WebCandidate("Slow", "https://slow.example/a", "slow.example", "pressure derivative", 1),
+                WebCandidate("Good", "https://good.example/a", "good.example", "pressure derivative", 2),
+            ],
+            2,
+        )
+    )
+    assert result.stats["web_fetch_failed"] == 1
+    assert result.stats["web_fetch_succeeded"] == 1
+    assert len(result.evidence) == 1 and result.evidence[0].fetched
+
+
+def test_overall_timeout_cancels_unfinished_and_keeps_completed_evidence(
+    tmp_path: Path,
+) -> None:
+    async def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.host == "slow.example":
+            await asyncio.sleep(0.2)
+        return httpx.Response(
+            200,
+            headers={"content-type": "text/plain"},
+            text="Pressure monitoring evidence explains pressure monitoring.",
+        )
+
+    web = service(
+        tmp_path,
+        handler,
+        web_fetch_concurrency=2,
+        web_research_timeout_seconds=0.05,
+    )
+    result = asyncio.run(
+        web.research_async(
+            "pressure monitoring",
+            [
+                WebCandidate("Fast", "https://fast.example/a", "fast.example", "pressure monitoring", 1),
+                WebCandidate("Slow", "https://slow.example/a", "slow.example", "pressure monitoring", 2),
+            ],
+            2,
+        )
+    )
+    assert result.stats["web_fetch_cancelled"] == 1
+    assert result.stats["web_fetch_seconds"] < 0.15
+    assert len(result.evidence) == 1
+    assert result.evidence[0].domain == "fast.example"
+
+
+def test_duplicate_url_is_fetched_once_under_concurrency(tmp_path: Path) -> None:
+    calls = 0
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal calls
+        calls += 1
+        await asyncio.sleep(0.01)
+        return httpx.Response(
+            200,
+            headers={"content-type": "text/plain"},
+            text="Pressure monitoring evidence explains pressure monitoring.",
+        )
+
+    web = service(tmp_path, handler)
+    duplicate = candidate()
+    asyncio.run(web.research_async("pressure monitoring", [duplicate, duplicate], 2))
+    assert calls == 1
+
+
+def test_relevance_gate_rejects_unrelated_fetched_page(tmp_path: Path) -> None:
+    web = service(
+        tmp_path,
+        lambda request: httpx.Response(
+            200,
+            headers={"content-type": "text/plain"},
+            text="Cake recipes use flour butter sugar and an oven.",
+        ),
+    )
+    result = web.research("CO2 plume monitoring", [candidate()], 5)
+    assert result.evidence == []
+    assert result.stats["web_fetch_succeeded"] == 1
+    assert result.stats["web_passages_rejected_low_relevance"] == 1
+    assert result.stats["web_sources_with_usable_passage"] == 0
+    assert result.stats["sources"][0]["selected_passage_count"] == 0
+
+
+def test_relevance_gate_orders_related_passages_and_never_backfills_low_scores(
+    tmp_path: Path,
+) -> None:
+    html = """
+    <main>
+      <h2>Best</h2><p>CO2 plume monitoring tracks CO2 plume monitoring movement.</p>
+      <h2>Partial</h2><p>CO2 monitoring supports containment assurance.</p>
+      <h2>Unrelated</h2><p>Football recipes and corporate menus.</p>
+    </main>
+    """
+    web = service(
+        tmp_path,
+        lambda request: httpx.Response(200, headers={"content-type": "text/html"}, text=html),
+    )
+    result = web.research("CO2 plume monitoring", [candidate()], 5)
+    assert 1 <= len(result.evidence) <= 2
+    assert result.evidence[0].heading == "Best"
+    assert result.stats["web_passages_rejected_low_relevance"] >= 1
+    assert result.stats["web_evidence_count"] < 5
+
+
+def test_threshold_and_negative_cosine_are_safe(tmp_path: Path) -> None:
+    negative = lambda texts: [[1.0, 0.0], *[[-1.0, 0.0] for _ in texts[1:]]]
+    web = service(
+        tmp_path,
+        lambda request: httpx.Response(200),
+        embedder=negative,
+    )
+    ranked = web.rank_passages(
+        "CO2 monitoring",
+        [Passage(0, "Cake recipe and football results.")],
+    )
+    assert ranked[0].score == 0
+
+    strict = service(
+        tmp_path,
+        lambda request: httpx.Response(
+            200,
+            headers={"content-type": "text/plain"},
+            text="CO2 monitoring evidence explains CO2 monitoring.",
+        ),
+        web_passage_min_relevance=0.31,
+    )
+    assert strict.research("CO2 monitoring", [candidate()], 2).evidence == []
+
+
+def test_embedding_failure_falls_back_to_lexical_relevance(tmp_path: Path) -> None:
+    def broken_embedder(texts):
+        raise RuntimeError("embedding unavailable")
+
+    web = service(
+        tmp_path,
+        lambda request: httpx.Response(
+            200,
+            headers={"content-type": "text/plain"},
+            text="Pressure derivative evidence explains pressure derivative analysis.",
+        ),
+        embedder=broken_embedder,
+    )
+    result = web.research("pressure derivative", [candidate()], 2)
+    assert len(result.evidence) == 1
+    assert result.evidence[0].fetched is True
+    assert result.stats["sources"][0]["best_passage_score"] == pytest.approx(0.3)
+
+
+def test_snippet_fallback_requires_query_overlap(tmp_path: Path) -> None:
+    web = service(tmp_path, lambda request: httpx.Response(404))
+    relevant = WebCandidate(
+        "Relevant", "https://relevant.example/a", "relevant.example", "CO2 plume monitoring study", 1
+    )
+    unrelated = WebCandidate(
+        "Unrelated", "https://unrelated.example/a", "unrelated.example", "Cake recipe and football", 2
+    )
+    result = web.research("CO2 plume monitoring", [relevant, unrelated], 5)
+    assert len(result.evidence) == 1
+    assert result.evidence[0].url == relevant.url
+    assert result.evidence[0].evidence_kind == "search_snippet_fallback"
+    assert result.stats["web_snippet_fallback_count"] == 1
+
+
+def test_successful_relevant_fetch_wins_over_search_snippet(tmp_path: Path) -> None:
+    web = service(
+        tmp_path,
+        lambda request: httpx.Response(
+            200,
+            headers={"content-type": "text/plain"},
+            text="CO2 plume monitoring evidence describes plume movement.",
+        ),
+    )
+    result = web.research("CO2 plume monitoring", [candidate()], 2)
+    assert len(result.evidence) == 1
+    assert result.evidence[0].evidence_kind == "fetched_page"
+    assert result.stats["web_snippet_fallback_count"] == 0
+
+
 def test_fetched_and_fallback_evidence_are_distinguishable_in_prompt(tmp_path: Path) -> None:
     fetched = service(
         tmp_path,
@@ -363,11 +603,23 @@ def test_external_only_and_hybrid_research_use_fetched_web_passages(tmp_path: Pa
         "metadata": {"filename": "storage.pdf", "page": 10},
     }
     hybrid_agent = ResearchAgent(
-        settings(tmp_path), _VectorStore([hit]), _Ollama(), searcher, web
+        settings(tmp_path),
+        _VectorStore([hit]),
+        _Ollama(),
+        searcher,
+        service(
+            tmp_path,
+            lambda request: httpx.Response(
+                200,
+                headers={"content-type": "text/plain"},
+                text="CO2 pressure monitoring provides evidence of plume containment.",
+            ),
+            embedder=lambda texts: [[1.0, 0.0] for _ in texts],
+        ),
     )
     hybrid = asyncio.run(
         hybrid_agent.research(
-            ResearchRequest(query="latest web 자료와 내부 자료 비교 pressure monitoring")
+            ResearchRequest(query="latest compare internal web pressure monitoring")
         )
     )
     assert hybrid.routing_mode == "hybrid_research"

@@ -213,8 +213,7 @@ class ResearchAgent:
             else self._empty_async()
         )
         web_task = (
-            asyncio.to_thread(
-                self.search_external_web_result,
+            self.search_external_web_result_async(
                 retrieval_query,
                 request.external_top_k,
             )
@@ -804,7 +803,7 @@ class ResearchAgent:
         required = 1 if len(tokens) == 1 else 2
         return matches >= required and matches / len(tokens) >= 0.4
 
-    def search_external_web_result(
+    async def search_external_web_result_async(
         self, query: str, max_results: int
     ) -> WebResearchResult:
         query = query.strip()
@@ -815,7 +814,11 @@ class ResearchAgent:
 
         search_started = time.perf_counter()
         try:
-            raw_results = self.web_searcher(query, max_results * 2)
+            raw_results = await asyncio.to_thread(
+                self.web_searcher,
+                query,
+                max_results * 2,
+            )
         except Exception as exc:
             raise ExternalServiceError(
                 "외부 웹 검색에 연결할 수 없습니다.",
@@ -841,9 +844,18 @@ class ResearchAgent:
             )
             if len(candidates) >= max_results * 2:
                 break
-        result = self.web_researcher.research(query, candidates, max_results)
+        result = await self.web_researcher.research_async(
+            query,
+            candidates,
+            max_results,
+        )
         result.stats["web_search_seconds"] = round(search_seconds, 6)
         return result
+
+    def search_external_web_result(
+        self, query: str, max_results: int
+    ) -> WebResearchResult:
+        return asyncio.run(self.search_external_web_result_async(query, max_results))
 
     def search_external_web(self, query: str, max_results: int) -> list[WebEvidence]:
         return self.search_external_web_result(query, max_results).evidence

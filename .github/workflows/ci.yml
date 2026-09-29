@@ -7,6 +7,11 @@ on:
 jobs:
   backend:
     runs-on: ubuntu-latest
+    env:
+      ANONYMIZED_TELEMETRY: "False"
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+      WEB_FETCH_ENABLED: "0"
     defaults:
       run:
         working-directory: backend
