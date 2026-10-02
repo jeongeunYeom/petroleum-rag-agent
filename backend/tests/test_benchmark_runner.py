@@ -102,6 +102,10 @@ def test_summary_exposes_paper_metrics():
 def test_engineering_metrics_are_written_to_json_and_csv(tmp_path):
     row = {
         "id": "WT-002",
+        "use_external": False,
+        "web_evidence_count": 0,
+        "web_search_triggered": False,
+        "engineering_validation_enabled": False,
         "engineering_contradiction_count": 1,
         "false_premise_detected": True,
         "false_premise_correction_success": False,
@@ -120,6 +124,10 @@ def test_engineering_metrics_are_written_to_json_and_csv(tmp_path):
         csv_row = next(csv.DictReader(handle))
 
     for field in (
+        "use_external",
+        "web_evidence_count",
+        "web_search_triggered",
+        "engineering_validation_enabled",
         "engineering_contradiction_count",
         "false_premise_detected",
         "false_premise_correction_success",
@@ -131,6 +139,10 @@ def test_engineering_metrics_are_written_to_json_and_csv(tmp_path):
         assert field in csv_row
     assert csv_row["repair_attempts"] == "2"
     assert csv_row["engineering_validation_passed"] == "False"
+    assert csv_row["use_external"] == "False"
+    assert csv_row["web_evidence_count"] == "0"
+    assert csv_row["web_search_triggered"] == "False"
+    assert csv_row["engineering_validation_enabled"] == "False"
 
 
 def test_figure_retrieval_requires_a_preferred_page_hit():

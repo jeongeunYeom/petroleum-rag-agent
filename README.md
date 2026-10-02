@@ -97,9 +97,12 @@ pnpm dev
 
 ## 검색 동작
 
-- 일반 문서 질문: 내부 ChromaDB 검색
-- 최신·현재 동향 질문: 외부 웹 검색
-- 내부 자료와 최신 연구 비교: 내부 + 외부 통합 검색
+- 기본: 내부 ChromaDB만 검색
+- `최신`, `최근`, `현재`, `동향`만으로는 웹 검색을 시작하지 않음
+- `웹 검색`, `인터넷 검색`, `web sources`처럼 웹 자료를 명시적으로 요청할 때만 내부 + 외부 통합 검색
+- `웹에서만`, `web only`처럼 명시하면 외부 웹만 검색
+
+기본 정책은 **Internal knowledge is used by default. Web Research is only activated when the user explicitly requests web/online sources.** 입니다. 내부 근거가 없거나 검증에서 제거되더라도 자동으로 웹 검색으로 전환하지 않습니다.
 
 외부 검색은 DDGS를 URL discovery에 사용한 뒤, 안전성 검사를 통과한 HTML/PDF를 직접 열어 본문을 추출하고 질문 관련 passage만 WEB 근거로 사용합니다. 페이지 fetch가 모두 실패한 경우에만 검색 snippet을 별도 fallback provenance로 표시합니다. 외부 결과는 요청 중에만 사용하며 ChromaDB에 저장하지 않습니다.
 
@@ -169,8 +172,12 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 python backend/scripts/run_well_test_benchmark.py `
   --mode research `
   --retrieval-mode legacy `
-  --model qwen3:8b
+  --model qwen3:8b `
+  --temperature 0 `
+  --seed 42
 ```
+
+논문 benchmark는 기본적으로 Web Search를 비활성화하여 실시간 검색 변동성을 제거합니다. `--use-external`을 명시한 경우에만 웹 검색을 사용합니다. Engineering Validator ablation은 같은 조건에서 기본 ON 실행과 `--disable-engineering-validator` 실행을 비교합니다.
 
 세 실행 결과를 한 표로 합칩니다.
 
@@ -181,7 +188,7 @@ python backend/scripts/compare_benchmark_runs.py `
   data/evaluation/<hybrid_rerank.json>
 ```
 
-결과 JSON/CSV에는 retrieval mode, 답변 정확도, hallucination rate, citation correctness, retrieval recall, engineering contradiction count, false-premise correction success, unsupported engineering claim count, 평균 retrieval/전체 시간이 기록됩니다.
+결과 JSON/CSV에는 retrieval mode, `use_external`, web evidence/search 여부, `engineering_validation_enabled`, 답변 정확도, hallucination rate, citation correctness, retrieval recall, engineering contradiction count, false-premise correction success, unsupported engineering claim count, 평균 retrieval/전체 시간이 기록됩니다.
 
 ## 안전 범위
 

@@ -530,6 +530,11 @@ def write_csv(
         "model",
         "temperature",
         "seed",
+        "use_external",
+        "web_evidence_count",
+        "web_search_triggered",
+        "web_search_reason",
+        "engineering_validation_enabled",
         "expected_behavior",
         "initial_behavior_passed",
         "final_behavior_passed",
@@ -988,6 +993,11 @@ def main() -> int:
         action="store_true",
         help="research mode에서 DDGS 외부 검색도 사용합니다.",
     )
+    parser.add_argument(
+        "--disable-engineering-validator",
+        action="store_true",
+        help="research mode의 engineering validator만 비활성화합니다.",
+    )
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument(
         "--ids",
@@ -1040,6 +1050,8 @@ def main() -> int:
         return 0
     if args.retrieval_mode and args.mode != "research":
         parser.error("--retrieval-mode requires --mode research")
+    if args.disable_engineering_validator and args.mode != "research":
+        parser.error("--disable-engineering-validator requires --mode research")
     if args.mode == "rag" and (
         args.temperature is not None or args.seed is not None
     ):
@@ -1076,6 +1088,11 @@ def main() -> int:
     print(f"model={args.model}")
     print(f"temperature={args.temperature}")
     print(f"seed={args.seed}")
+    print(f"use_external={args.use_external}")
+    print(
+        "engineering_validation_enabled="
+        f"{not args.disable_engineering_validator}"
+    )
     print(f"questions={len(items)}")
     print(
         "question_types="
@@ -1153,6 +1170,7 @@ def main() -> int:
                 "model": args.model,
                 "use_internal": True,
                 "use_external": args.use_external,
+                "engineering_validation": not args.disable_engineering_validator,
             }
             if args.top_k is not None:
                 request_payload["internal_top_k"] = args.top_k
@@ -1182,6 +1200,12 @@ def main() -> int:
             "model": args.model,
             "temperature": args.temperature,
             "seed": args.seed,
+            "use_external": args.use_external if args.mode == "research" else None,
+            "engineering_validation_enabled": (
+                not args.disable_engineering_validator
+                if args.mode == "research"
+                else None
+            ),
             "expected_behavior": item.get(
                 "expected_behavior"
             ),
@@ -1196,6 +1220,8 @@ def main() -> int:
         api_figure_numeric_support_pass: bool | None = None
         api_figure_citation_correctness: bool | None = None
         figure_vision_calls = 0
+        web_search_triggered: bool | None = None
+        web_search_reason: str | None = None
 
         try:
             if args.mode == "rag":
@@ -1293,6 +1319,15 @@ def main() -> int:
                     for source in (response.get("web_sources") or [])
                 ]
                 validation = response.get("validation") or {}
+                expected_engineering_validation = (
+                    not args.disable_engineering_validator
+                )
+                if validation.get("engineering_validation_enabled") is not (
+                    expected_engineering_validation
+                ):
+                    raise RuntimeError(
+                        "Backend engineering validator setting mismatch."
+                    )
                 repair_attempts = int(validation.get("repair_attempts") or 0)
                 api_engineering_contradictions = int(
                     validation.get("engineering_contradiction_count") or 0
@@ -1308,8 +1343,16 @@ def main() -> int:
                     if api_false_premise_detected
                     else None
                 )
-                api_engineering_validation_passed = bool(
-                    validation.get("engineering_validation_passed")
+                api_engineering_validation_passed = (
+                    bool(validation.get("engineering_validation_passed"))
+                    if validation.get("engineering_validation_passed") is not None
+                    else None
+                )
+                web_search_triggered = bool(
+                    validation.get("web_search_triggered")
+                )
+                web_search_reason = str(
+                    validation.get("web_search_reason") or ""
                 )
                 api_figure_numeric_support_pass = bool(
                     validation.get("figure_numeric_support_pass")
@@ -1467,6 +1510,9 @@ def main() -> int:
                     "total_seconds": total_seconds,
                     "internal_source_count": internal_source_count,
                     "external_source_count": external_source_count,
+                    "web_evidence_count": external_source_count,
+                    "web_search_triggered": web_search_triggered,
+                    "web_search_reason": web_search_reason,
                     "retrieved_web_urls": retrieved_web_urls,
                     "citation_correctness": citation_correctness,
                     "agent_citation_correctness": citation_correctness,
@@ -1579,6 +1625,9 @@ def main() -> int:
                     "total_seconds": 0.0,
                     "internal_source_count": 0,
                     "external_source_count": 0,
+                    "web_evidence_count": 0,
+                    "web_search_triggered": None,
+                    "web_search_reason": None,
                     "retrieved_web_urls": [],
                     "citation_correctness": None,
                     "unsupported_claim_count": None,
@@ -1624,6 +1673,11 @@ def main() -> int:
     run_condition = args.condition or f"{args.model}-{args.mode}"
     if args.mode == "research" and run_retrieval_mode:
         run_condition = f"{run_condition}-{run_retrieval_mode}"
+    if args.mode == "research":
+        run_condition = (
+            f"{run_condition}-validator-"
+            f"{'off' if args.disable_engineering_validator else 'on'}"
+        )
     for result in results:
         result["condition"] = run_condition
 
@@ -1643,6 +1697,12 @@ def main() -> int:
         "model": args.model,
         "temperature": args.temperature,
         "seed": args.seed,
+        "use_external": args.use_external if args.mode == "research" else None,
+        "engineering_validation_enabled": (
+            not args.disable_engineering_validator
+            if args.mode == "research"
+            else None
+        ),
         "api_url": api_base,
         "ollama_url": args.ollama_url.rstrip("/"),
         "question_count": len(items),

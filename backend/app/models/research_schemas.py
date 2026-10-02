@@ -12,6 +12,7 @@ class ResearchRequest(BaseModel):
     external_top_k: int = Field(default=5, ge=1, le=20)
     use_internal: bool = True
     use_external: bool = True
+    engineering_validation: bool = True
     model: str = Field(default="qwen3:8b", min_length=1, max_length=100)
     temperature: float | None = Field(default=None, ge=0, le=2)
     seed: int | None = Field(default=None, ge=0)

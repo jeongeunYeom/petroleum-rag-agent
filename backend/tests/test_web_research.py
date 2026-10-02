@@ -619,7 +619,9 @@ def test_external_only_and_hybrid_research_use_fetched_web_passages(tmp_path: Pa
     )
     hybrid = asyncio.run(
         hybrid_agent.research(
-            ResearchRequest(query="latest compare internal web pressure monitoring")
+            ResearchRequest(
+                query="latest compare internal knowledge base and web sources"
+            )
         )
     )
     assert hybrid.routing_mode == "hybrid_research"
