@@ -1,0 +1,954 @@
+{
+  "metadata": {
+    "benchmark": "petroleum_agent_heldout_v1",
+    "reviewer": "single AI-assisted semantic reviewer",
+    "petroleum_agent_reexecuted": false,
+    "pricing_date": "2026-10-02",
+    "latency_interpretation": "end-to-end user-perceived latency; local and cloud hardware are not directly comparable",
+    "api_availability": {
+      "OPENAI_API_KEY": false,
+      "GEMINI_API_KEY": false
+    }
+  },
+  "models": [
+    "Petroleum Agent",
+    "qwen3:8b",
+    "qwen2.5vl:7b",
+    "gpt-6-sol",
+    "gemini-3.8-flash"
+  ],
+  "conditions": [
+    "closed_book",
+    "same_evidence",
+    "figure"
+  ],
+  "sample_counts": {
+    "text": 50,
+    "figure_total": 10,
+    "figure_usable": 9
+  },
+  "semantic_metrics": {
+    "qwen_figure": {
+      "schema_version": "1.0",
+      "evaluation_condition": "figure",
+      "questions_reviewed": 9,
+      "strict_answer_accuracy": null,
+      "semantic_answer_accuracy": 0.5555555555555556,
+      "semantic_exact_accuracy": 0.5555555555555556,
+      "semantic_partial_or_better": 0.8888888888888888,
+      "mean_claim_coverage": 0.7241379310344828,
+      "false_premise_total": 0,
+      "false_premise_recognition_rate": null,
+      "false_premise_correction_rate": null,
+      "numeric_accuracy": null,
+      "figure_semantic_accuracy": 0.6666666666666666,
+      "axis_accuracy": 0.25,
+      "series_accuracy": 0.7142857142857143,
+      "figure_element_accuracy": 0.7777777777777778,
+      "figure_interpretation_accuracy": 0.6666666666666666,
+      "citation_accuracy": null,
+      "safe_refusal_rate": 0.1111111111111111,
+      "engineering_contradiction_rate": 0.0,
+      "hallucination_rate": 0.2222222222222222,
+      "domain_metrics": {
+        "cross_domain": {
+          "questions": 7,
+          "semantic_exact_accuracy": 0.5714285714285714,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 0.7619047619047619,
+          "hallucination_rate": 0.2857142857142857,
+          "safe_refusal_rate": 0.0
+        },
+        "reservoir": {
+          "questions": 1,
+          "semantic_exact_accuracy": 0.0,
+          "semantic_partial_or_better": 0.0,
+          "mean_claim_coverage": 0.0,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 1.0
+        },
+        "well_test": {
+          "questions": 1,
+          "semantic_exact_accuracy": 1.0,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 1.0,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.0
+        }
+      },
+      "task_type_metrics": {
+        "figure": {
+          "questions": 9,
+          "semantic_exact_accuracy": 0.5555555555555556,
+          "semantic_partial_or_better": 0.8888888888888888,
+          "mean_claim_coverage": 0.7037037037037037,
+          "hallucination_rate": 0.2222222222222222,
+          "safe_refusal_rate": 0.1111111111111111
+        }
+      },
+      "failure_attribution_counts": {
+        "engineering_error": 2,
+        "figure_failure": 2,
+        "other": 6
+      },
+      "strict_semantic_groups": {}
+    },
+    "qwen_closed_book": {
+      "schema_version": "1.0",
+      "evaluation_condition": "closed_book",
+      "questions_reviewed": 50,
+      "strict_answer_accuracy": null,
+      "semantic_answer_accuracy": 0.32,
+      "semantic_exact_accuracy": 0.32,
+      "semantic_partial_or_better": 0.76,
+      "mean_claim_coverage": 0.6099290780141844,
+      "false_premise_total": 12,
+      "false_premise_recognition_rate": 0.9166666666666666,
+      "false_premise_correction_rate": 0.9166666666666666,
+      "numeric_accuracy": 0.0,
+      "figure_semantic_accuracy": null,
+      "axis_accuracy": null,
+      "series_accuracy": null,
+      "figure_element_accuracy": null,
+      "figure_interpretation_accuracy": null,
+      "citation_accuracy": 0.0,
+      "safe_refusal_rate": 0.02,
+      "engineering_contradiction_rate": 0.2,
+      "hallucination_rate": 0.34,
+      "domain_metrics": {
+        "cross_domain": {
+          "questions": 5,
+          "semantic_exact_accuracy": 0.6,
+          "semantic_partial_or_better": 0.8,
+          "mean_claim_coverage": 0.8,
+          "hallucination_rate": 0.4,
+          "safe_refusal_rate": 0.0
+        },
+        "reservoir": {
+          "questions": 22,
+          "semantic_exact_accuracy": 0.4090909090909091,
+          "semantic_partial_or_better": 0.8636363636363636,
+          "mean_claim_coverage": 0.6818181818181818,
+          "hallucination_rate": 0.09090909090909091,
+          "safe_refusal_rate": 0.045454545454545456
+        },
+        "well_test": {
+          "questions": 23,
+          "semantic_exact_accuracy": 0.17391304347826086,
+          "semantic_partial_or_better": 0.6521739130434783,
+          "mean_claim_coverage": 0.4891304347826087,
+          "hallucination_rate": 0.5652173913043478,
+          "safe_refusal_rate": 0.0
+        }
+      },
+      "task_type_metrics": {
+        "citation": {
+          "questions": 6,
+          "semantic_exact_accuracy": 0.6666666666666666,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 0.8333333333333334,
+          "hallucination_rate": 0.8333333333333334,
+          "safe_refusal_rate": 0.0
+        },
+        "concept": {
+          "questions": 24,
+          "semantic_exact_accuracy": 0.4583333333333333,
+          "semantic_partial_or_better": 0.7916666666666666,
+          "mean_claim_coverage": 0.638888888888889,
+          "hallucination_rate": 0.25,
+          "safe_refusal_rate": 0.0
+        },
+        "false_premise": {
+          "questions": 12,
+          "semantic_exact_accuracy": 0.08333333333333333,
+          "semantic_partial_or_better": 0.9166666666666666,
+          "mean_claim_coverage": 0.736111111111111,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.0
+        },
+        "numeric": {
+          "questions": 8,
+          "semantic_exact_accuracy": 0.0,
+          "semantic_partial_or_better": 0.25,
+          "mean_claim_coverage": 0.13541666666666666,
+          "hallucination_rate": 0.75,
+          "safe_refusal_rate": 0.125
+        }
+      },
+      "failure_attribution_counts": {
+        "citation_failure": 6,
+        "engineering_error": 2,
+        "numeric_failure": 4,
+        "other": 32,
+        "safe_refusal": 1
+      },
+      "strict_semantic_groups": {}
+    },
+    "qwen_same_evidence": {
+      "schema_version": "1.0",
+      "evaluation_condition": "same_evidence",
+      "questions_reviewed": 50,
+      "strict_answer_accuracy": null,
+      "semantic_answer_accuracy": 0.7,
+      "semantic_exact_accuracy": 0.7,
+      "semantic_partial_or_better": 0.96,
+      "mean_claim_coverage": 0.8865248226950354,
+      "false_premise_total": 12,
+      "false_premise_recognition_rate": 0.9166666666666666,
+      "false_premise_correction_rate": 0.9166666666666666,
+      "numeric_accuracy": 0.625,
+      "figure_semantic_accuracy": null,
+      "axis_accuracy": null,
+      "series_accuracy": null,
+      "figure_element_accuracy": null,
+      "figure_interpretation_accuracy": null,
+      "citation_accuracy": 0.8333333333333334,
+      "safe_refusal_rate": 0.02,
+      "engineering_contradiction_rate": 0.14,
+      "hallucination_rate": 0.04,
+      "domain_metrics": {
+        "cross_domain": {
+          "questions": 5,
+          "semantic_exact_accuracy": 0.8,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 0.95,
+          "hallucination_rate": 0.2,
+          "safe_refusal_rate": 0.0
+        },
+        "reservoir": {
+          "questions": 22,
+          "semantic_exact_accuracy": 0.7727272727272727,
+          "semantic_partial_or_better": 0.9545454545454546,
+          "mean_claim_coverage": 0.9242424242424242,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.045454545454545456
+        },
+        "well_test": {
+          "questions": 23,
+          "semantic_exact_accuracy": 0.6086956521739131,
+          "semantic_partial_or_better": 0.9565217391304348,
+          "mean_claim_coverage": 0.851449275362319,
+          "hallucination_rate": 0.043478260869565216,
+          "safe_refusal_rate": 0.0
+        }
+      },
+      "task_type_metrics": {
+        "citation": {
+          "questions": 6,
+          "semantic_exact_accuracy": 1.0,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 1.0,
+          "hallucination_rate": 0.16666666666666666,
+          "safe_refusal_rate": 0.0
+        },
+        "concept": {
+          "questions": 24,
+          "semantic_exact_accuracy": 0.875,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 0.9479166666666666,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.0
+        },
+        "false_premise": {
+          "questions": 12,
+          "semantic_exact_accuracy": 0.25,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 0.8680555555555555,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.0
+        },
+        "numeric": {
+          "questions": 8,
+          "semantic_exact_accuracy": 0.625,
+          "semantic_partial_or_better": 0.75,
+          "mean_claim_coverage": 0.6875,
+          "hallucination_rate": 0.125,
+          "safe_refusal_rate": 0.125
+        }
+      },
+      "failure_attribution_counts": {
+        "citation_failure": 7,
+        "engineering_error": 1,
+        "numeric_failure": 1,
+        "other": 39,
+        "safe_refusal": 1
+      },
+      "strict_semantic_groups": {}
+    },
+    "petroleum_agent_text50": {
+      "schema_version": "1.0",
+      "evaluation_condition": "petroleum_agent",
+      "questions_reviewed": 50,
+      "strict_answer_accuracy": null,
+      "semantic_answer_accuracy": 0.48,
+      "semantic_exact_accuracy": 0.48,
+      "semantic_partial_or_better": 0.68,
+      "mean_claim_coverage": 0.5957446808510638,
+      "false_premise_total": 12,
+      "false_premise_recognition_rate": 0.4166666666666667,
+      "false_premise_correction_rate": 0.4166666666666667,
+      "numeric_accuracy": 0.375,
+      "figure_semantic_accuracy": null,
+      "axis_accuracy": null,
+      "series_accuracy": null,
+      "figure_element_accuracy": null,
+      "figure_interpretation_accuracy": null,
+      "citation_accuracy": 0.3333333333333333,
+      "safe_refusal_rate": 0.2,
+      "engineering_contradiction_rate": 0.1,
+      "hallucination_rate": 0.1,
+      "domain_metrics": {
+        "cross_domain": {
+          "questions": 5,
+          "semantic_exact_accuracy": 0.4,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 0.7333333333333333,
+          "hallucination_rate": 0.2,
+          "safe_refusal_rate": 0.0
+        },
+        "reservoir": {
+          "questions": 22,
+          "semantic_exact_accuracy": 0.5454545454545454,
+          "semantic_partial_or_better": 0.6818181818181818,
+          "mean_claim_coverage": 0.6287878787878788,
+          "hallucination_rate": 0.045454545454545456,
+          "safe_refusal_rate": 0.22727272727272727
+        },
+        "well_test": {
+          "questions": 23,
+          "semantic_exact_accuracy": 0.43478260869565216,
+          "semantic_partial_or_better": 0.6086956521739131,
+          "mean_claim_coverage": 0.5253623188405797,
+          "hallucination_rate": 0.13043478260869565,
+          "safe_refusal_rate": 0.21739130434782608
+        }
+      },
+      "task_type_metrics": {
+        "citation": {
+          "questions": 6,
+          "semantic_exact_accuracy": 0.5,
+          "semantic_partial_or_better": 0.6666666666666666,
+          "mean_claim_coverage": 0.5833333333333334,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.3333333333333333
+        },
+        "concept": {
+          "questions": 24,
+          "semantic_exact_accuracy": 0.625,
+          "semantic_partial_or_better": 0.9166666666666666,
+          "mean_claim_coverage": 0.7951388888888888,
+          "hallucination_rate": 0.041666666666666664,
+          "safe_refusal_rate": 0.041666666666666664
+        },
+        "false_premise": {
+          "questions": 12,
+          "semantic_exact_accuracy": 0.25,
+          "semantic_partial_or_better": 0.4166666666666667,
+          "mean_claim_coverage": 0.3333333333333333,
+          "hallucination_rate": 0.3333333333333333,
+          "safe_refusal_rate": 0.25
+        },
+        "numeric": {
+          "questions": 8,
+          "semantic_exact_accuracy": 0.375,
+          "semantic_partial_or_better": 0.375,
+          "mean_claim_coverage": 0.375,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.5
+        }
+      },
+      "failure_attribution_counts": {
+        "citation_failure": 3,
+        "engineering_error": 5,
+        "generation_omission": 14,
+        "numeric_failure": 5,
+        "partial_answer": 10,
+        "retrieval_failure": 1,
+        "safe_refusal": 10
+      },
+      "strict_semantic_groups": {}
+    },
+    "petroleum_agent_figure_usable": {
+      "schema_version": "1.0",
+      "evaluation_condition": "petroleum_agent",
+      "questions_reviewed": 9,
+      "strict_answer_accuracy": null,
+      "semantic_answer_accuracy": 0.2222222222222222,
+      "semantic_exact_accuracy": 0.2222222222222222,
+      "semantic_partial_or_better": 0.6666666666666666,
+      "mean_claim_coverage": 0.4827586206896552,
+      "false_premise_total": 0,
+      "false_premise_recognition_rate": null,
+      "false_premise_correction_rate": null,
+      "numeric_accuracy": null,
+      "figure_semantic_accuracy": 0.2222222222222222,
+      "axis_accuracy": 0.25,
+      "series_accuracy": 0.5714285714285714,
+      "figure_element_accuracy": 0.3333333333333333,
+      "figure_interpretation_accuracy": 0.3333333333333333,
+      "citation_accuracy": null,
+      "safe_refusal_rate": 0.0,
+      "engineering_contradiction_rate": 0.3333333333333333,
+      "hallucination_rate": 0.4444444444444444,
+      "domain_metrics": {
+        "cross_domain": {
+          "questions": 7,
+          "semantic_exact_accuracy": 0.14285714285714285,
+          "semantic_partial_or_better": 0.7142857142857143,
+          "mean_claim_coverage": 0.4523809523809524,
+          "hallucination_rate": 0.42857142857142855,
+          "safe_refusal_rate": 0.0
+        },
+        "reservoir": {
+          "questions": 1,
+          "semantic_exact_accuracy": 0.0,
+          "semantic_partial_or_better": 0.0,
+          "mean_claim_coverage": 0.0,
+          "hallucination_rate": 1.0,
+          "safe_refusal_rate": 0.0
+        },
+        "well_test": {
+          "questions": 1,
+          "semantic_exact_accuracy": 1.0,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 1.0,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.0
+        }
+      },
+      "task_type_metrics": {
+        "figure": {
+          "questions": 9,
+          "semantic_exact_accuracy": 0.2222222222222222,
+          "semantic_partial_or_better": 0.6666666666666666,
+          "mean_claim_coverage": 0.4629629629629629,
+          "hallucination_rate": 0.4444444444444444,
+          "safe_refusal_rate": 0.0
+        }
+      },
+      "failure_attribution_counts": {
+        "engineering_error": 3,
+        "figure_failure": 7,
+        "generation_omission": 4,
+        "partial_answer": 4,
+        "retrieval_failure": 3
+      },
+      "strict_semantic_groups": {}
+    }
+  },
+  "latency_metrics": {
+    "qwen2.5vl:7b (qwen)::figure": {
+      "mean": 2.3885597777777776,
+      "median": 1.677871,
+      "p95": 6.698141
+    },
+    "qwen3:8b (qwen)::closed_book": {
+      "mean": 2.45583632,
+      "median": 2.2103625,
+      "p95": 4.647997
+    },
+    "qwen3:8b (qwen)::same_evidence": {
+      "mean": 2.27573602,
+      "median": 2.186213,
+      "p95": 3.377959
+    },
+    "Petroleum Agent::petroleum_agent_text50": {
+      "mean": 30.462332019999998,
+      "median": 23.716312000000002,
+      "p95": 87.533628
+    },
+    "Petroleum Agent::petroleum_agent_figure_usable": {
+      "mean": 62.02245133333334,
+      "median": 58.594318,
+      "p95": 154.353609
+    },
+    "gpt-6-sol (openai)::closed_book": {
+      "mean": null,
+      "median": null,
+      "p95": null
+    },
+    "gpt-6-sol (openai)::same_evidence": {
+      "mean": null,
+      "median": null,
+      "p95": null
+    },
+    "gpt-6-sol (openai)::figure": {
+      "mean": null,
+      "median": null,
+      "p95": null
+    },
+    "gemini-3.8-flash (gemini)::closed_book": {
+      "mean": null,
+      "median": null,
+      "p95": null
+    },
+    "gemini-3.8-flash (gemini)::same_evidence": {
+      "mean": null,
+      "median": null,
+      "p95": null
+    },
+    "gemini-3.8-flash (gemini)::figure": {
+      "mean": null,
+      "median": null,
+      "p95": null
+    }
+  },
+  "cost_metrics": {
+    "qwen2.5vl:7b (qwen)::figure": 0.0,
+    "qwen3:8b (qwen)::closed_book": 0.0,
+    "qwen3:8b (qwen)::same_evidence": 0.0,
+    "Petroleum Agent::petroleum_agent_text50": 0.0,
+    "Petroleum Agent::petroleum_agent_figure_usable": 0.0,
+    "gpt-6-sol (openai)::closed_book": null,
+    "gpt-6-sol (openai)::same_evidence": null,
+    "gpt-6-sol (openai)::figure": null,
+    "gemini-3.8-flash (gemini)::closed_book": null,
+    "gemini-3.8-flash (gemini)::same_evidence": null,
+    "gemini-3.8-flash (gemini)::figure": null
+  },
+  "figure_metrics": {
+    "qwen_figure": {
+      "schema_version": "1.0",
+      "evaluation_condition": "figure",
+      "questions_reviewed": 9,
+      "strict_answer_accuracy": null,
+      "semantic_answer_accuracy": 0.5555555555555556,
+      "semantic_exact_accuracy": 0.5555555555555556,
+      "semantic_partial_or_better": 0.8888888888888888,
+      "mean_claim_coverage": 0.7241379310344828,
+      "false_premise_total": 0,
+      "false_premise_recognition_rate": null,
+      "false_premise_correction_rate": null,
+      "numeric_accuracy": null,
+      "figure_semantic_accuracy": 0.6666666666666666,
+      "axis_accuracy": 0.25,
+      "series_accuracy": 0.7142857142857143,
+      "figure_element_accuracy": 0.7777777777777778,
+      "figure_interpretation_accuracy": 0.6666666666666666,
+      "citation_accuracy": null,
+      "safe_refusal_rate": 0.1111111111111111,
+      "engineering_contradiction_rate": 0.0,
+      "hallucination_rate": 0.2222222222222222,
+      "domain_metrics": {
+        "cross_domain": {
+          "questions": 7,
+          "semantic_exact_accuracy": 0.5714285714285714,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 0.7619047619047619,
+          "hallucination_rate": 0.2857142857142857,
+          "safe_refusal_rate": 0.0
+        },
+        "reservoir": {
+          "questions": 1,
+          "semantic_exact_accuracy": 0.0,
+          "semantic_partial_or_better": 0.0,
+          "mean_claim_coverage": 0.0,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 1.0
+        },
+        "well_test": {
+          "questions": 1,
+          "semantic_exact_accuracy": 1.0,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 1.0,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.0
+        }
+      },
+      "task_type_metrics": {
+        "figure": {
+          "questions": 9,
+          "semantic_exact_accuracy": 0.5555555555555556,
+          "semantic_partial_or_better": 0.8888888888888888,
+          "mean_claim_coverage": 0.7037037037037037,
+          "hallucination_rate": 0.2222222222222222,
+          "safe_refusal_rate": 0.1111111111111111
+        }
+      },
+      "failure_attribution_counts": {
+        "engineering_error": 2,
+        "figure_failure": 2,
+        "other": 6
+      },
+      "strict_semantic_groups": {}
+    },
+    "petroleum_agent_figure_usable": {
+      "schema_version": "1.0",
+      "evaluation_condition": "petroleum_agent",
+      "questions_reviewed": 9,
+      "strict_answer_accuracy": null,
+      "semantic_answer_accuracy": 0.2222222222222222,
+      "semantic_exact_accuracy": 0.2222222222222222,
+      "semantic_partial_or_better": 0.6666666666666666,
+      "mean_claim_coverage": 0.4827586206896552,
+      "false_premise_total": 0,
+      "false_premise_recognition_rate": null,
+      "false_premise_correction_rate": null,
+      "numeric_accuracy": null,
+      "figure_semantic_accuracy": 0.2222222222222222,
+      "axis_accuracy": 0.25,
+      "series_accuracy": 0.5714285714285714,
+      "figure_element_accuracy": 0.3333333333333333,
+      "figure_interpretation_accuracy": 0.3333333333333333,
+      "citation_accuracy": null,
+      "safe_refusal_rate": 0.0,
+      "engineering_contradiction_rate": 0.3333333333333333,
+      "hallucination_rate": 0.4444444444444444,
+      "domain_metrics": {
+        "cross_domain": {
+          "questions": 7,
+          "semantic_exact_accuracy": 0.14285714285714285,
+          "semantic_partial_or_better": 0.7142857142857143,
+          "mean_claim_coverage": 0.4523809523809524,
+          "hallucination_rate": 0.42857142857142855,
+          "safe_refusal_rate": 0.0
+        },
+        "reservoir": {
+          "questions": 1,
+          "semantic_exact_accuracy": 0.0,
+          "semantic_partial_or_better": 0.0,
+          "mean_claim_coverage": 0.0,
+          "hallucination_rate": 1.0,
+          "safe_refusal_rate": 0.0
+        },
+        "well_test": {
+          "questions": 1,
+          "semantic_exact_accuracy": 1.0,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 1.0,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.0
+        }
+      },
+      "task_type_metrics": {
+        "figure": {
+          "questions": 9,
+          "semantic_exact_accuracy": 0.2222222222222222,
+          "semantic_partial_or_better": 0.6666666666666666,
+          "mean_claim_coverage": 0.4629629629629629,
+          "hallucination_rate": 0.4444444444444444,
+          "safe_refusal_rate": 0.0
+        }
+      },
+      "failure_attribution_counts": {
+        "engineering_error": 3,
+        "figure_failure": 7,
+        "generation_omission": 4,
+        "partial_answer": 4,
+        "retrieval_failure": 3
+      },
+      "strict_semantic_groups": {}
+    }
+  },
+  "paired_comparisons": {
+    "qwen_closed_book": {
+      "questions": 50,
+      "external_minus_petroleum_exact": -0.16,
+      "external_minus_petroleum_exact_bootstrap_95_ci": [
+        -0.34,
+        0.02
+      ],
+      "external_minus_petroleum_claim_coverage": 0.013333333333333326,
+      "external_minus_petroleum_claim_coverage_bootstrap_95_ci": [
+        -0.13333333333333333,
+        0.16166666666666665
+      ]
+    },
+    "qwen_same_evidence": {
+      "questions": 50,
+      "external_minus_petroleum_exact": 0.22,
+      "external_minus_petroleum_exact_bootstrap_95_ci": [
+        0.08,
+        0.36
+      ],
+      "external_minus_petroleum_claim_coverage": 0.3016666666666667,
+      "external_minus_petroleum_claim_coverage_bootstrap_95_ci": [
+        0.2016666666666667,
+        0.4083333333333334
+      ]
+    }
+  },
+  "limitations": [
+    "OpenAI and Gemini were not executed because their API-key environment variables were absent.",
+    "Semantic grading used one AI-assisted reviewer, not a human panel.",
+    "Petroleum Agent figure answers may include retrieved text and validator/repair context; the direct vision run used only question plus image.",
+    "Latency compares local RTX 3090 execution with remote APIs only when cloud runs are available and is not pure inference latency."
+  ],
+  "rows": [
+    {
+      "System": "qwen2.5vl:7b (qwen)",
+      "Condition": "figure",
+      "Status": "complete",
+      "N": 9,
+      "Semantic Exact": 0.5555555555555556,
+      "Partial+": 0.8888888888888888,
+      "Claim Coverage": 0.7241379310344828,
+      "Hallucination": 0.2222222222222222,
+      "Engineering Error": 0.0,
+      "Safe Refusal": 0.1111111111111111,
+      "False-Premise Recognition": null,
+      "False-Premise Correction": null,
+      "Numeric Accuracy": null,
+      "Citation Accuracy": null,
+      "Figure Accuracy": 0.6666666666666666,
+      "Axis Accuracy": 0.25,
+      "Series Accuracy": 0.7142857142857143,
+      "Figure Element Accuracy": 0.7777777777777778,
+      "Interpretation Accuracy": 0.6666666666666666,
+      "Mean Latency": 2.3885597777777776,
+      "Median Latency": 1.677871,
+      "P95 Latency": 6.698141,
+      "Estimated Cost": 0.0
+    },
+    {
+      "System": "qwen3:8b (qwen)",
+      "Condition": "closed_book",
+      "Status": "complete",
+      "N": 50,
+      "Semantic Exact": 0.32,
+      "Partial+": 0.76,
+      "Claim Coverage": 0.6099290780141844,
+      "Hallucination": 0.34,
+      "Engineering Error": 0.2,
+      "Safe Refusal": 0.02,
+      "False-Premise Recognition": 0.9166666666666666,
+      "False-Premise Correction": 0.9166666666666666,
+      "Numeric Accuracy": 0.0,
+      "Citation Accuracy": 0.0,
+      "Figure Accuracy": null,
+      "Axis Accuracy": null,
+      "Series Accuracy": null,
+      "Figure Element Accuracy": null,
+      "Interpretation Accuracy": null,
+      "Mean Latency": 2.45583632,
+      "Median Latency": 2.2103625,
+      "P95 Latency": 4.647997,
+      "Estimated Cost": 0.0
+    },
+    {
+      "System": "qwen3:8b (qwen)",
+      "Condition": "same_evidence",
+      "Status": "complete",
+      "N": 50,
+      "Semantic Exact": 0.7,
+      "Partial+": 0.96,
+      "Claim Coverage": 0.8865248226950354,
+      "Hallucination": 0.04,
+      "Engineering Error": 0.14,
+      "Safe Refusal": 0.02,
+      "False-Premise Recognition": 0.9166666666666666,
+      "False-Premise Correction": 0.9166666666666666,
+      "Numeric Accuracy": 0.625,
+      "Citation Accuracy": 0.8333333333333334,
+      "Figure Accuracy": null,
+      "Axis Accuracy": null,
+      "Series Accuracy": null,
+      "Figure Element Accuracy": null,
+      "Interpretation Accuracy": null,
+      "Mean Latency": 2.27573602,
+      "Median Latency": 2.186213,
+      "P95 Latency": 3.377959,
+      "Estimated Cost": 0.0
+    },
+    {
+      "System": "Petroleum Agent",
+      "Condition": "petroleum_agent_text50",
+      "Status": "complete",
+      "N": 50,
+      "Semantic Exact": 0.48,
+      "Partial+": 0.68,
+      "Claim Coverage": 0.5957446808510638,
+      "Hallucination": 0.1,
+      "Engineering Error": 0.1,
+      "Safe Refusal": 0.2,
+      "False-Premise Recognition": 0.4166666666666667,
+      "False-Premise Correction": 0.4166666666666667,
+      "Numeric Accuracy": 0.375,
+      "Citation Accuracy": 0.3333333333333333,
+      "Figure Accuracy": null,
+      "Axis Accuracy": null,
+      "Series Accuracy": null,
+      "Figure Element Accuracy": null,
+      "Interpretation Accuracy": null,
+      "Mean Latency": 30.462332019999998,
+      "Median Latency": 23.716312000000002,
+      "P95 Latency": 87.533628,
+      "Estimated Cost": 0.0
+    },
+    {
+      "System": "Petroleum Agent",
+      "Condition": "petroleum_agent_figure_usable",
+      "Status": "complete",
+      "N": 9,
+      "Semantic Exact": 0.2222222222222222,
+      "Partial+": 0.6666666666666666,
+      "Claim Coverage": 0.4827586206896552,
+      "Hallucination": 0.4444444444444444,
+      "Engineering Error": 0.3333333333333333,
+      "Safe Refusal": 0.0,
+      "False-Premise Recognition": null,
+      "False-Premise Correction": null,
+      "Numeric Accuracy": null,
+      "Citation Accuracy": null,
+      "Figure Accuracy": 0.2222222222222222,
+      "Axis Accuracy": 0.25,
+      "Series Accuracy": 0.5714285714285714,
+      "Figure Element Accuracy": 0.3333333333333333,
+      "Interpretation Accuracy": 0.3333333333333333,
+      "Mean Latency": 62.02245133333334,
+      "Median Latency": 58.594318,
+      "P95 Latency": 154.353609,
+      "Estimated Cost": 0.0
+    },
+    {
+      "System": "gpt-6-sol (openai)",
+      "Condition": "closed_book",
+      "Status": "not_run_missing_api_key",
+      "N": 0,
+      "Semantic Exact": null,
+      "Partial+": null,
+      "Claim Coverage": null,
+      "Hallucination": null,
+      "Engineering Error": null,
+      "Safe Refusal": null,
+      "False-Premise Recognition": null,
+      "False-Premise Correction": null,
+      "Numeric Accuracy": null,
+      "Citation Accuracy": null,
+      "Figure Accuracy": null,
+      "Axis Accuracy": null,
+      "Series Accuracy": null,
+      "Figure Element Accuracy": null,
+      "Interpretation Accuracy": null,
+      "Mean Latency": null,
+      "Median Latency": null,
+      "P95 Latency": null,
+      "Estimated Cost": null
+    },
+    {
+      "System": "gpt-6-sol (openai)",
+      "Condition": "same_evidence",
+      "Status": "not_run_missing_api_key",
+      "N": 0,
+      "Semantic Exact": null,
+      "Partial+": null,
+      "Claim Coverage": null,
+      "Hallucination": null,
+      "Engineering Error": null,
+      "Safe Refusal": null,
+      "False-Premise Recognition": null,
+      "False-Premise Correction": null,
+      "Numeric Accuracy": null,
+      "Citation Accuracy": null,
+      "Figure Accuracy": null,
+      "Axis Accuracy": null,
+      "Series Accuracy": null,
+      "Figure Element Accuracy": null,
+      "Interpretation Accuracy": null,
+      "Mean Latency": null,
+      "Median Latency": null,
+      "P95 Latency": null,
+      "Estimated Cost": null
+    },
+    {
+      "System": "gpt-6-sol (openai)",
+      "Condition": "figure",
+      "Status": "not_run_missing_api_key",
+      "N": 0,
+      "Semantic Exact": null,
+      "Partial+": null,
+      "Claim Coverage": null,
+      "Hallucination": null,
+      "Engineering Error": null,
+      "Safe Refusal": null,
+      "False-Premise Recognition": null,
+      "False-Premise Correction": null,
+      "Numeric Accuracy": null,
+      "Citation Accuracy": null,
+      "Figure Accuracy": null,
+      "Axis Accuracy": null,
+      "Series Accuracy": null,
+      "Figure Element Accuracy": null,
+      "Interpretation Accuracy": null,
+      "Mean Latency": null,
+      "Median Latency": null,
+      "P95 Latency": null,
+      "Estimated Cost": null
+    },
+    {
+      "System": "gemini-3.8-flash (gemini)",
+      "Condition": "closed_book",
+      "Status": "not_run_missing_api_key",
+      "N": 0,
+      "Semantic Exact": null,
+      "Partial+": null,
+      "Claim Coverage": null,
+      "Hallucination": null,
+      "Engineering Error": null,
+      "Safe Refusal": null,
+      "False-Premise Recognition": null,
+      "False-Premise Correction": null,
+      "Numeric Accuracy": null,
+      "Citation Accuracy": null,
+      "Figure Accuracy": null,
+      "Axis Accuracy": null,
+      "Series Accuracy": null,
+      "Figure Element Accuracy": null,
+      "Interpretation Accuracy": null,
+      "Mean Latency": null,
+      "Median Latency": null,
+      "P95 Latency": null,
+      "Estimated Cost": null
+    },
+    {
+      "System": "gemini-3.8-flash (gemini)",
+      "Condition": "same_evidence",
+      "Status": "not_run_missing_api_key",
+      "N": 0,
+      "Semantic Exact": null,
+      "Partial+": null,
+      "Claim Coverage": null,
+      "Hallucination": null,
+      "Engineering Error": null,
+      "Safe Refusal": null,
+      "False-Premise Recognition": null,
+      "False-Premise Correction": null,
+      "Numeric Accuracy": null,
+      "Citation Accuracy": null,
+      "Figure Accuracy": null,
+      "Axis Accuracy": null,
+      "Series Accuracy": null,
+      "Figure Element Accuracy": null,
+      "Interpretation Accuracy": null,
+      "Mean Latency": null,
+      "Median Latency": null,
+      "P95 Latency": null,
+      "Estimated Cost": null
+    },
+    {
+      "System": "gemini-3.8-flash (gemini)",
+      "Condition": "figure",
+      "Status": "not_run_missing_api_key",
+      "N": 0,
+      "Semantic Exact": null,
+      "Partial+": null,
+      "Claim Coverage": null,
+      "Hallucination": null,
+      "Engineering Error": null,
+      "Safe Refusal": null,
+      "False-Premise Recognition": null,
+      "False-Premise Correction": null,
+      "Numeric Accuracy": null,
+      "Citation Accuracy": null,
+      "Figure Accuracy": null,
+      "Axis Accuracy": null,
+      "Series Accuracy": null,
+      "Figure Element Accuracy": null,
+      "Interpretation Accuracy": null,
+      "Mean Latency": null,
+      "Median Latency": null,
+      "P95 Latency": null,
+      "Estimated Cost": null
+    }
+  ]
+}
