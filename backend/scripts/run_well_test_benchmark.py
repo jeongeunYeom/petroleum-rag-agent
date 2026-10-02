@@ -1058,6 +1058,13 @@ def main() -> int:
         parser.error("--temperature/--seed require --mode research or ollama-direct")
 
     benchmark_path = Path(args.benchmark).resolve()
+    benchmark_name = benchmark_path.stem
+    output_prefix = (
+        "well_test_benchmark"
+        if benchmark_name == "well_test_agent_benchmark"
+        else re.sub(r"[^A-Za-z0-9_.-]+", "_", benchmark_name).strip("._-")
+        or "benchmark"
+    )
     raw_benchmark_items = read_json(benchmark_path)
     if not isinstance(raw_benchmark_items, list):
         raise RuntimeError(
@@ -1685,7 +1692,7 @@ def main() -> int:
     elapsed = time.perf_counter() - overall_started
 
     payload = {
-        "benchmark_name": "well_test_agent_benchmark",
+        "benchmark_name": benchmark_name,
         "benchmark_file": str(benchmark_path),
         "run_id": run_id,
         "created_at": datetime.now(
@@ -1714,19 +1721,19 @@ def main() -> int:
 
     json_path = (
         evaluation_dir
-        / f"well_test_benchmark_{run_id}.json"
+        / f"{output_prefix}_{run_id}.json"
     )
     csv_path = (
         evaluation_dir
-        / f"well_test_benchmark_{run_id}.csv"
+        / f"{output_prefix}_{run_id}.csv"
     )
     latest_json_path = (
         evaluation_dir
-        / "well_test_benchmark_latest.json"
+        / f"{output_prefix}_latest.json"
     )
     latest_csv_path = (
         evaluation_dir
-        / "well_test_benchmark_latest.csv"
+        / f"{output_prefix}_latest.csv"
     )
 
     write_json(json_path, payload)
