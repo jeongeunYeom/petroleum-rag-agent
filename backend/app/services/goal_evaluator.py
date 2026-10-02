@@ -203,6 +203,10 @@ class GoalEvaluator:
                 )
             except ValueError:
                 expected_status = ExpectedResultStatus.INSUFFICIENT_EVIDENCE
+            if self.engineering_validator.detect_false_premises(
+                request.expected_result
+            ):
+                expected_status = ExpectedResultStatus.CONTRADICTED
         goal_conflicts_with_evidence = bool(
             data.get("goal_conflicts_with_evidence")
             and expected_status == ExpectedResultStatus.CONTRADICTED

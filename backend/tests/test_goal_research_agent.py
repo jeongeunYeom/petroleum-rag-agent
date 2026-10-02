@@ -408,6 +408,7 @@ def test_candidate_engineering_contradiction_prevents_goal_success():
     ))
     assert result.engineering_contradiction_count > 0
     assert result.achieved is False
+    assert result.expected_result_status == ExpectedResultStatus.CONTRADICTED
     assert result.gaps
     assert result.next_research_need
 
