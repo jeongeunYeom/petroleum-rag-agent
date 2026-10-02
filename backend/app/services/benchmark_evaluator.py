@@ -38,6 +38,26 @@ _ENGINEERING_REGIME_RULE_RE = re.compile(
 _ENGINEERING_FEATURE_RULE_RE = re.compile(
     r"unit|slope|plateau|horizontal|constant|overlap|derivative|기울기|평탄|수평|겹|도함수|미분"
 )
+_WELLBORE_STORAGE_RE = re.compile(
+    r"wellbore\s*storage|유정\s*저장|웰보어\s*스토리지",
+    re.IGNORECASE,
+)
+_PRESSURE_DERIVATIVE_PAIR_RE = re.compile(
+    r"(?:pressure|압력).{0,60}(?:and|&|및|와|과|하고|그리고).{0,40}"
+    r"(?:its\s+|the\s+)?(?:pressure\s*)?(?:derivative|미분|도함수)",
+    re.IGNORECASE,
+)
+_UNIT_SLOPE_RE = re.compile(
+    r"unit[- ]?slope|단위\s*기울기|unit\s+slope",
+    re.IGNORECASE,
+)
+_OVERLAP_RELATION_RE = re.compile(
+    r"\boverlap(?:s|ped|ping)?\b|\boverla(?:y|ys|yed|ying)\b|"
+    r"\bcoincid(?:e|es|ed|ent)\b|"
+    r"\blie\s+on\s+top\s+of\s+(?:one\s+another|each\s+other)\b|"
+    r"겹|중첩|포개|일치",
+    re.IGNORECASE,
+)
 
 
 @dataclass
@@ -157,13 +177,40 @@ def _required_failures(
     return [
         pattern
         for pattern in patterns
-        if re.search(
-            pattern,
-            normalized,
-            re.IGNORECASE | re.DOTALL,
+        if (
+            re.search(
+                pattern,
+                normalized,
+                re.IGNORECASE | re.DOTALL,
+            )
+            is None
+            and not (
+                _is_wellbore_storage_overlap_requirement(pattern)
+                and _has_wellbore_storage_overlap_relation(normalized)
+            )
         )
-        is None
     ]
+
+
+def _is_wellbore_storage_overlap_requirement(pattern: str) -> bool:
+    value = pattern.lower()
+    return bool(
+        re.search(r"wellbore|storage|유정|웰보어", value)
+        and re.search(r"pressure|압력", value)
+        and re.search(r"derivative|미분|도함수", value)
+        and re.search(r"overlap|겹", value)
+    )
+
+
+def _has_wellbore_storage_overlap_relation(answer: str) -> bool:
+    return any(
+        _WELLBORE_STORAGE_RE.search(claim)
+        and _PRESSURE_DERIVATIVE_PAIR_RE.search(claim)
+        and _UNIT_SLOPE_RE.search(claim)
+        and _OVERLAP_RELATION_RE.search(claim)
+        and not _NEGATION_RE.search(claim)
+        for claim in _claim_chunks(answer)
+    )
 
 
 def _forbidden_hits(
