@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "dry_run": false,
+  "metadata": {
+    "created_at": "2026-10-02T07:42:59.241931+00:00",
+    "provider": "gemini",
+    "model": "gemini-3.8-flash",
+    "condition": "gemini38_flash_closed_book",
+    "question_count": 5,
+    "web_used": false,
+    "tools_used": false,
+    "parameters": {
+      "max_output_tokens": 1200,
+      "temperature": 0,
+      "reasoning_effort": null,
+      "thinking_level": "low",
+      "qwen_think": null,
+      "max_retries": 2
+    },
+    "pricing": {
+      "pricing_date": "2026-10-02",
+      "service_tier": "standard",
+      "openai": {
+        "input_per_million": 2.0,
+        "output_per_million": 10.0
+      },
+      "gemini": {
+        "input_per_million": 0.75,
+        "output_per_million": 3.75
+      },
+      "qwen": {
+        "input_per_million": 0.0,
+        "output_per_million": 0.0
+      }
+    },
+    "estimated_cost_usd": 0.00618375,
+    "projected_full_cost_usd": 0.22467625,
+    "planned_request_count": 109,
+    "budget_approved_for_full_run": null,
+    "budget_stop_reason": null,
+    "latency_seconds": {
+      "mean": 17.549008,
+      "median": 9.855073,
+      "p95": 38.329674,
+      "min": 4.462277,
+      "max": 38.329674
+    },
+    "question_sha256": "37f9440357379901cec6fe587151f0fcc2e6d11bdb66ef128fda9f046cfe2bfc",
+    "evidence_sha256": "cebed9e8b6e8b831621245fee4d91939a7d9a2554a5207c8aba9dab5c63043fe"
+  },
+  "results": [
+    {
+      "question_id": "PH-WT-001",
+      "provider": "gemini",
+      "model": "gemini-3.8-flash",
+      "condition": "gemini38_flash_closed_book",
+      "answer": "웰테스트(Well-test) 해석에서 **무차원 스킨 팩터(Dimensionless Skin Factor, $s$)**의 물리적 의미와 **Positive Skin($s > 0$)**의 의미는 다음과 같습니다.\n\n---\n\n### 1. 무차원 스킨 팩터($s$)의 물리적 의미\n\n* **정의**: 유정 주변(근원공, near-wellbore) 지층의 유동 특성이 저류층 본래(unaltered reservoir)의 특성과 달라져 발생하는 **추가적인 압력 강하(또는 압력 손실 감소)를 정량화한 무차원 척도**입니다.\n* **압력 강하와의 관계**:\n  $$ \\Delta P_s = \\frac{q \\mu B}{2 \\pi k h} s \\quad (\\text{또는 필드 단위계에서 } \\Delta P_s = \\frac{141.2 q B \\mu}{k h} s) $$\n  여기서 $\\Delta P_s$는 스킨에 의한 추가 압력 강하, $k$는 저류층 투수율, $h$는 층 두께, $q$는 유량, $\\mu$는 점도, $B$는 부피계수입니다.\n* **유효 갱정 반경(Effective Wellbore Radius, $r_{wa}$)**:\n  $$ r_{wa} = r_w e^{-s} $$\n  스킨 팩터는 물리적 시추공 반경($r_w$)이 유동 관점에서 얼마나 확장되거나 축소되어 보이는지를 나타냅니다.\n* **물리적 범위**:\n  * $s = 0$: 이상적인 유정(손상도 자극도 없는 상태, $r_{wa} = r_w$)\n  * $s > 0$: 유동 저항 증가 (손상/수렴 유동 등)\n  * $s < 0$: 유동성 개선 (산처리, 수압파쇄 등 자극 처리 상태, $r_{wa} > r_w$)\n\n---\n\n### 2. Positive Skin ($s > 0$)의 의미\n\nPositive skin은 유정으로 유입되는 유체가 **원래 저류층 상태보다 더 큰 저항을 받아 추가적인 압력 손실($\\Delta P_s > 0$)이 발생함**을 의미합니다. 이는 생산성 지수(PI)의 저하로 이어집니다.\n\nPositive skin을 유발하는 주요 원인은 다음과 같이 크게 두 가지로 분류됩니다.\n\n1. **지층 손상 (Formation Damage, 기계적/화학적 요인)**\n   * 시추/완결 유체의 여과(filtrate invasion) 및 머드 케이크 형성\n   * 점토 광물의 팽창 및 미립자 이동(fines migration)에 의한 공극 막힘\n   * 아스팔텐, 파라핀 석출 또는 스케일(scale) 생성\n   * 원공 주변 2상 유동에 따른 상대투수율 저하(상대투수율 트랩)\n\n2. **기하학적/역학적 요인 (Pseudo-skin 효과)**\n   * **부분 관통(Partial Penetration)**: 생산 구간이 전체 저류층 두께의 일부에만 제한되어 방사상 유동 대신 구형/반구형 수렴 유동이 발생할 때\n   * **사공(Perforation) 효과**: 천공 밀도(perforation density)가 낮거나 천공 심도가 얕아 유동이 집중될 때\n   * **난류 유동(Non-Darcy Flow / Rate-dependent skin)**: 가스정 등에서 고유속으로 인해 비다르시 유동 저항이 추가될 때 ($s' = s + Dq$)\n   * **경사정/수평정 완결 상태**: 유입 기하학적 형상에 따른 유동 집중 현상",
+      "latency_seconds": 38.329674,
+      "input_tokens": 102,
+      "output_tokens": 870,
+      "reasoning_tokens": null,
+      "estimated_cost_usd": 0.003339,
+      "web_used": false,
+      "tools_used": false,
+      "figure_image_available": null,
+      "error": null
+    },
+    {
+      "question_id": "PH-WT-002",
+      "provider": "gemini",
+      "model": "gemini-3.8-flash",
+      "condition": "gemini38_flash_closed_book",
+      "answer": "제시하신 설명은 **기술적으로 틀렸습니다.** 정반대로 설명되어 있습니다.\n\n정확한 내용은 다음과 같습니다.\n\n1. **Positive Skin (양의 스킨 팩터, $s > 0$):**\n   * **유층 오염 및 유입 저해(Formation Damage):** 시멘팅 손상, 머드 침투, 스케일 형성, 불완전 유선 관통(partial penetration) 등으로 인해 공저 부근의 투과율이 저하된 상태를 뜻합니다.\n   * **추가 압력 강하 발생:** 유체의 흐름에 추가적인 저항이 생기므로 **추가 압력 강하($\\Delta p_s > 0$)가 증가**합니다.\n   * **생산성 저하:** 생산 지수(Productivity Index, PI)가 감소하여 생산성이 나빠집니다.\n\n2. **Negative Skin (음의 스킨 팩터, $s < 0$):**\n   * **생산성 개선(Stimulation):** 산처리(Acidizing)나 수압파쇄(Hydraulic Fracturing) 등을 통해 유선 저항을 줄였을 때 나타납니다.\n   * **추가 압력 강하 감소:** 흐름이 원활해져 공저 부근의 불필요한 **압력 강하를 줄이거나 오히려 유효 공경(effective wellbore radius)을 넓히는 효과**를 냅니다.\n   * **생산성 향상:** 생산 지수(PI)가 증가하여 생산성이 개선됩니다.\n\n따라서 **\"생산성 개선을 뜻하고 추가 압력 강하를 줄인다\"**는 설명은 **Negative skin($s < 0$)**에 해당합니다.",
+      "latency_seconds": 4.462277,
+      "input_tokens": 107,
+      "output_tokens": 381,
+      "reasoning_tokens": null,
+      "estimated_cost_usd": 0.001509,
+      "web_used": false,
+      "tools_used": false,
+      "figure_image_available": null,
+      "error": null
+    },
+    {
+      "question_id": "PH-RE-005",
+      "provider": "gemini",
+      "model": "gemini-3.8-flash",
+      "condition": "gemini38_flash_closed_book",
+      "answer": "석유공학에서 Darcy의 법칙에 기초한 **1 다아시(1 Darcy)**의 표준 정의는 다음과 같습니다.\n\n단상(single-phase) 유동 조건에서 **단면적이 $1\\text{ cm}^2$**인 다공성 매질을 통해, **점도가 $1\\text{ cP}$**인 유체가 **$1\\text{ atm/cm}$의 압력 구배** 하에서 **$1\\text{ cm}^3/\\text{s}$의 유량**으로 흐를 때의 매질의 투과율(permeability)을 **1 Darcy**로 정의합니다.\n\n각 요소별 수치와 단위는 다음과 같습니다:\n\n* **Fluid Viscosity (유체 점도, $\\mu$):** $1\\text{ cP}$ ($1\\text{ centipoise}$)\n* **Flow Rate (유량, $q$):** $1\\text{ cm}^3/\\text{s}$ (또는 $1\\text{ mL/s}$)\n* **Area (단면적, $A$):** $1\\text{ cm}^2$\n* **Pressure Gradient (압력 구배, $\\Delta P / L$):** $1\\text{ atm/cm}$\n\n*(참고: SI 단위 환산 시 $1\\text{ Darcy} \\approx 9.869233 \\times 10^{-13}\\text{ m}^2$ 또는 약 $0.987\\ \\mu\\text{m}^2$)*",
+      "latency_seconds": 9.855073,
+      "input_tokens": 106,
+      "output_tokens": 335,
+      "reasoning_tokens": null,
+      "estimated_cost_usd": 0.00133575,
+      "web_used": false,
+      "tools_used": false,
+      "figure_image_available": null,
+      "error": null
+    },
+    {
+      "question_id": "PH-RE-011",
+      "provider": "gemini",
+      "model": "gemini-3.8-flash",
+      "condition": "gemini38_flash_closed_book",
+      "answer": "",
+      "latency_seconds": 43.407039,
+      "input_tokens": null,
+      "output_tokens": null,
+      "reasoning_tokens": null,
+      "estimated_cost_usd": null,
+      "web_used": false,
+      "tools_used": false,
+      "figure_image_available": null,
+      "error": "HTTPError: HTTP Error 503: Service Unavailable"
+    },
+    {
+      "question_id": "PH-XD-001",
+      "provider": "gemini",
+      "model": "gemini-3.8-flash",
+      "condition": "gemini38_flash_closed_book",
+      "answer": "",
+      "latency_seconds": 60.732342,
+      "input_tokens": null,
+      "output_tokens": null,
+      "reasoning_tokens": null,
+      "estimated_cost_usd": null,
+      "web_used": false,
+      "tools_used": false,
+      "figure_image_available": null,
+      "error": "HTTPError: HTTP Error 503: Service Unavailable"
+    }
+  ]
+}

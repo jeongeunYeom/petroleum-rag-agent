@@ -5,8 +5,9 @@ import csv
 import json
 import os
 import random
+import re
 import statistics
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -109,20 +110,30 @@ def poster_pct(value: Any) -> float | str:
     return "N/A" if value is None else round(100 * value, 2)
 
 
+def error_type(error: str) -> str:
+    status = re.search(r"HTTP Error (\d+)", error)
+    return f"HTTP_{status.group(1)}" if status else error.split(":", 1)[0]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Merge blind review scores with model keys and aggregate results.")
-    parser.add_argument("--review", default=str(DEFAULT_REVIEW))
-    parser.add_argument("--key", default=str(DEFAULT_KEY))
+    parser.add_argument("--review", nargs="+", default=[str(DEFAULT_REVIEW)])
+    parser.add_argument("--key", nargs="+", default=[str(DEFAULT_KEY)])
     parser.add_argument("--runs", nargs="+", required=True)
     args = parser.parse_args()
 
     rubric = load_json(DEFAULT_RUBRIC)
-    review_rows = read_csv(Path(args.review))
-    answer_key = load_json(Path(args.key))["answers"]
+    review_rows = [row for path in args.review for row in read_csv(Path(path))]
+    answer_key: dict[str, Any] = {}
+    for path in args.key:
+        incoming = load_json(Path(path))["answers"]
+        overlap = set(answer_key) & set(incoming)
+        if overlap:
+            raise ValueError(f"Duplicate anonymous IDs across answer keys: {sorted(overlap)}")
+        answer_key.update(incoming)
     if {row["anonymous_answer_id"] for row in review_rows} != set(answer_key):
         raise ValueError("Completed blind review does not match the separate answer key")
     runs = [load_json(Path(path)) for path in args.runs]
-    run_by_key = {(run["metadata"]["provider"], run["metadata"]["condition"]): run for run in runs}
 
     grouped: dict[tuple[str, str, str], list[dict[str, str]]] = defaultdict(list)
     for row in review_rows:
@@ -137,7 +148,10 @@ def main() -> int:
         metrics = score_review(subset_rubric(rubric, ids), scored_rows, evaluation_condition=condition)
         run = next(run for run in runs if run["metadata"]["provider"] == provider and base_condition(run["metadata"]["condition"]) == condition)
         name = f"{model} ({provider})"
-        rows.append(metric_row(name, condition, metrics, latency_from_run(run, ids), run["metadata"]["estimated_cost_usd"]))
+        errors = [row["error"] for row in run["results"] if row.get("error")]
+        expected_figure_miss = condition == "figure" and errors == ["figure image unavailable"]
+        status = "complete_usable_subset" if expected_figure_miss else "partial_api_errors" if errors else "complete"
+        rows.append(metric_row(name, condition, metrics, latency_from_run(run, ids), run["metadata"]["estimated_cost_usd"], status))
         semantic[f"{provider}_{condition}"] = metrics
         if condition in {"closed_book", "same_evidence"}:
             external_text_rows[f"{provider}_{condition}"] = scored_rows
@@ -162,11 +176,31 @@ def main() -> int:
     for provider, model in (("openai", "gpt-6.1-sol"), ("gemini", "gemini-3.8-flash")):
         for condition in ("closed_book", "same_evidence", "figure"):
             if (provider, condition) not in completed:
-                rows.append(metric_row(f"{model} ({provider})", condition, {}, {}, None, "not_run_missing_api_key"))
+                key_present = bool(os.environ.get("OPENAI_API_KEY" if provider == "openai" else "GEMINI_API_KEY"))
+                status = "not_run_rate_limit_or_quota" if key_present else "not_run_missing_api_key"
+                rows.append(metric_row(f"{model} ({provider})", condition, {}, {}, None, status))
 
     text_ids = {item["id"] for item in rubric["items"] if item["task_type"] != "figure"}
     petroleum_text = [row for row in petroleum_rows if row["question_id"] in text_ids]
     paired = {name: paired_delta(petroleum_text, scored, subset_rubric(rubric, text_ids)) for name, scored in external_text_rows.items()}
+    run_metrics = {}
+    for run in runs:
+        provider = run["metadata"]["provider"]
+        condition = base_condition(run["metadata"]["condition"])
+        errors = [row["error"] for row in run["results"] if row.get("error")]
+        run_metrics[f"{provider}_{condition}"] = {
+            "requested": len(run["results"]),
+            "succeeded": sum(row.get("error") is None for row in run["results"]),
+            "errors": len(errors),
+            "error_types": dict(sorted(Counter(error_type(error) for error in errors).items())),
+            "estimated_cost_usd": run["metadata"].get("estimated_cost_usd"),
+        }
+    missing_conditions = [
+        f"{provider}/{condition}"
+        for provider in ("openai", "gemini")
+        for condition in ("closed_book", "same_evidence", "figure")
+        if (provider, condition) not in completed
+    ]
     comparison = {
         "metadata": {
             "benchmark": "petroleum_agent_heldout_v1", "reviewer": "single AI-assisted semantic reviewer",
@@ -183,10 +217,11 @@ def main() -> int:
         "semantic_metrics": semantic,
         "latency_metrics": {f"{row['System']}::{row['Condition']}": {"mean": row["Mean Latency"], "median": row["Median Latency"], "p95": row["P95 Latency"]} for row in rows},
         "cost_metrics": {f"{row['System']}::{row['Condition']}": row["Estimated Cost"] for row in rows},
+        "run_metrics": run_metrics,
         "figure_metrics": {key: value for key, value in semantic.items() if "figure" in key},
         "paired_comparisons": paired,
         "limitations": [
-            "OpenAI and Gemini were not executed because their API-key environment variables were absent.",
+            f"Unavailable provider conditions: {', '.join(missing_conditions) if missing_conditions else 'none'}.",
             "Petroleum Agent is a system-level baseline with retrieval, validation, and repair; direct closed-book models use only their internal knowledge.",
             "Same-evidence results compare generation and reasoning with retrieval differences removed.",
             "Semantic grading used one AI-assisted reviewer, not a human panel.",
@@ -226,7 +261,7 @@ def main() -> int:
     lines = [
         "# External model comparison summary", "",
         "Semantic results were produced by a **single AI-assisted semantic reviewer** using the frozen rubric.",
-        "The Petroleum Agent was not re-run. Qwen ran locally on the RTX 3090; GPT/Gemini API runs are unavailable because keys were absent.", "",
+        "The Petroleum Agent was not re-run. Qwen ran locally on the RTX 3090; completed GPT/Gemini conditions used remote APIs.", "",
         "| System | Condition | N | Exact | Partial+ | Coverage | Hallucination | Eng. error | Median s | P95 s | Status |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|",
     ]

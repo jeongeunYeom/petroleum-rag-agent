@@ -117,6 +117,19 @@ def test_anonymous_review_mapping_hides_model() -> None:
     assert packet["items"][0]["condition"] == "closed_book"
 
 
+def test_anonymous_review_supports_noncolliding_prefix() -> None:
+    rubric = runner.load_json(runner.RUBRIC_PATH)
+    run = {
+        "results": [{
+            "question_id": "PH-WT-001", "provider": "openai", "model": "gpt-6.1-sol",
+            "condition": "gpt61_sol_closed_book", "answer": "answer", "error": None,
+        }]
+    }
+    packet, key = runner.build_anonymous_review([run], rubric, answer_id_prefix="API")
+    assert packet["items"][0]["anonymous_answer_id"] == "API-0001"
+    assert set(key["answers"]) == {"API-0001"}
+
+
 @pytest.mark.parametrize(
     ("value", "expected"),
     [

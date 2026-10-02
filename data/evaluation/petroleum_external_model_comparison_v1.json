@@ -6,8 +6,8 @@
     "pricing_date": "2026-10-02",
     "latency_interpretation": "end-to-end user-perceived latency; local and cloud hardware are not directly comparable",
     "api_availability": {
-      "OPENAI_API_KEY": false,
-      "GEMINI_API_KEY": false
+      "OPENAI_API_KEY": true,
+      "GEMINI_API_KEY": true
     }
   },
   "models": [
@@ -28,6 +28,312 @@
     "figure_usable": 9
   },
   "semantic_metrics": {
+    "gemini_closed_book": {
+      "schema_version": "1.0",
+      "evaluation_condition": "closed_book",
+      "questions_reviewed": 7,
+      "strict_answer_accuracy": null,
+      "semantic_answer_accuracy": 0.7142857142857143,
+      "semantic_exact_accuracy": 0.7142857142857143,
+      "semantic_partial_or_better": 1.0,
+      "mean_claim_coverage": 0.9473684210526315,
+      "false_premise_total": 4,
+      "false_premise_recognition_rate": 1.0,
+      "false_premise_correction_rate": 1.0,
+      "numeric_accuracy": 0.0,
+      "figure_semantic_accuracy": null,
+      "axis_accuracy": null,
+      "series_accuracy": null,
+      "figure_element_accuracy": null,
+      "figure_interpretation_accuracy": null,
+      "citation_accuracy": null,
+      "safe_refusal_rate": 0.0,
+      "engineering_contradiction_rate": 0.14285714285714285,
+      "hallucination_rate": 0.0,
+      "domain_metrics": {
+        "well_test": {
+          "questions": 7,
+          "semantic_exact_accuracy": 0.7142857142857143,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 0.9523809523809523,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.0
+        }
+      },
+      "task_type_metrics": {
+        "concept": {
+          "questions": 2,
+          "semantic_exact_accuracy": 1.0,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 1.0,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.0
+        },
+        "false_premise": {
+          "questions": 4,
+          "semantic_exact_accuracy": 0.75,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 1.0,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.0
+        },
+        "numeric": {
+          "questions": 1,
+          "semantic_exact_accuracy": 0.0,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 0.6666666666666666,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.0
+        }
+      },
+      "failure_attribution_counts": {
+        "other": 7
+      },
+      "strict_semantic_groups": {}
+    },
+    "openai_closed_book": {
+      "schema_version": "1.0",
+      "evaluation_condition": "closed_book",
+      "questions_reviewed": 50,
+      "strict_answer_accuracy": null,
+      "semantic_answer_accuracy": 0.62,
+      "semantic_exact_accuracy": 0.62,
+      "semantic_partial_or_better": 0.88,
+      "mean_claim_coverage": 0.8085106382978723,
+      "false_premise_total": 12,
+      "false_premise_recognition_rate": 1.0,
+      "false_premise_correction_rate": 1.0,
+      "numeric_accuracy": 0.5,
+      "figure_semantic_accuracy": null,
+      "axis_accuracy": null,
+      "series_accuracy": null,
+      "figure_element_accuracy": null,
+      "figure_interpretation_accuracy": null,
+      "citation_accuracy": 0.0,
+      "safe_refusal_rate": 0.1,
+      "engineering_contradiction_rate": 0.1,
+      "hallucination_rate": 0.02,
+      "domain_metrics": {
+        "cross_domain": {
+          "questions": 5,
+          "semantic_exact_accuracy": 0.6,
+          "semantic_partial_or_better": 0.6,
+          "mean_claim_coverage": 0.8,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.4
+        },
+        "reservoir": {
+          "questions": 22,
+          "semantic_exact_accuracy": 0.6818181818181818,
+          "semantic_partial_or_better": 0.9545454545454546,
+          "mean_claim_coverage": 0.8446969696969698,
+          "hallucination_rate": 0.045454545454545456,
+          "safe_refusal_rate": 0.045454545454545456
+        },
+        "well_test": {
+          "questions": 23,
+          "semantic_exact_accuracy": 0.5652173913043478,
+          "semantic_partial_or_better": 0.8695652173913043,
+          "mean_claim_coverage": 0.782608695652174,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.08695652173913043
+        }
+      },
+      "task_type_metrics": {
+        "citation": {
+          "questions": 6,
+          "semantic_exact_accuracy": 0.6666666666666666,
+          "semantic_partial_or_better": 0.8333333333333334,
+          "mean_claim_coverage": 0.875,
+          "hallucination_rate": 0.16666666666666666,
+          "safe_refusal_rate": 0.16666666666666666
+        },
+        "concept": {
+          "questions": 24,
+          "semantic_exact_accuracy": 0.6666666666666666,
+          "semantic_partial_or_better": 0.9583333333333334,
+          "mean_claim_coverage": 0.8055555555555557,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.0
+        },
+        "false_premise": {
+          "questions": 12,
+          "semantic_exact_accuracy": 0.5833333333333334,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 1.0,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.0
+        },
+        "numeric": {
+          "questions": 8,
+          "semantic_exact_accuracy": 0.5,
+          "semantic_partial_or_better": 0.5,
+          "mean_claim_coverage": 0.5,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.5
+        }
+      },
+      "failure_attribution_counts": {
+        "citation_failure": 6,
+        "other": 39,
+        "safe_refusal": 4
+      },
+      "strict_semantic_groups": {}
+    },
+    "openai_figure": {
+      "schema_version": "1.0",
+      "evaluation_condition": "figure",
+      "questions_reviewed": 9,
+      "strict_answer_accuracy": null,
+      "semantic_answer_accuracy": 0.6666666666666666,
+      "semantic_exact_accuracy": 0.6666666666666666,
+      "semantic_partial_or_better": 0.6666666666666666,
+      "mean_claim_coverage": 0.6896551724137931,
+      "false_premise_total": 0,
+      "false_premise_recognition_rate": null,
+      "false_premise_correction_rate": null,
+      "numeric_accuracy": null,
+      "figure_semantic_accuracy": 0.6666666666666666,
+      "axis_accuracy": 0.25,
+      "series_accuracy": 0.5714285714285714,
+      "figure_element_accuracy": 0.6666666666666666,
+      "figure_interpretation_accuracy": 0.6666666666666666,
+      "citation_accuracy": null,
+      "safe_refusal_rate": 0.1111111111111111,
+      "engineering_contradiction_rate": 0.0,
+      "hallucination_rate": 0.2222222222222222,
+      "domain_metrics": {
+        "cross_domain": {
+          "questions": 7,
+          "semantic_exact_accuracy": 0.7142857142857143,
+          "semantic_partial_or_better": 0.7142857142857143,
+          "mean_claim_coverage": 0.7142857142857143,
+          "hallucination_rate": 0.2857142857142857,
+          "safe_refusal_rate": 0.0
+        },
+        "reservoir": {
+          "questions": 1,
+          "semantic_exact_accuracy": 0.0,
+          "semantic_partial_or_better": 0.0,
+          "mean_claim_coverage": 0.0,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 1.0
+        },
+        "well_test": {
+          "questions": 1,
+          "semantic_exact_accuracy": 1.0,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 1.0,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.0
+        }
+      },
+      "task_type_metrics": {
+        "figure": {
+          "questions": 9,
+          "semantic_exact_accuracy": 0.6666666666666666,
+          "semantic_partial_or_better": 0.6666666666666666,
+          "mean_claim_coverage": 0.6666666666666666,
+          "hallucination_rate": 0.2222222222222222,
+          "safe_refusal_rate": 0.1111111111111111
+        }
+      },
+      "failure_attribution_counts": {
+        "engineering_error": 1,
+        "figure_failure": 2,
+        "other": 7
+      },
+      "strict_semantic_groups": {}
+    },
+    "openai_same_evidence": {
+      "schema_version": "1.0",
+      "evaluation_condition": "same_evidence",
+      "questions_reviewed": 50,
+      "strict_answer_accuracy": null,
+      "semantic_answer_accuracy": 0.74,
+      "semantic_exact_accuracy": 0.74,
+      "semantic_partial_or_better": 0.96,
+      "mean_claim_coverage": 0.9290780141843972,
+      "false_premise_total": 12,
+      "false_premise_recognition_rate": 1.0,
+      "false_premise_correction_rate": 1.0,
+      "numeric_accuracy": 0.625,
+      "figure_semantic_accuracy": null,
+      "axis_accuracy": null,
+      "series_accuracy": null,
+      "figure_element_accuracy": null,
+      "figure_interpretation_accuracy": null,
+      "citation_accuracy": 1.0,
+      "safe_refusal_rate": 0.04,
+      "engineering_contradiction_rate": 0.14,
+      "hallucination_rate": 0.0,
+      "domain_metrics": {
+        "cross_domain": {
+          "questions": 5,
+          "semantic_exact_accuracy": 0.6,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 0.85,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.0
+        },
+        "reservoir": {
+          "questions": 22,
+          "semantic_exact_accuracy": 0.7727272727272727,
+          "semantic_partial_or_better": 0.9545454545454546,
+          "mean_claim_coverage": 0.9545454545454546,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.045454545454545456
+        },
+        "well_test": {
+          "questions": 23,
+          "semantic_exact_accuracy": 0.7391304347826086,
+          "semantic_partial_or_better": 0.9565217391304348,
+          "mean_claim_coverage": 0.9275362318840581,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.043478260869565216
+        }
+      },
+      "task_type_metrics": {
+        "citation": {
+          "questions": 6,
+          "semantic_exact_accuracy": 1.0,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 1.0,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.0
+        },
+        "concept": {
+          "questions": 24,
+          "semantic_exact_accuracy": 0.9166666666666666,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 0.9722222222222222,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.0
+        },
+        "false_premise": {
+          "questions": 12,
+          "semantic_exact_accuracy": 0.3333333333333333,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 0.9791666666666666,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.0
+        },
+        "numeric": {
+          "questions": 8,
+          "semantic_exact_accuracy": 0.625,
+          "semantic_partial_or_better": 0.75,
+          "mean_claim_coverage": 0.6875,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.25
+        }
+      },
+      "failure_attribution_counts": {
+        "citation_failure": 4,
+        "other": 43,
+        "safe_refusal": 2
+      },
+      "strict_semantic_groups": {}
+    },
     "qwen_figure": {
       "schema_version": "1.0",
       "evaluation_condition": "figure",
@@ -437,6 +743,26 @@
     }
   },
   "latency_metrics": {
+    "gemini-3.8-flash (gemini)::closed_book": {
+      "mean": 23.846867285714286,
+      "median": 17.009289,
+      "p95": 51.237002
+    },
+    "gpt-6.1-sol (openai)::closed_book": {
+      "mean": 14.542859980000001,
+      "median": 13.1938305,
+      "p95": 26.21281
+    },
+    "gpt-6.1-sol (openai)::figure": {
+      "mean": 9.940431111111112,
+      "median": 10.00711,
+      "p95": 15.139913
+    },
+    "gpt-6.1-sol (openai)::same_evidence": {
+      "mean": 9.62861218,
+      "median": 9.482716499999999,
+      "p95": 14.588641
+    },
     "qwen2.5vl:7b (qwen)::figure": {
       "mean": 2.3885597777777776,
       "median": 1.677871,
@@ -462,26 +788,6 @@
       "median": 58.594318,
       "p95": 154.353609
     },
-    "gpt-6.1-sol (openai)::closed_book": {
-      "mean": null,
-      "median": null,
-      "p95": null
-    },
-    "gpt-6.1-sol (openai)::same_evidence": {
-      "mean": null,
-      "median": null,
-      "p95": null
-    },
-    "gpt-6.1-sol (openai)::figure": {
-      "mean": null,
-      "median": null,
-      "p95": null
-    },
-    "gemini-3.8-flash (gemini)::closed_book": {
-      "mean": null,
-      "median": null,
-      "p95": null
-    },
     "gemini-3.8-flash (gemini)::same_evidence": {
       "mean": null,
       "median": null,
@@ -494,19 +800,142 @@
     }
   },
   "cost_metrics": {
+    "gemini-3.8-flash (gemini)::closed_book": 0.01286325,
+    "gpt-6.1-sol (openai)::closed_book": 0.23844,
+    "gpt-6.1-sol (openai)::figure": 0.040358,
+    "gpt-6.1-sol (openai)::same_evidence": 0.303988,
     "qwen2.5vl:7b (qwen)::figure": 0.0,
     "qwen3:8b (qwen)::closed_book": 0.0,
     "qwen3:8b (qwen)::same_evidence": 0.0,
     "Petroleum Agent::petroleum_agent_text50": 0.0,
     "Petroleum Agent::petroleum_agent_figure_usable": 0.0,
-    "gpt-6.1-sol (openai)::closed_book": null,
-    "gpt-6.1-sol (openai)::same_evidence": null,
-    "gpt-6.1-sol (openai)::figure": null,
-    "gemini-3.8-flash (gemini)::closed_book": null,
     "gemini-3.8-flash (gemini)::same_evidence": null,
     "gemini-3.8-flash (gemini)::figure": null
   },
+  "run_metrics": {
+    "qwen_closed_book": {
+      "requested": 50,
+      "succeeded": 50,
+      "errors": 0,
+      "error_types": {},
+      "estimated_cost_usd": 0.0
+    },
+    "qwen_same_evidence": {
+      "requested": 50,
+      "succeeded": 50,
+      "errors": 0,
+      "error_types": {},
+      "estimated_cost_usd": 0.0
+    },
+    "qwen_figure": {
+      "requested": 10,
+      "succeeded": 9,
+      "errors": 1,
+      "error_types": {
+        "figure image unavailable": 1
+      },
+      "estimated_cost_usd": 0.0
+    },
+    "openai_closed_book": {
+      "requested": 50,
+      "succeeded": 50,
+      "errors": 0,
+      "error_types": {},
+      "estimated_cost_usd": 0.23844
+    },
+    "openai_same_evidence": {
+      "requested": 50,
+      "succeeded": 50,
+      "errors": 0,
+      "error_types": {},
+      "estimated_cost_usd": 0.303988
+    },
+    "openai_figure": {
+      "requested": 10,
+      "succeeded": 9,
+      "errors": 1,
+      "error_types": {
+        "figure image unavailable": 1
+      },
+      "estimated_cost_usd": 0.040358
+    },
+    "gemini_closed_book": {
+      "requested": 50,
+      "succeeded": 7,
+      "errors": 43,
+      "error_types": {
+        "HTTP_429": 41,
+        "HTTP_503": 2
+      },
+      "estimated_cost_usd": 0.01286325
+    }
+  },
   "figure_metrics": {
+    "openai_figure": {
+      "schema_version": "1.0",
+      "evaluation_condition": "figure",
+      "questions_reviewed": 9,
+      "strict_answer_accuracy": null,
+      "semantic_answer_accuracy": 0.6666666666666666,
+      "semantic_exact_accuracy": 0.6666666666666666,
+      "semantic_partial_or_better": 0.6666666666666666,
+      "mean_claim_coverage": 0.6896551724137931,
+      "false_premise_total": 0,
+      "false_premise_recognition_rate": null,
+      "false_premise_correction_rate": null,
+      "numeric_accuracy": null,
+      "figure_semantic_accuracy": 0.6666666666666666,
+      "axis_accuracy": 0.25,
+      "series_accuracy": 0.5714285714285714,
+      "figure_element_accuracy": 0.6666666666666666,
+      "figure_interpretation_accuracy": 0.6666666666666666,
+      "citation_accuracy": null,
+      "safe_refusal_rate": 0.1111111111111111,
+      "engineering_contradiction_rate": 0.0,
+      "hallucination_rate": 0.2222222222222222,
+      "domain_metrics": {
+        "cross_domain": {
+          "questions": 7,
+          "semantic_exact_accuracy": 0.7142857142857143,
+          "semantic_partial_or_better": 0.7142857142857143,
+          "mean_claim_coverage": 0.7142857142857143,
+          "hallucination_rate": 0.2857142857142857,
+          "safe_refusal_rate": 0.0
+        },
+        "reservoir": {
+          "questions": 1,
+          "semantic_exact_accuracy": 0.0,
+          "semantic_partial_or_better": 0.0,
+          "mean_claim_coverage": 0.0,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 1.0
+        },
+        "well_test": {
+          "questions": 1,
+          "semantic_exact_accuracy": 1.0,
+          "semantic_partial_or_better": 1.0,
+          "mean_claim_coverage": 1.0,
+          "hallucination_rate": 0.0,
+          "safe_refusal_rate": 0.0
+        }
+      },
+      "task_type_metrics": {
+        "figure": {
+          "questions": 9,
+          "semantic_exact_accuracy": 0.6666666666666666,
+          "semantic_partial_or_better": 0.6666666666666666,
+          "mean_claim_coverage": 0.6666666666666666,
+          "hallucination_rate": 0.2222222222222222,
+          "safe_refusal_rate": 0.1111111111111111
+        }
+      },
+      "failure_attribution_counts": {
+        "engineering_error": 1,
+        "figure_failure": 2,
+        "other": 7
+      },
+      "strict_semantic_groups": {}
+    },
     "qwen_figure": {
       "schema_version": "1.0",
       "evaluation_condition": "figure",
@@ -641,6 +1070,45 @@
     }
   },
   "paired_comparisons": {
+    "gemini_closed_book": {
+      "questions": 7,
+      "external_minus_petroleum_exact": 0.2857142857142857,
+      "external_minus_petroleum_exact_bootstrap_95_ci": [
+        -0.2857142857142857,
+        0.7142857142857143
+      ],
+      "external_minus_petroleum_claim_coverage": 0.42857142857142855,
+      "external_minus_petroleum_claim_coverage_bootstrap_95_ci": [
+        0.04761904761904761,
+        0.8095238095238095
+      ]
+    },
+    "openai_closed_book": {
+      "questions": 50,
+      "external_minus_petroleum_exact": 0.14,
+      "external_minus_petroleum_exact_bootstrap_95_ci": [
+        -0.02,
+        0.3
+      ],
+      "external_minus_petroleum_claim_coverage": 0.22,
+      "external_minus_petroleum_claim_coverage_bootstrap_95_ci": [
+        0.07,
+        0.375
+      ]
+    },
+    "openai_same_evidence": {
+      "questions": 50,
+      "external_minus_petroleum_exact": 0.26,
+      "external_minus_petroleum_exact_bootstrap_95_ci": [
+        0.1,
+        0.42
+      ],
+      "external_minus_petroleum_claim_coverage": 0.34,
+      "external_minus_petroleum_claim_coverage_bootstrap_95_ci": [
+        0.225,
+        0.46166666666666667
+      ]
+    },
     "qwen_closed_book": {
       "questions": 50,
       "external_minus_petroleum_exact": -0.16,
@@ -669,7 +1137,7 @@
     }
   },
   "limitations": [
-    "OpenAI and Gemini were not executed because their API-key environment variables were absent.",
+    "Unavailable provider conditions: gemini/same_evidence, gemini/figure.",
     "Petroleum Agent is a system-level baseline with retrieval, validation, and repair; direct closed-book models use only their internal knowledge.",
     "Same-evidence results compare generation and reasoning with retrieval differences removed.",
     "Semantic grading used one AI-assisted reviewer, not a human panel.",
@@ -679,9 +1147,109 @@
   ],
   "rows": [
     {
+      "System": "gemini-3.8-flash (gemini)",
+      "Condition": "closed_book",
+      "Status": "partial_api_errors",
+      "N": 7,
+      "Semantic Exact": 0.7142857142857143,
+      "Partial+": 1.0,
+      "Claim Coverage": 0.9473684210526315,
+      "Hallucination": 0.0,
+      "Engineering Error": 0.14285714285714285,
+      "Safe Refusal": 0.0,
+      "False-Premise Recognition": 1.0,
+      "False-Premise Correction": 1.0,
+      "Numeric Accuracy": 0.0,
+      "Citation Accuracy": null,
+      "Figure Accuracy": null,
+      "Axis Accuracy": null,
+      "Series Accuracy": null,
+      "Figure Element Accuracy": null,
+      "Interpretation Accuracy": null,
+      "Mean Latency": 23.846867285714286,
+      "Median Latency": 17.009289,
+      "P95 Latency": 51.237002,
+      "Estimated Cost": 0.01286325
+    },
+    {
+      "System": "gpt-6.1-sol (openai)",
+      "Condition": "closed_book",
+      "Status": "complete",
+      "N": 50,
+      "Semantic Exact": 0.62,
+      "Partial+": 0.88,
+      "Claim Coverage": 0.8085106382978723,
+      "Hallucination": 0.02,
+      "Engineering Error": 0.1,
+      "Safe Refusal": 0.1,
+      "False-Premise Recognition": 1.0,
+      "False-Premise Correction": 1.0,
+      "Numeric Accuracy": 0.5,
+      "Citation Accuracy": 0.0,
+      "Figure Accuracy": null,
+      "Axis Accuracy": null,
+      "Series Accuracy": null,
+      "Figure Element Accuracy": null,
+      "Interpretation Accuracy": null,
+      "Mean Latency": 14.542859980000001,
+      "Median Latency": 13.1938305,
+      "P95 Latency": 26.21281,
+      "Estimated Cost": 0.23844
+    },
+    {
+      "System": "gpt-6.1-sol (openai)",
+      "Condition": "figure",
+      "Status": "complete_usable_subset",
+      "N": 9,
+      "Semantic Exact": 0.6666666666666666,
+      "Partial+": 0.6666666666666666,
+      "Claim Coverage": 0.6896551724137931,
+      "Hallucination": 0.2222222222222222,
+      "Engineering Error": 0.0,
+      "Safe Refusal": 0.1111111111111111,
+      "False-Premise Recognition": null,
+      "False-Premise Correction": null,
+      "Numeric Accuracy": null,
+      "Citation Accuracy": null,
+      "Figure Accuracy": 0.6666666666666666,
+      "Axis Accuracy": 0.25,
+      "Series Accuracy": 0.5714285714285714,
+      "Figure Element Accuracy": 0.6666666666666666,
+      "Interpretation Accuracy": 0.6666666666666666,
+      "Mean Latency": 9.940431111111112,
+      "Median Latency": 10.00711,
+      "P95 Latency": 15.139913,
+      "Estimated Cost": 0.040358
+    },
+    {
+      "System": "gpt-6.1-sol (openai)",
+      "Condition": "same_evidence",
+      "Status": "complete",
+      "N": 50,
+      "Semantic Exact": 0.74,
+      "Partial+": 0.96,
+      "Claim Coverage": 0.9290780141843972,
+      "Hallucination": 0.0,
+      "Engineering Error": 0.14,
+      "Safe Refusal": 0.04,
+      "False-Premise Recognition": 1.0,
+      "False-Premise Correction": 1.0,
+      "Numeric Accuracy": 0.625,
+      "Citation Accuracy": 1.0,
+      "Figure Accuracy": null,
+      "Axis Accuracy": null,
+      "Series Accuracy": null,
+      "Figure Element Accuracy": null,
+      "Interpretation Accuracy": null,
+      "Mean Latency": 9.62861218,
+      "Median Latency": 9.482716499999999,
+      "P95 Latency": 14.588641,
+      "Estimated Cost": 0.303988
+    },
+    {
       "System": "qwen2.5vl:7b (qwen)",
       "Condition": "figure",
-      "Status": "complete",
+      "Status": "complete_usable_subset",
       "N": 9,
       "Semantic Exact": 0.5555555555555556,
       "Partial+": 0.8888888888888888,
@@ -804,109 +1372,9 @@
       "Estimated Cost": 0.0
     },
     {
-      "System": "gpt-6.1-sol (openai)",
-      "Condition": "closed_book",
-      "Status": "not_run_missing_api_key",
-      "N": 0,
-      "Semantic Exact": null,
-      "Partial+": null,
-      "Claim Coverage": null,
-      "Hallucination": null,
-      "Engineering Error": null,
-      "Safe Refusal": null,
-      "False-Premise Recognition": null,
-      "False-Premise Correction": null,
-      "Numeric Accuracy": null,
-      "Citation Accuracy": null,
-      "Figure Accuracy": null,
-      "Axis Accuracy": null,
-      "Series Accuracy": null,
-      "Figure Element Accuracy": null,
-      "Interpretation Accuracy": null,
-      "Mean Latency": null,
-      "Median Latency": null,
-      "P95 Latency": null,
-      "Estimated Cost": null
-    },
-    {
-      "System": "gpt-6.1-sol (openai)",
-      "Condition": "same_evidence",
-      "Status": "not_run_missing_api_key",
-      "N": 0,
-      "Semantic Exact": null,
-      "Partial+": null,
-      "Claim Coverage": null,
-      "Hallucination": null,
-      "Engineering Error": null,
-      "Safe Refusal": null,
-      "False-Premise Recognition": null,
-      "False-Premise Correction": null,
-      "Numeric Accuracy": null,
-      "Citation Accuracy": null,
-      "Figure Accuracy": null,
-      "Axis Accuracy": null,
-      "Series Accuracy": null,
-      "Figure Element Accuracy": null,
-      "Interpretation Accuracy": null,
-      "Mean Latency": null,
-      "Median Latency": null,
-      "P95 Latency": null,
-      "Estimated Cost": null
-    },
-    {
-      "System": "gpt-6.1-sol (openai)",
-      "Condition": "figure",
-      "Status": "not_run_missing_api_key",
-      "N": 0,
-      "Semantic Exact": null,
-      "Partial+": null,
-      "Claim Coverage": null,
-      "Hallucination": null,
-      "Engineering Error": null,
-      "Safe Refusal": null,
-      "False-Premise Recognition": null,
-      "False-Premise Correction": null,
-      "Numeric Accuracy": null,
-      "Citation Accuracy": null,
-      "Figure Accuracy": null,
-      "Axis Accuracy": null,
-      "Series Accuracy": null,
-      "Figure Element Accuracy": null,
-      "Interpretation Accuracy": null,
-      "Mean Latency": null,
-      "Median Latency": null,
-      "P95 Latency": null,
-      "Estimated Cost": null
-    },
-    {
-      "System": "gemini-3.8-flash (gemini)",
-      "Condition": "closed_book",
-      "Status": "not_run_missing_api_key",
-      "N": 0,
-      "Semantic Exact": null,
-      "Partial+": null,
-      "Claim Coverage": null,
-      "Hallucination": null,
-      "Engineering Error": null,
-      "Safe Refusal": null,
-      "False-Premise Recognition": null,
-      "False-Premise Correction": null,
-      "Numeric Accuracy": null,
-      "Citation Accuracy": null,
-      "Figure Accuracy": null,
-      "Axis Accuracy": null,
-      "Series Accuracy": null,
-      "Figure Element Accuracy": null,
-      "Interpretation Accuracy": null,
-      "Mean Latency": null,
-      "Median Latency": null,
-      "P95 Latency": null,
-      "Estimated Cost": null
-    },
-    {
       "System": "gemini-3.8-flash (gemini)",
       "Condition": "same_evidence",
-      "Status": "not_run_missing_api_key",
+      "Status": "not_run_rate_limit_or_quota",
       "N": 0,
       "Semantic Exact": null,
       "Partial+": null,
@@ -931,7 +1399,7 @@
     {
       "System": "gemini-3.8-flash (gemini)",
       "Condition": "figure",
-      "Status": "not_run_missing_api_key",
+      "Status": "not_run_rate_limit_or_quota",
       "N": 0,
       "Semantic Exact": null,
       "Partial+": null,

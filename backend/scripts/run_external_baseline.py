@@ -444,7 +444,8 @@ def build_dry_run(provider: str, condition: str, selected: list[dict[str, Any]])
 
 
 def build_anonymous_review(
-    runs: list[dict[str, Any]], rubric: dict[str, Any], *, seed: int = 20261002
+    runs: list[dict[str, Any]], rubric: dict[str, Any], *, seed: int = 20261002,
+    answer_id_prefix: str = "EXT",
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Build a blind packet and a separate answer-to-model key."""
     rubric_by_id = {row["id"]: row for row in rubric["items"]}
@@ -459,7 +460,7 @@ def build_anonymous_review(
     for index, candidate in enumerate(candidates, start=1):
         result = candidate["result"]
         rubric_item = rubric_by_id[result["question_id"]]
-        anonymous_id = f"EXT-{index:04d}"
+        anonymous_id = f"{answer_id_prefix}-{index:04d}"
         packet_items.append(
             {
                 "anonymous_answer_id": anonymous_id,

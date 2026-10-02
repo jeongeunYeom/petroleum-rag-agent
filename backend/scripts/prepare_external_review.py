@@ -15,9 +15,14 @@ def main() -> int:
     parser.add_argument("--packet", required=True)
     parser.add_argument("--key", required=True)
     parser.add_argument("--template", required=True)
+    parser.add_argument("--answer-id-prefix", default="EXT")
     args = parser.parse_args()
 
-    packet, key = build_anonymous_review([load_json(Path(path)) for path in args.runs], load_json(RUBRIC_PATH))
+    packet, key = build_anonymous_review(
+        [load_json(Path(path)) for path in args.runs],
+        load_json(RUBRIC_PATH),
+        answer_id_prefix=args.answer_id_prefix,
+    )
     packet_path, key_path, template_path = map(Path, (args.packet, args.key, args.template))
     for path in (packet_path, key_path, template_path):
         path.parent.mkdir(parents=True, exist_ok=True)
