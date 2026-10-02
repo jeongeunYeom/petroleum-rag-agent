@@ -51,7 +51,7 @@ Do not use web search or external tools."""
 
 MODEL_CONFIG = {
     "qwen": {"text_model": "qwen3:8b", "figure_model": "qwen2.5vl:7b"},
-    "openai": {"text_model": "gpt-6-sol", "figure_model": "gpt-6-sol"},
+    "openai": {"text_model": "gpt-6.1-sol", "figure_model": "gpt-6.1-sol"},
     "gemini": {"text_model": "gemini-3.8-flash", "figure_model": "gemini-3.8-flash"},
 }
 
@@ -381,7 +381,7 @@ def latency_summary(results: list[dict[str, Any]]) -> dict[str, float | None]:
 
 
 def condition_name(provider: str, condition: str) -> str:
-    prefix = {"qwen": "qwen_direct", "openai": "gpt6_sol", "gemini": "gemini38_flash"}[provider]
+    prefix = {"qwen": "qwen_direct", "openai": "gpt61_sol", "gemini": "gemini38_flash"}[provider]
     return f"{prefix}_{condition}"
 
 
@@ -397,12 +397,12 @@ def default_output(provider: str, condition: str) -> Path:
         ("qwen", "closed_book"): "qwen_closed_book.json",
         ("qwen", "same_evidence"): "qwen_same_evidence.json",
         ("qwen", "figure"): "figure_qwen25vl.json",
-        ("openai", "closed_book"): "openai_gpt6_sol_closed_book.json",
-        ("openai", "same_evidence"): "openai_gpt6_sol_same_evidence.json",
-        ("openai", "figure"): "figure_gpt6_sol.json",
+        ("openai", "closed_book"): "openai_gpt61_sol_closed_book.json",
+        ("openai", "same_evidence"): "openai_gpt61_sol_same_evidence.json",
+        ("openai", "figure"): "openai_gpt61_sol_figure.json",
         ("gemini", "closed_book"): "gemini38_flash_closed_book.json",
         ("gemini", "same_evidence"): "gemini38_flash_same_evidence.json",
-        ("gemini", "figure"): "figure_gemini38_flash.json",
+        ("gemini", "figure"): "gemini38_flash_figure.json",
     }
     return DEFAULT_OUTPUT_DIR / names[(provider, condition)]
 
@@ -433,6 +433,13 @@ def build_dry_run(provider: str, condition: str, selected: list[dict[str, Any]])
             json.dumps([asdict(prompt) for prompt in prompts], ensure_ascii=False, sort_keys=True).encode("utf-8")
         ).hexdigest(),
         "image_available_count": sum(bool(prompt.image_paths) for prompt in prompts),
+        "question_sha256": sha256(QUESTIONS_PATH),
+        "evidence_sha256": sha256(EVIDENCE_PATH) if condition == "same_evidence" else None,
+        "image_sha256_by_question": {
+            question["id"]: [hashlib.sha256(Path(path).read_bytes()).hexdigest() for path in prompt.image_paths]
+            for question, prompt in zip(selected, prompts)
+            if prompt.image_paths
+        },
     }
 
 
@@ -499,6 +506,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     guard = OpenAIBudgetGuard(args.openai_budget_usd, args.openai_safety_stop_usd)
     caller = CALLERS[args.provider]
     results: list[dict[str, Any]] = []
+    budget_stop_reason: str | None = None
     secrets = [os.environ.get("OPENAI_API_KEY", ""), os.environ.get("GEMINI_API_KEY", "")]
     for question in selected:
         prompt = build_prompt(question, args.condition, evidences.get(question["id"]))
@@ -516,7 +524,11 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             continue
         if args.provider == "openai":
             observed = [row["estimated_cost_usd"] for row in results if row.get("estimated_cost_usd") is not None]
-            guard.check_next(statistics.fmean(observed) if observed else 0.05)
+            try:
+                guard.check_next(statistics.fmean(observed) if observed else 0.05)
+            except BudgetExceeded as exc:
+                budget_stop_reason = str(exc)
+                break
         started = time.perf_counter()
         error = None
         response = ProviderResponse("")
@@ -546,9 +558,17 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     total_cost = sum(row["estimated_cost_usd"] or 0.0 for row in results)
     successful = [row for row in results if row["error"] is None]
     average_cost = total_cost / len(successful) if successful else None
-    projected_cost = average_cost * len(select_questions(args.condition)) if average_cost is not None else None
+    planned_requests = sum(len(select_questions(condition)) for condition in ("closed_book", "same_evidence"))
+    planned_requests += sum(
+        bool(build_prompt(row, "figure", evidences.get(row["id"])).image_paths)
+        for row in select_questions("figure")
+    )
+    projected_cost = average_cost * planned_requests if average_cost is not None else None
     if args.provider == "openai" and args.pilot and projected_cost is not None:
-        guard.check_projection(projected_cost)
+        try:
+            guard.check_projection(projected_cost)
+        except BudgetExceeded as exc:
+            budget_stop_reason = str(exc)
     return {
         "schema_version": "1.0",
         "dry_run": False,
@@ -571,6 +591,9 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "pricing": PRICING,
             "estimated_cost_usd": round(total_cost, 8),
             "projected_full_cost_usd": round(projected_cost, 8) if projected_cost is not None else None,
+            "planned_request_count": planned_requests,
+            "budget_approved_for_full_run": budget_stop_reason is None if args.provider == "openai" and args.pilot else None,
+            "budget_stop_reason": budget_stop_reason,
             "latency_seconds": latency_summary(results),
             "question_sha256": sha256(QUESTIONS_PATH),
             "evidence_sha256": sha256(EVIDENCE_PATH),

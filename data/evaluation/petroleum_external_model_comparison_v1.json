@@ -14,7 +14,7 @@
     "Petroleum Agent",
     "qwen3:8b",
     "qwen2.5vl:7b",
-    "gpt-6-sol",
+    "gpt-6.1-sol",
     "gemini-3.8-flash"
   ],
   "conditions": [
@@ -462,17 +462,17 @@
       "median": 58.594318,
       "p95": 154.353609
     },
-    "gpt-6-sol (openai)::closed_book": {
+    "gpt-6.1-sol (openai)::closed_book": {
       "mean": null,
       "median": null,
       "p95": null
     },
-    "gpt-6-sol (openai)::same_evidence": {
+    "gpt-6.1-sol (openai)::same_evidence": {
       "mean": null,
       "median": null,
       "p95": null
     },
-    "gpt-6-sol (openai)::figure": {
+    "gpt-6.1-sol (openai)::figure": {
       "mean": null,
       "median": null,
       "p95": null
@@ -499,9 +499,9 @@
     "qwen3:8b (qwen)::same_evidence": 0.0,
     "Petroleum Agent::petroleum_agent_text50": 0.0,
     "Petroleum Agent::petroleum_agent_figure_usable": 0.0,
-    "gpt-6-sol (openai)::closed_book": null,
-    "gpt-6-sol (openai)::same_evidence": null,
-    "gpt-6-sol (openai)::figure": null,
+    "gpt-6.1-sol (openai)::closed_book": null,
+    "gpt-6.1-sol (openai)::same_evidence": null,
+    "gpt-6.1-sol (openai)::figure": null,
     "gemini-3.8-flash (gemini)::closed_book": null,
     "gemini-3.8-flash (gemini)::same_evidence": null,
     "gemini-3.8-flash (gemini)::figure": null
@@ -670,9 +670,12 @@
   },
   "limitations": [
     "OpenAI and Gemini were not executed because their API-key environment variables were absent.",
+    "Petroleum Agent is a system-level baseline with retrieval, validation, and repair; direct closed-book models use only their internal knowledge.",
+    "Same-evidence results compare generation and reasoning with retrieval differences removed.",
     "Semantic grading used one AI-assisted reviewer, not a human panel.",
     "Petroleum Agent figure answers may include retrieved text and validator/repair context; the direct vision run used only question plus image.",
-    "Latency compares local RTX 3090 execution with remote APIs only when cloud runs are available and is not pure inference latency."
+    "Latency compares local RTX 3090 execution with remote APIs only when cloud runs are available and is not pure inference latency.",
+    "Configured API models are gpt-6.1-sol and gemini-3.8-flash; evaluation date is 2026-10-02."
   ],
   "rows": [
     {
@@ -801,7 +804,7 @@
       "Estimated Cost": 0.0
     },
     {
-      "System": "gpt-6-sol (openai)",
+      "System": "gpt-6.1-sol (openai)",
       "Condition": "closed_book",
       "Status": "not_run_missing_api_key",
       "N": 0,
@@ -826,7 +829,7 @@
       "Estimated Cost": null
     },
     {
-      "System": "gpt-6-sol (openai)",
+      "System": "gpt-6.1-sol (openai)",
       "Condition": "same_evidence",
       "Status": "not_run_missing_api_key",
       "N": 0,
@@ -851,7 +854,7 @@
       "Estimated Cost": null
     },
     {
-      "System": "gpt-6-sol (openai)",
+      "System": "gpt-6.1-sol (openai)",
       "Condition": "figure",
       "Status": "not_run_missing_api_key",
       "N": 0,

@@ -10,16 +10,28 @@ The Petroleum Agent was not re-run. Qwen ran locally on the RTX 3090; GPT/Gemini
 | qwen3:8b (qwen) | same_evidence | 50 | 70.00% | 96.00% | 88.65% | 4.00% | 14.00% | 2.186213 | 3.377959 | complete |
 | Petroleum Agent | petroleum_agent_text50 | 50 | 48.00% | 68.00% | 59.57% | 10.00% | 10.00% | 23.716312000000002 | 87.533628 | complete |
 | Petroleum Agent | petroleum_agent_figure_usable | 9 | 22.22% | 66.67% | 48.28% | 44.44% | 33.33% | 58.594318 | 154.353609 | complete |
-| gpt-6-sol (openai) | closed_book | 0 | N/A | N/A | N/A | N/A | N/A | N/A | N/A | not_run_missing_api_key |
-| gpt-6-sol (openai) | same_evidence | 0 | N/A | N/A | N/A | N/A | N/A | N/A | N/A | not_run_missing_api_key |
-| gpt-6-sol (openai) | figure | 0 | N/A | N/A | N/A | N/A | N/A | N/A | N/A | not_run_missing_api_key |
+| gpt-6.1-sol (openai) | closed_book | 0 | N/A | N/A | N/A | N/A | N/A | N/A | N/A | not_run_missing_api_key |
+| gpt-6.1-sol (openai) | same_evidence | 0 | N/A | N/A | N/A | N/A | N/A | N/A | N/A | not_run_missing_api_key |
+| gpt-6.1-sol (openai) | figure | 0 | N/A | N/A | N/A | N/A | N/A | N/A | N/A | not_run_missing_api_key |
 | gemini-3.8-flash (gemini) | closed_book | 0 | N/A | N/A | N/A | N/A | N/A | N/A | N/A | not_run_missing_api_key |
 | gemini-3.8-flash (gemini) | same_evidence | 0 | N/A | N/A | N/A | N/A | N/A | N/A | N/A | not_run_missing_api_key |
 | gemini-3.8-flash (gemini) | figure | 0 | N/A | N/A | N/A | N/A | N/A | N/A | N/A | not_run_missing_api_key |
 
+## Key deltas
+
+- Petroleum Agent minus qwen3:8b (qwen) closed-book exact: +16.00 percentage points
+- qwen3:8b (qwen) same-evidence minus closed-book exact: +38.00 percentage points
+- Petroleum Agent minus gpt-6.1-sol (openai) closed-book exact: N/A
+- gpt-6.1-sol (openai) same-evidence minus closed-book exact: N/A
+- Petroleum Agent minus gemini-3.8-flash (gemini) closed-book exact: N/A
+- gemini-3.8-flash (gemini) same-evidence minus closed-book exact: N/A
+
 ## Interpretation limits
 
 - OpenAI and Gemini were not executed because their API-key environment variables were absent.
+- Petroleum Agent is a system-level baseline with retrieval, validation, and repair; direct closed-book models use only their internal knowledge.
+- Same-evidence results compare generation and reasoning with retrieval differences removed.
 - Semantic grading used one AI-assisted reviewer, not a human panel.
 - Petroleum Agent figure answers may include retrieved text and validator/repair context; the direct vision run used only question plus image.
 - Latency compares local RTX 3090 execution with remote APIs only when cloud runs are available and is not pure inference latency.
+- Configured API models are gpt-6.1-sol and gemini-3.8-flash; evaluation date is 2026-10-02.

@@ -21,6 +21,7 @@ PETROLEUM_REVIEW = PROJECT_ROOT / "evaluation" / "review" / "qwen_semantic_revie
 PETROLEUM_RESULT = PROJECT_ROOT / "data" / "evaluation" / "petroleum_agent_heldout_v1_20261002T024117Z.json"
 OUTPUT_JSON = PROJECT_ROOT / "data" / "evaluation" / "petroleum_external_model_comparison_v1.json"
 OUTPUT_CSV = PROJECT_ROOT / "data" / "evaluation" / "petroleum_external_model_comparison_v1.csv"
+POSTER_CSV = PROJECT_ROOT / "data" / "evaluation" / "poster_model_comparison.csv"
 OUTPUT_MD = PROJECT_ROOT / "evaluation" / "review" / "external_model_comparison_summary.md"
 
 
@@ -104,6 +105,10 @@ def pct(value: Any) -> str:
     return "N/A" if value is None else f"{100 * value:.2f}%"
 
 
+def poster_pct(value: Any) -> float | str:
+    return "N/A" if value is None else round(100 * value, 2)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Merge blind review scores with model keys and aggregate results.")
     parser.add_argument("--review", default=str(DEFAULT_REVIEW))
@@ -153,9 +158,11 @@ def main() -> int:
         rows.append(metric_row("Petroleum Agent", condition, metrics, petroleum_latency(petroleum_payload, ids), 0.0))
         semantic[condition] = metrics
 
-    for provider, model in (("openai", "gpt-6-sol"), ("gemini", "gemini-3.8-flash")):
+    completed = {(provider, condition) for provider, _model, condition in grouped}
+    for provider, model in (("openai", "gpt-6.1-sol"), ("gemini", "gemini-3.8-flash")):
         for condition in ("closed_book", "same_evidence", "figure"):
-            rows.append(metric_row(f"{model} ({provider})", condition, {}, {}, None, "not_run_missing_api_key"))
+            if (provider, condition) not in completed:
+                rows.append(metric_row(f"{model} ({provider})", condition, {}, {}, None, "not_run_missing_api_key"))
 
     text_ids = {item["id"] for item in rubric["items"] if item["task_type"] != "figure"}
     petroleum_text = [row for row in petroleum_rows if row["question_id"] in text_ids]
@@ -170,7 +177,7 @@ def main() -> int:
                 "GEMINI_API_KEY": bool(os.environ.get("GEMINI_API_KEY")),
             },
         },
-        "models": ["Petroleum Agent", "qwen3:8b", "qwen2.5vl:7b", "gpt-6-sol", "gemini-3.8-flash"],
+        "models": ["Petroleum Agent", "qwen3:8b", "qwen2.5vl:7b", "gpt-6.1-sol", "gemini-3.8-flash"],
         "conditions": ["closed_book", "same_evidence", "figure"],
         "sample_counts": {"text": 50, "figure_total": 10, "figure_usable": len(figure_success_ids)},
         "semantic_metrics": semantic,
@@ -180,9 +187,12 @@ def main() -> int:
         "paired_comparisons": paired,
         "limitations": [
             "OpenAI and Gemini were not executed because their API-key environment variables were absent.",
+            "Petroleum Agent is a system-level baseline with retrieval, validation, and repair; direct closed-book models use only their internal knowledge.",
+            "Same-evidence results compare generation and reasoning with retrieval differences removed.",
             "Semantic grading used one AI-assisted reviewer, not a human panel.",
             "Petroleum Agent figure answers may include retrieved text and validator/repair context; the direct vision run used only question plus image.",
             "Latency compares local RTX 3090 execution with remote APIs only when cloud runs are available and is not pure inference latency.",
+            "Configured API models are gpt-6.1-sol and gemini-3.8-flash; evaluation date is 2026-10-02.",
         ],
         "rows": rows,
     }
@@ -192,6 +202,26 @@ def main() -> int:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
+    poster_rows = [
+        {
+            "System": row["System"], "Condition": row["Condition"], "N": row["N"],
+            "Exact %": poster_pct(row["Semantic Exact"]), "Partial+ %": poster_pct(row["Partial+"]),
+            "Claim Coverage %": poster_pct(row["Claim Coverage"]),
+            "Hallucination %": poster_pct(row["Hallucination"]),
+            "Engineering Error %": poster_pct(row["Engineering Error"]),
+            "False-Premise Correction %": poster_pct(row["False-Premise Correction"]),
+            "Numeric Accuracy %": poster_pct(row["Numeric Accuracy"]),
+            "Figure Accuracy %": poster_pct(row["Figure Accuracy"]),
+            "Median Latency": row["Median Latency"] if row["Median Latency"] is not None else "N/A",
+            "P95 Latency": row["P95 Latency"] if row["P95 Latency"] is not None else "N/A",
+            "Estimated Cost USD": row["Estimated Cost"] if row["Estimated Cost"] is not None else "N/A",
+        }
+        for row in rows
+    ]
+    with POSTER_CSV.open("w", encoding="utf-8-sig", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(poster_rows[0]))
+        writer.writeheader()
+        writer.writerows(poster_rows)
 
     lines = [
         "# External model comparison summary", "",
@@ -207,10 +237,25 @@ def main() -> int:
             f"{pct(row['Engineering Error'])} | {row['Median Latency'] if row['Median Latency'] is not None else 'N/A'} | "
             f"{row['P95 Latency'] if row['P95 Latency'] is not None else 'N/A'} | {row['Status']} |"
         )
+    by_system_condition = {(row["System"], row["Condition"]): row for row in rows}
+    petroleum = by_system_condition[("Petroleum Agent", "petroleum_agent_text50")]
+
+    def delta(left: dict[str, Any] | None, right: dict[str, Any] | None, field: str) -> str:
+        if not left or not right or left[field] is None or right[field] is None:
+            return "N/A"
+        return f"{100 * (left[field] - right[field]):+.2f} percentage points"
+
+    lines += ["", "## Key deltas", ""]
+    for system in ("qwen3:8b (qwen)", "gpt-6.1-sol (openai)", "gemini-3.8-flash (gemini)"):
+        closed = by_system_condition.get((system, "closed_book"))
+        same = by_system_condition.get((system, "same_evidence"))
+        lines.append(f"- Petroleum Agent minus {system} closed-book exact: {delta(petroleum, closed, 'Semantic Exact')}")
+        lines.append(f"- {system} same-evidence minus closed-book exact: {delta(same, closed, 'Semantic Exact')}")
     lines += ["", "## Interpretation limits", ""] + [f"- {item}" for item in comparison["limitations"]]
     OUTPUT_MD.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"json={OUTPUT_JSON.resolve()}")
     print(f"csv={OUTPUT_CSV.resolve()}")
+    print(f"poster={POSTER_CSV.resolve()}")
     print(f"summary={OUTPUT_MD.resolve()}")
     return 0
 

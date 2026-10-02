@@ -121,7 +121,7 @@ def test_anonymous_review_mapping_hides_model() -> None:
     ("value", "expected"),
     [
         ("qwen_direct_closed_book", "closed_book"),
-        ("gpt6_sol_same_evidence", "same_evidence"),
+        ("gpt61_sol_same_evidence", "same_evidence"),
         ("gemini38_flash_figure", "figure"),
     ],
 )
@@ -133,3 +133,31 @@ def test_model_neutral_scorer_accepts_expected_condition_names() -> None:
     from score_semantic_review import VALID_CONDITIONS
 
     assert {"closed_book", "same_evidence", "petroleum_agent"} <= VALID_CONDITIONS
+
+
+def test_openai_uses_gpt61_without_overwriting_historical_outputs() -> None:
+    assert runner.MODEL_CONFIG["openai"]["text_model"] == "gpt-6.1-sol"
+    assert runner.condition_name("openai", "closed_book") == "gpt61_sol_closed_book"
+    assert runner.default_output("openai", "closed_book").name == "openai_gpt61_sol_closed_book.json"
+
+
+def test_dry_run_records_frozen_input_hashes() -> None:
+    metadata = runner.build_dry_run("openai", "same_evidence", runner.select_questions("same_evidence"))
+    assert metadata["question_sha256"] == runner.sha256(runner.QUESTIONS_PATH)
+    assert metadata["evidence_sha256"] == runner.sha256(runner.EVIDENCE_PATH)
+
+
+def test_openai_pilot_preserves_results_when_projection_exceeds_budget(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setitem(
+        runner.CALLERS,
+        "openai",
+        lambda *_args: runner.ProviderResponse("answer", input_tokens=100, output_tokens=4000),
+    )
+    args = runner.parse_args(["--provider", "openai", "--condition", "closed_book", "--pilot"])
+    payload = runner.run(args)
+    assert len(payload["results"]) == 5
+    assert payload["metadata"]["planned_request_count"] == 109
+    assert payload["metadata"]["budget_approved_for_full_run"] is False
+    assert "exceeds $3.25 budget" in payload["metadata"]["budget_stop_reason"]
