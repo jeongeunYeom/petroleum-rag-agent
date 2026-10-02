@@ -171,6 +171,10 @@ def test_openai_pilot_preserves_results_when_projection_exceeds_budget(
     args = runner.parse_args(["--provider", "openai", "--condition", "closed_book", "--pilot"])
     payload = runner.run(args)
     assert len(payload["results"]) == 5
-    assert payload["metadata"]["planned_request_count"] == 109
+    available_figures = sum(
+        bool(runner.build_prompt(row, "figure", runner.evidence_by_id()[row["id"]]).image_paths)
+        for row in runner.select_questions("figure")
+    )
+    assert payload["metadata"]["planned_request_count"] == 100 + available_figures
     assert payload["metadata"]["budget_approved_for_full_run"] is False
     assert "exceeds $3.25 budget" in payload["metadata"]["budget_stop_reason"]
