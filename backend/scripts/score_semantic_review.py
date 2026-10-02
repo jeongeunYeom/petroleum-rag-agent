@@ -10,6 +10,17 @@ from typing import Any
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_RUBRIC = PROJECT_ROOT / "evaluation" / "petroleum_agent_heldout_v1_semantic_rubric.json"
 VALID_CONDITIONS = {"closed_book", "same_evidence", "petroleum_agent"}
+VALID_FAILURES = {
+    "retrieval_failure",
+    "generation_omission",
+    "engineering_error",
+    "safe_refusal",
+    "figure_failure",
+    "numeric_failure",
+    "citation_failure",
+    "partial_answer",
+    "other",
+}
 
 
 def load_json(path: Path) -> Any:
@@ -35,6 +46,7 @@ def score_review(
     *,
     evaluation_condition: str | None = None,
     strict_answer_accuracy: float | None = None,
+    strict_pass_by_id: dict[str, bool] | None = None,
 ) -> dict[str, Any]:
     rubric_by_id = {item["id"]: item for item in rubric["items"]}
     row_by_id = {row["question_id"]: row for row in rows}
@@ -60,8 +72,11 @@ def score_review(
     figure_total = figure_correct = 0
     axis_total = axis_correct = 0
     series_total = series_correct = 0
+    element_total = element_correct = 0
     interpretation_total = interpretation_correct = 0
     safe_refusals = contradictions = hallucinations = 0
+    evaluated: list[dict[str, Any]] = []
+    failure_counts: dict[str, int] = {}
 
     for question_id, item in rubric_by_id.items():
         row = row_by_id[question_id]
@@ -90,6 +105,28 @@ def score_review(
         contradictions += contradiction
         safe_refusals += safe_refusal
         hallucinations += hallucination
+        failures = {
+            value.strip()
+            for value in row.get("failure_attribution", "").split(";")
+            if value.strip()
+        }
+        unknown_failures = failures - VALID_FAILURES
+        if unknown_failures:
+            raise ValueError(f"{question_id}: unknown failure attribution {sorted(unknown_failures)}")
+        for failure in failures:
+            failure_counts[failure] = failure_counts.get(failure, 0) + 1
+        evaluated.append(
+            {
+                "id": question_id,
+                "domain": item["domain"],
+                "task_type": item["task_type"],
+                "score": overall,
+                "coverage": sum(claim_values) / len(claim_values),
+                "hallucination": hallucination,
+                "contradiction": contradiction,
+                "safe_refusal": safe_refusal,
+            }
+        )
 
         if item["false_premise_required"]:
             recognized = parse_bool(row["false_premise_recognized"], "false_premise_recognized", question_id)
@@ -116,11 +153,41 @@ def score_review(
             if figure["series_claim_ids"]:
                 series_total += 1
                 series_correct += parse_bool(row["series_correct"], "series_correct", question_id)
+            if figure["figure_element_claim_ids"]:
+                element_total += 1
+                element_correct += parse_bool(
+                    row["figure_element_correct"], "figure_element_correct", question_id
+                )
             if figure["engineering_interpretation_claim_ids"]:
                 interpretation_total += 1
                 interpretation_correct += parse_bool(
                     row["figure_interpretation_correct"], "figure_interpretation_correct", question_id
                 )
+
+    def breakdown(field: str) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for value in sorted({row[field] for row in evaluated}):
+            subset = [row for row in evaluated if row[field] == value]
+            count = len(subset)
+            result[value] = {
+                "questions": count,
+                "semantic_exact_accuracy": ratio(sum(row["score"] == 2 for row in subset), count),
+                "semantic_partial_or_better": ratio(sum(row["score"] >= 1 for row in subset), count),
+                "mean_claim_coverage": ratio(sum(row["coverage"] for row in subset), count),
+                "hallucination_rate": ratio(sum(row["hallucination"] for row in subset), count),
+                "safe_refusal_rate": ratio(sum(row["safe_refusal"] for row in subset), count),
+            }
+        return result
+
+    strict_groups: dict[str, list[str]] = {}
+    if strict_pass_by_id is not None:
+        if set(strict_pass_by_id) != set(rubric_by_id):
+            raise ValueError("Strict-result IDs do not match rubric IDs")
+        strict_groups = {
+            "strict_pass_semantic_pass": [row["id"] for row in evaluated if strict_pass_by_id[row["id"]] and row["score"] == 2],
+            "strict_fail_semantic_pass": [row["id"] for row in evaluated if not strict_pass_by_id[row["id"]] and row["score"] == 2],
+            "strict_fail_semantic_fail": [row["id"] for row in evaluated if not strict_pass_by_id[row["id"]] and row["score"] < 2],
+        }
 
     total = len(rows)
     return {
@@ -139,11 +206,16 @@ def score_review(
         "figure_semantic_accuracy": ratio(figure_correct, figure_total),
         "axis_accuracy": ratio(axis_correct, axis_total),
         "series_accuracy": ratio(series_correct, series_total),
+        "figure_element_accuracy": ratio(element_correct, element_total),
         "figure_interpretation_accuracy": ratio(interpretation_correct, interpretation_total),
         "citation_accuracy": ratio(citation_correct, citation_total),
         "safe_refusal_rate": ratio(safe_refusals, total),
         "engineering_contradiction_rate": ratio(contradictions, total),
         "hallucination_rate": ratio(hallucinations, total),
+        "domain_metrics": breakdown("domain"),
+        "task_type_metrics": breakdown("task_type"),
+        "failure_attribution_counts": dict(sorted(failure_counts.items())),
+        "strict_semantic_groups": strict_groups,
     }
 
 
@@ -159,13 +231,20 @@ def main() -> int:
     with Path(args.review).open(encoding="utf-8-sig", newline="") as handle:
         rows = list(csv.DictReader(handle))
     strict_accuracy = None
+    strict_pass_by_id = None
     if args.strict_result:
-        strict_accuracy = load_json(Path(args.strict_result))["summary"]["answer_accuracy"]
+        strict_payload = load_json(Path(args.strict_result))
+        strict_accuracy = strict_payload["summary"]["answer_accuracy"]
+        strict_pass_by_id = {
+            row["id"]: bool(row["final_benchmark_passed"])
+            for row in strict_payload["results"]
+        }
     result = score_review(
         load_json(Path(args.rubric)),
         rows,
         evaluation_condition=args.evaluation_condition,
         strict_answer_accuracy=strict_accuracy,
+        strict_pass_by_id=strict_pass_by_id,
     )
     rendered = json.dumps(result, ensure_ascii=False, indent=2)
     if args.output:

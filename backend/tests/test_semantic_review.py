@@ -99,6 +99,8 @@ def test_blind_packet_and_model_neutral_aggregation():
                 row["axis_correct"] = "1"
             if item["figure_criterion"]["series_claim_ids"]:
                 row["series_correct"] = "1"
+            if item["figure_criterion"]["figure_element_claim_ids"]:
+                row["figure_element_correct"] = "1"
             row["figure_interpretation_correct"] = "1"
         assert set(row) == set(REVIEW_COLUMNS)
 

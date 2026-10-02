@@ -23,10 +23,12 @@ REVIEW_COLUMNS = [
     "figure_correct",
     "axis_correct",
     "series_correct",
+    "figure_element_correct",
     "figure_interpretation_correct",
     "safe_refusal",
     "hallucination_present",
     "overall_score_0_1_2",
+    "failure_attribution",
     "reviewer_notes",
 ]
 
