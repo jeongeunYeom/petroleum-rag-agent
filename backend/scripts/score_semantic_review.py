@@ -9,7 +9,7 @@ from typing import Any
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_RUBRIC = PROJECT_ROOT / "evaluation" / "petroleum_agent_heldout_v1_semantic_rubric.json"
-VALID_CONDITIONS = {"closed_book", "same_evidence", "petroleum_agent"}
+VALID_CONDITIONS = {"closed_book", "same_evidence", "figure", "petroleum_agent"}
 VALID_FAILURES = {
     "retrieval_failure",
     "generation_omission",
