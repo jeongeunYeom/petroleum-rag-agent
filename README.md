@@ -135,6 +135,33 @@ Well Test validator는 wellbore storage의 unit-slope/pressure-derivative overla
 
 Validator는 답변의 사실 근거가 아니라 consistency/contradiction guard입니다. 최종 claim은 계속 KB, WEB 또는 FIG evidence로 뒷받침되어야 합니다. 향후 Drilling, Petrophysics, Production validator도 같은 registry에 추가할 수 있지만 현재 구현 범위에는 포함하지 않습니다.
 
+## Goal-Directed Research Agent
+
+Goal Research는 주제, 연구 목표, 선택적 예상 결과와 성공 조건을 받아 bounded goal-directed iterative research를 수행합니다.
+
+```text
+Topic + Goal + Optional Expected Result + Success Criteria
+  -> ResearchAgent
+  -> evidence-grounded synthesis
+  -> criterion evaluation
+  -> gap-directed replanning
+  -> achieved / unsupported / insufficient evidence / bounded stop
+```
+
+예상 결과는 확인해야 할 **가설**이며 강제로 만들어야 하는 결론이 아닙니다. 근거가 가설과 반대이면 연구 목표를 달성하면서도 `expected_result_status=contradicted`로 끝날 수 있습니다. 성공 조건을 생략하면 Iteration 0에서 operational criteria를 생성한 뒤 고정하며, 실행 중 목표나 기준을 변경하지 않습니다.
+
+Goal loop는 최대 1~8회이며 기본 4회입니다. coverage가 의미 있게 개선되지 않고 새 근거도 추가되지 않으면 조기에 중단합니다. 각 run은 `data/agent_runs/goal-research/GR-*.json`에 query, 새 근거, criteria 평가, gap, coverage, timing과 stop reason을 저장합니다.
+
+API는 background run 방식입니다.
+
+```text
+POST /api/research/goal-runs
+GET  /api/research/goal-runs/{run_id}
+POST /api/research/goal-runs/{run_id}/cancel
+```
+
+웹 근거는 요청에서 `use_external=true`로 명시한 경우에만 사용합니다. 목표가 미달이어도 Agent가 웹 사용 권한이나 파일·코드 실행 권한을 임의로 확대하지 않습니다.
+
 ## 테스트
 
 ```powershell

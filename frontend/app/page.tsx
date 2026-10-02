@@ -17,6 +17,7 @@ import { DocumentInfoPanel } from "@/components/DocumentInfoPanel";
 import { PlotPanel } from "@/components/PlotPanel";
 import { SystemStatusPanel } from "@/components/SystemStatusPanel";
 import { MarkdownMath } from "@/components/MarkdownMath";
+import { GoalResearchPanel } from "@/components/GoalResearchPanel";
 import { AppIconRail, MobileModeTabs } from "@/components/AppNavigation";
 import {
   type AgentTask,
@@ -864,6 +865,7 @@ export default function Home() {
 
         <div className="flex-1 overflow-y-auto bg-[#f8fafc] px-4 py-6">
           <div className="mx-auto flex max-w-4xl flex-col gap-5">
+            <GoalResearchPanel />
             {messages.length === 0 && (
               <div className="flex gap-3">
                 <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
