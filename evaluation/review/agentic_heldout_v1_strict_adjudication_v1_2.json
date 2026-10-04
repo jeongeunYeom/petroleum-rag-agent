@@ -1,0 +1,75 @@
+{
+  "version": "1.2",
+  "policy": "Manual QA of the quote-grounded strict review only. Original blind reviews, strict reviews, benchmark ground truth, and agent outputs remain immutable. Corrections are tied to text plainly present or absent from final answers; this exploratory adjudication is reported separately from uncorrected scores.",
+  "corrections": [
+    {
+      "task_id": "AG-Q-007", "condition": "single_shot",
+      "criterion_scores": {"C2": 0, "C3": 0},
+      "reason": "Correct formula but no required 89.29 mD, 133 mD, or 48.96% result in final answer."
+    },
+    {
+      "task_id": "AG-Q-008", "condition": "single_shot",
+      "criterion_scores": {"C2": 0},
+      "reason": "Rankings are present but all three numerical productivity indices are absent."
+    },
+    {
+      "task_id": "AG-Q-009", "condition": "single_shot",
+      "criterion_scores": {"C2": 0, "C3": 0},
+      "reason": "Volumetric formula but none of the requested numerical volumes or percentage."
+    },
+    {
+      "task_id": "AG-FP-012", "condition": "single_shot",
+      "criterion_scores": {"C3": 0},
+      "reason": "False premise is rejected, but the required numerical series and arithmetic permeability values are absent."
+    },
+    {
+      "task_id": "AG-IE-015", "condition": "single_shot",
+      "criterion_scores": {"C1": 0},
+      "reason": "Recoverable reserves are correctly treated as unknowable, but 1.8 million m^3 OOIP is not computed."
+    },
+    {
+      "task_id": "AG-Q-008", "condition": "goal_agent",
+      "criterion_scores": {"C2": 2, "C3": 2},
+      "reason": "Final answer explicitly lists 4.5, 4.0, 5.0 STB/day/psi and both PI and raw-rate rankings; a single contiguous reviewer quote could not span separate sentences."
+    },
+    {
+      "task_id": "AG-Q-008", "condition": "full_agent",
+      "criterion_scores": {"C2": 2, "C3": 2},
+      "reason": "Final answer explicitly lists 4.5, 4.0, 5.0 STB/day/psi and both PI and raw-rate rankings; a single contiguous reviewer quote could not span separate sentences."
+    },
+    {
+      "task_id": "AG-IE-016", "condition": "goal_agent",
+      "criterion_scores": {"C1": 2, "C2": 2, "C3": 2},
+      "judgment_fields": {"insufficient_evidence_handling_correct": true},
+      "reason": "Limitations explicitly reject unique transmissibility, well-pair, and boundary-depth inference; name supercharging and list the missing interference, transient, production, and lithology data."
+    },
+    {
+      "task_id": "AG-IE-016", "condition": "full_agent",
+      "criterion_scores": {"C1": 2, "C2": 2, "C3": 2},
+      "judgment_fields": {"insufficient_evidence_handling_correct": true},
+      "reason": "Limitations explicitly reject unique transmissibility, well-pair, and boundary-depth inference; name supercharging and list the missing interference, transient, production, and lithology data."
+    },
+    {
+      "task_id": "AG-FP-011", "condition": "goal_agent",
+      "criterion_scores": {"C1": 0, "C2": 0},
+      "judgment_fields": {"engineering_contradiction": true, "hallucination": true, "hypothesis_handling_correct": false},
+      "reason": "Despite earlier correct statements, final answer later asserts 'Radial flow has pressure and derivative overlapping at unit slope' twice, endorsing the false premise."
+    },
+    {
+      "task_id": "AG-FP-011", "condition": "full_agent",
+      "criterion_scores": {"C1": 0, "C2": 0},
+      "judgment_fields": {"engineering_contradiction": true, "hallucination": true, "hypothesis_handling_correct": false},
+      "reason": "Despite earlier correct statements, final answer later asserts 'Radial flow has pressure and derivative overlapping at unit slope' twice, endorsing the false premise."
+    },
+    {
+      "task_id": "AG-FP-013", "condition": "goal_agent",
+      "judgment_fields": {"engineering_contradiction": true, "hallucination": true, "hypothesis_handling_correct": false},
+      "reason": "Final answer affirms 'A produced reservoir must remain hydrostatic, so all deviations are errors' even while citing evidence that produced reservoirs need not have straight hydrostatic profiles."
+    },
+    {
+      "task_id": "AG-FP-013", "condition": "full_agent",
+      "judgment_fields": {"engineering_contradiction": true, "hallucination": true, "hypothesis_handling_correct": false},
+      "reason": "Final answer affirms 'A produced reservoir must remain hydrostatic, so all deviations are errors' even while citing evidence that produced reservoirs need not have straight hydrostatic profiles."
+    }
+  ]
+}

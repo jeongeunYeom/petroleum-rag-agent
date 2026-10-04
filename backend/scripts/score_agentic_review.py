@@ -51,6 +51,33 @@ def _quote_supports_value(quote: str, value: float) -> bool:
     return any(math.isclose(n * factor * sign, value, rel_tol=1e-3, abs_tol=1e-6) for n in numbers for factor in multipliers for sign in (1, direction))
 
 
+def _answer_numeric_match(answer: str, target: dict) -> dict | None:
+    expected = target["value"]
+    unit = target["unit"]
+    for match in re.finditer(r"(?<![\w])[-+]?\d[\d,]*(?:\.\d+)?(?:[eE][-+]?\d+)?", answer):
+        before = answer[max(0, match.start() - 100):match.start()]
+        after = answer[match.end():match.end() + 40]
+        prefix = after[:25].lower()
+        if unit == "%":
+            unit_present = bool(re.match(r"\s*(?:%|percent\b)", prefix))
+        elif unit == "stock-tank m^3":
+            unit_present = bool(re.search(r"\bm(?:\^?3|³)\b", prefix) and re.search(r"stock[- ]tank|STOIIP|OOIP|oil in place|recoverable|reserves", before + after, re.I))
+        elif unit == "dimensionless":
+            unit_present = bool(re.search(r"ratio|times|fold|dimensionless", before[-70:] + after, re.I))
+        else:
+            unit_present = bool(re.search(rf"^\s*{re.escape(unit)}\b", prefix, re.I))
+        if not unit_present:
+            continue
+        value = float(match.group().replace(",", ""))
+        if re.match(r"\s*(?:million|MM)\b", prefix, re.I):
+            value *= 1_000_000
+        if expected < 0 and value > 0 and re.search(r"reduc|decreas|drop|하락|감소", before[-50:] + after, re.I):
+            value = -value
+        if abs(value - expected) <= target["abs_tolerance"]:
+            return {"value": value, "unit": unit, "quote": answer[match.start():match.end() + min(25, len(after))]}
+    return None
+
+
 def score_numeric(answer: str, targets: list[dict], extractions: list[dict]) -> dict[str, dict]:
     by_id = {item["target_id"]: item for item in extractions}
     results = {}
@@ -64,7 +91,12 @@ def score_numeric(answer: str, targets: list[dict], extractions: list[dict]) -> 
         quoted = bool(quote and quote in answer and value is not None and _quote_supports_value(quote, float(value)))
         unit_ok = _unit_ok(actual_unit, target["unit"])
         passed = bool(quoted and unit_ok and abs(float(value) - target["value"]) <= target["abs_tolerance"])
-        results[target["target_id"]] = {"passed": passed, "value": value, "unit": actual_unit, "quote_verified": quoted, "unit_verified": unit_ok}
+        direct = _answer_numeric_match(answer, target)
+        if direct is not None:
+            passed = True
+            value, actual_unit, quote = direct["value"], direct["unit"], direct["quote"]
+            quoted = unit_ok = True
+        results[target["target_id"]] = {"passed": passed, "value": value, "unit": actual_unit, "quote_verified": quoted, "unit_verified": unit_ok, "source": "answer_scan" if direct is not None else "reviewer_extraction"}
     return results
 
 
@@ -99,6 +131,7 @@ def score_final(task: dict, row: dict, judgment: dict) -> dict:
     for target in gt["numeric_targets"]:
         if not numeric[target["target_id"]]["passed"] and scores[target["criterion_id"]] == 2:
             qa_flags.append(f"reviewer_full_numeric_criterion_but_target_failed:{target['target_id']}")
+    qa_flags.extend(f"reviewer_quote_gate:{criterion_id}" for criterion_id in judgment.get("quote_gated_criteria", []))
     return {
         "task_id": task["task_id"], "condition": row["condition"], "goal_success": int(success),
         "external_goal_coverage": ext_coverage, "criterion_scores": scores,
@@ -126,7 +159,7 @@ def score_process(task: dict, row: dict, review: dict, final: dict) -> dict:
     new_relevant = []
     unnecessary = []
     for idx in range(1, len(iterations)):
-        relevant = bool(judgments[idx]["relevant_new_evidence_ids"])
+        relevant = bool(set(judgments[idx]["relevant_new_evidence_ids"]) & set(iterations[idx]["evidence_added"]))
         improved = ext[idx] > ext[idx - 1]
         corrected = judgments[idx - 1]["engineering_error"] and not judgments[idx]["engineering_error"]
         computed = bool(iterations[idx]["computation_ids"] and task["python_expected"] == "required")
@@ -145,7 +178,7 @@ def score_process(task: dict, row: dict, review: dict, final: dict) -> dict:
     return {
         "task_id": task["task_id"], "condition": row["condition"],
         "iterations": len(iterations),
-        "iterations_to_success": next((i + 1 for i, j in enumerate(judgments) if coverage(j["criterion_scores"], task["success_criteria"]) == 1 and not j["engineering_error"]), None),
+        "iterations_to_success": next((i + 1 for i, j in enumerate(judgments) if final["goal_success"] and coverage(j["criterion_scores"], task["success_criteria"]) == 1 and not j["engineering_error"]), None),
         "iteration_coverages": ext,
         "coverage_improvement": final["external_goal_coverage"] - ext[0] if ext else 0,
         "self_correction_opportunity": first_gap,
@@ -167,7 +200,8 @@ def score_process(task: dict, row: dict, review: dict, final: dict) -> dict:
         "python_repair_opportunities": sum(c["attempts"] > 1 for c in response["computations"]),
         "python_repair_successes": sum(c["attempts"] > 1 and c["validation_passed"] for c in response["computations"]),
         "reviewer_process_notes": review["reviewer_notes"],
-        "qa_flags": (["final_process_coverage_disagreement"] if ext and abs(ext[-1] - final["external_goal_coverage"]) > 0.25 else []),
+        "qa_flags": (["final_process_coverage_disagreement"] if ext and abs(ext[-1] - final["external_goal_coverage"]) > 0.25 else [])
+        + (["reviewer_named_old_evidence_as_new"] if any(set(j["relevant_new_evidence_ids"]) - set(it["evidence_added"]) for it, j in zip(iterations, judgments)) else []),
     }
 
 
@@ -252,40 +286,56 @@ def _write_csv(path: Path, rows: list[dict]) -> None:
         writer.writerows(rows)
 
 
-def write_outputs(comparison: dict, output_root: Path, run_dir: Path) -> None:
-    _save(output_root / "agentic_heldout_v1_comparison.json", comparison)
+def write_outputs(comparison: dict, output_root: Path, run_dir: Path, suffix: str = "") -> None:
+    stem = "agentic_heldout_v1"
+    _save(output_root / f"{stem}_comparison{suffix}.json", comparison)
     rows = []
     for condition, m in comparison["condition_metrics"].items():
         rows.append({"condition": condition, "goal_success": m["external_goal_success_rate"], "goal_coverage": m["external_goal_coverage"], "claim_accuracy": m["final_claim_accuracy"], "hallucination": m["hallucination_rate"], "engineering_error": m["engineering_contradiction_rate"], "evidence_grounding": m["evidence_grounding"], "latency_mean_seconds": m["latency_seconds"]["mean"], "latency_median_seconds": m["latency_seconds"]["median"], "latency_p95_seconds": m["latency_seconds"]["p95"]})
-    _write_csv(output_root / "agentic_heldout_v1_comparison.csv", rows)
-    _write_csv(output_root / "agentic_heldout_v1_poster.csv", [{k: row[k] for k in ("condition", "goal_success", "goal_coverage", "hallucination", "engineering_error", "latency_mean_seconds")} | {"self_correction": comparison["condition_metrics"][row["condition"]].get("agentic", {}).get("self_correction_rate")} for row in rows])
-    _write_csv(output_root / "agentic_heldout_v1_iteration_curves.csv", [{"condition": condition, "iteration": index + 1, "external_goal_coverage_locf": value} for condition in CONDITIONS[1:] for index, value in enumerate(comparison["condition_metrics"][condition]["agentic"]["external_coverage_by_iteration_locf"])])
-    _write_csv(output_root / "agentic_heldout_v1_task_scores.csv", [{"task_id": r["task_id"], "condition": r["condition"], "goal_success": r["goal_success"], "goal_coverage": r["external_goal_coverage"], "hallucination": int(r["hallucination"]), "engineering_error": int(r["engineering_contradiction"]), "numeric_pass": int(r["numeric_pass"]), "latency_seconds": r["latency_seconds"]} for r in comparison["task_scores"]])
-    lines = ["# Agentic Baseline v1", "", f"Run: `{run_dir.name}`. Product code remains frozen. Single AI-assisted semantic reviewer: `gemma4:latest`. Exploratory N=18; interval estimates are paired 10,000-bootstrap percentile 95% CIs.", "", "| Metric | Single-shot | Goal Agent | Full Agent |", "|---|---:|---:|---:|"]
+    _write_csv(output_root / f"{stem}_comparison{suffix}.csv", rows)
+    _write_csv(output_root / f"{stem}_poster{suffix}.csv", [{k: row[k] for k in ("condition", "goal_success", "goal_coverage", "hallucination", "engineering_error", "latency_mean_seconds")} | {"self_correction": comparison["condition_metrics"][row["condition"]].get("agentic", {}).get("self_correction_rate")} for row in rows])
+    _write_csv(output_root / f"{stem}_iteration_curves{suffix}.csv", [{"condition": condition, "iteration": index + 1, "external_goal_coverage_locf": value} for condition in CONDITIONS[1:] for index, value in enumerate(comparison["condition_metrics"][condition]["agentic"]["external_coverage_by_iteration_locf"])])
+    _write_csv(output_root / f"{stem}_task_scores{suffix}.csv", [{"task_id": r["task_id"], "condition": r["condition"], "goal_success": r["goal_success"], "goal_coverage": r["external_goal_coverage"], "hallucination": int(r["hallucination"]), "engineering_error": int(r["engineering_contradiction"]), "numeric_pass": int(r["numeric_pass"]), "latency_seconds": r["latency_seconds"]} for r in comparison["task_scores"]])
+    label = suffix.replace("_", " ").strip()
+    lines = ["# Agentic Baseline v1" + (f" — {label}" if label else ""), "", f"Run: `{run_dir.name}`. Product code remains frozen. Single AI-assisted semantic reviewer: `gemma4:latest`. Exploratory N=18; interval estimates are paired 10,000-bootstrap percentile 95% CIs.", "", "| Metric | Single-shot | Goal Agent | Full Agent |", "|---|---:|---:|---:|"]
     for label, key in (("External goal success", "external_goal_success_rate"), ("External goal coverage", "external_goal_coverage"), ("Hallucination", "hallucination_rate"), ("Engineering contradiction", "engineering_contradiction_rate")):
         lines.append("| " + label + " | " + " | ".join(_format_pct(comparison["condition_metrics"][c][key]) for c in CONDITIONS) + " |")
     lines.append("| System-level latency mean (s) | " + " | ".join(f"{comparison['condition_metrics'][c]['latency_seconds']['mean']:.1f}" for c in CONDITIONS) + " |")
     lines += ["", "## Process and Python", "", "The iteration curve uses last observation carried forward after a task stops. Internal goal coverage is reported only as calibration telemetry; it never determines external success.", "", f"Python-required task count: {comparison['python_metrics']['required_task_count']}. Python selection precision/recall: {_format_pct(comparison['python_metrics']['selection_precision'])} / {_format_pct(comparison['python_metrics']['selection_recall'])}.", "", "## Paired differences", ""]
     for key, data in comparison["paired_comparisons"].items():
         lines.append(f"- {key}: success {data['goal_success']['delta']:+.3f} [{data['goal_success']['ci95_low']:+.3f}, {data['goal_success']['ci95_high']:+.3f}]; coverage {data['goal_coverage']['delta']:+.3f} [{data['goal_coverage']['ci95_low']:+.3f}, {data['goal_coverage']['ci95_high']:+.3f}].")
-    lines += ["", "## Review QA", "", "Original semantic reviews are preserved in the run directory. Deterministic checks control numeric target/units and provenance. Any reviewer disagreements are flagged in task scores and require a separate adjudicated v1.1 review, never a silent overwrite.", ""]
-    (ROOT / "evaluation/review/agentic_heldout_v1_summary.md").write_text("\n".join(lines), encoding="utf-8")
+    lines += ["", "## Review QA", "", "Original semantic reviews are preserved in the run directory. Deterministic checks control numeric target/units and provenance. Reviewer quote-gating and process-ID disagreements are flagged in task scores. Adjudicated versions are separate files; no original review is overwritten."]
+    if comparison.get("adjudication"):
+        lines.append(f"Manual QA corrected {comparison['adjudication']['corrected_rows']} task-condition rows in v{comparison['adjudication']['version']}; see the separately hashed adjudication file for itemized reasons.")
+    if comparison.get("strict_review_quote_gates") is not None:
+        lines.append(f"The strict reviewer had {comparison['strict_review_quote_gates']} missing/non-verbatim criterion quotes; these criteria were gated to zero before any itemized adjudication.")
+    lines.append("")
+    (ROOT / "evaluation/review" / f"{stem}_summary{suffix}.md").write_text("\n".join(lines), encoding="utf-8")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run-dir", type=Path, required=True)
+    parser.add_argument("--adjudication", type=Path)
+    parser.add_argument("--strict-final-review", action="store_true")
     args = parser.parse_args()
     benchmark = json.loads(BENCHMARK.read_text(encoding="utf-8"))
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     if sha256(BENCHMARK) != manifest["benchmark_sha256"]:
         raise ValueError("Frozen benchmark checksum mismatch")
     mapping = json.loads((args.run_dir / "blind_review_map.json").read_text(encoding="utf-8"))
-    final_review = json.loads((args.run_dir / "final_review_original.json").read_text(encoding="utf-8"))["items"]
+    final_name = "final_review_strict_v1_1.json" if args.strict_final_review else "final_review_original.json"
+    final_review = json.loads((args.run_dir / final_name).read_text(encoding="utf-8"))["items"]
     process_review = json.loads((args.run_dir / "process_review_original.json").read_text(encoding="utf-8"))["items"]
     if set(mapping["final"]) != set(final_review) or set(mapping["process"]) != set(process_review):
         raise ValueError("Incomplete review")
     tasks = {t["task_id"]: t for t in benchmark["tasks"]}
+    overrides = {}
+    if args.adjudication:
+        adjudication = json.loads(args.adjudication.read_text(encoding="utf-8"))
+        overrides = {(entry["task_id"], entry["condition"]): entry for entry in adjudication["corrections"]}
+        if len(overrides) != len(adjudication["corrections"]):
+            raise ValueError("Duplicate adjudication key")
     raws = {condition: json.loads((args.run_dir / f"{condition}.json").read_text(encoding="utf-8")) for condition in CONDITIONS}
     if any(not raw["complete"] for raw in raws.values()):
         raise ValueError("Incomplete raw run")
@@ -294,7 +344,11 @@ def main() -> int:
     by_key = {}
     for anonymous_id, key in mapping["final"].items():
         task_id, condition = key["task_id"], key["condition"]
-        item = score_final(tasks[task_id], run_rows[(task_id, condition)], final_review[anonymous_id])
+        judgment = final_review[anonymous_id]
+        override = overrides.get((task_id, condition))
+        if override:
+            judgment = {**judgment, "criterion_scores": {**judgment["criterion_scores"], **override.get("criterion_scores", {})}, **override.get("judgment_fields", {})}
+        item = score_final(tasks[task_id], run_rows[(task_id, condition)], judgment)
         scored.append(item)
         by_key[(task_id, condition)] = item
     process = []
@@ -306,17 +360,30 @@ def main() -> int:
     comparison["benchmark_sha256"] = manifest["benchmark_sha256"]
     comparison["reviewer_method"] = "single AI-assisted semantic reviewer"
     comparison["reviewer_model"] = "gemma4:latest"
+    comparison["final_review_file"] = final_name
+    if args.strict_final_review:
+        comparison["strict_review_quote_gates"] = sum(len(j.get("quote_gated_criteria", [])) for j in final_review.values())
+    if args.adjudication:
+        comparison["adjudication"] = {"version": adjudication["version"], "sha256": sha256(args.adjudication), "corrected_rows": len(overrides), "original_reviews_preserved": True}
     random_sample = random.Random(42).sample(scored, min(6, len(scored)))
     comparison["review_qa_sample"] = [
         {"task_id": row["task_id"], "condition": row["condition"], "qa_flags": row["qa_flags"], "numeric_targets": row["numeric_targets"]}
         for row in random_sample
     ]
+    priority_types = {"quantitative", "false_premise", "insufficient_evidence"}
+    comparison["review_qa_priority"] = [
+        {"task_id": row["task_id"], "condition": row["condition"], "qa_flags": row["qa_flags"], "numeric_targets": row["numeric_targets"], "hypothesis_handling_correct": row["hypothesis_handling_correct"], "insufficient_evidence_detected": row["insufficient_evidence_detected"]}
+        for row in scored if tasks[row["task_id"]]["task_type"] in priority_types
+    ]
     comparison["review_qa_flags"] = [
         {"task_id": row["task_id"], "condition": row["condition"], "flags": row["qa_flags"]}
         for row in [*scored, *process] if row["qa_flags"]
     ]
-    write_outputs(comparison, args.run_dir.parent.parent, args.run_dir)
-    print(f"scored={len(scored)} process={len(process)} output={args.run_dir.parent.parent / 'agentic_heldout_v1_comparison.json'}")
+    suffix = "_strict_v1_1" if args.strict_final_review else ("_adjudicated_v1_1" if args.adjudication else "")
+    if args.strict_final_review and args.adjudication:
+        suffix = "_strict_adjudicated_v1_2"
+    write_outputs(comparison, args.run_dir.parent.parent, args.run_dir, suffix)
+    print(f"scored={len(scored)} process={len(process)} output={args.run_dir.parent.parent / f'agentic_heldout_v1_comparison{suffix}.json'}")
     return 0
 
 

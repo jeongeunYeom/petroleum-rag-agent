@@ -17,7 +17,7 @@ def _evidence(response: dict) -> list[dict]:
         {"evidence_id": item["evidence_id"], "document": item["document"], "page": item.get("page"), "chunk_id": item.get("chunk_id"), "excerpt": item.get("excerpt", "")[:700]}
         for item in response.get("internal_sources", [])
     ] + [
-        {"evidence_id": item["evidence_id"], "document": item["document"], "page": item.get("page"), "figure_number": item.get("figure_number"), "image_path": item.get("image_path"), "excerpt": item.get("excerpt", "")[:700]}
+        {"evidence_id": item["evidence_id"], "document": item["document"], "page": item.get("page"), "figure_number": item.get("figure_number"), "image_path": item.get("image_path"), "title": item.get("title"), "excerpt": item.get("excerpt", "")[:700], "source_note": item.get("source_note", "")[:700], "related_page_text": item.get("related_page_text", "")[:700]}
         for item in response.get("figures", [])
     ]
 

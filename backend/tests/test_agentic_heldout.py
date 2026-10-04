@@ -16,7 +16,8 @@ from scripts.run_agentic_heldout import (
     sha256,
 )
 from scripts.prepare_agentic_review import prepare
-from scripts.score_agentic_review import _write_csv, paired_bootstrap, score_final, score_numeric
+from scripts.review_agentic_heldout import _final_schema
+from scripts.score_agentic_review import _write_csv, paired_bootstrap, score_final, score_numeric, score_process
 
 
 class FakeResponse:
@@ -85,9 +86,12 @@ def test_condition_permissions_web_and_single_call(tmp_path):
     assert len(goal.calls) == 2
     assert all(not r["request"]["use_external"] and r["request"]["use_internal"] for r in rows)
     assert all(r["request"]["model"] == "qwen3:8b" and r["request"]["seed"] == 42 and r["request"]["temperature"] == 0 for r in rows)
+    assert all(r["request"]["internal_top_k"] == 5 for r in rows)
     assert rows[0]["request"]["query"].count("C1:") == 1
     assert rows[1]["request"]["allow_python_execution"] is False
     assert rows[1]["request"]["python_execution_approved"] is False
+    assert rows[1]["request"]["max_iterations"] == rows[2]["request"]["max_iterations"] == 4
+    assert rows[1]["request"]["no_progress_patience"] == rows[2]["request"]["no_progress_patience"] == 2
     assert rows[2]["request"]["allow_python_execution"] is True
     assert rows[2]["request"]["python_execution_approved"] is True
     path = tmp_path / "synthetic.json"
@@ -116,8 +120,45 @@ def test_numeric_tolerance_and_unit():
     answer = "Series effective permeability is 89.29 mD."
     item = {"target_id": "K", "value": 89.29, "unit": "mD", "quote": "89.29 mD"}
     assert score_numeric(answer, [target], [item])["K"]["passed"]
-    assert not score_numeric(answer, [target], [{**item, "unit": "psi"}])["K"]["passed"]
-    assert not score_numeric(answer, [target], [{**item, "value": 133}])["K"]["passed"]
+    assert score_numeric(answer, [target], [{**item, "value": 89.28571429, "quote": "89.28571429 mD"}])["K"]["passed"]
+    assert not score_numeric("Series effective permeability is 89.29 psi.", [target], [item])["K"]["passed"]
+    assert not score_numeric("Series effective permeability is 133 mD.", [target], [item])["K"]["passed"]
+    volume = {"target_id": "V", "value": 2_700_000, "unit": "stock-tank m^3", "abs_tolerance": 10_000}
+    text = "OOIP is 2.7 million stock-tank m^3."
+    extraction = {"target_id": "V", "value": 2.7, "unit": "stock-tank m^3", "quote": "2.7 million stock-tank m^3"}
+    assert score_numeric(text, [volume], [extraction])["V"]["passed"]
+    change = {"target_id": "P", "value": -6.67, "unit": "%", "abs_tolerance": 0.1}
+    assert score_numeric("A 6.67% reduction", [change], [{"target_id": "P", "value": -6.67, "unit": "%", "quote": "6.67% reduction"}])["P"]["passed"]
+
+
+def test_strict_review_requires_per_criterion_quotes():
+    item = {"criteria": [{"criterion_id": "C1"}], "ground_truth": {"claims": []}}
+    schema = _final_schema(item, strict=True)
+    assert "criterion_quotes" in schema["required"]
+    assert "contradiction_quote" in schema["required"]
+    assert schema["properties"]["criterion_quotes"]["required"] == ["C1"]
+
+
+def test_old_evidence_cannot_count_as_new_replan():
+    task = {"task_id": "SYNTHETIC", "python_expected": "not_needed", "success_criteria": [{"criterion_id": "C1", "required": True}]}
+    row = {"condition": "goal_agent", "request": {}, "response": {
+        "iterations": [
+            {"iteration": 1, "evidence_added": ["KB1"], "computation_ids": [], "python_requested": False},
+            {"iteration": 2, "evidence_added": ["KB2"], "computation_ids": [], "python_requested": False},
+        ],
+        "goal_coverage": 1.0, "stop_reason": "max_iterations", "status": "achieved",
+        "python_calls_total": 0, "python_attempts_total": 0, "python_failures": 0,
+        "computations": [], "final_answer": "answer",
+    }}
+    review = {"iteration_reviews": [
+        {"criterion_scores": {"C1": 2}, "relevant_new_evidence_ids": ["KB1"], "engineering_error": False},
+        {"criterion_scores": {"C1": 2}, "relevant_new_evidence_ids": ["KB1"], "engineering_error": False},
+    ], "reviewer_notes": "old evidence repeated"}
+    final = {"criterion_scores": {"C1": 2}, "external_goal_coverage": 1.0, "goal_success": 1, "engineering_contradiction": False}
+    process = score_process(task, row, review, final)
+    assert process["new_evidence_replans"] == 0
+    assert process["useful_replans"] == 0
+    assert "reviewer_named_old_evidence_as_new" in process["qa_flags"]
 
 
 def test_paired_bootstrap_reproducible():
@@ -157,4 +198,6 @@ def test_external_goal_success_requires_numeric_and_hypothesis_handling():
     }
     assert score_final(task, row, judgment)["goal_success"] == 1
     assert score_final(task, row, {**judgment, "hypothesis_handling_correct": False})["goal_success"] == 0
-    assert score_final(task, row, {**judgment, "numeric_extractions": []})["goal_success"] == 0
+    assert score_final(task, row, {**judgment, "numeric_extractions": []})["goal_success"] == 1
+    missing = {**row, "response": {"answer": "The target is false; the measurement is unavailable."}}
+    assert score_final(task, missing, {**judgment, "numeric_extractions": []})["goal_success"] == 0
