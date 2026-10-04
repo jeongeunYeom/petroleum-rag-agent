@@ -150,6 +150,17 @@ def test_unrelated_citation_cannot_ground_specialist_formula(tmp_path):
     assert record is None and not executed and ollama.calls == 0
 
 
+def test_wrong_arithmetic_result_fails_even_when_inputs_are_preserved(tmp_path):
+    wrong = code().replace("'difference': 10", "'difference': 999")
+    analysis, _ = setup(tmp_path, [wrong])
+    arithmetic = plan().model_copy(update={"formula": "difference = B - A"})
+    record, executed = asyncio.run(analysis.execute(
+        approved(max_python_attempts_per_call=1), arithmetic, EVIDENCE
+    ))
+    assert executed and not record.validation_passed
+    assert "does not match" in record.attempt_records[0]["error"]
+
+
 def test_validated_png_chart_is_recorded(tmp_path):
     chart_code = code() + (
         "import matplotlib.pyplot as plt\n"

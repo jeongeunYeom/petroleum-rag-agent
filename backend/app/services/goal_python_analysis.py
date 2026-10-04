@@ -6,6 +6,7 @@ import csv
 import hashlib
 import json
 import math
+import operator
 import re
 from dataclasses import replace
 from pathlib import Path
@@ -57,6 +58,38 @@ def _basic_arithmetic_formula(formula: str, names: set[str]) -> bool:
         if output_name:
             known_names.add(output_name)
     return True
+
+
+def _basic_formula_values(formula: str, facts: dict[str, float]) -> dict[str, float]:
+    values = dict(facts)
+    outputs: dict[str, float] = {}
+    operations = {
+        ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul,
+        ast.Div: operator.truediv, ast.Pow: operator.pow,
+    }
+
+    def calculate(node: ast.AST) -> float:
+        if isinstance(node, ast.Constant):
+            return float(node.value)
+        if isinstance(node, ast.Name):
+            return values[node.id]
+        if isinstance(node, ast.UnaryOp):
+            operand = calculate(node.operand)
+            return -operand if isinstance(node.op, ast.USub) else operand
+        if isinstance(node, ast.BinOp):
+            return operations[type(node.op)](calculate(node.left), calculate(node.right))
+        raise ValueError("Unsupported arithmetic formula")
+
+    for statement in re.split(r"[;\n]", formula):
+        if not statement.strip() or "=" not in statement:
+            continue
+        name, expression = (part.strip() for part in statement.split("=", 1))
+        value = calculate(ast.parse(expression, mode="eval").body)
+        if not math.isfinite(value):
+            raise ValueError("Arithmetic formula produced a non-finite result")
+        values[name] = value
+        outputs[name] = value
+    return outputs
 
 
 def _finite_tree(value: Any) -> bool:
@@ -234,7 +267,7 @@ class GoalPythonAnalysis:
                 record.attempts = attempt
                 self.cache[fingerprint] = record
                 return record, True
-            except (ValueError, OSError, RuntimeError, PermissionError, SyntaxError, KeyError, TypeError) as exc:
+            except (ValueError, OSError, RuntimeError, PermissionError, SyntaxError, KeyError, TypeError, ArithmeticError) as exc:
                 error = str(exc)[:1000]
                 failed_attempt = (
                     self._attempt_record(attempt, code, execution, False)
@@ -293,6 +326,14 @@ class GoalPythonAnalysis:
             observed = inputs.get(fact.name)
             if not isinstance(observed, (int, float)) or not math.isclose(observed, fact.value, rel_tol=1e-9, abs_tol=1e-12):
                 raise ValueError(f"Input fact {fact.name} was not preserved")
+        if plan.formula and _basic_arithmetic_formula(plan.formula, {fact.name for fact in plan.input_facts}):
+            expected = _basic_formula_values(
+                plan.formula, {fact.name: fact.value for fact in plan.input_facts}
+            )
+            for name, value in expected.items():
+                observed = result.get(name) if isinstance(result, dict) else result if len(expected) == 1 else None
+                if not isinstance(observed, (int, float)) or not math.isclose(observed, value, rel_tol=1e-6, abs_tol=1e-9):
+                    raise ValueError(f"Calculated output {name} does not match the grounded formula")
 
     @staticmethod
     def _attempt_record(attempt: int, code: str, execution: dict[str, Any], valid: bool) -> dict[str, Any]:
