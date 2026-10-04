@@ -1,6 +1,7 @@
 from functools import lru_cache
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import FileResponse
 
 from app.api.research_routes import cached_research_agent
 from app.api.routes import get_ollama
@@ -61,3 +62,16 @@ def cancel_goal_research(
         raise HTTPException(status_code=404, detail="Goal research run not found") from exc
     except GoalResearchRunConflict as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@router.get("/{run_id}/artifacts/{artifact_id}")
+def download_goal_artifact(
+    run_id: str,
+    artifact_id: str,
+    service: GoalResearchService = Depends(get_goal_research_service),
+) -> FileResponse:
+    try:
+        path = service.artifact_path(run_id, artifact_id)
+    except GoalResearchRunNotFound as exc:
+        raise HTTPException(status_code=404, detail="Artifact not found") from exc
+    return FileResponse(path, filename=path.name)

@@ -11,11 +11,14 @@ from app.models.goal_research_schemas import (
     ExpectedResultStatus,
     GoalCriterion,
     GoalResearchRequest,
+    ComputationRecord,
 )
 from app.services.engineering_validator import EngineeringValidator
 
 
-EVIDENCE_ID_RE = re.compile(r"(?<![A-Za-z0-9])(?:KB|WEB|FIG)\d+(?![A-Za-z0-9])")
+EVIDENCE_ID_RE = re.compile(r"(?<![A-Za-z0-9])(?:KB|WEB|FIG|CALC)\d+(?![A-Za-z0-9])")
+QUANTITATIVE_RE = re.compile(r"calculate|calculation|percent(?:age)? (?:change|difference)|plot|graph|chart|regression|계산|변화율|그래프|정량|회귀", re.IGNORECASE)
+CHART_RE = re.compile(r"plot|graph|chart|그래프|도표", re.IGNORECASE)
 
 
 EVALUATION_SCHEMA = {
@@ -101,8 +104,16 @@ class GoalEvaluator:
         candidate_answer: str,
         evidence: list[dict[str, Any]],
         research_validation: dict[str, Any],
+        computations: list[ComputationRecord] | None = None,
     ) -> GoalEvaluationResult:
-        evidence_ids = {str(item["evidence_id"]) for item in evidence}
+        valid_computations = {
+            item.computation_id: item for item in (computations or [])
+            if item.validation_passed and item.source_evidence_ids
+        }
+        evidence_ids = {
+            str(item["evidence_id"]) for item in evidence
+            if item.get("source_type") != "calculation" or item["evidence_id"] in valid_computations
+        }
         messages = [
             {
                 "role": "system",
@@ -120,6 +131,7 @@ class GoalEvaluator:
                     frozen_criteria,
                     candidate_answer,
                     evidence,
+                    valid_computations,
                 ),
             },
         ]
@@ -155,6 +167,7 @@ class GoalEvaluator:
             frozen_criteria,
             data.get("criteria", []),
             evidence_ids,
+            valid_computations,
         )
         coverage = self.coverage(frozen_criteria, evaluations)
         candidate_validation = self._validate_candidate(
@@ -162,6 +175,15 @@ class GoalEvaluator:
             candidate_answer,
             evidence,
         )
+        for line in candidate_answer.splitlines():
+            cited = set(EVIDENCE_ID_RE.findall(line))
+            for calc_id in cited & valid_computations.keys():
+                required_sources = set(valid_computations[calc_id].source_evidence_ids + valid_computations[calc_id].formula_evidence_ids)
+                if not required_sources.issubset(cited):
+                    candidate_validation["unsupported_engineering_claim_count"] += 1
+                    candidate_validation["reasons"].append(
+                        f"{calc_id} requires underlying source evidence citations."
+                    )
         contradictions = candidate_validation["engineering_contradiction_count"]
         unsupported = candidate_validation["unsupported_engineering_claim_count"]
         false_premise_detected = candidate_validation["false_premise_detected"]
@@ -307,7 +329,9 @@ class GoalEvaluator:
         frozen: list[GoalCriterion],
         raw: list[dict[str, Any]],
         evidence_ids: set[str],
+        computations: dict[str, ComputationRecord] | None = None,
     ) -> list[CriterionEvaluation]:
+        computations = computations or {}
         by_id = {
             str(item.get("criterion_id")): item
             for item in raw
@@ -327,6 +351,22 @@ class GoalEvaluator:
                     if str(value) in evidence_ids
                 )
             )
+            for calc_id in list(supporting):
+                if calc_id in computations:
+                    supporting.extend(
+                        source for source in computations[calc_id].source_evidence_ids + computations[calc_id].formula_evidence_ids
+                        if source in evidence_ids and source not in supporting
+                    )
+            if status == CriterionStatus.MET and QUANTITATIVE_RE.search(criterion.description):
+                matching = [
+                    computations[value] for value in supporting
+                    if value in computations
+                    and (not computations[value].target_criteria or criterion.criterion_id in computations[value].target_criteria)
+                ]
+                if CHART_RE.search(criterion.description):
+                    matching = [item for item in matching if any(path.endswith(".png") for path in item.output_files)]
+                if not matching:
+                    status = CriterionStatus.PARTIAL if supporting else CriterionStatus.BLOCKED
             if status == CriterionStatus.MET and not supporting:
                 status = CriterionStatus.PARTIAL
             normalized.append(
@@ -345,6 +385,7 @@ class GoalEvaluator:
         criteria: list[GoalCriterion],
         candidate: str,
         evidence: list[dict[str, Any]],
+        computations: dict[str, ComputationRecord] | None = None,
     ) -> str:
         compact_evidence = [
             {
@@ -363,6 +404,17 @@ class GoalEvaluator:
                 "frozen_criteria": [item.model_dump() for item in criteria],
                 "candidate_answer": candidate,
                 "untrusted_evidence": compact_evidence,
+                "validated_computations": [
+                    {
+                        "computation_id": item.computation_id,
+                        "source_evidence_ids": item.source_evidence_ids,
+                        "formula_evidence_ids": item.formula_evidence_ids,
+                        "summary": item.summary,
+                        "output_files": [path.rsplit("/", 1)[-1] for path in item.output_files],
+                        "target_criteria": item.target_criteria,
+                    }
+                    for item in (computations or {}).values()
+                ],
             },
             ensure_ascii=False,
         )

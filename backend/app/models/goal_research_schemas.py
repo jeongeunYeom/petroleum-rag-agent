@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -81,6 +81,12 @@ class GoalResearchRequest(BaseModel):
     external_top_k: int = Field(default=5, ge=1, le=20)
     temperature: float | None = Field(default=None, ge=0, le=2)
     seed: int | None = Field(default=None, ge=0)
+    allow_python_execution: bool = False
+    python_execution_approved: bool = False
+    max_python_calls: int = Field(default=4, ge=0, le=8)
+    max_python_attempts_per_call: int = Field(default=2, ge=1, le=3)
+    deliverables: list[Literal["docx", "pptx"]] = Field(default_factory=list)
+    include_generated_charts: bool = True
 
     @field_validator("topic", "model")
     @classmethod
@@ -126,6 +132,7 @@ class GoalIterationTiming(BaseModel):
     research_seconds: float = 0.0
     synthesis_seconds: float = 0.0
     evaluation_seconds: float = 0.0
+    python_seconds: float = 0.0
     iteration_seconds: float = 0.0
 
 
@@ -144,6 +151,39 @@ class GoalIterationRecord(BaseModel):
     gap_analysis: list[str] = Field(default_factory=list)
     next_research_need: str | None = None
     timing: GoalIterationTiming = Field(default_factory=GoalIterationTiming)
+    python_requested: bool = False
+    python_decision_reason: str = ""
+    python_executed: bool = False
+    python_calls: int = 0
+    computation_ids: list[str] = Field(default_factory=list)
+    generated_artifacts: list[str] = Field(default_factory=list)
+
+
+class ComputationRecord(BaseModel):
+    computation_id: str
+    analysis_id: str
+    purpose: str
+    target_criteria: list[str] = Field(default_factory=list)
+    source_evidence_ids: list[str] = Field(default_factory=list)
+    formula_evidence_ids: list[str] = Field(default_factory=list)
+    input_facts: list[dict[str, Any]] = Field(default_factory=list)
+    formula: str | None = None
+    code_record: str = ""
+    output_files: list[str] = Field(default_factory=list)
+    summary: str = ""
+    validation_passed: bool = False
+    attempts: int = 0
+    attempt_records: list[dict[str, Any]] = Field(default_factory=list)
+    fingerprint: str = ""
+
+
+class GeneratedArtifact(BaseModel):
+    artifact_id: str
+    artifact_type: Literal["docx", "pptx", "csv", "png", "json"]
+    path: str
+    size_bytes: int
+    validation_passed: bool
+    source_computations: list[str] = Field(default_factory=list)
 
 
 class GoalResearchResponse(BaseModel):
@@ -170,7 +210,16 @@ class GoalResearchResponse(BaseModel):
     internal_sources: list[InternalEvidence] = Field(default_factory=list)
     web_sources: list[WebEvidence] = Field(default_factory=list)
     figures: list[FigureEvidence] = Field(default_factory=list)
+    computations: list[ComputationRecord] = Field(default_factory=list)
+    artifacts: list[GeneratedArtifact] = Field(default_factory=list)
+    deliverable_status: dict[str, str] = Field(default_factory=dict)
+    deliverable_errors: dict[str, str] = Field(default_factory=dict)
+    python_calls_total: int = 0
+    python_attempts_total: int = 0
+    python_failures: int = 0
+    python_call_budget_exhausted: bool = False
     timing: dict[str, float] = Field(default_factory=dict)
+    telemetry: dict[str, Any] = Field(default_factory=dict)
     validation: dict[str, Any] = Field(default_factory=dict)
     cancel_requested: bool = False
     error: str | None = None

@@ -162,6 +162,14 @@ POST /api/research/goal-runs/{run_id}/cancel
 
 웹 근거는 요청에서 `use_external=true`로 명시한 경우에만 사용합니다. 목표가 미달이어도 Agent가 웹 사용 권한이나 파일·코드 실행 권한을 임의로 확대하지 않습니다.
 
+### Autonomous Analysis
+
+Goal Research는 정량 성공 조건에 계산이 필요한 경우, 근거에 적힌 수치와 출처 ID를 확인한 뒤 제한된 Python 분석 코드를 생성할 수 있습니다. 기본값은 꺼져 있으며 `allow_python_execution=true`와 `python_execution_approved=true`가 모두 필요합니다. 기존 `PythonTools`의 AST·라이브러리 허용 목록, 네트워크 차단, 제한 시간 및 작업공간 경계를 그대로 사용하고, 각 실행의 작업공간은 `workspace/results/goal-research/<run_id>/analysis/`로 더 좁힙니다. 기본 최대 4개 분석, 분석당 최대 2회 시도입니다. 검증된 결과만 `CALC1` 등의 ID로 기록하며 원본 KB/WEB/FIG 근거와 함께 인용합니다. 코드와 실행 기록은 run 로그에 남지만 환경변수나 비밀값은 코드 생성 입력으로 전달하지 않습니다.
+
+### Research Deliverables
+
+`deliverables: ["docx", "pptx"]`를 요청하면 연구가 종료된 후 고정된 최종 결과를 DOCX 보고서와 PPTX 발표자료로 표현합니다. 생성 단계에서는 새 검색·계산·가설 평가를 하지 않습니다. 산출물은 재열기 검증 후 run별 작업공간에 저장되며, 연구 상태와 독립적으로 성공/실패가 기록됩니다. 다운로드는 `GET /api/research/goal-runs/{run_id}/artifacts/{artifact_id}`를 사용합니다. 취소되거나 실패한 연구에서는 기본적으로 생성하지 않습니다.
+
 ## 테스트
 
 ```powershell

@@ -1,4 +1,4 @@
-import { requestJson } from "./http";
+import { API_BASE, requestJson } from "./http";
 
 export type CriterionStatus = "met" | "partial" | "unmet" | "blocked";
 
@@ -26,6 +26,27 @@ export type GoalIteration = {
   engineering_validation_passed: boolean;
   gap_analysis: string[];
   next_research_need?: string | null;
+  python_requested: boolean;
+  python_decision_reason: string;
+  python_executed: boolean;
+  computation_ids: string[];
+  generated_artifacts: string[];
+};
+
+export type Computation = {
+  computation_id: string;
+  purpose: string;
+  summary: string;
+  validation_passed: boolean;
+  attempts: number;
+  output_files: string[];
+};
+
+export type GeneratedArtifact = {
+  artifact_id: string;
+  artifact_type: "docx" | "pptx";
+  size_bytes: number;
+  validation_passed: boolean;
 };
 
 export type GoalResearchRun = {
@@ -51,6 +72,11 @@ export type GoalResearchRun = {
   internal_sources: unknown[];
   web_sources: unknown[];
   figures: unknown[];
+  computations: Computation[];
+  artifacts: GeneratedArtifact[];
+  deliverable_status: Record<string, string>;
+  deliverable_errors: Record<string, string>;
+  python_calls_total: number;
   cancel_requested: boolean;
   error?: string | null;
 };
@@ -63,7 +89,14 @@ export type GoalResearchInput = {
   use_internal: boolean;
   use_external: boolean;
   max_iterations: number;
+  allow_python_execution: boolean;
+  python_execution_approved: boolean;
+  deliverables: ("docx" | "pptx")[];
 };
+
+export function goalArtifactUrl(runId: string, artifactId: string): string {
+  return `${API_BASE}/research/goal-runs/${encodeURIComponent(runId)}/artifacts/${encodeURIComponent(artifactId)}`;
+}
 
 export function startGoalResearch(input: GoalResearchInput): Promise<GoalResearchRun> {
   return requestJson("/research/goal-runs", {

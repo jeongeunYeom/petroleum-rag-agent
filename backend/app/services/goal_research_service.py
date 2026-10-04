@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import asyncio
 import json
+import time
 from datetime import datetime, timezone
+from pathlib import Path
 from threading import RLock, Thread
 from uuid import uuid4
 
@@ -16,6 +18,7 @@ from app.models.goal_research_schemas import (
     GoalStopReason,
 )
 from app.services.goal_research_agent import GoalResearchAgent
+from app.services.deliverables.service import DeliverableService
 
 
 class GoalResearchRunNotFound(KeyError):
@@ -32,6 +35,7 @@ class GoalResearchService:
     def __init__(self, settings: Settings, controller: GoalResearchAgent):
         self.settings = settings
         self.controller = controller
+        self.deliverables = DeliverableService(settings)
 
     def start(self, request: GoalResearchRequest) -> GoalResearchResponse:
         run_id = self._new_run_id()
@@ -86,6 +90,25 @@ class GoalResearchService:
         self._write(run_id, request, response)
         return response
 
+    def artifact_path(self, run_id: str, artifact_id: str) -> Path:
+        response = self.get(run_id)
+        artifact = next(
+            (item for item in response.artifacts if item.artifact_id == artifact_id and item.validation_passed and item.artifact_type in {"docx", "pptx"}),
+            None,
+        )
+        if artifact is None:
+            raise GoalResearchRunNotFound(artifact_id)
+        workspace = self.settings.agent_workspace_dir.resolve()
+        allowed = (workspace / "results" / "goal-research" / run_id / "deliverables").resolve()
+        candidate = (workspace / artifact.path).resolve()
+        try:
+            candidate.relative_to(allowed)
+        except ValueError as exc:
+            raise GoalResearchRunNotFound(artifact_id) from exc
+        if not candidate.is_file():
+            raise GoalResearchRunNotFound(artifact_id)
+        return candidate
+
     def _execute(self, run_id: str, request: GoalResearchRequest) -> None:
         try:
             result = asyncio.run(
@@ -96,6 +119,31 @@ class GoalResearchService:
                     on_progress=lambda value: self._write(run_id, request, value),
                 )
             )
+            if result.run_status in {GoalRunStatus.COMPLETED, GoalRunStatus.STOPPED} and request.deliverables:
+                frozen = result.model_copy(deep=True)
+                result.deliverable_status = {kind: "pending" for kind in dict.fromkeys(request.deliverables)}
+                result.current_stage = "deliverables"
+                self._write(run_id, request, result)
+                started = time.perf_counter()
+                for kind in result.deliverable_status:
+                    result.deliverable_status[kind] = "running"
+                    self._write(run_id, request, result)
+                    try:
+                        result.artifacts.append(self.deliverables.create(
+                            frozen.model_copy(deep=True), kind, request.include_generated_charts
+                        ))
+                        result.deliverable_status[kind] = "completed"
+                    except Exception as exc:
+                        result.deliverable_status[kind] = "failed"
+                        result.deliverable_errors[kind] = str(exc)[:500]
+                    self._write(run_id, request, result)
+                result.timing["deliverable_generation_seconds"] = round(time.perf_counter() - started, 6)
+                result.telemetry.update({
+                    "artifact_generation_seconds": result.timing["deliverable_generation_seconds"],
+                    "docx_success": result.deliverable_status.get("docx") == "completed",
+                    "pptx_success": result.deliverable_status.get("pptx") == "completed",
+                })
+                result.current_stage = "finalize"
         except Exception as exc:
             _, result = self._read(run_id)
             result.run_status = GoalRunStatus.FAILED

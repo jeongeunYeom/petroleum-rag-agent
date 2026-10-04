@@ -6,6 +6,7 @@ import { MarkdownMath } from "@/components/MarkdownMath";
 import {
   cancelGoalResearch,
   getGoalResearch,
+  goalArtifactUrl,
   GoalCriterion,
   GoalResearchRun,
   startGoalResearch,
@@ -36,11 +37,15 @@ export function GoalResearchPanel() {
   const [maxIterations, setMaxIterations] = useState(4);
   const [useInternal, setUseInternal] = useState(true);
   const [useExternal, setUseExternal] = useState(false);
+  const [allowPython, setAllowPython] = useState(false);
+  const [pythonApproved, setPythonApproved] = useState(false);
+  const [docx, setDocx] = useState(false);
+  const [pptx, setPptx] = useState(false);
   const [run, setRun] = useState<GoalResearchRun | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!run || TERMINAL.has(run.run_status)) return;
+    if (!run || (TERMINAL.has(run.run_status) && !Object.values(run.deliverable_status || {}).some((status) => status === "pending" || status === "running"))) return;
     const timer = window.setInterval(async () => {
       try {
         const next = await getGoalResearch(run.run_id);
@@ -65,6 +70,9 @@ export function GoalResearchPanel() {
         use_internal: useInternal,
         use_external: useExternal,
         max_iterations: maxIterations,
+        allow_python_execution: allowPython,
+        python_execution_approved: allowPython && pythonApproved,
+        deliverables: [...(docx ? ["docx" as const] : []), ...(pptx ? ["pptx" as const] : [])],
       }));
     } catch (value) {
       setError(value instanceof Error ? value.message : "Goal Research를 시작하지 못했습니다.");
@@ -109,7 +117,14 @@ export function GoalResearchPanel() {
               <label><input type="checkbox" checked={useExternal} onChange={(event) => setUseExternal(event.target.checked)} className="mr-1" />웹 사용</label>
               <label>최대 반복 <input type="number" min={1} max={8} value={maxIterations} onChange={(event) => setMaxIterations(Number(event.target.value))} className="ml-1 w-14 rounded border border-slate-200 px-1 py-0.5" /></label>
             </div>
-            <button disabled={!topic.trim() || (!useInternal && !useExternal) || Boolean(run && !TERMINAL.has(run.run_status))} className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-40">
+            <div className="md:col-span-2 space-y-2 text-xs text-slate-600">
+              <label className="block"><input type="checkbox" checked={allowPython} onChange={(event) => { setAllowPython(event.target.checked); setPythonApproved(false); }} className="mr-1" />Python 계산 허용</label>
+              {allowPython && <label className="block rounded-lg border border-amber-200 bg-amber-50 p-3"><input type="checkbox" checked={pythonApproved} onChange={(event) => setPythonApproved(event.target.checked)} className="mr-1" />Agent가 제한된 로컬 Python 환경에서 계산 코드를 자동 작성·실행합니다. 인터넷과 작업공간 밖 파일 접근은 차단됩니다. 이를 승인합니다.</label>}
+              <p className="font-semibold">최종 산출물</p>
+              <label className="mr-4"><input type="checkbox" checked={docx} onChange={(event) => setDocx(event.target.checked)} className="mr-1" />DOCX 연구보고서</label>
+              <label><input type="checkbox" checked={pptx} onChange={(event) => setPptx(event.target.checked)} className="mr-1" />PPTX 발표자료</label>
+            </div>
+            <button disabled={!topic.trim() || (!useInternal && !useExternal) || (allowPython && !pythonApproved) || Boolean(run && (!TERMINAL.has(run.run_status) || Object.values(run.deliverable_status || {}).some((status) => status === "pending" || status === "running")))} className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-40">
               Goal Research 시작
             </button>
           </form>
@@ -140,6 +155,8 @@ export function GoalResearchPanel() {
                   <summary className="cursor-pointer font-semibold">Iteration {item.iteration} · coverage {(item.goal_coverage * 100).toFixed(0)}% · evidence +{item.evidence_added.length}</summary>
                   <p className="mt-2 whitespace-pre-wrap text-xs text-slate-500">Query: {item.research_query}</p>
                   {item.gap_analysis.length > 0 && <p className="mt-2 text-xs text-amber-700">Gaps: {item.gap_analysis.join(" · ")}</p>}
+                  {item.python_requested && <p className="mt-2 text-xs text-slate-600">Python Analysis: {item.python_executed ? "실행됨" : "미실행"} · {item.python_decision_reason} · {item.computation_ids.join(", ") || "검증된 계산 없음"}</p>}
+                  {item.generated_artifacts.length > 0 && <p className="mt-1 text-xs text-slate-500">생성: {item.generated_artifacts.map((path) => path.split("/").pop()).join(", ")}</p>}
                   {item.next_research_need && <p className="mt-1 text-xs text-violet-700">다음 작업: {item.next_research_need}</p>}
                 </details>
               ))}
@@ -148,6 +165,8 @@ export function GoalResearchPanel() {
                   <p className="text-xs font-bold uppercase text-violet-700">{run.status} · {run.stop_reason} · hypothesis {run.expected_result_status}</p>
                   <div className="mt-3"><MarkdownMath content={run.final_answer || "최종 답변이 없습니다."} /></div>
                   <p className="mt-3 text-xs text-slate-500">근거: 내부 {run.internal_sources.length} · 웹 {run.web_sources.length} · Figure {run.figures.length}</p>
+                  {run.computations.length > 0 && <div className="mt-3 text-xs"><strong>Calculations</strong>{run.computations.map((item) => <p key={item.computation_id}>{item.computation_id} {item.validation_passed ? "✓" : "실패"} · {item.purpose} · {item.summary}</p>)}</div>}
+                  {Object.keys(run.deliverable_status || {}).length > 0 && <div className="mt-3 text-xs"><strong>Deliverables</strong>{Object.entries(run.deliverable_status).map(([kind, status]) => <p key={kind}>{kind.toUpperCase()}: {status} {run.deliverable_errors?.[kind] || ""}</p>)}{run.artifacts.map((artifact) => <a key={artifact.artifact_id} className="mr-4 text-violet-700 underline" href={goalArtifactUrl(run.run_id, artifact.artifact_id)} download>{artifact.artifact_type.toUpperCase()} 다운로드</a>)}</div>}
                 </div>
               )}
             </div>
