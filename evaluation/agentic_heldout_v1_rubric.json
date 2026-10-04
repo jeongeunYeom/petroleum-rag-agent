@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "agentic_heldout_v1",
+  "version": "1.0",
+  "reviewer": "single AI-assisted semantic reviewer",
+  "reviewer_model": "gemma4:latest",
+  "final_outcome_scoring": {
+    "criterion_scale": {"0": "not satisfied or contradicted", "1": "partially satisfied without a complete supported conclusion", "2": "fully satisfied with correct engineering meaning"},
+    "external_goal_coverage": "sum required criterion scores / (2 * number of required criteria)",
+    "external_goal_success": "all required criteria score 2 AND every critical numeric target passes AND no engineering contradiction AND correct required hypothesis handling",
+    "claim_accuracy": "fraction of benchmark GT claims correctly and explicitly represented; unknown or absent claims do not count as correct",
+    "hallucination": "unsupported material factual invention, fabricated value or evidence, or false factual certainty",
+    "engineering_contradiction": "claim contradicts a cited or benchmark source's engineering meaning",
+    "evidence_grounding": "fraction of material claims accompanied by a real, semantically supporting citation; missing citation is not supporting evidence",
+    "hypothesis_handling": "for contradicted targets explicitly refuse the requested false conclusion and present the correction; null expected_result is not a hypothesis task",
+    "impossible_goal_detection": "on conflicts_with_evidence tasks, explicitly mark target unsupported rather than force it",
+    "insufficient_evidence_detection": "on insufficient_evidence tasks, explicitly mark the unanswerable requested quantity/claim undetermined and identify missing evidence",
+    "numeric": "deterministic value and compatible unit comparison against fixed absolute tolerance; a number for a different physical quantity fails",
+    "final_answer_only": "condition and iteration metadata are hidden during final review"
+  },
+  "process_scoring": {
+    "iteration_curve": "last observation carried forward through the frozen four-iteration horizon; only actual candidate answers may raise coverage",
+    "self_correction": "a criterion scored 0 in first actual iteration and 2 in final answer, or a first-iteration engineering error corrected in final answer",
+    "useful_replanning": "after a replan, at least one of new relevant evidence, external criterion increase, corrected engineering error, or validated required computation; changed query text alone never suffices",
+    "new_evidence_acquisition": "a later iteration adds a distinct source ID that supports a fixed GT claim or criterion",
+    "no_progress_stop_correctness": "stops for no_progress only when no criterion/evidence/computation gain in the patience window",
+    "unnecessary_iteration": "later iteration yields no new relevant evidence, criterion gain, correction, or required computation",
+    "calibration_error": "absolute difference between internal final goal coverage and external final goal coverage",
+    "overconfidence": "internal achieved status with external goal success false"
+  },
+  "python_scoring": {
+    "selection_precision": "selected tasks expected required or optional / all selected tasks",
+    "selection_recall": "selected required tasks / all required tasks",
+    "calculation_success": "required tasks with at least one validated computation / required tasks",
+    "calculation_accuracy": "required-task critical numeric target pass rate in final answer",
+    "calc_provenance_correctness": "validated CALC claim cites both computation and source evidence",
+    "repair_success": "failed first Python attempt followed by validated later attempt / tasks with an actual failed first attempt",
+    "unnecessary_python": "Python calls on not_needed tasks / all Python calls"
+  },
+  "review_qa": "Keep original semantic reviews immutable. Flag disagreements with deterministic numeric, figure-file, source-ID and hypothesis-status checks. Any adjudication is a separate v1.1 artifact."
+}
