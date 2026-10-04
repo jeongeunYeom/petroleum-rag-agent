@@ -16,7 +16,7 @@ from app.models.goal_research_schemas import (
 from app.services.engineering_validator import EngineeringValidator
 
 
-EVIDENCE_ID_RE = re.compile(r"(?<![A-Za-z0-9])(?:KB|WEB|FIG|CALC)\d+(?![A-Za-z0-9])")
+EVIDENCE_ID_RE = re.compile(r"(?<![A-Za-z0-9])(?:KB|WEB|FIG|CALC|USER)\d+(?![A-Za-z0-9])")
 QUANTITATIVE_RE = re.compile(r"calculate|calculation|percent(?:age)? (?:change|difference)|plot|graph|chart|regression|계산|변화율|그래프|정량|회귀", re.IGNORECASE)
 CHART_RE = re.compile(r"plot|graph|chart|그래프|도표", re.IGNORECASE)
 
@@ -108,11 +108,12 @@ class GoalEvaluator:
     ) -> GoalEvaluationResult:
         valid_computations = {
             item.computation_id: item for item in (computations or [])
-            if item.validation_passed and item.source_evidence_ids
+            if item.validation_passed and (item.source_evidence_ids or item.source_input_ids)
         }
         evidence_ids = {
             str(item["evidence_id"]) for item in evidence
-            if item.get("source_type") != "calculation" or item["evidence_id"] in valid_computations
+            if item.get("source_type") != "user_fact"
+            and (item.get("source_type") != "calculation" or item["evidence_id"] in valid_computations)
         }
         messages = [
             {
@@ -179,7 +180,7 @@ class GoalEvaluator:
         for line in candidate_answer.splitlines():
             cited = set(EVIDENCE_ID_RE.findall(line))
             for calc_id in cited & valid_computations.keys():
-                required_sources = set(valid_computations[calc_id].source_evidence_ids + valid_computations[calc_id].formula_evidence_ids)
+                required_sources = set(valid_computations[calc_id].source_evidence_ids + valid_computations[calc_id].source_input_ids + valid_computations[calc_id].formula_evidence_ids)
                 if not required_sources.issubset(cited):
                     candidate_validation["unsupported_engineering_claim_count"] += 1
                     candidate_validation["reasons"].append(
@@ -261,7 +262,7 @@ class GoalEvaluator:
                 "false_premise_corrected": True,
                 "reasons": [],
             }
-        by_id = {str(item["evidence_id"]): str(item["text"]) for item in evidence}
+        by_id = {str(item["evidence_id"]): str(item["text"]) for item in evidence if item.get("source_type") != "user_fact"}
         query = "\n".join(
             value
             for value in (request.topic, request.goal, request.expected_result)
@@ -409,6 +410,7 @@ class GoalEvaluator:
                     {
                         "computation_id": item.computation_id,
                         "source_evidence_ids": item.source_evidence_ids,
+                        "source_input_ids": item.source_input_ids,
                         "formula_evidence_ids": item.formula_evidence_ids,
                         "summary": item.summary,
                         "output_files": [path.rsplit("/", 1)[-1] for path in item.output_files],

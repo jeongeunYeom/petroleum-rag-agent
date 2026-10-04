@@ -15,8 +15,9 @@ from typing import Any
 from app.agents.permission_manager import PermissionManager
 from app.agents.result_validator import AgentResultValidator
 from app.core.config import Settings
+from app.core.run_ids import validate_workspace_run_id
 from app.models.agent_schemas import AgentAction, AgentPermissionLevel, AgentToolName
-from app.models.goal_research_schemas import ComputationRecord, GoalResearchRequest
+from app.models.goal_research_schemas import ComputationRecord, GoalResearchRequest, PythonExecutionTrace
 from app.services.goal_tool_planner import PythonAnalysisPlan
 from app.tools.python_tools import PythonTools
 
@@ -118,11 +119,9 @@ class GoalPythonAnalysis:
     """One-run, evidence-bound adapter around the existing Python sandbox."""
 
     def __init__(self, settings: Settings, ollama: Any, run_id: str):
-        if not re.fullmatch(r"GR-[A-Z0-9-]+", run_id):
-            raise ValueError("Invalid goal research run ID")
         self.settings = settings
         self.ollama = ollama
-        self.run_id = run_id
+        self.run_id = validate_workspace_run_id(run_id)
         self.calls = 0
         self.attempts = 0
         self.failures = 0
@@ -131,37 +130,45 @@ class GoalPythonAnalysis:
 
     @staticmethod
     def verified_facts(plan: PythonAnalysisPlan, evidence: list[dict[str, Any]]) -> bool:
-        by_id = {str(item["evidence_id"]): str(item["text"]) for item in evidence if item.get("source_type") != "calculation"}
+        return GoalPythonAnalysis.verification_failure(plan, evidence) is None
+
+    @staticmethod
+    def verification_failure(plan: PythonAnalysisPlan, evidence: list[dict[str, Any]]) -> str | None:
+        by_id = {str(item["evidence_id"]): item for item in evidence if item.get("source_type") != "calculation"}
+        formula_sources = {key: item for key, item in by_id.items() if item.get("source_type") in {"knowledge_base", "figure", "web"}}
         if not plan.input_facts:
-            return False
+            return "input_fact_verification_failed"
         if re.search(r"difference|change|compare|comparison|ratio|chart|graph|차이|변화율|비교|그래프", plan.purpose, re.IGNORECASE) and len(plan.input_facts) < 2:
-            return False
+            return "input_fact_verification_failed"
         if len({fact.name for fact in plan.input_facts}) != len(plan.input_facts):
-            return False
+            return "input_fact_verification_failed"
+        expected_types = {"kb": "knowledge_base", "figure": "figure", "web": "web", "user_fact": "user_fact"}
         for fact in plan.input_facts:
-            source = by_id.get(fact.evidence_id, "")
+            source = by_id.get(fact.evidence_id)
             excerpt = fact.source_excerpt.strip()
-            if not source or not excerpt or excerpt not in source or not math.isfinite(fact.value):
-                return False
+            if not source or (fact.source_type == "evidence" and source.get("source_type") not in {"knowledge_base", "figure", "web"}) or (fact.source_type != "evidence" and source.get("source_type") != expected_types[fact.source_type]):
+                return "input_fact_verification_failed"
+            if not excerpt or excerpt not in str(source["text"]) or not math.isfinite(fact.value):
+                return "input_fact_verification_failed"
             if fact.unit and fact.unit.casefold() not in excerpt.casefold():
-                return False
+                return "input_fact_verification_failed"
             numbers = [float(match.group().replace(",", "")) for match in NUMBER_RE.finditer(excerpt)]
             numbers.extend(
                 int(match.group(1)) / int(match.group(2))
                 for match in FRACTION_RE.finditer(excerpt) if int(match.group(2))
             )
             if not any(math.isclose(value, fact.value, rel_tol=1e-9, abs_tol=1e-12) for value in numbers):
-                return False
+                return "input_fact_verification_failed"
         basic_formula = bool(plan.formula and _basic_arithmetic_formula(plan.formula, {fact.name for fact in plan.input_facts}))
         if plan.formula and not basic_formula:
             if not plan.supporting_evidence_ids:
-                return False
+                return "formula_provenance_failed"
             normalized = re.sub(r"[^a-z0-9]", "", plan.formula.casefold())
-            if not any(normalized in re.sub(r"[^a-z0-9]", "", by_id.get(value, "").casefold()) for value in plan.supporting_evidence_ids):
-                return False
-        if any(value not in by_id for value in plan.supporting_evidence_ids):
-            return False
-        return True
+            if not any(normalized in re.sub(r"[^a-z0-9]", "", str(formula_sources.get(value, {}).get("text", "")).casefold()) for value in plan.supporting_evidence_ids):
+                return "formula_provenance_failed"
+        if any(value not in (by_id if basic_formula else formula_sources) for value in plan.supporting_evidence_ids):
+            return "formula_provenance_failed"
+        return None
 
     @staticmethod
     def fingerprint(plan: PythonAnalysisPlan) -> str:
@@ -180,29 +187,63 @@ class GoalPythonAnalysis:
         request: GoalResearchRequest,
         plan: PythonAnalysisPlan,
         evidence: list[dict[str, Any]],
+        trace: PythonExecutionTrace | None = None,
     ) -> tuple[ComputationRecord | None, bool]:
+        self.last_error = ""
+        if trace:
+            trace.permission_requested = request.allow_python_execution
+            trace.permission_passed = request.allow_python_execution and request.python_execution_approved
+            trace.input_fact_count = len(plan.input_facts)
+            trace.input_source_types = sorted(set(fact.source_type for fact in plan.input_facts))
         # Permission is checked again at the last possible boundary, independent of the UI.
         if not (request.allow_python_execution and request.python_execution_approved):
             self.last_error = "Python execution was not explicitly approved."
+            if trace:
+                trace.blocked_stage = "permission_not_approved"
             return None, False
-        if not self.verified_facts(plan, evidence):
+        failure = self.verification_failure(plan, evidence)
+        if failure:
             self.failures += 1
             self.last_error = "Input facts or formula provenance did not match source evidence."
+            if trace:
+                trace.blocked_stage = failure
             return None, False
+        if trace:
+            trace.facts_verified = True
         fingerprint = self.fingerprint(plan)
         if fingerprint in self.cache:
+            if trace:
+                trace.blocked_stage = "cache_hit"
+                trace.result_validation_passed = True
+                trace.computation_id = self.cache[fingerprint].computation_id
             return self.cache[fingerprint], False
         if self.calls >= request.max_python_calls:
             self.last_error = "Python call budget exhausted."
+            if trace:
+                trace.blocked_stage = "budget_exhausted"
             return None, False
         self.calls += 1
+        if trace:
+            trace.call_boundary_reached = True
         calc_id = f"CALC{self.calls}"
         analysis_id = f"PA-{self.calls:03d}"
-        analysis_dir = self.settings.agent_workspace_dir / "results" / "goal-research" / self.run_id / "analysis"
+        workspace = self.settings.agent_workspace_dir.resolve()
+        analysis_dir = workspace / "results" / "goal-research" / self.run_id / "analysis"
+        if not analysis_dir.resolve().is_relative_to(workspace):
+            if trace:
+                trace.blocked_stage = "workspace_escape_rejected"
+            raise ValueError("Python analysis workspace path escapes its root")
         analysis_dir.mkdir(parents=True, exist_ok=True)
         scoped_settings = replace(self.settings, agent_workspace_dir=analysis_dir)
         permissions = PermissionManager(scoped_settings)
-        permissions.require_tool_level(AgentPermissionLevel.APPROVED_EXECUTION, AgentToolName.RUN_PYTHON)
+        try:
+            permissions.require_tool_level(AgentPermissionLevel.APPROVED_EXECUTION, AgentToolName.RUN_PYTHON)
+        except PermissionError:
+            if trace:
+                trace.blocked_stage = "permission_manager_rejected"
+            raise
+        if trace:
+            trace.permission_manager_passed = True
         python = PythonTools(scoped_settings, permissions)
         validator = AgentResultValidator(scoped_settings, permissions)
         json_name = f"analysis_{self.calls:03d}.json"
@@ -219,7 +260,8 @@ class GoalPythonAnalysis:
             purpose=plan.purpose,
             target_criteria=plan.target_criteria,
             input_facts=[fact.model_dump() for fact in plan.input_facts],
-            source_evidence_ids=list(dict.fromkeys(fact.evidence_id for fact in plan.input_facts)),
+            source_evidence_ids=list(dict.fromkeys(fact.evidence_id for fact in plan.input_facts if fact.source_type != "user_fact")),
+            source_input_ids=list(dict.fromkeys(fact.evidence_id for fact in plan.input_facts if fact.source_type == "user_fact")),
             formula_evidence_ids=[] if plan.formula and _basic_arithmetic_formula(plan.formula, {fact.name for fact in plan.input_facts}) else plan.supporting_evidence_ids,
             formula=plan.formula,
             fingerprint=fingerprint,
@@ -229,20 +271,30 @@ class GoalPythonAnalysis:
             self.attempts += 1
             code = ""
             execution: dict[str, Any] | None = None
+            stage = "code_generation_failed"
             try:
                 code = await self._generate_code(request, plan, outputs, error)
+                if trace:
+                    trace.code_generated = True
+                stage = "sandbox_validation_failed"
                 python.validate(code)
+                if trace:
+                    trace.sandbox_validation_passed = True
                 action = AgentAction(
                     action_id=f"{analysis_id}-{attempt}",
                     tool=AgentToolName.RUN_PYTHON,
                     description=plan.purpose,
                     arguments={"expected_outputs": outputs},
                 )
+                stage = "execution_failed"
                 execution = await asyncio.to_thread(
                     python.run_python,
                     code,
                     task_id=f"goal-research/{self.run_id}/python/{analysis_id}_attempt{attempt}",
                 )
+                if trace:
+                    trace.subprocess_reached = True
+                stage = "result_validation_failed"
                 checked = validator.validate_action(action, execution)
                 if not checked or not checked["passed"]:
                     raise ValueError("; ".join((checked or {}).get("errors", ["Invalid output"])))
@@ -257,6 +309,11 @@ class GoalPythonAnalysis:
                 data = json.loads((analysis_dir / json_name).read_text(encoding="utf-8"), parse_constant=lambda value: (_ for _ in ()).throw(ValueError(value)))
                 self._validate_result(data, plan)
                 record.validation_passed = True
+                if trace:
+                    trace.result_validation_passed = True
+                    trace.blocked_stage = "validated"
+                    trace.computation_id = calc_id
+                    trace.error_summary = None
                 record.summary = str(data["summary"])[:2000]
                 record.output_files = [
                     (Path("results") / "goal-research" / self.run_id / "analysis" / name).as_posix()
@@ -269,6 +326,9 @@ class GoalPythonAnalysis:
                 return record, True
             except (ValueError, OSError, RuntimeError, PermissionError, SyntaxError, KeyError, TypeError, ArithmeticError) as exc:
                 error = str(exc)[:1000]
+                if trace:
+                    trace.blocked_stage = stage
+                    trace.error_summary = type(exc).__name__
                 failed_attempt = (
                     self._attempt_record(attempt, code, execution, False)
                     if execution is not None else {"attempt": attempt, "code": code, "validation_passed": False}

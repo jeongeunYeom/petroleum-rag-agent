@@ -480,7 +480,7 @@ def test_goal_loop_adds_calculation_after_research_before_synthesis_and_evaluati
         attempts = 0
         failures = 0
 
-        async def execute(self, request, plan, evidence):
+        async def execute(self, request, plan, evidence, trace=None):
             self.calls += 1
             self.attempts += 1
             events.append("python")

@@ -16,6 +16,7 @@ from app.models.goal_research_schemas import (
     GoalIterationTiming,
     GoalResearchRequest,
     GoalResearchResponse,
+    PythonExecutionTrace,
     GoalRunStatus,
     GoalStatus,
     GoalStopReason,
@@ -30,7 +31,7 @@ from app.models.research_schemas import (
 from app.services.goal_evaluator import GoalEvaluationResult, GoalEvaluator
 from app.services.goal_planner import GoalPlanner
 from app.services.goal_tool_planner import GoalToolPlanner
-from app.services.goal_python_analysis import GoalPythonAnalysis
+from app.services.goal_python_analysis import GoalPythonAnalysis, NUMBER_RE
 from app.services.goal_result_summary import resolve_final_limitations, without_limitations
 from app.core.config import get_settings
 
@@ -271,11 +272,23 @@ class GoalResearchAgent:
             research_seconds = time.perf_counter() - research_started
             evidence_added = accumulator.add(research_response)
             evidence = accumulator.records()
+            user_sources = ([{
+                "evidence_id": "USER1", "source_type": "user_fact",
+                "locator": "request.topic", "text": request.topic,
+            }] if NUMBER_RE.search(request.topic) else [])
+            analysis_evidence = evidence + user_sources
 
             python_requested = False
             python_decision_reason = ""
             python_error = None
             python_executed = False
+            python_trace = None
+            if request.allow_python_execution or request.python_execution_approved:
+                python_trace = PythonExecutionTrace(
+                    permission_requested=request.allow_python_execution,
+                    permission_passed=request.allow_python_execution and request.python_execution_approved,
+                    blocked_stage="permission_not_approved" if not (request.allow_python_execution and request.python_execution_approved) else None,
+                )
             computation_ids: list[str] = []
             generated_artifacts: list[str] = []
             python_started = time.perf_counter()
@@ -284,16 +297,26 @@ class GoalResearchAgent:
                 self._notify(result, on_progress)
                 try:
                     decision = await self.tool_planner.decide(
-                        request, frozen_criteria, evidence, previous_coverage,
+                        request, frozen_criteria, analysis_evidence, previous_coverage,
                         result.iterations[-1].criteria if result.iterations else None,
                     )
                     python_requested = decision.tool_needed
                     python_decision_reason = decision.reason
+                    python_trace.tool_selected = decision.tool_needed
+                    python_trace.tool_type = decision.tool_type
+                    python_trace.plan_present = decision.plan is not None
+                    python_trace.blocked_stage = "no_plan" if decision.tool_needed and not decision.plan else "not_selected" if not decision.tool_needed else None
                     if decision.tool_needed and decision.plan:
+                        python_trace.input_fact_count = len(decision.plan.input_facts)
+                        python_trace.input_source_types = sorted(set(fact.source_type for fact in decision.plan.input_facts))
                         if analysis is None:
-                            analysis = self.analysis_factory(run_id)
+                            try:
+                                analysis = self.analysis_factory(run_id)
+                            except (ValueError, RuntimeError, OSError, PermissionError):
+                                python_trace.blocked_stage = "analysis_initialization_failed"
+                                raise
                         computation, python_executed = await analysis.execute(
-                            request, decision.plan, evidence
+                            request, decision.plan, analysis_evidence, trace=python_trace
                         )
                         if computation is None and analysis.last_error:
                             python_decision_reason = f"{python_decision_reason} {analysis.last_error}".strip()
@@ -305,6 +328,8 @@ class GoalResearchAgent:
                                 generated_artifacts.extend(computation.output_files)
                 except (ValueError, RuntimeError, OSError, PermissionError) as exc:
                     python_error = str(exc)[:500]
+                    python_trace.blocked_stage = python_trace.blocked_stage or "execution_failed"
+                    python_trace.error_summary = type(exc).__name__
             if analysis is not None:
                 result.python_calls_total = analysis.calls
                 result.python_attempts_total = analysis.attempts
@@ -322,9 +347,12 @@ class GoalResearchAgent:
                             + ", ".join(path.rsplit("/", 1)[-1] for path in computation.output_files)
                         ),
                         "source_evidence_ids": computation.source_evidence_ids,
+                        "source_input_ids": computation.source_input_ids,
                         "formula_evidence_ids": computation.formula_evidence_ids,
                         "output_files": computation.output_files,
                     })
+            if any(item.validation_passed and item.source_input_ids for item in result.computations):
+                evidence.extend(user_sources)
 
             result.current_stage = "synthesize"
             self._notify(result, on_progress)
@@ -385,6 +413,7 @@ class GoalResearchAgent:
                 python_decision_reason=python_decision_reason,
                 python_executed=python_executed,
                 python_calls=analysis.calls if analysis else 0,
+                python_trace=python_trace,
                 computation_ids=computation_ids,
                 generated_artifacts=generated_artifacts,
             )
@@ -518,6 +547,7 @@ class GoalResearchAgent:
                     "hypothesis; explicitly report contradiction or insufficient evidence. "
                     "For every claim, put supporting KB/WEB/FIG/CALC IDs in citations. "
                     "A CALC-derived claim must also cite its underlying source evidence IDs. "
+                    "USER IDs mark task-provided calculation inputs, not scientific literature or formula evidence. "
                     "If expected_hypothesis is null, do not assess or invent a hypothesis; "
                     "return an empty hypothesis_assessment. "
                     "List only limitations still unresolved by the current evidence, never resolved prior gaps. "
@@ -560,7 +590,7 @@ class GoalResearchAgent:
             )
         valid_ids = {str(item["evidence_id"]) for item in evidence}
         calc_sources = {
-            str(item["evidence_id"]): list(dict.fromkeys(item.get("source_evidence_ids", []) + item.get("formula_evidence_ids", [])))
+            str(item["evidence_id"]): list(dict.fromkeys(item.get("source_evidence_ids", []) + item.get("source_input_ids", []) + item.get("formula_evidence_ids", [])))
             for item in evidence if item["source_type"] == "calculation"
         }
         lines = []
@@ -576,6 +606,8 @@ class GoalResearchAgent:
             citations = list(dict.fromkeys(
                 citations + [source for citation in citations for source in calc_sources.get(citation, []) if source in valid_ids]
             ))
+            if any(value.startswith("USER") for value in citations) and not any(value in calc_sources for value in citations):
+                continue
             if (
                 claim
                 and citations
@@ -589,7 +621,7 @@ class GoalResearchAgent:
             if item["source_type"] != "calculation":
                 continue
             calc_id = str(item["evidence_id"])
-            source_ids = [value for value in list(dict.fromkeys(item.get("source_evidence_ids", []) + item.get("formula_evidence_ids", []))) if value in valid_ids]
+            source_ids = [value for value in list(dict.fromkeys(item.get("source_evidence_ids", []) + item.get("source_input_ids", []) + item.get("formula_evidence_ids", []))) if value in valid_ids]
             if source_ids:
                 outputs = ", ".join(path.rsplit("/", 1)[-1] for path in item.get("output_files", []))
                 lines.append(
@@ -609,6 +641,8 @@ class GoalResearchAgent:
         assessment_citations = list(dict.fromkeys(
             assessment_citations + [source for citation in assessment_citations for source in calc_sources.get(citation, []) if source in valid_ids]
         ))
+        if any(value.startswith("USER") for value in assessment_citations) and not any(value in calc_sources for value in assessment_citations):
+            assessment_citations = []
         if request.expected_result is not None and assessment_claim and assessment_citations:
             rendered = " ".join(f"[{value}]" for value in assessment_citations)
             lines.append(f"Expected-result assessment: {assessment_claim} {rendered}")

@@ -136,6 +136,26 @@ class GoalIterationTiming(BaseModel):
     iteration_seconds: float = 0.0
 
 
+class PythonExecutionTrace(BaseModel):
+    tool_selected: bool = False
+    tool_type: Literal["none", "python_calculation", "python_plot"] = "none"
+    plan_present: bool = False
+    permission_requested: bool = False
+    permission_passed: bool = False
+    permission_manager_passed: bool = False
+    input_fact_count: int = 0
+    input_source_types: list[str] = Field(default_factory=list)
+    facts_verified: bool = False
+    blocked_stage: str | None = None
+    error_summary: str | None = None
+    call_boundary_reached: bool = False
+    code_generated: bool = False
+    sandbox_validation_passed: bool = False
+    subprocess_reached: bool = False
+    result_validation_passed: bool = False
+    computation_id: str | None = None
+
+
 class GoalIterationRecord(BaseModel):
     iteration: int
     research_query: str
@@ -155,6 +175,7 @@ class GoalIterationRecord(BaseModel):
     python_decision_reason: str = ""
     python_executed: bool = False
     python_calls: int = 0
+    python_trace: PythonExecutionTrace | None = None
     computation_ids: list[str] = Field(default_factory=list)
     generated_artifacts: list[str] = Field(default_factory=list)
 
@@ -165,6 +186,7 @@ class ComputationRecord(BaseModel):
     purpose: str
     target_criteria: list[str] = Field(default_factory=list)
     source_evidence_ids: list[str] = Field(default_factory=list)
+    source_input_ids: list[str] = Field(default_factory=list)
     formula_evidence_ids: list[str] = Field(default_factory=list)
     input_facts: list[dict[str, Any]] = Field(default_factory=list)
     formula: str | None = None

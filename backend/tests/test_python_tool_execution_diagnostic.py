@@ -106,9 +106,9 @@ def test_frozen_classification_from_minimal_synthetic_record():
     assert stats["run_id_rejected_iterations_by_deterministic_code_path"] == 1
 
 
-def test_frozen_run_id_is_rejected_before_analysis_execution(tmp_path):
-    with pytest.raises(ValueError, match="Invalid goal research run ID"):
-        GoalPythonAnalysis(Settings(data_dir=tmp_path), object(), "agentic-v1-20261004T075903Z-AG-Q-006-full_agent")
+def test_frozen_runner_style_id_is_now_accepted_without_altering_frozen_results(tmp_path):
+    run_id = "agentic-v1-20261004T075903Z-AG-Q-006-full_agent"
+    assert GoalPythonAnalysis(Settings(data_dir=tmp_path), object(), run_id).run_id == run_id
 
 
 def test_explainer_detects_missing_and_duplicate_inputs(fixture_cases):
