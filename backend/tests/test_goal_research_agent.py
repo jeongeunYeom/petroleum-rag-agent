@@ -24,6 +24,8 @@ from app.models.research_schemas import (
 from app.services.goal_evaluator import GoalEvaluationResult, GoalEvaluator
 from app.services.goal_planner import GoalPlanner
 from app.services.goal_research_agent import EvidenceAccumulator, GoalResearchAgent
+from app.services.goal_tool_planner import InputFact, PythonAnalysisPlan, ToolDecision
+from app.models.goal_research_schemas import ComputationRecord
 
 
 CRITERIA = [
@@ -457,3 +459,82 @@ def test_invalid_evaluator_json_retries_then_returns_safe_unmet_result():
     assert result.achieved is False
     assert result.coverage == 0
     assert result.expected_result_status == ExpectedResultStatus.INSUFFICIENT_EVIDENCE
+
+
+def test_goal_loop_adds_calculation_after_research_before_synthesis_and_evaluation():
+    events = []
+
+    class ToolPlanner:
+        async def decide(self, request, criteria, evidence, coverage, prior_evaluations):
+            events.append("tool_decision")
+            return ToolDecision(
+                tool_needed=True, tool_type="python_calculation", reason="quantitative gap",
+                plan=PythonAnalysisPlan(
+                    purpose="difference", target_criteria=["C2"],
+                    input_facts=[InputFact(name="A", value=10, evidence_id="KB1", source_excerpt="10")],
+                ),
+            )
+
+    class Analysis:
+        calls = 0
+        attempts = 0
+        failures = 0
+
+        async def execute(self, request, plan, evidence):
+            self.calls += 1
+            self.attempts += 1
+            events.append("python")
+            return ComputationRecord(
+                computation_id=f"CALC{self.calls}", analysis_id="PA-001",
+                purpose="difference", source_evidence_ids=["KB1"],
+                summary="Difference calculated", validation_passed=True,
+            ), True
+
+    class Evaluator:
+        async def evaluate(self, request, criteria, candidate, evidence, validation, computations=None):
+            events.append("evaluate")
+            assert any(item["evidence_id"] == "CALC1" for item in evidence)
+            assert computations and computations[0].validation_passed
+            return evaluation(1.0, achieved=True)
+
+    async def synth(request, criteria, evidence, previous):
+        events.append("synthesize")
+        assert any(item["evidence_id"] == "CALC1" for item in evidence)
+        return "Difference calculated [CALC1][KB1]"
+
+    research = FakeResearchAgent([research_response("1")])
+    agent = GoalResearchAgent(
+        research, object(), planner=GoalPlanner(object()), evaluator=Evaluator(),
+        synthesizer=synth, tool_planner=ToolPlanner(), analysis_factory=lambda run_id: Analysis(),
+    )
+    result = asyncio.run(agent.run(
+        "GR-TEST", GoalResearchRequest(
+            topic="Compare cases", success_criteria=CRITERIA,
+            allow_python_execution=True, python_execution_approved=True,
+        ),
+    ))
+    assert events == ["tool_decision", "python", "synthesize", "evaluate"]
+    assert result.status == GoalStatus.ACHIEVED
+    assert result.computations[0].computation_id == "CALC1"
+    assert result.iterations[0].computation_ids == ["CALC1"]
+    assert result.python_calls_total == 1
+
+
+def test_goal_loop_never_calls_tool_planner_without_approval():
+    class ToolPlanner:
+        async def decide(self, *_args):
+            raise AssertionError("planner must not run without approval")
+
+    agent = GoalResearchAgent(
+        FakeResearchAgent([research_response("1")]), object(),
+        planner=GoalPlanner(object()), evaluator=FakeEvaluator([evaluation(1.0, achieved=True)]),
+        synthesizer=synthesize, tool_planner=ToolPlanner(),
+    )
+    for allow, approve in ((False, True), (True, False)):
+        result = asyncio.run(agent.run(
+            "GR-TEST", GoalResearchRequest(
+                topic="Compare cases", success_criteria=CRITERIA,
+                allow_python_execution=allow, python_execution_approved=approve,
+            ),
+        ))
+        assert result.python_calls_total == 0
