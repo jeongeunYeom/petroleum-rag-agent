@@ -31,8 +31,9 @@ from app.models.research_schemas import (
 from app.services.goal_evaluator import GoalEvaluationResult, GoalEvaluator
 from app.services.goal_planner import GoalPlanner
 from app.services.goal_tool_planner import GoalToolPlanner
-from app.services.goal_python_analysis import GoalPythonAnalysis, NUMBER_RE
+from app.services.goal_python_analysis import GoalPythonAnalysis
 from app.services.goal_result_summary import resolve_final_limitations, without_limitations
+from app.services.user_fact_registry import UserFactRegistry
 from app.core.config import get_settings
 
 
@@ -217,6 +218,7 @@ class GoalResearchAgent:
         self._notify(result, on_progress)
 
         accumulator = EvidenceAccumulator()
+        user_registry = UserFactRegistry.from_topic(request.topic)
         previous_queries: list[str] = []
         previous_coverage: float | None = None
         no_progress_count = 0
@@ -272,10 +274,7 @@ class GoalResearchAgent:
             research_seconds = time.perf_counter() - research_started
             evidence_added = accumulator.add(research_response)
             evidence = accumulator.records()
-            user_sources = ([{
-                "evidence_id": "USER1", "source_type": "user_fact",
-                "locator": "request.topic", "text": request.topic,
-            }] if NUMBER_RE.search(request.topic) else [])
+            user_sources = user_registry.evidence()
             analysis_evidence = evidence + user_sources
 
             python_requested = False
@@ -288,6 +287,7 @@ class GoalResearchAgent:
                     permission_requested=request.allow_python_execution,
                     permission_passed=request.allow_python_execution and request.python_execution_approved,
                     blocked_stage="permission_not_approved" if not (request.allow_python_execution and request.python_execution_approved) else None,
+                    available_user_fact_ids=[item.fact_id for item in user_registry.records],
                 )
             computation_ids: list[str] = []
             generated_artifacts: list[str] = []
@@ -304,8 +304,22 @@ class GoalResearchAgent:
                     python_decision_reason = decision.reason
                     python_trace.tool_selected = decision.tool_needed
                     python_trace.tool_type = decision.tool_type
-                    python_trace.plan_present = decision.plan is not None
-                    python_trace.blocked_stage = "no_plan" if decision.tool_needed and not decision.plan else "not_selected" if not decision.tool_needed else None
+                    python_trace.plan_present = decision.plan is not None or decision.plan_parsed
+                    python_trace.planner_decision_attempts = decision.decision_attempts
+                    python_trace.planner_decision_status = decision.decision_status
+                    python_trace.planner_plan_attempts = decision.plan_attempts
+                    python_trace.planner_plan_status = decision.plan_status
+                    python_trace.selected_user_fact_ids = decision.selected_user_fact_ids
+                    python_trace.verification_failures = decision.verification_failures.copy()
+                    python_trace.plan_summary = decision.plan_summary
+                    python_trace.blocked_stage = (
+                        "planner_decision_parse_failed" if decision.decision_status == "planner_decision_parse_failed"
+                        else "planner_not_selected" if not decision.tool_needed
+                        else "planner_plan_parse_failed" if decision.plan_status == "planner_plan_parse_failed"
+                        else "fact_registry_empty" if "fact_registry_empty" in decision.verification_failures
+                        else "input_fact_verification_failed" if decision.verification_failures
+                        else "no_plan" if decision.plan is None else None
+                    )
                     if decision.tool_needed and decision.plan:
                         python_trace.input_fact_count = len(decision.plan.input_facts)
                         python_trace.input_source_types = sorted(set(fact.source_type for fact in decision.plan.input_facts))

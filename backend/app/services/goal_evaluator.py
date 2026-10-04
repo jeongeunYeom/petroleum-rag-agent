@@ -16,7 +16,7 @@ from app.models.goal_research_schemas import (
 from app.services.engineering_validator import EngineeringValidator
 
 
-EVIDENCE_ID_RE = re.compile(r"(?<![A-Za-z0-9])(?:KB|WEB|FIG|CALC|USER)\d+(?![A-Za-z0-9])")
+EVIDENCE_ID_RE = re.compile(r"(?<![A-Za-z0-9])(?:KB|WEB|FIG|CALC|USERF?)\d+(?![A-Za-z0-9])")
 QUANTITATIVE_RE = re.compile(r"calculate|calculation|percent(?:age)? (?:change|difference)|plot|graph|chart|regression|계산|변화율|그래프|정량|회귀", re.IGNORECASE)
 CHART_RE = re.compile(r"plot|graph|chart|그래프|도표", re.IGNORECASE)
 

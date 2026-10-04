@@ -25,7 +25,8 @@ from app.services.goal_evaluator import GoalEvaluator
 from app.services.goal_python_analysis import GoalPythonAnalysis
 from app.services.goal_research_agent import GoalResearchAgent
 from app.services.goal_research_service import GoalResearchRunNotFound, GoalResearchService
-from app.services.goal_tool_planner import GoalToolPlanner, PythonAnalysisPlan, ToolDecision
+from app.services.goal_tool_planner import GoalToolPlanner, PythonAnalysisPlan, ToolDecision, AnalysisPlanRequest
+from app.services.user_fact_registry import UserFactRegistry
 from scripts.diagnose_python_tool_execution import FIXTURE, FixtureCodeGenerator
 
 
@@ -126,20 +127,27 @@ def test_basic_arithmetic_may_reference_user_input_without_formula_evidence(tmp_
 
 def test_planner_receives_user_fact_as_input_source_not_expected_hypothesis():
     case, plan, evidence = prepared("D2")
+    evidence = [*evidence[:-1], *UserFactRegistry.from_topic(case["topic"]).evidence()]
 
     class PlannerOllama:
         prompt = None
 
-        async def chat_structured(self, messages, *_args, **_kwargs):
+        async def chat_structured(self, messages, schema, **_kwargs):
             self.prompt = json.loads(messages[-1]["content"])
-            return ToolDecision(tool_needed=True, tool_type="python_calculation", plan=plan).model_dump_json()
+            if "tool_needed" in schema["properties"]:
+                return json.dumps({"tool_needed": True, "tool_type": "python_calculation", "reason": "calculate"})
+            return AnalysisPlanRequest(
+                purpose=plan.purpose,
+                user_fact_refs=[{"fact_id": "USERF1", "alias": "A"}, {"fact_id": "USERF2", "alias": "B"}],
+                formula=plan.formula,
+            ).model_dump_json()
 
     ollama = PlannerOllama()
     request = GoalResearchRequest(topic=case["topic"], expected_result="999 mD")
     decision = asyncio.run(GoalToolPlanner(ollama).decide(request, [CRITERION], evidence, None))
     assert decision.tool_needed and decision.plan.input_facts[0].source_type == "user_fact"
     user_source = next(item for item in ollama.prompt["evidence"] if item["source_type"] == "user_fact")
-    assert user_source["evidence_id"] == "USER1" and user_source["text"] == case["topic"]
+    assert user_source["evidence_id"] == "USERF1" and user_source["text"] == "A = 10 mD"
     assert "999" not in json.dumps(ollama.prompt)
 
 
@@ -210,7 +218,14 @@ class StaticToolPlanner:
 
     async def decide(self, request, criteria, evidence, coverage, prior):
         self.seen = evidence
-        return ToolDecision(tool_needed=True, tool_type="python_calculation", reason="dev fixture", plan=self.plan)
+        plan = self.plan.model_copy(deep=True)
+        canonical = {item["name"]: item for item in evidence if item["source_type"] == "user_fact"}
+        for fact in plan.input_facts:
+            if fact.source_type == "user_fact":
+                item = canonical[fact.name]
+                fact.evidence_id = item["evidence_id"]
+                fact.source_excerpt = item["source_span"]
+        return ToolDecision(tool_needed=True, tool_type="python_calculation", reason="dev fixture", plan=plan)
 
 
 class LocalFixtureOllama(FixtureCodeGenerator):
@@ -255,9 +270,9 @@ def test_runner_style_full_goal_agent_reaches_validated_calc(tmp_path, case_id, 
     assert "[CALC1]" in result.final_answer
     assert len(result.internal_sources) == len(case["evidence"]) and not result.web_sources
     if case_id == "D3":
-        assert "[USER1]" in result.final_answer and "[KB1]" in result.final_answer
-        assert [item for item in tool_planner.seen if item["source_type"] == "user_fact"][0]["text"] == case["topic"]
-        assert "999" not in [item for item in tool_planner.seen if item["source_type"] == "user_fact"][0]["text"]
+        assert "[USERF1]" in result.final_answer and "[KB1]" in result.final_answer
+        assert [item for item in tool_planner.seen if item["source_type"] == "user_fact"][0]["text"] == "k1=10 mD"
+        assert "999" not in json.dumps([item for item in tool_planner.seen if item["source_type"] == "user_fact"])
 
 
 def test_runner_style_permission_denial_records_stage_and_never_calls_python(tmp_path):

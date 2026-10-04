@@ -140,6 +140,14 @@ class PythonExecutionTrace(BaseModel):
     tool_selected: bool = False
     tool_type: Literal["none", "python_calculation", "python_plot"] = "none"
     plan_present: bool = False
+    planner_decision_attempts: int = 0
+    planner_decision_status: str | None = None
+    planner_plan_attempts: int = 0
+    planner_plan_status: str | None = None
+    available_user_fact_ids: list[str] = Field(default_factory=list)
+    selected_user_fact_ids: list[str] = Field(default_factory=list)
+    verification_failures: list[str] = Field(default_factory=list)
+    plan_summary: dict[str, Any] | None = None
     permission_requested: bool = False
     permission_passed: bool = False
     permission_manager_passed: bool = False

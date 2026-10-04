@@ -134,40 +134,66 @@ class GoalPythonAnalysis:
 
     @staticmethod
     def verification_failure(plan: PythonAnalysisPlan, evidence: list[dict[str, Any]]) -> str | None:
+        failure = GoalPythonAnalysis.verification_failure_detail(plan, evidence)
+        return failure[0] if failure else None
+
+    @staticmethod
+    def verification_failure_detail(plan: PythonAnalysisPlan, evidence: list[dict[str, Any]]) -> tuple[str, str] | None:
         by_id = {str(item["evidence_id"]): item for item in evidence if item.get("source_type") != "calculation"}
         formula_sources = {key: item for key, item in by_id.items() if item.get("source_type") in {"knowledge_base", "figure", "web"}}
         if not plan.input_facts:
-            return "input_fact_verification_failed"
+            return "input_fact_verification_failed", "insufficient_input_facts"
         if re.search(r"difference|change|compare|comparison|ratio|chart|graph|차이|변화율|비교|그래프", plan.purpose, re.IGNORECASE) and len(plan.input_facts) < 2:
-            return "input_fact_verification_failed"
+            return "input_fact_verification_failed", "insufficient_input_facts"
         if len({fact.name for fact in plan.input_facts}) != len(plan.input_facts):
-            return "input_fact_verification_failed"
+            return "input_fact_verification_failed", "duplicate_fact"
         expected_types = {"kb": "knowledge_base", "figure": "figure", "web": "web", "user_fact": "user_fact"}
         for fact in plan.input_facts:
             source = by_id.get(fact.evidence_id)
             excerpt = fact.source_excerpt.strip()
-            if not source or (fact.source_type == "evidence" and source.get("source_type") not in {"knowledge_base", "figure", "web"}) or (fact.source_type != "evidence" and source.get("source_type") != expected_types[fact.source_type]):
-                return "input_fact_verification_failed"
-            if not excerpt or excerpt not in str(source["text"]) or not math.isfinite(fact.value):
-                return "input_fact_verification_failed"
-            if fact.unit and fact.unit.casefold() not in excerpt.casefold():
-                return "input_fact_verification_failed"
+            if not source:
+                return "input_fact_verification_failed", "fact_id_unknown"
+            if (fact.source_type == "evidence" and source.get("source_type") not in {"knowledge_base", "figure", "web"}) or (fact.source_type != "evidence" and source.get("source_type") != expected_types[fact.source_type]):
+                return "input_fact_verification_failed", "source_type_mismatch"
+            if not excerpt or excerpt not in str(source["text"]):
+                return "input_fact_verification_failed", "source_span_mismatch"
+            if not math.isfinite(fact.value):
+                return "input_fact_verification_failed", "value_mismatch"
+            if fact.source_type == "user_fact" and "source_span" in source:
+                if excerpt != source["source_span"]:
+                    return "input_fact_verification_failed", "source_span_mismatch"
+                if fact.unit.casefold() != str(source["unit"]).casefold():
+                    return "input_fact_verification_failed", "unit_mismatch"
+                if not math.isclose(fact.value, float(source["value"]), rel_tol=1e-9, abs_tol=1e-12):
+                    return "input_fact_verification_failed", "value_mismatch"
+                raw = str(source["raw_value_text"])
+                if raw not in excerpt:
+                    return "input_fact_verification_failed", "source_span_mismatch"
+                try:
+                    observed = (int(raw.split("/", 1)[0]) / int(raw.split("/", 1)[1])) if "/" in raw else float(raw.replace(",", ""))
+                except (ValueError, ZeroDivisionError):
+                    return "input_fact_verification_failed", "value_mismatch"
+                if not math.isclose(observed, fact.value, rel_tol=1e-9, abs_tol=1e-12):
+                    return "input_fact_verification_failed", "value_mismatch"
+                continue
+            elif fact.unit and fact.unit.casefold() not in excerpt.casefold():
+                return "input_fact_verification_failed", "unit_mismatch"
             numbers = [float(match.group().replace(",", "")) for match in NUMBER_RE.finditer(excerpt)]
             numbers.extend(
                 int(match.group(1)) / int(match.group(2))
                 for match in FRACTION_RE.finditer(excerpt) if int(match.group(2))
             )
             if not any(math.isclose(value, fact.value, rel_tol=1e-9, abs_tol=1e-12) for value in numbers):
-                return "input_fact_verification_failed"
+                return "input_fact_verification_failed", "value_mismatch"
         basic_formula = bool(plan.formula and _basic_arithmetic_formula(plan.formula, {fact.name for fact in plan.input_facts}))
         if plan.formula and not basic_formula:
             if not plan.supporting_evidence_ids:
-                return "formula_provenance_failed"
+                return "formula_provenance_failed", "formula_source_missing"
             normalized = re.sub(r"[^a-z0-9]", "", plan.formula.casefold())
             if not any(normalized in re.sub(r"[^a-z0-9]", "", str(formula_sources.get(value, {}).get("text", "")).casefold()) for value in plan.supporting_evidence_ids):
-                return "formula_provenance_failed"
+                return "formula_provenance_failed", "formula_text_mismatch"
         if any(value not in (by_id if basic_formula else formula_sources) for value in plan.supporting_evidence_ids):
-            return "formula_provenance_failed"
+            return "formula_provenance_failed", "formula_source_missing"
         return None
 
     @staticmethod
@@ -201,12 +227,13 @@ class GoalPythonAnalysis:
             if trace:
                 trace.blocked_stage = "permission_not_approved"
             return None, False
-        failure = self.verification_failure(plan, evidence)
+        failure = self.verification_failure_detail(plan, evidence)
         if failure:
             self.failures += 1
             self.last_error = "Input facts or formula provenance did not match source evidence."
             if trace:
-                trace.blocked_stage = failure
+                trace.blocked_stage = failure[0]
+                trace.verification_failures.append(failure[1])
             return None, False
         if trace:
             trace.facts_verified = True
