@@ -1,0 +1,140 @@
+{
+  "purpose": "Development-only gate diagnostics; not an agentic benchmark or performance score",
+  "cases": [
+    {
+      "id": "D1",
+      "description": "Both comparison inputs are in retrieved evidence",
+      "topic": "Calculate the difference and percentage change between cases A and B",
+      "evidence": [
+        {"evidence_id": "KB1", "source_type": "knowledge_base", "text": "Case A permeability = 10 mD."},
+        {"evidence_id": "KB2", "source_type": "knowledge_base", "text": "Case B permeability = 20 mD."}
+      ],
+      "plan": {
+        "purpose": "Calculate difference and percentage change",
+        "input_facts": [
+          {"name": "A", "value": 10, "unit": "mD", "evidence_id": "KB1", "source_excerpt": "Case A permeability = 10 mD."},
+          {"name": "B", "value": 20, "unit": "mD", "evidence_id": "KB2", "source_excerpt": "Case B permeability = 20 mD."}
+        ],
+        "formula": "difference = B - A; percent_change = difference / A * 100"
+      },
+      "expected_stage": "CALC_VALIDATED"
+    },
+    {
+      "id": "D2",
+      "description": "Numeric facts exist only in the task prompt, not retrieved evidence",
+      "topic": "A = 10 mD, B = 20 mD. Calculate difference and percentage change",
+      "evidence": [
+        {"evidence_id": "KB1", "source_type": "knowledge_base", "text": "Percentage change is (B - A) / A * 100."}
+      ],
+      "plan": {
+        "purpose": "Calculate difference and percentage change",
+        "input_facts": [
+          {"name": "A", "value": 10, "unit": "mD", "evidence_id": "USER1", "source_excerpt": "A = 10 mD"},
+          {"name": "B", "value": 20, "unit": "mD", "evidence_id": "USER2", "source_excerpt": "B = 20 mD"}
+        ],
+        "formula": "difference = B - A; percent_change = difference / A * 100"
+      },
+      "expected_stage": "EVIDENCE_ID_NOT_FOUND"
+    },
+    {
+      "id": "D3",
+      "description": "Task-only inputs with a sourced specialist formula",
+      "topic": "k1=10 mD, k2=20 mD, h1=1 m, h2=2 m. Calculate effective permeability",
+      "evidence": [
+        {"evidence_id": "KB1", "source_type": "knowledge_base", "text": "For parallel beds: k_eff = (k1*h1 + k2*h2)/(h1+h2)."}
+      ],
+      "plan": {
+        "purpose": "Calculate effective permeability",
+        "input_facts": [
+          {"name": "k1", "value": 10, "unit": "mD", "evidence_id": "USER1", "source_excerpt": "k1=10 mD"},
+          {"name": "k2", "value": 20, "unit": "mD", "evidence_id": "USER2", "source_excerpt": "k2=20 mD"},
+          {"name": "h1", "value": 1, "unit": "m", "evidence_id": "USER3", "source_excerpt": "h1=1 m"},
+          {"name": "h2", "value": 2, "unit": "m", "evidence_id": "USER4", "source_excerpt": "h2=2 m"}
+        ],
+        "formula": "k_eff = (k1*h1 + k2*h2)/(h1+h2)",
+        "supporting_evidence_ids": ["KB1"]
+      },
+      "expected_stage": "EVIDENCE_ID_NOT_FOUND"
+    },
+    {
+      "id": "D4",
+      "description": "Both specialist formula and all inputs are in retrieved evidence",
+      "topic": "Calculate effective permeability for two parallel beds",
+      "evidence": [
+        {"evidence_id": "KB1", "source_type": "knowledge_base", "text": "For parallel beds: k_eff = (k1*h1 + k2*h2)/(h1+h2)."},
+        {"evidence_id": "KB2", "source_type": "knowledge_base", "text": "Bed 1: k1=10 mD; h1=1 m. Bed 2: k2=20 mD; h2=2 m."}
+      ],
+      "plan": {
+        "purpose": "Calculate effective permeability",
+        "input_facts": [
+          {"name": "k1", "value": 10, "unit": "mD", "evidence_id": "KB2", "source_excerpt": "k1=10 mD"},
+          {"name": "k2", "value": 20, "unit": "mD", "evidence_id": "KB2", "source_excerpt": "k2=20 mD"},
+          {"name": "h1", "value": 1, "unit": "m", "evidence_id": "KB2", "source_excerpt": "h1=1 m"},
+          {"name": "h2", "value": 2, "unit": "m", "evidence_id": "KB2", "source_excerpt": "h2=2 m"}
+        ],
+        "formula": "k_eff = (k1*h1 + k2*h2)/(h1+h2)",
+        "supporting_evidence_ids": ["KB1"]
+      },
+      "expected_stage": "CALC_VALIDATED"
+    },
+    {
+      "id": "D5",
+      "description": "Fact value matches, but the stated unit does not occur in its excerpt",
+      "topic": "Calculate difference and percentage change",
+      "evidence": [
+        {"evidence_id": "KB1", "source_type": "knowledge_base", "text": "Case A permeability = 10 mD; Case B permeability = 20 mD."}
+      ],
+      "plan": {
+        "purpose": "Calculate difference and percentage change",
+        "input_facts": [
+          {"name": "A", "value": 10, "unit": "psi", "evidence_id": "KB1", "source_excerpt": "Case A permeability = 10 mD"},
+          {"name": "B", "value": 20, "unit": "mD", "evidence_id": "KB1", "source_excerpt": "Case B permeability = 20 mD"}
+        ],
+        "formula": "difference = B - A; percent_change = difference / A * 100"
+      },
+      "expected_stage": "UNIT_NOT_IN_EXCERPT"
+    },
+    {
+      "id": "D6",
+      "description": "Numbers are sourced, but a specialist formula has no source ID",
+      "topic": "Calculate effective permeability",
+      "evidence": [
+        {"evidence_id": "KB1", "source_type": "knowledge_base", "text": "Bed 1: k1=10 mD; h1=1 m. Bed 2: k2=20 mD; h2=2 m."}
+      ],
+      "plan": {
+        "purpose": "Calculate effective permeability",
+        "input_facts": [
+          {"name": "k1", "value": 10, "unit": "mD", "evidence_id": "KB1", "source_excerpt": "k1=10 mD"},
+          {"name": "k2", "value": 20, "unit": "mD", "evidence_id": "KB1", "source_excerpt": "k2=20 mD"}
+        ],
+        "formula": "k_eff = (k1+k2)/2"
+      },
+      "expected_stage": "FORMULA_PROVENANCE_MISSING"
+    },
+    {
+      "id": "D7",
+      "description": "Valid plan and facts but execution approval is absent",
+      "topic": "Calculate difference and percentage change",
+      "evidence": [
+        {"evidence_id": "KB1", "source_type": "knowledge_base", "text": "Case A permeability = 10 mD."},
+        {"evidence_id": "KB2", "source_type": "knowledge_base", "text": "Case B permeability = 20 mD."}
+      ],
+      "plan": {
+        "purpose": "Calculate difference and percentage change",
+        "input_facts": [
+          {"name": "A", "value": 10, "unit": "mD", "evidence_id": "KB1", "source_excerpt": "Case A permeability = 10 mD."},
+          {"name": "B", "value": 20, "unit": "mD", "evidence_id": "KB2", "source_excerpt": "Case B permeability = 20 mD."}
+        ],
+        "formula": "difference = B - A; percent_change = difference / A * 100"
+      },
+      "python_execution_approved": false,
+      "expected_stage": "PERMISSION_NOT_APPROVED"
+    },
+    {
+      "id": "D8",
+      "description": "A validated D1 plan is requested again and must hit the cache",
+      "reuse_case": "D1",
+      "expected_stage": "CACHE_HIT"
+    }
+  ]
+}
