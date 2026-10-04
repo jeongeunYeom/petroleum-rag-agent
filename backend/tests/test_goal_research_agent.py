@@ -538,3 +538,23 @@ def test_goal_loop_never_calls_tool_planner_without_approval():
             ),
         ))
         assert result.python_calls_total == 0
+
+
+def test_optional_python_planning_failure_does_not_fail_research():
+    class ToolPlanner:
+        async def decide(self, *_args):
+            raise RuntimeError("planner unavailable")
+
+    agent = GoalResearchAgent(
+        FakeResearchAgent([research_response("1")]), object(),
+        planner=GoalPlanner(object()), evaluator=FakeEvaluator([evaluation(1.0, achieved=True)]),
+        synthesizer=synthesize, tool_planner=ToolPlanner(),
+    )
+    result = asyncio.run(agent.run(
+        "GR-TEST", GoalResearchRequest(
+            topic="Compare cases", success_criteria=CRITERIA,
+            allow_python_execution=True, python_execution_approved=True,
+        ),
+    ))
+    assert result.status == GoalStatus.ACHIEVED
+    assert result.validation["python_analysis_error"] == "planner unavailable"

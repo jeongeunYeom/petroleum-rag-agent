@@ -273,6 +273,7 @@ class GoalResearchAgent:
 
             python_requested = False
             python_decision_reason = ""
+            python_error = None
             python_executed = False
             computation_ids: list[str] = []
             generated_artifacts: list[str] = []
@@ -302,7 +303,7 @@ class GoalResearchAgent:
                                 computation_ids.append(computation.computation_id)
                                 generated_artifacts.extend(computation.output_files)
                 except (ValueError, RuntimeError, OSError, PermissionError) as exc:
-                    result.validation["python_analysis_error"] = str(exc)[:500]
+                    python_error = str(exc)[:500]
             if analysis is not None:
                 result.python_calls_total = analysis.calls
                 result.python_attempts_total = analysis.attempts
@@ -402,6 +403,7 @@ class GoalResearchAgent:
                 "unsupported_engineering_claim_count": latest_evaluation.unsupported_engineering_claim_count,
                 "criteria_frozen": True,
                 "research_validation": research_response.validation,
+                **({"python_analysis_error": python_error} if python_error else {}),
             }
             self._notify(result, on_progress)
 
