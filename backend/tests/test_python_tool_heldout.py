@@ -9,6 +9,7 @@ from types import SimpleNamespace
 
 from scripts import run_python_tool_heldout as runner
 from scripts import score_python_tool_heldout as scorer
+from scripts import adjudicate_python_tool_heldout as adjudicator
 
 
 BENCHMARK, MANIFEST = runner.load_and_validate()
@@ -122,3 +123,23 @@ def test_failure_attribution_and_paired_bootstrap_are_deterministic():
     first = scorer.bootstrap([0, 1, 0], [1, 1, 0])
     assert first == scorer.bootstrap([0, 1, 0], [1, 1, 0])
     assert first["delta"] == 1 / 3
+
+
+def test_blind_packet_hides_conditions_and_tool_markers(tmp_path):
+    fixture_row = {"response": {"final_answer": "Python produced [CALC1] using [USER1].", "internal_sources": []}}
+    raw = {condition: {"results": [fixture_row for _ in TASKS]} for condition in ("python_off", "python_on")}
+    packet, mapping = scorer.blind_packet(TASKS, raw, tmp_path)
+    encoded = json.dumps(packet)
+    assert len(packet) == len(mapping) == 20
+    assert all(item["anonymous_id"].startswith("AR-") for item in packet)
+    assert not any(token in encoded for token in ("python_off", "python_on", "CALC1", "USER1", "tool_selected"))
+
+
+def test_manual_adjudication_is_complete_and_separate():
+    audit = json.loads(adjudicator.ADJUDICATION.read_text(encoding="utf-8"))
+    assert audit["original_review_preserved"] and audit["original_score_preserved"]
+    assert set(audit["task_decisions"]) == {task["task_id"] for task in TASKS}
+    for task in TASKS:
+        decision = audit["task_decisions"][task["task_id"]]
+        assert set(decision["criterion_passed"]) == {item["criterion_id"] for item in task["success_criteria"]}
+        assert set(decision["unit_supported_targets"]) <= {target["name"] for target in task["ground_truth"]["numeric_targets"]}

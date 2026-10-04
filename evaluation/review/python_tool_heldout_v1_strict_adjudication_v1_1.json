@@ -1,0 +1,69 @@
+{
+  "adjudication_id": "python_tool_heldout_v1_strict_adjudicated_v1_1",
+  "run_id": "python-heldout-v1-20261004T143509Z",
+  "method": "Manual QA of all 20 raw task-condition rows, keeping the original blind reviewer unchanged. Paired final answers and retrieved source locators were byte-identical for all ten tasks, so each verified task decision applies to both conditions.",
+  "original_review_preserved": true,
+  "original_score_preserved": true,
+  "task_decisions": {
+    "PY-RE-001": {
+      "criterion_passed": {"C1": true, "C2": false, "C3": false},
+      "hallucination": true, "engineering_contradiction": true,
+      "unit_supported_targets": ["total_thickness", "k_effective"],
+      "reason": "KB1 actually states the thickness-weighted parallel formula, so the blind review's C1=false was a false negative. The final 134.36 mD contradicts independently computed 121.5 mD, its kh-share formula omits permeability, and its L4>L6>L2 ranking is wrong; only total thickness 70 ft is numerically correct. No requested kh percentages are given."
+    },
+    "PY-RE-002": {
+      "criterion_passed": {"C1": false, "C2": false, "C3": false},
+      "hallucination": true, "engineering_contradiction": true,
+      "unit_supported_targets": [],
+      "reason": "No length-weighted harmonic calculation, comparison values, or percentage are supplied. The answer invents B2=9 mD as the bottleneck; user data say B1=30 mD is the lowest. Cited KB1/KB5 excerpts do not establish the requested series formula."
+    },
+    "PY-RE-003": {
+      "criterion_passed": {"C1": false, "C2": false, "C3": false},
+      "hallucination": true, "engineering_contradiction": false,
+      "unit_supported_targets": [],
+      "reason": "The final answer contains no PI calculation or ranking; its limitations inject unrelated claims about vitamin D, depression, and sunlight that have no task or retrieved-evidence basis."
+    },
+    "PY-RE-004": {
+      "criterion_passed": {"C1": true, "C2": false, "C3": false},
+      "hallucination": true, "engineering_contradiction": true,
+      "unit_supported_targets": [],
+      "reason": "The STOIIP relation is correctly written and KB4 page 32 directly supports it, contrary to reviewer C1=false. No requested volumes or percentage deltas are output. The answer says raising Sw gives the largest loss, but the frozen independent calculation shows lowering phi is largest (-12.20% vs -7.89%)."
+    },
+    "PY-WT-005": {
+      "criterion_passed": {"C1": false, "C2": false, "C3": true},
+      "hallucination": false, "engineering_contradiction": false,
+      "unit_supported_targets": [],
+      "reason": "The RFT table exists in KB page 81 but was absent from this run's retrieved excerpts; the answer refuses the numeric fit and provides no slope/RMSE/residual depth. Its caution against a unique contact from one global fit is supportable. This is retrieval failure, not an invented table value."
+    },
+    "PY-RE-006": {
+      "criterion_passed": {"C1": true, "C2": false, "C3": false},
+      "hallucination": true, "engineering_contradiction": true,
+      "unit_supported_targets": [],
+      "reason": "Cited KB3 page 32 contains A*h*phi*(1-Sw)/Bo and KB4 page 33 contains reserves=STOIIP*RF, so C1 passes despite reviewer C1=false. No block or total values are calculated. The answer falsely calls North the largest in-place block; South is 1,789,200 vs North 1,778,400 stock-tank m3."
+    },
+    "PY-RE-007": {
+      "criterion_passed": {"C1": true, "C2": true, "C3": false},
+      "hallucination": true, "engineering_contradiction": false,
+      "unit_supported_targets": ["additional_recoverable"],
+      "reason": "80,000 stock-tank m3 and the cited reserves relation are correct. The sentence 'Changed assumed RF from a proven field-performance forecast' does not distinguish a what-if RF sensitivity from a proven forecast, and limitations incorrectly suggest the input STOIIP is unavailable despite its explicit user value. Blind reviewer C3=true was too permissive."
+    },
+    "PY-WT-008": {
+      "criterion_passed": {"C1": true, "C2": true, "C3": true},
+      "hallucination": false, "engineering_contradiction": false,
+      "unit_supported_targets": ["gradient_difference"],
+      "reason": "The final answer reports 0.03 psi/ft, cites KB4 reservoir-engineering page 63 for hydrostatic/salinity context, and its limitations explicitly withhold definitive fluid/contact inference. The blind reviewer marked C2=false despite its own note acknowledging correct KB4 context; this is a false negative."
+    },
+    "PY-WT-009": {
+      "criterion_passed": {"C1": true, "C2": true, "C3": true},
+      "hallucination": false, "engineering_contradiction": false,
+      "unit_supported_targets": [],
+      "reason": "The answer identifies the one-over-two log-slope as linear flow with cited KB4 page 775, a horizontal derivative as radial with cited KB2 page 774, and limits unique fracture inference. The blind reviewer note agreed but its C1 quote gate returned false. C2 was incorrectly omitted from the original blind packet despite being qualitative."
+    },
+    "PY-WT-010": {
+      "criterion_passed": {"C1": true, "C2": true, "C3": true},
+      "hallucination": false, "engineering_contradiction": false,
+      "unit_supported_targets": [],
+      "reason": "The final answer correctly treats produced-field pressure as dynamic, requires evidence-based supercharging screening, and avoids barrier/contact certainty. The retrieved KB2 page 438 and KB1/KB3 page 464 support the context. C2 was qualitative but incorrectly omitted from the original blind packet; manual QA confirms it."
+    }
+  }
+}
