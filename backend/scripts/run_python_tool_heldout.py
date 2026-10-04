@@ -136,7 +136,11 @@ def preflight_kb(manifest: dict, benchmark: dict) -> None:
     if settings.data_dir != Path(kb["data_dir"]) or settings.retrieval_mode != kb["retrieval_mode"]:
         raise ValueError("DATA_DIR/retrieval mode does not match frozen production setting")
     import chromadb
-    collection = chromadb.PersistentClient(path=str(settings.vector_db_dir)).get_collection(kb["collection"])
+    from chromadb.config import Settings as ChromaSettings
+    collection = chromadb.PersistentClient(
+        path=str(settings.vector_db_dir),
+        settings=ChromaSettings(anonymized_telemetry=settings.anonymized_telemetry),
+    ).get_collection(kb["collection"])
     if collection.count() != kb["chunks"]:
         raise ValueError("Real KB chunk count mismatch")
     metadata = collection.get(include=["metadatas"])["metadatas"]
