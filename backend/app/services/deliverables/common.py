@@ -27,6 +27,7 @@ def metadata_lines(result: GoalResearchResponse) -> list[str]:
         f"Run ID: {result.run_id}",
         f"Generated UTC: {datetime.now(timezone.utc).isoformat(timespec='seconds')}",
         f"Goal status: {result.status.value}",
+        f"Coverage: {result.goal_coverage_percent:.0f}%",
         f"Hypothesis status: {result.expected_result_status.value}",
         f"Iterations: {result.iterations_completed}",
         provenance(result),

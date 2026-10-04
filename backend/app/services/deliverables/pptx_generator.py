@@ -37,7 +37,7 @@ def generate_pptx(result: GoalResearchResponse, path: Path, chart_paths: list[Pa
 
     slide(safe_text(result.topic)[:90], ["Goal Research Presentation", *metadata_lines(result)[:5]])
     slide("Research Background", [result.topic, f"Goal status: {result.status.value}"])
-    slide("Goal and Hypothesis", [result.goal or result.topic, f"Hypothesis: {result.expected_result or 'not provided'}", f"Assessment: {result.expected_result_status.value}"])
+    slide("Goal and Hypothesis", [result.goal or result.topic, f"Hypothesis: {result.expected_result or 'Not provided'}", f"Assessment: {result.expected_result_status.value if result.expected_result else 'Not applicable'}"])
     slide("Research Method", ["Iterative retrieval, evidence accumulation and synthesis", "Criterion evaluation and gap-directed replanning", "Approved, validated calculations are recorded as CALC results"])
     slide("Evidence", [
         f"Knowledge base sources: {len(result.internal_sources)}",
@@ -73,8 +73,9 @@ def generate_pptx(result: GoalResearchResponse, path: Path, chart_paths: list[Pa
         ] or ["No validated numerical result"])
     findings = [line.strip() for line in result.final_answer.splitlines() if line.strip() and not line.startswith("Limitations:")][:4]
     slide("Main Results", [*(findings or ["No supported finding was established."]), f"Coverage: {result.goal_coverage_percent:.0f}%"])
-    slide("Hypothesis Evaluation", [f"Expected: {result.expected_result or 'not provided'}", f"Assessment: {result.expected_result_status.value}"])
-    gaps = list(dict.fromkeys(gap for item in result.iterations for gap in item.gap_analysis))
-    slide("Limitations", gaps[:5] or ["No specific gap was recorded."])
+    slide("Hypothesis Evaluation", [f"Expected: {result.expected_result or 'Not provided'}", f"Assessment: {result.expected_result_status.value if result.expected_result else 'Not applicable'}"])
+    limitations = result.final_limitations or ["No unresolved limitation relevant to the requested goal."]
+    for offset in range(0, len(limitations), 5):
+        slide("Limitations", limitations[offset:offset + 5])
     slide("Conclusion", [f"Goal: {result.status.value}", f"Stop reason: {result.stop_reason.value if result.stop_reason else 'not recorded'}", f"Iterations: {result.iterations_completed}"])
     deck.save(path)

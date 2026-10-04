@@ -58,6 +58,7 @@ export type GoalResearchRun = {
   status: string;
   stop_reason?: string | null;
   final_answer: string;
+  final_limitations: string[];
   goal_coverage: number;
   goal_coverage_percent: number;
   criteria_source: "user" | "inferred";

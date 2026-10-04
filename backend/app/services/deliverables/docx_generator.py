@@ -61,6 +61,9 @@ def generate_docx(result: GoalResearchResponse, path: Path, chart_paths: list[Pa
         [str(item.iteration), f"{item.goal_coverage:.0%}", item.research_query, ", ".join(item.computation_ids) or "—"]
         for item in result.iterations
     ] or [["—", "—", "No completed iteration", "—"]])
+    for item in result.iterations:
+        if item.gap_analysis:
+            document.add_paragraph(f"Iteration {item.iteration} historical gap: {'; '.join(item.gap_analysis)}")
     document.add_heading("7 Calculation and Data Analysis", level=1)
     _table(document, ["ID", "Purpose", "Sources", "Status"], [
         [item.computation_id, item.purpose, ", ".join(item.source_evidence_ids), "validated" if item.validation_passed else "failed"]
@@ -71,15 +74,14 @@ def generate_docx(result: GoalResearchResponse, path: Path, chart_paths: list[Pa
         caption = document.add_paragraph(f"Validated analysis chart {chart.stem}")
         caption.style = "Caption"
     section_text("8 Main Findings", result.final_answer or "No supported finding was established.")
-    section_text("9 Hypothesis Evaluation", f"{result.expected_result_status.value}. {result.expected_result or 'No hypothesis provided.'}")
+    section_text("9 Hypothesis Evaluation", f"{result.expected_result_status.value}. {result.expected_result}" if result.expected_result else "Not applicable. No hypothesis was provided.")
     document.add_heading("10 Goal Criteria Evaluation", level=1)
     by_id = {item.criterion_id: item for item in result.criteria}
     _table(document, ["ID", "Criterion", "Status", "Evidence"], [
         [item.criterion_id, item.description, by_id[item.criterion_id].status.value if item.criterion_id in by_id else "unmet", ", ".join(by_id[item.criterion_id].supporting_evidence) if item.criterion_id in by_id else "—"]
         for item in result.frozen_criteria
     ] or [["—", "No criteria", "—", "—"]])
-    gaps = [gap for item in result.iterations for gap in item.gap_analysis]
-    section_text("11 Limitations", "; ".join(dict.fromkeys(gaps)) or "No specific gap was recorded.")
+    section_text("11 Limitations", "; ".join(result.final_limitations) or "No unresolved limitation relevant to the requested goal.")
     section_text("12 Conclusion", f"Goal status: {result.status.value}. Stop reason: {result.stop_reason.value if result.stop_reason else 'not recorded'}. {result.final_answer}")
     section_text("13 Sources and Provenance", provenance(result))
     footer = section.footer.paragraphs[0]

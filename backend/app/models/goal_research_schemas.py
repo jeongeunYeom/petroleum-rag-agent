@@ -195,6 +195,7 @@ class GoalResearchResponse(BaseModel):
     status: GoalStatus = GoalStatus.PENDING
     stop_reason: GoalStopReason | None = None
     final_answer: str = ""
+    final_limitations: list[str] = Field(default_factory=list)
     goal_coverage: float = Field(default=0.0, ge=0, le=1)
     goal_coverage_percent: float = Field(default=0.0, ge=0, le=100)
     criteria_source: str = "user"

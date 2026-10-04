@@ -31,6 +31,7 @@ from app.services.goal_evaluator import GoalEvaluationResult, GoalEvaluator
 from app.services.goal_planner import GoalPlanner
 from app.services.goal_tool_planner import GoalToolPlanner
 from app.services.goal_python_analysis import GoalPythonAnalysis
+from app.services.goal_result_summary import resolve_final_limitations, without_limitations
 from app.core.config import get_settings
 
 
@@ -517,6 +518,9 @@ class GoalResearchAgent:
                     "hypothesis; explicitly report contradiction or insufficient evidence. "
                     "For every claim, put supporting KB/WEB/FIG/CALC IDs in citations. "
                     "A CALC-derived claim must also cite its underlying source evidence IDs. "
+                    "If expected_hypothesis is null, do not assess or invent a hypothesis; "
+                    "return an empty hypothesis_assessment. "
+                    "List only limitations still unresolved by the current evidence, never resolved prior gaps. "
                     "Do not invent evidence, values, tools, files, or actions. Return JSON."
                 ),
             },
@@ -576,6 +580,7 @@ class GoalResearchAgent:
                 claim
                 and citations
                 and not claim.lower().startswith("expected-result assessment")
+                and (request.expected_result is not None or not re.search(r"\b(?:hypothesis|expected[ -]result)\b", claim, re.I))
             ):
                 if calc_sources and re.search(r"calculat|percentage change|difference|chart|plot|graph|계산|변화율|차이|그래프", claim, re.IGNORECASE) and not any(value in calc_sources for value in citations):
                     continue
@@ -604,7 +609,7 @@ class GoalResearchAgent:
         assessment_citations = list(dict.fromkeys(
             assessment_citations + [source for citation in assessment_citations for source in calc_sources.get(citation, []) if source in valid_ids]
         ))
-        if assessment_claim and assessment_citations:
+        if request.expected_result is not None and assessment_claim and assessment_citations:
             rendered = " ".join(f"[{value}]" for value in assessment_citations)
             lines.append(f"Expected-result assessment: {assessment_claim} {rendered}")
         limitations = [
@@ -656,6 +661,12 @@ class GoalResearchAgent:
         result.status = status
         result.stop_reason = stop_reason
         result.final_answer = answer
+        if result.expected_result is None:
+            result.expected_result_status = ExpectedResultStatus.NOT_PROVIDED
+        result.final_limitations = resolve_final_limitations(result)
+        result.final_answer = without_limitations(answer)
+        if result.final_limitations:
+            result.final_answer = (result.final_answer + "\n\nLimitations: " + "; ".join(result.final_limitations)).strip()
         result.current_stage = "finalize"
         result.timing["elapsed_seconds"] = round(time.perf_counter() - started, 6)
         result.timing["research_seconds"] = round(
