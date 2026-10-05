@@ -32,6 +32,10 @@ from app.services.goal_evaluator import GoalEvaluationResult, GoalEvaluator
 from app.services.goal_planner import GoalPlanner
 from app.services.goal_tool_planner import GoalToolPlanner
 from app.services.goal_python_analysis import GoalPythonAnalysis
+from app.services.calculation_contract import CalculationContractBuilder
+from app.services.evidence_fact_registry import EvidenceFactRegistry
+from app.services.formula_source_registry import FormulaSourceRegistry
+from app.services.calc_claim_grounding import validate_calc_claim
 from app.services.goal_result_summary import resolve_final_limitations, without_limitations
 from app.services.user_fact_registry import UserFactRegistry
 from app.core.config import get_settings
@@ -47,6 +51,7 @@ SYNTHESIS_SCHEMA = {
                 "properties": {
                     "claim": {"type": "string"},
                     "citations": {"type": "array", "items": {"type": "string"}},
+                    "output_ids": {"type": "array", "items": {"type": "string"}},
                 },
                 "required": ["claim", "citations"],
                 "additionalProperties": False,
@@ -57,6 +62,7 @@ SYNTHESIS_SCHEMA = {
             "properties": {
                 "claim": {"type": "string"},
                 "citations": {"type": "array", "items": {"type": "string"}},
+                "output_ids": {"type": "array", "items": {"type": "string"}},
             },
             "required": ["claim", "citations"],
             "additionalProperties": False,
@@ -172,6 +178,7 @@ class GoalResearchAgent:
         evaluator: GoalEvaluator | None = None,
         synthesizer: Callable[..., Awaitable[str]] | None = None,
         tool_planner: GoalToolPlanner | None = None,
+        contract_builder: CalculationContractBuilder | None = None,
         analysis_factory: Callable[[str], GoalPythonAnalysis] | None = None,
     ):
         self.research_agent = research_agent
@@ -180,6 +187,7 @@ class GoalResearchAgent:
         self.evaluator = evaluator or GoalEvaluator(ollama)
         self.synthesizer = synthesizer
         self.tool_planner = tool_planner or GoalToolPlanner(ollama)
+        self.contract_builder = contract_builder or CalculationContractBuilder(ollama)
         self.analysis_factory = analysis_factory or (
             lambda run_id: GoalPythonAnalysis(get_settings(), ollama, run_id)
         )
@@ -226,6 +234,7 @@ class GoalResearchAgent:
         latest_candidate = ""
         next_plan = self.planner.initial_plan(request, frozen_criteria)
         analysis = None
+        calculation_recovery_queries = 0
 
         for iteration in range(1, request.max_iterations + 1):
             if is_canceled and is_canceled():
@@ -300,6 +309,54 @@ class GoalResearchAgent:
                         request, frozen_criteria, analysis_evidence, previous_coverage,
                         result.iterations[-1].criteria if result.iterations else None,
                     )
+                    recovery_reasons = {"required_source_unavailable", "fact_registry_empty", "fact_id_unknown",
+                                        "formula_id_unknown", "formula_variable_missing", "formula_not_parseable"}
+                    formula_required = bool(re.search(
+                        r"(?:source|cited|published|documented)\s+(?:equation|formula)|(?:근거|출처)\s*(?:수식|공식)",
+                        " ".join(value for value in (request.goal, request.topic) if value), re.I,
+                    ))
+                    formula_absent = not FormulaSourceRegistry.from_evidence(analysis_evidence).records
+                    missing_source = decision.plan is None and bool(recovery_reasons.intersection(decision.verification_failures))
+                    missing_required_formula = formula_required and formula_absent and decision.selected_formula_id is None
+                    if (decision.tool_needed and request.use_internal and calculation_recovery_queries == 0
+                            and (missing_source or missing_required_formula)):
+                        calculation_recovery_queries = 1
+                        python_trace.recovery_triggered = True
+                        python_trace.recovery_reason = (
+                            sorted(recovery_reasons.intersection(decision.verification_failures))[0]
+                            if missing_source else "formula_source_unavailable"
+                        )
+                        python_trace.recovery_query_count = 1
+                        fact_catalog = {item.fact_id: item.name for item in EvidenceFactRegistry.from_evidence(analysis_evidence).records}
+                        fact_catalog.update({item.fact_id: item.name for item in user_registry.records})
+                        terms = [decision.plan_summary.get("purpose", "") if decision.plan_summary else "",
+                                 *[item.description for item in frozen_criteria],
+                                 *[fact_catalog[value] for value in decision.selected_fact_ids if value in fact_catalog],
+                                 "formula calculation variables"]
+                        recovery_query = re.sub(r"(?<!\w)\d+(?:\.\d+)?(?!\w)", " ",
+                                                " ".join(value.strip() for value in terms if value.strip()))[:500]
+                        recovered = await self.research_agent.research(ResearchRequest(
+                            query=recovery_query, use_internal=True, use_external=False,
+                            engineering_validation=request.engineering_validation, model=request.model,
+                            internal_top_k=request.internal_top_k, external_top_k=request.external_top_k,
+                            temperature=request.temperature, seed=request.seed,
+                        ))
+                        python_trace.recovery_new_source_ids = accumulator.add(recovered)
+                        evidence_added.extend(python_trace.recovery_new_source_ids)
+                        evidence = accumulator.records()
+                        analysis_evidence = evidence + user_sources
+                        python_trace.recovery_efact_count = len(EvidenceFactRegistry.from_evidence(analysis_evidence).records)
+                        python_trace.recovery_formula_count = len(FormulaSourceRegistry.from_evidence(analysis_evidence).records)
+                        decision = await self.tool_planner.decide(
+                            request, frozen_criteria, analysis_evidence, previous_coverage,
+                            result.iterations[-1].criteria if result.iterations else None,
+                        )
+                        python_trace.recovery_materialization_success = (
+                            decision.plan is not None and (not formula_required or decision.selected_formula_id is not None)
+                        )
+                        if not python_trace.recovery_materialization_success:
+                            python_trace.blocked_stage = "calculation_source_recovery_failed"
+                            decision.plan = None
                     python_requested = decision.tool_needed
                     python_decision_reason = decision.reason
                     python_trace.tool_selected = decision.tool_needed
@@ -319,7 +376,7 @@ class GoalResearchAgent:
                     python_trace.verification_failures_structured = decision.verification_failures_structured.copy()
                     python_trace.verification_failures = decision.verification_failures.copy()
                     python_trace.plan_summary = decision.plan_summary
-                    python_trace.blocked_stage = (
+                    python_trace.blocked_stage = python_trace.blocked_stage or (
                         "planner_decision_parse_failed" if decision.decision_status == "planner_decision_parse_failed"
                         else "planner_not_selected" if not decision.tool_needed
                         else "planner_plan_parse_failed" if decision.plan_status == "planner_plan_parse_failed"
@@ -336,9 +393,24 @@ class GoalResearchAgent:
                             except (ValueError, RuntimeError, OSError, PermissionError):
                                 python_trace.blocked_stage = "analysis_initialization_failed"
                                 raise
-                        computation, python_executed = await analysis.execute(
-                            request, decision.plan, analysis_evidence, trace=python_trace
-                        )
+                        if all(fact.canonical_fact_id for fact in decision.plan.input_facts):
+                            contract, contract_status, contract_attempts = await self.contract_builder.build(request, decision.plan)
+                            python_trace.contract_status = contract_status
+                            python_trace.contract_attempts = contract_attempts
+                            python_trace.calculation_contract_id = contract.contract_id if contract else None
+                            python_trace.required_output_ids = [item.output_id for item in contract.required_outputs if item.required] if contract else []
+                            if contract is None:
+                                python_trace.blocked_stage = contract_status
+                                computation, python_executed = None, False
+                            else:
+                                computation, python_executed = await analysis.execute(
+                                    request, decision.plan, analysis_evidence, trace=python_trace, contract=contract
+                                )
+                        else:
+                            # Persisted pre-v4 plans have no canonical IDs and retain their legacy execution contract.
+                            computation, python_executed = await analysis.execute(
+                                request, decision.plan, analysis_evidence, trace=python_trace
+                            )
                         if computation is None and analysis.last_error:
                             python_decision_reason = f"{python_decision_reason} {analysis.last_error}".strip()
                         if computation is not None:
@@ -371,9 +443,9 @@ class GoalResearchAgent:
                         "source_input_ids": computation.source_input_ids,
                         "formula_evidence_ids": computation.formula_evidence_ids,
                         "output_files": computation.output_files,
+                        "output_manifest": computation.output_manifest,
                     })
-            if any(item.validation_passed and item.source_input_ids for item in result.computations):
-                evidence.extend(user_sources)
+            evidence.extend(user_sources)
 
             result.current_stage = "synthesize"
             self._notify(result, on_progress)
@@ -383,6 +455,8 @@ class GoalResearchAgent:
                 frozen_criteria,
                 evidence,
                 result.iterations,
+                computations=result.computations,
+                python_trace=python_trace,
             )
             synthesis_seconds = time.perf_counter() - synthesis_started
 
@@ -535,6 +609,8 @@ class GoalResearchAgent:
         criteria: list[GoalCriterion],
         evidence: list[dict[str, Any]],
         previous: list[GoalIterationRecord],
+        computations: list[Any] | None = None,
+        python_trace: PythonExecutionTrace | None = None,
     ) -> str:
         if not evidence:
             return (
@@ -547,6 +623,7 @@ class GoalResearchAgent:
             {
                 **{key: item[key] for key in ("evidence_id", "source_type", "locator")},
                 "text": str(item["text"])[:1200],
+                **({"output_manifest": item.get("output_manifest", {})} if item["source_type"] == "calculation" else {}),
             }
             for item in evidence
         ]
@@ -567,6 +644,7 @@ class GoalResearchAgent:
                     "material claim with its evidence ID. The expected result is only a "
                     "hypothesis; explicitly report contradiction or insufficient evidence. "
                     "For every claim, put supporting KB/WEB/FIG/CALC IDs in citations. "
+                    "For each CALC claim state exact output name, value and unit, and include its output_ids. "
                     "A CALC-derived claim must also cite its underlying source evidence IDs. "
                     "USER IDs mark task-provided calculation inputs, not scientific literature or formula evidence. "
                     "If expected_hypothesis is null, do not assess or invent a hypothesis; "
@@ -614,20 +692,87 @@ class GoalResearchAgent:
             str(item["evidence_id"]): list(dict.fromkeys(item.get("source_evidence_ids", []) + item.get("source_input_ids", []) + item.get("formula_evidence_ids", [])))
             for item in evidence if item["source_type"] == "calculation"
         }
+        valid_calcs = {item.computation_id: item for item in (computations or []) if item.validation_passed}
+
+        def citations_for(item: dict[str, Any]) -> list[str]:
+            raw = [str(value) for value in item.get("citations", [])]
+            values = list(dict.fromkeys(value.split("#", 1)[0] for value in raw
+                                        if value.split("#", 1)[0] in valid_ids))
+            underlying: list[str] = []
+            for citation in values:
+                record = valid_calcs.get(citation)
+                refs = outputs_for(item)
+                if record and record.output_manifest and refs:
+                    source_map = {str(fact.get("canonical_fact_id") or fact.get("evidence_id")): str(fact.get("evidence_id"))
+                                  for fact in record.input_facts}
+                    for ref in refs:
+                        if ref.startswith(f"{citation}:"):
+                            spec = record.output_manifest.get(ref.split(":", 1)[1], {})
+                            underlying.extend(source_map.get(fact_id, fact_id) for fact_id in spec.get("source_fact_ids", []))
+                    underlying.extend(record.formula_evidence_ids)
+                else:
+                    underlying.extend(calc_sources.get(citation, []))
+            return list(dict.fromkeys(values + [source for source in underlying if source in valid_ids]))
+
+        def outputs_for(item: dict[str, Any]) -> list[str]:
+            refs = [*item.get("output_ids", []), *item.get("citations", [])]
+            resolved = []
+            for raw_value in refs:
+                value = str(raw_value).replace("#", ":", 1)
+                if ":" in value and value.split(":", 1)[0] in valid_calcs:
+                    resolved.append(value)
+                else:
+                    matches = [f"{calc_id}:{value}" for calc_id, record in valid_calcs.items()
+                               if value in record.output_manifest]
+                    resolved.extend(matches if len(matches) == 1 else [value] if matches else [])
+            return list(dict.fromkeys(resolved))
+
+        def grounding_failures(candidate: dict[str, Any]) -> tuple[list[str], set[str]]:
+            issues: list[str] = []
+            adopted: set[str] = set()
+            checked = [*candidate.get("claims", [])]
+            if request.expected_result is not None:
+                checked.append(candidate.get("hypothesis_assessment") or {})
+            for item in checked:
+                claim = str(item.get("claim") or "").strip()
+                if not claim:
+                    continue
+                failures, used = validate_calc_claim(
+                    claim, citations_for(item), outputs_for(item), valid_calcs, evidence,
+                )
+                issues.extend(failures)
+                adopted.update(used)
+            return list(dict.fromkeys(issues)), adopted
+
+        issues, adopted = grounding_failures(parsed)
+        if issues:
+            repair_messages = [*messages, {"role": "user", "content": json.dumps({
+                "grounding_failures": issues,
+                "allowed_calc_outputs": {key: value.output_manifest for key, value in valid_calcs.items()},
+                "instruction": "Repair only unsupported calculation claims/citations. Use exact output IDs, values, units and source IDs; omit claims not supported. Return JSON only.",
+            }, ensure_ascii=False)}]
+            try:
+                repaired = json.loads((await self.ollama.chat_structured(
+                    repair_messages, SYNTHESIS_SCHEMA, model=request.model,
+                    temperature=request.temperature, seed=request.seed,
+                )).strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip())
+                if isinstance(repaired, dict):
+                    parsed = repaired
+            except (TypeError, ValueError):
+                pass
+            issues, adopted = grounding_failures(parsed)
+        if python_trace:
+            python_trace.calc_grounding_validation_passed = not issues if valid_calcs or issues else None
+            python_trace.calc_grounding_failures = issues
+            python_trace.calc_output_adoption_count = len(adopted)
+            python_trace.calc_required_output_count = sum(len(item.required_output_ids) for item in valid_calcs.values())
+            python_trace.calc_adoption_coverage = round(len(adopted) / python_trace.calc_required_output_count, 6) if python_trace.calc_required_output_count else 0.0
         lines = []
         for item in parsed.get("claims", []):
             claim = str(item.get("claim") or "").strip()
-            citations = list(
-                dict.fromkeys(
-                    str(value)
-                    for value in item.get("citations", [])
-                    if str(value) in valid_ids
-                )
-            )
-            citations = list(dict.fromkeys(
-                citations + [source for citation in citations for source in calc_sources.get(citation, []) if source in valid_ids]
-            ))
-            if any(value.startswith("USER") for value in citations) and not any(value in calc_sources for value in citations):
+            citations = citations_for(item)
+            claim_issues, _ = validate_calc_claim(claim, citations, outputs_for(item), valid_calcs, evidence)
+            if claim_issues:
                 continue
             if (
                 claim
@@ -641,6 +786,8 @@ class GoalResearchAgent:
         for item in evidence:
             if item["source_type"] != "calculation":
                 continue
+            if item.get("output_manifest"):
+                continue
             calc_id = str(item["evidence_id"])
             source_ids = [value for value in list(dict.fromkeys(item.get("source_evidence_ids", []) + item.get("source_input_ids", []) + item.get("formula_evidence_ids", []))) if value in valid_ids]
             if source_ids:
@@ -652,26 +799,25 @@ class GoalResearchAgent:
                 )
         assessment = parsed.get("hypothesis_assessment") or {}
         assessment_claim = str(assessment.get("claim") or "").strip()
-        assessment_citations = list(
-            dict.fromkeys(
-                str(value)
-                for value in assessment.get("citations", [])
-                if str(value) in valid_ids
-            )
-        )
-        assessment_citations = list(dict.fromkeys(
-            assessment_citations + [source for citation in assessment_citations for source in calc_sources.get(citation, []) if source in valid_ids]
-        ))
-        if any(value.startswith("USER") for value in assessment_citations) and not any(value in calc_sources for value in assessment_citations):
-            assessment_citations = []
-        if request.expected_result is not None and assessment_claim and assessment_citations:
+        assessment_citations = citations_for(assessment)
+        assessment_issues, _ = validate_calc_claim(assessment_claim, assessment_citations,
+                                                   outputs_for(assessment), valid_calcs, evidence)
+        if request.expected_result is not None and assessment_claim and assessment_citations and not assessment_issues:
             rendered = " ".join(f"[{value}]" for value in assessment_citations)
             lines.append(f"Expected-result assessment: {assessment_claim} {rendered}")
         limitations = [
             str(value).strip()
             for value in parsed.get("limitations", [])
             if str(value).strip()
+            and not re.search(r"\b(?:untrusted data|prompt|instructions?)\b", str(value), re.I)
+            and not (request.expected_result is None and re.search(r"expected[ -]hypothesis|expected[ -]result", str(value), re.I))
+            and not (valid_calcs and re.search(r"calculat(?:ion|ed).*?(?:output|result).*?(?:not found|unavailable|not provided|missing)|(?:calculation|difference|result).*?(?:lack of validation|not validated)", str(value), re.I))
         ]
+        limitations = [value for value in limitations if not (
+            (calc_ids := re.findall(r"\bCALC\d+\b", value))
+            and validate_calc_claim(value, list(dict.fromkeys(calc_ids + [source for calc_id in calc_ids
+                for source in calc_sources.get(calc_id, [])])), [], valid_calcs, evidence)[0]
+        )]
         if limitations:
             lines.append("Limitations: " + " ".join(limitations))
         return "\n\n".join(lines).strip()

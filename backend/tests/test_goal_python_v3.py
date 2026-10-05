@@ -247,17 +247,35 @@ class SyntheticOllama:
         properties = schema["properties"]
         if "tool_needed" in properties:
             return yes()
+        if "contract_id" in properties:
+            return json.dumps({"contract_id": "CC1", "purpose": "Calculate productivity index", "target_criteria": ["C1"],
+                               "input_fact_ids": ["USERF1", "USERF2", "USERF3"], "formula_id": "FORMULA1",
+                               "operation_type": "formula", "scenarios": [{"scenario_id": "well", "input_bindings":
+                               {"q": "USERF1", "pr": "USERF2", "pwf": "USERF3"}}],
+                               "required_outputs": [{"output_id": "OUT_PI", "name": "PI", "semantic_type": "numeric",
+                               "unit": "stb/d/psi", "required": True, "scenario_id": "well",
+                               "source_fact_ids": ["USERF1", "USERF2", "USERF3"], "formula_id": "FORMULA1"}]})
         if "purpose" in properties:
             return selection().model_dump_json()
         if "code" in properties:
             payload = json.loads(messages[-1]["content"])
             facts = {item["name"]: item["value"] for item in payload["input_facts"]}
             value = facts["q"] / (facts["pr"] - facts["pwf"])
-            result = {"inputs": facts, "result": {"PI": value}, "summary": "Synthetic PI calculation validated."}
+            if "calculation_contract" in payload:
+                result = {"contract_id": "CC1", "outputs": {"OUT_PI": {"value": value, "unit": "stb/d/psi"}},
+                          "used_input_ids": ["USERF1", "USERF2", "USERF3"], "used_formula_id": "FORMULA1", "summary": "Synthetic PI calculation validated."}
+            else:
+                result = {"inputs": facts, "result": {"PI": value}, "summary": "Synthetic PI calculation validated."}
             code = f"import json\nwith open({payload['output_json']!r}, 'w') as f:\n    json.dump({result!r}, f)\n"
             return json.dumps({"code": code})
         if "claims" in properties:
-            return json.dumps({"claims": [{"claim": "The validated calculation gives a productivity index.", "citations": ["CALC1"]}], "hypothesis_assessment": {"claim": "", "citations": []}, "limitations": []})
+            payload = json.loads(messages[1]["content"])
+            calc = next((item for item in payload["untrusted_evidence"] if item["source_type"] == "calculation"), None)
+            if calc is None:
+                return json.dumps({"claims": [{"claim": "The source contains a productivity-index relation.", "citations": ["KB1"]}],
+                                   "hypothesis_assessment": {"claim": "", "citations": []}, "limitations": []})
+            value = calc["output_manifest"]["OUT_PI"]["value"]
+            return json.dumps({"claims": [{"claim": f"PI is {value} stb/d/psi.", "citations": ["CALC1"], "output_ids": ["OUT_PI"]}], "hypothesis_assessment": {"claim": "", "citations": []}, "limitations": []})
         return json.dumps({"criteria": [{"criterion_id": "C1", "status": "met", "reason": "Validated calculation", "supporting_evidence": ["CALC1"]}], "expected_result_status": "not_provided", "gaps": [], "next_research_need": None, "goal_conflicts_with_evidence": False})
 
 

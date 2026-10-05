@@ -265,12 +265,26 @@ class AgentReplies(FixedCode):
         fields = schema["properties"]
         if "tool_needed" in fields:
             return ToolNeedDecision(tool_needed=True, tool_type="python_calculation", reason="Need numeric result").model_dump_json()
+        if "contract_id" in fields:
+            return json.dumps({"contract_id": "CC1", "purpose": "Calculate pore volume", "target_criteria": ["C1"],
+                               "input_fact_ids": ["USERF1", "USERF2", "USERF3"], "formula_id": "FORMULA1",
+                               "operation_type": "formula", "scenarios": [{"scenario_id": "case", "input_bindings":
+                               {"A": "USERF1", "h": "USERF2", "phi": "USERF3"}}],
+                               "required_outputs": [{"output_id": "OUT_PV", "name": "PV", "semantic_type": "numeric",
+                               "unit": "bbl", "required": True, "scenario_id": "case",
+                               "source_fact_ids": ["USERF1", "USERF2", "USERF3"], "formula_id": "FORMULA1"}]})
         if "purpose" in fields:
             return select(["USERF1", "USERF2", "USERF3"], "FORMULA1").model_dump_json()
         if "code" in fields:
-            return await super().chat_structured(messages, schema, **kwargs)
+            payload = json.loads(messages[-1]["content"])
+            values = {item["name"]: item["value"] for item in payload["input_facts"]}
+            output = {"contract_id": "CC1", "outputs": {"OUT_PV": {"value": 7758 * values["A"] * values["h"] * values["phi"], "unit": "bbl"}},
+                      "used_input_ids": ["USERF1", "USERF2", "USERF3"], "used_formula_id": "FORMULA1", "summary": "Synthetic pore volume."}
+            return json.dumps({"code": f"import json\nwith open({payload['output_json']!r}, 'w') as f:\n    json.dump({output!r}, f)\n"})
         if "claims" in fields:
-            return json.dumps({"claims": [{"claim": "The validated pore volume was calculated.", "citations": ["CALC1"]}],
+            payload = json.loads(messages[-1]["content"])
+            value = next(item for item in payload["untrusted_evidence"] if item["source_type"] == "calculation")["output_manifest"]["OUT_PV"]["value"]
+            return json.dumps({"claims": [{"claim": f"PV is {value} bbl.", "citations": ["CALC1"], "output_ids": ["OUT_PV"]}],
                                "hypothesis_assessment": {"claim": "", "citations": []}, "limitations": []})
         return json.dumps({"criteria": [{"criterion_id": "C1", "status": "met", "reason": "validated calculation",
                                           "supporting_evidence": ["CALC1"]}], "expected_result_status": "not_provided",

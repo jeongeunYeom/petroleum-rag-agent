@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.models.research_schemas import FigureEvidence, InternalEvidence, WebEvidence
 
@@ -149,6 +149,36 @@ class VerificationFailure(BaseModel):
     span_hash: str | None = None
 
 
+class CalculationScenario(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    scenario_id: str
+    input_bindings: dict[str, str]
+
+
+class CalculationOutputSpec(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    output_id: str
+    name: str
+    semantic_type: Literal["numeric", "ranking", "label", "list", "boolean"]
+    unit: str | None = None
+    required: bool = True
+    scenario_id: str | None = None
+    source_fact_ids: list[str] = Field(default_factory=list)
+    formula_id: str | None = None
+
+
+class CalculationContract(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    contract_id: str
+    purpose: str
+    target_criteria: list[str]
+    input_fact_ids: list[str]
+    formula_id: str | None = None
+    operation_type: str
+    scenarios: list[CalculationScenario]
+    required_outputs: list[CalculationOutputSpec]
+
+
 class PythonExecutionTrace(BaseModel):
     tool_selected: bool = False
     tool_type: Literal["none", "python_calculation", "python_plot"] = "none"
@@ -183,6 +213,31 @@ class PythonExecutionTrace(BaseModel):
     subprocess_reached: bool = False
     result_validation_passed: bool = False
     computation_id: str | None = None
+    calculation_contract_id: str | None = None
+    contract_status: str | None = None
+    contract_attempts: int = 0
+    required_output_ids: list[str] = Field(default_factory=list)
+    produced_output_ids: list[str] = Field(default_factory=list)
+    missing_output_ids: list[str] = Field(default_factory=list)
+    used_input_ids: list[str] = Field(default_factory=list)
+    unused_required_input_ids: list[str] = Field(default_factory=list)
+    used_formula_id: str | None = None
+    contract_validation_passed: bool = False
+    execution_validated: bool = False
+    contract_complete: bool = False
+    provenance_validated: bool = False
+    calc_grounding_validation_passed: bool | None = None
+    calc_grounding_failures: list[str] = Field(default_factory=list)
+    calc_output_adoption_count: int = 0
+    calc_required_output_count: int = 0
+    calc_adoption_coverage: float = 0.0
+    recovery_triggered: bool = False
+    recovery_reason: str | None = None
+    recovery_query_count: int = 0
+    recovery_new_source_ids: list[str] = Field(default_factory=list)
+    recovery_efact_count: int = 0
+    recovery_formula_count: int = 0
+    recovery_materialization_success: bool = False
 
 
 class GoalIterationRecord(BaseModel):
@@ -229,6 +284,13 @@ class ComputationRecord(BaseModel):
     attempts: int = 0
     attempt_records: list[dict[str, Any]] = Field(default_factory=list)
     fingerprint: str = ""
+    contract_id: str | None = None
+    required_output_ids: list[str] = Field(default_factory=list)
+    produced_output_ids: list[str] = Field(default_factory=list)
+    used_input_ids: list[str] = Field(default_factory=list)
+    used_formula_id: str | None = None
+    output_manifest: dict[str, dict[str, Any]] = Field(default_factory=dict)
+    contract_validation_passed: bool = False
 
 
 class GeneratedArtifact(BaseModel):
