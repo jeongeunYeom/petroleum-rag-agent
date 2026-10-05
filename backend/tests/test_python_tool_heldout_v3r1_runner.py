@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from scripts.run_python_tool_heldout_v3r1 import load_frozen, make_request
+from scripts.run_python_tool_heldout_v3r1 import digest, load_frozen, make_request
 
 
 def test_frozen_manifest_and_off_on_requests() -> None:
@@ -21,3 +21,11 @@ def test_frozen_manifest_and_off_on_requests() -> None:
     assert off.model_dump(exclude={"allow_python_execution", "python_execution_approved"}) == on.model_dump(
         exclude={"allow_python_execution", "python_execution_approved"}
     )
+
+
+def test_frozen_hash_is_checkout_line_ending_independent(tmp_path) -> None:
+    lf = tmp_path / "lf.json"
+    crlf = tmp_path / "crlf.json"
+    lf.write_bytes(b'{\n  "x": 1\n}\n')
+    crlf.write_bytes(b'{\r\n  "x": 1\r\n}\r\n')
+    assert digest(lf) == digest(crlf)

@@ -24,7 +24,9 @@ def blind_answer(answer: str) -> str:
 
 
 def blind_packet(task: dict, response: dict, blind_id: str) -> dict:
-    numeric_ids = {"C2"} if task["python_expected"] == "required" else ({"C1", "C2"} if task["python_expected"] == "optional" else set())
+    numeric_ids = ({"C2"} if task["python_expected"] == "required" else
+                   {"C1", "C2"} if task["task_id"] == "PY3R1-RE-09" else
+                   {"C1"} if task["task_id"] == "PY3R1-WT-10" else set())
     sources = [{"evidence_id": s["evidence_id"], "document": s["document"], "page": s.get("page"),
                 "excerpt": s.get("excerpt", "")[:1100]} for s in response.get("internal_sources", [])[:12]]
     return {"blind_id": blind_id, "question": {"topic": task["topic"], "goal": task["goal"],

@@ -3,8 +3,9 @@ from __future__ import annotations
 import json
 
 from scripts.review_python_tool_heldout_v3r1 import blind_packet, no_condition_leakage
+from scripts.adjudicate_python_tool_heldout_v3r1 import numeric_criteria
 from scripts.score_python_tool_heldout_v3r1 import (
-    adoption, attribution, calc_score, funnel, numeric_match, paired_bootstrap,
+    adoption, attribution, calc_score, funnel, numeric_match, paired_bootstrap, scoring_targets,
 )
 
 
@@ -12,6 +13,13 @@ def test_numeric_matching_requires_case_and_accepts_fraction_percent() -> None:
     assert numeric_match("A ED = 85.4%", ["A_ED", 0.854, "fraction", 0.005]) == (True, True)
     assert numeric_match("B Bo = 1.2 dimensionless", ["A_Bo", 1.2, "ratio", 0.005]) == (False, False)
     assert numeric_match("R4: 4 psi", ["R4_abs", 4, "psi", 0.01]) == (True, True)
+
+
+def test_explicit_re03_mean_is_derived_from_frozen_case_targets() -> None:
+    task = {"task_id": "PY3R1-RE-03", "ground_truth": {"numeric_targets": [
+        [f"{case}_Fpvg", value, "fraction", 0.005] for case, value in
+        zip("ABCDE", (0.1, 0.2, 0.3, 0.4, 0.5))]}}
+    assert scoring_targets(task)[-1] == ["mean_Fpvg", 0.3, "fraction", 0.005]
 
 
 def test_funnel_aggregates_across_iterations() -> None:
@@ -56,6 +64,15 @@ def test_runtime_retrieval_missing_is_not_preflight_failure() -> None:
                         "calc_created": False}, {"calc_complete": None}, {"numeric_complete": False}) == ["retrieval_source_missing"]
 
 
+def test_disabled_off_condition_is_not_counted_as_planner_failure() -> None:
+    registry = {"retrieved_source_ids": {}, "evidence_registry_recall": None,
+                "formula_registry_recall": None}
+    result = attribution({"python_expected": "required"}, {}, registry,
+                         {"tool_selected": False, "plan_materialized": False, "calc_created": False},
+                         {"calc_complete": None}, {"numeric_complete": False}, "python_off")
+    assert result == ["python_disabled_by_condition"]
+
+
 def test_paired_bootstrap_deterministic() -> None:
     a = paired_bootstrap([(0, 1), (1, 1)], samples=10000, seed=42)
     b = paired_bootstrap([(0, 1), (1, 1)], samples=10000, seed=42)
@@ -63,7 +80,7 @@ def test_paired_bootstrap_deterministic() -> None:
 
 
 def test_blind_packet_removes_condition_and_calc_state() -> None:
-    task = {"topic": "Reference", "goal": "Explain", "python_expected": "required",
+    task = {"task_id": "PY3R1-RE-01", "topic": "Reference", "goal": "Explain", "python_expected": "required",
             "success_criteria": [{"criterion_id": "C1", "description": "Cite"},
                                  {"criterion_id": "C2", "description": "Compute"}]}
     packet = blind_packet(task, {"final_answer": "Python output [CALC1] from [USERF2] [KB1]"}, "BR-001")
@@ -71,3 +88,14 @@ def test_blind_packet_removes_condition_and_calc_state() -> None:
     assert "CALC1" not in json.dumps(packet)
     assert "Python output" not in json.dumps(packet)
     assert [c["criterion_id"] for c in packet["question"]["qualitative_criteria"]] == ["C1"]
+
+
+def test_numeric_criteria_cannot_be_replaced_by_semantic_review() -> None:
+    required = {"task_id": "PY3R1-RE-01", "python_expected": "required"}
+    row = {"target_matches": {"A_Bo": {"value": True, "unit": True},
+                              "B_Bo": {"value": False, "unit": True}}}
+    assert numeric_criteria(required, row) == {"C2": False}
+    optional = {"task_id": "PY3R1-RE-09", "python_expected": "optional"}
+    row = {"target_matches": {"gap_pp": {"value": True, "unit": True},
+                              "relative_gap": {"value": False, "unit": True}}}
+    assert numeric_criteria(optional, row) == {"C1": True, "C2": False}

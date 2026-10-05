@@ -95,6 +95,17 @@ def numeric_score(text: str, targets: list[list]) -> dict:
             "target_matches": {name: {"value": value, "unit": unit} for name, (value, unit) in matches.items()}}
 
 
+def scoring_targets(task: dict) -> list[list]:
+    """Include an explicitly required mean omitted from the frozen target list."""
+    targets = list(task["ground_truth"]["numeric_targets"])
+    if task.get("task_id") == "PY3R1-RE-03":
+        case_values = [item[1] for item in targets if re.fullmatch(r"[A-E]_Fpvg", item[0])]
+        if len(case_values) != 5:
+            raise ValueError("RE-03 requires five frozen Fpvg values")
+        targets.append(["mean_Fpvg", statistics.mean(case_values), "fraction", 0.005])
+    return targets
+
+
 def _source_records(response: dict) -> tuple[list[dict], dict[str, dict]]:
     records = [{"evidence_id": s["evidence_id"], "source_type": "knowledge_base",
                 "locator": f"{s.get('document')} p.{s.get('page')}", "text": s.get("excerpt", "")}
@@ -186,7 +197,7 @@ def calc_score(task: dict, response: dict, workspace: Path) -> dict:
             path = (workspace / raw_path).resolve()
             if path.is_relative_to(workspace.resolve()) and path.is_file() and path.suffix.lower() == ".json":
                 corpus += "\n" + path.read_text(encoding="utf-8")
-    scored = numeric_score(corpus, task["ground_truth"]["numeric_targets"]) if valid else None
+    scored = numeric_score(corpus, scoring_targets(task)) if valid else None
     return {"validated_calc_count": len(valid),
             "calc_numeric_total": scored["numeric_total"] if scored else None,
             "calc_numeric_correct": scored["numeric_correct"] if scored else None,
@@ -219,7 +230,8 @@ def adoption(task: dict, response: dict, numeric: dict, calc: dict, registry: di
             "formula_kb_citation_present": formula_cited, "calc_adopted": adopted}
 
 
-def attribution(task: dict, response: dict, registry: dict, stages: dict, calc: dict, numeric: dict) -> list[str]:
+def attribution(task: dict, response: dict, registry: dict, stages: dict, calc: dict, numeric: dict,
+                condition: str = "python_on") -> list[str]:
     if response.get("error"):
         return ["product_error"]
     if any(not present for present in registry["retrieved_source_ids"].values()):
@@ -231,6 +243,8 @@ def attribution(task: dict, response: dict, registry: dict, stages: dict, calc: 
     blocked = {t.get("blocked_stage") for i in response.get("iterations", []) for t in [i.get("python_trace") or {}] if t.get("blocked_stage")}
     if blocked:
         return sorted(blocked)
+    if task["python_expected"] == "required" and condition == "python_off" and not stages["tool_selected"]:
+        return ["python_disabled_by_condition"]
     if task["python_expected"] == "required" and not stages["tool_selected"]:
         return ["planner_not_selected"]
     if stages["tool_selected"] and not stages["plan_materialized"]:
@@ -298,12 +312,12 @@ def score(run_dir: Path, output_dir: Path) -> dict:
             response = raw_row.get("response") or {}
             traces = [i["python_trace"] for i in response.get("iterations", []) if i.get("python_trace")]
             registry = runtime_registry(task, response, catalog, traces)
-            numeric = numeric_score(response.get("final_answer", ""), task["ground_truth"]["numeric_targets"])
+            numeric = numeric_score(response.get("final_answer", ""), scoring_targets(task))
             calc = calc_score(task, response, workspace)
             stages = funnel(task, response, registry)
             adopted = adoption(task, response, numeric, calc, registry)
             stages["calc_adopted"] = adopted["calc_adopted"]
-            labels = attribution(task, response, registry, stages, calc, numeric)
+            labels = attribution(task, response, registry, stages, calc, numeric, name)
             criterion_pass = {"C1": bool(task["ground_truth"]["source_ids"] and registry["source_recall"] == 1),
                               "C2": numeric["numeric_complete"], "C3": False}
             if task["python_expected"] == "not_needed":
