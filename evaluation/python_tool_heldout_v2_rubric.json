@@ -1,0 +1,22 @@
+{
+  "rubric_id": "python_tool_heldout_v2_rubric",
+  "version": "2.0",
+  "primary_question": "Does Python ON improve quantitative petroleum-engineering outcomes over the same Agent v3 with Python OFF?",
+  "conditions": ["python_off", "python_on"],
+  "primary_population": "required",
+  "numeric_authority": "frozen independent ground truth and deterministic scorer; semantic reviewer never changes numeric values",
+  "numeric_match": "final answer value within frozen absolute tolerance with target unit in local context; CALC result value within tolerance; manual QA may correct documented false matches without editing raw scores",
+  "unit_match": "explicit target unit or frozen equivalent in the same local answer context; no inferred units",
+  "criterion_pass": "all numeric targets assigned to a criterion pass; qualitative source/engineering meaning is assessed by one blinded semantic reviewer",
+  "goal_success": "all fixed criteria pass, no material engineering contradiction, and no hallucination",
+  "external_coverage": "fraction of fixed criteria passing external scoring; product goal_coverage is telemetry only",
+  "selection_positive": "required",
+  "selection_negative": "not_needed",
+  "selection_excluded": "optional",
+  "task_funnel": "aggregate every iteration; never replace an earlier selected/validated step with a later not-selected iteration",
+  "furthest_stage": ["no_decision", "decision_parsed", "selected", "plan_parsed", "plan_materialized", "facts_verified", "formula_verified", "execution_boundary", "code_generated", "sandbox_passed", "subprocess", "result_validated", "calc_created"],
+  "paired_bootstrap": {"samples": 10000, "seed": 42, "interval": "95% percentile"},
+  "semantic_reviewer": {"method": "single AI-assisted semantic reviewer", "model": "gemma4:latest", "blind_ids": "BR-*", "scope": "qualitative engineering meaning and source support only"},
+  "manual_qa": "24/24 final answers; preserve raw reviewer and deterministic output; corrections only in separate strict_adjudicated_v1_1 file",
+  "failure_categories": ["planner_decision_parse_failure", "planner_not_selected", "planner_plan_parse_failure", "fact_registry_failure", "fact_selection_failure", "fact_verification_failure", "formula_provenance_failure", "permission_failure", "budget_failure", "code_generation_failure", "sandbox_failure", "runtime_failure", "result_validation_failure", "calc_correct_final_answer_failed", "retrieval_failure", "other"]
+}
