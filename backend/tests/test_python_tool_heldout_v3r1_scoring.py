@@ -56,6 +56,19 @@ def test_calc_scorer_and_adoption(tmp_path) -> None:
     assert adoption(task, response, numeric, calc, registry)["calc_adopted"]
 
 
+def test_calc_scorer_never_counts_inputs_as_outputs(tmp_path) -> None:
+    path = tmp_path / "result.json"
+    path.write_text(json.dumps({"inputs": {"R1_first": 1, "R1_repeat": 2},
+                                "result": {"difference": 1}, "summary": "difference=1"}), encoding="utf-8")
+    task = {"ground_truth": {"numeric_targets": [["R1_abs", 1, "psi", 0.01]]}}
+    response = {"computations": [{"validation_passed": True, "output_files": ["result.json"]}]}
+    assert calc_score(task, response, tmp_path)["calc_numeric_correct"] == 0
+
+    path.write_text(json.dumps({"inputs": {"R1_first": 100},
+                                "result": {"R1_abs": {"value": 1, "unit": "psi"}}}), encoding="utf-8")
+    assert calc_score(task, response, tmp_path)["calc_target_matches"]["R1_abs"] == {"value": True, "unit": True}
+
+
 def test_runtime_retrieval_missing_is_not_preflight_failure() -> None:
     task = {"python_expected": "required"}
     registry = {"retrieved_source_ids": {"W376": False}, "evidence_registry_recall": None,

@@ -189,6 +189,21 @@ def funnel(task: dict, response: dict, registry: dict) -> dict:
     return stages
 
 
+def _result_lines(value: object, name: str = "", unit: str = "") -> list[str]:
+    if isinstance(value, dict):
+        unit = str(value.get("unit", unit))
+        if isinstance(value.get("value"), (int, float)):
+            return [f"{name} = {value['value']} {unit}"]
+        return [line for key, item in value.items() if key not in {"unit", "summary"}
+                for line in _result_lines(item, f"{name}_{key}" if name else key, unit)]
+    if isinstance(value, list):
+        return [line for index, item in enumerate(value, 1)
+                for line in _result_lines(item, f"{name}_{index}", unit)]
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return [f"{name} = {value} {unit}"]
+    return []
+
+
 def calc_score(task: dict, response: dict, workspace: Path) -> dict:
     valid = [c for c in response.get("computations", []) if c.get("validation_passed")]
     corpus = "\n".join(c.get("summary", "") for c in valid)
@@ -196,7 +211,10 @@ def calc_score(task: dict, response: dict, workspace: Path) -> dict:
         for raw_path in record.get("output_files", []):
             path = (workspace / raw_path).resolve()
             if path.is_relative_to(workspace.resolve()) and path.is_file() and path.suffix.lower() == ".json":
-                corpus += "\n" + path.read_text(encoding="utf-8")
+                payload = json.loads(path.read_text(encoding="utf-8"))
+                if isinstance(payload, dict):
+                    corpus += "\n" + "\n".join(_result_lines(payload.get("result"), unit=str(payload.get("unit", ""))))
+                    corpus += "\n" + str(payload.get("summary", ""))
     scored = numeric_score(corpus, scoring_targets(task)) if valid else None
     return {"validated_calc_count": len(valid),
             "calc_numeric_total": scored["numeric_total"] if scored else None,
