@@ -1,0 +1,13 @@
+# Python Tool Held-out v3 policy
+
+This is an exploratory, 12-task, previously unseen A/B evaluation of the immutable Agent v4 product SHA `f71896627cc77cd6df569bb3cd140289d3667fac`. It is not a proof of general superiority.
+
+The six **pipeline** required tasks supply all case measurements in the user topic; one additionally requires a KB numeric fact. The two **end-to-end** required tasks require retrieval of numeric KB rows plus a separate equation. Two small calculations are optional and two conceptual questions do not need Python. The strata must not be merged when attributing retrieval versus planning/execution failure.
+
+All task wording, source locators, semantic expected USERF/EFACT facts, independent ground truth, units, tolerances, criteria, and rubric are frozen in the first evaluation commit, before any Agent v4 answer is observed. The source catalog was qualified by opening the original PDFs and checking Chroma chunk IDs; no product FormulaSourceRegistry screening is used to select cases. The predecessor v1/v2 pages in `review/python_tool_heldout_v3_source_exclusions.json` are excluded. The v3 cases are not numeric substitutions of predecessor cases.
+
+Run one complete 12-task Python OFF sequence, then one complete 12-task Python ON sequence, with qwen3:8b, temperature 0, seed 42, legacy product-default retrieval, 5 internal hits, no external/web search, max_iterations 4, and no_progress_patience 2. The sole condition difference is execution permission: OFF is false/false and ON true/true. Use the real read-only 12-document, 18,976-chunk ChromaDB. Do not rebuild or ingest it. If infrastructure fails, preserve the incomplete run and distinguish it from product behavior; never rerun a single failed product task. Do not rerun predecessor benchmarks. Never change product code, benchmark, GT, source, tolerance, or prompts after freeze.
+
+The deterministic scorer is authoritative for arithmetic and units. A single gemma4:latest blind reviewer assesses only qualitative engineering and source support; then manually QA all 24 answers. Raw and adjudicated results remain separate. Compare paired task deltas with 10,000 seed-42 bootstrap samples and report small-sample uncertainty. Observe all iterations for funnel stages, provenance, CALC correctness/adoption, and latency, while retaining each raw iteration.
+
+The p205 seven-component source table contains minor inconsistencies in printed per-row products; GT recomputes from the raw mole fractions and pure-component critical columns, not from printed contribution cells. The p152 candidate-lithology exercise uses the p191 Point A density only as a hypothetical common comparison; it cannot identify the actual rock.
