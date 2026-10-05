@@ -17,7 +17,9 @@ from app.agents.result_validator import AgentResultValidator
 from app.core.config import Settings
 from app.core.run_ids import validate_workspace_run_id
 from app.models.agent_schemas import AgentAction, AgentPermissionLevel, AgentToolName
-from app.models.goal_research_schemas import ComputationRecord, GoalResearchRequest, PythonExecutionTrace
+from app.models.goal_research_schemas import ComputationRecord, GoalResearchRequest, PythonExecutionTrace, VerificationFailure
+from app.services.evidence_fact_registry import EvidenceFactRegistry
+from app.services.formula_source_registry import FormulaSourceRegistry, expression_variables, normalize_formula
 from app.services.goal_tool_planner import PythonAnalysisPlan
 from app.tools.python_tools import PythonTools
 
@@ -52,7 +54,7 @@ def _basic_arithmetic_formula(formula: str, names: set[str]) -> bool:
         if not all(
             isinstance(node, allowed)
             and (not isinstance(node, ast.Name) or node.id in known_names)
-            and (not isinstance(node, ast.Constant) or (isinstance(node.value, (int, float)) and node.value in {0, 1, 2, 100}))
+            and (not isinstance(node, ast.Constant) or (isinstance(node.value, (int, float)) and node.value in {0, 1, 2, 100, len(names)}))
             for node in ast.walk(tree)
         ):
             return False
@@ -139,61 +141,102 @@ class GoalPythonAnalysis:
 
     @staticmethod
     def verification_failure_detail(plan: PythonAnalysisPlan, evidence: list[dict[str, Any]]) -> tuple[str, str] | None:
+        failure = GoalPythonAnalysis.fact_verification_failure(plan, evidence) or GoalPythonAnalysis.formula_verification_failure(plan, evidence)
+        return (failure.stage, failure.reason) if failure else None
+
+    @staticmethod
+    def fact_verification_failure(plan: PythonAnalysisPlan, evidence: list[dict[str, Any]]) -> VerificationFailure | None:
         by_id = {str(item["evidence_id"]): item for item in evidence if item.get("source_type") != "calculation"}
-        formula_sources = {key: item for key, item in by_id.items() if item.get("source_type") in {"knowledge_base", "figure", "web"}}
+        canonical = {item.fact_id: item for item in EvidenceFactRegistry.from_evidence(evidence).records}
+        def fail(reason: str, fact: Any = None, **details: Any) -> VerificationFailure:
+            return VerificationFailure(stage="input_fact_verification_failed", reason=reason,
+                                       fact_id=getattr(fact, "canonical_fact_id", None) or (getattr(fact, "evidence_id", None) if fact else None),
+                                       source_id=getattr(fact, "evidence_id", None) if fact else None, **details)
         if not plan.input_facts:
-            return "input_fact_verification_failed", "insufficient_input_facts"
+            return fail("insufficient_input_facts")
         if re.search(r"difference|change|compare|comparison|ratio|chart|graph|차이|변화율|비교|그래프", plan.purpose, re.IGNORECASE) and len(plan.input_facts) < 2:
-            return "input_fact_verification_failed", "insufficient_input_facts"
+            return fail("insufficient_input_facts")
         if len({fact.name for fact in plan.input_facts}) != len(plan.input_facts):
-            return "input_fact_verification_failed", "duplicate_fact"
+            return fail("duplicate_fact")
         expected_types = {"kb": "knowledge_base", "figure": "figure", "web": "web", "user_fact": "user_fact"}
         for fact in plan.input_facts:
             source = by_id.get(fact.evidence_id)
             excerpt = fact.source_excerpt.strip()
             if not source:
-                return "input_fact_verification_failed", "fact_id_unknown"
+                return fail("fact_id_unknown", fact)
             if (fact.source_type == "evidence" and source.get("source_type") not in {"knowledge_base", "figure", "web"}) or (fact.source_type != "evidence" and source.get("source_type") != expected_types[fact.source_type]):
-                return "input_fact_verification_failed", "source_type_mismatch"
+                return fail("source_type_mismatch", fact)
+            if fact.canonical_fact_id and fact.canonical_fact_id.startswith("EFACT"):
+                record = canonical.get(fact.canonical_fact_id)
+                if record is None or record.source_id != fact.evidence_id:
+                    return fail("fact_id_unknown", fact)
+                if (fact.source_excerpt != record.source_span or fact.span_start != record.span_start
+                        or fact.span_end != record.span_end):
+                    return fail("source_span_mismatch", fact)
+                if fact.unit.casefold() != record.unit.casefold():
+                    return fail("unit_mismatch", fact, expected_unit=record.unit, observed_unit=fact.unit)
+                if fact.name != record.name or not math.isclose(fact.value, record.value, rel_tol=1e-9, abs_tol=1e-12):
+                    return fail("value_mismatch", fact, expected_value=record.value, observed_value=fact.value)
             if not excerpt or excerpt not in str(source["text"]):
-                return "input_fact_verification_failed", "source_span_mismatch"
+                return fail("source_span_mismatch", fact)
             if not math.isfinite(fact.value):
-                return "input_fact_verification_failed", "value_mismatch"
+                return fail("value_mismatch", fact)
             if fact.source_type == "user_fact" and "source_span" in source:
                 if excerpt != source["source_span"]:
-                    return "input_fact_verification_failed", "source_span_mismatch"
+                    return fail("source_span_mismatch", fact)
                 if fact.unit.casefold() != str(source["unit"]).casefold():
-                    return "input_fact_verification_failed", "unit_mismatch"
+                    return fail("unit_mismatch", fact, expected_unit=str(source["unit"]), observed_unit=fact.unit)
                 if not math.isclose(fact.value, float(source["value"]), rel_tol=1e-9, abs_tol=1e-12):
-                    return "input_fact_verification_failed", "value_mismatch"
+                    return fail("value_mismatch", fact, expected_value=float(source["value"]), observed_value=fact.value)
                 raw = str(source["raw_value_text"])
                 if raw not in excerpt:
-                    return "input_fact_verification_failed", "source_span_mismatch"
+                    return fail("source_span_mismatch", fact)
                 try:
                     observed = (int(raw.split("/", 1)[0]) / int(raw.split("/", 1)[1])) if "/" in raw else float(raw.replace(",", ""))
                 except (ValueError, ZeroDivisionError):
-                    return "input_fact_verification_failed", "value_mismatch"
+                    return fail("value_mismatch", fact)
                 if not math.isclose(observed, fact.value, rel_tol=1e-9, abs_tol=1e-12):
-                    return "input_fact_verification_failed", "value_mismatch"
+                    return fail("value_mismatch", fact, expected_value=observed, observed_value=fact.value)
                 continue
             elif fact.unit and fact.unit.casefold() not in excerpt.casefold():
-                return "input_fact_verification_failed", "unit_mismatch"
+                return fail("unit_mismatch", fact, observed_unit=fact.unit)
             numbers = [float(match.group().replace(",", "")) for match in NUMBER_RE.finditer(excerpt)]
             numbers.extend(
                 int(match.group(1)) / int(match.group(2))
                 for match in FRACTION_RE.finditer(excerpt) if int(match.group(2))
             )
             if not any(math.isclose(value, fact.value, rel_tol=1e-9, abs_tol=1e-12) for value in numbers):
-                return "input_fact_verification_failed", "value_mismatch"
-        basic_formula = bool(plan.formula and _basic_arithmetic_formula(plan.formula, {fact.name for fact in plan.input_facts}))
+                return fail("value_mismatch", fact, observed_value=fact.value)
+        return None
+
+    @staticmethod
+    def formula_verification_failure(plan: PythonAnalysisPlan, evidence: list[dict[str, Any]]) -> VerificationFailure | None:
+        by_id = {str(item["evidence_id"]): item for item in evidence if item.get("source_type") != "calculation"}
+        formula_sources = {key: item for key, item in by_id.items() if item.get("source_type") in {"knowledge_base", "figure", "web"}}
+        basic_formula = bool(plan.formula and not plan.formula_source_id and _basic_arithmetic_formula(plan.formula, {fact.name for fact in plan.input_facts}))
+        if plan.formula_source_id:
+            registry = {item.formula_id: item for item in FormulaSourceRegistry.from_evidence(evidence).records}
+            record = registry.get(plan.formula_source_id)
+            if record is None:
+                return VerificationFailure(stage="formula_provenance_failed", reason="formula_id_unknown", formula_id=plan.formula_source_id)
+            if (record.raw_span != plan.formula_source_span or record.expression_candidate is None
+                    or not plan.formula or normalize_formula(record.expression_candidate) != normalize_formula(plan.formula)
+                    or plan.supporting_evidence_ids != [record.source_id]):
+                return VerificationFailure(stage="formula_provenance_failed", reason="formula_text_mismatch", formula_id=record.formula_id, source_id=record.source_id)
+            variables = expression_variables(plan.formula)
+            if variables is None:
+                return VerificationFailure(stage="formula_provenance_failed", reason="formula_not_parseable", formula_id=record.formula_id, source_id=record.source_id)
+            if variables - {fact.name for fact in plan.input_facts}:
+                return VerificationFailure(stage="formula_provenance_failed", reason="formula_variable_missing", formula_id=record.formula_id, source_id=record.source_id)
+            return None
         if plan.formula and not basic_formula:
             if not plan.supporting_evidence_ids:
-                return "formula_provenance_failed", "formula_source_missing"
+                return VerificationFailure(stage="formula_provenance_failed", reason="formula_source_missing")
             normalized = re.sub(r"[^a-z0-9]", "", plan.formula.casefold())
             if not any(normalized in re.sub(r"[^a-z0-9]", "", str(formula_sources.get(value, {}).get("text", "")).casefold()) for value in plan.supporting_evidence_ids):
-                return "formula_provenance_failed", "formula_text_mismatch"
+                return VerificationFailure(stage="formula_provenance_failed", reason="formula_text_mismatch", source_id=plan.supporting_evidence_ids[0])
         if any(value not in (by_id if basic_formula else formula_sources) for value in plan.supporting_evidence_ids):
-            return "formula_provenance_failed", "formula_source_missing"
+            return VerificationFailure(stage="formula_provenance_failed", reason="formula_source_missing")
         return None
 
     @staticmethod
@@ -227,16 +270,21 @@ class GoalPythonAnalysis:
             if trace:
                 trace.blocked_stage = "permission_not_approved"
             return None, False
-        failure = self.verification_failure_detail(plan, evidence)
+        failure = self.fact_verification_failure(plan, evidence)
+        if failure is None and trace:
+            trace.facts_verified = True
+        if failure is None:
+            failure = self.formula_verification_failure(plan, evidence)
+        if failure is None and trace:
+            trace.formula_verified = True
         if failure:
             self.failures += 1
             self.last_error = "Input facts or formula provenance did not match source evidence."
             if trace:
-                trace.blocked_stage = failure[0]
-                trace.verification_failures.append(failure[1])
+                trace.blocked_stage = failure.stage
+                trace.verification_failures.append(failure.reason)
+                trace.verification_failures_structured.append(failure)
             return None, False
-        if trace:
-            trace.facts_verified = True
         fingerprint = self.fingerprint(plan)
         if fingerprint in self.cache:
             if trace:
@@ -289,7 +337,10 @@ class GoalPythonAnalysis:
             input_facts=[fact.model_dump() for fact in plan.input_facts],
             source_evidence_ids=list(dict.fromkeys(fact.evidence_id for fact in plan.input_facts if fact.source_type != "user_fact")),
             source_input_ids=list(dict.fromkeys(fact.evidence_id for fact in plan.input_facts if fact.source_type == "user_fact")),
-            formula_evidence_ids=[] if plan.formula and _basic_arithmetic_formula(plan.formula, {fact.name for fact in plan.input_facts}) else plan.supporting_evidence_ids,
+            formula_evidence_ids=[] if plan.formula and not plan.formula_source_id and _basic_arithmetic_formula(plan.formula, {fact.name for fact in plan.input_facts}) else plan.supporting_evidence_ids,
+            formula_source_id=plan.formula_source_id,
+            canonical_fact_ids=list(dict.fromkeys(fact.canonical_fact_id for fact in plan.input_facts if fact.canonical_fact_id)),
+            canonical_formula_ids=[plan.formula_source_id] if plan.formula_source_id else [],
             formula=plan.formula,
             fingerprint=fingerprint,
         )
@@ -368,6 +419,20 @@ class GoalPythonAnalysis:
         return record, True
 
     async def _generate_code(self, request: GoalResearchRequest, plan: PythonAnalysisPlan, outputs: list[str], error: str) -> str:
+        if (plan.formula and not plan.formula_source_id and not plan.create_chart
+                and all(fact.canonical_fact_id for fact in plan.input_facts)
+                and _basic_arithmetic_formula(plan.formula, {fact.name for fact in plan.input_facts})
+                and all(re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", fact.name) for fact in plan.input_facts)
+                and not any(str(name).lower().endswith(".csv") for name in plan.expected_outputs)):
+            statements = [part.strip() for part in re.split(r"[;\n]", plan.formula) if part.strip()]
+            names = [part.split("=", 1)[0].strip() for part in statements]
+            facts = {fact.name: fact.value for fact in plan.input_facts}
+            lines = ["import json", *(f"{name} = {value!r}" for name, value in facts.items()), *statements]
+            summary = "; ".join(f"{name}={{{name}:.6g}}" for name in names)
+            lines.append(f"with open({outputs[0]!r}, 'w') as output:")
+            lines.append("    json.dump({" + f"'inputs': {facts!r}, 'result': {{" + ", ".join(f"{name!r}: {name}" for name in names)
+                         + f"}}, 'summary': f{summary!r}}}, output)")
+            return "\n".join(lines) + "\n"
         prompt = {
             "purpose": plan.purpose,
             "input_facts": [fact.model_dump(include={"name", "value", "unit"}) for fact in plan.input_facts],
@@ -413,7 +478,7 @@ class GoalPythonAnalysis:
             observed = inputs.get(fact.name)
             if not isinstance(observed, (int, float)) or not math.isclose(observed, fact.value, rel_tol=1e-9, abs_tol=1e-12):
                 raise ValueError(f"Input fact {fact.name} was not preserved")
-        if plan.formula and _basic_arithmetic_formula(plan.formula, {fact.name for fact in plan.input_facts}):
+        if plan.formula and (plan.formula_source_id or _basic_arithmetic_formula(plan.formula, {fact.name for fact in plan.input_facts})):
             expected = _basic_formula_values(
                 plan.formula, {fact.name: fact.value for fact in plan.input_facts}
             )

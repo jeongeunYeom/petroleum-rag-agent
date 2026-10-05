@@ -310,6 +310,13 @@ class GoalResearchAgent:
                     python_trace.planner_plan_attempts = decision.plan_attempts
                     python_trace.planner_plan_status = decision.plan_status
                     python_trace.selected_user_fact_ids = decision.selected_user_fact_ids
+                    python_trace.available_evidence_fact_ids = decision.available_evidence_fact_ids
+                    python_trace.selected_fact_ids = decision.selected_fact_ids
+                    python_trace.available_formula_ids = decision.available_formula_ids
+                    python_trace.selected_formula_id = decision.selected_formula_id
+                    python_trace.fact_materialization_status = decision.fact_materialization_status
+                    python_trace.formula_materialization_status = decision.formula_materialization_status
+                    python_trace.verification_failures_structured = decision.verification_failures_structured.copy()
                     python_trace.verification_failures = decision.verification_failures.copy()
                     python_trace.plan_summary = decision.plan_summary
                     python_trace.blocked_stage = (
@@ -317,7 +324,7 @@ class GoalResearchAgent:
                         else "planner_not_selected" if not decision.tool_needed
                         else "planner_plan_parse_failed" if decision.plan_status == "planner_plan_parse_failed"
                         else "fact_registry_empty" if "fact_registry_empty" in decision.verification_failures
-                        else "input_fact_verification_failed" if decision.verification_failures
+                        else "materialization_failed" if decision.verification_failures
                         else "no_plan" if decision.plan is None else None
                     )
                     if decision.tool_needed and decision.plan:

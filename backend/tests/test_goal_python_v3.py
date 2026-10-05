@@ -19,7 +19,7 @@ from app.services.goal_python_analysis import GoalPythonAnalysis
 from app.services.goal_research_agent import GoalResearchAgent
 from app.services.goal_research_service import GoalResearchService
 from app.services.goal_tool_planner import (
-    AnalysisPlanRequest, GoalToolPlanner, PlanFactRef, ToolNeedDecision,
+    AnalysisPlanRequest, AnalysisPlanSelection, GoalToolPlanner, PlanFactRef, ToolNeedDecision,
     materialize_analysis_plan,
 )
 from app.services.user_fact_registry import UserFactRegistry
@@ -41,6 +41,14 @@ def proposed(refs=("USERF1", "USERF2", "USERF3"), formula=FORMULA, supporting=("
         user_fact_refs=[PlanFactRef(fact_id=value, alias="") for value in refs],
         formula=formula, supporting_evidence_ids=list(supporting),
         expected_outputs=["analysis.json"],
+    )
+
+
+def selection(refs=("USERF1", "USERF2", "USERF3")):
+    return AnalysisPlanSelection(
+        purpose="Calculate productivity index", target_criteria=["C1"],
+        fact_refs=list(refs), formula_ref="FORMULA1", operation_hint=None,
+        expected_outputs=["analysis.json"], create_chart=False,
     )
 
 
@@ -75,7 +83,7 @@ def decide(fake, topic=TOPIC, evidence=None):
 
 
 def test_decision_schema_and_retry_succeeds():
-    fake = PlannerReplies(["invalid JSON", yes()], [proposed().model_dump_json()])
+    fake = PlannerReplies(["invalid JSON", yes()], [selection().model_dump_json()])
     result = decide(fake)
     assert result.tool_needed and result.plan is not None
     assert result.decision_attempts == 2 and result.decision_status == "selected"
@@ -90,7 +98,7 @@ def test_permanent_decision_parse_failure_is_not_legitimate_none():
 
 
 def test_plan_parse_retry_and_exhaustion():
-    repaired = decide(PlannerReplies([yes()], ["bad", proposed().model_dump_json()]))
+    repaired = decide(PlannerReplies([yes()], ["bad", selection().model_dump_json()]))
     assert repaired.plan and repaired.plan_attempts == 2 and repaired.plan_status == "materialized"
     failed = decide(PlannerReplies([yes()], ["bad", "still bad"]))
     assert failed.tool_needed and failed.plan is None and failed.plan_attempts == 2
@@ -142,7 +150,7 @@ def test_untyped_numbers_are_not_engineering_facts():
 
 
 def test_unknown_fact_and_value_override_are_rejected():
-    unknown = decide(PlannerReplies([yes()], [proposed(refs=("USERF999",)).model_dump_json()]))
+    unknown = decide(PlannerReplies([yes()], [selection(refs=("USERF999",)).model_dump_json()] * 2))
     assert unknown.plan is None and unknown.verification_failures == ["fact_id_unknown"]
     assert unknown.plan_status == "materialization_failed"
     with pytest.raises(ValidationError):
@@ -240,7 +248,7 @@ class SyntheticOllama:
         if "tool_needed" in properties:
             return yes()
         if "purpose" in properties:
-            return proposed().model_dump_json()
+            return selection().model_dump_json()
         if "code" in properties:
             payload = json.loads(messages[-1]["content"])
             facts = {item["name"]: item["value"] for item in payload["input_facts"]}

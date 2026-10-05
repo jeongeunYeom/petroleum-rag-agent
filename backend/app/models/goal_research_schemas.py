@@ -136,6 +136,19 @@ class GoalIterationTiming(BaseModel):
     iteration_seconds: float = 0.0
 
 
+class VerificationFailure(BaseModel):
+    stage: str
+    reason: str
+    fact_id: str | None = None
+    formula_id: str | None = None
+    source_id: str | None = None
+    expected_unit: str | None = None
+    observed_unit: str | None = None
+    expected_value: float | None = None
+    observed_value: float | None = None
+    span_hash: str | None = None
+
+
 class PythonExecutionTrace(BaseModel):
     tool_selected: bool = False
     tool_type: Literal["none", "python_calculation", "python_plot"] = "none"
@@ -145,6 +158,13 @@ class PythonExecutionTrace(BaseModel):
     planner_plan_attempts: int = 0
     planner_plan_status: str | None = None
     available_user_fact_ids: list[str] = Field(default_factory=list)
+    available_evidence_fact_ids: list[str] = Field(default_factory=list)
+    selected_fact_ids: list[str] = Field(default_factory=list)
+    available_formula_ids: list[str] = Field(default_factory=list)
+    selected_formula_id: str | None = None
+    fact_materialization_status: str | None = None
+    formula_materialization_status: str | None = None
+    verification_failures_structured: list[VerificationFailure] = Field(default_factory=list)
     selected_user_fact_ids: list[str] = Field(default_factory=list)
     verification_failures: list[str] = Field(default_factory=list)
     plan_summary: dict[str, Any] | None = None
@@ -154,6 +174,7 @@ class PythonExecutionTrace(BaseModel):
     input_fact_count: int = 0
     input_source_types: list[str] = Field(default_factory=list)
     facts_verified: bool = False
+    formula_verified: bool = False
     blocked_stage: str | None = None
     error_summary: str | None = None
     call_boundary_reached: bool = False
@@ -196,6 +217,9 @@ class ComputationRecord(BaseModel):
     source_evidence_ids: list[str] = Field(default_factory=list)
     source_input_ids: list[str] = Field(default_factory=list)
     formula_evidence_ids: list[str] = Field(default_factory=list)
+    formula_source_id: str | None = None
+    canonical_fact_ids: list[str] = Field(default_factory=list)
+    canonical_formula_ids: list[str] = Field(default_factory=list)
     input_facts: list[dict[str, Any]] = Field(default_factory=list)
     formula: str | None = None
     code_record: str = ""

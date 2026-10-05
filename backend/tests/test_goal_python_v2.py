@@ -25,7 +25,7 @@ from app.services.goal_evaluator import GoalEvaluator
 from app.services.goal_python_analysis import GoalPythonAnalysis
 from app.services.goal_research_agent import GoalResearchAgent
 from app.services.goal_research_service import GoalResearchRunNotFound, GoalResearchService
-from app.services.goal_tool_planner import GoalToolPlanner, PythonAnalysisPlan, ToolDecision, AnalysisPlanRequest
+from app.services.goal_tool_planner import GoalToolPlanner, PythonAnalysisPlan, ToolDecision, AnalysisPlanRequest, AnalysisPlanSelection
 from app.services.user_fact_registry import UserFactRegistry
 from scripts.diagnose_python_tool_execution import FIXTURE, FixtureCodeGenerator
 
@@ -136,10 +136,9 @@ def test_planner_receives_user_fact_as_input_source_not_expected_hypothesis():
             self.prompt = json.loads(messages[-1]["content"])
             if "tool_needed" in schema["properties"]:
                 return json.dumps({"tool_needed": True, "tool_type": "python_calculation", "reason": "calculate"})
-            return AnalysisPlanRequest(
-                purpose=plan.purpose,
-                user_fact_refs=[{"fact_id": "USERF1", "alias": "A"}, {"fact_id": "USERF2", "alias": "B"}],
-                formula=plan.formula,
+            return AnalysisPlanSelection(
+                purpose=plan.purpose, target_criteria=["C1"], fact_refs=["USERF1", "USERF2"],
+                formula_ref=None, operation_hint="difference", expected_outputs=[], create_chart=False,
             ).model_dump_json()
 
     ollama = PlannerOllama()
