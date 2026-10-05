@@ -13,6 +13,8 @@ def test_numeric_matching_requires_case_and_accepts_fraction_percent() -> None:
     assert numeric_match("A ED = 85.4%", ["A_ED", 0.854, "fraction", 0.005]) == (True, True)
     assert numeric_match("B Bo = 1.2 dimensionless", ["A_Bo", 1.2, "ratio", 0.005]) == (False, False)
     assert numeric_match("R4: 4 psi", ["R4_abs", 4, "psi", 0.01]) == (True, True)
+    assert numeric_match("The gap is three percentage points.",
+                         ["gap_pp", 3, "percentage points", 0.01]) == (True, True)
 
 
 def test_explicit_re03_mean_is_derived_from_frozen_case_targets() -> None:
@@ -84,6 +86,16 @@ def test_disabled_off_condition_is_not_counted_as_planner_failure() -> None:
                          {"tool_selected": False, "plan_materialized": False, "calc_created": False},
                          {"calc_complete": None}, {"numeric_complete": False}, "python_off")
     assert result == ["python_disabled_by_condition"]
+
+
+def test_validated_stage_is_not_a_failure_label() -> None:
+    result = attribution({"python_expected": "required"},
+                         {"iterations": [{"python_trace": {"blocked_stage": "validated"}}]},
+                         {"retrieved_source_ids": {}, "evidence_registry_recall": None,
+                          "formula_registry_recall": None},
+                         {"tool_selected": True, "plan_materialized": True, "calc_created": True},
+                         {"calc_complete": True}, {"numeric_complete": True})
+    assert result == []
 
 
 def test_paired_bootstrap_deterministic() -> None:

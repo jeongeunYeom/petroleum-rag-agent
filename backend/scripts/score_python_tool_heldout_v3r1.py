@@ -23,6 +23,9 @@ from app.services.formula_source_registry import FormulaSourceRegistry, normaliz
 from app.services.user_fact_registry import UserFactRegistry  # noqa: E402
 
 NUMBER = re.compile(r"(?<![\w.])[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:[eE][-+]?\d+)?")
+NUMBER_WORDS = {word: value for value, word in enumerate(
+    ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"))}
+NUMBER_WORD = re.compile(r"\b(?:" + "|".join(NUMBER_WORDS) + r")\b", re.I)
 FUNNEL = ("decision_parsed", "tool_selected", "plan_parsed", "plan_materialized",
           "expected_user_available", "expected_evidence_available", "expected_formula_available",
           "required_user_selected", "required_evidence_selected", "formula_selected",
@@ -71,8 +74,9 @@ def _candidate_lines(text: str, target_name: str) -> list[str]:
 def numeric_match(text: str, target: list) -> tuple[bool, bool]:
     name, wanted, unit, tolerance = target
     for line in _candidate_lines(text, name):
-        for found in NUMBER.finditer(line):
-            value = float(found.group().replace(",", ""))
+        for found in [*NUMBER.finditer(line), *NUMBER_WORD.finditer(line)]:
+            token = found.group().casefold()
+            value = float(NUMBER_WORDS[token] if token in NUMBER_WORDS else token.replace(",", ""))
             after = line[found.end():found.end()+12]
             is_percent = bool(re.match(r"\s*(?:%|percent\b)", after, re.I)) if after else False
             comparable = value / 100 if unit == "fraction" and is_percent else value
@@ -258,7 +262,9 @@ def attribution(task: dict, response: dict, registry: dict, stages: dict, calc: 
         return ["evidence_registry_missing"]
     if registry["formula_registry_recall"] not in (None,1):
         return ["formula_registry_missing"]
-    blocked = {t.get("blocked_stage") for i in response.get("iterations", []) for t in [i.get("python_trace") or {}] if t.get("blocked_stage")}
+    blocked = {t.get("blocked_stage") for i in response.get("iterations", [])
+               for t in [i.get("python_trace") or {}]
+               if t.get("blocked_stage") and t.get("blocked_stage") != "validated"}
     if blocked:
         return sorted(blocked)
     if task["python_expected"] == "required" and condition == "python_off" and not stages["tool_selected"]:
