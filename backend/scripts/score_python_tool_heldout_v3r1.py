@@ -118,7 +118,12 @@ def runtime_registry(task: dict, response: dict, catalog: dict, traces: list[dic
     expected_evidence_ids = set()
     for key, name, value, unit in gt["required_evidence_facts"]:
         for row in efacts:
-            if row.source_id in retrieved.get(key, []) and same(row, [name, value, unit]):
+            canonical_name = row.name.casefold()
+            expected_name = name.casefold()
+            deduped_name = bool(re.fullmatch(re.escape(expected_name) + r"_\d+", canonical_name))
+            if (row.source_id in retrieved.get(key, []) and
+                    (canonical_name == expected_name or deduped_name) and
+                    math.isclose(row.value, value, abs_tol=1e-9) and row.unit.casefold() == unit.casefold()):
                 expected_evidence_ids.add(row.fact_id)
                 break
     expected_formula_ids = set()
@@ -204,8 +209,11 @@ def adoption(task: dict, response: dict, numeric: dict, calc: dict, registry: di
     user_provenance = (not task["ground_truth"]["required_user_facts"] or
                        bool(re.search(r"\[USERF\d+\]", answer)) or
                        bool(re.search(r"user[- ]supplied|hypothetical|provided by (?:the )?user", answer, re.I)))
-    source_ids = set(registry["evidence_source_map"].values())
-    formula_cited = not task["ground_truth"]["formula_sources"] or any(f"[{evidence_id}]" in answer for evidence_id in source_ids)
+    formula_keys = {key for key, _ in task["ground_truth"]["formula_sources"]}
+    formula_cited = not formula_keys or any(
+        f"[{registry['evidence_source_map'][key]}]" in answer
+        for key in formula_keys if key in registry["evidence_source_map"]
+    )
     adopted = bool(cited_calcs) and numeric["numeric_complete"] and user_provenance and formula_cited
     return {"calc_citation_present": bool(cited_calcs), "user_provenance_present": user_provenance,
             "formula_kb_citation_present": formula_cited, "calc_adopted": adopted}

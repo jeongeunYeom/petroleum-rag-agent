@@ -24,7 +24,7 @@ PREFLIGHT = ROOT / "evaluation/review/python_tool_heldout_v3r1_preflight.json"
 
 
 def digest(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
 def load_frozen() -> tuple[dict, dict]:
