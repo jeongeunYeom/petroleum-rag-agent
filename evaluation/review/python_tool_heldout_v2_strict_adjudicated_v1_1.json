@@ -1,0 +1,73 @@
+{
+  "benchmark_id": "python_tool_heldout_v2",
+  "adjudication_version": "strict_adjudicated_v1_1",
+  "run_id": "python-heldout-v2-20261005T044234Z",
+  "basis": "Manual inspection of all 24 final answers, each answer's KB citation mapping, frozen GT, deterministic numeric matches, and the 24 preserved blind reviewer responses.",
+  "raw_run_dir": "D:\\petroleum-rag-agent\\data\\evaluation\\python_tool_heldout_v2\\raw\\python-heldout-v2-20261005T044234Z",
+  "original_comparison": "D:\\petroleum-rag-agent\\data\\evaluation\\python_tool_heldout_v2_comparison.json",
+  "original_reviewer": "evaluation/review/python_tool_heldout_v2_reviewer_raw.json",
+  "numeric_score_changes": 0,
+  "paired_final_answers_identical": true,
+  "paired_citation_mappings_identical": true,
+  "manual_qa_rows": [
+    "PY2-RE-001/python_off", "PY2-RE-002/python_off", "PY2-RE-003/python_off", "PY2-RE-004/python_off",
+    "PY2-WT-001/python_off", "PY2-WT-002/python_off", "PY2-WT-003/python_off", "PY2-WT-004/python_off",
+    "PY2-RE-005/python_off", "PY2-WT-005/python_off", "PY2-RE-006/python_off", "PY2-WT-006/python_off",
+    "PY2-RE-001/python_on", "PY2-RE-002/python_on", "PY2-RE-003/python_on", "PY2-RE-004/python_on",
+    "PY2-WT-001/python_on", "PY2-WT-002/python_on", "PY2-WT-003/python_on", "PY2-WT-004/python_on",
+    "PY2-RE-005/python_on", "PY2-WT-005/python_on", "PY2-RE-006/python_on", "PY2-WT-006/python_on"
+  ],
+  "task_judgments_applied_to_each_identical_pair": [
+    {"task_id":"PY2-RE-001","criterion_pass":{"C1":false,"C2":false,"C3":false,"C4":false},"hallucination_count":1,"engineering_contradiction_count":1,"qa_note":"Geometric averaging and k/k_eff contribution are wrong for parallel beds; no required numeric results or USERF provenance."},
+    {"task_id":"PY2-RE-002","criterion_pass":{"C1":false,"C2":false,"C3":false,"C4":false},"hallucination_count":1,"engineering_contradiction_count":1,"qa_note":"Series equation omits division by total length, cites no frozen formula page, and gives no target values."},
+    {"task_id":"PY2-RE-003","criterion_pass":{"C1":false,"C2":false,"C3":false,"C4":true},"hallucination_count":1,"engineering_contradiction_count":1,"qa_note":"Final STOIIP equation multiplies by Bo instead of dividing by Bo; scenario values are absent. User estimates are identified as such."},
+    {"task_id":"PY2-RE-004","criterion_pass":{"C1":true,"C2":false,"C3":false,"C4":true},"hallucination_count":0,"engineering_contradiction_count":0,"qa_note":"Volume/recovery relations and scenario provenance are stated, but all block and total calculations are absent."},
+    {"task_id":"PY2-WT-001","criterion_pass":{"C1":true,"C2":false,"C3":false,"C4":true},"hallucination_count":1,"engineering_contradiction_count":0,"qa_note":"PI relation is correct, but well values and ranking are absent; added skin/non-Darcy/heterogeneity cautions lack support in cited excerpts."},
+    {"task_id":"PY2-WT-002","criterion_pass":{"C1":true,"C2":true,"C3":true,"C4":true},"hallucination_count":0,"engineering_contradiction_count":0,"qa_note":"All rounded plateaus and ratio meet frozen tolerances with units; radial plateau and storage unit slope are distinguished."},
+    {"task_id":"PY2-WT-003","criterion_pass":{"C1":false,"C2":false,"C3":false,"C4":false},"hallucination_count":0,"engineering_contradiction_count":0,"qa_note":"Safe refusal; the actual KB page 363 was not retrieved, so refusal cannot satisfy the requirement to retrieve and cite Table 1."},
+    {"task_id":"PY2-WT-004","criterion_pass":{"C1":false,"C2":false,"C3":false,"C4":true},"hallucination_count":0,"engineering_contradiction_count":0,"qa_note":"Safe refusal; actual page 173 was not retrieved. No unsupported flow-regime inference was made."},
+    {"task_id":"PY2-RE-005","criterion_pass":{"C1":true,"C2":true,"C3":true},"hallucination_count":0,"engineering_contradiction_count":0,"qa_note":"Incremental STB and percent are correct; cited KB2 page 24 also contains Ultimate Recovery = STOIIP x RF."},
+    {"task_id":"PY2-WT-005","criterion_pass":{"C1":false,"C2":false,"C3":true},"hallucination_count":0,"engineering_contradiction_count":0,"qa_note":"No numeric difference or percentage given; cautious fluid-identity interpretation is supported."},
+    {"task_id":"PY2-RE-006","criterion_pass":{"C1":true,"C2":true,"C3":true},"hallucination_count":0,"engineering_contradiction_count":0,"qa_note":"Conceptual distinction and uncertainty are covered without invented reserve numbers."},
+    {"task_id":"PY2-WT-006","criterion_pass":{"C1":true,"C2":false,"C3":false},"hallucination_count":1,"engineering_contradiction_count":1,"qa_note":"Radial plateau is correct, but the required half-slope page 775 was not retrieved/cited; final answer wrongly associates the radial plateau with wellbore-storage-dominated flow."}
+  ],
+  "itemized_reviewer_corrections": [
+    {"task_id":"PY2-RE-002","condition":"python_off","field":"engineering_contradiction_count","old":0,"new":1,"reason":"Identical ON answer was counted; equation lacks L_total normalization."},
+    {"task_id":"PY2-RE-003","condition":"python_off","field":"criterion_pass.C1","old":true,"new":false,"reason":"Bo is multiplied instead of divided."},
+    {"task_id":"PY2-RE-003","condition":"python_on","field":"criterion_pass.C1","old":true,"new":false,"reason":"Same wrong Bo relation in identical final answer."},
+    {"task_id":"PY2-RE-003","condition":"python_off","field":"engineering_contradiction_count","old":0,"new":1,"reason":"Wrong Bo direction in STOIIP equation."},
+    {"task_id":"PY2-RE-003","condition":"python_on","field":"engineering_contradiction_count","old":0,"new":1,"reason":"Same wrong Bo direction."},
+    {"task_id":"PY2-WT-001","condition":"python_off","field":"hallucination_count","old":0,"new":1,"reason":"Identical ON answer was counted for unsupported extra engineering cautions."},
+    {"task_id":"PY2-WT-003","condition":"python_off","field":"criterion_pass.C1","old":true,"new":false,"reason":"Refusal is not retrieval and citation of the actual table; ON reviewer correctly marked false."},
+    {"task_id":"PY2-WT-004","condition":"python_off","field":"criterion_pass.C1","old":true,"new":false,"reason":"Refusal is not retrieval and citation of the actual table."},
+    {"task_id":"PY2-WT-004","condition":"python_on","field":"criterion_pass.C1","old":true,"new":false,"reason":"Same requirement was missed by reviewer for identical answer."},
+    {"task_id":"PY2-WT-006","condition":"python_off","field":"criterion_pass.C3","old":true,"new":false,"reason":"The final answer conflates radial plateau with wellbore-storage-dominated flow."},
+    {"task_id":"PY2-WT-006","condition":"python_on","field":"criterion_pass.C3","old":true,"new":false,"reason":"Same false attribution in identical answer."},
+    {"task_id":"PY2-WT-006","condition":"python_off","field":"engineering_contradiction_count","old":0,"new":1,"reason":"Radial plateau is wrongly assigned to storage-dominated period."},
+    {"task_id":"PY2-WT-006","condition":"python_on","field":"engineering_contradiction_count","old":0,"new":1,"reason":"Same false attribution in identical answer."}
+  ],
+  "correction_count": 13,
+  "strict_summary_each_condition": {
+    "overall_goal_success": 0.25,
+    "overall_external_coverage": 0.4305555555555556,
+    "required_goal_success": 0.125,
+    "required_external_coverage": 0.3125,
+    "overall_numeric_accuracy": 0.16,
+    "required_numeric_accuracy": 0.13043478260869565,
+    "overall_unit_accuracy": 0.16,
+    "required_unit_accuracy": 0.13043478260869565,
+    "hallucination_claim_count": 5,
+    "engineering_contradiction_count": 4,
+    "mean_calibration_error": 0.20833333333333334
+  },
+  "strict_paired_result": {
+    "benefit_tasks": 0,
+    "neutral_tasks": 8,
+    "harm_tasks": 0,
+    "goal_success_delta": 0,
+    "coverage_delta": 0,
+    "numeric_accuracy_delta": 0,
+    "unit_accuracy_delta": 0,
+    "paired_bootstrap_10000_seed42_ci95_for_all_deltas": [0, 0]
+  }
+}
