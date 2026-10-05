@@ -1,0 +1,13 @@
+# Python-tool held-out v3r1 evaluation policy
+
+- Product code is fixed at `f71896627cc77cd6df569bb3cd140289d3667fac`; this branch changes only evaluation assets.
+- The earlier `python_tool_heldout_v3` is `INVALIDATED_PRE_RUN` (freeze `092200d01c3cb74204913d42c2269e5696bed61d`) because of `INPUT_CONTRACT_MISMATCH`. Agent A/B tasks executed: **0**. It has no performance score, and v3r1 scores must not be compared to it.
+- v3r1 is an independent replacement branched directly from product v4, not from the invalidated evaluation branch. Prior Agent outputs were not observed when drafting the replacement.
+- Before freeze, the deterministic preflight may inspect only the immutable v4 user/evidence/formula registries, real source chunks, and independently authored ground truth. It must not call an LLM, Agent, planner, or retrieval-success probe. An input-contract failure may be repaired only before freeze; it is not permission to tune the benchmark to model performance.
+- Freeze requires 12 tasks: 8 required (6 pipeline, 2 end-to-end), 2 optional, 2 not-needed, plus complete source provenance and 100% recall of required USERF, EFACT and parseable formula anchors in the *given source*. Record preflight hashes and zero LLM calls.
+- After freeze, task wording, ground truth, tolerances, source catalog, rubric and product code are immutable. A source retrieval miss in runtime is a legitimate held-out failure, separate from preflight source-to-registry compatibility.
+- Run exactly one complete A/B sequence: all 12 Python OFF, then all 12 Python ON. No selective retries or benchmark-data edits; only product-internal bounded retries are allowed. The two conditions differ only in `allow_python_execution` and `python_execution_approved`.
+- Both conditions use real `D:\petroleum-rag-agent\data` (`petroleum_knowledge`: 18,976 chunks / 12 documents), `qwen3:8b`, temperature 0, seed 42, internal KB only, web off, default legacy retrieval, `max_iterations=4`, `no_progress_patience=2`.
+- Ollama, Chroma, disk and runner availability failures are infrastructure errors. Planner, registry, verifier, code-generation, sandbox, subprocess and answer failures are product results.
+- Report paired outcomes for all 12, required 8, pipeline 6 and end-to-end 2. Score the execution funnel, independent CALC numeric/unit/completeness, final adoption/provenance, and criterion-level final answers. Use a 10,000-resample paired bootstrap (seed 42), blind `gemma4:latest` semantic review, and human-readable QA of all 24 answers. Do not use OpenAI or Gemini APIs.
+- Do not rerun prior v1/v2/v3 benchmarks, tune retrieval, modify Chroma, or merge to `main`.

@@ -1,0 +1,91 @@
+{
+  "benchmark_id":"python_tool_heldout_v3r1",
+  "version":"3.1",
+  "product_code_sha":"f71896627cc77cd6df569bb3cd140289d3667fac",
+  "tasks":[
+    {
+      "task_id":"PY3R1-RE-01","domain":"reservoir_engineering","python_expected":"required","evaluation_stratum":"pipeline","input_provenance_expected":"user_fact_plus_formula",
+      "topic":"Five hypothetical two-stage separator records are supplied by the user. All volumes are in bbl, so this question concerns only oil FVF, not GOR.\nA_Vres=144 bbl\nA_L2=120 bbl\nB_Vres=183 bbl\nB_L2=150 bbl\nC_Vres=262.5 bbl\nC_L2=175 bbl\nD_Vres=99 bbl\nD_L2=90 bbl\nE_Vres=213 bbl\nE_L2=180 bbl",
+      "goal":"Find the KB two-stage separator Bo relation, calculate Bo for all five records and their mean, identify the largest and smallest, and keep hypothetical USERF volumes distinct from the KB equation.","expected_result":null,
+      "success_criteria":[{"criterion_id":"C1","description":"Cite and apply the two-stage separator Bo=Vres/L2 relation.","required":true},{"criterion_id":"C2","description":"Report five Bo values, mean and extrema.","required":true},{"criterion_id":"C3","description":"Label the volumes as user inputs and state separator-condition dependence.","required":true}],
+      "ground_truth":{"required_user_facts":[["A_Vres",144,"bbl"],["A_L2",120,"bbl"],["B_Vres",183,"bbl"],["B_L2",150,"bbl"],["C_Vres",262.5,"bbl"],["C_L2",175,"bbl"],["D_Vres",99,"bbl"],["D_L2",90,"bbl"],["E_Vres",213,"bbl"],["E_L2",180,"bbl"]],"required_evidence_facts":[],"formula_sources":[["R559","Bo = Vres / L2"]],"source_ids":["R559"],"numeric_targets":[["A_Bo",1.2,"ratio",0.005],["B_Bo",1.22,"ratio",0.005],["C_Bo",1.5,"ratio",0.005],["D_Bo",1.1,"ratio",0.005],["E_Bo",1.183333333333,"ratio",0.005],["mean_Bo",1.240666666667,"ratio",0.005]],"expected_extrema":{"highest":"C","lowest":"D"}}
+    },
+    {
+      "task_id":"PY3R1-RE-02","domain":"reservoir_engineering","python_expected":"required","evaluation_stratum":"pipeline","input_provenance_expected":"user_fact_plus_formula",
+      "topic":"Five hypothetical gas-displacement screening cases. Swi and Sgr are percentage saturations supplied by the user, not measured in the handbook.\nA_Swi=18 %\nA_Sgr=12 %\nB_Swi=24 %\nB_Sgr=9 %\nC_Swi=30 %\nC_Sgr=18 %\nD_Swi=12 %\nD_Sgr=8 %\nE_Swi=22 %\nE_Sgr=15 %",
+      "goal":"Use the KB gas displacement efficiency equation ED=(1-Swi-Sgr)/(1-Swi) to compute ED for all five cases and their mean; rank best and worst without claiming field recovery is proved.","expected_result":null,
+      "success_criteria":[{"criterion_id":"C1","description":"Cite the correct gas displacement efficiency equation and convert percentages to fractions.","required":true},{"criterion_id":"C2","description":"Compute five ED values, mean and extrema.","required":true},{"criterion_id":"C3","description":"Limit interpretation to hypothetical screening.","required":true}],
+      "ground_truth":{"required_user_facts":[["A_Swi",18,"%"],["A_Sgr",12,"%"],["B_Swi",24,"%"],["B_Sgr",9,"%"],["C_Swi",30,"%"],["C_Sgr",18,"%"],["D_Swi",12,"%"],["D_Sgr",8,"%"],["E_Swi",22,"%"],["E_Sgr",15,"%"]],"required_evidence_facts":[],"formula_sources":[["H1520","ED = (1 −Swi −Sgr) /(1 −Swi)"]],"source_ids":["H1520"],"numeric_targets":[["A_ED",0.8536585366,"fraction",0.005],["B_ED",0.8815789474,"fraction",0.005],["C_ED",0.7428571429,"fraction",0.005],["D_ED",0.9090909091,"fraction",0.005],["E_ED",0.8076923077,"fraction",0.005],["mean_ED",0.8389755687,"fraction",0.005]],"expected_extrema":{"highest":"D","lowest":"C"}}
+    },
+    {
+      "task_id":"PY3R1-RE-03","domain":"reservoir_engineering","python_expected":"required","evaluation_stratum":"pipeline","input_provenance_expected":"user_fact_plus_formula",
+      "topic":"For five user-proposed waterflood patterns, gas, initial-water and residual-oil saturations are percentages.\nA_Sg=6 %\nA_Swi=24 %\nA_Sorw=18 %\nB_Sg=12 %\nB_Swi=30 %\nB_Sorw=20 %\nC_Sg=8 %\nC_Swi=26 %\nC_Sorw=14 %\nD_Sg=15 %\nD_Swi=22 %\nD_Sorw=18 %\nE_Sg=4 %\nE_Swi=18 %\nE_Sorw=12 %",
+      "goal":"Find the KB waterflood-performance envelope relation Fpvg=Sg/(1-Swi-Sorw). Calculate five Fpvg values, mean, and largest/smallest; describe it as an envelope construction, not actual recovery.","expected_result":null,
+      "success_criteria":[{"criterion_id":"C1","description":"Cite and apply the Fpvg relation using fraction saturations.","required":true},{"criterion_id":"C2","description":"Report five Fpvg values, mean and extrema.","required":true},{"criterion_id":"C3","description":"Do not equate Fpvg with measured recovery.","required":true}],
+      "ground_truth":{"required_user_facts":[["A_Sg",6,"%"],["A_Swi",24,"%"],["A_Sorw",18,"%"],["B_Sg",12,"%"],["B_Swi",30,"%"],["B_Sorw",20,"%"],["C_Sg",8,"%"],["C_Swi",26,"%"],["C_Sorw",14,"%"],["D_Sg",15,"%"],["D_Swi",22,"%"],["D_Sorw",18,"%"],["E_Sg",4,"%"],["E_Swi",18,"%"],["E_Sorw",12,"%"]],"required_evidence_facts":[],"formula_sources":[["H1091","Fpvg = Sg /(1 −Swi −Sorw)"]],"source_ids":["H1091"],"numeric_targets":[["A_Fpvg",0.1034482759,"fraction",0.005],["B_Fpvg",0.24,"fraction",0.005],["C_Fpvg",0.1333333333,"fraction",0.005],["D_Fpvg",0.25,"fraction",0.005],["E_Fpvg",0.0571428571,"fraction",0.005]],"expected_extrema":{"highest":"D","lowest":"E"}}
+    },
+    {
+      "task_id":"PY3R1-WT-04","domain":"well_test","python_expected":"required","evaluation_stratum":"pipeline","input_provenance_expected":"user_fact_plus_formula",
+      "topic":"These are hypothetical true-damage and partial-penetration pseudo-skin components inferred by the user from separate measurements. They are dimensionless, not KB measurements.\nA_Sd=4.2\nA_Sp=1.4\nB_Sd=2.6\nB_Sp=2.8\nC_Sd=-1.5\nC_Sp=3.2\nD_Sd=6.1\nD_Sp=-0.8\nE_Sd=0.4\nE_Sp=4.5",
+      "goal":"Using the KB limited-entry relation Sa=Sd+Sp, calculate each apparent skin and order highest to lowest. Explain why apparent skin is not automatically all formation damage.","expected_result":null,
+      "success_criteria":[{"criterion_id":"C1","description":"Cite the apparent-skin decomposition.","required":true},{"criterion_id":"C2","description":"Compute five Sa values and rank them.","required":true},{"criterion_id":"C3","description":"Distinguish pseudo-skin from damage.","required":true}],
+      "ground_truth":{"required_user_facts":[["A_Sd",4.2,""],["A_Sp",1.4,""],["B_Sd",2.6,""],["B_Sp",2.8,""],["C_Sd",-1.5,""],["C_Sp",3.2,""],["D_Sd",6.1,""],["D_Sp",-0.8,""],["E_Sd",0.4,""],["E_Sp",4.5,""]],"required_evidence_facts":[],"formula_sources":[["W65","Sa = Sd + Sp"]],"source_ids":["W65"],"numeric_targets":[["A_Sa",5.6,"dimensionless",0.02],["B_Sa",5.4,"dimensionless",0.02],["C_Sa",1.7,"dimensionless",0.02],["D_Sa",5.3,"dimensionless",0.02],["E_Sa",4.9,"dimensionless",0.02]],"expected_ranking":["A","B","D","E","C"]}
+    },
+    {
+      "task_id":"PY3R1-WT-05","domain":"well_test","python_expected":"required","evaluation_stratum":"pipeline","input_provenance_expected":"user_fact_plus_evidence_fact_plus_formula",
+      "topic":"Use the KB limited-height-fracture exercise with k=1 md and kz=0.05 md only as a documented reference rock. For a hypothetical new vertical-permeability sensitivity while keeping horizontal permeability at that source k, the USER values are:\nV1_kv=0.04 mD\nV2_kv=0.08 mD\nV3_kv=0.2 mD\nV4_kv=0.5 mD",
+      "goal":"Find the separate RFT anisotropy definition A=kh/kv. Compute the reference anisotropy and four hypothetical A values, then identify which variant is closest to the KB reference. Do not claim the variants were measured in the source.","expected_result":null,
+      "success_criteria":[{"criterion_id":"C1","description":"Retrieve source k and kz and cite A=kh/kv.","required":true},{"criterion_id":"C2","description":"Compute reference and four variant anisotropy ratios.","required":true},{"criterion_id":"C3","description":"Keep KB reference and hypothetical USER variations distinct.","required":true}],
+      "ground_truth":{"required_user_facts":[["V1_kv",0.04,"mD"],["V2_kv",0.08,"mD"],["V3_kv",0.2,"mD"],["V4_kv",0.5,"mD"]],"required_evidence_facts":[["W83","k",1,"md"],["W83","kz",0.05,"md"]],"formula_sources":[["W376","A = kh/kv"]],"source_ids":["W83","W376"],"numeric_targets":[["reference_A",20,"ratio",0.1],["V1_A",25,"ratio",0.1],["V2_A",12.5,"ratio",0.1],["V3_A",5,"ratio",0.1],["V4_A",2,"ratio",0.1]],"closest":"V1"}
+    },
+    {
+      "task_id":"PY3R1-WT-06","domain":"well_test","python_expected":"required","evaluation_stratum":"pipeline","input_provenance_expected":"user_fact",
+      "topic":"User-supplied RFT gauge repeatability QC pairs, not a published survey. Each line is a station with first and repeat pressure readings.\n(first psia, repeat psia):\nR1=(3100,3101)\nR2=(3120,3118)\nR3=(3085,3086)\nR4=(3150,3154)\nR5=(3200,3199)\nR6=(3175,3175)\nR7=(3225,3222)\nR8=(3050,3051)\nR9=(3300,3296)\nR10=(3250,3252)",
+      "goal":"Calculate each absolute repeat difference, mean absolute difference, root-mean-square difference and stations tied for largest absolute difference. This is instrument repeatability QC, not a fluid-gradient or flow-regime diagnosis.","expected_result":null,
+      "success_criteria":[{"criterion_id":"C1","description":"Use all ten paired USERF readings.","required":true},{"criterion_id":"C2","description":"Report ten differences, mean absolute and RMS differences, and tied maxima.","required":true},{"criterion_id":"C3","description":"Avoid inferring fluid gradient or flow regime from repeatability alone.","required":true}],
+      "ground_truth":{"required_user_facts":[["R1_first",3100,"psia"],["R1_repeat",3101,"psia"],["R2_first",3120,"psia"],["R2_repeat",3118,"psia"],["R3_first",3085,"psia"],["R3_repeat",3086,"psia"],["R4_first",3150,"psia"],["R4_repeat",3154,"psia"],["R5_first",3200,"psia"],["R5_repeat",3199,"psia"],["R6_first",3175,"psia"],["R6_repeat",3175,"psia"],["R7_first",3225,"psia"],["R7_repeat",3222,"psia"],["R8_first",3050,"psia"],["R8_repeat",3051,"psia"],["R9_first",3300,"psia"],["R9_repeat",3296,"psia"],["R10_first",3250,"psia"],["R10_repeat",3252,"psia"]],"required_evidence_facts":[],"formula_sources":[],"source_ids":[],"numeric_targets":[["R1_abs",1,"psi",0.01],["R2_abs",2,"psi",0.01],["R3_abs",1,"psi",0.01],["R4_abs",4,"psi",0.01],["R5_abs",1,"psi",0.01],["R6_abs",0,"psi",0.01],["R7_abs",3,"psi",0.01],["R8_abs",1,"psi",0.01],["R9_abs",4,"psi",0.01],["R10_abs",2,"psi",0.01],["mean_absolute",1.9,"psi",0.02],["rms",2.3021728866,"psi",0.03]],"max_stations":["R4","R9"]}
+    },
+    {
+      "task_id":"PY3R1-RE-07","domain":"reservoir_engineering","python_expected":"required","evaluation_stratum":"end_to_end","input_provenance_expected":"kb_evidence_fact_plus_user_fact_plus_formula",
+      "topic":"The KB water-influx worked example reports its first-year We; locate that value and the separate aquifer pressure-step superposition diagram. Four alternative pairs of additional hypothetical pressure-step contributions are supplied only by the user, not by the worked example:\nA_We2=21600 bbl\nA_We3=18400 bbl\nB_We2=17500 bbl\nB_We3=12500 bbl\nC_We2=34000 bbl\nC_We3=28000 bbl\nD_We2=11200 bbl\nD_We3=9400 bbl",
+      "goal":"Use the source first-year We as We1 and the KB three-contribution superposition relation to calculate four hypothetical total We values, rank them and give the largest percent increment over We1. Clearly separate the real worked-example value from hypothetical user increments; do not call these published three-year predictions.","expected_result":null,
+      "success_criteria":[{"criterion_id":"C1","description":"Retrieve the first-year We EFACT and cite the additive superposition equation.","required":true},{"criterion_id":"C2","description":"Compute total and percent increment correctly.","required":true},{"criterion_id":"C3","description":"Separate example EFACT from hypothetical USERF increments.","required":true}],
+      "ground_truth":{"required_user_facts":[["A_We2",21600,"bbl"],["A_We3",18400,"bbl"],["B_We2",17500,"bbl"],["B_We3",12500,"bbl"],["C_We2",34000,"bbl"],["C_We3",28000,"bbl"],["D_We2",11200,"bbl"],["D_We3",9400,"bbl"]],"required_evidence_facts":[["R727","We",48626,"bbl"]],"formula_sources":[["R710","We = We1+We2+We3"]],"source_ids":["R727","R710"],"numeric_targets":[["A_total_We",88626,"bbl",1],["B_total_We",78626,"bbl",1],["C_total_We",110626,"bbl",1],["D_total_We",69226,"bbl",1],["C_percent_increment",127.50380455,"%",0.1]],"expected_ranking":["C","A","B","D"]}
+    },
+    {
+      "task_id":"PY3R1-WT-08","domain":"well_test","python_expected":"required","evaluation_stratum":"end_to_end","input_provenance_expected":"kb_evidence_fact_plus_formula",
+      "topic":"Compare horizontal-versus-vertical permeability contrast in two different handbook well-test worked examples: the early-radial horizontal-well case with kx and kz, and Example 8.4 Well Prf-3 with kx and kz. No permeability numbers are supplied by the user.",
+      "goal":"Extract the actual permeability numbers for both examples, use the separate RFT definition A=kh/kv to calculate both anisotropy ratios and their ratio, and avoid treating the examples as the same reservoir or predicting RFT drawdown from A alone.","expected_result":null,
+      "success_criteria":[{"criterion_id":"C1","description":"Retrieve four KB permeability values from the two actual examples.","required":true},{"criterion_id":"C2","description":"Cite A=kh/kv and compute A for each example plus contrast.","required":true},{"criterion_id":"C3","description":"Do not conflate the two reservoirs or equate A with RFT drawdown directly.","required":true}],
+      "ground_truth":{"required_user_facts":[],"required_evidence_facts":[["H819","kx",200,"md"],["H819","kz",2,"md"],["H826","kx",100,"md"],["H826","kz",10,"md"]],"formula_sources":[["W376","A = kh/kv"]],"source_ids":["H819","H826","W376"],"numeric_targets":[["early_radial_example_A",100,"ratio",0.1],["prf3_example_A",10,"ratio",0.1],["contrast",10,"ratio",0.05]]}
+    },
+    {
+      "task_id":"PY3R1-RE-09","domain":"reservoir_engineering","python_expected":"optional","evaluation_stratum":"optional","input_provenance_expected":"user_fact",
+      "topic":"Two user-supplied porosity screening estimates of the same plug are:\ncore_phi=18 %\nlog_phi=21 %",
+      "goal":"Give the absolute gap in percentage points and the relative gap against the core estimate. A calculator is optional; do not infer which instrument is wrong.","expected_result":null,
+      "success_criteria":[{"criterion_id":"C1","description":"State a three-percentage-point gap.","required":true},{"criterion_id":"C2","description":"State the 16.7 percent relative gap against core.","required":true},{"criterion_id":"C3","description":"Avoid an unsupported measurement-cause claim.","required":true}],
+      "ground_truth":{"required_user_facts":[["core_phi",18,"%"],["log_phi",21,"%"]],"required_evidence_facts":[],"formula_sources":[],"source_ids":[],"numeric_targets":[["gap_pp",3,"percentage points",0.01],["relative_gap",16.666666667,"%",0.1]]}
+    },
+    {
+      "task_id":"PY3R1-WT-10","domain":"well_test","python_expected":"optional","evaluation_stratum":"optional","input_provenance_expected":"user_fact",
+      "topic":"Two user-supplied dimensionless skin estimates for separate interpretation windows are:\nearly_skin=-2.5\nlate_skin=1.0",
+      "goal":"Give the numerical increase from early to late skin, while noting two estimates alone do not diagnose a specific flow regime. Python is optional.","expected_result":null,
+      "success_criteria":[{"criterion_id":"C1","description":"Compute the 3.5-unit increase.","required":true},{"criterion_id":"C2","description":"Keep skin dimensionless.","required":true},{"criterion_id":"C3","description":"Avoid unique flow-regime attribution.","required":true}],
+      "ground_truth":{"required_user_facts":[["early_skin",-2.5,""],["late_skin",1.0,""]],"required_evidence_facts":[],"formula_sources":[],"source_ids":[],"numeric_targets":[["increase",3.5,"dimensionless",0.01]]}
+    },
+    {
+      "task_id":"PY3R1-RE-11","domain":"reservoir_engineering","python_expected":"not_needed","evaluation_stratum":"not_needed","input_provenance_expected":"none",
+      "topic":"Why must oil formation-volume factor and solution gas-oil ratio from a separator test be reported with the actual separator conditions? No calculation is requested.",
+      "goal":"Explain the stage/pressure/temperature dependence and cite the two-stage separator discussion without inventing a numerical PVT value or running Python.","expected_result":null,
+      "success_criteria":[{"criterion_id":"C1","description":"Explain separator-condition dependence.","required":true},{"criterion_id":"C2","description":"Cite the KB separator discussion.","required":true},{"criterion_id":"C3","description":"Do not invent values or run Python.","required":true}],
+      "ground_truth":{"required_user_facts":[],"required_evidence_facts":[],"formula_sources":[],"source_ids":["R559"],"numeric_targets":[]}
+    },
+    {
+      "task_id":"PY3R1-WT-12","domain":"well_test","python_expected":"not_needed","evaluation_stratum":"not_needed","input_provenance_expected":"none",
+      "topic":"Why can a Horner buildup interpretation of a new well in a developed reservoir be distorted by depletion and interlayer crossflow, even when it is tempting to use a single-well model? No numeric result is requested.",
+      "goal":"Explain the difference from an initially uniform, infinite-acting appraisal setting; cite the developed-reservoir discussion and avoid fabricated pressure numbers or Python.","expected_result":null,
+      "success_criteria":[{"criterion_id":"C1","description":"Describe the uniform-pressure/infinite-acting assumptions.","required":true},{"criterion_id":"C2","description":"Explain production-driven pressure gradients and crossflow risks with citation.","required":true},{"criterion_id":"C3","description":"Do not invent values or run Python.","required":true}],
+      "ground_truth":{"required_user_facts":[],"required_evidence_facts":[],"formula_sources":[],"source_ids":["W345"],"numeric_targets":[]}
+    }
+  ]
+}

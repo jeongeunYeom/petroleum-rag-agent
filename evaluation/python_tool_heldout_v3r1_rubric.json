@@ -1,0 +1,16 @@
+{
+  "benchmark_id":"python_tool_heldout_v3r1",
+  "version":"3.1",
+  "frozen_scoring_policy":{
+    "goal_success":"All required criteria supported in the final answer; numerical criteria must be independently correct, not merely marked met by the product.",
+    "numeric_accuracy":"Each named GT numeric target must appear in the answer with the correct case/meaning and be within its frozen absolute tolerance. Overall task numeric pass requires all targets.",
+    "unit_accuracy":"Each numeric target must have the specified unit or a mathematically equivalent unit, with dimensionless/ratio values labelled clearly. Do not accept a correct numeral attached to the wrong quantity.",
+    "citation_correctness":"KB claims must cite evidence from the correct document/page and have matching engineering meaning. USERF values must not be represented as KB facts.",
+    "calc_correctness":"A validated computation must have a successful subprocess and contain all independently correct numeric outputs; no validated-CALC denominator means N/A, not zero.",
+    "calc_adoption":"The final answer must use a validated CALC result, include its [CALC#] citation, preserve USERF provenance and cite the KB formula separately.",
+    "python_need":"Required tasks should reach the calculation boundary; optional tasks may use or omit Python; not_needed tasks should omit Python.",
+    "failure_attribution":"Separate source retrieval miss, registry miss, planner-selection miss, fact/formula verification, code generation, sandbox, subprocess, result validation, CALC adoption, and final reasoning. Product failures are results, not infrastructure exclusions.",
+    "manual_qa":"Review all 24 final answers blind to condition for semantic correctness, source support, units, and limitations; deterministic numeric scoring remains independent of the reviewer.",
+    "statistical_comparison":"Paired required-task benefit/neutral/harm and 10000-resample paired bootstrap with seed 42; report 95% percentile intervals and small-sample limits."
+  }
+}
