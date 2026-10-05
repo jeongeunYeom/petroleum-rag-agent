@@ -188,6 +188,16 @@ class FixedCode:
         return json.dumps({"code": code})
 
 
+def selected_plan(topic: str, evidence: list[dict], selection: AnalysisPlanSelection):
+    request = GoalResearchRequest(topic=topic)
+    criterion = [GoalCriterion(criterion_id="C1", description="Calculate the requested numeric result")]
+    decision = asyncio.run(GoalToolPlanner(Replies([selection.model_dump_json()])).decide(request, criterion, evidence, None))
+    assert decision.tool_needed and decision.decision_status == "selected"
+    assert decision.plan_status == "materialized" and decision.plan is not None
+    assert decision.selected_fact_ids == selection.fact_refs and decision.selected_formula_id == selection.formula_ref
+    return decision.plan
+
+
 @pytest.mark.parametrize("topic,kb,refs,formula,operation", [
     ("Core A porosity=14 %, Core B porosity=21 %", "Context only.", ["USERF1", "USERF2"], None, "difference_and_percent_change"),
     ("A=83 acres, h=26 ft, phi=0.22", "PV = 7758 * A * h * phi.", ["USERF1", "USERF2", "USERF3"], "FORMULA1", None),
@@ -195,7 +205,7 @@ class FixedCode:
 ])
 def test_three_new_synthetic_paths_reach_validated_calc(tmp_path, topic, kb, refs, formula, operation):
     evidence = [source(kb), *UserFactRegistry.from_topic(topic).evidence()]
-    plan = materialize(select(refs, formula, operation), evidence)
+    plan = selected_plan(topic, evidence, select(refs, formula, operation))
     trace = PythonExecutionTrace()
     analysis = GoalPythonAnalysis(Settings(data_dir=tmp_path / "data", agent_workspace_dir=tmp_path / "workspace"), FixedCode(), "v4-new-path")
     record, executed = asyncio.run(analysis.execute(
@@ -217,7 +227,8 @@ def test_eight_fact_multirow_source_formula_reaches_calc(tmp_path):
             "Layer D: thickness=13 ft, permeability=210 mD\n"
             "k_eff = (Layer_A_thickness*Layer_A_permeability + Layer_B_thickness*Layer_B_permeability + Layer_C_thickness*Layer_C_permeability + Layer_D_thickness*Layer_D_permeability)/(Layer_A_thickness + Layer_B_thickness + Layer_C_thickness + Layer_D_thickness).")
     evidence = [source(text)]
-    plan = materialize(select([f"EFACT{i}" for i in range(1, 9)], "FORMULA1"), evidence)
+    plan = selected_plan("Calculate weighted permeability from all four layers", evidence,
+                         select([f"EFACT{i}" for i in range(1, 9)], "FORMULA1"))
     trace = PythonExecutionTrace()
     analysis = GoalPythonAnalysis(Settings(data_dir=tmp_path / "data", agent_workspace_dir=tmp_path / "workspace"), FixedCode(), "v4-eight-facts")
     record, _ = asyncio.run(analysis.execute(GoalResearchRequest(topic="Calculate weighted k", allow_python_execution=True, python_execution_approved=True), plan, evidence, trace))
