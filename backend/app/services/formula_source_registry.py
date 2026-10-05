@@ -64,13 +64,15 @@ class FormulaSourceRegistry(BaseModel):
             for match in EQUATION.finditer(text):
                 raw = match.group("equation").rstrip(" .\t")
                 candidate = raw.translate(TRANSLATION)
-                if expression_variables(candidate) is None:
+                variables = expression_variables(candidate)
+                rhs = raw.split("=", 1)[1]
+                if variables is None and not (re.search(r"[+\-*/×÷−·]", rhs) and re.search(r"[A-Za-z_]", rhs)):
                     continue
                 start, end = match.start(), match.start() + len(raw)
                 records.append(FormulaSourceRecord(
                     formula_id=f"FORMULA{len(records) + 1}", source_id=str(source["evidence_id"]),
                     source_type=str(source["source_type"]), raw_span=raw,
                     normalized_span=normalize_formula(raw), locator=source.get("locator"),
-                    span_start=start, span_end=end, expression_candidate=candidate,
+                    span_start=start, span_end=end, expression_candidate=candidate if variables is not None else None,
                 ))
         return cls(records=records)

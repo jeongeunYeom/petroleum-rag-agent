@@ -82,6 +82,9 @@ def test_formula_registry_normalizes_only_literal_equations():
     assert normalize_formula("P₁ = Q × R") == normalize_formula("P1=Q*R")
     assert FormulaSourceRegistry.from_evidence([source("P₁ = Q × R")]).records[0].expression_candidate == "P1 = Q * R"
     assert FormulaSourceRegistry.from_evidence([source("Productivity is influenced by flow rate and drawdown.")]).records == []
+    ambiguous = FormulaSourceRegistry.from_evidence([source("X = a/(b -)")]).records
+    assert len(ambiguous) == 1 and ambiguous[0].expression_candidate is None
+    assert FormulaSourceRegistry.from_evidence([source("pressure = 147 mD")]).records == []
 
 
 def test_plan_schema_has_ids_only_and_materialization_is_canonical():
@@ -114,6 +117,14 @@ def test_invalid_ids_missing_variable_or_source_never_materialize(selection, rea
     assert error.value.reason == reason
     if field:
         assert getattr(error.value.failure, field)
+
+
+def test_unparseable_equation_anchor_is_recorded_but_never_executed():
+    evidence = [source("X = a/(b -)"), *UserFactRegistry.from_topic("a=7 ft, b=2 ft").evidence()]
+    with pytest.raises(PlanMaterializationError) as error:
+        materialize(select(["USERF1", "USERF2"], "FORMULA1"), evidence)
+    assert error.value.reason == "formula_not_parseable"
+    assert error.value.failure.formula_id == "FORMULA1" and error.value.failure.source_id == "KB1"
 
 
 def test_evidence_fact_and_formula_materialize_and_trace_exact_failure(tmp_path):
