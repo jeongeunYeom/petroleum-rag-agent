@@ -10,11 +10,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 REVIEW = ROOT / "evaluation/review"
-FREEZE_SHA = "213231fd5c4f6bc29cefebd37f98fc9656c488cb"
+FREEZE_SHA = "4a05deb18f95e01623da7117423ea4825fcf5c51"
 
 
 def digest(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
 def record(run_dir: Path) -> dict:
@@ -26,7 +26,10 @@ def record(run_dir: Path) -> dict:
         "source_catalog": "evaluation/python_tool_heldout_v4r1_source_catalog.json",
         "source_exclusions": "evaluation/python_tool_heldout_v4r1_source_exclusions.json",
         "preflight": "evaluation/review/python_tool_heldout_v4r1_preflight.json",
+        "gt_consistency": "evaluation/review/python_tool_heldout_v4r1_gt_consistency.json",
         "reference_calculator": "evaluation/reference/python_tool_heldout_v4r1_ground_truth.py",
+        "reference_outputs": "evaluation/reference/python_tool_heldout_v4r1_reference_outputs.json",
+        "policy": "evaluation/PYTHON_TOOL_HELDOUT_V4R1_POLICY.md",
     }.items():
         if digest(ROOT / relative) != manifest[label + "_sha256"]:
             raise ValueError(f"Frozen {label} hash changed")
@@ -48,7 +51,9 @@ def record(run_dir: Path) -> dict:
         "source_catalog_sha256": manifest["source_catalog_sha256"],
         "source_exclusions_sha256": manifest["source_exclusions_sha256"],
         "preflight_sha256": manifest["preflight_sha256"],
+        "gt_consistency_sha256": manifest["gt_consistency_sha256"],
         "reference_calculator_sha256": manifest["reference_calculator_sha256"],
+        "reference_outputs_sha256": manifest["reference_outputs_sha256"],
         "raw_sha256": {name: digest(path) for name, path in raw.items()},
         "raw_paths": {name: str(path.resolve()) for name, path in raw.items()},
         "execution_order": ["python_off", "python_on"],

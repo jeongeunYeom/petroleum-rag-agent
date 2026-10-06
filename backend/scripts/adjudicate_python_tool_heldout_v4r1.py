@@ -63,12 +63,14 @@ def _rate(rows: list[dict], field: str) -> float | None:
 def population_summary(rows: list[dict]) -> dict:
     total = sum(row["numeric_total"] for row in rows)
     typed_total = sum(row["typed_total"] for row in rows)
+    ranking_total = sum(row["ranking_total"] for row in rows)
     return {
         "n": len(rows), "goal_success": _rate(rows, "goal_success"),
         "external_coverage": _rate(rows, "external_coverage"),
         "numeric_accuracy": sum(row["numeric_correct"] for row in rows) / total if total else None,
         "unit_accuracy": sum(row["unit_correct"] for row in rows) / total if total else None,
         "typed_accuracy": sum(row["typed_correct"] for row in rows) / typed_total if typed_total else None,
+        "ranking_accuracy": sum(row["ranking_correct"] for row in rows) / ranking_total if ranking_total else None,
         "scenario_completeness": _rate(rows, "scenario_complete"),
         "citation_correctness": _rate(rows, "citation_correct"),
         "latency_mean": statistics.mean(row["elapsed_seconds"] for row in rows) if rows else None,
@@ -122,8 +124,6 @@ def adjudicate() -> dict:
         criterion = dict(qa["qualitative_criterion_pass"])
         if numeric:
             criterion["C2"] = numeric_pass and typed_pass
-        if task["python_expected"] == "not_needed" and original["subprocess"]:
-            criterion["C3"] = False
         if set(criterion) != {item["criterion_id"] for item in task["success_criteria"]}:
             raise ValueError(f"Incomplete criteria: {pair}")
         blind_id = blind_by_pair[pair]
@@ -150,8 +150,12 @@ def adjudicate() -> dict:
             "unit_correct": sum(item["value"] and item["unit"] for item in numeric_matches.values()),
             "typed_matches": typed_matches,
             "typed_correct": sum(typed_matches.values()),
+            "ranking_correct": sum(typed_matches[target["semantic_name"]]
+                                   for target in task["ground_truth"]["ranking_targets"]),
             "external_coverage": coverage,
-            "goal_success": coverage == 1 and unsupported == engineering == provenance_errors == 0,
+            "goal_success": (coverage == 1 and unsupported == engineering == provenance_errors == 0
+                             and (not task["ground_truth"]["source_ids"] or qa["citation_correct"])
+                             and not (task["python_expected"] == "not_needed" and original["subprocess"])),
             "scenario_complete": numeric_pass and typed_pass,
             "citation_correct": bool(qa["citation_correct"]),
             "grounded_adoption": bool(original["grounded_adoption"] and qa["calc_grounded_adoption_verified"]),
@@ -255,7 +259,7 @@ def report_markdown(result: dict) -> str:
     def pct(value):
         return "N/A" if value is None else f"{100 * value:.1f}%"
     lines = [
-        "# Python Tool Heldout v4 — strict first-run baseline", "",
+        "# Python Tool Heldout v4r1 — strict first-run baseline", "",
         f"Product `{result['product_code_sha']}` · run `{result['run_id']}` · manual QA 24/24", "",
         "| Stratum | n | Goal OFF | Goal ON | Coverage OFF | Coverage ON | Numeric OFF | Numeric ON | Unit OFF | Unit ON |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",

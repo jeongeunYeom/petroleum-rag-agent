@@ -208,6 +208,15 @@ def test_manifest_freeze_and_portable_hash_when_present(tmp_path):
     assert digest(path) != frozen["preflight_sha256"]
 
 
+def test_runner_rejects_changed_frozen_benchmark_before_task_one(tmp_path, monkeypatch):
+    import run_python_tool_heldout_v4r1 as runner
+    altered = tmp_path / "benchmark.json"
+    altered.write_bytes((BASE / "python_tool_heldout_v4r1.json").read_bytes() + b" ")
+    monkeypatch.setattr(runner, "BENCHMARK", altered)
+    with pytest.raises(ValueError, match="Frozen benchmark hash mismatch"):
+        runner.load_frozen()
+
+
 def test_numeric_tolerance_unit_typed_and_ranking_scoring():
     target = {"semantic_name": "A_F", "value": 1855, "unit": "bbl", "abs_tolerance": .02}
     assert numeric_match("A F = 1855.01 bbl", target)["unit"]
@@ -229,6 +238,18 @@ def test_contract_and_calc_scoring_distinguish_completeness_from_gt():
     assert first["calc_created"] and first["contract_complete_calc"] and not first["gt_correct_calc"]
     calc["output_manifest"]["OUT_F"]["value"] = target["value"]
     assert calc_score(row, {"computations": [calc]})["gt_correct_calc"]
+    calc["validation_passed"] = False
+    unvalidated = calc_score(row, {"computations": [calc]})
+    assert unvalidated["calc_created"] and not unvalidated["validated_calc"]
+    assert not unvalidated["gt_correct_calc"]
+
+
+def test_contract_scenario_coverage_uses_canonical_scenario_ids():
+    row = task("PT4R1-RE-P2")
+    scored = contract_score(row, {"computations": [{"computation_id": "CALC1", "output_manifest": {
+        "OUT_I1": {"name": "I1_Tap", "value": 144, "unit": "dimensionless"}
+    }}]})
+    assert scored["contract_scenario_coverage_observable"] == 0.25
 
 
 def test_iteration_trace_integrity_pair_hash_and_benefit():
@@ -281,3 +302,7 @@ def test_scorer_smoke_all_24_rows_after_freeze(tmp_path):
     assert len(result["rows"]) == 24
     assert result["populations"]["required_8"]["python_on"]["n"] == 8
     assert result["funnel"]["pipeline_6"]["subprocess"] == 0
+    not_needed = next(row for row in result["rows"] if row["task_id"] == "PT4R1-RE-N1")
+    assert set(not_needed["criterion_pass_preliminary"]) == {"C1"}
+    ranking = next(row for row in result["rows"] if row["task_id"] == "PT4R1-RE-P2")
+    assert ranking["ranking_total"] == 1

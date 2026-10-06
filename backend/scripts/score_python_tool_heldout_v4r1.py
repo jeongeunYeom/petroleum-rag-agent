@@ -151,10 +151,10 @@ def contract_score(task: dict, response: dict) -> dict:
     unit_hits = sum(unit_equivalent(item["unit"], matches[item["semantic_name"]].get("unit"))
                     for item in expected if item["type"] == "numeric" and matches[item["semantic_name"]])
     numeric_matched = sum(item["type"] == "numeric" and bool(matches[item["semantic_name"]]) for item in expected)
-    scenario_expected = {re.match(r"^[A-Z]\d+", item["semantic_name"]).group()
-                         for item in expected if re.match(r"^[A-Z]\d+", item["semantic_name"])}
-    scenario_matched = {re.match(r"^[A-Z]\d+", key).group() for key, value in matches.items()
-                        if value and re.match(r"^[A-Z]\d+", key)}
+    scenarios = {item["semantic_name"]: item.get("scenario_id") for item in
+                 task["ground_truth"]["canonical_targets"] if item.get("scenario_id")}
+    scenario_expected = set(scenarios.values())
+    scenario_matched = {scenarios[key] for key, value in matches.items() if value and key in scenarios}
     # Product v5 exposes contract IDs and output IDs, but not the full contract
     # names/units before execution. Post-result semantic matching is a lower bound.
     return {
@@ -170,7 +170,8 @@ def contract_score(task: dict, response: dict) -> dict:
 
 def calc_score(task: dict, response: dict) -> dict:
     expected = task["ground_truth"]
-    validated = [calc for calc in response.get("computations", []) if calc.get("validation_passed")]
+    computations = response.get("computations", [])
+    validated = [calc for calc in computations if calc.get("validation_passed")]
     best = None
     for calc in validated:
         outputs = [{"output_id": key, **item} for key, item in (calc.get("output_manifest") or {}).items()]
@@ -193,15 +194,20 @@ def calc_score(task: dict, response: dict) -> dict:
                  "calc_unit_correct": sum(item["unit"] for item in match.values()),
                  "calc_typed_correct": sum(bool(row and row.get("value") == target["value"]) for target in expected["typed_targets"]
                                        for row in [typed[target["semantic_name"]]]),
+                 "calc_ranking_correct": sum(bool(typed[target["semantic_name"]] and
+                     typed[target["semantic_name"]].get("value") == target["value"])
+                     for target in expected["ranking_targets"]),
                  "calc_target_matches": match, "calc_typed_matches": {key: row.get("value") if row else None for key, row in typed.items()}}
         if best is None or (score["gt_correct_calc"], score["calc_numeric_correct"]) > (best["gt_correct_calc"], best["calc_numeric_correct"]):
             best = score
-    return {"calc_created": bool(validated), "validated_calc_count": len(validated),
+    return {"calc_created": bool(computations), "validated_calc": bool(validated),
+            "validated_calc_count": len(validated),
             "contract_complete_calc": bool(best and best["contract_complete_calc"]),
             "gt_correct_calc": bool(best and best["gt_correct_calc"]),
             "calc_numeric_correct": best["calc_numeric_correct"] if best else 0,
             "calc_unit_correct": best["calc_unit_correct"] if best else 0,
             "calc_typed_correct": best["calc_typed_correct"] if best else 0,
+            "calc_ranking_correct": best["calc_ranking_correct"] if best else 0,
             "calc_best": best}
 
 
@@ -248,7 +254,7 @@ def aggregate_stages(response: dict, calc: dict, answer: str) -> dict:
         "sandbox_passed": anyt("sandbox_validation_passed"),
         "subprocess": anyt("subprocess_reached"),
         "result_schema_valid": anyt("result_validation_passed"),
-        "validated_calc": calc["calc_created"],
+        "validated_calc": calc.get("validated_calc", calc["calc_created"]),
         "contract_complete_calc": calc["contract_complete_calc"],
         "gt_correct_calc": calc["gt_correct_calc"],
         "grounded_adoption": bool(calc["gt_correct_calc"] and any(
@@ -394,18 +400,27 @@ def score(run_dir: Path, output_dir: Path) -> dict:
             traces = _all_traces(response)
             semantic_source = not task["ground_truth"]["source_ids"] or all(registry["source_retrieved"].values())
             numeric_pass = numeric["complete"] and all(typed.values())
-            criterion = {"C1": semantic_source, "C2": numeric_pass if task["python_expected"] != "not_needed" else True,
-                         "C3": task["python_expected"] != "not_needed" or not stages["subprocess"]}
+            criterion = {"C1": semantic_source}
+            if any(item["criterion_id"] == "C2" for item in task["success_criteria"]):
+                criterion["C2"] = numeric_pass
+            if set(criterion) != {item["criterion_id"] for item in task["success_criteria"]}:
+                raise ValueError(f"Scorer criterion map differs from frozen task: {task['task_id']}")
+            preliminary_goal = all(criterion.values()) and not (
+                task["python_expected"] == "not_needed" and stages["subprocess"]
+            )
             row = {
                 "task_id": task["task_id"], "condition": condition, "domain": task["domain"],
                 "python_expected": task["python_expected"], "evaluation_stratum": task["evaluation_stratum"],
                 "elapsed_seconds": raw_row["elapsed_seconds"], "product_exception": raw_row.get("product_exception"),
                 "product_status": response.get("status"), "internal_coverage": response.get("goal_coverage"),
-                "external_coverage_preliminary": sum(criterion.values()) / 3,
-                "goal_success_preliminary": all(criterion.values()), "criterion_pass_preliminary": criterion,
+                "external_coverage_preliminary": sum(criterion.values()) / len(criterion),
+                "goal_success_preliminary": preliminary_goal, "criterion_pass_preliminary": criterion,
                 "numeric_total": numeric["total"], "numeric_correct": numeric["correct"],
                 "unit_correct": numeric["unit_correct"], "numeric_matches": numeric["target_matches"],
                 "typed_total": len(typed), "typed_correct": sum(typed.values()), "typed_matches": typed,
+                "ranking_total": len(task["ground_truth"]["ranking_targets"]),
+                "ranking_correct": sum(typed[target["semantic_name"]]
+                                       for target in task["ground_truth"]["ranking_targets"]),
                 "answer_sha256": sha(answer.encode()), "citation_mapping_sha256": sha(citation_mapping(response)),
                 "final_answer": answer, "python_calls_total": response.get("python_calls_total", 0),
                 "python_attempts_total": response.get("python_attempts_total", 0),
@@ -437,7 +452,7 @@ def score(run_dir: Path, output_dir: Path) -> dict:
                 "contract_external_complete_observable","matched_output_ids")})
             calcs.append({key: row[key] for key in ("task_id","condition","calc_created","validated_calc_count",
                 "contract_complete_calc","gt_correct_calc","calc_numeric_correct","calc_unit_correct",
-                "calc_typed_correct","calc_best","grounded_adoption")})
+                "calc_typed_correct","calc_ranking_correct","calc_best","grounded_adoption")})
             for item in response.get("iterations", []):
                 iterations.append({"task_id": task["task_id"], "condition": condition, "iteration": item.get("iteration"),
                                    "python_seconds": item.get("timing", {}).get("python_seconds", 0),
