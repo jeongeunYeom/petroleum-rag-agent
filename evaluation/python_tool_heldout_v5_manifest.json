@@ -1,0 +1,73 @@
+{
+  "benchmark_id": "python_tool_heldout_v5",
+  "product_code_sha": "8a720a02caa557a893c4d75245bed01df565b85f",
+  "benchmark_sha256": "aa588b115ab997ca5f1a3eb2b1c2eeda83233fd12673e477eb1fc3d8612e1c60",
+  "rubric_sha256": "17f9e89b5288bca9ba7eeab9470b300159f3ee7576ffcf26e5f5dae92fdac75a",
+  "source_catalog_sha256": "4b871bfbd7bfdedee08fcf8ec809483dab5b7944bde167bcda0e7471729fb97b",
+  "source_exclusions_sha256": "959fe16897a8553c787a450dbbf03808453305cae48a9da625800759a40d697a",
+  "reference_calculator_sha256": "bc79aa2afd302e9e218a1a126dc138c39cdc827dd23b9d79a6ce99bfb636f133",
+  "reference_outputs_sha256": "91d41cb2005cf0d10d26c2c27396e559b6a44b72e655a24282f3311b4d1ac0cd",
+  "policy_sha256": "48492998b19eafec8b262dfb19483d97e75f7063b3ab076b2abac73f195bbbef",
+  "preflight_sha256": "38d77ea50c78ed15bc910298ae9c66b31a8dc0ef0f6e229242243d9435c4d8b3",
+  "gt_consistency_sha256": "f1e01c24f1c103f62b6719fb381583ef65c05a5966037809572a24f50e4f2a56",
+  "preflight_status": "PASS",
+  "gt_consistency_status": "PASS",
+  "preflight_llm_calls": 0,
+  "gt_conflicts": 0,
+  "task_count": 12,
+  "python_need_count": {
+    "required": 8,
+    "optional": 2,
+    "not_needed": 2
+  },
+  "required_stratum_count": {
+    "pipeline_direct": 4,
+    "pipeline_recovery_challenge": 2,
+    "end_to_end": 2
+  },
+  "domain_count": {
+    "reservoir_engineering": 5,
+    "well_test": 4,
+    "formation_evaluation": 3
+  },
+  "expected_user_facts": 47,
+  "expected_evidence_facts": 7,
+  "expected_formulas": 8,
+  "expected_required_outputs": 84,
+  "kb": {
+    "data_dir": "D:\\petroleum-rag-agent\\data",
+    "collection": "petroleum_knowledge",
+    "chunks": 18976,
+    "documents": 12,
+    "retrieval_mode": "legacy"
+  },
+  "model_settings": {
+    "research_model": "qwen3:8b",
+    "review_model": "gemma4:latest",
+    "temperature": 0,
+    "seed": 42,
+    "use_internal": true,
+    "use_external": false,
+    "engineering_validation": true,
+    "internal_top_k": 5,
+    "external_top_k": 5,
+    "max_iterations": 4,
+    "no_progress_patience": 2,
+    "max_python_calls": 4,
+    "max_python_attempts_per_call": 2
+  },
+  "conditions": [
+    {
+      "name": "python_off",
+      "allow_python_execution": false,
+      "python_execution_approved": false
+    },
+    {
+      "name": "python_on",
+      "allow_python_execution": true,
+      "python_execution_approved": true
+    }
+  ],
+  "run_policy": "one complete OFF 12 then ON 12; no selective reruns; product failures scored",
+  "freeze_commit_sha": null
+}
