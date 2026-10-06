@@ -40,7 +40,15 @@ def test_old_scenario_source_and_smoke_contamination_zero():
 
 
 def test_user_evidence_formula_representability():
-    report, audit = preflight.audit()
+    report = json.loads((BASE / "review/python_tool_heldout_v5_preflight.json").read_text(encoding="utf-8"))
+    audit = json.loads((BASE / "review/python_tool_heldout_v5_gt_consistency.json").read_text(encoding="utf-8"))
+    # The committed audit is portable; repeat the Chroma-backed check only where the
+    # original 18,976-chunk DB is present (GitHub CI intentionally has no KB).
+    if preflight.DB.is_file():
+        live_report, live_audit = preflight.audit()
+        assert live_report["representability"] == report["representability"]
+        assert live_report["kb_collection_count"] == report["kb_collection_count"]
+        assert live_audit["conflict_count"] == audit["conflict_count"]
     assert report["status"] == audit["status"] == "PASS"
     assert report["representability"] == {"user": {"expected": 47, "matched": 47},
                                            "evidence": {"expected": 7, "matched": 7},

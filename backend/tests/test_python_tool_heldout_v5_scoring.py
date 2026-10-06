@@ -42,9 +42,13 @@ def mini_contract(value: float = 2.5) -> tuple[dict, dict]:
     return task, response
 
 
-def test_runner_frozen_sha_and_product_identity(monkeypatch):
-    benchmark, manifest = runner.load_frozen()
+def test_runner_frozen_asset_hashes_and_product_identity(monkeypatch):
+    # The runner checks Git ancestry against the freeze commit in a full checkout.
+    # CI uses checkout@v4's shallow clone, so test portable hashes here instead.
+    benchmark = runner.load(runner.BENCHMARK)
+    manifest = runner.load(runner.MANIFEST)
     assert manifest["product_code_sha"] == benchmark["product_code_sha"]
+    assert all(runner.digest(path) == manifest[label + "_sha256"] for label, path in runner.FILES.items())
     original = runner.load
     monkeypatch.setattr(runner, "load", lambda path: {**original(path), "product_code_sha": "wrong"}
                         if path == runner.MANIFEST else original(path))
