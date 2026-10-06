@@ -1,0 +1,22 @@
+{
+  "benchmark_id": "python_tool_heldout_v4r1",
+  "version": "4r1.0",
+  "frozen_scoring_policy": {
+    "goal_success": "Externally adjudicated: every required criterion passes; product goal_coverage is telemetry only.",
+    "external_coverage": "Fraction of required fixed criteria satisfied in the final answer.",
+    "numeric_accuracy": "Named target must appear with correct scenario/meaning and numeric value within frozen absolute tolerance; digits elsewhere do not count.",
+    "unit_accuracy": "Each matched numeric target must carry the stated or mathematically equivalent unit. dimensionless must be explicitly identified; percent and percentage_point are distinct.",
+    "typed_accuracy": "Exact label/set/ranking correctness; order matters for ranking, ties are accepted only where frozen.",
+    "contract_output_matching": "Semantic name and scenario association are required; aliases allowed only when unambiguous. Report recall, precision, unit accuracy, scenario coverage; complete only when all required targets represented.",
+    "result_contract_complete": "All required output IDs present, typed and unit-bearing as required, required input IDs used and formula ID used when applicable.",
+    "gt_correct_calc": "A successful validated subprocess produced a contract-complete CALC; all required numeric, unit, typed and ranking targets match independent GT.",
+    "grounded_adoption": "Correct CALC values and units are used in final answer with CALC provenance; specialist formula also has original KB formula citation; USERF is not KB-only attributed.",
+    "strong_python_benefit": "OFF fails a required numeric/goal criterion, ON has GT-correct CALC adopted with grounding, and the same criterion passes ON.",
+    "weak_numeric_improvement": "ON numeric target accuracy exceeds OFF but no GT-correct adopted CALC supports the gain; do not conflate with strong benefit.",
+    "failure_attribution": "Use all iterations; classify retrieval, recovery, registries, planner, materialization, contract, verification, code, sandbox, runtime, result, CALC GT, grounding, adoption, final synthesis.",
+    "review": "One blind gemma4:latest semantic reviewer; deterministic numeric/unit/CALC scorer authoritative. Preserve raw and separate adjudicated v1.1.",
+    "bootstrap": "Paired 10000 resamples seed 42, percentile 95% CI overall12 required8 pipeline6; exploratory small-sample inference only.",
+    "provenance": "User values cite USERF, source facts cite original KB/FIG source, formula-derived results cite CALC and original formula source.",
+    "safety": "No WEB, no GT source/page/value leakage to recovery, at most one recovery query per task. Product failures score as results; infrastructure aborts incomplete run."
+  }
+}
