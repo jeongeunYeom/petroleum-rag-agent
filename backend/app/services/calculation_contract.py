@@ -3,13 +3,22 @@
 from __future__ import annotations
 
 import json
+import ast
+import re
 from typing import Any
 
 from app.models.goal_research_schemas import CalculationContract, CalculationOutputSpec, CalculationScenario, GoalResearchRequest
 from app.services.goal_tool_planner import PythonAnalysisPlan
+from app.services.calculation_requirements import CalculationRequirementGraph
+from app.services.required_outputs import RequiredOutputIntent, missing_checklist_outputs
+from app.services.user_fact_registry import UNIT
 
 
-def validate_contract(contract: CalculationContract, plan: PythonAnalysisPlan) -> str | None:
+def validate_contract(contract: CalculationContract, plan: PythonAnalysisPlan,
+                      graph: CalculationRequirementGraph | None = None,
+                      checklist: list[RequiredOutputIntent] | None = None) -> str | None:
+    if graph and not graph.source_complete:
+        return "calculation_source_incomplete"
     facts = {fact.canonical_fact_id or fact.evidence_id: fact for fact in plan.input_facts}
     selected = set(facts)
     if set(contract.input_fact_ids) != selected or len(contract.input_fact_ids) != len(selected):
@@ -26,6 +35,15 @@ def validate_contract(contract: CalculationContract, plan: PythonAnalysisPlan) -
         return "calculation_contract_duplicate_scenario"
     if any(set(item.input_bindings.values()) - selected for item in contract.scenarios):
         return "calculation_contract_unknown_fact"
+    if graph and graph.formula_id:
+        actual = {item.scenario_id: item.input_bindings for item in contract.scenarios}
+        expected = graph.scenario_bindings
+        if "default" in expected and len(expected) == 1 and len(actual) == 1:
+            valid_bindings = next(iter(actual.values())) == expected["default"]
+        else:
+            valid_bindings = all(actual.get(key) == bindings for key, bindings in expected.items())
+        if not valid_bindings:
+            return "calculation_contract_binding_mismatch"
     for item in contract.required_outputs:
         if not item.source_fact_ids:
             return "calculation_contract_output_sources_missing"
@@ -43,6 +61,8 @@ def validate_contract(contract: CalculationContract, plan: PythonAnalysisPlan) -
         return "calculation_contract_unknown_criterion"
     if selected - {fact_id for item in contract.required_outputs if item.required for fact_id in item.source_fact_ids}:
         return "calculation_contract_unused_fact"
+    if checklist and missing_checklist_outputs(contract, checklist):
+        return "calculation_contract_missing_requested_output"
     return None
 
 
@@ -99,13 +119,66 @@ def paired_reading_contract(request: GoalResearchRequest, plan: PythonAnalysisPl
                                scenarios=scenarios, required_outputs=outputs)
 
 
+def source_formula_contract(request: GoalResearchRequest, plan: PythonAnalysisPlan,
+                            graph: CalculationRequirementGraph,
+                            checklist: list[RequiredOutputIntent]) -> CalculationContract | None:
+    """Compile simple source equations when every requested output is per-scenario."""
+    if not graph.source_complete or not graph.formula_id or not plan.formula or any(
+        item.semantic_name != "per_case" for item in checklist):
+        return None
+    if not graph.scenario_bindings or not graph.formula_variables:
+        return None
+    goal = request.goal or request.topic
+    explicit_unit = re.search(r"\bin\s+([A-Za-z%][A-Za-z0-9/%^.-]{0,25})(?=\s|[.,;]|$)", goal, re.I)
+    unit = explicit_unit.group(1) if explicit_unit and (
+        re.fullmatch(UNIT, explicit_unit.group(1), re.I) or "/" in explicit_unit.group(1)
+        or explicit_unit.group(1).casefold() == "dimensionless") else None
+    if unit is None:
+        rhs = plan.formula.split("=", 1)[1].strip()
+        try:
+            tree = ast.parse(rhs, mode="eval")
+        except SyntaxError:
+            return None
+        if not all(not isinstance(node, ast.BinOp) or isinstance(node.op, (ast.Add, ast.Sub))
+                   for node in ast.walk(tree)):
+            return None
+        units = {fact.unit for fact in plan.input_facts}
+        unit = next(iter(units)) if len(units) == 1 else None
+    if not unit:
+        return None
+    lhs = plan.formula.split("=", 1)[0].strip()
+    selected = {fact.canonical_fact_id or fact.evidence_id for fact in plan.input_facts}
+    bindings = graph.scenario_bindings
+    if selected != {fact_id for scenario in bindings.values() for fact_id in scenario.values()}:
+        return None
+    scenarios = [CalculationScenario(scenario_id=key, input_bindings=value) for key, value in bindings.items()]
+    outputs = [CalculationOutputSpec(output_id=f"OUT_{key}_{lhs}", name=f"{key}_{lhs}",
+        semantic_type="numeric", unit=unit, scenario_id=key,
+        source_fact_ids=list(dict.fromkeys(value.values())), formula_id=graph.formula_id)
+        for key, value in bindings.items()]
+    return CalculationContract(contract_id="CC-SOURCE-FORMULA", purpose=plan.purpose,
+        target_criteria=plan.target_criteria, input_fact_ids=[fact.canonical_fact_id or fact.evidence_id
+        for fact in plan.input_facts], formula_id=graph.formula_id, operation_type="source_formula",
+        scenarios=scenarios, required_outputs=outputs)
+
+
 class CalculationContractBuilder:
     def __init__(self, ollama: Any):
         self.ollama = ollama
+        self.last_candidate: CalculationContract | None = None
 
-    async def build(self, request: GoalResearchRequest, plan: PythonAnalysisPlan) -> tuple[CalculationContract | None, str, int]:
+    async def build(self, request: GoalResearchRequest, plan: PythonAnalysisPlan,
+                    graph: CalculationRequirementGraph | None = None,
+                    checklist: list[RequiredOutputIntent] | None = None) -> tuple[CalculationContract | None, str, int]:
+        self.last_candidate = None
+        if graph and not graph.source_complete:
+            return None, "calculation_source_incomplete", 0
+        if graph:
+            deterministic_formula = source_formula_contract(request, plan, graph, checklist or [])
+            if deterministic_formula and validate_contract(deterministic_formula, plan, graph, checklist) is None:
+                return deterministic_formula, "materialized", 0
         deterministic = paired_reading_contract(request, plan)
-        if deterministic and validate_contract(deterministic, plan) is None:
+        if deterministic and validate_contract(deterministic, plan, graph, checklist) is None:
             return deterministic, "materialized", 0
         facts = [{"fact_id": fact.canonical_fact_id or fact.evidence_id, "name": fact.name, "unit": fact.unit}
                  for fact in plan.input_facts]
@@ -117,6 +190,8 @@ class CalculationContractBuilder:
             "formula_id": plan.formula_source_id,
             "formula": plan.formula,
             "expected_outputs": plan.expected_outputs,
+            "canonical_formula_bindings": graph.scenario_bindings if graph else {},
+            "required_output_checklist": [item.model_dump() for item in checklist or []],
             "instructions": "List every per-scenario result and every requested summary (mean, RMS, maximum, ties, ranking).",
         }
         messages = [
@@ -146,7 +221,8 @@ class CalculationContractBuilder:
                 reason = "calculation_contract_parse_failed"
             else:
                 resolve_output_sources(contract)
-                reason = validate_contract(contract, plan) or "materialized"
+                self.last_candidate = contract
+                reason = validate_contract(contract, plan, graph, checklist) or "materialized"
                 if reason == "materialized":
                     return contract, reason, attempt
             if attempt == 1:
@@ -154,6 +230,9 @@ class CalculationContractBuilder:
                     "validation_error": reason,
                     "available_fact_ids": [item["fact_id"] for item in facts],
                     "available_formula_id": plan.formula_source_id,
+                    "required_output_checklist": [item.model_dump() for item in checklist or []],
+                    "missing_requested_outputs": missing_checklist_outputs(self.last_candidate, checklist or []) if self.last_candidate else [],
+                    "canonical_formula_bindings": graph.scenario_bindings if graph else {},
                     "instruction": "Repair using only these IDs and all required outputs. Every output source_fact_ids must list its participating input fact IDs (for formula output, all formula-variable fact IDs). Set contract formula_id and each output formula_id to available_formula_id exactly (null means null).",
                 })})
         return None, reason, 2

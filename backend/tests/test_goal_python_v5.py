@@ -430,7 +430,7 @@ def test_recovery_failure_stops_before_python_and_stays_bounded(tmp_path):
     )))
     assert response.python_calls_total == 0 and not response.computations
     assert sum(item.python_trace.recovery_query_count for item in response.iterations) == 1
-    assert response.iterations[0].python_trace.blocked_stage == "calculation_source_recovery_failed"
+    assert response.iterations[0].python_trace.blocked_stage == "calculation_source_incomplete"
 
 
 class SynthesisReplies:
@@ -463,9 +463,9 @@ def test_bounded_synthesis_repair_or_safe_omission(repair_value, expected_ground
                                             evidence, [], computations=[record], python_trace=trace))
     assert ollama.calls == 2
     assert ("Difference is 7 psi." in answer) is expected_grounded
-    assert trace.calc_grounding_validation_passed is expected_grounded
+    assert trace.calc_grounding_validation_passed
     if not expected_grounded:
-        assert "Difference is 8 psi." not in answer and "[CALC1]" not in answer
+        assert "Difference is 8 psi." not in answer and "difference: 7 psi" in answer and "[CALC1]" in answer
 
 
 def test_source_and_formula_citations_are_expanded_for_grounded_calc():

@@ -36,6 +36,8 @@ class PythonAnalysisPlan(BaseModel):
     expected_outputs: list[str] = Field(default_factory=list)
     create_chart: bool = False
     chart_description: str | None = None
+    formula_bindings: dict[str, dict[str, str]] = Field(default_factory=dict)
+    dependency_formulas: list[str] = Field(default_factory=list)
 
 
 class ToolNeedDecision(BaseModel):
@@ -187,6 +189,8 @@ def materialize_analysis_plan_v4(
     evidence: list[dict[str, Any]],
     evidence_facts: EvidenceFactRegistry,
     formulas: FormulaSourceRegistry,
+    *,
+    allow_unbound: bool = False,
 ) -> PythonAnalysisPlan:
     users = {str(item["evidence_id"]): item for item in evidence if item.get("source_type") == "user_fact"}
     facts_by_id = {item.fact_id: item for item in evidence_facts.records}
@@ -226,7 +230,7 @@ def materialize_analysis_plan_v4(
         if variables is None:
             raise PlanMaterializationError("formula_not_parseable", formula_id=source.formula_id, source_id=source.source_id)
         missing = variables - {fact.name for fact in facts}
-        if missing:
+        if missing and not allow_unbound:
             raise PlanMaterializationError("formula_variable_missing", formula_id=source.formula_id, source_id=source.source_id)
         formula, support = source.expression_candidate, [source.source_id]
         formula_span, formula_id = source.raw_span, source.formula_id
@@ -382,7 +386,8 @@ class GoalToolPlanner:
                 "operation_hint": proposed.operation_hint, "expected_outputs": proposed.expected_outputs,
             }
             try:
-                result.plan = materialize_analysis_plan_v4(proposed, evidence, evidence_facts, formulas)
+                result.plan = materialize_analysis_plan_v4(proposed, evidence, evidence_facts, formulas,
+                                                           allow_unbound=True)
                 result.plan_status = "materialized"
                 result.fact_materialization_status = "materialized"
                 result.formula_materialization_status = "materialized" if proposed.formula_ref else "basic_arithmetic"

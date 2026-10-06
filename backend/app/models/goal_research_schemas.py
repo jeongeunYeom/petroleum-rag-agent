@@ -238,6 +238,29 @@ class PythonExecutionTrace(BaseModel):
     recovery_efact_count: int = 0
     recovery_formula_count: int = 0
     recovery_materialization_success: bool = False
+    requirement_graph_schema_version: int | None = None
+    calculation_contract_schema_version: int | None = None
+    requirement_graph: dict[str, Any] | None = None
+    calculation_contract: dict[str, Any] | None = None
+    required_output_checklist: list[dict[str, Any]] = Field(default_factory=list)
+    missing_requested_outputs: list[str] = Field(default_factory=list)
+    extra_contract_outputs: list[str] = Field(default_factory=list)
+    source_complete: bool | None = None
+    required_variable_count: int = 0
+    bound_variable_count: int = 0
+    missing_variables: list[str] = Field(default_factory=list)
+    ambiguous_variables: list[str] = Field(default_factory=list)
+    unit_mismatch_variables: list[str] = Field(default_factory=list)
+    formula_source_available: bool = False
+    required_evidence_ids: list[str] = Field(default_factory=list)
+    recovery_rounds_used: int = 0
+    recovery_rounds: list[dict[str, Any]] = Field(default_factory=list)
+    source_complete_after_recovery: bool | None = None
+    assumption_guard_passed: bool | None = None
+    assumption_guard_failures: list[str] = Field(default_factory=list)
+    final_response_leakage_detected: bool = False
+    final_response_leakage_repaired: bool = False
+    final_response_leakage_stripped: bool = False
 
 
 class GoalIterationRecord(BaseModel):

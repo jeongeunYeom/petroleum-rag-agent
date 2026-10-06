@@ -20,6 +20,7 @@ from app.models.goal_research_schemas import (
     GoalRunStatus,
     GoalStatus,
     GoalStopReason,
+    VerificationFailure,
 )
 from app.models.research_schemas import (
     FigureEvidence,
@@ -33,10 +34,16 @@ from app.services.goal_planner import GoalPlanner
 from app.services.goal_tool_planner import GoalToolPlanner
 from app.services.goal_python_analysis import GoalPythonAnalysis
 from app.services.calculation_contract import CalculationContractBuilder
+from app.services.calculation_requirements import (
+    CalculationRequirementGraph, augment_plan_with_bindings, build_requirement_graph,
+    required_recovery_gain, select_formula_candidate,
+)
+from app.services.required_outputs import required_output_checklist, missing_checklist_outputs
 from app.services.evidence_fact_registry import EvidenceFactRegistry
 from app.services.formula_source_registry import FormulaSourceRegistry
 from app.services.calc_claim_grounding import validate_calc_claim
 from app.services.goal_result_summary import resolve_final_limitations, without_limitations
+from app.services.final_response_guard import leaked_text, synthesis_has_leak, strip_synthesis_leaks
 from app.services.user_fact_registry import UserFactRegistry
 from app.core.config import get_settings
 
@@ -235,6 +242,7 @@ class GoalResearchAgent:
         next_plan = self.planner.initial_plan(request, frozen_criteria)
         analysis = None
         calculation_recovery_queries = 0
+        calculation_recovery_searches: set[str] = set()
 
         for iteration in range(1, request.max_iterations + 1):
             if is_canceled and is_canceled():
@@ -309,54 +317,114 @@ class GoalResearchAgent:
                         request, frozen_criteria, analysis_evidence, previous_coverage,
                         result.iterations[-1].criteria if result.iterations else None,
                     )
-                    recovery_reasons = {"required_source_unavailable", "fact_registry_empty", "fact_id_unknown",
-                                        "formula_id_unknown", "formula_variable_missing", "formula_not_parseable"}
                     formula_required = bool(re.search(
-                        r"(?:source|cited|published|documented)\s+(?:equation|formula)|(?:근거|출처)\s*(?:수식|공식)",
+                        r"(?:source|cited|published|documented)\s+(?:equation|formula)|(?:근거|출처)\s*(?:수식|공식)|"
+                        r"(?:equation|formula|관계식|공식|수식)\s*(?:for|from|based|을|를|으로)",
                         " ".join(value for value in (request.goal, request.topic) if value), re.I,
                     ))
-                    formula_absent = not FormulaSourceRegistry.from_evidence(analysis_evidence).records
-                    missing_source = decision.plan is None and bool(recovery_reasons.intersection(decision.verification_failures))
-                    missing_required_formula = formula_required and formula_absent and decision.selected_formula_id is None
-                    if (decision.tool_needed and request.use_internal and calculation_recovery_queries == 0
-                            and (missing_source or missing_required_formula)):
-                        calculation_recovery_queries = 1
+                    selected_formula = decision.selected_formula_id or (
+                        (decision.plan_summary or {}).get("formula_ref") if decision.plan_summary else None
+                    )
+                    if formula_required and not selected_formula:
+                        chosen = select_formula_candidate(analysis_evidence,
+                            " ".join([request.goal or request.topic, *(item.description for item in frozen_criteria)]),
+                            [fact.name for fact in decision.plan.input_facts] if decision.plan else [item.name for item in user_registry.records])
+                        if chosen:
+                            selected_formula = chosen.formula_id
+                            self._attach_source_formula(decision, chosen)
+                    if selected_formula and decision.plan and not decision.plan.formula_source_id:
+                        selected_record = next((item for item in FormulaSourceRegistry.from_evidence(analysis_evidence).records
+                            if item.formula_id == selected_formula), None)
+                        if selected_record:
+                            self._attach_source_formula(decision, selected_record)
+                    graph = build_requirement_graph(decision.plan, analysis_evidence,
+                        formula_id=selected_formula, formula_required=formula_required,
+                        require_all_scenarios=bool(re.search(r"\b(?:each|every|per[- ](?:case|sample|reading|well))\b|각각",
+                            request.goal or request.topic, re.I)))
+                    calculation_goal = bool(re.search(r"\b(?:calculat|comput|derive|estimate)\w*\b|계산|산출",
+                                                      request.goal or request.topic, re.I))
+                    while ((decision.tool_needed or (formula_required and calculation_goal and not graph.formula_source_available))
+                           and not graph.source_complete and request.use_internal
+                           and decision.plan_status != "planner_plan_parse_failed"
+                           and decision.decision_status != "planner_decision_parse_failed"
+                           and calculation_recovery_queries < 2):
+                        recovery_query = self._calculation_recovery_query(request, frozen_criteria, graph,
+                                                                          decision.plan_summary)
+                        normalized_recovery = self.planner.normalize_query(recovery_query)
+                        if not recovery_query or normalized_recovery in calculation_recovery_searches:
+                            break
+                        calculation_recovery_searches.add(normalized_recovery)
+                        calculation_recovery_queries += 1
                         python_trace.recovery_triggered = True
-                        python_trace.recovery_reason = (
-                            sorted(recovery_reasons.intersection(decision.verification_failures))[0]
-                            if missing_source else "formula_source_unavailable"
+                        python_trace.recovery_reason = python_trace.recovery_reason or (
+                            "formula_source_unavailable" if not graph.formula_source_available and formula_required
+                            else "calculation_source_incomplete"
                         )
-                        python_trace.recovery_query_count = 1
-                        fact_catalog = {item.fact_id: item.name for item in EvidenceFactRegistry.from_evidence(analysis_evidence).records}
-                        fact_catalog.update({item.fact_id: item.name for item in user_registry.records})
-                        terms = [decision.plan_summary.get("purpose", "") if decision.plan_summary else "",
-                                 *[item.description for item in frozen_criteria],
-                                 *[fact_catalog[value] for value in decision.selected_fact_ids if value in fact_catalog],
-                                 "formula calculation variables"]
-                        recovery_query = re.sub(r"(?<!\w)\d+(?:\.\d+)?(?!\w)", " ",
-                                                " ".join(value.strip() for value in terms if value.strip()))[:500]
+                        missing_before = set(graph.missing_variables + graph.ambiguous_variables + graph.unit_mismatch_variables)
                         recovered = await self.research_agent.research(ResearchRequest(
                             query=recovery_query, use_internal=True, use_external=False,
                             engineering_validation=request.engineering_validation, model=request.model,
                             internal_top_k=request.internal_top_k, external_top_k=request.external_top_k,
                             temperature=request.temperature, seed=request.seed,
                         ))
-                        python_trace.recovery_new_source_ids = accumulator.add(recovered)
-                        evidence_added.extend(python_trace.recovery_new_source_ids)
+                        added = accumulator.add(recovered)
+                        python_trace.recovery_new_source_ids.extend(added)
+                        evidence_added.extend(added)
                         evidence = accumulator.records()
                         analysis_evidence = evidence + user_sources
+                        # Rebuild both registries and the plan; a new passage alone is not a gain.
                         python_trace.recovery_efact_count = len(EvidenceFactRegistry.from_evidence(analysis_evidence).records)
                         python_trace.recovery_formula_count = len(FormulaSourceRegistry.from_evidence(analysis_evidence).records)
                         decision = await self.tool_planner.decide(
                             request, frozen_criteria, analysis_evidence, previous_coverage,
                             result.iterations[-1].criteria if result.iterations else None,
                         )
-                        python_trace.recovery_materialization_success = (
-                            decision.plan is not None and (not formula_required or decision.selected_formula_id is not None)
-                        )
-                        if not python_trace.recovery_materialization_success:
-                            python_trace.blocked_stage = "calculation_source_recovery_failed"
-                            decision.plan = None
+                        new_formula = decision.selected_formula_id or selected_formula
+                        if formula_required and not new_formula:
+                            chosen = select_formula_candidate(analysis_evidence,
+                                " ".join([request.goal or request.topic, *(item.description for item in frozen_criteria)]),
+                                [fact.name for fact in decision.plan.input_facts] if decision.plan else [item.name for item in user_registry.records])
+                            if chosen:
+                                new_formula = chosen.formula_id
+                                self._attach_source_formula(decision, chosen)
+                        if new_formula and decision.plan and not decision.plan.formula_source_id:
+                            selected_record = next((item for item in FormulaSourceRegistry.from_evidence(analysis_evidence).records
+                                if item.formula_id == new_formula), None)
+                            if selected_record:
+                                self._attach_source_formula(decision, selected_record)
+                        refreshed = build_requirement_graph(decision.plan, analysis_evidence,
+                            formula_id=new_formula, formula_required=formula_required,
+                            require_all_scenarios=bool(re.search(r"\b(?:each|every|per[- ](?:case|sample|reading|well))\b|각각",
+                                request.goal or request.topic, re.I)))
+                        gain = required_recovery_gain(graph, refreshed, added)
+                        python_trace.recovery_rounds.append({
+                            "round": calculation_recovery_queries, "query": recovery_query,
+                            "missing_before": sorted(missing_before), "required_gain": gain,
+                            "new_source_ids": added, "status": "required_gain" if gain else "recovery_no_required_gain",
+                        })
+                        python_trace.recovery_materialization_success = bool(gain)
+                        graph = refreshed
+                        selected_formula = new_formula
+                        if graph.source_complete:
+                            break
+                    python_trace.recovery_query_count = len(python_trace.recovery_rounds)
+                    python_trace.recovery_rounds_used = len(python_trace.recovery_rounds)
+                    python_trace.source_complete_after_recovery = graph.source_complete if python_trace.recovery_triggered else None
+                    self._record_requirements(python_trace, graph)
+                    if decision.plan and graph.source_complete:
+                        augment_plan_with_bindings(decision.plan, graph, analysis_evidence)
+                        decision.plan.formula_bindings = graph.scenario_bindings if graph.formula_id else {}
+                        decision.plan.dependency_formulas = graph.dependency_formulas.copy()
+                        if graph.formula_id:
+                            required_ids = {fact_id for bindings in graph.scenario_bindings.values()
+                                            for fact_id in bindings.values()}
+                            decision.plan.input_facts = [fact for fact in decision.plan.input_facts
+                                if (fact.canonical_fact_id or fact.evidence_id) in required_ids]
+                    elif decision.tool_needed and not graph.source_complete:
+                        python_trace.blocked_stage = (
+                            "planner_plan_parse_failed" if decision.plan_status == "planner_plan_parse_failed"
+                            else "calculation_source_incomplete")
+                        decision.plan = None
                     python_requested = decision.tool_needed
                     python_decision_reason = decision.reason
                     python_trace.tool_selected = decision.tool_needed
@@ -375,6 +443,14 @@ class GoalResearchAgent:
                     python_trace.formula_materialization_status = decision.formula_materialization_status
                     python_trace.verification_failures_structured = decision.verification_failures_structured.copy()
                     python_trace.verification_failures = decision.verification_failures.copy()
+                    if decision.tool_needed and not graph.source_complete:
+                        reason = ("formula_variable_ambiguous" if graph.ambiguous_variables else
+                                  "formula_variable_unit_mismatch" if graph.unit_mismatch_variables else
+                                  "calculation_source_incomplete")
+                        python_trace.verification_failures.append(reason)
+                        python_trace.verification_failures_structured.append(
+                            VerificationFailure(stage="calculation_source_readiness", reason=reason,
+                                                formula_id=graph.formula_id))
                     python_trace.plan_summary = decision.plan_summary
                     python_trace.blocked_stage = python_trace.blocked_stage or (
                         "planner_decision_parse_failed" if decision.decision_status == "planner_decision_parse_failed"
@@ -394,11 +470,27 @@ class GoalResearchAgent:
                                 python_trace.blocked_stage = "analysis_initialization_failed"
                                 raise
                         if all(fact.canonical_fact_id for fact in decision.plan.input_facts):
-                            contract, contract_status, contract_attempts = await self.contract_builder.build(request, decision.plan)
+                            checklist = required_output_checklist(request, graph)
+                            python_trace.required_output_checklist = [item.model_dump() for item in checklist]
+                            if type(self.contract_builder) is CalculationContractBuilder:
+                                contract, contract_status, contract_attempts = await self.contract_builder.build(
+                                    request, decision.plan, graph, checklist)
+                            else:
+                                # Keep injected legacy builders usable for persisted v5 workflows.
+                                contract, contract_status, contract_attempts = await self.contract_builder.build(
+                                    request, decision.plan)
                             python_trace.contract_status = contract_status
                             python_trace.contract_attempts = contract_attempts
                             python_trace.calculation_contract_id = contract.contract_id if contract else None
                             python_trace.required_output_ids = [item.output_id for item in contract.required_outputs if item.required] if contract else []
+                            snapshot = contract or getattr(self.contract_builder, "last_candidate", None)
+                            python_trace.calculation_contract_schema_version = (
+                                2 if snapshot and type(self.contract_builder) is CalculationContractBuilder else None)
+                            python_trace.calculation_contract = snapshot.model_dump(mode="json") if snapshot else None
+                            python_trace.missing_requested_outputs = missing_checklist_outputs(snapshot, checklist) if snapshot else [
+                                f"{item.scenario_id or 'aggregate'}:{item.semantic_name}" for item in checklist]
+                            python_trace.extra_contract_outputs = [item.output_id for item in contract.required_outputs
+                                if item.required and not any(intent.scenario_id == item.scenario_id for intent in checklist)] if contract else []
                             if contract is None:
                                 python_trace.blocked_stage = contract_status
                                 computation, python_executed = None, False
@@ -458,6 +550,18 @@ class GoalResearchAgent:
                 computations=result.computations,
                 python_trace=python_trace,
             )
+            if python_trace and python_trace.tool_selected and python_trace.source_complete is False:
+                missing = [
+                    {"formula_source": "검증된 계산식", "numeric_facts": "수치 입력",
+                     "formula_not_parseable": "해석 가능한 계산식"}.get(value, value.split(":", 1)[-1])
+                    for value in python_trace.missing_variables if value != "calculation_plan"
+                ]
+                missing.extend(f"{value.split(':', 1)[-1]} 입력값 구분" for value in python_trace.ambiguous_variables)
+                missing.extend(f"{value.split(':', 1)[-1]} 단위 확인" for value in python_trace.unit_mismatch_variables)
+                detail = ", ".join(dict.fromkeys(missing[:5])) or "필요한 계산 근거"
+                latest_candidate = (latest_candidate + "\n\n" if latest_candidate else "") + (
+                    f"현재 검색된 내부 자료에서는 {detail}에 필요한 근거를 확인하지 못해 계산 결과는 제시하지 않습니다."
+                )
             synthesis_seconds = time.perf_counter() - synthesis_started
 
             result.current_stage = "evaluate"
@@ -603,6 +707,49 @@ class GoalResearchAgent:
             started,
         )
 
+    @staticmethod
+    def _attach_source_formula(decision: Any, record: Any) -> None:
+        if decision.plan is None or decision.plan.formula_source_id:
+            return
+        decision.plan.formula = record.expression_candidate
+        decision.plan.formula_source_id = record.formula_id
+        decision.plan.formula_source_span = record.raw_span
+        decision.plan.supporting_evidence_ids = [record.source_id]
+        decision.selected_formula_id = record.formula_id
+
+    @staticmethod
+    def _record_requirements(trace: PythonExecutionTrace, graph: CalculationRequirementGraph) -> None:
+        trace.requirement_graph_schema_version = graph.schema_version
+        trace.requirement_graph = graph.model_dump(mode="json")
+        trace.source_complete = graph.source_complete
+        trace.required_variable_count = graph.required_variable_count
+        trace.bound_variable_count = graph.bound_variable_count
+        trace.missing_variables = graph.missing_variables.copy()
+        trace.ambiguous_variables = graph.ambiguous_variables.copy()
+        trace.unit_mismatch_variables = graph.unit_mismatch_variables.copy()
+        trace.formula_source_available = graph.formula_source_available
+        trace.required_evidence_ids = graph.required_evidence_ids.copy()
+
+    @staticmethod
+    def _calculation_recovery_query(request: GoalResearchRequest, criteria: list[GoalCriterion],
+                                    graph: CalculationRequirementGraph,
+                                    plan_summary: dict[str, Any] | None) -> str:
+        missing = [item for item in graph.formula_variables if item.status != "bound"]
+        concepts = [str((plan_summary or {}).get("purpose") or ""),
+                    *(item.description for item in criteria if item.required)]
+        if not any(concepts):
+            concepts = [request.goal or request.topic]
+        terms = [*concepts, *[item.variable_name for item in missing],
+                 *[alias for item in missing for alias in item.aliases]]
+        if not graph.formula_source_available:
+            terms.extend(["engineering equation formula", *[item.variable_name for item in graph.formula_variables]])
+        else:
+            terms.extend(["measured numeric evidence", *graph.missing_variables])
+        terms = [value for value in terms if value != "calculation_plan"]
+        # A recovery query contains concepts and symbols, never supplied numeric answers.
+        query = re.sub(r"(?<![A-Za-z])\d+(?:\.\d+)?(?![A-Za-z])", " ", " ".join(terms))
+        return re.sub(r"\s+", " ", query).strip()[:500]
+
     async def _synthesize(
         self,
         request: GoalResearchRequest,
@@ -687,6 +834,27 @@ class GoalResearchAgent:
                 if previous
                 else "근거 기반 synthesis JSON을 생성하지 못해 결론을 보류합니다."
             )
+        user_text = " ".join(value for value in (request.topic, request.goal) if value)
+        if synthesis_has_leak(parsed, user_text):
+            if python_trace:
+                python_trace.final_response_leakage_detected = True
+            try:
+                repaired = json.loads((await self.ollama.chat_structured(
+                    [*messages, {"role": "user", "content": json.dumps({
+                        "issue": "Internal response instructions or schema keys appeared in user-facing text.",
+                        "instruction": "Remove those sentences. Keep only source-supported research findings and user-facing limitations. Return JSON.",
+                    })}], SYNTHESIS_SCHEMA, model=request.model,
+                    temperature=request.temperature, seed=request.seed,
+                )).strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip())
+                if isinstance(repaired, dict) and not synthesis_has_leak(repaired, user_text):
+                    parsed = repaired
+                    if python_trace:
+                        python_trace.final_response_leakage_repaired = True
+            except (TypeError, ValueError):
+                pass
+            parsed = strip_synthesis_leaks(parsed, user_text)
+            if python_trace and not python_trace.final_response_leakage_repaired:
+                python_trace.final_response_leakage_stripped = True
         valid_ids = {str(item["evidence_id"]) for item in evidence}
         calc_sources = {
             str(item["evidence_id"]): list(dict.fromkeys(item.get("source_evidence_ids", []) + item.get("source_input_ids", []) + item.get("formula_evidence_ids", [])))
@@ -761,6 +929,21 @@ class GoalResearchAgent:
             except (TypeError, ValueError):
                 pass
             issues, adopted = grounding_failures(parsed)
+        if python_trace and python_trace.tool_selected and python_trace.source_complete is False:
+            source_texts = [re.sub(r"\s+", " ", str(item.get("text") or "")).casefold()
+                            for item in evidence if item.get("source_type") != "calculation"]
+            parsed["claims"] = [item for item in parsed.get("claims", []) if not re.search(r"\d|=|\bcalculat", str(item.get("claim") or ""), re.I)
+                or any(re.sub(r"\s+", " ", str(item.get("claim") or "")).casefold() in source
+                       for source in source_texts)]
+            parsed["limitations"] = []
+            parsed["hypothesis_assessment"] = {"claim": "", "citations": []}
+        if synthesis_has_leak(parsed, user_text):
+            if python_trace:
+                python_trace.final_response_leakage_detected = True
+            parsed = strip_synthesis_leaks(parsed, user_text)
+            if python_trace:
+                python_trace.final_response_leakage_stripped = True
+        issues, adopted = grounding_failures(parsed)
         if python_trace:
             python_trace.calc_grounding_validation_passed = not issues if valid_calcs or issues else None
             python_trace.calc_grounding_failures = issues
@@ -768,10 +951,13 @@ class GoalResearchAgent:
             python_trace.calc_required_output_count = sum(len(item.required_output_ids) for item in valid_calcs.values())
             python_trace.calc_adoption_coverage = round(len(adopted) / python_trace.calc_required_output_count, 6) if python_trace.calc_required_output_count else 0.0
         lines = []
+        final_adopted: set[str] = set()
         for item in parsed.get("claims", []):
             claim = str(item.get("claim") or "").strip()
+            if leaked_text(claim, user_text):
+                continue
             citations = citations_for(item)
-            claim_issues, _ = validate_calc_claim(claim, citations, outputs_for(item), valid_calcs, evidence)
+            claim_issues, used_outputs = validate_calc_claim(claim, citations, outputs_for(item), valid_calcs, evidence)
             if claim_issues:
                 continue
             if (
@@ -783,6 +969,30 @@ class GoalResearchAgent:
                 if calc_sources and re.search(r"calculat|percentage change|difference|chart|plot|graph|계산|변화율|차이|그래프", claim, re.IGNORECASE) and not any(value in calc_sources for value in citations):
                     continue
                 lines.append(f"{claim} {' '.join(f'[{value}]' for value in citations)}")
+                final_adopted.update(used_outputs)
+        for calc_id, record in valid_calcs.items():
+            source_map = {str(fact.get("canonical_fact_id") or fact.get("evidence_id")): str(fact.get("evidence_id"))
+                          for fact in record.input_facts}
+            for output_id, spec in record.output_manifest.items():
+                qualified = f"{calc_id}:{output_id}"
+                if qualified in final_adopted or not spec.get("required", output_id in record.required_output_ids):
+                    continue
+                unit = spec.get("unit") or ""
+                claim = f"{spec['name']}: {spec['value']} {unit}".strip()
+                citations = list(dict.fromkeys([calc_id, *[source_map.get(value, value)
+                    for value in spec.get("source_fact_ids", [])], *record.formula_evidence_ids]))
+                failures, adopted_output = validate_calc_claim(claim, citations, [qualified], valid_calcs, evidence)
+                if not failures:
+                    lines.append(f"{claim} {' '.join(f'[{value}]' for value in citations if value in valid_ids)}")
+                    final_adopted.update(adopted_output)
+        if python_trace and valid_calcs:
+            required_refs = {f"{calc_id}:{output_id}" for calc_id, record in valid_calcs.items()
+                             for output_id, spec in record.output_manifest.items()
+                             if spec.get("required", output_id in record.required_output_ids)}
+            python_trace.calc_grounding_validation_passed = required_refs.issubset(final_adopted)
+            python_trace.calc_grounding_failures = [] if python_trace.calc_grounding_validation_passed else ["calc_output_not_adopted"]
+            python_trace.calc_output_adoption_count = len(final_adopted)
+            python_trace.calc_adoption_coverage = round(len(final_adopted) / python_trace.calc_required_output_count, 6) if python_trace.calc_required_output_count else 0.0
         for item in evidence:
             if item["source_type"] != "calculation":
                 continue
@@ -809,6 +1019,7 @@ class GoalResearchAgent:
             str(value).strip()
             for value in parsed.get("limitations", [])
             if str(value).strip()
+            and not leaked_text(str(value), user_text)
             and not re.search(r"\b(?:untrusted data|prompt|instructions?)\b", str(value), re.I)
             and not (request.expected_result is None and re.search(r"expected[ -]hypothesis|expected[ -]result", str(value), re.I))
             and not (valid_calcs and re.search(r"calculat(?:ion|ed).*?(?:output|result).*?(?:not found|unavailable|not provided|missing)|(?:calculation|difference|result).*?(?:lack of validation|not validated)", str(value), re.I))
@@ -865,6 +1076,16 @@ class GoalResearchAgent:
         if result.expected_result is None:
             result.expected_result_status = ExpectedResultStatus.NOT_PROVIDED
         result.final_limitations = resolve_final_limitations(result)
+        last_trace = result.iterations[-1].python_trace if result.iterations else None
+        if last_trace and last_trace.tool_selected and last_trace.source_complete is False:
+            result.final_limitations = []
+        else:
+            validated = any(item.validation_passed for item in result.computations)
+            result.final_limitations = [value for value in result.final_limitations
+                if not leaked_text(value)
+                and not (validated and re.search(r"calculat(?:ion|ed).*?(?:not|lack).*?validat|"
+                                                 r"calculat(?:ion|ed).*?(?:not found|unavailable|missing)|"
+                                                 r"calculat(?:ion|ed).*?(?:does not|not).*?(?:reference|cite|support)", value, re.I))]
         result.final_answer = without_limitations(answer)
         if result.final_limitations:
             result.final_answer = (result.final_answer + "\n\nLimitations: " + "; ".join(result.final_limitations)).strip()
