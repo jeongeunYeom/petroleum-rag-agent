@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import json
+import subprocess
 import sys
 from collections import Counter
 from pathlib import Path
@@ -215,6 +216,17 @@ def test_scorer_smoke_all_24_rows(tmp_path):
     assert len(result["rows"]) == 24
     assert result["populations"]["required_8"]["python_on"]["n"] == 8
     assert result["funnel"]["pipeline_6"]["subprocess"] == 0
+
+
+def test_frozen_preflight_hash_is_portable_across_checkout_line_endings(tmp_path):
+    from run_python_tool_heldout_v4 import digest
+    manifest = json.loads((ROOT / "evaluation/python_tool_heldout_v4_manifest.json").read_text(encoding="utf-8"))
+    lf_blob = subprocess.check_output([
+        "git", "show", "213231fd5c4f6bc29cefebd37f98fc9656c488cb:evaluation/review/python_tool_heldout_v4_preflight.json"
+    ], cwd=ROOT)
+    path = tmp_path / "preflight.json"
+    path.write_bytes(lf_blob)
+    assert digest(path, preflight_report=True) == manifest["preflight_sha256"]
 
 
 def test_invalidated_benchmark_cannot_be_rerun():

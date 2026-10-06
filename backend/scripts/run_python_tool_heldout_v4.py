@@ -23,8 +23,12 @@ CATALOG = ROOT / "evaluation/python_tool_heldout_v4_source_catalog.json"
 PREFLIGHT = ROOT / "evaluation/review/python_tool_heldout_v4_preflight.json"
 
 
-def digest(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+def digest(path: Path, *, preflight_report: bool = False) -> str:
+    data = path.read_bytes()
+    # The frozen preflight report was authored with Windows CRLF; Git stores LF.
+    if preflight_report and b"\r\n" not in data:
+        data = data.replace(b"\n", b"\r\n")
+    return hashlib.sha256(data).hexdigest()
 
 
 def load_frozen() -> tuple[dict, dict]:
@@ -32,7 +36,7 @@ def load_frozen() -> tuple[dict, dict]:
     benchmark = json.loads(BENCHMARK.read_text(encoding="utf-8"))
     preflight = json.loads(PREFLIGHT.read_text(encoding="utf-8"))
     for label, path in (("benchmark", BENCHMARK), ("rubric", RUBRIC), ("source_catalog", CATALOG), ("preflight", PREFLIGHT)):
-        if digest(path) != manifest[label + "_sha256"]:
+        if digest(path, preflight_report=label == "preflight") != manifest[label + "_sha256"]:
             raise ValueError(f"Frozen {label} hash mismatch")
     if manifest["preflight_status"] != "PASS" or manifest["preflight_llm_calls"] != 0 or preflight["status"] != "PASS":
         raise ValueError("Pre-freeze contract audit did not pass without LLM")
