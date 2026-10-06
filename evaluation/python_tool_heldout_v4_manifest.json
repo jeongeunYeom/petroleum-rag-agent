@@ -1,0 +1,68 @@
+{
+  "benchmark_id": "python_tool_heldout_v4",
+  "product_code_sha": "2646be1e5439cd689fdd236e064e2f9b64255274",
+  "benchmark_sha256": "c936fca1a0d2615a9ec18e6af135d43412fe05d4b0909359d481269e195f5632",
+  "rubric_sha256": "34347ac2f2983133fa462253f73e3037524ba37c1ed7aa63accb128fff01aab1",
+  "source_catalog_sha256": "8bde9ad61946b24d96146b05f44abef06a31af0101e81e00f93b5e8af358a2cb",
+  "source_exclusions_sha256": "669a1b759d67d9dbbe341ad902b3cc1abb1b455b8a6c47c8929e372d57d3559b",
+  "preflight_sha256": "98251a0d305c8ae9f5ae5450da1918c22be0b25148650750aab66fb7dac29cc5",
+  "reference_calculator_sha256": "3b677dc5ceed67b7fd58dca0e8c4d2e5db5c6087813890c16c7c80c6c1e9736b",
+  "preflight_status": "PASS",
+  "preflight_llm_calls": 0,
+  "task_count": 12,
+  "python_need_count": {
+    "required": 8,
+    "optional": 2,
+    "not_needed": 2
+  },
+  "required_stratum_count": {
+    "pipeline": 6,
+    "end_to_end": 2
+  },
+  "domain_count": {
+    "reservoir_engineering": 6,
+    "formation_evaluation": 2,
+    "well_test": 4
+  },
+  "expected_user_facts": 98,
+  "expected_evidence_facts": 5,
+  "expected_formulas": 8,
+  "expected_required_outputs": 92,
+  "kb": {
+    "data_dir": "D:\\petroleum-rag-agent\\data",
+    "collection": "petroleum_knowledge",
+    "chunks": 18976,
+    "documents": 12,
+    "retrieval_mode": "legacy"
+  },
+  "model_settings": {
+    "research_model": "qwen3:8b",
+    "review_model": "gemma4:latest",
+    "temperature": 0,
+    "seed": 42,
+    "use_internal": true,
+    "use_external": false,
+    "engineering_validation": true,
+    "internal_top_k": 5,
+    "external_top_k": 5,
+    "max_iterations": 4,
+    "no_progress_patience": 2,
+    "max_python_calls": 4,
+    "max_python_attempts_per_call": 2
+  },
+  "conditions": [
+    {
+      "name": "python_off",
+      "allow_python_execution": false,
+      "python_execution_approved": false
+    },
+    {
+      "name": "python_on",
+      "allow_python_execution": true,
+      "python_execution_approved": true
+    }
+  ],
+  "run_policy": "one complete OFF 12 then ON 12; no selective reruns; product failures retained",
+  "freeze_commit_sha": "recorded_externally_in_run_provenance",
+  "manifest_sha256": "recorded_externally_in_run_provenance"
+}

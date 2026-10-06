@@ -1,0 +1,3252 @@
+{
+  "benchmark_id": "python_tool_heldout_v4",
+  "version": "4.0",
+  "product_code_sha": "2646be1e5439cd689fdd236e064e2f9b64255274",
+  "tasks": [
+    {
+      "task_id": "PT4-RE-P1",
+      "benchmark_id": "python_tool_heldout_v4",
+      "domain": "reservoir_engineering",
+      "python_expected": "required",
+      "evaluation_stratum": "pipeline",
+      "input_provenance_expected": "user_fact_plus_formula",
+      "topic": "Eight independent, hypothetical oil-water phase-pressure pairs in a capillary transition zone. Pressure values are user measurements, not a published table.\nC1_Po=3512 psi\nC1_Pw=3486 psi\nC2_Po=3491 psi\nC2_Pw=3460 psi\nC3_Po=3567 psi\nC3_Pw=3535 psi\nC4_Po=3438 psi\nC4_Pw=3411 psi\nC5_Po=3611 psi\nC5_Pw=3574 psi\nC6_Po=3479 psi\nC6_Pw=3450 psi\nC7_Po=3544 psi\nC7_Pw=3507 psi\nC8_Po=3397 psi\nC8_Pw=3365 psi",
+      "goal": "Find the KB capillary-pressure relation Pc=Po-Pw. Calculate Pc for every case, mean and maximum, and identify all tied maximum cases. Interpret these as phase-pressure differences only, not direct saturation estimates.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "Pc is oil-phase minus water-phase pressure.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every required numeric output with correct units and labels.",
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "No saturation can be inferred from pressure difference alone.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "required_claims": [
+          {
+            "text": "Pc is oil-phase minus water-phase pressure.",
+            "source_ids": [
+              "R69"
+            ]
+          },
+          {
+            "text": "No saturation can be inferred from pressure difference alone.",
+            "source_ids": [
+              "R69"
+            ]
+          }
+        ],
+        "expected_user_facts": [
+          [
+            "C1_Po",
+            3512,
+            "psi"
+          ],
+          [
+            "C1_Pw",
+            3486,
+            "psi"
+          ],
+          [
+            "C2_Po",
+            3491,
+            "psi"
+          ],
+          [
+            "C2_Pw",
+            3460,
+            "psi"
+          ],
+          [
+            "C3_Po",
+            3567,
+            "psi"
+          ],
+          [
+            "C3_Pw",
+            3535,
+            "psi"
+          ],
+          [
+            "C4_Po",
+            3438,
+            "psi"
+          ],
+          [
+            "C4_Pw",
+            3411,
+            "psi"
+          ],
+          [
+            "C5_Po",
+            3611,
+            "psi"
+          ],
+          [
+            "C5_Pw",
+            3574,
+            "psi"
+          ],
+          [
+            "C6_Po",
+            3479,
+            "psi"
+          ],
+          [
+            "C6_Pw",
+            3450,
+            "psi"
+          ],
+          [
+            "C7_Po",
+            3544,
+            "psi"
+          ],
+          [
+            "C7_Pw",
+            3507,
+            "psi"
+          ],
+          [
+            "C8_Po",
+            3397,
+            "psi"
+          ],
+          [
+            "C8_Pw",
+            3365,
+            "psi"
+          ]
+        ],
+        "required_user_facts": [
+          [
+            "C1_Po",
+            3512,
+            "psi"
+          ],
+          [
+            "C1_Pw",
+            3486,
+            "psi"
+          ],
+          [
+            "C2_Po",
+            3491,
+            "psi"
+          ],
+          [
+            "C2_Pw",
+            3460,
+            "psi"
+          ],
+          [
+            "C3_Po",
+            3567,
+            "psi"
+          ],
+          [
+            "C3_Pw",
+            3535,
+            "psi"
+          ],
+          [
+            "C4_Po",
+            3438,
+            "psi"
+          ],
+          [
+            "C4_Pw",
+            3411,
+            "psi"
+          ],
+          [
+            "C5_Po",
+            3611,
+            "psi"
+          ],
+          [
+            "C5_Pw",
+            3574,
+            "psi"
+          ],
+          [
+            "C6_Po",
+            3479,
+            "psi"
+          ],
+          [
+            "C6_Pw",
+            3450,
+            "psi"
+          ],
+          [
+            "C7_Po",
+            3544,
+            "psi"
+          ],
+          [
+            "C7_Pw",
+            3507,
+            "psi"
+          ],
+          [
+            "C8_Po",
+            3397,
+            "psi"
+          ],
+          [
+            "C8_Pw",
+            3365,
+            "psi"
+          ]
+        ],
+        "expected_evidence_facts": [],
+        "required_evidence_facts": [],
+        "expected_formula_source": [
+          [
+            "R69",
+            "Pc = Po - Pw"
+          ]
+        ],
+        "formula_sources": [
+          [
+            "R69",
+            "Pc = Po - Pw"
+          ]
+        ],
+        "source_ids": [
+          "R69"
+        ],
+        "expected_contract_outputs": [
+          {
+            "semantic_name": "C1_Pc",
+            "type": "numeric",
+            "value": 26,
+            "unit": "psi",
+            "required": true
+          },
+          {
+            "semantic_name": "C2_Pc",
+            "type": "numeric",
+            "value": 31,
+            "unit": "psi",
+            "required": true
+          },
+          {
+            "semantic_name": "C3_Pc",
+            "type": "numeric",
+            "value": 32,
+            "unit": "psi",
+            "required": true
+          },
+          {
+            "semantic_name": "C4_Pc",
+            "type": "numeric",
+            "value": 27,
+            "unit": "psi",
+            "required": true
+          },
+          {
+            "semantic_name": "C5_Pc",
+            "type": "numeric",
+            "value": 37,
+            "unit": "psi",
+            "required": true
+          },
+          {
+            "semantic_name": "C6_Pc",
+            "type": "numeric",
+            "value": 29,
+            "unit": "psi",
+            "required": true
+          },
+          {
+            "semantic_name": "C7_Pc",
+            "type": "numeric",
+            "value": 37,
+            "unit": "psi",
+            "required": true
+          },
+          {
+            "semantic_name": "C8_Pc",
+            "type": "numeric",
+            "value": 32,
+            "unit": "psi",
+            "required": true
+          },
+          {
+            "semantic_name": "mean_Pc",
+            "type": "numeric",
+            "value": 31.375,
+            "unit": "psi",
+            "required": true
+          },
+          {
+            "semantic_name": "max_Pc",
+            "type": "numeric",
+            "value": 37,
+            "unit": "psi",
+            "required": true
+          },
+          {
+            "semantic_name": "max_cases",
+            "type": "label_list",
+            "value": [
+              "C5",
+              "C7"
+            ],
+            "required": true
+          }
+        ],
+        "numeric_targets": [
+          {
+            "semantic_name": "C1_Pc",
+            "value": 26,
+            "unit": "psi",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "C2_Pc",
+            "value": 31,
+            "unit": "psi",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "C3_Pc",
+            "value": 32,
+            "unit": "psi",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "C4_Pc",
+            "value": 27,
+            "unit": "psi",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "C5_Pc",
+            "value": 37,
+            "unit": "psi",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "C6_Pc",
+            "value": 29,
+            "unit": "psi",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "C7_Pc",
+            "value": 37,
+            "unit": "psi",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "C8_Pc",
+            "value": 32,
+            "unit": "psi",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "mean_Pc",
+            "value": 31.375,
+            "unit": "psi",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "max_Pc",
+            "value": 37,
+            "unit": "psi",
+            "abs_tolerance": 0.05,
+            "required": true
+          }
+        ],
+        "typed_targets": [
+          {
+            "semantic_name": "max_cases",
+            "type": "label_list",
+            "value": [
+              "C5",
+              "C7"
+            ]
+          }
+        ],
+        "ranking_targets": [],
+        "expected_provenance": {
+          "user_fact": true,
+          "evidence_fact": false,
+          "formula_source": true,
+          "source_ids": [
+            "R69"
+          ]
+        }
+      }
+    },
+    {
+      "task_id": "PT4-RE-P2",
+      "benchmark_id": "python_tool_heldout_v4",
+      "domain": "reservoir_engineering",
+      "python_expected": "required",
+      "evaluation_stratum": "pipeline",
+      "input_provenance_expected": "user_fact_plus_formula",
+      "topic": "Eight hypothetical reservoir-simulation cells at a changed stress state; each has updated pore and bulk volumes in bbl. These are scenario inputs, not measurements from the handbook.\nC1_Vp=138 bbl\nC1_Vb=620 bbl\nC2_Vp=154 bbl\nC2_Vb=710 bbl\nC3_Vp=127 bbl\nC3_Vb=590 bbl\nC4_Vp=169 bbl\nC4_Vb=790 bbl\nC5_Vp=141 bbl\nC5_Vb=660 bbl\nC6_Vp=183 bbl\nC6_Vb=840 bbl\nC7_Vp=132 bbl\nC7_Vb=605 bbl\nC8_Vp=176 bbl\nC8_Vb=810 bbl",
+      "goal": "Apply the handbook true-porosity relation f=Vp/Vb to every cell. Report eight porosities, mean and max-minus-min spread; identify the least and most porous cell. Do not treat fixed-reference pseudoporosity as the same quantity.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "True porosity uses current pore and bulk volumes.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every required numeric output with correct units and labels.",
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "A reference-bulk-volume pseudoporosity is distinct.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "required_claims": [
+          {
+            "text": "True porosity uses current pore and bulk volumes.",
+            "source_ids": [
+              "H1453"
+            ]
+          },
+          {
+            "text": "A reference-bulk-volume pseudoporosity is distinct.",
+            "source_ids": [
+              "H1453"
+            ]
+          }
+        ],
+        "expected_user_facts": [
+          [
+            "C1_Vp",
+            138,
+            "bbl"
+          ],
+          [
+            "C1_Vb",
+            620,
+            "bbl"
+          ],
+          [
+            "C2_Vp",
+            154,
+            "bbl"
+          ],
+          [
+            "C2_Vb",
+            710,
+            "bbl"
+          ],
+          [
+            "C3_Vp",
+            127,
+            "bbl"
+          ],
+          [
+            "C3_Vb",
+            590,
+            "bbl"
+          ],
+          [
+            "C4_Vp",
+            169,
+            "bbl"
+          ],
+          [
+            "C4_Vb",
+            790,
+            "bbl"
+          ],
+          [
+            "C5_Vp",
+            141,
+            "bbl"
+          ],
+          [
+            "C5_Vb",
+            660,
+            "bbl"
+          ],
+          [
+            "C6_Vp",
+            183,
+            "bbl"
+          ],
+          [
+            "C6_Vb",
+            840,
+            "bbl"
+          ],
+          [
+            "C7_Vp",
+            132,
+            "bbl"
+          ],
+          [
+            "C7_Vb",
+            605,
+            "bbl"
+          ],
+          [
+            "C8_Vp",
+            176,
+            "bbl"
+          ],
+          [
+            "C8_Vb",
+            810,
+            "bbl"
+          ]
+        ],
+        "required_user_facts": [
+          [
+            "C1_Vp",
+            138,
+            "bbl"
+          ],
+          [
+            "C1_Vb",
+            620,
+            "bbl"
+          ],
+          [
+            "C2_Vp",
+            154,
+            "bbl"
+          ],
+          [
+            "C2_Vb",
+            710,
+            "bbl"
+          ],
+          [
+            "C3_Vp",
+            127,
+            "bbl"
+          ],
+          [
+            "C3_Vb",
+            590,
+            "bbl"
+          ],
+          [
+            "C4_Vp",
+            169,
+            "bbl"
+          ],
+          [
+            "C4_Vb",
+            790,
+            "bbl"
+          ],
+          [
+            "C5_Vp",
+            141,
+            "bbl"
+          ],
+          [
+            "C5_Vb",
+            660,
+            "bbl"
+          ],
+          [
+            "C6_Vp",
+            183,
+            "bbl"
+          ],
+          [
+            "C6_Vb",
+            840,
+            "bbl"
+          ],
+          [
+            "C7_Vp",
+            132,
+            "bbl"
+          ],
+          [
+            "C7_Vb",
+            605,
+            "bbl"
+          ],
+          [
+            "C8_Vp",
+            176,
+            "bbl"
+          ],
+          [
+            "C8_Vb",
+            810,
+            "bbl"
+          ]
+        ],
+        "expected_evidence_facts": [],
+        "required_evidence_facts": [],
+        "expected_formula_source": [
+          [
+            "H1453",
+            "f = Vp /Vb"
+          ]
+        ],
+        "formula_sources": [
+          [
+            "H1453",
+            "f = Vp /Vb"
+          ]
+        ],
+        "source_ids": [
+          "H1453"
+        ],
+        "expected_contract_outputs": [
+          {
+            "semantic_name": "C1_phi",
+            "type": "numeric",
+            "value": 0.22258064516129034,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "C2_phi",
+            "type": "numeric",
+            "value": 0.21690140845070421,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "C3_phi",
+            "type": "numeric",
+            "value": 0.21525423728813559,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "C4_phi",
+            "type": "numeric",
+            "value": 0.2139240506329114,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "C5_phi",
+            "type": "numeric",
+            "value": 0.21363636363636362,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "C6_phi",
+            "type": "numeric",
+            "value": 0.21785714285714286,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "C7_phi",
+            "type": "numeric",
+            "value": 0.21818181818181817,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "C8_phi",
+            "type": "numeric",
+            "value": 0.21728395061728395,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "mean_phi",
+            "type": "numeric",
+            "value": 0.21695245210320627,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "spread_phi",
+            "type": "numeric",
+            "value": 0.008944281524926712,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "highest_cell",
+            "type": "label",
+            "value": "C1",
+            "required": true
+          },
+          {
+            "semantic_name": "lowest_cell",
+            "type": "label",
+          "value": "C5",
+            "required": true
+          }
+        ],
+        "numeric_targets": [
+          {
+            "semantic_name": "C1_phi",
+            "value": 0.22258064516129034,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "C2_phi",
+            "value": 0.21690140845070421,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "C3_phi",
+            "value": 0.21525423728813559,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "C4_phi",
+            "value": 0.2139240506329114,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "C5_phi",
+            "value": 0.21363636363636362,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "C6_phi",
+            "value": 0.21785714285714286,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "C7_phi",
+            "value": 0.21818181818181817,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "C8_phi",
+            "value": 0.21728395061728395,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "mean_phi",
+            "value": 0.21695245210320627,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "spread_phi",
+            "value": 0.008944281524926712,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          }
+        ],
+        "typed_targets": [
+          {
+            "semantic_name": "highest_cell",
+            "type": "label",
+            "value": "C1"
+          },
+          {
+            "semantic_name": "lowest_cell",
+            "type": "label",
+            "value": "C4"
+          }
+        ],
+        "ranking_targets": [],
+        "expected_provenance": {
+          "user_fact": true,
+          "evidence_fact": false,
+          "formula_source": true,
+          "source_ids": [
+            "H1453"
+          ]
+        }
+      }
+    },
+    {
+      "task_id": "PT4-FE-P3",
+      "benchmark_id": "python_tool_heldout_v4",
+      "domain": "formation_evaluation",
+      "python_expected": "required",
+      "evaluation_stratum": "pipeline",
+      "input_provenance_expected": "user_fact_plus_formula",
+      "topic": "Eight hypothetical shaly-sand log interpretation zones. Sim and q are user-estimated fractions, not KB measurements.\nZ1_Sim=0.58\nZ1_q=0.11\nZ2_Sim=0.64\nZ2_q=0.16\nZ3_Sim=0.55\nZ3_q=0.09\nZ4_Sim=0.71\nZ4_q=0.2\nZ5_Sim=0.62\nZ5_q=0.13\nZ6_Sim=0.68\nZ6_q=0.18\nZ7_Sim=0.6\nZ7_q=0.12\nZ8_Sim=0.73\nZ8_q=0.22",
+      "goal": "Use the handbook dispersed-shale correction Sw=(Sim-q)/(1-q) for each zone. Report all eight effective-porosity water saturations, mean and range, and rank highest to lowest. Explain that these are model-based screening values.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "The correction removes dispersed-shale fraction before expressing effective-porosity water saturation.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every required numeric output with correct units and labels.",
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "These estimates depend on the stated model and user inputs.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "required_claims": [
+          {
+            "text": "The correction removes dispersed-shale fraction before expressing effective-porosity water saturation.",
+            "source_ids": [
+              "H165"
+            ]
+          },
+          {
+            "text": "These estimates depend on the stated model and user inputs.",
+            "source_ids": [
+              "H165"
+            ]
+          }
+        ],
+        "expected_user_facts": [
+          [
+            "Z1_Sim",
+            0.58,
+            ""
+          ],
+          [
+            "Z1_q",
+            0.11,
+            ""
+          ],
+          [
+            "Z2_Sim",
+            0.64,
+            ""
+          ],
+          [
+            "Z2_q",
+            0.16,
+            ""
+          ],
+          [
+            "Z3_Sim",
+            0.55,
+            ""
+          ],
+          [
+            "Z3_q",
+            0.09,
+            ""
+          ],
+          [
+            "Z4_Sim",
+            0.71,
+            ""
+          ],
+          [
+            "Z4_q",
+            0.2,
+            ""
+          ],
+          [
+            "Z5_Sim",
+            0.62,
+            ""
+          ],
+          [
+            "Z5_q",
+            0.13,
+            ""
+          ],
+          [
+            "Z6_Sim",
+            0.68,
+            ""
+          ],
+          [
+            "Z6_q",
+            0.18,
+            ""
+          ],
+          [
+            "Z7_Sim",
+            0.6,
+            ""
+          ],
+          [
+            "Z7_q",
+            0.12,
+            ""
+          ],
+          [
+            "Z8_Sim",
+            0.73,
+            ""
+          ],
+          [
+            "Z8_q",
+            0.22,
+            ""
+          ]
+        ],
+        "required_user_facts": [
+          [
+            "Z1_Sim",
+            0.58,
+            ""
+          ],
+          [
+            "Z1_q",
+            0.11,
+            ""
+          ],
+          [
+            "Z2_Sim",
+            0.64,
+            ""
+          ],
+          [
+            "Z2_q",
+            0.16,
+            ""
+          ],
+          [
+            "Z3_Sim",
+            0.55,
+            ""
+          ],
+          [
+            "Z3_q",
+            0.09,
+            ""
+          ],
+          [
+            "Z4_Sim",
+            0.71,
+            ""
+          ],
+          [
+            "Z4_q",
+            0.2,
+            ""
+          ],
+          [
+            "Z5_Sim",
+            0.62,
+            ""
+          ],
+          [
+            "Z5_q",
+            0.13,
+            ""
+          ],
+          [
+            "Z6_Sim",
+            0.68,
+            ""
+          ],
+          [
+            "Z6_q",
+            0.18,
+            ""
+          ],
+          [
+            "Z7_Sim",
+            0.6,
+            ""
+          ],
+          [
+            "Z7_q",
+            0.12,
+            ""
+          ],
+          [
+            "Z8_Sim",
+            0.73,
+            ""
+          ],
+          [
+            "Z8_q",
+            0.22,
+            ""
+          ]
+        ],
+        "expected_evidence_facts": [],
+        "required_evidence_facts": [],
+        "expected_formula_source": [
+          [
+            "H165",
+            "Sw = (Sim − q)/(1 − q)"
+          ]
+        ],
+        "formula_sources": [
+          [
+            "H165",
+            "Sw = (Sim − q)/(1 − q)"
+          ]
+        ],
+        "source_ids": [
+          "H165"
+        ],
+        "expected_contract_outputs": [
+          {
+            "semantic_name": "Z1_Sw",
+            "type": "numeric",
+            "value": 0.5280898876404494,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "Z2_Sw",
+            "type": "numeric",
+            "value": 0.5714285714285714,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "Z3_Sw",
+            "type": "numeric",
+            "value": 0.5054945054945056,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "Z4_Sw",
+            "type": "numeric",
+            "value": 0.6375,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "Z5_Sw",
+            "type": "numeric",
+            "value": 0.5632183908045977,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "Z6_Sw",
+            "type": "numeric",
+            "value": 0.6097560975609756,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "Z7_Sw",
+            "type": "numeric",
+            "value": 0.5454545454545454,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "Z8_Sw",
+            "type": "numeric",
+            "value": 0.6538461538461539,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "mean_Sw",
+            "type": "numeric",
+            "value": 0.5768485190287249,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "range_Sw",
+            "type": "numeric",
+            "value": 0.14835164835164827,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "Sw_ranking",
+            "type": "ranking",
+            "value": ["Z8", "Z4", "Z6", "Z2", "Z5", "Z7", "Z1", "Z3"],
+            "required": true
+          }
+        ],
+        "numeric_targets": [
+          {
+            "semantic_name": "Z1_Sw",
+            "value": 0.5280898876404494,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "Z2_Sw",
+            "value": 0.5714285714285714,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "Z3_Sw",
+            "value": 0.5054945054945056,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "Z4_Sw",
+            "value": 0.6375,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "Z5_Sw",
+            "value": 0.5632183908045977,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "Z6_Sw",
+            "value": 0.6097560975609756,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "Z7_Sw",
+            "value": 0.5454545454545454,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "Z8_Sw",
+            "value": 0.6538461538461539,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "mean_Sw",
+            "value": 0.5768485190287249,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "range_Sw",
+            "value": 0.14835164835164827,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          }
+        ],
+        "typed_targets": [
+          {
+            "semantic_name": "Sw_ranking",
+            "type": "ranking",
+            "value": ["Z8", "Z4", "Z6", "Z2", "Z5", "Z7", "Z1", "Z3"]
+          }
+        ],
+        "ranking_targets": [
+          {
+            "semantic_name": "Sw_ranking",
+            "type": "ranking",
+            "value": ["Z8", "Z4", "Z6", "Z2", "Z5", "Z7", "Z1", "Z3"]
+          }
+        ],
+        "expected_provenance": {
+          "user_fact": true,
+          "evidence_fact": false,
+          "formula_source": true,
+          "source_ids": [
+            "H165"
+          ]
+        }
+      }
+    },
+    {
+      "task_id": "PT4-WT-P4",
+      "benchmark_id": "python_tool_heldout_v4",
+      "domain": "well_test",
+      "python_expected": "required",
+      "evaluation_stratum": "pipeline",
+      "input_provenance_expected": "user_fact_plus_formula",
+      "topic": "Eight hypothetical commingled-production checkpoints. Each oil and water rate is user supplied in bbl/d; checkpoints are separate flow conditions, not additive production through time.\nT1_qo=440 bbl/d\nT1_qw=95 bbl/d\nT2_qo=515 bbl/d\nT2_qw=180 bbl/d\nT3_qo=390 bbl/d\nT3_qw=130 bbl/d\nT4_qo=605 bbl/d\nT4_qw=245 bbl/d\nT5_qo=480 bbl/d\nT5_qw=125 bbl/d\nT6_qo=550 bbl/d\nT6_qw=210 bbl/d\nT7_qo=420 bbl/d\nT7_qw=160 bbl/d\nT8_qo=575 bbl/d\nT8_qw=260 bbl/d",
+      "goal": "Use the KB two-phase total-rate identity qt=qo+qw. Report qt at each checkpoint, sum of oil and water rates across checkpoints as a screening aggregate, sum of total rates, aggregate water-cut percent, and checkpoint with the highest water cut. Do not call summed checkpoints cumulative production.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "At each checkpoint total liquid rate is oil plus water rate.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every required numeric output with correct units and labels.",
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "A sum across checkpoints is a screening aggregate, not a time-integrated production volume.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "required_claims": [
+          {
+            "text": "At each checkpoint total liquid rate is oil plus water rate.",
+            "source_ids": [
+              "W544"
+            ]
+          },
+          {
+            "text": "A sum across checkpoints is a screening aggregate, not a time-integrated production volume.",
+            "source_ids": [
+              "W544"
+            ]
+          }
+        ],
+        "expected_user_facts": [
+          [
+            "T1_qo",
+            440,
+            "bbl/d"
+          ],
+          [
+            "T1_qw",
+            95,
+            "bbl/d"
+          ],
+          [
+            "T2_qo",
+            515,
+            "bbl/d"
+          ],
+          [
+            "T2_qw",
+            180,
+            "bbl/d"
+          ],
+          [
+            "T3_qo",
+            390,
+            "bbl/d"
+          ],
+          [
+            "T3_qw",
+            130,
+            "bbl/d"
+          ],
+          [
+            "T4_qo",
+            605,
+            "bbl/d"
+          ],
+          [
+            "T4_qw",
+            245,
+            "bbl/d"
+          ],
+          [
+            "T5_qo",
+            480,
+            "bbl/d"
+          ],
+          [
+            "T5_qw",
+            125,
+            "bbl/d"
+          ],
+          [
+            "T6_qo",
+            550,
+            "bbl/d"
+          ],
+          [
+            "T6_qw",
+            210,
+            "bbl/d"
+          ],
+          [
+            "T7_qo",
+            420,
+            "bbl/d"
+          ],
+          [
+            "T7_qw",
+            160,
+            "bbl/d"
+          ],
+          [
+            "T8_qo",
+            575,
+            "bbl/d"
+          ],
+          [
+            "T8_qw",
+            260,
+            "bbl/d"
+          ]
+        ],
+        "required_user_facts": [
+          [
+            "T1_qo",
+            440,
+            "bbl/d"
+          ],
+          [
+            "T1_qw",
+            95,
+            "bbl/d"
+          ],
+          [
+            "T2_qo",
+            515,
+            "bbl/d"
+          ],
+          [
+            "T2_qw",
+            180,
+            "bbl/d"
+          ],
+          [
+            "T3_qo",
+            390,
+            "bbl/d"
+          ],
+          [
+            "T3_qw",
+            130,
+            "bbl/d"
+          ],
+          [
+            "T4_qo",
+            605,
+            "bbl/d"
+          ],
+          [
+            "T4_qw",
+            245,
+            "bbl/d"
+          ],
+          [
+            "T5_qo",
+            480,
+            "bbl/d"
+          ],
+          [
+            "T5_qw",
+            125,
+            "bbl/d"
+          ],
+          [
+            "T6_qo",
+            550,
+            "bbl/d"
+          ],
+          [
+            "T6_qw",
+            210,
+            "bbl/d"
+          ],
+          [
+            "T7_qo",
+            420,
+            "bbl/d"
+          ],
+          [
+            "T7_qw",
+            160,
+            "bbl/d"
+          ],
+          [
+            "T8_qo",
+            575,
+            "bbl/d"
+          ],
+          [
+            "T8_qw",
+            260,
+            "bbl/d"
+          ]
+        ],
+        "expected_evidence_facts": [],
+        "required_evidence_facts": [],
+        "expected_formula_source": [
+          [
+            "W544",
+            "qt = qo + qw"
+          ]
+        ],
+        "formula_sources": [
+          [
+            "W544",
+            "qt = qo + qw"
+          ]
+        ],
+        "source_ids": [
+          "W544"
+        ],
+        "expected_contract_outputs": [
+          {
+            "semantic_name": "T1_qt",
+            "type": "numeric",
+            "value": 535,
+            "unit": "bbl/d",
+            "required": true
+          },
+          {
+            "semantic_name": "T2_qt",
+            "type": "numeric",
+            "value": 695,
+            "unit": "bbl/d",
+            "required": true
+          },
+          {
+            "semantic_name": "T3_qt",
+            "type": "numeric",
+            "value": 520,
+            "unit": "bbl/d",
+            "required": true
+          },
+          {
+            "semantic_name": "T4_qt",
+            "type": "numeric",
+            "value": 850,
+            "unit": "bbl/d",
+            "required": true
+          },
+          {
+            "semantic_name": "T5_qt",
+            "type": "numeric",
+            "value": 605,
+            "unit": "bbl/d",
+            "required": true
+          },
+          {
+            "semantic_name": "T6_qt",
+            "type": "numeric",
+            "value": 760,
+            "unit": "bbl/d",
+            "required": true
+          },
+          {
+            "semantic_name": "T7_qt",
+            "type": "numeric",
+            "value": 580,
+            "unit": "bbl/d",
+            "required": true
+          },
+          {
+            "semantic_name": "T8_qt",
+            "type": "numeric",
+            "value": 835,
+            "unit": "bbl/d",
+            "required": true
+          },
+          {
+            "semantic_name": "total_oil",
+            "type": "numeric",
+            "value": 3975,
+            "unit": "bbl/d",
+            "required": true
+          },
+          {
+            "semantic_name": "total_water",
+            "type": "numeric",
+            "value": 1405,
+            "unit": "bbl/d",
+            "required": true
+          },
+          {
+            "semantic_name": "total_liquid",
+            "type": "numeric",
+            "value": 5380,
+            "unit": "bbl/d",
+            "required": true
+          },
+          {
+            "semantic_name": "aggregate_watercut",
+            "type": "numeric",
+            "value": 26.11524163568773,
+            "unit": "%",
+            "required": true
+          },
+          {
+            "semantic_name": "highest_watercut_checkpoint",
+            "type": "label",
+            "value": "T8",
+            "required": true
+          }
+        ],
+        "numeric_targets": [
+          {
+            "semantic_name": "T1_qt",
+            "value": 535,
+            "unit": "bbl/d",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "T2_qt",
+            "value": 695,
+            "unit": "bbl/d",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "T3_qt",
+            "value": 520,
+            "unit": "bbl/d",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "T4_qt",
+            "value": 850,
+            "unit": "bbl/d",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "T5_qt",
+            "value": 605,
+            "unit": "bbl/d",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "T6_qt",
+            "value": 760,
+            "unit": "bbl/d",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "T7_qt",
+            "value": 580,
+            "unit": "bbl/d",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "T8_qt",
+            "value": 835,
+            "unit": "bbl/d",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "total_oil",
+            "value": 3975,
+            "unit": "bbl/d",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "total_water",
+            "value": 1405,
+            "unit": "bbl/d",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "total_liquid",
+            "value": 5380,
+            "unit": "bbl/d",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "aggregate_watercut",
+            "value": 26.11524163568773,
+            "unit": "%",
+            "abs_tolerance": 0.05,
+            "required": true
+          }
+        ],
+        "typed_targets": [
+          {
+            "semantic_name": "highest_watercut_checkpoint",
+            "type": "label",
+            "value": "T8"
+          }
+        ],
+        "ranking_targets": [],
+        "expected_provenance": {
+          "user_fact": true,
+          "evidence_fact": false,
+          "formula_source": true,
+          "source_ids": [
+            "W544"
+          ]
+        }
+      }
+    },
+    {
+      "task_id": "PT4-RE-P5",
+      "benchmark_id": "python_tool_heldout_v4",
+      "domain": "reservoir_engineering",
+      "python_expected": "required",
+      "evaluation_stratum": "pipeline",
+      "input_provenance_expected": "user_fact_plus_evidence_fact_plus_formula",
+      "topic": "Use the Heriot-Watt gas-mixture worked example's reported pseudocritical pressure as a reference. The following six pressure states are hypothetical user scenarios in psia, not values in that example.\nS1_P=1210 psia\nS2_P=1775 psia\nS3_P=2290 psia\nS4_P=2875 psia\nS5_P=3330 psia\nS6_P=3925 psia",
+      "goal": "Retrieve the example's pseudocritical pressure and Ppr=P/Ppc relation. Compute six pseudoreduced pressures, their mean and range, and identify the highest scenario. Do not infer z from Ppr alone.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "Ppr is absolute pressure divided by pseudocritical pressure.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every required numeric output with correct units and labels.",
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "Ppr alone does not determine gas compressibility factor z.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "required_claims": [
+          {
+            "text": "Ppr is absolute pressure divided by pseudocritical pressure.",
+            "source_ids": [
+              "R153"
+            ]
+          },
+          {
+            "text": "Ppr alone does not determine gas compressibility factor z.",
+            "source_ids": [
+              "R153"
+            ]
+          }
+        ],
+        "expected_user_facts": [
+          [
+            "S1_P",
+            1210,
+            "psia"
+          ],
+          [
+            "S2_P",
+            1775,
+            "psia"
+          ],
+          [
+            "S3_P",
+            2290,
+            "psia"
+          ],
+          [
+            "S4_P",
+            2875,
+            "psia"
+          ],
+          [
+            "S5_P",
+            3330,
+            "psia"
+          ],
+          [
+            "S6_P",
+            3925,
+            "psia"
+          ]
+        ],
+        "required_user_facts": [
+          [
+            "S1_P",
+            1210,
+            "psia"
+          ],
+          [
+            "S2_P",
+            1775,
+            "psia"
+          ],
+          [
+            "S3_P",
+            2290,
+            "psia"
+          ],
+          [
+            "S4_P",
+            2875,
+            "psia"
+          ],
+          [
+            "S5_P",
+            3330,
+            "psia"
+          ],
+          [
+            "S6_P",
+            3925,
+            "psia"
+          ]
+        ],
+        "expected_evidence_facts": [
+          [
+            "R153",
+            "Pseudocritical_pressure",
+            668.4,
+            "psia"
+          ]
+        ],
+        "required_evidence_facts": [
+          [
+            "R153",
+            "Pseudocritical_pressure",
+            668.4,
+            "psia"
+          ]
+        ],
+        "expected_formula_source": [
+          [
+            "R153",
+            "Ppr = P/Ppc"
+          ]
+        ],
+        "formula_sources": [
+          [
+            "R153",
+            "Ppr = P/Ppc"
+          ]
+        ],
+        "source_ids": [
+          "R153"
+        ],
+        "expected_contract_outputs": [
+          {
+            "semantic_name": "S1_Ppr",
+            "type": "numeric",
+            "value": 1.8102932375822862,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "S2_Ppr",
+            "type": "numeric",
+            "value": 2.6555954518252545,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "S3_Ppr",
+            "type": "numeric",
+            "value": 3.4260921603830043,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "S4_Ppr",
+            "type": "numeric",
+            "value": 4.30131657690006,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "S5_Ppr",
+            "type": "numeric",
+            "value": 4.982046678635548,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "S6_Ppr",
+            "type": "numeric",
+            "value": 5.872232196289647,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "mean_Ppr",
+            "type": "numeric",
+            "value": 3.8412627169359665,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "range_Ppr",
+            "type": "numeric",
+            "value": 4.061938958707361,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "highest_scenario",
+            "type": "label",
+            "value": "S6",
+            "required": true
+          }
+        ],
+        "numeric_targets": [
+          {
+            "semantic_name": "S1_Ppr",
+            "value": 1.8102932375822862,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "S2_Ppr",
+            "value": 2.6555954518252545,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "S3_Ppr",
+            "value": 3.4260921603830043,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "S4_Ppr",
+            "value": 4.30131657690006,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "S5_Ppr",
+            "value": 4.982046678635548,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "S6_Ppr",
+            "value": 5.872232196289647,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "mean_Ppr",
+            "value": 3.8412627169359665,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          },
+          {
+            "semantic_name": "range_Ppr",
+            "value": 4.061938958707361,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.002,
+            "required": true
+          }
+        ],
+        "typed_targets": [
+          {
+            "semantic_name": "highest_scenario",
+            "type": "label",
+            "value": "S6"
+          }
+        ],
+        "ranking_targets": [],
+        "expected_provenance": {
+          "user_fact": true,
+          "evidence_fact": true,
+          "formula_source": true,
+          "source_ids": [
+            "R153"
+          ]
+        }
+      }
+    },
+    {
+      "task_id": "PT4-FE-P6",
+      "benchmark_id": "python_tool_heldout_v4",
+      "domain": "formation_evaluation",
+      "python_expected": "required",
+      "evaluation_stratum": "pipeline",
+      "input_provenance_expected": "user_fact",
+      "topic": "A hypothetical formation-evaluation porosity QC traverse, one percent-porosity value per depth bin. These 12 readings are supplied by the user, not by the KB.\nD1_phi=16.4 %\nD2_phi=18.1 %\nD3_phi=17.7 %\nD4_phi=21.2 %\nD5_phi=19.6 %\nD6_phi=14.8 %\nD7_phi=23.4 %\nD8_phi=20.5 %\nD9_phi=18.9 %\nD10_phi=22.1 %\nD11_phi=17.2 %\nD12_phi=19.3 %",
+      "goal": "Return all 12 recorded values with their bin IDs, the arithmetic mean, median, population standard deviation in percentage points, count strictly above 20%, and top three bin IDs. This is QC summary, not a lithology or saturation diagnosis.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "The statistics summarize only the 12 user porosity readings.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every required numeric output with correct units and labels.",
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "Porosity alone does not prove lithology or water saturation.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "required_claims": [
+          {
+            "text": "The statistics summarize only the 12 user porosity readings.",
+            "source_ids": []
+          },
+          {
+            "text": "Porosity alone does not prove lithology or water saturation.",
+            "source_ids": []
+          }
+        ],
+        "expected_user_facts": [
+          [
+            "D1_phi",
+            16.4,
+            "%"
+          ],
+          [
+            "D2_phi",
+            18.1,
+            "%"
+          ],
+          [
+            "D3_phi",
+            17.7,
+            "%"
+          ],
+          [
+            "D4_phi",
+            21.2,
+            "%"
+          ],
+          [
+            "D5_phi",
+            19.6,
+            "%"
+          ],
+          [
+            "D6_phi",
+            14.8,
+            "%"
+          ],
+          [
+            "D7_phi",
+            23.4,
+            "%"
+          ],
+          [
+            "D8_phi",
+            20.5,
+            "%"
+          ],
+          [
+            "D9_phi",
+            18.9,
+            "%"
+          ],
+          [
+            "D10_phi",
+            22.1,
+            "%"
+          ],
+          [
+            "D11_phi",
+            17.2,
+            "%"
+          ],
+          [
+            "D12_phi",
+            19.3,
+            "%"
+          ]
+        ],
+        "required_user_facts": [
+          [
+            "D1_phi",
+            16.4,
+            "%"
+          ],
+          [
+            "D2_phi",
+            18.1,
+            "%"
+          ],
+          [
+            "D3_phi",
+            17.7,
+            "%"
+          ],
+          [
+            "D4_phi",
+            21.2,
+            "%"
+          ],
+          [
+            "D5_phi",
+            19.6,
+            "%"
+          ],
+          [
+            "D6_phi",
+            14.8,
+            "%"
+          ],
+          [
+            "D7_phi",
+            23.4,
+            "%"
+          ],
+          [
+            "D8_phi",
+            20.5,
+            "%"
+          ],
+          [
+            "D9_phi",
+            18.9,
+            "%"
+          ],
+          [
+            "D10_phi",
+            22.1,
+            "%"
+          ],
+          [
+            "D11_phi",
+            17.2,
+            "%"
+          ],
+          [
+            "D12_phi",
+            19.3,
+            "%"
+          ]
+        ],
+        "expected_evidence_facts": [],
+        "required_evidence_facts": [],
+        "expected_formula_source": [],
+        "formula_sources": [],
+        "source_ids": [],
+        "expected_contract_outputs": [
+          {
+            "semantic_name": "D1_phi",
+            "type": "numeric",
+            "value": 16.4,
+            "unit": "%",
+            "required": true
+          },
+          {
+            "semantic_name": "D2_phi",
+            "type": "numeric",
+            "value": 18.1,
+            "unit": "%",
+            "required": true
+          },
+          {
+            "semantic_name": "D3_phi",
+            "type": "numeric",
+            "value": 17.7,
+            "unit": "%",
+            "required": true
+          },
+          {
+            "semantic_name": "D4_phi",
+            "type": "numeric",
+            "value": 21.2,
+            "unit": "%",
+            "required": true
+          },
+          {
+            "semantic_name": "D5_phi",
+            "type": "numeric",
+            "value": 19.6,
+            "unit": "%",
+            "required": true
+          },
+          {
+            "semantic_name": "D6_phi",
+            "type": "numeric",
+            "value": 14.8,
+            "unit": "%",
+            "required": true
+          },
+          {
+            "semantic_name": "D7_phi",
+            "type": "numeric",
+            "value": 23.4,
+            "unit": "%",
+            "required": true
+          },
+          {
+            "semantic_name": "D8_phi",
+            "type": "numeric",
+            "value": 20.5,
+            "unit": "%",
+            "required": true
+          },
+          {
+            "semantic_name": "D9_phi",
+            "type": "numeric",
+            "value": 18.9,
+            "unit": "%",
+            "required": true
+          },
+          {
+            "semantic_name": "D10_phi",
+            "type": "numeric",
+            "value": 22.1,
+            "unit": "%",
+            "required": true
+          },
+          {
+            "semantic_name": "D11_phi",
+            "type": "numeric",
+            "value": 17.2,
+            "unit": "%",
+            "required": true
+          },
+          {
+            "semantic_name": "D12_phi",
+            "type": "numeric",
+            "value": 19.3,
+            "unit": "%",
+            "required": true
+          },
+          {
+            "semantic_name": "mean_phi",
+            "type": "numeric",
+            "value": 19.1,
+            "unit": "%",
+            "required": true
+          },
+          {
+            "semantic_name": "median_phi",
+            "type": "numeric",
+            "value": 19.1,
+            "unit": "%",
+            "required": true
+          },
+          {
+            "semantic_name": "population_sd",
+            "type": "numeric",
+            "value": 2.3547823678633235,
+            "unit": "percentage_point",
+            "required": true
+          },
+          {
+            "semantic_name": "above_20_count",
+            "type": "numeric",
+            "value": 4,
+            "unit": "dimensionless",
+            "required": true
+          },
+          {
+            "semantic_name": "top_three_bins",
+            "type": "ranking",
+            "value": [
+              "D7",
+              "D10",
+              "D4"
+            ],
+            "required": true
+          }
+        ],
+        "numeric_targets": [
+          {
+            "semantic_name": "D1_phi",
+            "value": 16.4,
+            "unit": "%",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "D2_phi",
+            "value": 18.1,
+            "unit": "%",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "D3_phi",
+            "value": 17.7,
+            "unit": "%",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "D4_phi",
+            "value": 21.2,
+            "unit": "%",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "D5_phi",
+            "value": 19.6,
+            "unit": "%",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "D6_phi",
+            "value": 14.8,
+            "unit": "%",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "D7_phi",
+            "value": 23.4,
+            "unit": "%",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "D8_phi",
+            "value": 20.5,
+            "unit": "%",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "D9_phi",
+            "value": 18.9,
+            "unit": "%",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "D10_phi",
+            "value": 22.1,
+            "unit": "%",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "D11_phi",
+            "value": 17.2,
+            "unit": "%",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "D12_phi",
+            "value": 19.3,
+            "unit": "%",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "mean_phi",
+            "value": 19.1,
+            "unit": "%",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "median_phi",
+            "value": 19.1,
+            "unit": "%",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "population_sd",
+            "value": 2.3547823678633235,
+            "unit": "percentage_point",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "above_20_count",
+            "value": 4,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.05,
+            "required": true
+          }
+        ],
+        "typed_targets": [
+          {
+            "semantic_name": "top_three_bins",
+            "type": "ranking",
+            "value": [
+              "D7",
+              "D10",
+              "D4"
+            ]
+          }
+        ],
+        "ranking_targets": [
+          {
+            "semantic_name": "top_three_bins",
+            "type": "ranking",
+            "value": [
+              "D7",
+              "D10",
+              "D4"
+            ]
+          }
+        ],
+        "expected_provenance": {
+          "user_fact": true,
+          "evidence_fact": false,
+          "formula_source": false,
+          "source_ids": []
+        }
+      }
+    },
+    {
+      "task_id": "PT4-RE-E1",
+      "benchmark_id": "python_tool_heldout_v4",
+      "domain": "reservoir_engineering",
+      "python_expected": "required",
+      "evaluation_stratum": "end_to_end",
+      "input_provenance_expected": "kb_evidence_fact_plus_user_fact_plus_formula",
+      "topic": "Locate the Heriot-Watt infinite-aquifer water-influx exercise's stated porosity, but do not use its water-influx result. Treat that porosity only as a hypothetical common rock fraction for six user-proposed grid-block bulk volumes; volumes are not from the exercise.\nB1_Vb=8450 bbl\nB2_Vb=9120 bbl\nB3_Vb=10875 bbl\nB4_Vb=7650 bbl\nB5_Vb=11940 bbl\nB6_Vb=9825 bbl",
+      "goal": "Retrieve the source porosity and a separate handbook true-porosity relation f=Vp/Vb. Rearrange to compute pore volume for each proposed block, total and mean pore volume, and identify largest block. Separate KB porosity from USERF volumes; do not claim a water-influx prediction.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "The 22% porosity is from the source exercise; bulk volumes are hypothetical.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every required numeric output with correct units and labels.",
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "Pore volumes here do not establish water influx.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "required_claims": [
+          {
+            "text": "The 22% porosity is from the source exercise; bulk volumes are hypothetical.",
+            "source_ids": [
+              "R708",
+              "H1453"
+            ]
+          },
+          {
+            "text": "Pore volumes here do not establish water influx.",
+            "source_ids": [
+              "R708",
+              "H1453"
+            ]
+          }
+        ],
+        "expected_user_facts": [
+          [
+            "B1_Vb",
+            8450,
+            "bbl"
+          ],
+          [
+            "B2_Vb",
+            9120,
+            "bbl"
+          ],
+          [
+            "B3_Vb",
+            10875,
+            "bbl"
+          ],
+          [
+            "B4_Vb",
+            7650,
+            "bbl"
+          ],
+          [
+            "B5_Vb",
+            11940,
+            "bbl"
+          ],
+          [
+            "B6_Vb",
+            9825,
+            "bbl"
+          ]
+        ],
+        "required_user_facts": [
+          [
+            "B1_Vb",
+            8450,
+            "bbl"
+          ],
+          [
+            "B2_Vb",
+            9120,
+            "bbl"
+          ],
+          [
+            "B3_Vb",
+            10875,
+            "bbl"
+          ],
+          [
+            "B4_Vb",
+            7650,
+            "bbl"
+          ],
+          [
+            "B5_Vb",
+            11940,
+            "bbl"
+          ],
+          [
+            "B6_Vb",
+            9825,
+            "bbl"
+          ]
+        ],
+        "expected_evidence_facts": [
+          [
+            "R708",
+            "porosity",
+            22,
+            "%"
+          ]
+        ],
+        "required_evidence_facts": [
+          [
+            "R708",
+            "porosity",
+            22,
+            "%"
+          ]
+        ],
+        "expected_formula_source": [
+          [
+            "H1453",
+            "f = Vp /Vb"
+          ]
+        ],
+        "formula_sources": [
+          [
+            "H1453",
+            "f = Vp /Vb"
+          ]
+        ],
+        "source_ids": [
+          "R708",
+          "H1453"
+        ],
+        "expected_contract_outputs": [
+          {
+            "semantic_name": "B1_Vp",
+            "type": "numeric",
+            "value": 1859,
+            "unit": "bbl",
+            "required": true
+          },
+          {
+            "semantic_name": "B2_Vp",
+            "type": "numeric",
+            "value": 2006.4,
+            "unit": "bbl",
+            "required": true
+          },
+          {
+            "semantic_name": "B3_Vp",
+            "type": "numeric",
+            "value": 2392.5,
+            "unit": "bbl",
+            "required": true
+          },
+          {
+            "semantic_name": "B4_Vp",
+            "type": "numeric",
+            "value": 1683,
+            "unit": "bbl",
+            "required": true
+          },
+          {
+            "semantic_name": "B5_Vp",
+            "type": "numeric",
+            "value": 2626.8,
+            "unit": "bbl",
+            "required": true
+          },
+          {
+            "semantic_name": "B6_Vp",
+            "type": "numeric",
+            "value": 2161.5,
+            "unit": "bbl",
+            "required": true
+          },
+          {
+            "semantic_name": "total_Vp",
+            "type": "numeric",
+            "value": 12729.2,
+            "unit": "bbl",
+            "required": true
+          },
+          {
+            "semantic_name": "mean_Vp",
+            "type": "numeric",
+            "value": 2121.5333333333333,
+            "unit": "bbl",
+            "required": true
+          },
+          {
+            "semantic_name": "largest_block",
+            "type": "label",
+            "value": "B5",
+            "required": true
+          }
+        ],
+        "numeric_targets": [
+          {
+            "semantic_name": "B1_Vp",
+            "value": 1859,
+            "unit": "bbl",
+            "abs_tolerance": 0.5,
+            "required": true
+          },
+          {
+            "semantic_name": "B2_Vp",
+            "value": 2006.4,
+            "unit": "bbl",
+            "abs_tolerance": 0.5,
+            "required": true
+          },
+          {
+            "semantic_name": "B3_Vp",
+            "value": 2392.5,
+            "unit": "bbl",
+            "abs_tolerance": 0.5,
+            "required": true
+          },
+          {
+            "semantic_name": "B4_Vp",
+            "value": 1683,
+            "unit": "bbl",
+            "abs_tolerance": 0.5,
+            "required": true
+          },
+          {
+            "semantic_name": "B5_Vp",
+            "value": 2626.8,
+            "unit": "bbl",
+            "abs_tolerance": 0.5,
+            "required": true
+          },
+          {
+            "semantic_name": "B6_Vp",
+            "value": 2161.5,
+            "unit": "bbl",
+            "abs_tolerance": 0.5,
+            "required": true
+          },
+          {
+            "semantic_name": "total_Vp",
+            "value": 12729.2,
+            "unit": "bbl",
+            "abs_tolerance": 0.5,
+            "required": true
+          },
+          {
+            "semantic_name": "mean_Vp",
+            "value": 2121.5333333333333,
+            "unit": "bbl",
+            "abs_tolerance": 0.5,
+            "required": true
+          }
+        ],
+        "typed_targets": [
+          {
+            "semantic_name": "largest_block",
+            "type": "label",
+            "value": "B5"
+          }
+        ],
+        "ranking_targets": [],
+        "expected_provenance": {
+          "user_fact": true,
+          "evidence_fact": true,
+          "formula_source": true,
+          "source_ids": [
+            "R708",
+            "H1453"
+          ]
+        }
+      }
+    },
+    {
+      "task_id": "PT4-WT-E2",
+      "benchmark_id": "python_tool_heldout_v4",
+      "domain": "well_test",
+      "python_expected": "required",
+      "evaluation_stratum": "end_to_end",
+      "input_provenance_expected": "kb_evidence_fact_plus_user_fact",
+      "topic": "Locate the Ekofisk compaction discussion's 9000-psia overburden, initial 2000-psi net effective stress and late-1985 5000-psi net stress. Six later pore-pressure values below are hypothetical user sensitivity cases, not Ekofisk measurements.\nY1_pore=3600 psia\nY2_pore=3450 psia\nY3_pore=3250 psia\nY4_pore=3050 psia\nY5_pore=2800 psia\nY6_pore=2550 psia",
+      "goal": "With overburden held at the source value, compute net effective stress for each hypothetical pore pressure, mean and maximum stress, and observed initial-to-1985 stress change from the source. Identify highest-stress scenario. Do not predict actual subsidence from this arithmetic.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "The source documents a 2000-to-5000 psi observed net-stress increase.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every required numeric output with correct units and labels.",
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "Hypothetical pressure sensitivities are not observed Ekofisk outcomes.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "required_claims": [
+          {
+            "text": "The source documents a 2000-to-5000 psi observed net-stress increase.",
+            "source_ids": [
+              "W27"
+            ]
+          },
+          {
+            "text": "Hypothetical pressure sensitivities are not observed Ekofisk outcomes.",
+            "source_ids": [
+              "W27"
+            ]
+          }
+        ],
+        "expected_user_facts": [
+          [
+            "Y1_pore",
+            3600,
+            "psia"
+          ],
+          [
+            "Y2_pore",
+            3450,
+            "psia"
+          ],
+          [
+            "Y3_pore",
+            3250,
+            "psia"
+          ],
+          [
+            "Y4_pore",
+            3050,
+            "psia"
+          ],
+          [
+            "Y5_pore",
+            2800,
+            "psia"
+          ],
+          [
+            "Y6_pore",
+            2550,
+            "psia"
+          ]
+        ],
+        "required_user_facts": [
+          [
+            "Y1_pore",
+            3600,
+            "psi"
+          ],
+          [
+            "Y2_pore",
+            3450,
+            "psi"
+          ],
+          [
+            "Y3_pore",
+            3250,
+            "psi"
+          ],
+          [
+            "Y4_pore",
+            3050,
+            "psi"
+          ],
+          [
+            "Y5_pore",
+            2800,
+            "psi"
+          ],
+          [
+            "Y6_pore",
+            2550,
+            "psi"
+          ]
+        ],
+        "expected_evidence_facts": [
+          [
+            "W27",
+            "Initial_NET_effective_stress",
+            2000,
+            "psi"
+          ],
+          [
+            "W27",
+            "NET_effective_stress",
+            5000,
+            "psi"
+          ],
+          [
+            "W27",
+            "overburden_stress_in_the_reservoir",
+            9000,
+            "psia"
+          ]
+        ],
+        "required_evidence_facts": [
+          [
+            "W27",
+            "Initial_NET_effective_stress",
+            2000,
+            "psi"
+          ],
+          [
+            "W27",
+            "NET_effective_stress",
+            5000,
+            "psi"
+          ],
+          [
+            "W27",
+            "overburden_stress_in_the_reservoir",
+            9000,
+            "psia"
+          ]
+        ],
+        "expected_formula_source": [],
+        "formula_sources": [],
+        "source_ids": [
+          "W27"
+        ],
+        "expected_contract_outputs": [
+          {
+            "semantic_name": "Y1_stress",
+            "type": "numeric",
+            "value": 5400,
+            "unit": "psi",
+            "required": true
+          },
+          {
+            "semantic_name": "Y2_stress",
+            "type": "numeric",
+            "value": 5550,
+            "unit": "psi",
+            "required": true
+          },
+          {
+            "semantic_name": "Y3_stress",
+            "type": "numeric",
+            "value": 5750,
+            "unit": "psi",
+            "required": true
+          },
+          {
+            "semantic_name": "Y4_stress",
+            "type": "numeric",
+            "value": 5950,
+            "unit": "psi",
+            "required": true
+          },
+          {
+            "semantic_name": "Y5_stress",
+            "type": "numeric",
+            "value": 6200,
+            "unit": "psi",
+            "required": true
+          },
+          {
+            "semantic_name": "Y6_stress",
+            "type": "numeric",
+            "value": 6450,
+            "unit": "psi",
+            "required": true
+          },
+          {
+            "semantic_name": "mean_stress",
+            "type": "numeric",
+            "value": 5883.333333333333,
+            "unit": "psi",
+            "required": true
+          },
+          {
+            "semantic_name": "max_stress",
+            "type": "numeric",
+            "value": 6450,
+            "unit": "psi",
+            "required": true
+          },
+          {
+            "semantic_name": "observed_stress_change",
+            "type": "numeric",
+            "value": 3000,
+            "unit": "psi",
+            "required": true
+          },
+          {
+            "semantic_name": "highest_stress_scenario",
+            "type": "label",
+            "value": "Y6",
+            "required": true
+          }
+        ],
+        "numeric_targets": [
+          {
+            "semantic_name": "Y1_stress",
+            "value": 5400,
+            "unit": "psi",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "Y2_stress",
+            "value": 5550,
+            "unit": "psi",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "Y3_stress",
+            "value": 5750,
+            "unit": "psi",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "Y4_stress",
+            "value": 5950,
+            "unit": "psi",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "Y5_stress",
+            "value": 6200,
+            "unit": "psi",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "Y6_stress",
+            "value": 6450,
+            "unit": "psi",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "mean_stress",
+            "value": 5883.333333333333,
+            "unit": "psi",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "max_stress",
+            "value": 6450,
+            "unit": "psi",
+            "abs_tolerance": 0.05,
+            "required": true
+          },
+          {
+            "semantic_name": "observed_stress_change",
+            "value": 3000,
+            "unit": "psi",
+            "abs_tolerance": 0.05,
+            "required": true
+          }
+        ],
+        "typed_targets": [
+          {
+            "semantic_name": "highest_stress_scenario",
+            "type": "label",
+            "value": "Y6"
+          }
+        ],
+        "ranking_targets": [],
+        "expected_provenance": {
+          "user_fact": true,
+          "evidence_fact": true,
+          "formula_source": false,
+          "source_ids": [
+            "W27"
+          ]
+        }
+      }
+    },
+    {
+      "task_id": "PT4-RE-O1",
+      "benchmark_id": "python_tool_heldout_v4",
+      "domain": "reservoir_engineering",
+      "python_expected": "optional",
+      "evaluation_stratum": "optional",
+      "input_provenance_expected": "user_fact_plus_formula",
+      "topic": "Two hypothetical same-depth oil-water phase pressures.\nPo=3024 psi\nPw=3000 psi",
+      "goal": "Give the capillary pressure difference in psi using the cited phase-pressure definition. Direct arithmetic is sufficient; Python is optional.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "Capillary pressure is the phase-pressure difference.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every required numeric output with correct units and labels.",
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "Capillary pressure is the phase-pressure difference.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "required_claims": [
+          {
+            "text": "Capillary pressure is the phase-pressure difference.",
+            "source_ids": [
+              "R69"
+            ]
+          }
+        ],
+        "expected_user_facts": [
+          [
+            "Po",
+            3024,
+            "psi"
+          ],
+          [
+            "Pw",
+            3000,
+            "psi"
+          ]
+        ],
+        "required_user_facts": [
+          [
+            "Po",
+            3024,
+            "psi"
+          ],
+          [
+            "Pw",
+            3000,
+            "psi"
+          ]
+        ],
+        "expected_evidence_facts": [],
+        "required_evidence_facts": [],
+        "expected_formula_source": [
+          [
+            "R69",
+            "Pc = Po - Pw"
+          ]
+        ],
+        "formula_sources": [
+          [
+            "R69",
+            "Pc = Po - Pw"
+          ]
+        ],
+        "source_ids": [
+          "R69"
+        ],
+        "expected_contract_outputs": [
+          {
+            "semantic_name": "Pc",
+            "type": "numeric",
+            "value": 24,
+            "unit": "psi",
+            "required": true
+          }
+        ],
+        "numeric_targets": [
+          {
+            "semantic_name": "Pc",
+            "value": 24,
+            "unit": "psi",
+            "abs_tolerance": 0.05,
+            "required": true
+          }
+        ],
+        "typed_targets": [],
+        "ranking_targets": [],
+        "expected_provenance": {
+          "user_fact": true,
+          "evidence_fact": false,
+          "formula_source": true,
+          "source_ids": [
+            "R69"
+          ]
+        }
+      }
+    },
+    {
+      "task_id": "PT4-WT-O2",
+      "benchmark_id": "python_tool_heldout_v4",
+      "domain": "well_test",
+      "python_expected": "optional",
+      "evaluation_stratum": "optional",
+      "input_provenance_expected": "user_fact_plus_formula",
+      "topic": "At one hypothetical commingled-flow checkpoint, the user supplies oil and water rates.\nqo=530 bbl/d\nqw=125 bbl/d",
+      "goal": "Give the total liquid rate with units from the cited oil-plus-water identity. Direct arithmetic is sufficient; Python is optional.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "Total liquid rate equals oil plus water rate.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every required numeric output with correct units and labels.",
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "Total liquid rate equals oil plus water rate.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "required_claims": [
+          {
+            "text": "Total liquid rate equals oil plus water rate.",
+            "source_ids": [
+              "W544"
+            ]
+          }
+        ],
+        "expected_user_facts": [
+          [
+            "qo",
+            530,
+            "bbl/d"
+          ],
+          [
+            "qw",
+            125,
+            "bbl/d"
+          ]
+        ],
+        "required_user_facts": [
+          [
+            "qo",
+            530,
+            "bbl/d"
+          ],
+          [
+            "qw",
+            125,
+            "bbl/d"
+          ]
+        ],
+        "expected_evidence_facts": [],
+        "required_evidence_facts": [],
+        "expected_formula_source": [
+          [
+            "W544",
+            "qt = qo + qw"
+          ]
+        ],
+        "formula_sources": [
+          [
+            "W544",
+            "qt = qo + qw"
+          ]
+        ],
+        "source_ids": [
+          "W544"
+        ],
+        "expected_contract_outputs": [
+          {
+            "semantic_name": "qt",
+            "type": "numeric",
+            "value": 655,
+            "unit": "bbl/d",
+            "required": true
+          }
+        ],
+        "numeric_targets": [
+          {
+            "semantic_name": "qt",
+            "value": 655,
+            "unit": "bbl/d",
+            "abs_tolerance": 0.05,
+            "required": true
+          }
+        ],
+        "typed_targets": [],
+        "ranking_targets": [],
+        "expected_provenance": {
+          "user_fact": true,
+          "evidence_fact": false,
+          "formula_source": true,
+          "source_ids": [
+            "W544"
+          ]
+        }
+      }
+    },
+    {
+      "task_id": "PT4-RE-N1",
+      "benchmark_id": "python_tool_heldout_v4",
+      "domain": "reservoir_engineering",
+      "python_expected": "not_needed",
+      "evaluation_stratum": "not_needed",
+      "input_provenance_expected": "none",
+      "topic": "A reservoir-simulation team reports both true porosity and reference-bulk-volume pseudoporosity under compaction.",
+      "goal": "Explain why the two porosity definitions can diverge as bulk volume changes, citing the handbook discussion. No numerical inputs or calculation are requested.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "True porosity uses current bulk volume; pseudoporosity uses reference bulk volume.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Answer conceptually without calculation.",
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "True porosity uses current bulk volume; pseudoporosity uses reference bulk volume.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "required_claims": [
+          {
+            "text": "True porosity uses current bulk volume; pseudoporosity uses reference bulk volume.",
+            "source_ids": [
+              "H1453"
+            ]
+          }
+        ],
+        "expected_user_facts": [],
+        "required_user_facts": [],
+        "expected_evidence_facts": [],
+        "required_evidence_facts": [],
+        "expected_formula_source": [],
+        "formula_sources": [],
+        "source_ids": [
+          "H1453"
+        ],
+        "expected_contract_outputs": [],
+        "numeric_targets": [],
+        "typed_targets": [],
+        "ranking_targets": [],
+        "expected_provenance": {
+          "user_fact": false,
+          "evidence_fact": false,
+          "formula_source": false,
+          "source_ids": [
+            "H1453"
+          ]
+        }
+      }
+    },
+    {
+      "task_id": "PT4-WT-N2",
+      "benchmark_id": "python_tool_heldout_v4",
+      "domain": "well_test",
+      "python_expected": "not_needed",
+      "evaluation_stratum": "not_needed",
+      "input_provenance_expected": "none",
+      "topic": "A colleague attributes Ekofisk seabed subsidence solely to a measured increase in permeability.",
+      "goal": "Explain what the cited Ekofisk compaction discussion actually supports about pore-pressure decline, net effective stress and compaction. Do not invent permeability or subsidence predictions. No calculation is requested.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "Pressure decline increased effective stress and contributed to compaction; permeability change alone is not the documented explanation.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Answer conceptually without calculation.",
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "Pressure decline increased effective stress and contributed to compaction; permeability change alone is not the documented explanation.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "required_claims": [
+          {
+            "text": "Pressure decline increased effective stress and contributed to compaction; permeability change alone is not the documented explanation.",
+            "source_ids": [
+              "W27"
+            ]
+          }
+        ],
+        "expected_user_facts": [],
+        "required_user_facts": [],
+        "expected_evidence_facts": [],
+        "required_evidence_facts": [],
+        "expected_formula_source": [],
+        "formula_sources": [],
+        "source_ids": [
+          "W27"
+        ],
+        "expected_contract_outputs": [],
+        "numeric_targets": [],
+        "typed_targets": [],
+        "ranking_targets": [],
+        "expected_provenance": {
+          "user_fact": false,
+          "evidence_fact": false,
+          "formula_source": false,
+          "source_ids": [
+            "W27"
+          ]
+        }
+      }
+    }
+  ]
+}
