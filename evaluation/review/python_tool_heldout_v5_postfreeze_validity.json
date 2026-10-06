@@ -1,0 +1,13 @@
+{
+  "status": "POSTFREEZE_GT_DEFECT_FOUND",
+  "task_id": "PT5-FE-D3",
+  "affected_targets": ["Rwa_index_ranking", "Rwa_index_leader"],
+  "finding": "C_Rt/C_F = 5.4/18 = 0.3 and D_Rt/D_F = 9.6/32 = 0.3 are mathematically tied. The frozen reference calculator used binary floating point, yielding 0.30000000000000004 for C and 0.3 for D, then assigning C sole first place.",
+  "gap": 5.551115123125783e-17,
+  "numeric_target_tolerance": 0.01,
+  "preflight_missed_tie": true,
+  "frozen_assets_changed": false,
+  "product_changed": false,
+  "rerun_allowed": false,
+  "interpretation": "The frozen strict score remains auditable but PT5-FE-D3 typed/ranking correctness and any affected goal-success aggregate are not scientifically valid. Report a separately labeled sensitivity excluding this task; do not rewrite the frozen benchmark or rerun tasks."
+}
