@@ -192,6 +192,16 @@ def adjudicate() -> dict:
     result["failure_attribution"] = {condition: dict(Counter(reason for row in rows if row["condition"] == condition
                                                                   for reason in row["failure_attribution"]))
                                      for condition in ("python_off", "python_on")}
+    valid = [(off, on) for off, on in pairs if off["task_id"] != "PT5-FE-D3"]
+    result["postfreeze_validity_sensitivity"] = {
+        "excluded_task_id": "PT5-FE-D3",
+        "reason": "Mathematical C/D tie misrepresented as C sole leader by frozen binary-float GT",
+        "status": "DESCRIPTIVE_ONLY_NOT_A_RERUN_OR_RESCORING_OF_FROZEN_TASK",
+        "all_11": {"python_off": population_summary([off for off, _ in valid]),
+                   "python_on": population_summary([on for _, on in valid])},
+        "required_7": {"python_off": population_summary([off for off, _ in valid if off["python_expected"] == "required"]),
+                       "python_on": population_summary([on for _, on in valid if on["python_expected"] == "required"])},
+    }
     return result
 
 
