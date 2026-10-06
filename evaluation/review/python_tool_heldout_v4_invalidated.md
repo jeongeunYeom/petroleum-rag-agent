@@ -1,6 +1,6 @@
 # Python Tool Heldout v4 invalidated before a complete A/B run
 
-Frozen product: `2646be1e5439cd689fdd236e064e2f9b64255274`  
+Frozen product: `2646be1e5439cd689fdd236e064e2f9b64255274`
 Freeze commit: `213231fd5c4f6bc29cefebd37f98fc9656c488cb`
 
 The frozen P2 ground truth is contradictory: `expected_contract_outputs.lowest_cell=C5`, but `typed_targets.lowest_cell=C4`. Independent arithmetic gives C5 (141/660 = 0.213636...) below C4 (169/790 = 0.213924...). The preflight falsely passed because it validated numeric targets and typed-output counts, but not typed-output values against the independent calculation or the duplicate GT field.
