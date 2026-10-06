@@ -69,6 +69,7 @@ def test_binding_correct_id_and_scenario_required():
     response = {"iterations": [{"python_trace": {"requirement_graph": {"formula_variables": [
         {"variable_name": "x", "scenario_id": "A", "status": "bound", "bound_fact_id": "USERF1"}]}}}]}
     assert scorer.binding_audit(task, response, source)["binding_complete"]
+    assert scorer.binding_audit(task, response, source)["userf_runtime_bound"] == 1
     response["iterations"][0]["python_trace"]["requirement_graph"]["formula_variables"][0]["scenario_id"] = "B"
     assert not scorer.binding_audit(task, response, source)["binding_complete"]
 

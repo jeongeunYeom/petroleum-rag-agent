@@ -207,8 +207,18 @@ def binding_audit(task: dict, response: dict, source: dict) -> dict:
                      "scenario_errors": scenario_errors, "graph": graph}
         if best["graph"] is None or (candidate["correct"], candidate["bound"]) > (best["correct"], best["bound"]):
             best = candidate
+    graph = best["graph"] or {}
+    bound_ids = {row.get("bound_fact_id") for row in graph.get("formula_variables", []) if row.get("status") == "bound"}
+    user_ids = set(source["matched_user_fact_ids"].values()) - {None}
+    evidence_ids = set(source["matched_evidence_fact_ids"].values()) - {None}
+    initial_binding = None if any(trace.get("recovery_triggered") for trace in traces(response)) else (
+        bool(total and best["correct"] == total) if expected else None)
     return {"binding_required": total, "binding_correct": best["correct"], "binding_bound": best["bound"],
             "binding_complete": bool(total and best["correct"] == total) if expected else None,
+            "initial_binding_complete_observable": initial_binding,
+            "userf_runtime_bound": len(bound_ids & user_ids), "efact_runtime_bound": len(bound_ids & evidence_ids),
+            "formula_runtime_bound": bool(graph.get("formula_id") and
+                                         graph.get("formula_id") in set(source["matched_formula_ids"].values())),
             "binding_missing_count": best["missing"], "binding_ambiguous_count": best["ambiguous"],
             "binding_unit_mismatch_count": best["unit_mismatch"],
             "cross_scenario_binding_errors": best["scenario_errors"], "best_requirement_graph": best["graph"]}
@@ -534,6 +544,19 @@ def failure_attribution(task: dict, row: dict) -> list[str]:
             labels.append("source_complete_false_negative")
         if row["recovery_triggered"] and not row["recovery_success"]:
             labels.append("recovery_no_required_gain")
+        if row["recovery_round_count"] >= 2 and not row["post_recovery_source_complete_external"]:
+            labels.append("recovery_budget_exhausted")
+        blocked = {trace.get("blocked_stage") for trace in row["python_traces"]}
+        if "planner_decision_parse_failed" in blocked:
+            labels.append("planner_parse_failed")
+        if "planner_plan_parse_failed" in blocked or "materialization_failed" in blocked:
+            labels.append("plan_materialization_failed")
+        if "calculation_contract_parse_failed" in blocked:
+            labels.append("contract_parse_failed")
+        if "assumption_guard_failed" in blocked:
+            labels.append("assumption_guard_blocked")
+        if "CALC_INCOMPLETE_OUTPUTS" in blocked:
+            labels.append("result_schema_failed")
         if row["checklist_output_recall"] is not None and row["checklist_output_recall"] < 1:
             labels.append("checklist_incomplete")
         if row["contract_generated"] and not row["external_contract_complete"]:
@@ -551,7 +574,9 @@ def failure_attribution(task: dict, row: dict) -> list[str]:
         if row["externally_valid_calc"] and not row["gt_correct_calc"]:
             labels.append("calc_gt_incorrect")
         if row["gt_correct_calc"] and not row["grounded_adoption"]:
-            labels.append("final_adoption_failed")
+            labels.append("calc_grounding_failed" if row["calc_grounding_failure_reasons"] else "final_adoption_failed")
+    if row["final_leakage"]:
+        labels.append("final_response_leak")
     return labels or (["final_synthesis"] if row["numeric_correct"] < row["numeric_total"] else ["other"])
 
 
@@ -612,11 +637,13 @@ def score_one(task: dict, raw_row: dict, catalog: dict, reference: dict) -> dict
         "unsupported_engineering_claim_count": sum(item.get("unsupported_engineering_claim_count", 0) for item in response.get("iterations", [])),
         "final_leakage": _final_leakage(answer),
         "calc_grounding_failure_reasons": [reason for trace in traces(response) for reason in trace.get("calc_grounding_failures", [])],
+        "python_traces": traces(response),
         **final, **source, **recovery, **binding, **checklist, **contract, **assumption, **calc, **stage,
     }
     row["internal_external_calibration_error"] = (abs(row["internal_goal_coverage"] - row["external_coverage_deterministic"])
                                                    if isinstance(row["internal_goal_coverage"], (int, float)) else None)
     row["failure_attribution"] = failure_attribution(task, row)
+    row.pop("python_traces")
     return row
 
 
