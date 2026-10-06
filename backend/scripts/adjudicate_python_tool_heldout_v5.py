@@ -95,11 +95,11 @@ def adjudicate() -> dict:
             raise ValueError(f"Unreviewed or altered answer: {pair}")
         numeric = copy.deepcopy(original["numeric_matches"])
         typed = dict(original["typed_matches"])
-        for name, value in qa["numeric_target_overrides"].items():
+        for name, value in qa.get("numeric_target_overrides", {}).items():
             if name not in numeric or set(value) != {"value", "unit"}:
                 raise ValueError(f"Invalid numeric override: {pair} {name}")
             numeric[name].update(value=bool(value["value"]), unit=bool(value["unit"]))
-        for name, value in qa["typed_target_overrides"].items():
+        for name, value in qa.get("typed_target_overrides", {}).items():
             if name not in typed:
                 raise ValueError(f"Invalid typed override: {pair} {name}")
             typed[name] = bool(value)
@@ -113,8 +113,8 @@ def adjudicate() -> dict:
             if key in reviewer_criteria and bool(reviewer_criteria[key]) != bool(passed):
                 disagreements.append({"task_id": pair[0], "condition": pair[1], "criterion_id": key,
                                       "reviewer": bool(reviewer_criteria[key]), "manual": bool(passed),
-                                      "reason": qa["note"]})
-        provenance_errors = sum(int(qa[key]) for key in ("user_input_as_kb_count", "efact_attribution_error_count",
+                                      "reason": qa.get("note", "")})
+        provenance_errors = sum(int(qa.get(key, 0)) for key in ("user_input_as_kb_count", "efact_attribution_error_count",
                                                          "formula_provenance_error_count", "calc_overclaim_count"))
         numeric_count = sum(item["value"] for item in numeric.values())
         unit_count = sum(item["value"] and item["unit"] for item in numeric.values())
@@ -124,17 +124,17 @@ def adjudicate() -> dict:
                  "typed_matches": typed, "typed_correct": typed_count,
                  "ranking_correct": sum(typed[row["semantic_name"]] for row in task["ground_truth"]["ranking_targets"]),
                  "external_coverage": sum(criteria.values()) / len(criteria),
-                 "scenario_complete": c2, "citation_correct": bool(qa["citation_correct"]),
-                 "safe_source_incomplete": qa["safe_source_incomplete"],
-                 "grounded_adoption": bool(original["grounded_adoption"] and qa["calc_grounded_adoption_verified"]),
-                 "unsupported_claim_count": int(qa["unsupported_claim_count"]),
-                 "engineering_contradiction_count_manual": int(qa["engineering_contradiction_count"]),
-                 "python_unsupported_claim_count": int(qa["python_unsupported_claim_count"]),
-                 "user_input_as_kb_count": int(qa["user_input_as_kb_count"]),
-                 "efact_attribution_error_count": int(qa["efact_attribution_error_count"]),
-                 "formula_provenance_error_count": int(qa["formula_provenance_error_count"]),
-                 "calc_overclaim_count": int(qa["calc_overclaim_count"]),
-                 "manual_qa_note": qa["note"], "reviewer_criterion_pass": reviewer_criteria,
+                 "scenario_complete": c2, "citation_correct": bool(qa.get("citation_correct", False)),
+                 "safe_source_incomplete": qa.get("safe_source_incomplete"),
+                 "grounded_adoption": bool(original["grounded_adoption"] and qa.get("calc_grounded_adoption_verified", False)),
+                 "unsupported_claim_count": int(qa.get("unsupported_claim_count", 0)),
+                 "engineering_contradiction_count_manual": int(qa.get("engineering_contradiction_count", 0)),
+                 "python_unsupported_claim_count": int(qa.get("python_unsupported_claim_count", 0)),
+                 "user_input_as_kb_count": int(qa.get("user_input_as_kb_count", 0)),
+                 "efact_attribution_error_count": int(qa.get("efact_attribution_error_count", 0)),
+                 "formula_provenance_error_count": int(qa.get("formula_provenance_error_count", 0)),
+                 "calc_overclaim_count": int(qa.get("calc_overclaim_count", 0)),
+                 "manual_qa_note": qa.get("note", ""), "reviewer_criterion_pass": reviewer_criteria,
                  "reviewer_unsupported_claim_count": parsed.get("unsupported_claim_count"),
                  "reviewer_engineering_contradiction_count": parsed.get("engineering_contradiction_count")}
         final["goal_success"] = bool(all(criteria.values()) and final["citation_correct"] and
