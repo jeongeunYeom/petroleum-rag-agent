@@ -14,7 +14,7 @@ The external source-completeness audit requires the frozen exact chunk and parse
 |---|---|
 | 1–3 Starting branch / product SHA / evaluation branch | `feature/python-tool-v6` / `8a720a02caa557a893c4d75245bed01df565b85f` / `feature/python-tool-heldout-v5` |
 | 4 Freeze SHA | `a44e0e1627a5b071649151b09aad2724f38f6417` |
-| 5 Final SHA | To be recorded after report commit |
+| 5 Final SHA | Reported in the final task handoff; a Git commit cannot embed its own SHA |
 | 6–8 Product files / previous heldouts changed / previous heldouts rerun | NO / NO / NO |
 | 9–12 Tasks / need / strata / domains | 12; required 8, optional 2, not-needed 2; direct 4, recovery-challenge 2, end-to-end 2; reservoir 5, well test 4, formation evaluation 3 |
 | 13–16 Preflight representability / targets | USERF 47/47, EFACT 7/7, formula 8/8; 84 canonical = 69 numeric + 15 typed, including 8 ranking |
@@ -94,7 +94,7 @@ Distinct manually counted unsupported answer claims: OFF 13, ON 9; engineering c
 
 Paired bootstrap: 10,000 task-pair resamples, seed 42, 95% percentile CI; small-N exploratory only. All-12 ON−OFF: Goal 0 [0,0], Coverage −0.083 [−0.167,0], per-task Numeric −0.163 [−0.396,0]. Required-8: Goal 0 [0,0], Coverage −0.125 [−0.250,−0.0417], per-task Numeric −0.244 [−0.572,−0.00962], Unit −0.00962 [−0.0288,0]. Pipeline-6: Goal 0 [0,0], Coverage −0.167 [−0.278,−0.0556], Numeric −0.325 [−0.659,−0.0128]. Per-task bootstrap weighting differs from pooled target accuracy.
 
-Single AI-assisted semantic reviewer: local `gemma4:latest`, blind shuffled packets without OFF/ON, tool, recovery, graph, contract or CALC state; 24/24 parsed. Deterministic numbers/units/GT and human evidence QA overrode reviewer where needed. Manual QA 24/24; reviewer criterion correction count 6. New evaluation tests 37 (24 preflight/GT plus 13 scoring/review); full backend pytest **692 passed, 6 warnings, xfail 0**. Local frontend `pnpm build` passed. OpenAI API NO; Gemini API NO. Commit/push/CI/clean-tree status is recorded after publication.
+Single AI-assisted semantic reviewer: local `gemma4:latest`, blind shuffled packets without OFF/ON, tool, recovery, graph, contract or CALC state; 24/24 parsed. Deterministic numbers/units/GT and human evidence QA overrode reviewer where needed. Manual QA 24/24; reviewer criterion correction count 6. New evaluation tests 37 (24 preflight/GT plus 13 scoring/review); full backend pytest **692 passed, 6 warnings, xfail 0**. Local frontend `pnpm build` passed. OpenAI API NO; Gemini API NO. Final commit/push/CI/clean-tree status is given in the task handoff after publication.
 
 ## Answer to the 17 engineering questions
 
