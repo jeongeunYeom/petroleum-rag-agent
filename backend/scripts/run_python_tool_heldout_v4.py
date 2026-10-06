@@ -140,6 +140,8 @@ async def run_full(benchmark: dict, manifest: dict, output: Path) -> None:
 
 
 def main() -> int:
+    if (ROOT / "evaluation/review/python_tool_heldout_v4_invalidated.json").exists():
+        raise RuntimeError("Frozen heldout v4 was invalidated; do not restart or selectively rerun it")
     parser = argparse.ArgumentParser()
     parser.add_argument("--validate-only", action="store_true")
     parser.add_argument("--output-dir", type=Path, default=None)

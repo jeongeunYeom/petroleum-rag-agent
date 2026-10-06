@@ -41,6 +41,20 @@ def matches(expected: list, records: list) -> bool:
     )
 
 
+def can_freeze(report: dict) -> bool:
+    return (
+        report.get("status") == "PASS"
+        and report.get("llm_calls") == 0
+        and not report.get("errors")
+        and len(report.get("tasks", [])) == 12
+        and all(row.get("status") == "PASS"
+                and row.get("matched_user") == row.get("expected_user")
+                and row.get("matched_evidence") == row.get("expected_evidence")
+                and row.get("matched_formula") == row.get("expected_formula")
+                for row in report.get("tasks", []))
+    )
+
+
 def preflight() -> dict:
     import chromadb
 
@@ -225,7 +239,7 @@ def main() -> int:
         if row["errors"]:
             print(row["task_id"], row["errors"])
     print(report["errors"])
-    return 0 if report["status"] == "PASS" else 1
+    return 0 if can_freeze(report) else 1
 
 
 if __name__ == "__main__":
