@@ -1,0 +1,155 @@
+{
+  "tasks": [
+    {
+      "task_id": "PT6-RE-G1",
+      "domain": "reservoir_engineering",
+      "python_expected": "required",
+      "evaluation_stratum": "generic_direct",
+      "input_provenance_expected": "user_fact",
+      "intro": "Four independent hypothetical oil wells with two daily rate snapshots each. These are not a field forecast; all rates are STB/D.",
+      "inputs": [["A_initial", 820, "stb/d"], ["A_final", 705, "stb/d"], ["B_initial", 950, "stb/d"], ["B_final", 760, "stb/d"], ["C_initial", 630, "stb/d"], ["C_final", 590, "stb/d"], ["D_initial", 1040, "stb/d"], ["D_final", 845, "stb/d"]],
+      "goal": "For each well calculate percentage decline from initial to final rate. Report all four declines, mean, maximum, minimum, range, the largest-decline well and descending ranking. Also report combined initial and final daily rates and the fleet-weighted percentage decline. Do not confuse fleet-weighted decline with unweighted mean.",
+      "sources": [], "formulas": []
+    },
+    {
+      "task_id": "PT6-WT-G2",
+      "domain": "well_test",
+      "python_expected": "required",
+      "evaluation_stratum": "generic_direct",
+      "input_provenance_expected": "user_fact",
+      "intro": "Four independent hypothetical RFT pressure-gauge QC pairs; reference and observed pressures are in psi. This is instrument-error arithmetic, not a flow-regime diagnosis.",
+      "inputs": [["A_reference", 3020, "psi"], ["A_observed", 3021.4, "psi"], ["B_reference", 2990, "psi"], ["B_observed", 2987.8, "psi"], ["C_reference", 3009.5, "psi"], ["C_observed", 3010.1, "psi"], ["D_reference", 2975, "psi"], ["D_observed", 2972.5, "psi"]],
+      "goal": "Compute signed gauge error observed minus reference and absolute error for A-D. Report all eight values, mean signed bias, mean absolute error, root-mean-square error, maximum absolute error, the worst gauge and descending ranking by absolute error. Do not claim these synthetic QC readings prove reservoir properties.",
+      "sources": [], "formulas": []
+    },
+    {
+      "task_id": "PT6-RE-S1",
+      "domain": "reservoir_engineering",
+      "python_expected": "required",
+      "evaluation_stratum": "specialist_direct",
+      "input_provenance_expected": "user_fact_plus_formula",
+      "intro": "Four separate hypothetical radial-drainage geometries; each re and rw is a radius in ft.",
+      "inputs": [["A_re", 1800, "ft"], ["A_rw", 0.25, "ft"], ["B_re", 2500, "ft"], ["B_rw", 0.3, "ft"], ["C_re", 3200, "ft"], ["C_rw", 0.4, "ft"], ["D_re", 4100, "ft"], ["D_rw", 0.5, "ft"]],
+      "goal": "Locate the KB dimensionless external-radius definition reD=re/rw. Calculate reD for A-D, mean, maximum, minimum, range, largest-reD geometry and descending ranking. Treat these as geometric ratios, not a full well-test solution.",
+      "sources": ["R349_RD"], "formulas": [["R349_RD", "reD = re/rw"]]
+    },
+    {
+      "task_id": "PT6-WT-S2",
+      "domain": "well_test",
+      "python_expected": "required",
+      "evaluation_stratum": "specialist_direct",
+      "input_provenance_expected": "user_fact_plus_formula",
+      "intro": "Four separate hypothetical 10 cc RFT probe-chamber drawdowns; T2 values below are elapsed seconds, not hours. The source relation is specific to this 10 cc probe example.",
+      "inputs": [["A_T2", 8, ""], ["B_T2", 12, ""], ["C_T2", 15, ""], ["D_T2", 20, ""]],
+      "goal": "Use the KB probe relation q2=10/T2 and compute illustrative probe flow rates q2 for A-D in cc/s. Report mean, maximum, minimum, range, highest-flow case and descending ranking. Do not generalize the 10 cc numerator to a different chamber or infer permeability without other required inputs.",
+      "sources": ["W365_Q2"], "formulas": [["W365_Q2", "q2 = 10/T2"]]
+    },
+    {
+      "task_id": "PT6-FE-S3",
+      "domain": "formation_evaluation",
+      "python_expected": "required",
+      "evaluation_stratum": "specialist_direct",
+      "input_provenance_expected": "user_fact_plus_formula",
+      "intro": "Four independent hypothetical NMR logs; MPHI is effective porosity and MCBW is clay-bound-water porosity, both expressed in percent of bulk rock.",
+      "inputs": [["A_MPHI", 12, "%"], ["A_MCBW", 3, "%"], ["B_MPHI", 15, "%"], ["B_MCBW", 2, "%"], ["C_MPHI", 9, "%"], ["C_MCBW", 5, "%"], ["D_MPHI", 18, "%"], ["D_MCBW", 1, "%"]],
+      "goal": "Use the KB NMR relation MSIG=MPHI+MCBW to compute total NMR porosity MSIG for A-D in percent. Report mean, maximum, minimum, range, top case and descending ranking. Do not call MPHI alone total porosity.",
+      "sources": ["H323_MSIG"], "formulas": [["H323_MSIG", "MSIG = MPHI + MCBW"]]
+    },
+    {
+      "task_id": "PT6-RE-R1",
+      "domain": "reservoir_engineering",
+      "python_expected": "required",
+      "evaluation_stratum": "recovery_challenge",
+      "recovery_challenge": "formula",
+      "input_provenance_expected": "user_fact_plus_formula",
+      "intro": "Four hypothetical gas-core permeability corrections. kg is apparent gas permeability in mD; b and mean flowing p are both in psi. The Klinkenberg relation is in a separate handbook chapter.",
+      "inputs": [["A_kg", 100, "mD"], ["A_b", 20, "psi"], ["A_p", 100, "psi"], ["B_kg", 120, "mD"], ["B_b", 40, "psi"], ["B_p", 200, "psi"], ["C_kg", 150, "mD"], ["C_b", 30, "psi"], ["C_p", 150, "psi"], ["D_kg", 95, "mD"], ["D_b", 15, "psi"], ["D_p", 75, "psi"]],
+      "goal": "Find the KB Klinkenberg correction kL=kg/(1+b/p), then calculate liquid-equivalent permeability kL for A-D in mD. Report mean, maximum, minimum, range, highest case and descending ranking. Keep gas and corrected liquid permeabilities distinct.",
+      "sources": ["I703_KL"], "formulas": [["I703_KL", "kL=kg/(1+b/p)"]]
+    },
+    {
+      "task_id": "PT6-RE-E1",
+      "domain": "reservoir_engineering",
+      "python_expected": "required",
+      "evaluation_stratum": "end_to_end",
+      "input_provenance_expected": "evidence_fact_plus_formula",
+      "intro": "Compare the drainage-radius geometries stated in two separate C13 and C14 textbook exercises. They describe different hypothetical developments, not the same reservoir.",
+      "inputs": [],
+      "evidence": {
+        "C13_re": ["R880_C13", "re", 10000, "ft"],
+        "C13_rw": ["R880_C13", "rw", 0.3, "ft"],
+        "C14_re": ["R880_C14", "re", 5000, "ft"],
+        "C14_rw": ["R880_C14", "rw", 0.3, "ft"]
+      },
+      "goal": "Retrieve the C13 and C14 radii from two KB exercise passages and the separate definition reD=re/rw. Compute reD for each exercise, mean, maximum, minimum, range, the larger-ratio exercise, descending ranking and C13/C14 ratio. Keep the two exercises' input provenance separate; do not infer productivity index.",
+      "sources": ["R880_C13", "R880_C14", "R349_RD"],
+      "formulas": [["R349_RD", "reD = re/rw"]]
+    },
+    {
+      "task_id": "PT6-WT-E2",
+      "domain": "well_test",
+      "python_expected": "required",
+      "evaluation_stratum": "end_to_end",
+      "input_provenance_expected": "evidence_fact_plus_generic_arithmetic",
+      "intro": "Three Layer 1-3 permeability/thickness pairs in one well-test exercise and a fourth pair in a separate exercise. D must not be called a fourth layer of the first reservoir.",
+      "inputs": [],
+      "evidence": {
+        "L1_k": ["W88_LAYERS", "k", 10, "md"],
+        "L1_h": ["W88_LAYERS", "h", 120, "ft"],
+        "L2_k": ["W88_LAYERS", "k_2", 140, "md"],
+        "L2_h": ["W88_LAYERS", "h_2", 90, "ft"],
+        "L3_k": ["W88_LAYERS", "k_3", 60, "md"],
+        "L3_h": ["W88_LAYERS", "h_3", 110, "ft"],
+        "D_k": ["W89_CASE", "k", 24, "md"],
+        "D_h": ["W89_CASE", "h", 80, "ft"]
+      },
+      "goal": "Retrieve the separately labelled k and h values and compute each illustrative permeability-thickness product k times h (mD-ft) for A=Layer 1, B=Layer 2, C=Layer 3, D=the separate 3.5 exercise. Report all four products, mean, maximum, minimum, range, top case and descending ranking. A product is only a comparison proxy, not a productivity index.",
+      "sources": ["W88_LAYERS", "W89_CASE"], "formulas": []
+    },
+    {
+      "task_id": "PT6-RE-O1",
+      "domain": "reservoir_engineering",
+      "python_expected": "optional",
+      "evaluation_stratum": "optional",
+      "input_provenance_expected": "user_fact",
+      "intro": "One hypothetical pressure-drawdown check, both pressures in psi.",
+      "inputs": [["initial_pressure", 3475, "psi"], ["flowing_pressure", 3190, "psi"]],
+      "goal": "Report pressure drawdown initial minus flowing in psi. Direct subtraction is sufficient; Python is optional. Do not infer permeability.",
+      "sources": [], "formulas": []
+    },
+    {
+      "task_id": "PT6-FE-O2",
+      "domain": "formation_evaluation",
+      "python_expected": "optional",
+      "evaluation_stratum": "optional",
+      "input_provenance_expected": "user_fact_plus_evidence_fact",
+      "intro": "A textbook density-neutron crossplot example reports a porosity. The target below is a hypothetical comparison threshold, not the source's target.",
+      "inputs": [["target_porosity", 20, "%"]],
+      "evidence": {"crossplot_porosity": ["F141_POR", "porosity", 18, "%"]},
+      "goal": "Retrieve the example's 18% porosity and report how many percentage points it lies below the hypothetical 20% target. One subtraction is enough; Python is optional. Do not call this a field porosity deficit.",
+      "sources": ["F141_POR"], "formulas": []
+    },
+    {
+      "task_id": "PT6-WT-N1",
+      "domain": "well_test",
+      "python_expected": "not_needed",
+      "evaluation_stratum": "not_needed",
+      "input_provenance_expected": "knowledge_base",
+      "intro": "Conceptual WFT monitoring question only; no numeric inputs or calculation request.",
+      "inputs": [],
+      "goal": "Explain why fault-block crossflow cannot be inferred reliably from a distributed pressure survey alone when rate allocation and drained pore volumes are unknown. Cite the KB discussion and describe missing measurements; do not calculate.",
+      "sources": ["W449_CONTEXT"], "formulas": []
+    },
+    {
+      "task_id": "PT6-FE-N2",
+      "domain": "formation_evaluation",
+      "python_expected": "not_needed",
+      "evaluation_stratum": "not_needed",
+      "input_provenance_expected": "knowledge_base",
+      "intro": "Conceptual dual-water petrophysics question only; no arithmetic request.",
+      "inputs": [],
+      "goal": "Explain the distinction between total pore-volume water and bound/connate water in a shaly-sand interpretation and why bound water complicates a simple resistivity reading. Cite the handbook discussion; do not calculate.",
+      "sources": ["H168_CONTEXT"], "formulas": []
+    }
+  ]
+}

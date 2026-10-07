@@ -1,0 +1,77 @@
+{
+  "benchmark_id": "python_tool_heldout_v6",
+  "product_code_sha": "ec987f074648a6eb442b911044dff4808bc87d84",
+  "author_spec_sha256": "5c9972f97a871cf9a0dab1b299200bc9751b7f85c17b3d7c5ce73515421283b3",
+  "author_script_sha256": "9dff02a79f26db71aef92bd276aa9d6d1b65ff1ece9831bcaa059d0a94978f6f",
+  "benchmark_sha256": "f40cd96f92da09b4363e31d0ab81574f5e6f217d69a8da3be36dab01d3ccd296",
+  "rubric_sha256": "9e24ef93d701dcb4e55a401b4a62c371b8fa9cf76d1601500f9e3845710fd627",
+  "source_catalog_sha256": "f956ac14c2286f5c2c6ec1da34844269aab4890b68757790e130c993cdf210e8",
+  "source_exclusions_sha256": "1ff2c78b948e463f88845ee85b2f0da174c478a42ea833d01a23547d7853229a",
+  "reference_calculator_sha256": "5a8f04395f612796d73c04f7eb1d8b000c036c7ed173c36aa3e882136eabf8ac",
+  "reference_outputs_sha256": "a45af7f1b004302286a0cf5e31969bc4354700819468ceafd9315098b85e02e6",
+  "policy_sha256": "d7a8c41d414b493335250c6b927f40d2905dbb282ea18d8d2a7c61f1b4d7c8df",
+  "preflight_sha256": "aea9815edd81218d0b750af9ecd1b1402fbd92a6cf87f6c3a59630c85b162021",
+  "gt_consistency_sha256": "1195b567e7a154d234743ee1caa7619f52f8abc918f7fa618181f581b38005f3",
+  "freeze_script_sha256": "de725f296796aa0460efd97c9927a2c21858b4de8027f2c9cd1a91f2a03baa69",
+  "preflight_status": "PASS",
+  "gt_consistency_status": "PASS",
+  "preflight_llm_calls": 0,
+  "gt_conflicts": 0,
+  "task_count": 12,
+  "python_need_count": {
+    "required": 8,
+    "optional": 2,
+    "not_needed": 2
+  },
+  "required_stratum_count": {
+    "generic_direct": 2,
+    "specialist_direct": 3,
+    "recovery_challenge": 1,
+    "end_to_end": 2
+  },
+  "domain_count": {
+    "reservoir_engineering": 5,
+    "well_test": 4,
+    "formation_evaluation": 3
+  },
+  "expected_user_facts": 51,
+  "expected_evidence_facts": 13,
+  "expected_formulas": 5,
+  "expected_required_outputs": 86,
+  "kb": {
+    "data_dir": "D:\\petroleum-rag-agent\\data",
+    "collection": "petroleum_knowledge",
+    "chunks": 18976,
+    "documents": 12,
+    "retrieval_mode": "legacy"
+  },
+  "model_settings": {
+    "research_model": "qwen3:8b",
+    "review_model": "gemma4:latest",
+    "temperature": 0,
+    "seed": 42,
+    "use_internal": true,
+    "use_external": false,
+    "engineering_validation": true,
+    "internal_top_k": 5,
+    "external_top_k": 5,
+    "max_iterations": 4,
+    "no_progress_patience": 2,
+    "max_python_calls": 4,
+    "max_python_attempts_per_call": 2
+  },
+  "conditions": [
+    {
+      "name": "python_off",
+      "allow_python_execution": false,
+      "python_execution_approved": false
+    },
+    {
+      "name": "python_on",
+      "allow_python_execution": true,
+      "python_execution_approved": true
+    }
+  ],
+  "run_policy": "one complete OFF 12 then ON 12; no selective reruns; product failures scored",
+  "freeze_commit_sha": null
+}

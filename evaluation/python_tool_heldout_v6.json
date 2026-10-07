@@ -1,0 +1,3826 @@
+{
+  "benchmark_id": "python_tool_heldout_v6",
+  "product_code_sha": "ec987f074648a6eb442b911044dff4808bc87d84",
+  "tasks": [
+    {
+      "task_id": "PT6-RE-G1",
+      "benchmark_id": "python_tool_heldout_v6",
+      "domain": "reservoir_engineering",
+      "python_expected": "required",
+      "evaluation_stratum": "generic_direct",
+      "recovery_challenge": null,
+      "input_provenance_expected": "user_fact",
+      "topic": "Four independent hypothetical oil wells with two daily rate snapshots each. These are not a field forecast; all rates are STB/D.\nA_initial=820 stb/d\nA_final=705 stb/d\nB_initial=950 stb/d\nB_final=760 stb/d\nC_initial=630 stb/d\nC_final=590 stb/d\nD_initial=1040 stb/d\nD_final=845 stb/d",
+      "goal": "For each well calculate percentage decline from initial to final rate. Report all four declines, mean, maximum, minimum, range, the largest-decline well and descending ranking. Also report combined initial and final daily rates and the fleet-weighted percentage decline. Do not confuse fleet-weighted decline with unweighted mean.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "Use the stated relation and distinguish user and KB provenance.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every requested numeric or typed output with scenario and unit.",
+          "target_refs": [
+            "T_PT6_RE_G1_A_DECLINE_PCT",
+            "T_PT6_RE_G1_B_DECLINE_PCT",
+            "T_PT6_RE_G1_C_DECLINE_PCT",
+            "T_PT6_RE_G1_D_DECLINE_PCT",
+            "T_PT6_RE_G1_MEAN_DECLINE_PCT",
+            "T_PT6_RE_G1_MAX_DECLINE_PCT",
+            "T_PT6_RE_G1_MIN_DECLINE_PCT",
+            "T_PT6_RE_G1_RANGE_DECLINE_PCT",
+            "T_PT6_RE_G1_DECLINE_PCT_RANKING",
+            "T_PT6_RE_G1_DECLINE_PCT_LEADER",
+            "T_PT6_RE_G1_COMBINED_INITIAL_RATE",
+            "T_PT6_RE_G1_COMBINED_FINAL_RATE",
+            "T_PT6_RE_G1_FLEET_WEIGHTED_DECLINE_PCT"
+          ],
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "Respect the scenario-specific interpretation and citation caveat.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "canonical_targets": [
+          {
+            "semantic_name": "A_decline_pct",
+            "target_type": "numeric",
+            "value": 14.02439024390244,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "scenario_id": "A",
+            "target_id": "T_PT6_RE_G1_A_DECLINE_PCT",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "B_decline_pct",
+            "target_type": "numeric",
+            "value": 20.0,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "scenario_id": "B",
+            "target_id": "T_PT6_RE_G1_B_DECLINE_PCT",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "C_decline_pct",
+            "target_type": "numeric",
+            "value": 6.349206349206349,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "scenario_id": "C",
+            "target_id": "T_PT6_RE_G1_C_DECLINE_PCT",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "D_decline_pct",
+            "target_type": "numeric",
+            "value": 18.75,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "scenario_id": "D",
+            "target_id": "T_PT6_RE_G1_D_DECLINE_PCT",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "mean_decline_pct",
+            "target_type": "numeric",
+            "value": 14.780899148277197,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_RE_G1_MEAN_DECLINE_PCT",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "max_decline_pct",
+            "target_type": "numeric",
+            "value": 20.0,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_RE_G1_MAX_DECLINE_PCT",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "min_decline_pct",
+            "target_type": "numeric",
+            "value": 6.349206349206349,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_RE_G1_MIN_DECLINE_PCT",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "range_decline_pct",
+            "target_type": "numeric",
+            "value": 13.650793650793652,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_RE_G1_RANGE_DECLINE_PCT",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "decline_pct_ranking",
+            "target_type": "ranking",
+            "value": [
+              "B",
+              "D",
+              "A",
+              "C"
+            ],
+            "unit": null,
+            "ranking_of": {
+              "A": "A_decline_pct",
+              "B": "B_decline_pct",
+              "C": "C_decline_pct",
+              "D": "D_decline_pct"
+            },
+            "order": "desc",
+            "target_id": "T_PT6_RE_G1_DECLINE_PCT_RANKING",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "decline_pct_leader",
+            "target_type": "label",
+            "value": "B",
+            "unit": null,
+            "extremum": "max",
+            "extremum_of": {
+              "A": "A_decline_pct",
+              "B": "B_decline_pct",
+              "C": "C_decline_pct",
+              "D": "D_decline_pct"
+            },
+            "target_id": "T_PT6_RE_G1_DECLINE_PCT_LEADER",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "combined_initial_rate",
+            "target_type": "numeric",
+            "value": 3440.0,
+            "unit": "stb/d",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_RE_G1_COMBINED_INITIAL_RATE",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "combined_final_rate",
+            "target_type": "numeric",
+            "value": 2900.0,
+            "unit": "stb/d",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_RE_G1_COMBINED_FINAL_RATE",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "fleet_weighted_decline_pct",
+            "target_type": "numeric",
+            "value": 15.69767441860465,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_RE_G1_FLEET_WEIGHTED_DECLINE_PCT",
+            "required": true,
+            "source": "reference_calculator"
+          }
+        ],
+        "numeric_targets": [
+          {
+            "target_id": "T_PT6_RE_G1_A_DECLINE_PCT",
+            "semantic_name": "A_decline_pct",
+            "value": 14.02439024390244,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_G1_B_DECLINE_PCT",
+            "semantic_name": "B_decline_pct",
+            "value": 20.0,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_G1_C_DECLINE_PCT",
+            "semantic_name": "C_decline_pct",
+            "value": 6.349206349206349,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_G1_D_DECLINE_PCT",
+            "semantic_name": "D_decline_pct",
+            "value": 18.75,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_G1_MEAN_DECLINE_PCT",
+            "semantic_name": "mean_decline_pct",
+            "value": 14.780899148277197,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_G1_MAX_DECLINE_PCT",
+            "semantic_name": "max_decline_pct",
+            "value": 20.0,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_G1_MIN_DECLINE_PCT",
+            "semantic_name": "min_decline_pct",
+            "value": 6.349206349206349,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_G1_RANGE_DECLINE_PCT",
+            "semantic_name": "range_decline_pct",
+            "value": 13.650793650793652,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_G1_COMBINED_INITIAL_RATE",
+            "semantic_name": "combined_initial_rate",
+            "value": 3440.0,
+            "unit": "stb/d",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_G1_COMBINED_FINAL_RATE",
+            "semantic_name": "combined_final_rate",
+            "value": 2900.0,
+            "unit": "stb/d",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_G1_FLEET_WEIGHTED_DECLINE_PCT",
+            "semantic_name": "fleet_weighted_decline_pct",
+            "value": 15.69767441860465,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "required": true
+          }
+        ],
+        "typed_targets": [
+          {
+            "target_id": "T_PT6_RE_G1_DECLINE_PCT_RANKING",
+            "semantic_name": "decline_pct_ranking",
+            "target_type": "ranking",
+            "value": [
+              "B",
+              "D",
+              "A",
+              "C"
+            ],
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_G1_DECLINE_PCT_LEADER",
+            "semantic_name": "decline_pct_leader",
+            "target_type": "label",
+            "value": "B",
+            "required": true
+          }
+        ],
+        "ranking_targets": [
+          {
+            "semantic_name": "decline_pct_ranking",
+            "target_type": "ranking",
+            "value": [
+              "B",
+              "D",
+              "A",
+              "C"
+            ],
+            "unit": null,
+            "ranking_of": {
+              "A": "A_decline_pct",
+              "B": "B_decline_pct",
+              "C": "C_decline_pct",
+              "D": "D_decline_pct"
+            },
+            "order": "desc",
+            "target_id": "T_PT6_RE_G1_DECLINE_PCT_RANKING",
+            "required": true,
+            "source": "reference_calculator"
+          }
+        ],
+        "expected_contract_outputs": [
+          {
+            "target_id": "T_PT6_RE_G1_A_DECLINE_PCT",
+            "semantic_name": "A_decline_pct",
+            "type": "numeric",
+            "value": 14.02439024390244,
+            "unit": "percent"
+          },
+          {
+            "target_id": "T_PT6_RE_G1_B_DECLINE_PCT",
+            "semantic_name": "B_decline_pct",
+            "type": "numeric",
+            "value": 20.0,
+            "unit": "percent"
+          },
+          {
+            "target_id": "T_PT6_RE_G1_C_DECLINE_PCT",
+            "semantic_name": "C_decline_pct",
+            "type": "numeric",
+            "value": 6.349206349206349,
+            "unit": "percent"
+          },
+          {
+            "target_id": "T_PT6_RE_G1_D_DECLINE_PCT",
+            "semantic_name": "D_decline_pct",
+            "type": "numeric",
+            "value": 18.75,
+            "unit": "percent"
+          },
+          {
+            "target_id": "T_PT6_RE_G1_MEAN_DECLINE_PCT",
+            "semantic_name": "mean_decline_pct",
+            "type": "numeric",
+            "value": 14.780899148277197,
+            "unit": "percent"
+          },
+          {
+            "target_id": "T_PT6_RE_G1_MAX_DECLINE_PCT",
+            "semantic_name": "max_decline_pct",
+            "type": "numeric",
+            "value": 20.0,
+            "unit": "percent"
+          },
+          {
+            "target_id": "T_PT6_RE_G1_MIN_DECLINE_PCT",
+            "semantic_name": "min_decline_pct",
+            "type": "numeric",
+            "value": 6.349206349206349,
+            "unit": "percent"
+          },
+          {
+            "target_id": "T_PT6_RE_G1_RANGE_DECLINE_PCT",
+            "semantic_name": "range_decline_pct",
+            "type": "numeric",
+            "value": 13.650793650793652,
+            "unit": "percent"
+          },
+          {
+            "target_id": "T_PT6_RE_G1_DECLINE_PCT_RANKING",
+            "semantic_name": "decline_pct_ranking",
+            "type": "ranking",
+            "value": [
+              "B",
+              "D",
+              "A",
+              "C"
+            ],
+            "unit": null
+          },
+          {
+            "target_id": "T_PT6_RE_G1_DECLINE_PCT_LEADER",
+            "semantic_name": "decline_pct_leader",
+            "type": "label",
+            "value": "B",
+            "unit": null
+          },
+          {
+            "target_id": "T_PT6_RE_G1_COMBINED_INITIAL_RATE",
+            "semantic_name": "combined_initial_rate",
+            "type": "numeric",
+            "value": 3440.0,
+            "unit": "stb/d"
+          },
+          {
+            "target_id": "T_PT6_RE_G1_COMBINED_FINAL_RATE",
+            "semantic_name": "combined_final_rate",
+            "type": "numeric",
+            "value": 2900.0,
+            "unit": "stb/d"
+          },
+          {
+            "target_id": "T_PT6_RE_G1_FLEET_WEIGHTED_DECLINE_PCT",
+            "semantic_name": "fleet_weighted_decline_pct",
+            "type": "numeric",
+            "value": 15.69767441860465,
+            "unit": "percent"
+          }
+        ],
+        "expected_user_facts": [
+          [
+            "A_initial",
+            820,
+            "stb/d"
+          ],
+          [
+            "A_final",
+            705,
+            "stb/d"
+          ],
+          [
+            "B_initial",
+            950,
+            "stb/d"
+          ],
+          [
+            "B_final",
+            760,
+            "stb/d"
+          ],
+          [
+            "C_initial",
+            630,
+            "stb/d"
+          ],
+          [
+            "C_final",
+            590,
+            "stb/d"
+          ],
+          [
+            "D_initial",
+            1040,
+            "stb/d"
+          ],
+          [
+            "D_final",
+            845,
+            "stb/d"
+          ]
+        ],
+        "expected_evidence_facts": [],
+        "formula_sources": [],
+        "source_ids": [],
+        "expected_bindings": {},
+        "required_claims": [
+          {
+            "claim_id": "CL_PROVENANCE",
+            "text": "Attribute the relation and numeric facts to their respective sources.",
+            "source_ids": [],
+            "target_refs": []
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "PT6-WT-G2",
+      "benchmark_id": "python_tool_heldout_v6",
+      "domain": "well_test",
+      "python_expected": "required",
+      "evaluation_stratum": "generic_direct",
+      "recovery_challenge": null,
+      "input_provenance_expected": "user_fact",
+      "topic": "Four independent hypothetical RFT pressure-gauge QC pairs; reference and observed pressures are in psi. This is instrument-error arithmetic, not a flow-regime diagnosis.\nA_reference=3020 psi\nA_observed=3021.4 psi\nB_reference=2990 psi\nB_observed=2987.8 psi\nC_reference=3009.5 psi\nC_observed=3010.1 psi\nD_reference=2975 psi\nD_observed=2972.5 psi",
+      "goal": "Compute signed gauge error observed minus reference and absolute error for A-D. Report all eight values, mean signed bias, mean absolute error, root-mean-square error, maximum absolute error, the worst gauge and descending ranking by absolute error. Do not claim these synthetic QC readings prove reservoir properties.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "Use the stated relation and distinguish user and KB provenance.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every requested numeric or typed output with scenario and unit.",
+          "target_refs": [
+            "T_PT6_WT_G2_A_SIGNED_ERROR",
+            "T_PT6_WT_G2_B_SIGNED_ERROR",
+            "T_PT6_WT_G2_C_SIGNED_ERROR",
+            "T_PT6_WT_G2_D_SIGNED_ERROR",
+            "T_PT6_WT_G2_A_ABS_ERROR",
+            "T_PT6_WT_G2_B_ABS_ERROR",
+            "T_PT6_WT_G2_C_ABS_ERROR",
+            "T_PT6_WT_G2_D_ABS_ERROR",
+            "T_PT6_WT_G2_MEAN_SIGNED_BIAS",
+            "T_PT6_WT_G2_MEAN_ABS_ERROR",
+            "T_PT6_WT_G2_RMS_ERROR",
+            "T_PT6_WT_G2_MAX_ABS_ERROR",
+            "T_PT6_WT_G2_ABS_ERROR_RANKING",
+            "T_PT6_WT_G2_ABS_ERROR_LEADER"
+          ],
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "Respect the scenario-specific interpretation and citation caveat.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "canonical_targets": [
+          {
+            "semantic_name": "A_signed_error",
+            "target_type": "numeric",
+            "value": 1.400000000000091,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "scenario_id": "A",
+            "target_id": "T_PT6_WT_G2_A_SIGNED_ERROR",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "B_signed_error",
+            "target_type": "numeric",
+            "value": -2.199999999999818,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "scenario_id": "B",
+            "target_id": "T_PT6_WT_G2_B_SIGNED_ERROR",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "C_signed_error",
+            "target_type": "numeric",
+            "value": 0.599999999999909,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "scenario_id": "C",
+            "target_id": "T_PT6_WT_G2_C_SIGNED_ERROR",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "D_signed_error",
+            "target_type": "numeric",
+            "value": -2.5,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "scenario_id": "D",
+            "target_id": "T_PT6_WT_G2_D_SIGNED_ERROR",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "A_abs_error",
+            "target_type": "numeric",
+            "value": 1.400000000000091,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "scenario_id": "A",
+            "target_id": "T_PT6_WT_G2_A_ABS_ERROR",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "B_abs_error",
+            "target_type": "numeric",
+            "value": 2.199999999999818,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "scenario_id": "B",
+            "target_id": "T_PT6_WT_G2_B_ABS_ERROR",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "C_abs_error",
+            "target_type": "numeric",
+            "value": 0.599999999999909,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "scenario_id": "C",
+            "target_id": "T_PT6_WT_G2_C_ABS_ERROR",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "D_abs_error",
+            "target_type": "numeric",
+            "value": 2.5,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "scenario_id": "D",
+            "target_id": "T_PT6_WT_G2_D_ABS_ERROR",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "mean_signed_bias",
+            "target_type": "numeric",
+            "value": -0.6749999999999545,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_WT_G2_MEAN_SIGNED_BIAS",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "mean_abs_error",
+            "target_type": "numeric",
+            "value": 1.6749999999999545,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_WT_G2_MEAN_ABS_ERROR",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "rms_error",
+            "target_type": "numeric",
+            "value": 1.8309833423600108,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_WT_G2_RMS_ERROR",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "max_abs_error",
+            "target_type": "numeric",
+            "value": 2.5,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_WT_G2_MAX_ABS_ERROR",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "abs_error_ranking",
+            "target_type": "ranking",
+            "value": [
+              "D",
+              "B",
+              "A",
+              "C"
+            ],
+            "unit": null,
+            "ranking_of": {
+              "A": "A_abs_error",
+              "B": "B_abs_error",
+              "C": "C_abs_error",
+              "D": "D_abs_error"
+            },
+            "order": "desc",
+            "target_id": "T_PT6_WT_G2_ABS_ERROR_RANKING",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "abs_error_leader",
+            "target_type": "label",
+            "value": "D",
+            "unit": null,
+            "extremum": "max",
+            "extremum_of": {
+              "A": "A_abs_error",
+              "B": "B_abs_error",
+              "C": "C_abs_error",
+              "D": "D_abs_error"
+            },
+            "target_id": "T_PT6_WT_G2_ABS_ERROR_LEADER",
+            "required": true,
+            "source": "reference_calculator"
+          }
+        ],
+        "numeric_targets": [
+          {
+            "target_id": "T_PT6_WT_G2_A_SIGNED_ERROR",
+            "semantic_name": "A_signed_error",
+            "value": 1.400000000000091,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_G2_B_SIGNED_ERROR",
+            "semantic_name": "B_signed_error",
+            "value": -2.199999999999818,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_G2_C_SIGNED_ERROR",
+            "semantic_name": "C_signed_error",
+            "value": 0.599999999999909,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_G2_D_SIGNED_ERROR",
+            "semantic_name": "D_signed_error",
+            "value": -2.5,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_G2_A_ABS_ERROR",
+            "semantic_name": "A_abs_error",
+            "value": 1.400000000000091,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_G2_B_ABS_ERROR",
+            "semantic_name": "B_abs_error",
+            "value": 2.199999999999818,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_G2_C_ABS_ERROR",
+            "semantic_name": "C_abs_error",
+            "value": 0.599999999999909,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_G2_D_ABS_ERROR",
+            "semantic_name": "D_abs_error",
+            "value": 2.5,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_G2_MEAN_SIGNED_BIAS",
+            "semantic_name": "mean_signed_bias",
+            "value": -0.6749999999999545,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_G2_MEAN_ABS_ERROR",
+            "semantic_name": "mean_abs_error",
+            "value": 1.6749999999999545,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_G2_RMS_ERROR",
+            "semantic_name": "rms_error",
+            "value": 1.8309833423600108,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_G2_MAX_ABS_ERROR",
+            "semantic_name": "max_abs_error",
+            "value": 2.5,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "required": true
+          }
+        ],
+        "typed_targets": [
+          {
+            "target_id": "T_PT6_WT_G2_ABS_ERROR_RANKING",
+            "semantic_name": "abs_error_ranking",
+            "target_type": "ranking",
+            "value": [
+              "D",
+              "B",
+              "A",
+              "C"
+            ],
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_G2_ABS_ERROR_LEADER",
+            "semantic_name": "abs_error_leader",
+            "target_type": "label",
+            "value": "D",
+            "required": true
+          }
+        ],
+        "ranking_targets": [
+          {
+            "semantic_name": "abs_error_ranking",
+            "target_type": "ranking",
+            "value": [
+              "D",
+              "B",
+              "A",
+              "C"
+            ],
+            "unit": null,
+            "ranking_of": {
+              "A": "A_abs_error",
+              "B": "B_abs_error",
+              "C": "C_abs_error",
+              "D": "D_abs_error"
+            },
+            "order": "desc",
+            "target_id": "T_PT6_WT_G2_ABS_ERROR_RANKING",
+            "required": true,
+            "source": "reference_calculator"
+          }
+        ],
+        "expected_contract_outputs": [
+          {
+            "target_id": "T_PT6_WT_G2_A_SIGNED_ERROR",
+            "semantic_name": "A_signed_error",
+            "type": "numeric",
+            "value": 1.400000000000091,
+            "unit": "psi"
+          },
+          {
+            "target_id": "T_PT6_WT_G2_B_SIGNED_ERROR",
+            "semantic_name": "B_signed_error",
+            "type": "numeric",
+            "value": -2.199999999999818,
+            "unit": "psi"
+          },
+          {
+            "target_id": "T_PT6_WT_G2_C_SIGNED_ERROR",
+            "semantic_name": "C_signed_error",
+            "type": "numeric",
+            "value": 0.599999999999909,
+            "unit": "psi"
+          },
+          {
+            "target_id": "T_PT6_WT_G2_D_SIGNED_ERROR",
+            "semantic_name": "D_signed_error",
+            "type": "numeric",
+            "value": -2.5,
+            "unit": "psi"
+          },
+          {
+            "target_id": "T_PT6_WT_G2_A_ABS_ERROR",
+            "semantic_name": "A_abs_error",
+            "type": "numeric",
+            "value": 1.400000000000091,
+            "unit": "psi"
+          },
+          {
+            "target_id": "T_PT6_WT_G2_B_ABS_ERROR",
+            "semantic_name": "B_abs_error",
+            "type": "numeric",
+            "value": 2.199999999999818,
+            "unit": "psi"
+          },
+          {
+            "target_id": "T_PT6_WT_G2_C_ABS_ERROR",
+            "semantic_name": "C_abs_error",
+            "type": "numeric",
+            "value": 0.599999999999909,
+            "unit": "psi"
+          },
+          {
+            "target_id": "T_PT6_WT_G2_D_ABS_ERROR",
+            "semantic_name": "D_abs_error",
+            "type": "numeric",
+            "value": 2.5,
+            "unit": "psi"
+          },
+          {
+            "target_id": "T_PT6_WT_G2_MEAN_SIGNED_BIAS",
+            "semantic_name": "mean_signed_bias",
+            "type": "numeric",
+            "value": -0.6749999999999545,
+            "unit": "psi"
+          },
+          {
+            "target_id": "T_PT6_WT_G2_MEAN_ABS_ERROR",
+            "semantic_name": "mean_abs_error",
+            "type": "numeric",
+            "value": 1.6749999999999545,
+            "unit": "psi"
+          },
+          {
+            "target_id": "T_PT6_WT_G2_RMS_ERROR",
+            "semantic_name": "rms_error",
+            "type": "numeric",
+            "value": 1.8309833423600108,
+            "unit": "psi"
+          },
+          {
+            "target_id": "T_PT6_WT_G2_MAX_ABS_ERROR",
+            "semantic_name": "max_abs_error",
+            "type": "numeric",
+            "value": 2.5,
+            "unit": "psi"
+          },
+          {
+            "target_id": "T_PT6_WT_G2_ABS_ERROR_RANKING",
+            "semantic_name": "abs_error_ranking",
+            "type": "ranking",
+            "value": [
+              "D",
+              "B",
+              "A",
+              "C"
+            ],
+            "unit": null
+          },
+          {
+            "target_id": "T_PT6_WT_G2_ABS_ERROR_LEADER",
+            "semantic_name": "abs_error_leader",
+            "type": "label",
+            "value": "D",
+            "unit": null
+          }
+        ],
+        "expected_user_facts": [
+          [
+            "A_reference",
+            3020,
+            "psi"
+          ],
+          [
+            "A_observed",
+            3021.4,
+            "psi"
+          ],
+          [
+            "B_reference",
+            2990,
+            "psi"
+          ],
+          [
+            "B_observed",
+            2987.8,
+            "psi"
+          ],
+          [
+            "C_reference",
+            3009.5,
+            "psi"
+          ],
+          [
+            "C_observed",
+            3010.1,
+            "psi"
+          ],
+          [
+            "D_reference",
+            2975,
+            "psi"
+          ],
+          [
+            "D_observed",
+            2972.5,
+            "psi"
+          ]
+        ],
+        "expected_evidence_facts": [],
+        "formula_sources": [],
+        "source_ids": [],
+        "expected_bindings": {},
+        "required_claims": [
+          {
+            "claim_id": "CL_PROVENANCE",
+            "text": "Attribute the relation and numeric facts to their respective sources.",
+            "source_ids": [],
+            "target_refs": []
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "PT6-RE-S1",
+      "benchmark_id": "python_tool_heldout_v6",
+      "domain": "reservoir_engineering",
+      "python_expected": "required",
+      "evaluation_stratum": "specialist_direct",
+      "recovery_challenge": null,
+      "input_provenance_expected": "user_fact_plus_formula",
+      "topic": "Four separate hypothetical radial-drainage geometries; each re and rw is a radius in ft.\nA_re=1800 ft\nA_rw=0.25 ft\nB_re=2500 ft\nB_rw=0.3 ft\nC_re=3200 ft\nC_rw=0.4 ft\nD_re=4100 ft\nD_rw=0.5 ft",
+      "goal": "Locate the KB dimensionless external-radius definition reD=re/rw. Calculate reD for A-D, mean, maximum, minimum, range, largest-reD geometry and descending ranking. Treat these as geometric ratios, not a full well-test solution.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "Use the stated relation and distinguish user and KB provenance.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every requested numeric or typed output with scenario and unit.",
+          "target_refs": [
+            "T_PT6_RE_S1_A_RED",
+            "T_PT6_RE_S1_B_RED",
+            "T_PT6_RE_S1_C_RED",
+            "T_PT6_RE_S1_D_RED",
+            "T_PT6_RE_S1_MEAN_RED",
+            "T_PT6_RE_S1_MAX_RED",
+            "T_PT6_RE_S1_MIN_RED",
+            "T_PT6_RE_S1_RANGE_RED",
+            "T_PT6_RE_S1_RED_RANKING",
+            "T_PT6_RE_S1_RED_LEADER"
+          ],
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "Respect the scenario-specific interpretation and citation caveat.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "canonical_targets": [
+          {
+            "semantic_name": "A_reD",
+            "target_type": "numeric",
+            "value": 7200.0,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "scenario_id": "A",
+            "target_id": "T_PT6_RE_S1_A_RED",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "B_reD",
+            "target_type": "numeric",
+            "value": 8333.333333333334,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "scenario_id": "B",
+            "target_id": "T_PT6_RE_S1_B_RED",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "C_reD",
+            "target_type": "numeric",
+            "value": 8000.0,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "scenario_id": "C",
+            "target_id": "T_PT6_RE_S1_C_RED",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "D_reD",
+            "target_type": "numeric",
+            "value": 8200.0,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "scenario_id": "D",
+            "target_id": "T_PT6_RE_S1_D_RED",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "mean_reD",
+            "target_type": "numeric",
+            "value": 7933.333333333334,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_RE_S1_MEAN_RED",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "max_reD",
+            "target_type": "numeric",
+            "value": 8333.333333333334,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_RE_S1_MAX_RED",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "min_reD",
+            "target_type": "numeric",
+            "value": 7200.0,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_RE_S1_MIN_RED",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "range_reD",
+            "target_type": "numeric",
+            "value": 1133.333333333334,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_RE_S1_RANGE_RED",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "reD_ranking",
+            "target_type": "ranking",
+            "value": [
+              "B",
+              "D",
+              "C",
+              "A"
+            ],
+            "unit": null,
+            "ranking_of": {
+              "A": "A_reD",
+              "B": "B_reD",
+              "C": "C_reD",
+              "D": "D_reD"
+            },
+            "order": "desc",
+            "target_id": "T_PT6_RE_S1_RED_RANKING",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "reD_leader",
+            "target_type": "label",
+            "value": "B",
+            "unit": null,
+            "extremum": "max",
+            "extremum_of": {
+              "A": "A_reD",
+              "B": "B_reD",
+              "C": "C_reD",
+              "D": "D_reD"
+            },
+            "target_id": "T_PT6_RE_S1_RED_LEADER",
+            "required": true,
+            "source": "reference_calculator"
+          }
+        ],
+        "numeric_targets": [
+          {
+            "target_id": "T_PT6_RE_S1_A_RED",
+            "semantic_name": "A_reD",
+            "value": 7200.0,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_S1_B_RED",
+            "semantic_name": "B_reD",
+            "value": 8333.333333333334,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_S1_C_RED",
+            "semantic_name": "C_reD",
+            "value": 8000.0,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_S1_D_RED",
+            "semantic_name": "D_reD",
+            "value": 8200.0,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_S1_MEAN_RED",
+            "semantic_name": "mean_reD",
+            "value": 7933.333333333334,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_S1_MAX_RED",
+            "semantic_name": "max_reD",
+            "value": 8333.333333333334,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_S1_MIN_RED",
+            "semantic_name": "min_reD",
+            "value": 7200.0,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_S1_RANGE_RED",
+            "semantic_name": "range_reD",
+            "value": 1133.333333333334,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "required": true
+          }
+        ],
+        "typed_targets": [
+          {
+            "target_id": "T_PT6_RE_S1_RED_RANKING",
+            "semantic_name": "reD_ranking",
+            "target_type": "ranking",
+            "value": [
+              "B",
+              "D",
+              "C",
+              "A"
+            ],
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_S1_RED_LEADER",
+            "semantic_name": "reD_leader",
+            "target_type": "label",
+            "value": "B",
+            "required": true
+          }
+        ],
+        "ranking_targets": [
+          {
+            "semantic_name": "reD_ranking",
+            "target_type": "ranking",
+            "value": [
+              "B",
+              "D",
+              "C",
+              "A"
+            ],
+            "unit": null,
+            "ranking_of": {
+              "A": "A_reD",
+              "B": "B_reD",
+              "C": "C_reD",
+              "D": "D_reD"
+            },
+            "order": "desc",
+            "target_id": "T_PT6_RE_S1_RED_RANKING",
+            "required": true,
+            "source": "reference_calculator"
+          }
+        ],
+        "expected_contract_outputs": [
+          {
+            "target_id": "T_PT6_RE_S1_A_RED",
+            "semantic_name": "A_reD",
+            "type": "numeric",
+            "value": 7200.0,
+            "unit": "dimensionless"
+          },
+          {
+            "target_id": "T_PT6_RE_S1_B_RED",
+            "semantic_name": "B_reD",
+            "type": "numeric",
+            "value": 8333.333333333334,
+            "unit": "dimensionless"
+          },
+          {
+            "target_id": "T_PT6_RE_S1_C_RED",
+            "semantic_name": "C_reD",
+            "type": "numeric",
+            "value": 8000.0,
+            "unit": "dimensionless"
+          },
+          {
+            "target_id": "T_PT6_RE_S1_D_RED",
+            "semantic_name": "D_reD",
+            "type": "numeric",
+            "value": 8200.0,
+            "unit": "dimensionless"
+          },
+          {
+            "target_id": "T_PT6_RE_S1_MEAN_RED",
+            "semantic_name": "mean_reD",
+            "type": "numeric",
+            "value": 7933.333333333334,
+            "unit": "dimensionless"
+          },
+          {
+            "target_id": "T_PT6_RE_S1_MAX_RED",
+            "semantic_name": "max_reD",
+            "type": "numeric",
+            "value": 8333.333333333334,
+            "unit": "dimensionless"
+          },
+          {
+            "target_id": "T_PT6_RE_S1_MIN_RED",
+            "semantic_name": "min_reD",
+            "type": "numeric",
+            "value": 7200.0,
+            "unit": "dimensionless"
+          },
+          {
+            "target_id": "T_PT6_RE_S1_RANGE_RED",
+            "semantic_name": "range_reD",
+            "type": "numeric",
+            "value": 1133.333333333334,
+            "unit": "dimensionless"
+          },
+          {
+            "target_id": "T_PT6_RE_S1_RED_RANKING",
+            "semantic_name": "reD_ranking",
+            "type": "ranking",
+            "value": [
+              "B",
+              "D",
+              "C",
+              "A"
+            ],
+            "unit": null
+          },
+          {
+            "target_id": "T_PT6_RE_S1_RED_LEADER",
+            "semantic_name": "reD_leader",
+            "type": "label",
+            "value": "B",
+            "unit": null
+          }
+        ],
+        "expected_user_facts": [
+          [
+            "A_re",
+            1800,
+            "ft"
+          ],
+          [
+            "A_rw",
+            0.25,
+            "ft"
+          ],
+          [
+            "B_re",
+            2500,
+            "ft"
+          ],
+          [
+            "B_rw",
+            0.3,
+            "ft"
+          ],
+          [
+            "C_re",
+            3200,
+            "ft"
+          ],
+          [
+            "C_rw",
+            0.4,
+            "ft"
+          ],
+          [
+            "D_re",
+            4100,
+            "ft"
+          ],
+          [
+            "D_rw",
+            0.5,
+            "ft"
+          ]
+        ],
+        "expected_evidence_facts": [],
+        "formula_sources": [
+          [
+            "R349_RD",
+            "reD = re/rw"
+          ]
+        ],
+        "source_ids": [
+          "R349_RD"
+        ],
+        "expected_bindings": {
+          "A": {
+            "re": "A_re",
+            "rw": "A_rw"
+          },
+          "B": {
+            "re": "B_re",
+            "rw": "B_rw"
+          },
+          "C": {
+            "re": "C_re",
+            "rw": "C_rw"
+          },
+          "D": {
+            "re": "D_re",
+            "rw": "D_rw"
+          }
+        },
+        "required_claims": [
+          {
+            "claim_id": "CL_PROVENANCE",
+            "text": "Attribute the relation and numeric facts to their respective sources.",
+            "source_ids": [
+              "R349_RD"
+            ],
+            "target_refs": []
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "PT6-WT-S2",
+      "benchmark_id": "python_tool_heldout_v6",
+      "domain": "well_test",
+      "python_expected": "required",
+      "evaluation_stratum": "specialist_direct",
+      "recovery_challenge": null,
+      "input_provenance_expected": "user_fact_plus_formula",
+      "topic": "Four separate hypothetical 10 cc RFT probe-chamber drawdowns; T2 values below are elapsed seconds, not hours. The source relation is specific to this 10 cc probe example.\nA_T2=8\nB_T2=12\nC_T2=15\nD_T2=20",
+      "goal": "Use the KB probe relation q2=10/T2 and compute illustrative probe flow rates q2 for A-D in cc/s. Report mean, maximum, minimum, range, highest-flow case and descending ranking. Do not generalize the 10 cc numerator to a different chamber or infer permeability without other required inputs.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "Use the stated relation and distinguish user and KB provenance.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every requested numeric or typed output with scenario and unit.",
+          "target_refs": [
+            "T_PT6_WT_S2_A_Q2",
+            "T_PT6_WT_S2_B_Q2",
+            "T_PT6_WT_S2_C_Q2",
+            "T_PT6_WT_S2_D_Q2",
+            "T_PT6_WT_S2_MEAN_Q2",
+            "T_PT6_WT_S2_MAX_Q2",
+            "T_PT6_WT_S2_MIN_Q2",
+            "T_PT6_WT_S2_RANGE_Q2",
+            "T_PT6_WT_S2_Q2_RANKING",
+            "T_PT6_WT_S2_Q2_LEADER"
+          ],
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "Respect the scenario-specific interpretation and citation caveat.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "canonical_targets": [
+          {
+            "semantic_name": "A_q2",
+            "target_type": "numeric",
+            "value": 1.25,
+            "unit": "cc/s",
+            "abs_tolerance": 0.01,
+            "scenario_id": "A",
+            "target_id": "T_PT6_WT_S2_A_Q2",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "B_q2",
+            "target_type": "numeric",
+            "value": 0.8333333333333334,
+            "unit": "cc/s",
+            "abs_tolerance": 0.01,
+            "scenario_id": "B",
+            "target_id": "T_PT6_WT_S2_B_Q2",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "C_q2",
+            "target_type": "numeric",
+            "value": 0.6666666666666666,
+            "unit": "cc/s",
+            "abs_tolerance": 0.01,
+            "scenario_id": "C",
+            "target_id": "T_PT6_WT_S2_C_Q2",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "D_q2",
+            "target_type": "numeric",
+            "value": 0.5,
+            "unit": "cc/s",
+            "abs_tolerance": 0.01,
+            "scenario_id": "D",
+            "target_id": "T_PT6_WT_S2_D_Q2",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "mean_q2",
+            "target_type": "numeric",
+            "value": 0.8125,
+            "unit": "cc/s",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_WT_S2_MEAN_Q2",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "max_q2",
+            "target_type": "numeric",
+            "value": 1.25,
+            "unit": "cc/s",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_WT_S2_MAX_Q2",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "min_q2",
+            "target_type": "numeric",
+            "value": 0.5,
+            "unit": "cc/s",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_WT_S2_MIN_Q2",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "range_q2",
+            "target_type": "numeric",
+            "value": 0.75,
+            "unit": "cc/s",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_WT_S2_RANGE_Q2",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "q2_ranking",
+            "target_type": "ranking",
+            "value": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "unit": null,
+            "ranking_of": {
+              "A": "A_q2",
+              "B": "B_q2",
+              "C": "C_q2",
+              "D": "D_q2"
+            },
+            "order": "desc",
+            "target_id": "T_PT6_WT_S2_Q2_RANKING",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "q2_leader",
+            "target_type": "label",
+            "value": "A",
+            "unit": null,
+            "extremum": "max",
+            "extremum_of": {
+              "A": "A_q2",
+              "B": "B_q2",
+              "C": "C_q2",
+              "D": "D_q2"
+            },
+            "target_id": "T_PT6_WT_S2_Q2_LEADER",
+            "required": true,
+            "source": "reference_calculator"
+          }
+        ],
+        "numeric_targets": [
+          {
+            "target_id": "T_PT6_WT_S2_A_Q2",
+            "semantic_name": "A_q2",
+            "value": 1.25,
+            "unit": "cc/s",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_S2_B_Q2",
+            "semantic_name": "B_q2",
+            "value": 0.8333333333333334,
+            "unit": "cc/s",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_S2_C_Q2",
+            "semantic_name": "C_q2",
+            "value": 0.6666666666666666,
+            "unit": "cc/s",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_S2_D_Q2",
+            "semantic_name": "D_q2",
+            "value": 0.5,
+            "unit": "cc/s",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_S2_MEAN_Q2",
+            "semantic_name": "mean_q2",
+            "value": 0.8125,
+            "unit": "cc/s",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_S2_MAX_Q2",
+            "semantic_name": "max_q2",
+            "value": 1.25,
+            "unit": "cc/s",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_S2_MIN_Q2",
+            "semantic_name": "min_q2",
+            "value": 0.5,
+            "unit": "cc/s",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_S2_RANGE_Q2",
+            "semantic_name": "range_q2",
+            "value": 0.75,
+            "unit": "cc/s",
+            "abs_tolerance": 0.01,
+            "required": true
+          }
+        ],
+        "typed_targets": [
+          {
+            "target_id": "T_PT6_WT_S2_Q2_RANKING",
+            "semantic_name": "q2_ranking",
+            "target_type": "ranking",
+            "value": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_S2_Q2_LEADER",
+            "semantic_name": "q2_leader",
+            "target_type": "label",
+            "value": "A",
+            "required": true
+          }
+        ],
+        "ranking_targets": [
+          {
+            "semantic_name": "q2_ranking",
+            "target_type": "ranking",
+            "value": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "unit": null,
+            "ranking_of": {
+              "A": "A_q2",
+              "B": "B_q2",
+              "C": "C_q2",
+              "D": "D_q2"
+            },
+            "order": "desc",
+            "target_id": "T_PT6_WT_S2_Q2_RANKING",
+            "required": true,
+            "source": "reference_calculator"
+          }
+        ],
+        "expected_contract_outputs": [
+          {
+            "target_id": "T_PT6_WT_S2_A_Q2",
+            "semantic_name": "A_q2",
+            "type": "numeric",
+            "value": 1.25,
+            "unit": "cc/s"
+          },
+          {
+            "target_id": "T_PT6_WT_S2_B_Q2",
+            "semantic_name": "B_q2",
+            "type": "numeric",
+            "value": 0.8333333333333334,
+            "unit": "cc/s"
+          },
+          {
+            "target_id": "T_PT6_WT_S2_C_Q2",
+            "semantic_name": "C_q2",
+            "type": "numeric",
+            "value": 0.6666666666666666,
+            "unit": "cc/s"
+          },
+          {
+            "target_id": "T_PT6_WT_S2_D_Q2",
+            "semantic_name": "D_q2",
+            "type": "numeric",
+            "value": 0.5,
+            "unit": "cc/s"
+          },
+          {
+            "target_id": "T_PT6_WT_S2_MEAN_Q2",
+            "semantic_name": "mean_q2",
+            "type": "numeric",
+            "value": 0.8125,
+            "unit": "cc/s"
+          },
+          {
+            "target_id": "T_PT6_WT_S2_MAX_Q2",
+            "semantic_name": "max_q2",
+            "type": "numeric",
+            "value": 1.25,
+            "unit": "cc/s"
+          },
+          {
+            "target_id": "T_PT6_WT_S2_MIN_Q2",
+            "semantic_name": "min_q2",
+            "type": "numeric",
+            "value": 0.5,
+            "unit": "cc/s"
+          },
+          {
+            "target_id": "T_PT6_WT_S2_RANGE_Q2",
+            "semantic_name": "range_q2",
+            "type": "numeric",
+            "value": 0.75,
+            "unit": "cc/s"
+          },
+          {
+            "target_id": "T_PT6_WT_S2_Q2_RANKING",
+            "semantic_name": "q2_ranking",
+            "type": "ranking",
+            "value": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "unit": null
+          },
+          {
+            "target_id": "T_PT6_WT_S2_Q2_LEADER",
+            "semantic_name": "q2_leader",
+            "type": "label",
+            "value": "A",
+            "unit": null
+          }
+        ],
+        "expected_user_facts": [
+          [
+            "A_T2",
+            8,
+            ""
+          ],
+          [
+            "B_T2",
+            12,
+            ""
+          ],
+          [
+            "C_T2",
+            15,
+            ""
+          ],
+          [
+            "D_T2",
+            20,
+            ""
+          ]
+        ],
+        "expected_evidence_facts": [],
+        "formula_sources": [
+          [
+            "W365_Q2",
+            "q2 = 10/T2"
+          ]
+        ],
+        "source_ids": [
+          "W365_Q2"
+        ],
+        "expected_bindings": {
+          "A": {
+            "T2": "A_T2"
+          },
+          "B": {
+            "T2": "B_T2"
+          },
+          "C": {
+            "T2": "C_T2"
+          },
+          "D": {
+            "T2": "D_T2"
+          }
+        },
+        "required_claims": [
+          {
+            "claim_id": "CL_PROVENANCE",
+            "text": "Attribute the relation and numeric facts to their respective sources.",
+            "source_ids": [
+              "W365_Q2"
+            ],
+            "target_refs": []
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "PT6-FE-S3",
+      "benchmark_id": "python_tool_heldout_v6",
+      "domain": "formation_evaluation",
+      "python_expected": "required",
+      "evaluation_stratum": "specialist_direct",
+      "recovery_challenge": null,
+      "input_provenance_expected": "user_fact_plus_formula",
+      "topic": "Four independent hypothetical NMR logs; MPHI is effective porosity and MCBW is clay-bound-water porosity, both expressed in percent of bulk rock.\nA_MPHI=12 %\nA_MCBW=3 %\nB_MPHI=15 %\nB_MCBW=2 %\nC_MPHI=9 %\nC_MCBW=5 %\nD_MPHI=18 %\nD_MCBW=1 %",
+      "goal": "Use the KB NMR relation MSIG=MPHI+MCBW to compute total NMR porosity MSIG for A-D in percent. Report mean, maximum, minimum, range, top case and descending ranking. Do not call MPHI alone total porosity.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "Use the stated relation and distinguish user and KB provenance.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every requested numeric or typed output with scenario and unit.",
+          "target_refs": [
+            "T_PT6_FE_S3_A_MSIG",
+            "T_PT6_FE_S3_B_MSIG",
+            "T_PT6_FE_S3_C_MSIG",
+            "T_PT6_FE_S3_D_MSIG",
+            "T_PT6_FE_S3_MEAN_MSIG",
+            "T_PT6_FE_S3_MAX_MSIG",
+            "T_PT6_FE_S3_MIN_MSIG",
+            "T_PT6_FE_S3_RANGE_MSIG",
+            "T_PT6_FE_S3_MSIG_RANKING",
+            "T_PT6_FE_S3_MSIG_LEADER"
+          ],
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "Respect the scenario-specific interpretation and citation caveat.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "canonical_targets": [
+          {
+            "semantic_name": "A_MSIG",
+            "target_type": "numeric",
+            "value": 15.0,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "scenario_id": "A",
+            "target_id": "T_PT6_FE_S3_A_MSIG",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "B_MSIG",
+            "target_type": "numeric",
+            "value": 17.0,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "scenario_id": "B",
+            "target_id": "T_PT6_FE_S3_B_MSIG",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "C_MSIG",
+            "target_type": "numeric",
+            "value": 14.0,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "scenario_id": "C",
+            "target_id": "T_PT6_FE_S3_C_MSIG",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "D_MSIG",
+            "target_type": "numeric",
+            "value": 19.0,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "scenario_id": "D",
+            "target_id": "T_PT6_FE_S3_D_MSIG",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "mean_MSIG",
+            "target_type": "numeric",
+            "value": 16.25,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_FE_S3_MEAN_MSIG",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "max_MSIG",
+            "target_type": "numeric",
+            "value": 19.0,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_FE_S3_MAX_MSIG",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "min_MSIG",
+            "target_type": "numeric",
+            "value": 14.0,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_FE_S3_MIN_MSIG",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "range_MSIG",
+            "target_type": "numeric",
+            "value": 5.0,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_FE_S3_RANGE_MSIG",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "MSIG_ranking",
+            "target_type": "ranking",
+            "value": [
+              "D",
+              "B",
+              "A",
+              "C"
+            ],
+            "unit": null,
+            "ranking_of": {
+              "A": "A_MSIG",
+              "B": "B_MSIG",
+              "C": "C_MSIG",
+              "D": "D_MSIG"
+            },
+            "order": "desc",
+            "target_id": "T_PT6_FE_S3_MSIG_RANKING",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "MSIG_leader",
+            "target_type": "label",
+            "value": "D",
+            "unit": null,
+            "extremum": "max",
+            "extremum_of": {
+              "A": "A_MSIG",
+              "B": "B_MSIG",
+              "C": "C_MSIG",
+              "D": "D_MSIG"
+            },
+            "target_id": "T_PT6_FE_S3_MSIG_LEADER",
+            "required": true,
+            "source": "reference_calculator"
+          }
+        ],
+        "numeric_targets": [
+          {
+            "target_id": "T_PT6_FE_S3_A_MSIG",
+            "semantic_name": "A_MSIG",
+            "value": 15.0,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_FE_S3_B_MSIG",
+            "semantic_name": "B_MSIG",
+            "value": 17.0,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_FE_S3_C_MSIG",
+            "semantic_name": "C_MSIG",
+            "value": 14.0,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_FE_S3_D_MSIG",
+            "semantic_name": "D_MSIG",
+            "value": 19.0,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_FE_S3_MEAN_MSIG",
+            "semantic_name": "mean_MSIG",
+            "value": 16.25,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_FE_S3_MAX_MSIG",
+            "semantic_name": "max_MSIG",
+            "value": 19.0,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_FE_S3_MIN_MSIG",
+            "semantic_name": "min_MSIG",
+            "value": 14.0,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_FE_S3_RANGE_MSIG",
+            "semantic_name": "range_MSIG",
+            "value": 5.0,
+            "unit": "percent",
+            "abs_tolerance": 0.01,
+            "required": true
+          }
+        ],
+        "typed_targets": [
+          {
+            "target_id": "T_PT6_FE_S3_MSIG_RANKING",
+            "semantic_name": "MSIG_ranking",
+            "target_type": "ranking",
+            "value": [
+              "D",
+              "B",
+              "A",
+              "C"
+            ],
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_FE_S3_MSIG_LEADER",
+            "semantic_name": "MSIG_leader",
+            "target_type": "label",
+            "value": "D",
+            "required": true
+          }
+        ],
+        "ranking_targets": [
+          {
+            "semantic_name": "MSIG_ranking",
+            "target_type": "ranking",
+            "value": [
+              "D",
+              "B",
+              "A",
+              "C"
+            ],
+            "unit": null,
+            "ranking_of": {
+              "A": "A_MSIG",
+              "B": "B_MSIG",
+              "C": "C_MSIG",
+              "D": "D_MSIG"
+            },
+            "order": "desc",
+            "target_id": "T_PT6_FE_S3_MSIG_RANKING",
+            "required": true,
+            "source": "reference_calculator"
+          }
+        ],
+        "expected_contract_outputs": [
+          {
+            "target_id": "T_PT6_FE_S3_A_MSIG",
+            "semantic_name": "A_MSIG",
+            "type": "numeric",
+            "value": 15.0,
+            "unit": "percent"
+          },
+          {
+            "target_id": "T_PT6_FE_S3_B_MSIG",
+            "semantic_name": "B_MSIG",
+            "type": "numeric",
+            "value": 17.0,
+            "unit": "percent"
+          },
+          {
+            "target_id": "T_PT6_FE_S3_C_MSIG",
+            "semantic_name": "C_MSIG",
+            "type": "numeric",
+            "value": 14.0,
+            "unit": "percent"
+          },
+          {
+            "target_id": "T_PT6_FE_S3_D_MSIG",
+            "semantic_name": "D_MSIG",
+            "type": "numeric",
+            "value": 19.0,
+            "unit": "percent"
+          },
+          {
+            "target_id": "T_PT6_FE_S3_MEAN_MSIG",
+            "semantic_name": "mean_MSIG",
+            "type": "numeric",
+            "value": 16.25,
+            "unit": "percent"
+          },
+          {
+            "target_id": "T_PT6_FE_S3_MAX_MSIG",
+            "semantic_name": "max_MSIG",
+            "type": "numeric",
+            "value": 19.0,
+            "unit": "percent"
+          },
+          {
+            "target_id": "T_PT6_FE_S3_MIN_MSIG",
+            "semantic_name": "min_MSIG",
+            "type": "numeric",
+            "value": 14.0,
+            "unit": "percent"
+          },
+          {
+            "target_id": "T_PT6_FE_S3_RANGE_MSIG",
+            "semantic_name": "range_MSIG",
+            "type": "numeric",
+            "value": 5.0,
+            "unit": "percent"
+          },
+          {
+            "target_id": "T_PT6_FE_S3_MSIG_RANKING",
+            "semantic_name": "MSIG_ranking",
+            "type": "ranking",
+            "value": [
+              "D",
+              "B",
+              "A",
+              "C"
+            ],
+            "unit": null
+          },
+          {
+            "target_id": "T_PT6_FE_S3_MSIG_LEADER",
+            "semantic_name": "MSIG_leader",
+            "type": "label",
+            "value": "D",
+            "unit": null
+          }
+        ],
+        "expected_user_facts": [
+          [
+            "A_MPHI",
+            12,
+            "%"
+          ],
+          [
+            "A_MCBW",
+            3,
+            "%"
+          ],
+          [
+            "B_MPHI",
+            15,
+            "%"
+          ],
+          [
+            "B_MCBW",
+            2,
+            "%"
+          ],
+          [
+            "C_MPHI",
+            9,
+            "%"
+          ],
+          [
+            "C_MCBW",
+            5,
+            "%"
+          ],
+          [
+            "D_MPHI",
+            18,
+            "%"
+          ],
+          [
+            "D_MCBW",
+            1,
+            "%"
+          ]
+        ],
+        "expected_evidence_facts": [],
+        "formula_sources": [
+          [
+            "H323_MSIG",
+            "MSIG = MPHI + MCBW"
+          ]
+        ],
+        "source_ids": [
+          "H323_MSIG"
+        ],
+        "expected_bindings": {
+          "A": {
+            "MPHI": "A_MPHI",
+            "MCBW": "A_MCBW"
+          },
+          "B": {
+            "MPHI": "B_MPHI",
+            "MCBW": "B_MCBW"
+          },
+          "C": {
+            "MPHI": "C_MPHI",
+            "MCBW": "C_MCBW"
+          },
+          "D": {
+            "MPHI": "D_MPHI",
+            "MCBW": "D_MCBW"
+          }
+        },
+        "required_claims": [
+          {
+            "claim_id": "CL_PROVENANCE",
+            "text": "Attribute the relation and numeric facts to their respective sources.",
+            "source_ids": [
+              "H323_MSIG"
+            ],
+            "target_refs": []
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "PT6-RE-R1",
+      "benchmark_id": "python_tool_heldout_v6",
+      "domain": "reservoir_engineering",
+      "python_expected": "required",
+      "evaluation_stratum": "recovery_challenge",
+      "recovery_challenge": "formula",
+      "input_provenance_expected": "user_fact_plus_formula",
+      "topic": "Four hypothetical gas-core permeability corrections. kg is apparent gas permeability in mD; b and mean flowing p are both in psi. The Klinkenberg relation is in a separate handbook chapter.\nA_kg=100 mD\nA_b=20 psi\nA_p=100 psi\nB_kg=120 mD\nB_b=40 psi\nB_p=200 psi\nC_kg=150 mD\nC_b=30 psi\nC_p=150 psi\nD_kg=95 mD\nD_b=15 psi\nD_p=75 psi",
+      "goal": "Find the KB Klinkenberg correction kL=kg/(1+b/p), then calculate liquid-equivalent permeability kL for A-D in mD. Report mean, maximum, minimum, range, highest case and descending ranking. Keep gas and corrected liquid permeabilities distinct.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "Use the stated relation and distinguish user and KB provenance.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every requested numeric or typed output with scenario and unit.",
+          "target_refs": [
+            "T_PT6_RE_R1_A_KL",
+            "T_PT6_RE_R1_B_KL",
+            "T_PT6_RE_R1_C_KL",
+            "T_PT6_RE_R1_D_KL",
+            "T_PT6_RE_R1_MEAN_KL",
+            "T_PT6_RE_R1_MAX_KL",
+            "T_PT6_RE_R1_MIN_KL",
+            "T_PT6_RE_R1_RANGE_KL",
+            "T_PT6_RE_R1_KL_RANKING",
+            "T_PT6_RE_R1_KL_LEADER"
+          ],
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "Respect the scenario-specific interpretation and citation caveat.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "canonical_targets": [
+          {
+            "semantic_name": "A_kL",
+            "target_type": "numeric",
+            "value": 83.33333333333334,
+            "unit": "mD",
+            "abs_tolerance": 0.01,
+            "scenario_id": "A",
+            "target_id": "T_PT6_RE_R1_A_KL",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "B_kL",
+            "target_type": "numeric",
+            "value": 100.0,
+            "unit": "mD",
+            "abs_tolerance": 0.01,
+            "scenario_id": "B",
+            "target_id": "T_PT6_RE_R1_B_KL",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "C_kL",
+            "target_type": "numeric",
+            "value": 125.0,
+            "unit": "mD",
+            "abs_tolerance": 0.01,
+            "scenario_id": "C",
+            "target_id": "T_PT6_RE_R1_C_KL",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "D_kL",
+            "target_type": "numeric",
+            "value": 79.16666666666667,
+            "unit": "mD",
+            "abs_tolerance": 0.01,
+            "scenario_id": "D",
+            "target_id": "T_PT6_RE_R1_D_KL",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "mean_kL",
+            "target_type": "numeric",
+            "value": 96.875,
+            "unit": "mD",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_RE_R1_MEAN_KL",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "max_kL",
+            "target_type": "numeric",
+            "value": 125.0,
+            "unit": "mD",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_RE_R1_MAX_KL",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "min_kL",
+            "target_type": "numeric",
+            "value": 79.16666666666667,
+            "unit": "mD",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_RE_R1_MIN_KL",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "range_kL",
+            "target_type": "numeric",
+            "value": 45.83333333333333,
+            "unit": "mD",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_RE_R1_RANGE_KL",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "kL_ranking",
+            "target_type": "ranking",
+            "value": [
+              "C",
+              "B",
+              "A",
+              "D"
+            ],
+            "unit": null,
+            "ranking_of": {
+              "A": "A_kL",
+              "B": "B_kL",
+              "C": "C_kL",
+              "D": "D_kL"
+            },
+            "order": "desc",
+            "target_id": "T_PT6_RE_R1_KL_RANKING",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "kL_leader",
+            "target_type": "label",
+            "value": "C",
+            "unit": null,
+            "extremum": "max",
+            "extremum_of": {
+              "A": "A_kL",
+              "B": "B_kL",
+              "C": "C_kL",
+              "D": "D_kL"
+            },
+            "target_id": "T_PT6_RE_R1_KL_LEADER",
+            "required": true,
+            "source": "reference_calculator"
+          }
+        ],
+        "numeric_targets": [
+          {
+            "target_id": "T_PT6_RE_R1_A_KL",
+            "semantic_name": "A_kL",
+            "value": 83.33333333333334,
+            "unit": "mD",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_R1_B_KL",
+            "semantic_name": "B_kL",
+            "value": 100.0,
+            "unit": "mD",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_R1_C_KL",
+            "semantic_name": "C_kL",
+            "value": 125.0,
+            "unit": "mD",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_R1_D_KL",
+            "semantic_name": "D_kL",
+            "value": 79.16666666666667,
+            "unit": "mD",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_R1_MEAN_KL",
+            "semantic_name": "mean_kL",
+            "value": 96.875,
+            "unit": "mD",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_R1_MAX_KL",
+            "semantic_name": "max_kL",
+            "value": 125.0,
+            "unit": "mD",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_R1_MIN_KL",
+            "semantic_name": "min_kL",
+            "value": 79.16666666666667,
+            "unit": "mD",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_R1_RANGE_KL",
+            "semantic_name": "range_kL",
+            "value": 45.83333333333333,
+            "unit": "mD",
+            "abs_tolerance": 0.01,
+            "required": true
+          }
+        ],
+        "typed_targets": [
+          {
+            "target_id": "T_PT6_RE_R1_KL_RANKING",
+            "semantic_name": "kL_ranking",
+            "target_type": "ranking",
+            "value": [
+              "C",
+              "B",
+              "A",
+              "D"
+            ],
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_R1_KL_LEADER",
+            "semantic_name": "kL_leader",
+            "target_type": "label",
+            "value": "C",
+            "required": true
+          }
+        ],
+        "ranking_targets": [
+          {
+            "semantic_name": "kL_ranking",
+            "target_type": "ranking",
+            "value": [
+              "C",
+              "B",
+              "A",
+              "D"
+            ],
+            "unit": null,
+            "ranking_of": {
+              "A": "A_kL",
+              "B": "B_kL",
+              "C": "C_kL",
+              "D": "D_kL"
+            },
+            "order": "desc",
+            "target_id": "T_PT6_RE_R1_KL_RANKING",
+            "required": true,
+            "source": "reference_calculator"
+          }
+        ],
+        "expected_contract_outputs": [
+          {
+            "target_id": "T_PT6_RE_R1_A_KL",
+            "semantic_name": "A_kL",
+            "type": "numeric",
+            "value": 83.33333333333334,
+            "unit": "mD"
+          },
+          {
+            "target_id": "T_PT6_RE_R1_B_KL",
+            "semantic_name": "B_kL",
+            "type": "numeric",
+            "value": 100.0,
+            "unit": "mD"
+          },
+          {
+            "target_id": "T_PT6_RE_R1_C_KL",
+            "semantic_name": "C_kL",
+            "type": "numeric",
+            "value": 125.0,
+            "unit": "mD"
+          },
+          {
+            "target_id": "T_PT6_RE_R1_D_KL",
+            "semantic_name": "D_kL",
+            "type": "numeric",
+            "value": 79.16666666666667,
+            "unit": "mD"
+          },
+          {
+            "target_id": "T_PT6_RE_R1_MEAN_KL",
+            "semantic_name": "mean_kL",
+            "type": "numeric",
+            "value": 96.875,
+            "unit": "mD"
+          },
+          {
+            "target_id": "T_PT6_RE_R1_MAX_KL",
+            "semantic_name": "max_kL",
+            "type": "numeric",
+            "value": 125.0,
+            "unit": "mD"
+          },
+          {
+            "target_id": "T_PT6_RE_R1_MIN_KL",
+            "semantic_name": "min_kL",
+            "type": "numeric",
+            "value": 79.16666666666667,
+            "unit": "mD"
+          },
+          {
+            "target_id": "T_PT6_RE_R1_RANGE_KL",
+            "semantic_name": "range_kL",
+            "type": "numeric",
+            "value": 45.83333333333333,
+            "unit": "mD"
+          },
+          {
+            "target_id": "T_PT6_RE_R1_KL_RANKING",
+            "semantic_name": "kL_ranking",
+            "type": "ranking",
+            "value": [
+              "C",
+              "B",
+              "A",
+              "D"
+            ],
+            "unit": null
+          },
+          {
+            "target_id": "T_PT6_RE_R1_KL_LEADER",
+            "semantic_name": "kL_leader",
+            "type": "label",
+            "value": "C",
+            "unit": null
+          }
+        ],
+        "expected_user_facts": [
+          [
+            "A_kg",
+            100,
+            "mD"
+          ],
+          [
+            "A_b",
+            20,
+            "psi"
+          ],
+          [
+            "A_p",
+            100,
+            "psi"
+          ],
+          [
+            "B_kg",
+            120,
+            "mD"
+          ],
+          [
+            "B_b",
+            40,
+            "psi"
+          ],
+          [
+            "B_p",
+            200,
+            "psi"
+          ],
+          [
+            "C_kg",
+            150,
+            "mD"
+          ],
+          [
+            "C_b",
+            30,
+            "psi"
+          ],
+          [
+            "C_p",
+            150,
+            "psi"
+          ],
+          [
+            "D_kg",
+            95,
+            "mD"
+          ],
+          [
+            "D_b",
+            15,
+            "psi"
+          ],
+          [
+            "D_p",
+            75,
+            "psi"
+          ]
+        ],
+        "expected_evidence_facts": [],
+        "formula_sources": [
+          [
+            "I703_KL",
+            "kL=kg/(1+b/p)"
+          ]
+        ],
+        "source_ids": [
+          "I703_KL"
+        ],
+        "expected_bindings": {
+          "A": {
+            "kg": "A_kg",
+            "b": "A_b",
+            "p": "A_p"
+          },
+          "B": {
+            "kg": "B_kg",
+            "b": "B_b",
+            "p": "B_p"
+          },
+          "C": {
+            "kg": "C_kg",
+            "b": "C_b",
+            "p": "C_p"
+          },
+          "D": {
+            "kg": "D_kg",
+            "b": "D_b",
+            "p": "D_p"
+          }
+        },
+        "required_claims": [
+          {
+            "claim_id": "CL_PROVENANCE",
+            "text": "Attribute the relation and numeric facts to their respective sources.",
+            "source_ids": [
+              "I703_KL"
+            ],
+            "target_refs": []
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "PT6-RE-E1",
+      "benchmark_id": "python_tool_heldout_v6",
+      "domain": "reservoir_engineering",
+      "python_expected": "required",
+      "evaluation_stratum": "end_to_end",
+      "recovery_challenge": null,
+      "input_provenance_expected": "evidence_fact_plus_formula",
+      "topic": "Compare the drainage-radius geometries stated in two separate C13 and C14 textbook exercises. They describe different hypothetical developments, not the same reservoir.",
+      "goal": "Retrieve the C13 and C14 radii from two KB exercise passages and the separate definition reD=re/rw. Compute reD for each exercise, mean, maximum, minimum, range, the larger-ratio exercise, descending ranking and C13/C14 ratio. Keep the two exercises' input provenance separate; do not infer productivity index.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "Use the stated relation and distinguish user and KB provenance.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every requested numeric or typed output with scenario and unit.",
+          "target_refs": [
+            "T_PT6_RE_E1_C13_RED",
+            "T_PT6_RE_E1_C14_RED",
+            "T_PT6_RE_E1_MEAN_RED",
+            "T_PT6_RE_E1_MAX_RED",
+            "T_PT6_RE_E1_MIN_RED",
+            "T_PT6_RE_E1_RANGE_RED",
+            "T_PT6_RE_E1_RED_RANKING",
+            "T_PT6_RE_E1_RED_LEADER",
+            "T_PT6_RE_E1_C13_TO_C14_RED_RATIO"
+          ],
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "Respect the scenario-specific interpretation and citation caveat.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "canonical_targets": [
+          {
+            "semantic_name": "C13_reD",
+            "target_type": "numeric",
+            "value": 33333.333333333336,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "scenario_id": "C13",
+            "target_id": "T_PT6_RE_E1_C13_RED",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "C14_reD",
+            "target_type": "numeric",
+            "value": 16666.666666666668,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "scenario_id": "C14",
+            "target_id": "T_PT6_RE_E1_C14_RED",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "mean_reD",
+            "target_type": "numeric",
+            "value": 25000.0,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_RE_E1_MEAN_RED",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "max_reD",
+            "target_type": "numeric",
+            "value": 33333.333333333336,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_RE_E1_MAX_RED",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "min_reD",
+            "target_type": "numeric",
+            "value": 16666.666666666668,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_RE_E1_MIN_RED",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "range_reD",
+            "target_type": "numeric",
+            "value": 16666.666666666668,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_RE_E1_RANGE_RED",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "reD_ranking",
+            "target_type": "ranking",
+            "value": [
+              "C13",
+              "C14"
+            ],
+            "unit": null,
+            "ranking_of": {
+              "C13": "C13_reD",
+              "C14": "C14_reD"
+            },
+            "order": "desc",
+            "target_id": "T_PT6_RE_E1_RED_RANKING",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "reD_leader",
+            "target_type": "label",
+            "value": "C13",
+            "unit": null,
+            "extremum": "max",
+            "extremum_of": {
+              "C13": "C13_reD",
+              "C14": "C14_reD"
+            },
+            "target_id": "T_PT6_RE_E1_RED_LEADER",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "C13_to_C14_reD_ratio",
+            "target_type": "numeric",
+            "value": 2.0,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_RE_E1_C13_TO_C14_RED_RATIO",
+            "required": true,
+            "source": "reference_calculator"
+          }
+        ],
+        "numeric_targets": [
+          {
+            "target_id": "T_PT6_RE_E1_C13_RED",
+            "semantic_name": "C13_reD",
+            "value": 33333.333333333336,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_E1_C14_RED",
+            "semantic_name": "C14_reD",
+            "value": 16666.666666666668,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_E1_MEAN_RED",
+            "semantic_name": "mean_reD",
+            "value": 25000.0,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_E1_MAX_RED",
+            "semantic_name": "max_reD",
+            "value": 33333.333333333336,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_E1_MIN_RED",
+            "semantic_name": "min_reD",
+            "value": 16666.666666666668,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_E1_RANGE_RED",
+            "semantic_name": "range_reD",
+            "value": 16666.666666666668,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_E1_C13_TO_C14_RED_RATIO",
+            "semantic_name": "C13_to_C14_reD_ratio",
+            "value": 2.0,
+            "unit": "dimensionless",
+            "abs_tolerance": 0.01,
+            "required": true
+          }
+        ],
+        "typed_targets": [
+          {
+            "target_id": "T_PT6_RE_E1_RED_RANKING",
+            "semantic_name": "reD_ranking",
+            "target_type": "ranking",
+            "value": [
+              "C13",
+              "C14"
+            ],
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_RE_E1_RED_LEADER",
+            "semantic_name": "reD_leader",
+            "target_type": "label",
+            "value": "C13",
+            "required": true
+          }
+        ],
+        "ranking_targets": [
+          {
+            "semantic_name": "reD_ranking",
+            "target_type": "ranking",
+            "value": [
+              "C13",
+              "C14"
+            ],
+            "unit": null,
+            "ranking_of": {
+              "C13": "C13_reD",
+              "C14": "C14_reD"
+            },
+            "order": "desc",
+            "target_id": "T_PT6_RE_E1_RED_RANKING",
+            "required": true,
+            "source": "reference_calculator"
+          }
+        ],
+        "expected_contract_outputs": [
+          {
+            "target_id": "T_PT6_RE_E1_C13_RED",
+            "semantic_name": "C13_reD",
+            "type": "numeric",
+            "value": 33333.333333333336,
+            "unit": "dimensionless"
+          },
+          {
+            "target_id": "T_PT6_RE_E1_C14_RED",
+            "semantic_name": "C14_reD",
+            "type": "numeric",
+            "value": 16666.666666666668,
+            "unit": "dimensionless"
+          },
+          {
+            "target_id": "T_PT6_RE_E1_MEAN_RED",
+            "semantic_name": "mean_reD",
+            "type": "numeric",
+            "value": 25000.0,
+            "unit": "dimensionless"
+          },
+          {
+            "target_id": "T_PT6_RE_E1_MAX_RED",
+            "semantic_name": "max_reD",
+            "type": "numeric",
+            "value": 33333.333333333336,
+            "unit": "dimensionless"
+          },
+          {
+            "target_id": "T_PT6_RE_E1_MIN_RED",
+            "semantic_name": "min_reD",
+            "type": "numeric",
+            "value": 16666.666666666668,
+            "unit": "dimensionless"
+          },
+          {
+            "target_id": "T_PT6_RE_E1_RANGE_RED",
+            "semantic_name": "range_reD",
+            "type": "numeric",
+            "value": 16666.666666666668,
+            "unit": "dimensionless"
+          },
+          {
+            "target_id": "T_PT6_RE_E1_RED_RANKING",
+            "semantic_name": "reD_ranking",
+            "type": "ranking",
+            "value": [
+              "C13",
+              "C14"
+            ],
+            "unit": null
+          },
+          {
+            "target_id": "T_PT6_RE_E1_RED_LEADER",
+            "semantic_name": "reD_leader",
+            "type": "label",
+            "value": "C13",
+            "unit": null
+          },
+          {
+            "target_id": "T_PT6_RE_E1_C13_TO_C14_RED_RATIO",
+            "semantic_name": "C13_to_C14_reD_ratio",
+            "type": "numeric",
+            "value": 2.0,
+            "unit": "dimensionless"
+          }
+        ],
+        "expected_user_facts": [],
+        "expected_evidence_facts": [
+          [
+            "R880_C13",
+            "re",
+            10000,
+            "ft"
+          ],
+          [
+            "R880_C13",
+            "rw",
+            0.3,
+            "ft"
+          ],
+          [
+            "R880_C14",
+            "re",
+            5000,
+            "ft"
+          ],
+          [
+            "R880_C14",
+            "rw",
+            0.3,
+            "ft"
+          ]
+        ],
+        "formula_sources": [
+          [
+            "R349_RD",
+            "reD = re/rw"
+          ]
+        ],
+        "source_ids": [
+          "R880_C13",
+          "R880_C14",
+          "R349_RD"
+        ],
+        "expected_bindings": {
+          "C13": {
+            "re": "C13_re",
+            "rw": "C13_rw"
+          },
+          "C14": {
+            "re": "C14_re",
+            "rw": "C14_rw"
+          }
+        },
+        "required_claims": [
+          {
+            "claim_id": "CL_PROVENANCE",
+            "text": "Attribute the relation and numeric facts to their respective sources.",
+            "source_ids": [
+              "R880_C13",
+              "R880_C14",
+              "R349_RD"
+            ],
+            "target_refs": []
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "PT6-WT-E2",
+      "benchmark_id": "python_tool_heldout_v6",
+      "domain": "well_test",
+      "python_expected": "required",
+      "evaluation_stratum": "end_to_end",
+      "recovery_challenge": null,
+      "input_provenance_expected": "evidence_fact_plus_generic_arithmetic",
+      "topic": "Three Layer 1-3 permeability/thickness pairs in one well-test exercise and a fourth pair in a separate exercise. D must not be called a fourth layer of the first reservoir.",
+      "goal": "Retrieve the separately labelled k and h values and compute each illustrative permeability-thickness product k times h (mD-ft) for A=Layer 1, B=Layer 2, C=Layer 3, D=the separate 3.5 exercise. Report all four products, mean, maximum, minimum, range, top case and descending ranking. A product is only a comparison proxy, not a productivity index.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "Use the stated relation and distinguish user and KB provenance.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every requested numeric or typed output with scenario and unit.",
+          "target_refs": [
+            "T_PT6_WT_E2_A_KH_PROXY",
+            "T_PT6_WT_E2_B_KH_PROXY",
+            "T_PT6_WT_E2_C_KH_PROXY",
+            "T_PT6_WT_E2_D_KH_PROXY",
+            "T_PT6_WT_E2_MEAN_KH_PROXY",
+            "T_PT6_WT_E2_MAX_KH_PROXY",
+            "T_PT6_WT_E2_MIN_KH_PROXY",
+            "T_PT6_WT_E2_RANGE_KH_PROXY",
+            "T_PT6_WT_E2_KH_PROXY_RANKING",
+            "T_PT6_WT_E2_KH_PROXY_LEADER"
+          ],
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "Respect the scenario-specific interpretation and citation caveat.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "canonical_targets": [
+          {
+            "semantic_name": "A_kh_proxy",
+            "target_type": "numeric",
+            "value": 1200.0,
+            "unit": "mD-ft",
+            "abs_tolerance": 0.01,
+            "scenario_id": "A",
+            "target_id": "T_PT6_WT_E2_A_KH_PROXY",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "B_kh_proxy",
+            "target_type": "numeric",
+            "value": 12600.0,
+            "unit": "mD-ft",
+            "abs_tolerance": 0.01,
+            "scenario_id": "B",
+            "target_id": "T_PT6_WT_E2_B_KH_PROXY",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "C_kh_proxy",
+            "target_type": "numeric",
+            "value": 6600.0,
+            "unit": "mD-ft",
+            "abs_tolerance": 0.01,
+            "scenario_id": "C",
+            "target_id": "T_PT6_WT_E2_C_KH_PROXY",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "D_kh_proxy",
+            "target_type": "numeric",
+            "value": 1920.0,
+            "unit": "mD-ft",
+            "abs_tolerance": 0.01,
+            "scenario_id": "D",
+            "target_id": "T_PT6_WT_E2_D_KH_PROXY",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "mean_kh_proxy",
+            "target_type": "numeric",
+            "value": 5580.0,
+            "unit": "mD-ft",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_WT_E2_MEAN_KH_PROXY",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "max_kh_proxy",
+            "target_type": "numeric",
+            "value": 12600.0,
+            "unit": "mD-ft",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_WT_E2_MAX_KH_PROXY",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "min_kh_proxy",
+            "target_type": "numeric",
+            "value": 1200.0,
+            "unit": "mD-ft",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_WT_E2_MIN_KH_PROXY",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "range_kh_proxy",
+            "target_type": "numeric",
+            "value": 11400.0,
+            "unit": "mD-ft",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_WT_E2_RANGE_KH_PROXY",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "kh_proxy_ranking",
+            "target_type": "ranking",
+            "value": [
+              "B",
+              "C",
+              "D",
+              "A"
+            ],
+            "unit": null,
+            "ranking_of": {
+              "A": "A_kh_proxy",
+              "B": "B_kh_proxy",
+              "C": "C_kh_proxy",
+              "D": "D_kh_proxy"
+            },
+            "order": "desc",
+            "target_id": "T_PT6_WT_E2_KH_PROXY_RANKING",
+            "required": true,
+            "source": "reference_calculator"
+          },
+          {
+            "semantic_name": "kh_proxy_leader",
+            "target_type": "label",
+            "value": "B",
+            "unit": null,
+            "extremum": "max",
+            "extremum_of": {
+              "A": "A_kh_proxy",
+              "B": "B_kh_proxy",
+              "C": "C_kh_proxy",
+              "D": "D_kh_proxy"
+            },
+            "target_id": "T_PT6_WT_E2_KH_PROXY_LEADER",
+            "required": true,
+            "source": "reference_calculator"
+          }
+        ],
+        "numeric_targets": [
+          {
+            "target_id": "T_PT6_WT_E2_A_KH_PROXY",
+            "semantic_name": "A_kh_proxy",
+            "value": 1200.0,
+            "unit": "mD-ft",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_E2_B_KH_PROXY",
+            "semantic_name": "B_kh_proxy",
+            "value": 12600.0,
+            "unit": "mD-ft",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_E2_C_KH_PROXY",
+            "semantic_name": "C_kh_proxy",
+            "value": 6600.0,
+            "unit": "mD-ft",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_E2_D_KH_PROXY",
+            "semantic_name": "D_kh_proxy",
+            "value": 1920.0,
+            "unit": "mD-ft",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_E2_MEAN_KH_PROXY",
+            "semantic_name": "mean_kh_proxy",
+            "value": 5580.0,
+            "unit": "mD-ft",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_E2_MAX_KH_PROXY",
+            "semantic_name": "max_kh_proxy",
+            "value": 12600.0,
+            "unit": "mD-ft",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_E2_MIN_KH_PROXY",
+            "semantic_name": "min_kh_proxy",
+            "value": 1200.0,
+            "unit": "mD-ft",
+            "abs_tolerance": 0.01,
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_E2_RANGE_KH_PROXY",
+            "semantic_name": "range_kh_proxy",
+            "value": 11400.0,
+            "unit": "mD-ft",
+            "abs_tolerance": 0.01,
+            "required": true
+          }
+        ],
+        "typed_targets": [
+          {
+            "target_id": "T_PT6_WT_E2_KH_PROXY_RANKING",
+            "semantic_name": "kh_proxy_ranking",
+            "target_type": "ranking",
+            "value": [
+              "B",
+              "C",
+              "D",
+              "A"
+            ],
+            "required": true
+          },
+          {
+            "target_id": "T_PT6_WT_E2_KH_PROXY_LEADER",
+            "semantic_name": "kh_proxy_leader",
+            "target_type": "label",
+            "value": "B",
+            "required": true
+          }
+        ],
+        "ranking_targets": [
+          {
+            "semantic_name": "kh_proxy_ranking",
+            "target_type": "ranking",
+            "value": [
+              "B",
+              "C",
+              "D",
+              "A"
+            ],
+            "unit": null,
+            "ranking_of": {
+              "A": "A_kh_proxy",
+              "B": "B_kh_proxy",
+              "C": "C_kh_proxy",
+              "D": "D_kh_proxy"
+            },
+            "order": "desc",
+            "target_id": "T_PT6_WT_E2_KH_PROXY_RANKING",
+            "required": true,
+            "source": "reference_calculator"
+          }
+        ],
+        "expected_contract_outputs": [
+          {
+            "target_id": "T_PT6_WT_E2_A_KH_PROXY",
+            "semantic_name": "A_kh_proxy",
+            "type": "numeric",
+            "value": 1200.0,
+            "unit": "mD-ft"
+          },
+          {
+            "target_id": "T_PT6_WT_E2_B_KH_PROXY",
+            "semantic_name": "B_kh_proxy",
+            "type": "numeric",
+            "value": 12600.0,
+            "unit": "mD-ft"
+          },
+          {
+            "target_id": "T_PT6_WT_E2_C_KH_PROXY",
+            "semantic_name": "C_kh_proxy",
+            "type": "numeric",
+            "value": 6600.0,
+            "unit": "mD-ft"
+          },
+          {
+            "target_id": "T_PT6_WT_E2_D_KH_PROXY",
+            "semantic_name": "D_kh_proxy",
+            "type": "numeric",
+            "value": 1920.0,
+            "unit": "mD-ft"
+          },
+          {
+            "target_id": "T_PT6_WT_E2_MEAN_KH_PROXY",
+            "semantic_name": "mean_kh_proxy",
+            "type": "numeric",
+            "value": 5580.0,
+            "unit": "mD-ft"
+          },
+          {
+            "target_id": "T_PT6_WT_E2_MAX_KH_PROXY",
+            "semantic_name": "max_kh_proxy",
+            "type": "numeric",
+            "value": 12600.0,
+            "unit": "mD-ft"
+          },
+          {
+            "target_id": "T_PT6_WT_E2_MIN_KH_PROXY",
+            "semantic_name": "min_kh_proxy",
+            "type": "numeric",
+            "value": 1200.0,
+            "unit": "mD-ft"
+          },
+          {
+            "target_id": "T_PT6_WT_E2_RANGE_KH_PROXY",
+            "semantic_name": "range_kh_proxy",
+            "type": "numeric",
+            "value": 11400.0,
+            "unit": "mD-ft"
+          },
+          {
+            "target_id": "T_PT6_WT_E2_KH_PROXY_RANKING",
+            "semantic_name": "kh_proxy_ranking",
+            "type": "ranking",
+            "value": [
+              "B",
+              "C",
+              "D",
+              "A"
+            ],
+            "unit": null
+          },
+          {
+            "target_id": "T_PT6_WT_E2_KH_PROXY_LEADER",
+            "semantic_name": "kh_proxy_leader",
+            "type": "label",
+            "value": "B",
+            "unit": null
+          }
+        ],
+        "expected_user_facts": [],
+        "expected_evidence_facts": [
+          [
+            "W88_LAYERS",
+            "k",
+            10,
+            "md"
+          ],
+          [
+            "W88_LAYERS",
+            "h",
+            120,
+            "ft"
+          ],
+          [
+            "W88_LAYERS",
+            "k_2",
+            140,
+            "md"
+          ],
+          [
+            "W88_LAYERS",
+            "h_2",
+            90,
+            "ft"
+          ],
+          [
+            "W88_LAYERS",
+            "k_3",
+            60,
+            "md"
+          ],
+          [
+            "W88_LAYERS",
+            "h_3",
+            110,
+            "ft"
+          ],
+          [
+            "W89_CASE",
+            "k",
+            24,
+            "md"
+          ],
+          [
+            "W89_CASE",
+            "h",
+            80,
+            "ft"
+          ]
+        ],
+        "formula_sources": [],
+        "source_ids": [
+          "W88_LAYERS",
+          "W89_CASE"
+        ],
+        "expected_bindings": {},
+        "required_claims": [
+          {
+            "claim_id": "CL_PROVENANCE",
+            "text": "Attribute the relation and numeric facts to their respective sources.",
+            "source_ids": [
+              "W88_LAYERS",
+              "W89_CASE"
+            ],
+            "target_refs": []
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "PT6-RE-O1",
+      "benchmark_id": "python_tool_heldout_v6",
+      "domain": "reservoir_engineering",
+      "python_expected": "optional",
+      "evaluation_stratum": "optional",
+      "recovery_challenge": null,
+      "input_provenance_expected": "user_fact",
+      "topic": "One hypothetical pressure-drawdown check, both pressures in psi.\ninitial_pressure=3475 psi\nflowing_pressure=3190 psi",
+      "goal": "Report pressure drawdown initial minus flowing in psi. Direct subtraction is sufficient; Python is optional. Do not infer permeability.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "Use the stated relation and distinguish user and KB provenance.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every requested numeric or typed output with scenario and unit.",
+          "target_refs": [
+            "T_PT6_RE_O1_DRAWDOWN"
+          ],
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "Respect the scenario-specific interpretation and citation caveat.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "canonical_targets": [
+          {
+            "semantic_name": "drawdown",
+            "target_type": "numeric",
+            "value": 285.0,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_RE_O1_DRAWDOWN",
+            "required": true,
+            "source": "reference_calculator"
+          }
+        ],
+        "numeric_targets": [
+          {
+            "target_id": "T_PT6_RE_O1_DRAWDOWN",
+            "semantic_name": "drawdown",
+            "value": 285.0,
+            "unit": "psi",
+            "abs_tolerance": 0.01,
+            "required": true
+          }
+        ],
+        "typed_targets": [],
+        "ranking_targets": [],
+        "expected_contract_outputs": [
+          {
+            "target_id": "T_PT6_RE_O1_DRAWDOWN",
+            "semantic_name": "drawdown",
+            "type": "numeric",
+            "value": 285.0,
+            "unit": "psi"
+          }
+        ],
+        "expected_user_facts": [
+          [
+            "initial_pressure",
+            3475,
+            "psi"
+          ],
+          [
+            "flowing_pressure",
+            3190,
+            "psi"
+          ]
+        ],
+        "expected_evidence_facts": [],
+        "formula_sources": [],
+        "source_ids": [],
+        "expected_bindings": {},
+        "required_claims": [
+          {
+            "claim_id": "CL_PROVENANCE",
+            "text": "Attribute the relation and numeric facts to their respective sources.",
+            "source_ids": [],
+            "target_refs": []
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "PT6-FE-O2",
+      "benchmark_id": "python_tool_heldout_v6",
+      "domain": "formation_evaluation",
+      "python_expected": "optional",
+      "evaluation_stratum": "optional",
+      "recovery_challenge": null,
+      "input_provenance_expected": "user_fact_plus_evidence_fact",
+      "topic": "A textbook density-neutron crossplot example reports a porosity. The target below is a hypothetical comparison threshold, not the source's target.\ntarget_porosity=20 %",
+      "goal": "Retrieve the example's 18% porosity and report how many percentage points it lies below the hypothetical 20% target. One subtraction is enough; Python is optional. Do not call this a field porosity deficit.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "Use the stated relation and distinguish user and KB provenance.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every requested numeric or typed output with scenario and unit.",
+          "target_refs": [
+            "T_PT6_FE_O2_POROSITY_SHORTFALL"
+          ],
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "Respect the scenario-specific interpretation and citation caveat.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "canonical_targets": [
+          {
+            "semantic_name": "porosity_shortfall",
+            "target_type": "numeric",
+            "value": 2.0,
+            "unit": "percentage_point",
+            "abs_tolerance": 0.01,
+            "target_id": "T_PT6_FE_O2_POROSITY_SHORTFALL",
+            "required": true,
+            "source": "reference_calculator"
+          }
+        ],
+        "numeric_targets": [
+          {
+            "target_id": "T_PT6_FE_O2_POROSITY_SHORTFALL",
+            "semantic_name": "porosity_shortfall",
+            "value": 2.0,
+            "unit": "percentage_point",
+            "abs_tolerance": 0.01,
+            "required": true
+          }
+        ],
+        "typed_targets": [],
+        "ranking_targets": [],
+        "expected_contract_outputs": [
+          {
+            "target_id": "T_PT6_FE_O2_POROSITY_SHORTFALL",
+            "semantic_name": "porosity_shortfall",
+            "type": "numeric",
+            "value": 2.0,
+            "unit": "percentage_point"
+          }
+        ],
+        "expected_user_facts": [
+          [
+            "target_porosity",
+            20,
+            "%"
+          ]
+        ],
+        "expected_evidence_facts": [
+          [
+            "F141_POR",
+            "porosity",
+            18,
+            "%"
+          ]
+        ],
+        "formula_sources": [],
+        "source_ids": [
+          "F141_POR"
+        ],
+        "expected_bindings": {},
+        "required_claims": [
+          {
+            "claim_id": "CL_PROVENANCE",
+            "text": "Attribute the relation and numeric facts to their respective sources.",
+            "source_ids": [
+              "F141_POR"
+            ],
+            "target_refs": []
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "PT6-WT-N1",
+      "benchmark_id": "python_tool_heldout_v6",
+      "domain": "well_test",
+      "python_expected": "not_needed",
+      "evaluation_stratum": "not_needed",
+      "recovery_challenge": null,
+      "input_provenance_expected": "knowledge_base",
+      "topic": "Conceptual WFT monitoring question only; no numeric inputs or calculation request.",
+      "goal": "Explain why fault-block crossflow cannot be inferred reliably from a distributed pressure survey alone when rate allocation and drained pore volumes are unknown. Cite the KB discussion and describe missing measurements; do not calculate.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "Use the stated relation and distinguish user and KB provenance.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every requested numeric or typed output with scenario and unit.",
+          "target_refs": [],
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "Respect the scenario-specific interpretation and citation caveat.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "canonical_targets": [],
+        "numeric_targets": [],
+        "typed_targets": [],
+        "ranking_targets": [],
+        "expected_contract_outputs": [],
+        "expected_user_facts": [],
+        "expected_evidence_facts": [],
+        "formula_sources": [],
+        "source_ids": [
+          "W449_CONTEXT"
+        ],
+        "expected_bindings": {},
+        "required_claims": [
+          {
+            "claim_id": "CL_PROVENANCE",
+            "text": "Attribute the relation and numeric facts to their respective sources.",
+            "source_ids": [
+              "W449_CONTEXT"
+            ],
+            "target_refs": []
+          }
+        ]
+      }
+    },
+    {
+      "task_id": "PT6-FE-N2",
+      "benchmark_id": "python_tool_heldout_v6",
+      "domain": "formation_evaluation",
+      "python_expected": "not_needed",
+      "evaluation_stratum": "not_needed",
+      "recovery_challenge": null,
+      "input_provenance_expected": "knowledge_base",
+      "topic": "Conceptual dual-water petrophysics question only; no arithmetic request.",
+      "goal": "Explain the distinction between total pore-volume water and bound/connate water in a shaly-sand interpretation and why bound water complicates a simple resistivity reading. Cite the handbook discussion; do not calculate.",
+      "expected_result": null,
+      "success_criteria": [
+        {
+          "criterion_id": "C1",
+          "description": "Use the stated relation and distinguish user and KB provenance.",
+          "required": true
+        },
+        {
+          "criterion_id": "C2",
+          "description": "Report every requested numeric or typed output with scenario and unit.",
+          "target_refs": [],
+          "required": true
+        },
+        {
+          "criterion_id": "C3",
+          "description": "Respect the scenario-specific interpretation and citation caveat.",
+          "required": true
+        }
+      ],
+      "ground_truth": {
+        "canonical_targets": [],
+        "numeric_targets": [],
+        "typed_targets": [],
+        "ranking_targets": [],
+        "expected_contract_outputs": [],
+        "expected_user_facts": [],
+        "expected_evidence_facts": [],
+        "formula_sources": [],
+        "source_ids": [
+          "H168_CONTEXT"
+        ],
+        "expected_bindings": {},
+        "required_claims": [
+          {
+            "claim_id": "CL_PROVENANCE",
+            "text": "Attribute the relation and numeric facts to their respective sources.",
+            "source_ids": [
+              "H168_CONTEXT"
+            ],
+            "target_refs": []
+          }
+        ]
+      }
+    }
+  ]
+}
