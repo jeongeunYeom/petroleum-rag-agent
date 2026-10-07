@@ -8,6 +8,7 @@ from app.api.routes import get_ollama
 from app.core.config import Settings, get_settings
 from app.models.goal_research_schemas import GoalResearchRequest, GoalResearchResponse
 from app.services.goal_research_agent import GoalResearchAgent
+from app.services.goal_execution_agent import GoalExecutionAgent
 from app.services.goal_research_service import (
     GoalResearchRunConflict,
     GoalResearchRunNotFound,
@@ -21,8 +22,9 @@ router = APIRouter(prefix="/research/goal-runs", tags=["goal-research"])
 @lru_cache(maxsize=1)
 def cached_goal_research_service() -> GoalResearchService:
     settings = get_settings()
-    controller = GoalResearchAgent(cached_research_agent(), get_ollama())
-    return GoalResearchService(settings, controller)
+    research, ollama = cached_research_agent(), get_ollama()
+    return GoalResearchService(settings, GoalResearchAgent(research, ollama),
+                               GoalExecutionAgent(research, ollama))
 
 
 def get_goal_research_service(

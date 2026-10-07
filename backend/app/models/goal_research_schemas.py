@@ -50,6 +50,8 @@ class GoalStopReason(str, Enum):
     GOAL_CONFLICTS_WITH_EVIDENCE = "goal_conflicts_with_evidence"
     CANCELED = "canceled"
     ERROR = "error"
+    CALCULATION_BLOCKED = "calculation_blocked"
+    SIMULATION_BLOCKED = "simulation_blocked"
 
 
 class GoalCriterion(BaseModel):
@@ -85,6 +87,11 @@ class GoalResearchRequest(BaseModel):
     python_execution_approved: bool = False
     max_python_calls: int = Field(default=4, ge=0, le=8)
     max_python_attempts_per_call: int = Field(default=2, ge=1, le=3)
+    execution_mode: Literal["legacy_goal_research", "autonomous_goal_execution"] = "legacy_goal_research"
+    max_retrieval_actions: int = Field(default=3, ge=0, le=8)
+    max_simulation_actions: int = Field(default=1, ge=0, le=3)
+    max_verification_actions: int = Field(default=2, ge=1, le=4)
+    simulation_spec: dict[str, Any] | None = None
     deliverables: list[Literal["docx", "pptx"]] = Field(default_factory=list)
     include_generated_charts: bool = True
 
@@ -362,6 +369,9 @@ class GoalResearchResponse(BaseModel):
     current_iteration: int = 0
     max_iterations: int
     current_stage: str = "initialize"
+    current_action: str | None = None
+    action_history: list[dict[str, Any]] = Field(default_factory=list)
+    state_history: list[dict[str, Any]] = Field(default_factory=list)
     iterations: list[GoalIterationRecord] = Field(default_factory=list)
     internal_sources: list[InternalEvidence] = Field(default_factory=list)
     web_sources: list[WebEvidence] = Field(default_factory=list)

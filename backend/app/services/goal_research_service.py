@@ -18,6 +18,7 @@ from app.models.goal_research_schemas import (
     GoalStopReason,
 )
 from app.services.goal_research_agent import GoalResearchAgent
+from app.services.goal_execution_agent import GoalExecutionAgent
 from app.services.deliverables.service import DeliverableService
 
 
@@ -32,9 +33,11 @@ class GoalResearchRunConflict(RuntimeError):
 class GoalResearchService:
     _lock = RLock()
 
-    def __init__(self, settings: Settings, controller: GoalResearchAgent):
+    def __init__(self, settings: Settings, controller: GoalResearchAgent,
+                 execution_controller: GoalExecutionAgent | None = None):
         self.settings = settings
         self.controller = controller
+        self.execution_controller = execution_controller
         self.deliverables = DeliverableService(settings)
 
     def start(self, request: GoalResearchRequest) -> GoalResearchResponse:
@@ -111,8 +114,13 @@ class GoalResearchService:
 
     def _execute(self, run_id: str, request: GoalResearchRequest) -> None:
         try:
+            controller = self.controller
+            if request.execution_mode == "autonomous_goal_execution":
+                if self.execution_controller is None:
+                    raise RuntimeError("Autonomous goal execution controller is not configured")
+                controller = self.execution_controller
             result = asyncio.run(
-                self.controller.run(
+                controller.run(
                     run_id,
                     request,
                     is_canceled=lambda: self._cancel_requested(run_id),

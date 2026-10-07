@@ -14,6 +14,7 @@ from app.models.goal_research_schemas import (
     ComputationRecord,
 )
 from app.services.engineering_validator import EngineeringValidator
+from app.services.calc_claim_grounding import validate_calc_claim
 
 
 EVIDENCE_ID_RE = re.compile(r"(?<![A-Za-z0-9])(?:KB|WEB|FIG|CALC|USERF?)\d+(?![A-Za-z0-9])")
@@ -176,6 +177,7 @@ class GoalEvaluator:
             request,
             candidate_answer,
             evidence,
+            valid_computations,
         )
         for line in candidate_answer.splitlines():
             cited = set(EVIDENCE_ID_RE.findall(line))
@@ -253,6 +255,7 @@ class GoalEvaluator:
         request: GoalResearchRequest,
         candidate: str,
         evidence: list[dict[str, Any]],
+        computations: dict[str, ComputationRecord] | None = None,
     ) -> dict[str, Any]:
         if not request.engineering_validation:
             return {
@@ -271,6 +274,7 @@ class GoalEvaluator:
         contradictions = 0
         unsupported = 0
         reasons: list[str] = []
+        computations = computations or {}
         for line in candidate.splitlines():
             claim = line.strip().lstrip("-* ")
             if len(claim) < 10 or claim.startswith("#"):
@@ -284,7 +288,30 @@ class GoalEvaluator:
                 require_evidence_support=True,
             )
             contradictions += validation.engineering_contradiction_count
-            unsupported += validation.unsupported_engineering_claim_count
+            cited_calcs = {item: computations[item] for item in ids if item in computations}
+            direct_calc = False
+            if cited_calcs:
+                # The grounding matcher cannot infer an aggregate output from a
+                # short label such as "Mean score"; identify that exact manifest
+                # field, then let the normal provenance/value validator check it.
+                output_ids = ["OUT_MEAN_RESULT"] if re.search(r"\bmean\b", claim, re.I) and any(
+                    "OUT_MEAN_RESULT" in record.output_manifest for record in cited_calcs.values()
+                ) else []
+                if re.search(r"\brange\b", claim, re.I) and any(
+                    "OUT_RANGE_RESULT" in record.output_manifest for record in cited_calcs.values()
+                ):
+                    output_ids.append("OUT_RANGE_RESULT")
+                issues, _ = validate_calc_claim(claim, ids, output_ids, cited_calcs, evidence)
+                allowed_words = {word.casefold() for record in cited_calcs.values()
+                                 for output in record.output_manifest.values()
+                                 for value in (str(output.get("name") or ""), str(output.get("unit") or ""))
+                                 for word in re.findall(r"[A-Za-z]+", value)}
+                allowed_words.update({"best", "worst", "mean", "range", "case", "result", "parameter", "validated"})
+                claim_words = {word.casefold() for word in re.findall(r"[A-Za-z]+",
+                               EVIDENCE_ID_RE.sub("", claim))}
+                direct_calc = not issues and claim_words <= allowed_words
+            unsupported += 0 if direct_calc else max(validation.unsupported_engineering_claim_count,
+                                                       1 if cited_calcs and issues else 0)
             reasons.extend(
                 " ".join(
                     value

@@ -69,6 +69,15 @@ export type GoalResearchRun = {
   current_iteration: number;
   max_iterations: number;
   current_stage: string;
+  current_action?: string | null;
+  action_history?: {
+    action_type: string;
+    status: string;
+    reason_code: string;
+    evidence_added: string[];
+    computation_ids: string[];
+    coverage_after: number;
+  }[];
   iterations: GoalIteration[];
   internal_sources: unknown[];
   web_sources: unknown[];
@@ -90,6 +99,7 @@ export type GoalResearchInput = {
   use_internal: boolean;
   use_external: boolean;
   max_iterations: number;
+  execution_mode?: "legacy_goal_research" | "autonomous_goal_execution";
   allow_python_execution: boolean;
   python_execution_approved: boolean;
   deliverables: ("docx" | "pptx")[];
