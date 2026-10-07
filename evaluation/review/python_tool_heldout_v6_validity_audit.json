@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "python_tool_heldout_v6",
+  "status": "INVALIDATED_POST_FREEZE_DISCOVERY",
+  "discovered_after": "one complete OFF12/ON12 run and descriptive adjudication",
+  "defect_class": "reference_calculator_and_freeze_gate",
+  "frozen_asset_modified": false,
+  "rerun_performed": false,
+  "finding": "The frozen reference calculator ranks raw binary floats and chooses a sole leader without the required evaluation-owned isclose tie policy. The frozen policy and preflight did not specify or test tie tolerances.",
+  "reproduction": {
+    "function": "evaluation/reference/python_tool_heldout_v6_ground_truth.py:ranked",
+    "inputs": {"A": 0.3, "B": 0.30000000000000004},
+    "observed_ranking": ["B", "A"],
+    "observed_sole_leader": "B",
+    "required_behavior": "A and B form one tie group under the frozen evaluation-owned tolerance; neither is a sole leader"
+  },
+  "impact": "Violates mandatory floating-tie regression and GT consistency hard gate. The run remains descriptive exploratory data and must not be presented as a valid Python Tool Heldout v6 Baseline or used for product-version superiority claims.",
+  "additional_authoring_caveat": "PT6-WT-S2 states that T2 is in seconds in prose, but its four expected USERF records carry empty unit strings. Its numbers and reference output are internally consistent; unit-level representability was not fully established by the preflight.",
+  "required_next_step": "Design a separately named python_tool_heldout_v6r1 with a frozen tie policy, synthetic tie regression, stronger unit preflight, and fresh unseen tasks before any new run. Do not repair or rerun this frozen v6 pair."
+}
