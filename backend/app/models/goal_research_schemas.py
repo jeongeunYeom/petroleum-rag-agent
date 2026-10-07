@@ -180,6 +180,22 @@ class CalculationContract(BaseModel):
 
 
 class PythonExecutionTrace(BaseModel):
+    request_ir: dict[str, Any] | None = None
+    computation_class: str | None = None
+    generic_fast_path: bool = False
+    initial_readiness_snapshot: dict[str, Any] | None = None
+    recovery_snapshots: list[dict[str, Any]] = Field(default_factory=list)
+    formula_candidates: list[dict[str, Any]] = Field(default_factory=list)
+    resolved_formula_id: str | None = None
+    formula_resolution_reason: str | None = None
+    binding_map: dict[str, dict[str, str]] = Field(default_factory=dict)
+    contract_skeleton: dict[str, Any] | None = None
+    contract_final: dict[str, Any] | None = None
+    contract_skeleton_diff: list[str] = Field(default_factory=list)
+    execution_path: str | None = None
+    input_ready: bool | None = None
+    method_ready: bool | None = None
+    tie_policy: str = "isclose_rel_1e-9_abs_1e-12"
     tool_selected: bool = False
     tool_type: Literal["none", "python_calculation", "python_plot"] = "none"
     plan_present: bool = False

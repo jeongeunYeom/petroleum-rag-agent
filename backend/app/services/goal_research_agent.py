@@ -33,12 +33,16 @@ from app.services.goal_evaluator import GoalEvaluationResult, GoalEvaluator
 from app.services.goal_planner import GoalPlanner
 from app.services.goal_tool_planner import GoalToolPlanner
 from app.services.goal_python_analysis import GoalPythonAnalysis
-from app.services.calculation_contract import CalculationContractBuilder
+from app.services.calculation_contract import CalculationContractBuilder, validate_contract
 from app.services.calculation_requirements import (
-    CalculationRequirementGraph, augment_plan_with_bindings, build_requirement_graph,
-    required_recovery_gain, select_formula_candidate,
+    CalculationRequirementGraph, _catalog, augment_plan_with_bindings, build_requirement_graph,
+    normalize_symbol, required_recovery_gain, scenario_fact_match, select_formula_candidate,
 )
-from app.services.required_outputs import required_output_checklist, missing_checklist_outputs
+from app.services.required_outputs import checklist_from_ir, required_output_checklist, missing_checklist_outputs
+from app.services.calculation_request_ir import parse_request_ir, resolve_request_ir, validate_ir
+from app.services.calculation_contract_skeleton import build_contract_skeleton, skeleton_diff
+from app.services.formula_resolver import FormulaIntent, resolve_formula
+from app.services.goal_tool_planner import PythonAnalysisPlan
 from app.services.evidence_fact_registry import EvidenceFactRegistry
 from app.services.formula_source_registry import FormulaSourceRegistry
 from app.services.calc_claim_grounding import validate_calc_claim
@@ -212,6 +216,9 @@ class GoalResearchAgent:
         criteria_source = "user" if frozen_criteria else "inferred"
         if not frozen_criteria:
             frozen_criteria = await self.planner.infer_criteria(request)
+        # Request-only intent is fixed before the first research result is seen.
+        pre_retrieval_ir = (parse_request_ir(request, frozen_criteria)
+                            if request.goal and request.allow_python_execution and request.python_execution_approved else None)
         criteria_hash = self._criteria_hash(frozen_criteria)
         result = GoalResearchResponse(
             run_id=run_id,
@@ -317,39 +324,92 @@ class GoalResearchAgent:
                         request, frozen_criteria, analysis_evidence, previous_coverage,
                         result.iterations[-1].criteria if result.iterations else None,
                     )
-                    formula_required = bool(re.search(
+                    ir = (pre_retrieval_ir if pre_retrieval_ir and not validate_ir(pre_retrieval_ir)
+                          else await resolve_request_ir(request, frozen_criteria, self.ollama)) if decision.tool_needed and request.goal else None
+                    if ir and ir.specialist_relation_required and not ir.requested_units:
+                        # Older open-ended requests retain the existing contract path; v7
+                        # does not assign a numeric output unit without an explicit request.
+                        ir = None
+                    checklist = checklist_from_ir(ir) if ir else []
+                    if ir:
+                        python_trace.request_ir = ir.model_dump(mode="json")
+                        python_trace.computation_class = ir.computation_class
+                        python_trace.required_output_checklist = [item.model_dump() for item in checklist]
+                    ir_errors = validate_ir(ir) if ir else []
+                    formula_required = ir.specialist_relation_required if ir else bool(re.search(
                         r"(?:source|cited|published|documented)\s+(?:equation|formula)|(?:근거|출처)\s*(?:수식|공식)|"
                         r"(?:equation|formula|관계식|공식|수식)\s*(?:for|from|based|을|를|으로)",
-                        " ".join(value for value in (request.goal, request.topic) if value), re.I,
-                    ))
-                    selected_formula = decision.selected_formula_id or (
-                        (decision.plan_summary or {}).get("formula_ref") if decision.plan_summary else None
-                    )
-                    if formula_required and not selected_formula:
-                        chosen = select_formula_candidate(analysis_evidence,
-                            " ".join([request.goal or request.topic, *(item.description for item in frozen_criteria)]),
-                            [fact.name for fact in decision.plan.input_facts] if decision.plan else [item.name for item in user_registry.records])
-                        if chosen:
-                            selected_formula = chosen.formula_id
-                            self._attach_source_formula(decision, chosen)
-                    if selected_formula and decision.plan and not decision.plan.formula_source_id:
-                        selected_record = next((item for item in FormulaSourceRegistry.from_evidence(analysis_evidence).records
-                            if item.formula_id == selected_formula), None)
-                        if selected_record:
-                            self._attach_source_formula(decision, selected_record)
+                        " ".join(value for value in (request.goal, request.topic) if value), re.I))
+                    if decision.tool_needed and ir and not formula_required:
+                        # For ordinary arithmetic the canonical registry, not a retrieved equation,
+                        # supplies the method. Never let a planner-selected KB formula override it.
+                        facts = _catalog(analysis_evidence)
+                        users = [fact for fact in facts if fact.source_type == "user_fact"]
+                        selected_facts = users or [fact for fact in facts if fact.source_type != "user_fact"]
+                        decision.plan = PythonAnalysisPlan(purpose=request.goal or request.topic,
+                            target_criteria=[item.description for item in frozen_criteria if item.required],
+                            input_facts=selected_facts, expected_outputs=[item.semantic_name for item in checklist]) if selected_facts else None
+                        python_trace.generic_fast_path = True
+                        python_trace.execution_path = "generic"
+                    elif ir:
+                        python_trace.execution_path = "specialist"
+                    resolution = None
+                    selected_formula = None
+                    if formula_required and ir:
+                        available = tuple(fact.name for fact in _catalog(analysis_evidence))
+                        intent = FormulaIntent(desired_output_names=tuple(ir.target_concepts),
+                            concept_terms=tuple(ir.target_concepts), available_input_semantics=available,
+                            expected_unit_family=next(iter(ir.requested_units.values()), None))
+                        resolution = resolve_formula(analysis_evidence, intent)
+                        python_trace.formula_candidates = resolution.candidates
+                        python_trace.formula_resolution_reason = resolution.reason
+                        selected_formula = resolution.record.formula_id if resolution.record else None
+                        python_trace.resolved_formula_id = selected_formula
+                        if decision.plan:
+                            decision.plan.formula = None
+                            decision.plan.formula_source_id = None
+                            decision.plan.supporting_evidence_ids = []
+                        if resolution.record:
+                            self._attach_source_formula(decision, resolution.record)
+                    elif not ir:
+                        selected_formula = decision.selected_formula_id or (
+                            (decision.plan_summary or {}).get("formula_ref") if decision.plan_summary else None)
+                        if formula_required and not selected_formula:
+                            chosen = select_formula_candidate(analysis_evidence,
+                                " ".join([request.goal or request.topic, *(item.description for item in frozen_criteria)]),
+                                [fact.name for fact in decision.plan.input_facts] if decision.plan else [item.name for item in user_registry.records])
+                            if chosen:
+                                selected_formula = chosen.formula_id
+                                self._attach_source_formula(decision, chosen)
+                        if selected_formula and decision.plan and not decision.plan.formula_source_id:
+                            selected_record = next((item for item in FormulaSourceRegistry.from_evidence(analysis_evidence).records
+                                if item.formula_id == selected_formula), None)
+                            if selected_record:
+                                self._attach_source_formula(decision, selected_record)
                     graph = build_requirement_graph(decision.plan, analysis_evidence,
                         formula_id=selected_formula, formula_required=formula_required,
-                        require_all_scenarios=bool(re.search(r"\b(?:each|every|per[- ](?:case|sample|reading|well))\b|각각",
-                            request.goal or request.topic, re.I)))
+                        require_all_scenarios=bool(ir and ir.scenarios))
+                    if ir:
+                        self._require_scenarios(graph, ir, analysis_evidence)
+                    if ir_errors:
+                        graph.missing_variables.extend(ir_errors)
+                        graph.source_complete = False
+                    if ir:
+                        python_trace.input_ready = bool(decision.plan) and not any(
+                            value != "formula_source" for value in graph.missing_variables + graph.ambiguous_variables + graph.unit_mismatch_variables)
+                        python_trace.method_ready = graph.formula_source_available if formula_required else bool(ir.requested_operation_types)
+                        graph.source_complete = bool(python_trace.input_ready and python_trace.method_ready)
+                        python_trace.initial_readiness_snapshot = self._readiness_snapshot(graph, resolution, checklist, analysis_evidence)
                     calculation_goal = bool(re.search(r"\b(?:calculat|comput|derive|estimate)\w*\b|계산|산출",
                                                       request.goal or request.topic, re.I))
-                    while ((decision.tool_needed or (formula_required and calculation_goal and not graph.formula_source_available))
+                    while (((formula_required and (decision.tool_needed or calculation_goal)) if ir else
+                            (decision.tool_needed or (formula_required and calculation_goal and not graph.formula_source_available)))
                            and not graph.source_complete and request.use_internal
                            and decision.plan_status != "planner_plan_parse_failed"
                            and decision.decision_status != "planner_decision_parse_failed"
                            and calculation_recovery_queries < 2):
                         recovery_query = self._calculation_recovery_query(request, frozen_criteria, graph,
-                                                                          decision.plan_summary)
+                                                                          decision.plan_summary, ir)
                         normalized_recovery = self.planner.normalize_query(recovery_query)
                         if not recovery_query or normalized_recovery in calculation_recovery_searches:
                             break
@@ -375,36 +435,64 @@ class GoalResearchAgent:
                         # Rebuild both registries and the plan; a new passage alone is not a gain.
                         python_trace.recovery_efact_count = len(EvidenceFactRegistry.from_evidence(analysis_evidence).records)
                         python_trace.recovery_formula_count = len(FormulaSourceRegistry.from_evidence(analysis_evidence).records)
+                        previous_plan = decision.plan
                         decision = await self.tool_planner.decide(
                             request, frozen_criteria, analysis_evidence, previous_coverage,
                             result.iterations[-1].criteria if result.iterations else None,
                         )
-                        new_formula = decision.selected_formula_id or selected_formula
-                        if formula_required and not new_formula:
-                            chosen = select_formula_candidate(analysis_evidence,
-                                " ".join([request.goal or request.topic, *(item.description for item in frozen_criteria)]),
-                                [fact.name for fact in decision.plan.input_facts] if decision.plan else [item.name for item in user_registry.records])
-                            if chosen:
-                                new_formula = chosen.formula_id
-                                self._attach_source_formula(decision, chosen)
-                        if new_formula and decision.plan and not decision.plan.formula_source_id:
-                            selected_record = next((item for item in FormulaSourceRegistry.from_evidence(analysis_evidence).records
-                                if item.formula_id == new_formula), None)
-                            if selected_record:
-                                self._attach_source_formula(decision, selected_record)
+                        if ir:
+                            decision.plan = decision.plan or previous_plan
+                            intent = FormulaIntent(desired_output_names=tuple(ir.target_concepts),
+                                concept_terms=tuple(ir.target_concepts),
+                                available_input_semantics=tuple(fact.name for fact in _catalog(analysis_evidence)),
+                                expected_unit_family=next(iter(ir.requested_units.values()), None))
+                            resolution = resolve_formula(analysis_evidence, intent)
+                            python_trace.formula_candidates = resolution.candidates
+                            python_trace.formula_resolution_reason = resolution.reason
+                            new_formula = resolution.record.formula_id if resolution.record else None
+                            python_trace.resolved_formula_id = new_formula
+                            if decision.plan:
+                                decision.plan.formula = None
+                                decision.plan.formula_source_id = None
+                                decision.plan.supporting_evidence_ids = []
+                            if resolution.record:
+                                self._attach_source_formula(decision, resolution.record)
+                        else:
+                            new_formula = decision.selected_formula_id or selected_formula
+                            if formula_required and not new_formula:
+                                chosen = select_formula_candidate(analysis_evidence,
+                                    " ".join([request.goal or request.topic, *(item.description for item in frozen_criteria)]),
+                                    [fact.name for fact in decision.plan.input_facts] if decision.plan else [item.name for item in user_registry.records])
+                                if chosen:
+                                    new_formula = chosen.formula_id
+                                    self._attach_source_formula(decision, chosen)
+                            if new_formula and decision.plan and not decision.plan.formula_source_id:
+                                selected_record = next((item for item in FormulaSourceRegistry.from_evidence(analysis_evidence).records
+                                    if item.formula_id == new_formula), None)
+                                if selected_record:
+                                    self._attach_source_formula(decision, selected_record)
                         refreshed = build_requirement_graph(decision.plan, analysis_evidence,
                             formula_id=new_formula, formula_required=formula_required,
-                            require_all_scenarios=bool(re.search(r"\b(?:each|every|per[- ](?:case|sample|reading|well))\b|각각",
+                            require_all_scenarios=bool(ir.scenarios) if ir else bool(re.search(
+                                r"\b(?:each|every|per[- ](?:case|sample|reading|well))\b|각각",
                                 request.goal or request.topic, re.I)))
+                        if ir:
+                            self._require_scenarios(refreshed, ir, analysis_evidence)
                         gain = required_recovery_gain(graph, refreshed, added)
                         python_trace.recovery_rounds.append({
                             "round": calculation_recovery_queries, "query": recovery_query,
                             "missing_before": sorted(missing_before), "required_gain": gain,
                             "new_source_ids": added, "status": "required_gain" if gain else "recovery_no_required_gain",
                         })
-                        python_trace.recovery_materialization_success = bool(gain)
+                        python_trace.recovery_materialization_success |= bool(gain)
                         graph = refreshed
                         selected_formula = new_formula
+                        if ir:
+                            python_trace.input_ready = bool(decision.plan) and not any(
+                                value != "formula_source" for value in graph.missing_variables + graph.ambiguous_variables + graph.unit_mismatch_variables)
+                            python_trace.method_ready = graph.formula_source_available
+                            graph.source_complete = bool(python_trace.input_ready and python_trace.method_ready)
+                            python_trace.recovery_snapshots.append(self._readiness_snapshot(graph, resolution, checklist, analysis_evidence))
                         if graph.source_complete:
                             break
                     python_trace.recovery_query_count = len(python_trace.recovery_rounds)
@@ -470,21 +558,36 @@ class GoalResearchAgent:
                                 python_trace.blocked_stage = "analysis_initialization_failed"
                                 raise
                         if all(fact.canonical_fact_id for fact in decision.plan.input_facts):
-                            checklist = required_output_checklist(request, graph)
+                            checklist = checklist_from_ir(ir) if ir else required_output_checklist(request, graph)
                             python_trace.required_output_checklist = [item.model_dump() for item in checklist]
-                            if type(self.contract_builder) is CalculationContractBuilder:
+                            skeleton = build_contract_skeleton(ir, checklist, decision.plan, graph) if ir else None
+                            if skeleton:
+                                python_trace.contract_skeleton = skeleton.model_dump(mode="json")
+                            if skeleton and type(self.contract_builder) is CalculationContractBuilder:
+                                contract_status = validate_contract(skeleton, decision.plan, graph, checklist) or "materialized"
+                                contract = skeleton if contract_status == "materialized" else None
+                                contract_attempts = 0
+                            elif type(self.contract_builder) is CalculationContractBuilder:
                                 contract, contract_status, contract_attempts = await self.contract_builder.build(
                                     request, decision.plan, graph, checklist)
                             else:
                                 # Keep injected legacy builders usable for persisted v5 workflows.
                                 contract, contract_status, contract_attempts = await self.contract_builder.build(
                                     request, decision.plan)
+                            if skeleton and contract:
+                                python_trace.contract_final = contract.model_dump(mode="json")
+                                python_trace.contract_skeleton_diff = skeleton_diff(skeleton, contract)
+                                if python_trace.contract_skeleton_diff:
+                                    contract_status = "contract_skeleton_violation"
+                                    contract = None
                             python_trace.contract_status = contract_status
                             python_trace.contract_attempts = contract_attempts
                             python_trace.calculation_contract_id = contract.contract_id if contract else None
                             python_trace.required_output_ids = [item.output_id for item in contract.required_outputs if item.required] if contract else []
-                            snapshot = contract or getattr(self.contract_builder, "last_candidate", None)
+                            snapshot = contract or (skeleton if ir and type(self.contract_builder) is CalculationContractBuilder
+                                                    else getattr(self.contract_builder, "last_candidate", None))
                             python_trace.calculation_contract_schema_version = (
+                                3 if snapshot and ir and type(self.contract_builder) is CalculationContractBuilder else
                                 2 if snapshot and type(self.contract_builder) is CalculationContractBuilder else None)
                             python_trace.calculation_contract = snapshot.model_dump(mode="json") if snapshot else None
                             python_trace.missing_requested_outputs = missing_checklist_outputs(snapshot, checklist) if snapshot else [
@@ -709,7 +812,7 @@ class GoalResearchAgent:
 
     @staticmethod
     def _attach_source_formula(decision: Any, record: Any) -> None:
-        if decision.plan is None or decision.plan.formula_source_id:
+        if decision.plan is None:
             return
         decision.plan.formula = record.expression_candidate
         decision.plan.formula_source_id = record.formula_id
@@ -718,9 +821,38 @@ class GoalResearchAgent:
         decision.selected_formula_id = record.formula_id
 
     @staticmethod
+    def _require_scenarios(graph: CalculationRequirementGraph, ir: Any,
+                           evidence: list[dict[str, Any]]) -> None:
+        if not ir.scenarios:
+            return
+        names = [fact.name for fact in _catalog(evidence)]
+        for scenario in ir.scenarios:
+            key = normalize_symbol(scenario.scenario_id)
+            present = (any(normalize_symbol(value).endswith(key) for value in graph.scenario_bindings if value != "default")
+                       if ir.specialist_relation_required else any(scenario_fact_match(value, key) for value in names))
+            if not present:
+                graph.missing_variables.append(f"scenario:{scenario.scenario_id}")
+        if graph.missing_variables:
+            graph.source_complete = False
+
+    @staticmethod
+    def _readiness_snapshot(graph: CalculationRequirementGraph, resolution: Any,
+                            checklist: list[Any], evidence: list[dict[str, Any]]) -> dict[str, Any]:
+        return {"formula_candidates": resolution.candidates if resolution else [],
+                "selected_formula": graph.formula_id, "binding_map": graph.scenario_bindings,
+                "missing_requirements": [*graph.missing_variables, *graph.ambiguous_variables,
+                                         *graph.unit_mismatch_variables],
+                "available_facts": [{"fact_id": fact.canonical_fact_id or fact.evidence_id,
+                                     "name": fact.name, "unit": fact.unit} for fact in _catalog(evidence)],
+                "available_formulas": [item.formula_id for item in FormulaSourceRegistry.from_evidence(evidence).records],
+                "checklist": [item.model_dump() for item in checklist],
+                "source_complete": graph.source_complete}
+
+    @staticmethod
     def _record_requirements(trace: PythonExecutionTrace, graph: CalculationRequirementGraph) -> None:
         trace.requirement_graph_schema_version = graph.schema_version
         trace.requirement_graph = graph.model_dump(mode="json")
+        trace.binding_map = graph.scenario_bindings.copy()
         trace.source_complete = graph.source_complete
         trace.required_variable_count = graph.required_variable_count
         trace.bound_variable_count = graph.bound_variable_count
@@ -733,8 +865,20 @@ class GoalResearchAgent:
     @staticmethod
     def _calculation_recovery_query(request: GoalResearchRequest, criteria: list[GoalCriterion],
                                     graph: CalculationRequirementGraph,
-                                    plan_summary: dict[str, Any] | None) -> str:
+                                    plan_summary: dict[str, Any] | None,
+                                    ir: Any = None) -> str:
         missing = [item for item in graph.formula_variables if item.status != "bound"]
+        if ir:
+            targets = list(ir.target_concepts)
+            if not graph.formula_source_available:
+                terms = [*targets, *[item.name for item in _catalog(UserFactRegistry.from_topic(request.topic).evidence())],
+                         "engineering equation relation"]
+            else:
+                terms = [*targets, *[item.variable_name for item in missing],
+                         *[alias for item in missing for alias in item.aliases],
+                         *graph.missing_variables, "measured numeric evidence"]
+            query = re.sub(r"(?<![A-Za-z])\d+(?:\.\d+)?(?![A-Za-z])", " ", " ".join(terms))
+            return re.sub(r"\s+", " ", query).strip()[:240]
         concepts = [str((plan_summary or {}).get("purpose") or ""),
                     *(item.description for item in criteria if item.required)]
         if not any(concepts):
@@ -1023,6 +1167,8 @@ class GoalResearchAgent:
             and not re.search(r"\b(?:untrusted data|prompt|instructions?)\b", str(value), re.I)
             and not (request.expected_result is None and re.search(r"expected[ -]hypothesis|expected[ -]result", str(value), re.I))
             and not (valid_calcs and re.search(r"calculat(?:ion|ed).*?(?:output|result).*?(?:not found|unavailable|not provided|missing)|(?:calculation|difference|result).*?(?:lack of validation|not validated)", str(value), re.I))
+            and not (any(record.formula_evidence_ids for record in valid_calcs.values())
+                     and re.search(r"\b(?:formula|equation|relation)\b.*?\b(?:not\s+(?:explicitly\s+)?(?:cited|provided|found)|missing|unavailable)\b", str(value), re.I))
         ]
         limitations = [value for value in limitations if not (
             (calc_ids := re.findall(r"\bCALC\d+\b", value))

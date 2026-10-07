@@ -8,6 +8,8 @@ from pydantic import BaseModel
 
 from app.models.goal_research_schemas import CalculationContract, GoalResearchRequest
 from app.services.calculation_requirements import CalculationRequirementGraph
+from app.services.calculation_requirements import normalize_symbol
+from app.services.calculation_request_ir import CalculationRequestIR
 
 
 class RequiredOutputIntent(BaseModel):
@@ -16,6 +18,13 @@ class RequiredOutputIntent(BaseModel):
     scenario_id: str | None = None
     requested_unit: str | None = None
     required: bool = True
+
+
+def checklist_from_ir(ir: CalculationRequestIR) -> list[RequiredOutputIntent]:
+    """Freeze output shape before any evidence or plan is inspected."""
+    return [RequiredOutputIntent(semantic_name=item.semantic_name, output_type=item.output_type,
+                                 scenario_id=item.scenario_id, requested_unit=item.unit)
+            for item in ir.requested_outputs]
 
 
 def required_output_checklist(request: GoalResearchRequest, graph: CalculationRequirementGraph) -> list[RequiredOutputIntent]:
@@ -44,7 +53,8 @@ def missing_checklist_outputs(contract: CalculationContract, checklist: list[Req
     missing: list[str] = []
     for intent in checklist:
         candidates = [item for item in contract.required_outputs if item.required and
-                      (intent.scenario_id is None or item.scenario_id == intent.scenario_id)]
+                      (intent.scenario_id is None or item.scenario_id == intent.scenario_id or
+                       (item.scenario_id and normalize_symbol(item.scenario_id).endswith(normalize_symbol(intent.scenario_id))))]
         if intent.semantic_name == "per_case":
             matches = [item for item in candidates if item.semantic_type == "numeric"]
         else:
@@ -52,8 +62,8 @@ def missing_checklist_outputs(contract: CalculationContract, checklist: list[Req
                 "mean": ("mean", "average"), "maximum": ("max", "largest", "highest"),
                 "minimum": ("min", "smallest", "lowest"), "ranking": ("rank", "order"),
                 "rms": ("rms", "root_mean_square"), "sum": ("sum", "total"),
-            }[intent.semantic_name]
-            matches = [item for item in candidates if any(term in (item.name + " " + item.output_id).casefold()
+            }.get(intent.semantic_name, (intent.semantic_name,))
+            matches = [item for item in candidates if any(term.casefold() in (item.name + " " + item.output_id).casefold()
                        for term in terms) and (intent.semantic_name != "ranking" or item.semantic_type in {"ranking", "list"})]
         if not matches:
             missing.append(f"{intent.scenario_id or 'aggregate'}:{intent.semantic_name}")

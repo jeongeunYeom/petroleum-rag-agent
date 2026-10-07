@@ -21,12 +21,28 @@ ALIASES: dict[str, tuple[str, ...]] = {
     "h": ("thickness",),
     "t": ("time",),
     "p0": ("initial_pressure",),
+    "td": ("dimensionless_time",),
+    "cd": ("dimensionless_storage", "dimensionless_wellbore_storage"),
+    "pd": ("dimensionless_pressure",),
 }
 SUBSCRIPTS = str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789")
 
 
 def normalize_symbol(name: str) -> str:
     return re.sub(r"[^a-z0-9]", "", name.translate(SUBSCRIPTS).casefold())
+
+
+def symbol_names(variable: str) -> set[str]:
+    return {normalize_symbol(value) for value in (variable, *ALIASES.get(variable.casefold(), ()))}
+
+
+def scenario_fact_match(name: str, scenario: str) -> bool:
+    """Match a complete scenario prefix, never the `C` inside `case`."""
+    normalized, key = normalize_symbol(name), normalize_symbol(scenario)
+    for prefix in ("case", "well", "layer", "sample"):
+        if normalized.startswith(prefix):
+            return normalized.startswith(prefix + key) and len(normalized) > len(prefix + key)
+    return normalized.startswith(key) and len(normalized) > len(key)
 
 
 def select_formula_candidate(evidence: list[dict[str, Any]], intent: str,
@@ -105,7 +121,7 @@ def _catalog(evidence: list[dict[str, Any]]) -> list[InputFact]:
 
 
 def _scenarios(facts: list[InputFact], variables: set[str]) -> list[str | None]:
-    suffixes = {normalize_symbol(value) for variable in variables for value in (variable, *ALIASES.get(variable.casefold(), ()))}
+    suffixes = set().union(*(symbol_names(variable) for variable in variables))
     found: set[str] = set()
     for fact in facts:
         if fact.source_type != "user_fact" and not re.match(r"^(?:Layer|Well)_", fact.name, re.I):
@@ -134,11 +150,13 @@ def _bind(variable: str, scenario: str | None, facts: list[InputFact], source_id
         ]
     else:
         prefix = normalize_symbol(scenario)
+        prefixes = {prefix, *(f"{kind}{prefix}" for kind in ("case", "well", "layer", "sample"))}
         levels = [
-            ("scenario_exact", [fact for fact in facts if normalize_symbol(fact.name) == prefix + normalized]),
-            ("scenario_alias", [fact for fact in facts if normalize_symbol(fact.name) in {prefix + normalize_symbol(a) for a in aliases}]),
+            ("scenario_exact", [fact for fact in facts if normalize_symbol(fact.name) in {p + normalized for p in prefixes}]),
+            ("scenario_alias", [fact for fact in facts if normalize_symbol(fact.name) in
+             {p + normalize_symbol(a) for p in prefixes for a in aliases}]),
         ]
-    if source_id:
+    if source_id and scenario is None:
         levels.append(("source_label", [fact for fact in facts if fact.evidence_id == source_id and
                         normalize_symbol(fact.name) in {normalize_symbol(term) for term in terms}]))
     if scenario is None:
@@ -153,7 +171,7 @@ def _bind(variable: str, scenario: str | None, facts: list[InputFact], source_id
             continue
         requirement.candidate_fact_ids = [fact.canonical_fact_id or fact.evidence_id for fact in candidates]
         requirement.binding_method = method
-        if expected_unit and any(fact.unit.casefold() != expected_unit.casefold() for fact in candidates):
+        if expected_unit and any(normalize_symbol(fact.unit) != normalize_symbol(expected_unit) for fact in candidates):
             requirement.unit_check = "mismatch"
             requirement.status = "unit_mismatch"
         elif len(candidates) != 1:
@@ -161,7 +179,8 @@ def _bind(variable: str, scenario: str | None, facts: list[InputFact], source_id
         else:
             fact = candidates[0]
             requirement.bound_fact_id = fact.canonical_fact_id or fact.evidence_id
-            requirement.binding_confidence = "deterministic"
+            requirement.binding_confidence = "deterministic_exact" if method in {"exact", "scenario_exact"} else (
+                "scenario_match" if method.startswith("scenario") else "deterministic_alias")
             requirement.source_type = fact.source_type
             requirement.source_id = fact.evidence_id
             requirement.unit_check = "matched" if expected_unit else "not_specified"
@@ -295,9 +314,20 @@ def required_recovery_gain(before: CalculationRequirementGraph, after: Calculati
     if (not before.formula_source_available and after.formula_source_available
             and after.required_evidence_ids and after.required_evidence_ids[0] in added):
         gain.add("formula_source")
+    if (before.formula_source_available and after.formula_id != before.formula_id
+            and after.bound_variable_count > before.bound_variable_count
+            and after.required_evidence_ids and after.required_evidence_ids[0] in added):
+        gain.add("formula_replacement")
     missing = set(before.missing_variables)
     for item in after.formula_variables:
         label = f"{item.scenario_id or 'default'}:{item.variable_name}"
         if label in missing and item.status == "bound" and item.bound_fact_id and item.bound_fact_id.startswith("EFACT") and item.source_id in added:
             gain.add(label)
+    for missing_scenario in (value for value in before.missing_variables if value.startswith("scenario:")):
+        key = normalize_symbol(missing_scenario.split(":", 1)[1])
+        bindings = next((value for scenario, value in after.scenario_bindings.items()
+                         if normalize_symbol(scenario).endswith(key)), {})
+        if bindings and any(item.source_id in added for item in after.formula_variables
+                            if item.bound_fact_id in bindings.values()):
+            gain.add(missing_scenario)
     return sorted(gain)

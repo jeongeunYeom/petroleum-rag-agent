@@ -386,7 +386,7 @@ class GoalPythonAnalysis:
                 code = await self._generate_code(request, plan, outputs, error, contract)
                 if trace:
                     trace.code_generated = True
-                if trace and trace.calculation_contract_schema_version == 2 and contract:
+                if trace and (trace.calculation_contract_schema_version or 0) >= 2 and contract:
                     stage = "calculation_code_preflight_failed"
                     formula_literals: set[float] = {0.0, 1.0, 100.0, float(len(plan.input_facts))}
                     for equation in [plan.formula or "", *plan.dependency_formulas]:
@@ -492,16 +492,27 @@ class GoalPythonAnalysis:
 
     async def _generate_code(self, request: GoalResearchRequest, plan: PythonAnalysisPlan, outputs: list[str], error: str,
                              contract: CalculationContract | None = None) -> str:
+        if contract and contract.operation_type in {"generic_arithmetic", "generic_statistics"}:
+            from app.services.generic_calculation_registry import generic_code
+            code = generic_code(plan, contract, outputs[0])
+            if code is None:
+                raise ValueError("unsupported_generic_operation")
+            return code
         if contract and plan.formula_source_id and plan.formula and expression_variables(plan.formula) is not None:
             lhs, rhs = (part.strip() for part in plan.formula.split("=", 1))
             scenarios = {item.scenario_id: item.input_bindings for item in contract.scenarios}
-            numeric = [item for item in contract.required_outputs if item.required]
-            if (scenarios and numeric and all(item.semantic_type == "numeric" and item.scenario_id in scenarios
-                                              for item in numeric)
-                    and all(sum(item.scenario_id == scenario for item in numeric) == 1 for scenario in scenarios)):
+            per_scenario = [item for item in contract.required_outputs if item.required and item.scenario_id]
+            aggregate = [item for item in contract.required_outputs if item.required and not item.scenario_id]
+            aggregate_ops = {"mean": "statistics.mean(list(results.values()))", "median": "statistics.median(list(results.values()))",
+                             "maximum": "max(results.values())", "minimum": "min(results.values())",
+                             "range": "max(results.values()) - min(results.values())",
+                             "sum": "sum(results.values())", "ranking": "ranking", "leader_ids": "leaders"}
+            if (scenarios and per_scenario and all(item.semantic_type == "numeric" for item in per_scenario)
+                    and all(sum(item.scenario_id == scenario for item in per_scenario) == 1 for scenario in scenarios)
+                    and all(item.name in aggregate_ops for item in aggregate)):
                 values = {fact.canonical_fact_id or fact.evidence_id: {"value": fact.value, "unit": fact.unit}
                           for fact in plan.input_facts}
-                lines = ["import json", f"facts = {values!r}", "results = {}", "outputs = {}"]
+                lines = ["import json, math, statistics", f"facts = {values!r}", "results = {}", "outputs = {}"]
                 for scenario, bindings in scenarios.items():
                     for variable in sorted(expression_variables(plan.formula) or ()):
                         if variable in bindings:
@@ -510,8 +521,20 @@ class GoalPythonAnalysis:
                         lines.append(f"{variable} = facts[{bindings[variable]!r}]['value']")
                     lines.extend(plan.dependency_formulas)
                     lines.append(f"results[{scenario!r}] = {rhs}")
-                    item = next(item for item in numeric if item.scenario_id == scenario)
+                    item = next(item for item in per_scenario if item.scenario_id == scenario)
                     lines.append(f"outputs[{item.output_id!r}] = {{'value': results[{scenario!r}], 'unit': {item.unit!r}}}")
+                if aggregate:
+                    lines.extend(["maximum = max(results.values())",
+                        "leaders = sorted(key for key, value in results.items() if math.isclose(value, maximum, rel_tol=1e-9, abs_tol=1e-12))",
+                        "rank_groups = []",
+                        "for key in sorted(results, key=lambda item: (-results[item], item)):",
+                        "    if rank_groups and math.isclose(results[key], results[rank_groups[-1][0]], rel_tol=1e-9, abs_tol=1e-12):",
+                        "        rank_groups[-1].append(key)",
+                        "    else:",
+                        "        rank_groups.append([key])",
+                        "ranking = ['='.join(sorted(group)) for group in rank_groups]"])
+                    for item in aggregate:
+                        lines.append(f"outputs[{item.output_id!r}] = {{'value': {aggregate_ops[item.name]}, 'unit': {item.unit!r}}}")
                 lines.append(f"with open({outputs[0]!r}, 'w') as output:")
                 lines.append("    json.dump({" + f"'contract_id': {contract.contract_id!r}, 'outputs': outputs, "
                              + f"'used_input_ids': {contract.input_fact_ids!r}, 'used_formula_id': {contract.formula_id!r}, "
