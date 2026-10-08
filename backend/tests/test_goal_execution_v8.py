@@ -22,6 +22,8 @@ from app.services.goal_execution_state import (
 from app.services.goal_research_agent import EvidenceAccumulator
 from app.services.goal_research_service import GoalResearchService
 from app.services.goal_simulation import validate_expression
+from app.services.goal_python_analysis import GoalPythonAnalysis
+from app.services.goal_tool_planner import ToolDecision
 from app.services.user_fact_registry import UserFactRegistry
 
 
@@ -222,6 +224,7 @@ def test_simulation_integrates_real_sandbox_and_stops_after_verification(tmp_pat
     })
     req.success_criteria = [GoalCriterion(criterion_id="C1", description="Report all simulated cases")]
     req.max_iterations = 5
+    req.allow_python_execution = req.python_execution_approved = False
     agent = GoalExecutionAgent(NoResearch(), object(), evaluator=PassingEvaluator())
     result = asyncio.run(agent.run("GR-TEST-SIM", req))
     assert result.status == GoalStatus.ACHIEVED
@@ -231,6 +234,75 @@ def test_simulation_integrates_real_sandbox_and_stops_after_verification(tmp_pat
     assert result.computations[0].validation_passed
     assert sum(key.startswith("OUT_CASE_") for key in result.computations[0].output_manifest) == 11
     assert result.python_calls_total == 1
+    assert result.telemetry["python_authorization_source"] == "autonomous_execution_mode"
+    assert result.action_history[0]["details"]["subprocess_reached"] is True
+
+
+class StaticResearch:
+    def __init__(self, text: str = ""):
+        self.text = text
+
+    async def research(self, request):
+        sources = [InternalEvidence(evidence_id="KB1", document="source.pdf", page=1,
+                                    chunk_id="c1", score=1, excerpt=self.text)] if self.text else []
+        return ResearchResponse(query=request.query, answer=self.text, internal_sources=sources,
+                                web_sources=[], figures=[], provenance=[], model=request.model,
+                                inference_used=False, evidence_counts=EvidenceCounts(internal=len(sources), external=0),
+                                routing_mode="internal_only", retrieval_mode="hybrid",
+                                timing=ResearchTiming(retrieval_seconds=0, reasoning_seconds=0, elapsed_seconds=0),
+                                validation={})
+
+
+async def synthetic_synthesis(*_args):
+    return "Source-supported result. [KB1] [CALC1]"
+
+
+def test_autonomous_research_only_uses_no_python_without_client_flags():
+    req = GoalResearchRequest(topic="API gravity and crude oil types",
+                              goal="Explain the relation between API gravity and heavy or light crude",
+                              success_criteria=[GoalCriterion(criterion_id="C1", description="Explain the relation")],
+                              execution_mode="autonomous_goal_execution")
+    agent = GoalExecutionAgent(StaticResearch("Higher API gravity indicates lighter crude."), object(),
+                               evaluator=PassingEvaluator(), synthesizer=synthetic_synthesis)
+    result = asyncio.run(agent.run("GR-TEST-RESEARCH", req))
+    assert result.status == GoalStatus.ACHIEVED
+    assert result.python_calls_total == 0
+    assert all(item["action_type"] != "calculate" for item in result.action_history)
+    assert result.telemetry["python_authorization_source"] == "autonomous_execution_mode"
+
+
+def test_autonomous_user_fact_calculation_reaches_sandbox_without_client_flags(tmp_path, monkeypatch):
+    settings = Settings(data_dir=tmp_path / "data", agent_workspace_dir=tmp_path / "workspace")
+    monkeypatch.setattr("app.services.goal_execution_agent.get_settings", lambda: settings)
+
+    class ComputePlanner:
+        async def decide(self, *_args):
+            return ToolDecision(tool_needed=True, tool_type="python_calculation", reason="requested arithmetic")
+
+    req = GoalResearchRequest(topic="A_rate=187 stb/d, B_rate=234 stb/d, C_rate=163 stb/d.",
+                              goal="Calculate the mean rate, descending rank and top case.",
+                              success_criteria=[GoalCriterion(criterion_id="C1", description="Calculate mean and ranking")],
+                              execution_mode="autonomous_goal_execution", max_iterations=5)
+    agent = GoalExecutionAgent(NoResearch(), object(), evaluator=PassingEvaluator(),
+                               synthesizer=synthetic_synthesis, tool_planner=ComputePlanner(),
+                               analysis_factory=lambda run_id: GoalPythonAnalysis(settings, object(), run_id))
+    result = asyncio.run(agent.run("GR-TEST-AUTO-CALC", req))
+    assert result.action_history[0]["action_type"] == "calculate"
+    assert result.action_history[0]["details"]["subprocess_reached"] is True
+    assert result.python_calls_total == 1
+    assert result.computations[0].validation_passed
+    assert result.computations[0].output_manifest["OUT_mean"]["value"] == pytest.approx(194.66666666666666)
+    assert result.computations[0].output_manifest["OUT_mean"]["unit"] == "stb/d"
+
+
+def test_autonomous_missing_specialist_formula_stops_without_python():
+    req = GoalResearchRequest(topic="Xq=31 psi", goal="Find a cited equation for fictional Kappa-Zeta coupling, then calculate Zeta in psi.",
+                              success_criteria=[GoalCriterion(criterion_id="C1", description="Calculate with a cited equation")],
+                              execution_mode="autonomous_goal_execution", max_retrieval_actions=1)
+    result = asyncio.run(GoalExecutionAgent(StaticResearch(), object()).run("GR-TEST-MISSING-FORMULA", req))
+    assert result.status != GoalStatus.ACHIEVED
+    assert result.python_calls_total == 0
+    assert not any(item.validation_passed for item in result.computations)
 
 
 def test_research_answer_drops_tangential_cited_claims():

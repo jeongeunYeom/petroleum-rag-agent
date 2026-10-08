@@ -35,12 +35,26 @@ export type GoalIteration = {
 
 export type Computation = {
   computation_id: string;
+  analysis_id: string;
   purpose: string;
   summary: string;
   validation_passed: boolean;
   attempts: number;
   output_files: string[];
+  source_input_ids: string[];
+  source_evidence_ids: string[];
+  formula_evidence_ids: string[];
+  input_facts: { name: string; value: number; unit?: string | null; evidence_id?: string; canonical_fact_id?: string }[];
+  output_manifest: Record<string, {
+    name: string;
+    value: number | string | (string | number)[];
+    unit?: string | null;
+    semantic_type?: string;
+    source_fact_ids?: string[];
+  }>;
 };
+
+export type InternalSource = { evidence_id: string; document: string; page?: number | null };
 
 export type GeneratedArtifact = {
   artifact_id: string;
@@ -79,7 +93,7 @@ export type GoalResearchRun = {
     coverage_after: number;
   }[];
   iterations: GoalIteration[];
-  internal_sources: unknown[];
+  internal_sources: InternalSource[];
   web_sources: unknown[];
   figures: unknown[];
   computations: Computation[];
@@ -100,8 +114,8 @@ export type GoalResearchInput = {
   use_external: boolean;
   max_iterations: number;
   execution_mode?: "legacy_goal_research" | "autonomous_goal_execution";
-  allow_python_execution: boolean;
-  python_execution_approved: boolean;
+  allow_python_execution?: boolean;
+  python_execution_approved?: boolean;
   deliverables: ("docx" | "pptx")[];
 };
 

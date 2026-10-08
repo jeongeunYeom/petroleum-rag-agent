@@ -337,6 +337,13 @@ class GoalExecutionAgent(GoalResearchAgent):
         is_canceled: Callable[[], bool] | None = None,
         on_progress: Callable[[GoalResearchResponse], None] | None = None,
     ) -> GoalResearchResponse:
+        autonomous_python = request.execution_mode == "autonomous_goal_execution"
+        if autonomous_python:
+            # Mode grants bounded tool permission; the action planner still decides if it is needed.
+            request = request.model_copy(update={
+                "allow_python_execution": True,
+                "python_execution_approved": True,
+            })
         started = time.perf_counter()
         users = UserFactRegistry.from_topic(request.topic)
         simulation_spec = self._simulation_spec(request)
@@ -355,6 +362,8 @@ class GoalExecutionAgent(GoalResearchAgent):
             expected_result_status=ExpectedResultStatus.INSUFFICIENT_EVIDENCE if request.expected_result
             else ExpectedResultStatus.NOT_PROVIDED,
         )
+        if autonomous_python:
+            result.telemetry["python_authorization_source"] = "autonomous_execution_mode"
         state = GoalExecutionState.from_criteria(run_id, request.goal or request.topic, criteria)
         state.known_facts = [item.fact_id for item in users.records]
         simulation_source_id = f"USERF{len(users.records) + 1}"

@@ -1228,7 +1228,7 @@ export default function Home() {
               ↑
             </button>
           </div>
-          <p className="mt-2 text-center text-[11px] text-slate-400">RAG 근거와 Agent 실행 결과를 함께 확인하세요. 파일 변경·코드 실행은 승인 후 진행됩니다.</p>
+          <p className="mt-2 text-center text-[11px] text-slate-400">목표 연구에 필요한 제한된 로컬 계산은 자동 실행됩니다. 파일 변경은 별도 승인이 필요합니다.</p>
         </form>
       </section>
 

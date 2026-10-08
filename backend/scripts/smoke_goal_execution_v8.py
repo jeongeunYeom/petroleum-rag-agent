@@ -125,6 +125,8 @@ def check(case: str, result) -> tuple[bool, list[str]]:
 async def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("cases", nargs="*")
+    parser.add_argument("--auto-python", action="store_true",
+                        help="Omit client Python flags to exercise autonomous authorization")
     parser.add_argument("--output", type=Path, default=Path(__file__).resolve().parents[2] /
                         "evaluation" / "review" / "goal_execution_v8_development_smoke.json")
     args = parser.parse_args()
@@ -138,7 +140,11 @@ async def main() -> None:
     ollama = OllamaClient(settings)
     reports = []
     for case in args.cases or list(CASES):
-        request = GoalResearchRequest(**COMMON, **CASES[case])
+        case_input = dict(CASES[case])
+        if args.auto_python:
+            case_input.pop("allow_python_execution", None)
+            case_input.pop("python_execution_approved", None)
+        request = GoalResearchRequest(**COMMON, **case_input)
         research = NoResearch() if case in {"B", "E", "F"} else cached_research_agent()
         started = time.perf_counter()
         try:
@@ -146,9 +152,15 @@ async def main() -> None:
             passed, problems = check(case, result)
             report = {
                 "case": case, "passed": passed, "problems": problems,
+                "execution_mode": request.execution_mode,
+                "python_flags_supplied_by_client": not args.auto_python and "allow_python_execution" in case_input,
                 "status": result.status.value, "stop_reason": result.stop_reason.value,
                 "goal_coverage": result.goal_coverage, "elapsed_seconds": round(time.perf_counter() - started, 3),
                 "actions": result.action_history, "state_history": result.state_history,
+                "first_action": result.action_history[0]["action_type"] if result.action_history else None,
+                "action_sequence": [item["action_type"] for item in result.action_history],
+                "subprocess_reached": any(item.get("details", {}).get("subprocess_reached")
+                                          for item in result.action_history),
                 "python_calls": result.python_calls_total,
                 "validated_calcs": sum(item.validation_passed for item in result.computations),
                 "computations": [{"id": item.computation_id, "valid": item.validation_passed,
@@ -158,6 +170,8 @@ async def main() -> None:
                 "kb_sources": [{"id": item.evidence_id, "document": item.document, "page": item.page}
                                for item in result.internal_sources],
                 "validation": result.validation, "answer": result.final_answer,
+                "python_authorization_source": result.telemetry.get("python_authorization_source"),
+                "unsupported_claims": result.validation.get("unsupported_engineering_claim_count", 0),
             }
         except Exception as exc:
             report = {"case": case, "passed": False, "problems": [type(exc).__name__],
