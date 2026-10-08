@@ -131,6 +131,14 @@ export function startGoalResearch(input: GoalResearchInput): Promise<GoalResearc
   });
 }
 
+export function startGoalResearchFromMessage(message: string, model: string, contextMessage?: string): Promise<GoalResearchRun> {
+  return requestJson("/research/goal-runs/from-message", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message, model, context_message: contextMessage }),
+  });
+}
+
 export function getGoalResearch(runId: string): Promise<GoalResearchRun> {
   return requestJson(`/research/goal-runs/${runId}`, { cache: "no-store" });
 }

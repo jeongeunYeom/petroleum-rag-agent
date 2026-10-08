@@ -18,6 +18,12 @@ TUPLE_HEADER = re.compile(r"\((?P<header>[^()]+)\)\s*:")
 TUPLE_ROW = re.compile(r"(?P<label>[A-Za-z][A-Za-z0-9_]*)\s*=\s*\((?P<values>[^()]+)\)")
 WELL_HEADER = re.compile(r"\bWell\s+(?P<well>[A-Za-z][A-Za-z0-9_-]*)\s*:", re.IGNORECASE)
 KOREAN_SG = re.compile(rf"비중\s*(?:은|는|이|가|[:=])?\s*(?P<value>{NUMBER})")
+KOREAN_NAMED_SG = re.compile(rf"\bSG\s*(?:은|는|이|가)\s*(?P<value>{NUMBER})(?=$|[가-힣,;\s]|\.(?!\d))", re.I)
+BARE_SERIES = re.compile(
+    rf"(?P<body>(?:\b[A-Z]\s+(?:{NUMBER})\s*[,;]\s*)+\b[A-Z]\s+(?:{NUMBER}))"
+    rf"\s*(?P<unit>stb/d|bbl/d|m\^?3/d)(?=$|[가-힣,;.\s])"
+)
+BARE_ITEM = re.compile(rf"\b(?P<label>[A-Z])\s+(?P<value>{NUMBER})")
 
 
 def _number(raw: str) -> float | None:
@@ -107,6 +113,12 @@ class UserFactRegistry(BaseModel):
                 add(prefix + label, found.group("value"), found.group("unit") or "", found.group(0), f"Well {well}" if well else None, offset + found.start())
             for found in KOREAN_SG.finditer(text):
                 add("SG", found.group("value"), "", found.group(0), None, offset + found.start())
+            for found in KOREAN_NAMED_SG.finditer(text):
+                add("SG", found.group("value"), "", found.group(0), None, offset + found.start())
+            for series in BARE_SERIES.finditer(text):
+                for item in BARE_ITEM.finditer(series.group("body")):
+                    add(f"{item.group('label')}_rate", item.group("value"), series.group("unit"),
+                        series.group(0), series.group(0), offset + series.start())
             offset += len(line)
         return cls(records=records)
 

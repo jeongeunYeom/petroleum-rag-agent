@@ -52,6 +52,7 @@ class GoalResearchService:
             max_iterations=request.max_iterations,
             criteria_source="user" if request.success_criteria else "inferred",
             frozen_criteria=[item.model_copy(deep=True) for item in request.success_criteria],
+            deliverable_status={kind: "pending" for kind in dict.fromkeys(request.deliverables)},
             expected_result_status=(
                 ExpectedResultStatus.INSUFFICIENT_EVIDENCE
                 if request.expected_result
@@ -193,6 +194,10 @@ class GoalResearchService:
         response: GoalResearchResponse,
     ) -> None:
         path = self._path(run_id)
+        if request.deliverables and not response.deliverable_status and response.run_status not in {
+            GoalRunStatus.FAILED, GoalRunStatus.CANCELED,
+        }:
+            response.deliverable_status = {kind: "pending" for kind in dict.fromkeys(request.deliverables)}
         with self._lock:
             path.parent.mkdir(parents=True, exist_ok=True)
             if path.is_file():

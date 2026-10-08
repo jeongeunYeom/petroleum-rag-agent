@@ -419,7 +419,8 @@ class GoalEvaluator:
             supporting = list(
                 dict.fromkeys(
                     str(value)
-                    for value in item.get("supporting_evidence", [])
+                    for value in [*(item.get("supporting_evidence") or []),
+                                  *EVIDENCE_ID_RE.findall(str(item.get("reason") or ""))]
                     if str(value) in evidence_ids
                 )
             )

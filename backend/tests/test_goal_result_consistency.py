@@ -86,6 +86,23 @@ def test_missing_hypothesis_is_ignored_in_synthesis_and_evaluation():
     assert evaluation.expected_result_status == ExpectedResultStatus.NOT_PROVIDED
 
 
+def test_internal_diagnostic_code_is_not_shown_as_a_user_limitation():
+    class DiagnosticOllama:
+        async def chat_structured(self, *_args, **_kwargs):
+            return json.dumps({
+                "claims": [{"claim": "The source states that case B is 20 mD.", "citations": ["KB1"]}],
+                "hypothesis_assessment": {"claim": "", "citations": []},
+                "limitations": ["provenance_attribution_error"],
+            })
+
+    request = GoalResearchRequest(topic="Case B permeability", engineering_validation=False)
+    evidence = [{"evidence_id": "KB1", "source_type": "knowledge_base", "locator": "fixture",
+                 "text": "The source states that case B is 20 mD."}]
+    answer = asyncio.run(GoalResearchAgent(object(), DiagnosticOllama())._synthesize(
+        request, [], evidence, []))
+    assert "provenance_attribution_error" not in answer
+
+
 def test_resolved_gap_is_removed_but_iteration_history_is_preserved():
     result = _result()
     result.expected_result_status = ExpectedResultStatus.SUPPORTED

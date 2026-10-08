@@ -1167,6 +1167,7 @@ class GoalResearchAgent:
             str(value).strip()
             for value in parsed.get("limitations", [])
             if str(value).strip()
+            and not re.fullmatch(r"[a-z]+(?:_[a-z]+)+", str(value).strip())
             and not leaked_text(str(value), user_text)
             and not re.search(r"\b(?:untrusted data|prompt|instructions?)\b", str(value), re.I)
             and not (request.expected_result is None and re.search(r"expected[ -]hypothesis|expected[ -]result", str(value), re.I))

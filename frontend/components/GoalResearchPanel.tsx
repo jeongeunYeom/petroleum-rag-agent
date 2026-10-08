@@ -57,8 +57,8 @@ function parseCriteria(value: string): GoalCriterion[] {
     }));
 }
 
-export function GoalResearchPanel() {
-  const [open, setOpen] = useState(false);
+export function GoalResearchPanel({ defaultOpen = false }: { defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen);
   const [topic, setTopic] = useState("");
   const [goal, setGoal] = useState("");
   const [expected, setExpected] = useState("");

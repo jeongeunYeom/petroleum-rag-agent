@@ -9,6 +9,7 @@ from app.core.config import Settings, get_settings
 from app.models.goal_research_schemas import GoalResearchRequest, GoalResearchResponse
 from app.services.goal_research_agent import GoalResearchAgent
 from app.services.goal_execution_agent import GoalExecutionAgent
+from app.services.goal_message_parser import GoalMessageRequest, parse_goal_message
 from app.services.goal_research_service import (
     GoalResearchRunConflict,
     GoalResearchRunNotFound,
@@ -40,6 +41,17 @@ def start_goal_research(
     service: GoalResearchService = Depends(get_goal_research_service),
 ) -> GoalResearchResponse:
     return service.start(request)
+
+
+@router.post("/from-message", response_model=GoalResearchResponse, status_code=201)
+def start_goal_research_from_message(
+    request: GoalMessageRequest,
+    service: GoalResearchService = Depends(get_goal_research_service),
+) -> GoalResearchResponse:
+    try:
+        return service.start(parse_goal_message(request))
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @router.get("/{run_id}", response_model=GoalResearchResponse)

@@ -9,9 +9,9 @@ from app.services.goal_execution_state import GoalAction, GoalActionType, GoalEx
 from app.services.goal_intent import asks_for_api_gravity_calculation
 
 
-CALC_WORDS = re.compile(r"\b(?:calculat\w*|comput\w*|derive|mean|average|rank\w*|compare\s+numeric|difference|ratio)\b|계산|산출|평균|순위", re.I)
-ANALYZE_WORDS = re.compile(r"\b(?:rank\w*|best|worst|maximum|minimum|optim\w*|sensitiv\w*|compare)\b|순위|최적|민감도|최대|최소", re.I)
-SIMULATE_WORDS = re.compile(r"\b(?:simulat\w*|sweep|parameter\s+range|vary\w*)\b|시뮬레이션|매개변수\s*변화|범위\s*탐색", re.I)
+CALC_WORDS = re.compile(r"\b(?:calculat\w*|comput\w*|derive|mean|average|rank\w*|compare\s+numeric|difference|ratio)\b|계산|산출|평균|순위|그래프", re.I)
+ANALYZE_WORDS = re.compile(r"\b(?:rank\w*|best|worst|maximum|minimum|optim\w*|sensitiv\w*|compare|plot|graph|chart)\b|순위|최적|민감도|최대|최소|그래프|도표", re.I)
+SIMULATE_WORDS = re.compile(r"\b(?:simulat\w*|sweep|parameter\s+range|vary\w*)\b|시뮬레이션|매개변수\s*변화|범위\s*탐색|범위로\s*계산|바꿔가며|간격으로", re.I)
 
 
 class GoalActionPlanner:

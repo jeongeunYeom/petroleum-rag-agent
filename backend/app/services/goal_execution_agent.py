@@ -169,11 +169,24 @@ class GoalExecutionAgent(GoalResearchAgent):
                                  (r"\brange\b|\bsensitiv", "Report the sensitivity range")):
                 if re.search(word, goal, re.I):
                     descriptions.append(phrase)
-        elif users.records and re.search(r"\b(?:calculat|comput)\w*\b|계산", goal, re.I):
+        elif users.records and re.search(r"공식|수식|관계식|\b(?:formula|equation|correlation)\b", goal, re.I) and re.search(
+                r"계산|구해|\b(?:calculat\w*|comput\w*)\b", goal, re.I):
+            descriptions.append("출처 있는 관계식과 제공된 입력으로 검증된 계산 결과를 제시" if prefers_korean(request)
+                                else "Provide a validated result from a sourced equation and supplied inputs")
+        elif users.records and re.search(r"\b(?:calculat|comput|determine|find)\w*\b|계산|구해|구하", goal, re.I):
             if re.search(r"\bmean\b|\baverage\b|평균", goal, re.I):
-                descriptions.append("Calculate the requested mean from the supplied inputs")
-            if re.search(r"\b(?:rank|top|best|highest)\b|순위|최고|최적", goal, re.I):
-                descriptions.append("Identify the requested ranking or top case from the supplied inputs")
+                descriptions.append("제공된 입력의 평균을 계산하여 제시" if prefers_korean(request)
+                                    else "Calculate the requested mean from the supplied inputs")
+            if re.search(r"\b(?:rank|top|best|highest)\b|순위|최고|최적|가장\s*높", goal, re.I):
+                descriptions.append("제공된 입력의 순위와 가장 높은 항목을 제시" if prefers_korean(request)
+                                    else "Identify the requested ranking or top case from the supplied inputs")
+        elif request.deliverables:
+            descriptions.append("요청한 주제의 조사 결과를 확인 가능한 근거와 함께 제시" if prefers_korean(request)
+                                else "Present the requested research with identifiable evidence")
+        elif (not request.deliverables and re.search(r"설명해|\b(?:explain|describe)\b", goal, re.I)
+              and not re.search(r"계산|시뮬레이션|\b(?:calculat\w*|simulat\w*)\b", goal, re.I)):
+            descriptions.append("요청한 관계를 확인 가능한 근거와 함께 설명" if prefers_korean(request)
+                                else "Explain the requested relationship with identifiable evidence")
         return [GoalCriterion(criterion_id=f"C{index}", description=description)
                 for index, description in enumerate(descriptions, 1)]
 
@@ -218,6 +231,9 @@ class GoalExecutionAgent(GoalResearchAgent):
     def _safe_unavailable_answer(candidate: str, state: GoalExecutionState,
                                  reason: str = "", formula: Any = None,
                                  korean: bool = False) -> str:
+        if reason == "missing_validated_formula":
+            return ("요청한 계산을 뒷받침할 출처 있는 관계식과 검증된 계산 결과를 함께 확보하지 못했습니다. 값을 추측하지 않습니다."
+                    if korean else "A sourced equation and validated calculation result were not both available. No value was guessed.")
         if candidate.strip():
             return candidate
         if reason in {"calculation_permission_required", "simulation_permission_required"}:
@@ -226,6 +242,9 @@ class GoalExecutionAgent(GoalResearchAgent):
                       if formula else "")
             return source + ("Python 실행 승인이 없어 수치 계산을 수행하지 않았습니다." if korean else
                              "No numerical calculation was run because Python execution was not approved.")
+        if reason == "simulation_spec_missing":
+            return ("계산할 결과의 정의와 모델 식이 없어 시뮬레이션을 실행하지 않았습니다. 결과 변수와 관계식을 알려주세요."
+                    if korean else "No result definition or model equation was supplied, so the simulation was not run.")
         if state.computation_ids:
             return ("검증된 결과만으로 필요한 결론을 모두 확인하지 못했습니다." if korean else
                     "The available validated results did not establish every required conclusion.")
@@ -420,6 +439,10 @@ class GoalExecutionAgent(GoalResearchAgent):
             })
         started = time.perf_counter()
         korean = prefers_korean(request)
+        requires_sourced_formula = bool(
+            re.search(r"공식|수식|관계식|\b(?:formula|equation|correlation)\b", request.goal or request.topic, re.I)
+            and re.search(r"계산|구해|\b(?:calculat\w*|comput\w*)\b", request.goal or request.topic, re.I)
+        )
         users = UserFactRegistry.from_topic(request.topic)
         simulation_spec = self._simulation_spec(request)
         criteria = [item.model_copy(deep=True) for item in request.success_criteria]
@@ -477,16 +500,22 @@ class GoalExecutionAgent(GoalResearchAgent):
                     "python_call_budget_exhausted": GoalStopReason.CALCULATION_BLOCKED,
                 }.get(action.reason_code, GoalStopReason.INSUFFICIENT_EVIDENCE)
                 self._record_stop(result, state, action.reason_code)
+                safe_reason = ("missing_validated_formula"
+                               if autonomous_python and requires_sourced_formula and not state.computation_ids
+                               and action.reason_code in {"no_progress", "calculation_blocked", "insufficient_evidence"}
+                               else action.reason_code)
                 return self._finish(result, GoalRunStatus.STOPPED, GoalStatus.STOPPED,
                                     reason, self._safe_unavailable_answer(
-                                        latest_candidate, state, action.reason_code, selected_formula, korean), started)
+                                        latest_candidate, state, safe_reason, selected_formula, korean), started)
             input_ids = [r.fact_id for r in users.records] + state.evidence_ids + state.computation_ids
             signature = action.fingerprint(input_ids)
             if signature in seen_actions:
                 self._record_stop(result, state, "repeated_action_fingerprint")
                 return self._finish(result, GoalRunStatus.STOPPED, GoalStatus.STOPPED,
                                     GoalStopReason.NO_PROGRESS,
-                                    self._safe_unavailable_answer(latest_candidate, state, korean=korean), started)
+                                    self._safe_unavailable_answer(latest_candidate, state,
+                                                                  reason="missing_validated_formula" if autonomous_python and requires_sourced_formula and not state.computation_ids else "",
+                                                                  korean=korean), started)
             seen_actions.add(signature)
             before = state.fingerprint()
             action_started = datetime.now(timezone.utc)
@@ -682,6 +711,10 @@ class GoalExecutionAgent(GoalResearchAgent):
                   GoalStopReason.INSUFFICIENT_EVIDENCE if state.blocked_reasons and not state.computation_ids else
                   GoalStopReason.MAX_ITERATIONS)
         self._record_stop(result, state, reason.value)
+        formula_unverified = (autonomous_python and requires_sourced_formula and
+                              not state.goal_achieved and not state.computation_ids)
         return self._finish(result, GoalRunStatus.COMPLETED if state.goal_achieved else GoalRunStatus.STOPPED,
                             GoalStatus.ACHIEVED if state.goal_achieved else GoalStatus.STOPPED,
-                            reason, self._safe_unavailable_answer(latest_candidate, state, korean=korean), started)
+                            reason, self._safe_unavailable_answer(latest_candidate, state,
+                                                                  reason="missing_validated_formula" if formula_unverified else "",
+                                                                  korean=korean), started)

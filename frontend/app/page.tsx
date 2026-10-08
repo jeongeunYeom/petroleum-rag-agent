@@ -18,6 +18,8 @@ import { PlotPanel } from "@/components/PlotPanel";
 import { SystemStatusPanel } from "@/components/SystemStatusPanel";
 import { MarkdownMath } from "@/components/MarkdownMath";
 import { GoalResearchPanel } from "@/components/GoalResearchPanel";
+import { getGoalResearch, goalArtifactUrl, GoalResearchRun, startGoalResearchFromMessage } from "@/lib/goalResearchApi";
+import { displayAnswer } from "@/lib/goalResultPresentation";
 import { AppIconRail, MobileModeTabs } from "@/components/AppNavigation";
 import {
   type AgentTask,
@@ -142,6 +144,7 @@ type ChatMessage = {
   comparison?: ChatCompareResponseWithFigures;
   agentTask?: AgentTask;
   agentError?: string;
+  goalRun?: GoalResearchRun;
 };
 
 type SavedChat = {
@@ -217,6 +220,18 @@ async function waitForAgentTask(taskId: string): Promise<AgentTask> {
     await new Promise((resolve) => window.setTimeout(resolve, 500));
   }
   return getAgentTask(taskId);
+}
+
+async function waitForGoalRun(runId: string, onProgress: (run: GoalResearchRun) => void): Promise<GoalResearchRun> {
+  for (let attempt = 0; attempt < 900; attempt += 1) {
+    const run = await getGoalResearch(runId);
+    onProgress(run);
+    const deliverablesBusy = Object.values(run.deliverable_status || {}).some((value) => value === "pending" || value === "running");
+    if (["failed", "canceled"].includes(run.run_status) ||
+        (["completed", "stopped"].includes(run.run_status) && !deliverablesBusy)) return run;
+    await new Promise((resolve) => window.setTimeout(resolve, 1000));
+  }
+  throw new Error(`연구 실행 시간 초과 · 실행 ID ${runId}`);
 }
 
 export default function Home() {
@@ -483,8 +498,31 @@ export default function Home() {
     setStatus(
       answerMode === "compare"
         ? "RAG 비교 답변과 Agent 작업 계획을 함께 실행 중..."
-        : `RAG + ${answerMode} 답변과 Agent 작업을 함께 실행 중...`,
+        : "연구 목표를 분석하고 필요한 근거와 도구를 실행 중...",
     );
+
+    if (answerMode !== "compare") {
+      try {
+        const context = [...messages].reverse().find((item) => item.role === "user" &&
+          !/이\s*(?:주제|내용)|앞서|위의|this topic|same topic/i.test(item.content))?.content;
+        const started = await startGoalResearchFromMessage(submittedQuestion, answerMode, context);
+        const completed = await waitForGoalRun(started.run_id, (current) =>
+          setStatus(`목표 연구 · ${current.current_stage} · 반복 ${current.current_iteration}/${current.max_iterations}`));
+        setMessages((previous) => [...previous, {
+          id: crypto.randomUUID(), role: "assistant",
+          content: displayAnswer(completed.final_answer || completed.error || "근거가 충분하지 않아 결론을 보류했습니다.", completed.computations),
+          goalRun: completed,
+        }]);
+        setStatus(completed.status === "achieved" ? "목표 달성 · 근거와 계산 검증 완료" : "연구 종료 · 남은 조건을 확인하세요.");
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "목표 연구를 시작하지 못했습니다.";
+        setMessages((previous) => [...previous, { id: crypto.randomUUID(), role: "assistant", content: `오류: ${message}` }]);
+        setStatus(message);
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
 
     const previousAgentTask = [...messages]
       .reverse()
@@ -828,8 +866,8 @@ export default function Home() {
         <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 md:px-6">
           <div className="flex items-center gap-3">
             <div>
-              <h2 className="text-sm font-bold">Petroleum RAG Agent 7.0 ▾</h2>
-              <p className="hidden text-xs text-slate-500 sm:block">Citation-grounded Q&A with local knowledge base</p>
+              <h2 className="text-sm font-bold">Petroleum Research Agent v8</h2>
+              <p className="hidden text-xs text-slate-500 sm:block">한 문장으로 근거 검색 · 계산 · 검증</p>
             </div>
           </div>
           <div className="flex items-center gap-2 text-slate-500">
@@ -865,7 +903,10 @@ export default function Home() {
 
         <div className="flex-1 overflow-y-auto bg-[#f8fafc] px-4 py-6">
           <div className="mx-auto flex max-w-4xl flex-col gap-5">
-            <GoalResearchPanel />
+            <details className="rounded-2xl border border-violet-200 bg-white shadow-sm">
+              <summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-slate-700">고급 설정 · 세부 항목 직접 지정</summary>
+              <div className="px-3 pb-3"><GoalResearchPanel defaultOpen /></div>
+            </details>
             {messages.length === 0 && (
               <div className="flex gap-3">
                 <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
@@ -1027,6 +1068,21 @@ export default function Home() {
                       <p className="mt-4 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-700">
                         Agent 오류: {message.agentError}
                       </p>
+                    )}
+
+                    {message.goalRun && (
+                      <section className="mt-5 rounded-2xl border border-violet-100 bg-violet-50/50 p-4 text-xs leading-5">
+                        <p className="font-bold text-violet-800">목표 연구 · {message.goalRun.status === "achieved" ? "목표 달성" : "근거/조건 확인 필요"}</p>
+                        <p className="mt-1 text-slate-600">{message.goalRun.action_history?.map((item) => item.action_type.toUpperCase()).join(" → ")}</p>
+                        {message.goalRun.criteria.map((item) => <p key={item.criterion_id} className="mt-2 text-slate-700">
+                          {item.status === "met" ? "✓" : "△"} {message.goalRun!.frozen_criteria.find((criterion) => criterion.criterion_id === item.criterion_id)?.description || item.criterion_id}: {displayAnswer(item.reason, message.goalRun!.computations)}
+                        </p>)}
+                        <p className="mt-2 text-slate-500">근거: 내부 문서 {message.goalRun.internal_sources.length} · 웹 {message.goalRun.web_sources.length} · 검증 계산 {message.goalRun.computations.filter((item) => item.validation_passed).length}</p>
+                        {message.goalRun.artifacts.map((artifact) => <a key={artifact.artifact_id} className="mr-4 text-violet-700 underline" href={goalArtifactUrl(message.goalRun!.run_id, artifact.artifact_id)} download>
+                          {artifact.artifact_type.toUpperCase()} 다운로드
+                        </a>)}
+                        {Object.entries(message.goalRun.deliverable_errors || {}).map(([kind, issue]) => <p key={kind} className="text-red-600">{kind.toUpperCase()}: {issue}</p>)}
+                      </section>
                     )}
 
 
@@ -1209,8 +1265,8 @@ export default function Home() {
           <div className="mx-auto flex max-w-4xl items-end gap-2 rounded-3xl border border-slate-200 bg-white px-4 py-3 shadow-lg shadow-slate-200/70">
             <span className="pb-2 text-slate-400">＋</span>
             <textarea
-              className="max-h-40 min-h-[36px] flex-1 resize-none bg-transparent py-2 text-sm outline-none placeholder:text-slate-400"
-              placeholder="연구 목표 또는 질문을 입력하세요..."
+              className="max-h-56 min-h-24 flex-1 resize-y bg-transparent py-2 text-sm outline-none placeholder:text-slate-400"
+              placeholder="연구 주제와 원하는 결과를 자연어로 입력하세요. 예: 비중 0.918인 원유의 API도를 교재 근거로 계산해줘."
               value={question}
               onChange={(event) => setQuestion(event.target.value)}
               onKeyDown={(event) => {

@@ -31,8 +31,10 @@ def response(run_id="GR-TEST", run_status=GoalRunStatus.PLANNED):
 class FakeService:
     def __init__(self):
         self.value = response()
+        self.request = None
 
     def start(self, request):
+        self.request = request
         self.value.topic = request.topic
         return self.value
 
@@ -69,8 +71,28 @@ def test_goal_research_routes_start_poll_and_cancel():
 def test_goal_research_routes_are_registered():
     paths = {route.path for route in app.routes}
     assert "/api/research/goal-runs" in paths
+    assert "/api/research/goal-runs/from-message" in paths
     assert "/api/research/goal-runs/{run_id}" in paths
     assert "/api/research/goal-runs/{run_id}/cancel" in paths
+
+
+def test_single_message_route_uses_existing_goal_service_without_web_by_default():
+    service = FakeService()
+    app.dependency_overrides[get_goal_research_service] = lambda: service
+    try:
+        with TestClient(app) as client:
+            created = client.post(
+                "/api/research/goal-runs/from-message",
+                json={"message": "SG가 0.918인 원유의 API gravity를 내부 교재의 식을 찾아 계산해줘."},
+            )
+            assert created.status_code == 201
+            assert service.request.execution_mode == "autonomous_goal_execution"
+            assert service.request.use_internal and not service.request.use_external
+            assert service.request.expected_result is None
+            assert service.request.goal.startswith("SG가 0.918")
+            assert client.post("/api/research/goal-runs/from-message", json={"message": "이 주제로 조사해줘."}).status_code == 422
+    finally:
+        app.dependency_overrides.clear()
 
 
 class CompletingController:
@@ -102,3 +124,12 @@ def test_background_service_persists_complete_run(tmp_path: Path):
     assert current.status == GoalStatus.ACHIEVED
     assert current.final_answer == "done"
     assert (settings.goal_research_runs_dir / f"{created.run_id}.json").is_file()
+
+
+def test_deliverables_remain_pending_during_terminal_agent_progress(tmp_path: Path):
+    settings = Settings(data_dir=tmp_path / "data", agent_workspace_dir=tmp_path / "workspace")
+    service = GoalResearchService(settings, CompletingController())
+    request = GoalResearchRequest(topic="topic", deliverables=["docx", "pptx"])
+    interim = response("GR-TEST", GoalRunStatus.COMPLETED)
+    service._write("GR-TEST", request, interim)
+    assert service.get("GR-TEST").deliverable_status == {"docx": "pending", "pptx": "pending"}

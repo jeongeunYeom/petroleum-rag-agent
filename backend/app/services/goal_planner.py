@@ -41,11 +41,15 @@ class GoalPlanner:
         self.ollama = ollama
 
     async def infer_criteria(self, request: GoalResearchRequest) -> list[GoalCriterion]:
+        hypothesis_instruction = (
+            "The expected result is an unverified hypothesis: never encode it as a required truth. "
+            "Assess whether it is supported, contradicted, or unresolved. "
+            if request.expected_result else
+            "No expected result or hypothesis was provided; do not create a criterion to assess one. "
+        )
         prompt = (
-            "Create operational research success criteria. The expected result is an "
-            "unverified hypothesis: never encode it as a required truth. Criteria must "
-            "ask to determine the relationship and assess whether the hypothesis is "
-            "supported, contradicted, or unresolved. Include evidence grounding.\n\n"
+            "Create operational research success criteria from only the user's goal. "
+            + hypothesis_instruction + "Include evidence grounding.\n\n"
             f"Topic: {request.topic}\nGoal: {request.goal or 'not provided'}\n"
             f"Expected hypothesis: {request.expected_result or 'not provided'}"
         )
@@ -76,6 +80,9 @@ class GoalPlanner:
                 )
                 for index, item in enumerate(values, start=1)
                 if str(item.get("description", "")).strip()
+                and (request.expected_result is not None or not re.search(
+                    r"가설|예상\s*결과|hypothesis|expected[ -]result",
+                    str(item.get("description", "")), re.I))
             ]
             if criteria:
                 return criteria

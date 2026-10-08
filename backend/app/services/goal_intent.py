@@ -13,8 +13,8 @@ def prefers_korean(request: GoalResearchRequest) -> bool:
 
 def asks_for_api_gravity(request: GoalResearchRequest) -> bool:
     text = " ".join((request.topic, request.goal or ""))
-    return bool(re.search(r"\bAPI(?:\s+gravity)?\b|API도", text, re.I)
-                and re.search(r"\bSG\b|specific\s+gravity|비중", text, re.I))
+    return bool(re.search(r"(?<![A-Za-z0-9])API(?:\s+gravity)?(?![A-Za-z0-9])|API도", text, re.I)
+                and re.search(r"(?<![A-Za-z0-9])SG(?![A-Za-z0-9])|specific\s+gravity|비중", text, re.I))
 
 
 def asks_for_api_gravity_calculation(request: GoalResearchRequest) -> bool:
