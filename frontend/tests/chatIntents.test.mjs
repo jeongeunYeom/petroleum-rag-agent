@@ -16,5 +16,6 @@ test("agent progress is phrased for users", () => {
   assert.equal(goalStageLabel("calculate"), "계산 중");
   assert.equal(goalStageLabel("simulate"), "시뮬레이션 중");
   assert.equal(goalStageLabel("waiting_for_user_input"), "추가 정보 필요");
-  assert.equal(goalStageLabel("verify"), "검증 중");
+  assert.equal(goalStageLabel("verify"), "결과 검증 중");
+  assert.equal(goalStageLabel("synthesize"), "답변 작성 중");
 });

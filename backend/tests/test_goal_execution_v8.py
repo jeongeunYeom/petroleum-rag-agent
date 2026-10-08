@@ -395,6 +395,10 @@ def test_autonomous_research_only_uses_no_python_without_client_flags():
     assert result.python_calls_total == 0
     assert all(item["action_type"] != "calculate" for item in result.action_history)
     assert result.telemetry["python_authorization_source"] == "autonomous_execution_mode"
+    assert result.timing["planning_seconds"] >= 0
+    assert result.timing["retrieval_seconds"] >= 0
+    assert result.timing["synthesis_seconds"] >= 0
+    assert result.timing["evaluation_seconds"] >= 0
 
 
 def test_autonomous_user_fact_calculation_reaches_sandbox_without_client_flags(tmp_path, monkeypatch):
@@ -419,6 +423,19 @@ def test_autonomous_user_fact_calculation_reaches_sandbox_without_client_flags(t
     assert result.computations[0].validation_passed
     assert result.computations[0].output_manifest["OUT_mean"]["value"] == pytest.approx(194.66666666666666)
     assert result.computations[0].output_manifest["OUT_mean"]["unit"] == "stb/d"
+    evidence = agent._evidence(EvidenceAccumulator(), UserFactRegistry.from_topic(req.topic),
+                               result.computations, None, "USERF4")
+    answer = agent._simple_user_fact_answer(req, result.computations, evidence)
+    assert answer is not None and "194.66666666666666" in answer
+    assert "B > A > C" in answer
+    assert "[CALC1]" in answer and "[USERF2]" in answer
+    checked = GoalEvaluator(object())._validate_candidate(
+        req, answer, evidence, {result.computations[0].computation_id: result.computations[0]})
+    assert checked["unsupported_engineering_claim_count"] == 0
+    wrong_order = answer.replace("B > A > C; top: B", "A > B > C; top: A")
+    checked_wrong = GoalEvaluator(object())._validate_candidate(
+        req, wrong_order, evidence, {result.computations[0].computation_id: result.computations[0]})
+    assert checked_wrong["unsupported_engineering_claim_count"] > 0
 
 
 def test_sourced_api_formula_retrieves_then_calculates_without_clarification(tmp_path, monkeypatch):

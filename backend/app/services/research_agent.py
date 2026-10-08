@@ -262,7 +262,13 @@ class ResearchAgent:
         }
 
         reasoning_started = time.perf_counter()
-        if evidence_ids:
+        if request.evidence_only:
+            # Goal execution synthesizes and validates its own final answer. Do not
+            # generate and validate an intermediate answer that is never displayed.
+            answer = ""
+            validation = {"evidence_only": True, "conflict_count": len(conflicts)}
+            inference_used = False
+        elif evidence_ids:
             messages = self.build_reasoning_messages(
                 request.query,
                 internal_sources,

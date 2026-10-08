@@ -333,6 +333,7 @@ class GoalEvaluator:
             contradictions += validation.engineering_contradiction_count
             cited_calcs = {item: computations[item] for item in ids if item in computations}
             direct_calc = False
+            ranking_mismatch = False
             if cited_calcs:
                 # The grounding matcher cannot infer an aggregate output from a
                 # short label such as "Mean score"; identify that exact manifest
@@ -347,14 +348,33 @@ class GoalEvaluator:
                 issues, _ = validate_calc_claim(claim, ids, output_ids, cited_calcs, evidence)
                 allowed_words = {word.casefold() for record in cited_calcs.values()
                                  for output in record.output_manifest.values()
-                                 for value in (str(output.get("name") or ""), str(output.get("unit") or ""))
+                                 for value in (str(output.get("name") or ""), str(output.get("unit") or ""),
+                                               *([str(item) for item in output.get("value")]
+                                                 if isinstance(output.get("value"), list) else []))
                                  for word in re.findall(r"[A-Za-z]+", value)}
-                allowed_words.update({"best", "worst", "mean", "range", "case", "result", "parameter", "validated"})
+                allowed_words.update({"best", "worst", "top", "mean", "range", "case", "result", "parameter", "validated"})
                 claim_words = {word.casefold() for word in re.findall(r"[A-Za-z]+",
                                EVIDENCE_ID_RE.sub("", claim))}
                 direct_calc = not issues and claim_words <= allowed_words
+                if direct_calc and re.search(r"\b(?:ranking|rank|top)\b|순위|최고", claim, re.I):
+                    for record in cited_calcs.values():
+                        for output in record.output_manifest.values():
+                            order = output.get("value")
+                            if not (isinstance(order, list) and output.get("semantic_type") == "ranking"
+                                    and order and all(isinstance(value, str) for value in order)):
+                                continue
+                            plain = EVIDENCE_ID_RE.sub("", claim)
+                            labels = re.findall(r"\b(?:" + "|".join(re.escape(value) for value in order) + r")\b",
+                                                plain, re.I)
+                            if re.search(r"\b(?:ranking|rank)\b|순위", plain, re.I) and labels[:len(order)] != order:
+                                direct_calc = False
+                                ranking_mismatch = True
+                            top = re.search(r"\btop\b\s*:?\s*([A-Za-z0-9_]+)", plain, re.I)
+                            if top and top.group(1) != order[0]:
+                                direct_calc = False
+                                ranking_mismatch = True
             unsupported += 0 if direct_calc else max(validation.unsupported_engineering_claim_count,
-                                                       1 if cited_calcs and issues else 0)
+                                                       1 if ranking_mismatch or (cited_calcs and issues) else 0)
             reasons.extend(
                 " ".join(
                     value

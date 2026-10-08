@@ -9,7 +9,8 @@ export function goalStageLabel(stage: string): string {
     case "calculate": return "계산 중";
     case "simulate": return "시뮬레이션 중";
     case "analyze": return "결과 분석 중";
-    case "verify": return "검증 중";
+    case "verify": return "결과 검증 중";
+    case "synthesize": return "답변 작성 중";
     case "waiting_for_user_input": return "추가 정보 필요";
     case "resume": return "계산을 계속하는 중";
     case "deliverables": return "산출물 작성 중";

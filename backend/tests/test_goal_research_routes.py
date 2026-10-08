@@ -33,9 +33,10 @@ class FakeService:
         self.value = response()
         self.request = None
 
-    def start(self, request):
+    def start(self, request, *, parsing_seconds=0.0):
         self.request = request
         self.value.topic = request.topic
+        self.value.timing["message_parsing_seconds"] = parsing_seconds
         return self.value
 
     def get(self, run_id):
@@ -113,6 +114,7 @@ def test_single_message_route_uses_existing_goal_service_without_web_by_default(
             assert service.request.use_internal and not service.request.use_external
             assert service.request.expected_result is None
             assert service.request.goal.startswith("SG가 0.918")
+            assert created.json()["timing"]["message_parsing_seconds"] >= 0
             assert client.post("/api/research/goal-runs/from-message", json={"message": "이 주제로 조사해줘."}).status_code == 422
     finally:
         app.dependency_overrides.clear()

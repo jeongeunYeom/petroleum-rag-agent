@@ -230,7 +230,7 @@ async function waitForGoalRun(runId: string, onProgress: (run: GoalResearchRun) 
     const deliverablesBusy = Object.values(run.deliverable_status || {}).some((value) => value === "pending" || value === "running");
     if (["failed", "canceled", "waiting_for_user_input"].includes(run.run_status) ||
         (["completed", "stopped"].includes(run.run_status) && !deliverablesBusy)) return run;
-    await new Promise((resolve) => window.setTimeout(resolve, 1000));
+    await new Promise((resolve) => window.setTimeout(resolve, 500));
   }
   throw new Error(`연구 실행 시간 초과 · 실행 ID ${runId}`);
 }
@@ -713,7 +713,7 @@ export default function Home() {
   return (
     <main className="flex h-screen overflow-hidden bg-[#eef1f6] text-slate-900 md:pl-[72px]">
       <AppIconRail />
-      <aside className="hidden w-[292px] shrink-0 border-r border-slate-200 bg-[#f8fafc] md:flex md:flex-col">
+      <aside className="hidden w-[340px] shrink-0 border-r border-slate-200 bg-[#f8fafc] md:flex md:flex-col xl:w-[370px]">
         <div className="flex h-14 items-center gap-3 border-b border-slate-200 px-4">
           <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-600 text-sm font-bold text-white">A</div>
           <div className="min-w-0">
@@ -988,7 +988,14 @@ export default function Home() {
                             )}
                           </div>
                         )}
-                        <MarkdownMath content={message.content} />
+                        <MarkdownMath
+                          content={message.content}
+                          sources={message.goalRun ? [
+                            ...message.goalRun.internal_sources,
+                            ...message.goalRun.web_sources,
+                            ...message.goalRun.figures,
+                          ] : []}
+                        />
                         {message.figureReview && (
                           <a href="/review" className="mt-3 inline-flex rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700">
                             Figure Review 열기
@@ -1238,7 +1245,7 @@ export default function Home() {
             )}
 
             {status && (
-              <div className="mx-auto rounded-full border border-slate-200 bg-white px-4 py-2 text-xs text-slate-500 shadow-sm">
+              <div role="status" aria-live="polite" className="mx-auto rounded-full border border-slate-200 bg-white px-4 py-2 text-xs text-slate-500 shadow-sm">
                 {busy ? "⏳ " : status.startsWith("목표 달성") ? "✅ " : "• "}{status}
               </div>
             )}

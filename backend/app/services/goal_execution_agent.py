@@ -152,6 +152,10 @@ class GoalExecutionAgent(GoalResearchAgent):
             self.tool_planner = _V8ToolPlanner(ollama)
 
     @staticmethod
+    def _add_time(result: GoalResearchResponse, stage: str, seconds: float) -> None:
+        result.timing[stage] = round(result.timing.get(stage, 0.0) + seconds, 6)
+
+    @staticmethod
     def _explicit_numeric_criteria(request: GoalResearchRequest,
                                    users: UserFactRegistry,
                                    simulation_spec: SimulationSpec | None) -> list[GoalCriterion]:
@@ -327,6 +331,44 @@ class GoalExecutionAgent(GoalResearchAgent):
         return None
 
     @staticmethod
+    def _simple_user_fact_answer(request: GoalResearchRequest, computations: list[Any],
+                                 evidence: list[dict[str, Any]]) -> str | None:
+        """Render only validated mean/ranking outputs from the supplied user values."""
+        goal = request.goal or request.topic
+        if request.expected_result or not re.search(r"\b(?:mean|average|rank|top|highest)\b|평균|순위|가장\s*높", goal, re.I):
+            return None
+        for calc in computations:
+            if (not calc.validation_passed or not calc.source_input_ids or calc.source_evidence_ids
+                    or calc.formula_evidence_ids):
+                continue
+            rows = calc.output_manifest
+            if not rows or any(str(row.get("name", "")).casefold() not in {"mean", "ranking"}
+                               for row in rows.values()):
+                continue
+            citations = list(dict.fromkeys([calc.computation_id, *calc.source_input_ids]))
+            lines = []
+            for output_id, row in rows.items():
+                name = str(row.get("name", "")).casefold()
+                value = row.get("value")
+                if name == "mean" and isinstance(value, (int, float)):
+                    claim = f"{'평균 mean' if prefers_korean(request) else 'Mean'}: {value} {row.get('unit') or ''}".strip()
+                elif name == "ranking" and isinstance(value, list) and value and all(
+                        isinstance(item, str) for item in value):
+                    order = " > ".join(value)
+                    claim = (f"순위 ranking: {order}; 최고 top: {value[0]}" if prefers_korean(request)
+                             else f"Ranking: {order}; top: {value[0]}")
+                else:
+                    break
+                issues, _ = validate_calc_claim(claim, citations, [output_id],
+                                                {calc.computation_id: calc}, evidence)
+                if issues:
+                    break
+                lines.append(claim + " " + " ".join(f"[{source}]" for source in citations))
+            else:
+                return "\n\n".join(lines)
+        return None
+
+    @staticmethod
     def _simulation_answer(computation: Any, spec: SimulationSpec,
                            evidence: list[dict[str, Any]], source_id: str,
                            korean: bool = False) -> str:
@@ -476,6 +518,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                 "python_execution_approved": True,
             })
         started = time.perf_counter()
+        planning_started = time.perf_counter()
         korean = prefers_korean(request)
         requires_sourced_formula = bool(
             re.search(r"공식|수식|관계식|\b(?:formula|equation|correlation)\b", request.goal or request.topic, re.I)
@@ -526,6 +569,12 @@ class GoalExecutionAgent(GoalResearchAgent):
             clarification_attempts = 0
         if autonomous_python:
             result.telemetry["python_authorization_source"] = "autonomous_execution_mode"
+        for stage in ("planning_seconds", "retrieval_seconds", "llm_generation_seconds",
+                      "python_seconds", "verification_seconds", "evaluation_seconds",
+                      "synthesis_seconds"):
+            result.timing.setdefault(stage, 0.0)
+        self._add_time(result, "planning_seconds", time.perf_counter() - planning_started)
+        retrieval_cache: dict[tuple[str, bool, bool, str], ResearchResponse] = {}
         self._notify(result, on_progress)
 
         for iteration in range(state.iteration + 1, request.max_iterations + 1):
@@ -552,12 +601,14 @@ class GoalExecutionAgent(GoalResearchAgent):
                 simulation_source = readiness.formula_source_id
                 simulation_inputs = readiness.input_ids
                 missing_simulation = readiness.missing
+            selection_started = time.perf_counter()
             action = self.action_planner.select(request, state, user_fact_ids=[r.fact_id for r in users.records],
                                                 evidence_fact_ids=evidence_fact_ids,
                                                 formula_ready=selected_formula is not None,
                                                 formula_id=selected_formula.formula_id if selected_formula else None,
                                                 python_calls_used=result.python_calls_total,
                                                 simulation_spec=simulation_spec)
+            self._add_time(result, "planning_seconds", time.perf_counter() - selection_started)
             if action.action_type == GoalActionType.STOP:
                 calculation_stalled = (action.reason_code == "no_progress" and not state.computation_ids
                                        and bool(CALC_WORDS.search(f"{request.topic} {request.goal or ''}")))
@@ -598,6 +649,7 @@ class GoalExecutionAgent(GoalResearchAgent):
             seen_actions.add(signature)
             before = state.fingerprint()
             action_started = datetime.now(timezone.utc)
+            action_clock = time.perf_counter()
             coverage_before = state.current_coverage
             result.current_iteration = iteration
             result.current_action = action.action_type.value
@@ -611,20 +663,29 @@ class GoalExecutionAgent(GoalResearchAgent):
 
             try:
                 if action.action_type == GoalActionType.RETRIEVE:
-                    response = await self.research_agent.research(ResearchRequest(
-                        query=action.query or request.goal or request.topic,
+                    query = action.query or request.goal or request.topic
+                    cache_key = (query, request.use_internal, request.use_external, request.model)
+                    cached = retrieval_cache.get(cache_key)
+                    response = cached.model_copy(deep=True) if cached else await self.research_agent.research(ResearchRequest(
+                        query=query,
                         use_internal=request.use_internal, use_external=request.use_external,
-                        engineering_validation=request.engineering_validation, model=request.model,
+                        engineering_validation=request.engineering_validation, evidence_only=True,
+                        model=request.model,
                         internal_top_k=request.internal_top_k, external_top_k=request.external_top_k,
                         temperature=request.temperature, seed=request.seed,
                     ))
+                    if cached is None:
+                        retrieval_cache[cache_key] = response.model_copy(deep=True)
+                        self._add_time(result, "retrieval_seconds", response.timing.retrieval_seconds)
+                        self._add_time(result, "llm_generation_seconds", response.timing.reasoning_seconds)
                     added = accumulator.add(response)
                     state.evidence_ids.extend(added)
                     state.known_facts = list(dict.fromkeys(
                         state.known_facts + [item.fact_id for item in
                                              EvidenceFactRegistry.from_evidence(accumulator.records()).records]))
                     research_validation = response.validation
-                    details = {"new_evidence_count": len(added), "retrieval_mode": response.retrieval_mode}
+                    details = {"new_evidence_count": len(added), "retrieval_mode": response.retrieval_mode,
+                               "cache_hit": cached is not None}
                     state.verified = False
                     if not added:
                         status, failure = "blocked", "retrieve_no_progress"
@@ -644,6 +705,10 @@ class GoalExecutionAgent(GoalResearchAgent):
                                                     "max_python_calls": request.max_python_calls - result.python_calls_total,
                                                     "deliverables": []})
                     subresult = await adapter.run(f"{run_id}-A{iteration}", subrequest)
+                    self._add_time(result, "python_seconds", subresult.timing.get("python_seconds", 0.0))
+                    self._add_time(result, "llm_generation_seconds",
+                                   subresult.timing.get("synthesis_seconds", 0.0) +
+                                   subresult.timing.get("evaluation_seconds", 0.0))
                     result.python_calls_total += subresult.python_calls_total
                     result.python_attempts_total += subresult.python_attempts_total
                     result.python_failures += subresult.python_failures
@@ -678,9 +743,11 @@ class GoalExecutionAgent(GoalResearchAgent):
                 elif action.action_type == GoalActionType.SIMULATE:
                     if simulation_spec is None:
                         raise ValueError("simulation specification unavailable")
+                    python_started = time.perf_counter()
                     computation = await run_parameter_sweep(get_settings(), request, run_id,
                                                             simulation_spec, f"CALC{len(result.computations) + 1}",
                                                             simulation_source_id)
+                    self._add_time(result, "python_seconds", time.perf_counter() - python_started)
                     if simulation_source:
                         computation.formula_evidence_ids = [simulation_source]
                         computation.source_evidence_ids = [simulation_source]
@@ -717,17 +784,30 @@ class GoalExecutionAgent(GoalResearchAgent):
                                               simulation_spec, simulation_source_id)
                     simulation = next((item for item in result.computations
                                        if item.validation_passed and item.analysis_id.startswith("SIM-")), None)
+                    synthesis_started = time.perf_counter()
+                    result.current_stage = "synthesize"
+                    self._notify(result, on_progress)
                     latest_candidate = (self._simulation_answer(simulation, simulation_spec, evidence,
                                                                 simulation_source_id, korean)
                                         if simulation and simulation_spec else
                                         self._api_gravity_answer(request, result.computations, evidence)
+                                        or self._simple_user_fact_answer(request, result.computations, evidence)
                                         or await self._synthesize(request, criteria, evidence, [],
                                                                   computations=result.computations))
+                    synthesis_seconds = time.perf_counter() - synthesis_started
+                    self._add_time(result, "synthesis_seconds", synthesis_seconds)
+                    self._add_time(result, "llm_generation_seconds", synthesis_seconds)
+                    result.current_stage = "verify"
+                    self._notify(result, on_progress)
                     if not result.computations:
                         latest_candidate = self._focus_research_answer(latest_candidate, criteria)
+                    evaluation_started = time.perf_counter()
                     evaluation = await self.evaluator.evaluate(request, criteria, latest_candidate,
                                                                evidence, research_validation,
                                                                computations=result.computations)
+                    evaluation_seconds = time.perf_counter() - evaluation_started
+                    self._add_time(result, "evaluation_seconds", evaluation_seconds)
+                    self._add_time(result, "llm_generation_seconds", evaluation_seconds)
                     if simulation:
                         evaluation = self._deterministic_simulation_criteria(
                             evaluation, criteria, latest_candidate, simulation, korean)
@@ -766,6 +846,11 @@ class GoalExecutionAgent(GoalResearchAgent):
                 state.blocked_reasons = [failure]
                 state.unresolved_information = [failure]
                 details = {"error_type": type(exc).__name__}
+
+            self._add_time(result, f"{action.action_type.value}_action_seconds",
+                           time.perf_counter() - action_clock)
+            if action.action_type == GoalActionType.VERIFY:
+                self._add_time(result, "verification_seconds", time.perf_counter() - action_clock)
 
             state.iteration = iteration
             record = ActionRecord(iteration=iteration, action_id=action.action_id,

@@ -1,4 +1,5 @@
 from functools import lru_cache
+import time
 from pydantic import BaseModel, Field
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -54,7 +55,9 @@ def start_goal_research_from_message(
     service: GoalResearchService = Depends(get_goal_research_service),
 ) -> GoalResearchResponse:
     try:
-        return service.start(parse_goal_message(request))
+        started = time.perf_counter()
+        parsed = parse_goal_message(request)
+        return service.start(parsed, parsing_seconds=time.perf_counter() - started)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 

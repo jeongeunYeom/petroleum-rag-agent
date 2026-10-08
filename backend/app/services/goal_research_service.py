@@ -41,7 +41,7 @@ class GoalResearchService:
         self.execution_controller = execution_controller
         self.deliverables = DeliverableService(settings)
 
-    def start(self, request: GoalResearchRequest) -> GoalResearchResponse:
+    def start(self, request: GoalResearchRequest, *, parsing_seconds: float = 0.0) -> GoalResearchResponse:
         run_id = self._new_run_id()
         response = GoalResearchResponse(
             run_id=run_id,
@@ -59,11 +59,12 @@ class GoalResearchService:
                 if request.expected_result
                 else ExpectedResultStatus.NOT_PROVIDED
             ),
+            timing={"message_parsing_seconds": round(parsing_seconds, 6)},
         )
         self._write(run_id, request, response)
         worker = Thread(
             target=self._execute,
-            args=(run_id, request),
+            args=(run_id, request, None, None, parsing_seconds),
             daemon=True,
             name=f"goal-research-{run_id}",
         )
@@ -154,7 +155,8 @@ class GoalResearchService:
 
     def _execute(self, run_id: str, request: GoalResearchRequest,
                  resume_state: dict | None = None,
-                 resume_result: GoalResearchResponse | None = None) -> None:
+                 resume_result: GoalResearchResponse | None = None,
+                 parsing_seconds: float = 0.0) -> None:
         try:
             controller = self.controller
             if request.execution_mode == "autonomous_goal_execution":
@@ -166,6 +168,9 @@ class GoalResearchService:
             if resume_state is not None:
                 kwargs.update(resume_state=resume_state, resume_result=resume_result)
             result = asyncio.run(controller.run(run_id, request, **kwargs))
+            result.timing["message_parsing_seconds"] = round(parsing_seconds, 6)
+            result.timing["total_seconds"] = round(
+                result.timing.get("elapsed_seconds", 0.0) + parsing_seconds, 6)
             if result.status == GoalStatus.ACHIEVED and request.deliverables:
                 frozen = result.model_copy(deep=True)
                 result.deliverable_status = {kind: "pending" for kind in dict.fromkeys(request.deliverables)}
@@ -185,6 +190,8 @@ class GoalResearchService:
                         result.deliverable_errors[kind] = str(exc)[:500]
                     self._write(run_id, request, result)
                 result.timing["deliverable_generation_seconds"] = round(time.perf_counter() - started, 6)
+                result.timing["total_seconds"] = round(
+                    result.timing["total_seconds"] + result.timing["deliverable_generation_seconds"], 6)
                 result.telemetry.update({
                     "artifact_generation_seconds": result.timing["deliverable_generation_seconds"],
                     "docx_success": result.deliverable_status.get("docx") == "completed",

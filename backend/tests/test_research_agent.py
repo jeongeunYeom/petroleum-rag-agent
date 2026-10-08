@@ -142,6 +142,23 @@ def make_agent(
     )
 
 
+def test_evidence_only_keeps_sources_and_provenance_without_intermediate_llm(tmp_path: Path) -> None:
+    store = FakeVectorStore(dense=[{
+        "id": "chunk-1", "text": "Higher API gravity indicates lighter crude.",
+        "metadata": {"document": "handbook.pdf", "page": 90},
+    }])
+    ollama = FakeOllama()
+    response = asyncio.run(make_agent(tmp_path, vector_store=store, ollama=ollama).research(
+        ResearchRequest(query="API gravity crude oil", use_external=False, evidence_only=True)
+    ))
+    assert response.internal_sources
+    assert response.provenance[0].evidence_id == response.internal_sources[0].evidence_id
+    assert response.validation["evidence_only"] is True
+    assert response.answer == ""
+    assert response.inference_used is False
+    assert ollama.calls == []
+
+
 def test_retrieval_modes_switch_only_the_internal_retriever(tmp_path: Path) -> None:
     dense = [{"id": "dense", "text": "wellbore storage", "metadata": {}}]
     keyword = [{"id": "keyword", "text": "wellbore storage", "metadata": {}}]

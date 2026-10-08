@@ -54,7 +54,9 @@ export type Computation = {
   }>;
 };
 
-export type InternalSource = { evidence_id: string; document: string; page?: number | null };
+export type InternalSource = { evidence_id: string; document: string; page?: number | null; excerpt: string };
+export type WebSource = { evidence_id: string; title: string; url: string; passage?: string | null; snippet: string };
+export type FigureSource = { evidence_id: string; document: string; page?: number | null; excerpt: string; title?: string | null };
 
 export type GeneratedArtifact = {
   artifact_id: string;
@@ -96,8 +98,8 @@ export type GoalResearchRun = {
   }[];
   iterations: GoalIteration[];
   internal_sources: InternalSource[];
-  web_sources: unknown[];
-  figures: unknown[];
+  web_sources: WebSource[];
+  figures: FigureSource[];
   computations: Computation[];
   artifacts: GeneratedArtifact[];
   deliverable_status: Record<string, string>;

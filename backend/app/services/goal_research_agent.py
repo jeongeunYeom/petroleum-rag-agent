@@ -1256,18 +1256,21 @@ class GoalResearchAgent:
             result.final_answer = (result.final_answer + "\n\nLimitations: " + "; ".join(result.final_limitations)).strip()
         result.current_stage = "finalize"
         result.timing["elapsed_seconds"] = round(time.perf_counter() - started, 6)
-        result.timing["research_seconds"] = round(
-            sum(item.timing.research_seconds for item in result.iterations), 6
-        )
-        result.timing["synthesis_seconds"] = round(
-            sum(item.timing.synthesis_seconds for item in result.iterations), 6
-        )
-        result.timing["evaluation_seconds"] = round(
-            sum(item.timing.evaluation_seconds for item in result.iterations), 6
-        )
-        result.timing["python_seconds"] = round(
-            sum(item.timing.python_seconds for item in result.iterations), 6
-        )
+        result.timing.setdefault("total_seconds", result.timing["elapsed_seconds"])
+        if result.iterations:
+            result.timing["research_seconds"] = round(
+                sum(item.timing.research_seconds for item in result.iterations), 6
+            )
+            result.timing["synthesis_seconds"] = round(
+                sum(item.timing.synthesis_seconds for item in result.iterations), 6
+            )
+            result.timing["evaluation_seconds"] = round(
+                sum(item.timing.evaluation_seconds for item in result.iterations), 6
+            )
+            result.timing["python_seconds"] = round(
+                sum(item.timing.python_seconds for item in result.iterations), 6
+            )
+        result.timing.setdefault("python_seconds", 0.0)
         valid_calculations = [item for item in result.computations if item.validation_passed]
         result.telemetry.update({
             "python_needed": any(item.python_requested for item in result.iterations),
