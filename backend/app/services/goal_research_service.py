@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import re
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -72,6 +73,42 @@ class GoalResearchService:
     def get(self, run_id: str) -> GoalResearchResponse:
         return self._read(run_id)[1]
 
+    def resume(self, run_id: str, message: str) -> GoalResearchResponse:
+        reply = message.strip()
+        if not reply or len(reply) > 2000:
+            raise GoalResearchRunConflict("A clarification reply must contain 1–2000 characters.")
+        with self._lock:
+            request, response = self._read(run_id)
+            path = self._path(run_id)
+            checkpoint = json.loads(path.read_text(encoding="utf-8")).get("checkpoint")
+            if response.run_status != GoalRunStatus.WAITING_FOR_USER_INPUT or not checkpoint:
+                raise GoalResearchRunConflict("This run is not waiting for a clarification reply.")
+            if re.fullmatch(r"(?:모르겠(?:어|어요|습니다)?|알\s*수\s*없(?:어|어요|습니다)?|"
+                            r"값이\s*없(?:어|어요|습니다)?|그만|중단|"
+                            r"(?:i\s+)?(?:don'?t|do\s+not)\s+know|cannot\s+provide|stop)\s*[.!?]?",
+                            reply, re.I):
+                response.run_status = GoalRunStatus.STOPPED
+                response.status = GoalStatus.INSUFFICIENT_EVIDENCE
+                response.stop_reason = GoalStopReason.INSUFFICIENT_EVIDENCE
+                response.current_stage = "finalize"
+                response.final_answer = ("필요한 입력값이나 검증 가능한 모델이 없어 계산을 중단했습니다. 값을 추측하지 않았습니다."
+                                         if re.search(r"[가-힣]", request.topic) else
+                                         "The required inputs or validated model are unavailable. No values were guessed.")
+                response.clarification_question = None
+                response.required_inputs = []
+                response.deliverable_status = {kind: "skipped" for kind in dict.fromkeys(request.deliverables)}
+                self._write(run_id, request, response, checkpoint={})
+                return response
+            checkpoint["user_replies"] = [*checkpoint.get("user_replies", []), reply]
+            response.run_status = GoalRunStatus.RUNNING
+            response.current_stage = "resume"
+            response.clarification_question = None
+            response.required_inputs = []
+            self._write(run_id, request, response, checkpoint=checkpoint)
+        Thread(target=self._execute, args=(run_id, request, checkpoint, response), daemon=True,
+               name=f"goal-research-{run_id}-resume").start()
+        return response
+
     def cancel(self, run_id: str) -> GoalResearchResponse:
         request, response = self._read(run_id)
         if response.run_status in {
@@ -84,14 +121,16 @@ class GoalResearchService:
                 f"A {response.run_status.value} run cannot be canceled."
             )
         response.cancel_requested = True
-        if response.run_status == GoalRunStatus.PLANNED:
+        if response.run_status in {GoalRunStatus.PLANNED, GoalRunStatus.WAITING_FOR_USER_INPUT}:
             response.run_status = GoalRunStatus.CANCELED
             response.status = GoalStatus.CANCELED
             response.stop_reason = GoalStopReason.CANCELED
             response.current_stage = "finalize"
+            response.deliverable_status = {kind: "skipped" for kind in dict.fromkeys(request.deliverables)}
         else:
             response.current_stage = "cancel_requested"
-        self._write(run_id, request, response)
+        self._write(run_id, request, response,
+                    checkpoint={} if response.run_status == GoalRunStatus.CANCELED else None)
         return response
 
     def artifact_path(self, run_id: str, artifact_id: str) -> Path:
@@ -113,22 +152,21 @@ class GoalResearchService:
             raise GoalResearchRunNotFound(artifact_id)
         return candidate
 
-    def _execute(self, run_id: str, request: GoalResearchRequest) -> None:
+    def _execute(self, run_id: str, request: GoalResearchRequest,
+                 resume_state: dict | None = None,
+                 resume_result: GoalResearchResponse | None = None) -> None:
         try:
             controller = self.controller
             if request.execution_mode == "autonomous_goal_execution":
                 if self.execution_controller is None:
                     raise RuntimeError("Autonomous goal execution controller is not configured")
                 controller = self.execution_controller
-            result = asyncio.run(
-                controller.run(
-                    run_id,
-                    request,
-                    is_canceled=lambda: self._cancel_requested(run_id),
-                    on_progress=lambda value: self._write(run_id, request, value),
-                )
-            )
-            if result.run_status in {GoalRunStatus.COMPLETED, GoalRunStatus.STOPPED} and request.deliverables:
+            kwargs = {"is_canceled": lambda: self._cancel_requested(run_id),
+                      "on_progress": lambda value: self._write(run_id, request, value)}
+            if resume_state is not None:
+                kwargs.update(resume_state=resume_state, resume_result=resume_result)
+            result = asyncio.run(controller.run(run_id, request, **kwargs))
+            if result.status == GoalStatus.ACHIEVED and request.deliverables:
                 frozen = result.model_copy(deep=True)
                 result.deliverable_status = {kind: "pending" for kind in dict.fromkeys(request.deliverables)}
                 result.current_stage = "deliverables"
@@ -153,6 +191,9 @@ class GoalResearchService:
                     "pptx_success": result.deliverable_status.get("pptx") == "completed",
                 })
                 result.current_stage = "finalize"
+            elif result.run_status in {GoalRunStatus.COMPLETED, GoalRunStatus.STOPPED,
+                                       GoalRunStatus.FAILED, GoalRunStatus.CANCELED} and request.deliverables:
+                result.deliverable_status = {kind: "skipped" for kind in dict.fromkeys(request.deliverables)}
         except Exception as exc:
             _, result = self._read(run_id)
             result.run_status = GoalRunStatus.FAILED
@@ -160,7 +201,8 @@ class GoalResearchService:
             result.stop_reason = GoalStopReason.ERROR
             result.current_stage = "finalize"
             result.error = str(exc)
-        self._write(run_id, request, result)
+        self._write(run_id, request, result, checkpoint=(result.resume_checkpoint
+                    if result.run_status == GoalRunStatus.WAITING_FOR_USER_INPUT else {}))
 
     def _cancel_requested(self, run_id: str) -> bool:
         try:
@@ -192,6 +234,7 @@ class GoalResearchService:
         run_id: str,
         request: GoalResearchRequest,
         response: GoalResearchResponse,
+        checkpoint: dict | None = None,
     ) -> None:
         path = self._path(run_id)
         if request.deliverables and not response.deliverable_status and response.run_status not in {
@@ -204,9 +247,12 @@ class GoalResearchService:
                 current = json.loads(path.read_text(encoding="utf-8"))
                 if current.get("response", {}).get("cancel_requested"):
                     response.cancel_requested = True
+            else:
+                current = {}
             payload = {
                 "request": request.model_dump(mode="json"),
                 "response": response.model_dump(mode="json"),
+                "checkpoint": current.get("checkpoint", {}) if checkpoint is None else checkpoint,
                 "updated_at": datetime.now(timezone.utc).isoformat(),
             }
             temporary = path.with_suffix(".json.tmp")

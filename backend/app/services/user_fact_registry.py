@@ -9,9 +9,9 @@ from pydantic import BaseModel, Field
 
 
 NUMBER = r"[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d*)?(?:[eE][-+]?\d+)?|[-+]?\.\d+(?:[eE][-+]?\d+)?|[-+]?\d+\s*/\s*\d+"
-UNIT = r"(?:stb/d|bbl/d|m\^?3/d|acres?|feet|ft|mD|md|psi|psia|psig|kPa|Pa|bbl|stb|days?|hours?|hr|m|%|cP)"
+UNIT = r"(?:kg/m\^?3|m\^?3/d|m\^?3|stb/d|bbl/d|acres?|feet|ft|mD|md|psi|psia|psig|kPa|Pa|bbl|stb|days?|hours?|hr|kg|m|%|cP)"
 ASSIGNMENT = re.compile(
-    rf"(?P<label>[A-Za-z][A-Za-z0-9 _/-]{{0,48}}?)\s*[:=]\s*(?P<value>{NUMBER})\s*(?P<unit>{UNIT})?(?=$|[,;\s]|\.(?!\d)|[가-힣])",
+    rf"(?P<label>[A-Za-z][A-Za-z0-9 _/\-]{{0,48}}?)\s*[:=]\s*(?P<value>{NUMBER})\s*(?P<unit>{UNIT})?(?=$|[,;\s]|\.(?!\d)|[가-힣])",
     re.IGNORECASE,
 )
 TUPLE_HEADER = re.compile(r"\((?P<header>[^()]+)\)\s*:")
@@ -19,6 +19,11 @@ TUPLE_ROW = re.compile(r"(?P<label>[A-Za-z][A-Za-z0-9_]*)\s*=\s*\((?P<values>[^(
 WELL_HEADER = re.compile(r"\bWell\s+(?P<well>[A-Za-z][A-Za-z0-9_-]*)\s*:", re.IGNORECASE)
 KOREAN_SG = re.compile(rf"비중\s*(?:은|는|이|가|[:=])?\s*(?P<value>{NUMBER})")
 KOREAN_NAMED_SG = re.compile(rf"\bSG\s*(?:은|는|이|가)\s*(?P<value>{NUMBER})(?=$|[가-힣,;\s]|\.(?!\d))", re.I)
+KOREAN_SIMULATION_INPUT = re.compile(
+    rf"(?P<label>저류층\s*부피|벌크\s*부피|부피|CO₂?\s*밀도|이산화탄소\s*밀도|밀도)"
+    rf"\s*(?:은|는|이|가|[:=])?\s*(?P<value>{NUMBER})\s*(?P<unit>{UNIT})?",
+    re.I,
+)
 BARE_SERIES = re.compile(
     rf"(?P<body>(?:\b[A-Z]\s+(?:{NUMBER})\s*[,;]\s*)+\b[A-Z]\s+(?:{NUMBER}))"
     rf"\s*(?P<unit>stb/d|bbl/d|m\^?3/d)(?=$|[가-힣,;.\s])"
@@ -115,6 +120,11 @@ class UserFactRegistry(BaseModel):
                 add("SG", found.group("value"), "", found.group(0), None, offset + found.start())
             for found in KOREAN_NAMED_SG.finditer(text):
                 add("SG", found.group("value"), "", found.group(0), None, offset + found.start())
+            for found in KOREAN_SIMULATION_INPUT.finditer(text):
+                label = found.group("label")
+                name = "bulk_volume" if "부피" in label else "CO2_density"
+                add(name, found.group("value"), found.group("unit") or "", found.group(0), None,
+                    offset + found.start())
             for series in BARE_SERIES.finditer(text):
                 for item in BARE_ITEM.finditer(series.group("body")):
                     add(f"{item.group('label')}_rate", item.group("value"), series.group("unit"),

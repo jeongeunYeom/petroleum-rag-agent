@@ -105,5 +105,7 @@ export function displayAnswer(answer: string, computations: Computation[]): stri
   }
   return result.replace(/\bdefault_API_gravity\b/g, "API Gravity")
     .replace(/(\[CALC\d+\])(?:\s*\[USERF\d+\])+/g, "$1")
-    .replace(/\[USERF\d+\](?:\s*\[USERF\d+\])*/g, "[사용자 입력]");
+    .replace(/\[USERF\d+\](?:\s*\[USERF\d+\])*/g, "[사용자 입력]")
+    .replace(/\[EFACT\d+\]/g, "[자료 수치]")
+    .replace(/\[FORMULA\d+\]/g, "[자료 수식]");
 }

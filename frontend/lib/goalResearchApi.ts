@@ -68,10 +68,12 @@ export type GoalResearchRun = {
   topic: string;
   goal?: string | null;
   expected_result?: string | null;
-  run_status: "planned" | "running" | "completed" | "stopped" | "failed" | "canceled";
+  run_status: "planned" | "running" | "waiting_for_user_input" | "completed" | "stopped" | "failed" | "canceled";
   status: string;
   stop_reason?: string | null;
   final_answer: string;
+  clarification_question?: string | null;
+  required_inputs?: string[];
   final_limitations: string[];
   goal_coverage: number;
   goal_coverage_percent: number;
@@ -141,6 +143,14 @@ export function startGoalResearchFromMessage(message: string, model: string, con
 
 export function getGoalResearch(runId: string): Promise<GoalResearchRun> {
   return requestJson(`/research/goal-runs/${runId}`, { cache: "no-store" });
+}
+
+export function resumeGoalResearch(runId: string, message: string): Promise<GoalResearchRun> {
+  return requestJson(`/research/goal-runs/${encodeURIComponent(runId)}/resume`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message }),
+  });
 }
 
 export function cancelGoalResearch(runId: string): Promise<GoalResearchRun> {

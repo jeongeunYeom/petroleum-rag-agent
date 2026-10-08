@@ -49,6 +49,13 @@ class FakeService:
         self.value.stop_reason = GoalStopReason.CANCELED
         return self.value
 
+    def resume(self, run_id, message):
+        assert run_id == self.value.run_id
+        assert self.value.run_status == GoalRunStatus.WAITING_FOR_USER_INPUT
+        assert message == "부피는 1000 m3, 밀도는 700 kg/m3"
+        self.value.run_status = GoalRunStatus.RUNNING
+        return self.value
+
 
 def test_goal_research_routes_start_poll_and_cancel():
     service = FakeService()
@@ -74,6 +81,22 @@ def test_goal_research_routes_are_registered():
     assert "/api/research/goal-runs/from-message" in paths
     assert "/api/research/goal-runs/{run_id}" in paths
     assert "/api/research/goal-runs/{run_id}/cancel" in paths
+    assert "/api/research/goal-runs/{run_id}/resume" in paths
+
+
+def test_goal_research_resume_route_uses_same_run_id():
+    service = FakeService()
+    service.value.run_status = GoalRunStatus.WAITING_FOR_USER_INPUT
+    app.dependency_overrides[get_goal_research_service] = lambda: service
+    try:
+        with TestClient(app) as client:
+            resumed = client.post("/api/research/goal-runs/GR-TEST/resume",
+                                  json={"message": "부피는 1000 m3, 밀도는 700 kg/m3"})
+            assert resumed.status_code == 200
+            assert resumed.json()["run_id"] == "GR-TEST"
+            assert resumed.json()["run_status"] == "running"
+    finally:
+        app.dependency_overrides.clear()
 
 
 def test_single_message_route_uses_existing_goal_service_without_web_by_default():

@@ -26,6 +26,7 @@ class ExpectedResultStatus(str, Enum):
 class GoalRunStatus(str, Enum):
     PLANNED = "planned"
     RUNNING = "running"
+    WAITING_FOR_USER_INPUT = "waiting_for_user_input"
     COMPLETED = "completed"
     STOPPED = "stopped"
     FAILED = "failed"
@@ -357,6 +358,10 @@ class GoalResearchResponse(BaseModel):
     status: GoalStatus = GoalStatus.PENDING
     stop_reason: GoalStopReason | None = None
     final_answer: str = ""
+    clarification_question: str | None = None
+    required_inputs: list[str] = Field(default_factory=list)
+    # Persisted by the run service, never exposed by the API.
+    resume_checkpoint: dict[str, Any] = Field(default_factory=dict, exclude=True)
     final_limitations: list[str] = Field(default_factory=list)
     goal_coverage: float = Field(default=0.0, ge=0, le=1)
     goal_coverage_percent: float = Field(default=0.0, ge=0, le=100)

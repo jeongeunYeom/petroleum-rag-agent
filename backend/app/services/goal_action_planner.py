@@ -11,7 +11,7 @@ from app.services.goal_intent import asks_for_api_gravity_calculation
 
 CALC_WORDS = re.compile(r"\b(?:calculat\w*|comput\w*|derive|mean|average|rank\w*|compare\s+numeric|difference|ratio)\b|계산|산출|평균|순위|그래프", re.I)
 ANALYZE_WORDS = re.compile(r"\b(?:rank\w*|best|worst|maximum|minimum|optim\w*|sensitiv\w*|compare|plot|graph|chart)\b|순위|최적|민감도|최대|최소|그래프|도표", re.I)
-SIMULATE_WORDS = re.compile(r"\b(?:simulat\w*|sweep|parameter\s+range|vary\w*)\b|시뮬레이션|매개변수\s*변화|범위\s*탐색|범위로\s*계산|바꿔가며|간격으로", re.I)
+SIMULATE_WORDS = re.compile(r"\b(?:simulat\w*|sweep|parameter\s+range|vary\w*)\b|시뮬레이션|매개변수\s*변화|범위\s*탐색|범위로\s*계산|바꿔가며|바꾸면서|간격으로", re.I)
 
 
 class GoalActionPlanner:
@@ -74,6 +74,9 @@ class GoalActionPlanner:
             if request.max_simulation_actions == 0:
                 return action(GoalActionType.STOP, "simulation_budget_exhausted")
             if simulation_spec is None:
+                if request.use_internal and counts[GoalActionType.RETRIEVE] < min(request.max_retrieval_actions, 2):
+                    return action(GoalActionType.RETRIEVE, "simulation_model_or_inputs_missing",
+                                  GoalActionPlanner.query(request, state))
                 return action(GoalActionType.STOP, "simulation_spec_missing")
             return action(GoalActionType.SIMULATE, "simulation_inputs_ready")
         retry_after_gain = bool(last and last.action_type == GoalActionType.RETRIEVE and
@@ -115,4 +118,6 @@ class GoalActionPlanner:
         missing = "; ".join(state.unresolved_information[:3])
         unmet = "; ".join(item.description for item in state.criteria if item.required and item.status.value != "met")
         terms = "\nspecific gravity SG API gravity conversion equation" if asks_for_api_gravity_calculation(request) else ""
+        if SIMULATE_WORDS.search(f"{request.goal or ''} {request.topic}"):
+            terms += "\nparameter sweep storage capacity model equation required variables"
         return f"{request.goal or request.topic}\nMissing: {missing or unmet or request.topic}{terms}"[:4000]

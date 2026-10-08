@@ -1,4 +1,5 @@
 from functools import lru_cache
+from pydantic import BaseModel, Field
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
@@ -18,6 +19,10 @@ from app.services.goal_research_service import (
 
 
 router = APIRouter(prefix="/research/goal-runs", tags=["goal-research"])
+
+
+class ClarificationReply(BaseModel):
+    message: str = Field(min_length=1, max_length=2000)
 
 
 @lru_cache(maxsize=1)
@@ -72,6 +77,20 @@ def cancel_goal_research(
 ) -> GoalResearchResponse:
     try:
         return service.cancel(run_id)
+    except GoalResearchRunNotFound as exc:
+        raise HTTPException(status_code=404, detail="Goal research run not found") from exc
+    except GoalResearchRunConflict as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@router.post("/{run_id}/resume", response_model=GoalResearchResponse)
+def resume_goal_research(
+    run_id: str,
+    reply: ClarificationReply,
+    service: GoalResearchService = Depends(get_goal_research_service),
+) -> GoalResearchResponse:
+    try:
+        return service.resume(run_id, reply.message)
     except GoalResearchRunNotFound as exc:
         raise HTTPException(status_code=404, detail="Goal research run not found") from exc
     except GoalResearchRunConflict as exc:

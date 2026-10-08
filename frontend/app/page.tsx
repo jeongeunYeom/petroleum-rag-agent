@@ -14,12 +14,12 @@ import {
   UploadJob,
 } from "@/lib/api";
 import { DocumentInfoPanel } from "@/components/DocumentInfoPanel";
-import { PlotPanel } from "@/components/PlotPanel";
 import { SystemStatusPanel } from "@/components/SystemStatusPanel";
 import { MarkdownMath } from "@/components/MarkdownMath";
 import { GoalResearchPanel } from "@/components/GoalResearchPanel";
-import { getGoalResearch, goalArtifactUrl, GoalResearchRun, startGoalResearchFromMessage } from "@/lib/goalResearchApi";
+import { getGoalResearch, goalArtifactUrl, GoalResearchRun, resumeGoalResearch, startGoalResearchFromMessage } from "@/lib/goalResearchApi";
 import { displayAnswer } from "@/lib/goalResultPresentation";
+import { goalStageLabel, wantsFigureReview } from "@/lib/chatIntents";
 import { AppIconRail, MobileModeTabs } from "@/components/AppNavigation";
 import {
   type AgentTask,
@@ -145,6 +145,7 @@ type ChatMessage = {
   agentTask?: AgentTask;
   agentError?: string;
   goalRun?: GoalResearchRun;
+  figureReview?: boolean;
 };
 
 type SavedChat = {
@@ -227,7 +228,7 @@ async function waitForGoalRun(runId: string, onProgress: (run: GoalResearchRun) 
     const run = await getGoalResearch(runId);
     onProgress(run);
     const deliverablesBusy = Object.values(run.deliverable_status || {}).some((value) => value === "pending" || value === "running");
-    if (["failed", "canceled"].includes(run.run_status) ||
+    if (["failed", "canceled", "waiting_for_user_input"].includes(run.run_status) ||
         (["completed", "stopped"].includes(run.run_status) && !deliverablesBusy)) return run;
     await new Promise((resolve) => window.setTimeout(resolve, 1000));
   }
@@ -494,26 +495,41 @@ export default function Home() {
 
     setMessages((previous) => [...previous, userMessage]);
     setQuestion("");
+    if (wantsFigureReview(submittedQuestion)) {
+      setMessages((previous) => [...previous, {
+        id: crypto.randomUUID(), role: "assistant",
+        content: "추출된 그림을 확인할 수 있습니다. 아래 버튼으로 Figure Review를 여세요.",
+        figureReview: true,
+      }]);
+      return;
+    }
+    const latestRun = [...messages].reverse().find((item) => item.role === "assistant" && item.goalRun)?.goalRun;
+    const pendingRun = latestRun?.run_status === "waiting_for_user_input" ? latestRun : null;
     setBusy(true);
     setStatus(
-      answerMode === "compare"
+      pendingRun ? "확인했습니다. 계산을 계속합니다." : answerMode === "compare"
         ? "RAG 비교 답변과 Agent 작업 계획을 함께 실행 중..."
         : "연구 목표를 분석하고 필요한 근거와 도구를 실행 중...",
     );
 
-    if (answerMode !== "compare") {
+    if (pendingRun || answerMode !== "compare") {
       try {
         const context = [...messages].reverse().find((item) => item.role === "user" &&
           !/이\s*(?:주제|내용)|앞서|위의|this topic|same topic/i.test(item.content))?.content;
-        const started = await startGoalResearchFromMessage(submittedQuestion, answerMode, context);
+        const started = pendingRun
+          ? await resumeGoalResearch(pendingRun.run_id, submittedQuestion)
+          : await startGoalResearchFromMessage(submittedQuestion, answerMode === "compare" ? "qwen3:8b" : answerMode, context);
         const completed = await waitForGoalRun(started.run_id, (current) =>
-          setStatus(`목표 연구 · ${current.current_stage} · 반복 ${current.current_iteration}/${current.max_iterations}`));
+          setStatus(goalStageLabel(current.current_stage)));
         setMessages((previous) => [...previous, {
           id: crypto.randomUUID(), role: "assistant",
-          content: displayAnswer(completed.final_answer || completed.error || "근거가 충분하지 않아 결론을 보류했습니다.", completed.computations),
+          content: completed.run_status === "waiting_for_user_input"
+            ? completed.clarification_question || "계산을 계속하려면 추가 정보가 필요합니다."
+            : displayAnswer(completed.final_answer || completed.error || "근거가 충분하지 않아 결론을 보류했습니다.", completed.computations),
           goalRun: completed,
         }]);
-        setStatus(completed.status === "achieved" ? "목표 달성 · 근거와 계산 검증 완료" : "연구 종료 · 남은 조건을 확인하세요.");
+        setStatus(completed.run_status === "waiting_for_user_input" ? "추가 정보 필요" :
+          completed.status === "achieved" ? "목표 달성 · 근거와 계산 검증 완료" : "연구 종료 · 남은 조건을 확인하세요.");
       } catch (error) {
         const message = error instanceof Error ? error.message : "목표 연구를 시작하지 못했습니다.";
         setMessages((previous) => [...previous, { id: crypto.randomUUID(), role: "assistant", content: `오류: ${message}` }]);
@@ -697,7 +713,7 @@ export default function Home() {
   return (
     <main className="flex h-screen overflow-hidden bg-[#eef1f6] text-slate-900 md:pl-[72px]">
       <AppIconRail />
-      <aside className="hidden w-[456px] shrink-0 border-r border-slate-200 bg-[#f8fafc] md:flex md:flex-col">
+      <aside className="hidden w-[292px] shrink-0 border-r border-slate-200 bg-[#f8fafc] md:flex md:flex-col">
         <div className="flex h-14 items-center gap-3 border-b border-slate-200 px-4">
           <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-600 text-sm font-bold text-white">A</div>
           <div className="min-w-0">
@@ -713,14 +729,14 @@ export default function Home() {
             className="mb-4 flex w-full items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium shadow-sm hover:bg-slate-50"
           >
             <span>＋</span>
-            New chat
+            새 채팅
           </button>
 
           <div className="space-y-5">
             <section>
               <div className="mb-2 flex items-center justify-between px-2">
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                  Recent Chats
+                  최근 대화
                 </p>
                 {savedChats.length > 0 && (
                   <button
@@ -787,15 +803,9 @@ export default function Home() {
               </div>
             </section>
 
-            <section>
-              <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Documents</p>
-              <div className="mb-2 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
-                <input
-                  className="w-full bg-transparent text-xs outline-none placeholder:text-slate-400"
-                  placeholder="Search documents..."
-                  disabled
-                />
-              </div>
+            <details className="rounded-xl border border-slate-200 bg-white p-3 text-sm">
+              <summary className="cursor-pointer font-semibold text-slate-700">지식베이스 · 문서 추가</summary>
+            <section className="mt-4">
               <DocumentInfoPanel
                 refreshKey={knowledgeRefreshKey}
                 onDocumentsChanged={() =>
@@ -804,8 +814,7 @@ export default function Home() {
               />
             </section>
 
-            <section>
-              <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Tools</p>
+            <section className="mt-4">
               <div className="space-y-2">
                 <label className="block cursor-pointer rounded-xl border border-slate-200 bg-white p-3 text-sm shadow-sm hover:border-indigo-200">
                   <input
@@ -846,17 +855,21 @@ export default function Home() {
               </div>
             </section>
 
-            <section>
-              <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">System</p>
+            <section className="mt-4">
               <SystemStatusPanel refreshKey={knowledgeRefreshKey} />
             </section>
-          </div>
-        </div>
-
-        <div className="border-t border-slate-200 p-3">
-          <div className="rounded-xl bg-white p-3 text-xs text-slate-500 shadow-sm">
-            <p className="font-semibold text-slate-700">Local-first mode</p>
-            <p className="mt-1">Ollama · ChromaDB · Source-grounded answers</p>
+            </details>
+            <details className="rounded-xl border border-slate-200 bg-white p-3 text-sm">
+              <summary className="cursor-pointer font-semibold text-slate-700">고급 설정</summary>
+              <label className="mt-3 block text-xs text-slate-500" htmlFor="advanced-model">답변 모델</label>
+              <select id="advanced-model" value={answerMode} onChange={(event) => setAnswerMode(event.target.value as AnswerMode)}
+                disabled={busy} className="mt-1 w-full rounded-lg border border-slate-200 bg-white p-2 text-xs">
+                <option value="qwen3:8b">Qwen3 8B</option>
+                <option value="gemma4:latest">Gemma4</option>
+                <option value="compare">Qwen3 vs Gemma4</option>
+              </select>
+              <GoalResearchPanel defaultOpen />
+            </details>
           </div>
         </div>
 
@@ -872,41 +885,12 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-2 text-slate-500">
             <MobileModeTabs />
-            <a
-              href="/evaluation"
-              className="rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 hover:bg-sky-100"
-            >
-              Benchmark
-            </a>
-            <a
-              href="/review"
-              className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100"
-            >
-              Figure review
-            </a>
-            <select
-              value={answerMode}
-              onChange={(event) =>
-                setAnswerMode(event.target.value as AnswerMode)
-              }
-              disabled={busy}
-              className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 outline-none disabled:opacity-50"
-              aria-label="답변 모델 선택"
-            >
-              <option value="qwen3:8b">Qwen3 8B</option>
-              <option value="gemma4:latest">Gemma4</option>
-              <option value="compare">Qwen3 vs Gemma4</option>
-            </select>
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100">☾</span>
+            <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">Local AI</span>
           </div>
         </header>
 
         <div className="flex-1 overflow-y-auto bg-[#f8fafc] px-4 py-6">
           <div className="mx-auto flex max-w-4xl flex-col gap-5">
-            <details className="rounded-2xl border border-violet-200 bg-white shadow-sm">
-              <summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-slate-700">고급 설정 · 세부 항목 직접 지정</summary>
-              <div className="px-3 pb-3"><GoalResearchPanel defaultOpen /></div>
-            </details>
             {messages.length === 0 && (
               <div className="flex gap-3">
                 <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
@@ -1005,6 +989,11 @@ export default function Home() {
                           </div>
                         )}
                         <MarkdownMath content={message.content} />
+                        {message.figureReview && (
+                          <a href="/review" className="mt-3 inline-flex rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700">
+                            Figure Review 열기
+                          </a>
+                        )}
                       </>
                     )}
 
@@ -1071,17 +1060,19 @@ export default function Home() {
                     )}
 
                     {message.goalRun && (
-                      <section className="mt-5 rounded-2xl border border-violet-100 bg-violet-50/50 p-4 text-xs leading-5">
-                        <p className="font-bold text-violet-800">목표 연구 · {message.goalRun.status === "achieved" ? "목표 달성" : "근거/조건 확인 필요"}</p>
-                        <p className="mt-1 text-slate-600">{message.goalRun.action_history?.map((item) => item.action_type.toUpperCase()).join(" → ")}</p>
+                      <section className="mt-4 rounded-2xl border border-violet-100 bg-violet-50/50 p-4 text-xs leading-5">
+                        <p className="font-bold text-violet-800">{message.goalRun.run_status === "waiting_for_user_input" ? "추가 정보가 필요합니다" :
+                          message.goalRun.status === "achieved" ? "목표 달성" : "검증된 정보 부족"}</p>
+                        {message.goalRun.run_status !== "waiting_for_user_input" && <>
                         {message.goalRun.criteria.map((item) => <p key={item.criterion_id} className="mt-2 text-slate-700">
-                          {item.status === "met" ? "✓" : "△"} {message.goalRun!.frozen_criteria.find((criterion) => criterion.criterion_id === item.criterion_id)?.description || item.criterion_id}: {displayAnswer(item.reason, message.goalRun!.computations)}
+                          {item.status === "met" ? "✓" : "△"} {message.goalRun!.frozen_criteria.find((criterion) => criterion.criterion_id === item.criterion_id)?.description || "성공 조건"}: {displayAnswer(item.reason, message.goalRun!.computations)}
                         </p>)}
                         <p className="mt-2 text-slate-500">근거: 내부 문서 {message.goalRun.internal_sources.length} · 웹 {message.goalRun.web_sources.length} · 검증 계산 {message.goalRun.computations.filter((item) => item.validation_passed).length}</p>
                         {message.goalRun.artifacts.map((artifact) => <a key={artifact.artifact_id} className="mr-4 text-violet-700 underline" href={goalArtifactUrl(message.goalRun!.run_id, artifact.artifact_id)} download>
                           {artifact.artifact_type.toUpperCase()} 다운로드
                         </a>)}
                         {Object.entries(message.goalRun.deliverable_errors || {}).map(([kind, issue]) => <p key={kind} className="text-red-600">{kind.toUpperCase()}: {issue}</p>)}
+                        </>}
                       </section>
                     )}
 
@@ -1248,22 +1239,15 @@ export default function Home() {
 
             {status && (
               <div className="mx-auto rounded-full border border-slate-200 bg-white px-4 py-2 text-xs text-slate-500 shadow-sm">
-                {busy ? "⏳ " : "✅ "}{status}
+                {busy ? "⏳ " : status.startsWith("목표 달성") ? "✅ " : "• "}{status}
               </div>
             )}
 
-            <details className="rounded-2xl border border-slate-200 bg-white p-4 text-sm shadow-sm">
-              <summary className="cursor-pointer font-semibold text-slate-700">Plot panel</summary>
-              <div className="mt-4">
-                <PlotPanel />
-              </div>
-            </details>
           </div>
         </div>
 
         <form onSubmit={onAsk} className="shrink-0 border-t border-slate-200 bg-white px-4 py-4">
           <div className="mx-auto flex max-w-4xl items-end gap-2 rounded-3xl border border-slate-200 bg-white px-4 py-3 shadow-lg shadow-slate-200/70">
-            <span className="pb-2 text-slate-400">＋</span>
             <textarea
               className="max-h-56 min-h-24 flex-1 resize-y bg-transparent py-2 text-sm outline-none placeholder:text-slate-400"
               placeholder="연구 주제와 원하는 결과를 자연어로 입력하세요. 예: 비중 0.918인 원유의 API도를 교재 근거로 계산해줘."

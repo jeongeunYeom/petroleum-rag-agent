@@ -93,6 +93,20 @@ class EvidenceAccumulator:
         self.figures: list[FigureEvidence] = []
         self._keys: set[tuple[Any, ...]] = set()
 
+    @classmethod
+    def restore(cls, internal: list[InternalEvidence], web: list[WebEvidence],
+                figures: list[FigureEvidence]) -> "EvidenceAccumulator":
+        value = cls()
+        value.internal = [item.model_copy(deep=True) for item in internal]
+        value.web = [item.model_copy(deep=True) for item in web]
+        value.figures = [item.model_copy(deep=True) for item in figures]
+        value._keys.update(("internal", item.document, item.page, item.chunk_id) for item in internal)
+        value._keys.update(("web", cls._canonical_url(item.url), (item.passage or item.snippet or "").strip())
+                           for item in web)
+        value._keys.update(("figure", item.document, item.page, item.figure_number, item.filename)
+                           for item in figures)
+        return value
+
     def add(self, response: ResearchResponse) -> list[str]:
         added: list[str] = []
         for item in response.internal_sources:

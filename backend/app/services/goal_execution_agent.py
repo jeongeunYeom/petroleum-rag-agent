@@ -18,9 +18,10 @@ from app.models.goal_research_schemas import (
 from app.models.research_schemas import EvidenceCounts, ResearchRequest, ResearchResponse, ResearchTiming
 from app.services.formula_source_registry import FormulaSourceRegistry
 from app.services.calculation_requirements import select_formula_candidate
+from app.services.goal_clarification import calculation_missing, clarification_question, simulation_readiness
 from app.services.evidence_fact_registry import EvidenceFactRegistry
 from app.services.calc_claim_grounding import validate_calc_claim
-from app.services.goal_action_planner import GoalActionPlanner
+from app.services.goal_action_planner import CALC_WORDS, GoalActionPlanner
 from app.services.goal_intent import asks_for_api_gravity_calculation, prefers_korean
 from app.services.goal_evaluator import GoalEvaluator
 from app.services.goal_execution_state import (
@@ -327,10 +328,13 @@ class GoalExecutionAgent(GoalResearchAgent):
 
     @staticmethod
     def _simulation_answer(computation: Any, spec: SimulationSpec,
-                           evidence: list[dict[str, Any]], source_id: str) -> str:
+                           evidence: list[dict[str, Any]], source_id: str,
+                           korean: bool = False) -> str:
         """Render only externally validated outputs, with explicit parent provenance."""
         manifest = computation.output_manifest
-        citations = [computation.computation_id, source_id]
+        citations = list(dict.fromkeys([computation.computation_id, source_id,
+                                        *computation.source_input_ids, *computation.formula_evidence_ids]))
+        citation_text = " ".join(f"[{item}]" for item in citations)
         lines = []
         for key in sorted(value for value in manifest if value.startswith("OUT_CASE_")):
             index = key.rsplit("_", 1)[1]
@@ -341,10 +345,10 @@ class GoalExecutionAgent(GoalResearchAgent):
                                              {computation.computation_id: computation}, evidence)
             if issues:
                 raise ValueError("simulation case grounding failed: " + ", ".join(issues))
-            lines.append(f"{claim} [{computation.computation_id}] [{source_id}]")
+            lines.append(f"{claim} {citation_text}")
         for label, first, second in (
-            ("Best", "OUT_BEST_PARAMETER", "OUT_BEST_RESULT"),
-            ("Worst", "OUT_WORST_PARAMETER", "OUT_WORST_RESULT"),
+            ("최적" if korean else "Best", "OUT_BEST_PARAMETER", "OUT_BEST_RESULT"),
+            ("최저" if korean else "Worst", "OUT_WORST_PARAMETER", "OUT_WORST_RESULT"),
         ):
             claim = (f"{label} {spec.parameter.name}={manifest[first]['value']}, "
                      f"{spec.output_name}={manifest[second]['value']}")
@@ -352,15 +356,44 @@ class GoalExecutionAgent(GoalResearchAgent):
                                              {computation.computation_id: computation}, evidence)
             if issues:
                 raise ValueError("simulation extrema grounding failed: " + ", ".join(issues))
-            lines.append(f"{claim} [{computation.computation_id}] [{source_id}]")
-        for label, output_id in (("Mean", "OUT_MEAN_RESULT"), ("Range", "OUT_RANGE_RESULT")):
+            lines.append(f"{claim} {citation_text}")
+        for label, output_id in ((("평균" if korean else "Mean"), "OUT_MEAN_RESULT"),
+                                 (("범위" if korean else "Range"), "OUT_RANGE_RESULT")):
             claim = f"{label} {spec.output_name}={manifest[output_id]['value']}"
             issues, _ = validate_calc_claim(claim, citations, [output_id],
                                              {computation.computation_id: computation}, evidence)
             if issues:
                 raise ValueError("simulation aggregate grounding failed: " + ", ".join(issues))
-            lines.append(f"{claim} [{computation.computation_id}] [{source_id}]")
+            lines.append(f"{claim} {citation_text}")
         return "\n".join(lines)
+
+    @staticmethod
+    def _pause(result: GoalResearchResponse, state: GoalExecutionState,
+               accumulator: EvidenceAccumulator, seen_actions: set[str],
+               research_validation: dict[str, Any], latest_candidate: str,
+               missing: list[str], korean: bool, attempts: int,
+               user_replies: list[str]) -> GoalResearchResponse:
+        result.run_status = GoalRunStatus.WAITING_FOR_USER_INPUT
+        result.status = GoalStatus.PENDING
+        result.current_stage = "waiting_for_user_input"
+        result.current_action = None
+        result.required_inputs = list(dict.fromkeys(missing))
+        result.clarification_question = clarification_question(result.required_inputs, korean)
+        result.final_answer = ""
+        state.unresolved_information = result.required_inputs.copy()
+        result.resume_checkpoint = {
+            "state": state.model_dump(mode="json"),
+            "seen_actions": sorted(seen_actions),
+            "research_validation": research_validation,
+            "latest_candidate": latest_candidate,
+            "clarification_attempts": attempts,
+            "user_replies": user_replies,
+        }
+        result.internal_sources = accumulator.internal
+        result.web_sources = accumulator.web
+        result.figures = accumulator.figures
+        result.state_history.append(state.snapshot())
+        return result
 
     @staticmethod
     def _focus_research_answer(candidate: str, criteria: list[GoalCriterion]) -> str:
@@ -382,7 +415,8 @@ class GoalExecutionAgent(GoalResearchAgent):
 
     @staticmethod
     def _deterministic_simulation_criteria(evaluation: Any, criteria: list[GoalCriterion],
-                                           candidate: str, computation: Any) -> Any:
+                                           candidate: str, computation: Any,
+                                           korean: bool = False) -> Any:
         """Prefer exact validated output coverage over stochastic semantic grading."""
         if not computation.validation_passed or not evaluation.engineering_validation_passed:
             return evaluation
@@ -391,9 +425,9 @@ class GoalExecutionAgent(GoalResearchAgent):
         cited_case_count = sum(bool(re.match(r"^[A-Za-z_]+=[-+]?\d", line) and
                                     f"[{computation.computation_id}]" in line) for line in lines)
         proof = {"all_cases": cited_case_count == case_count and case_count >= 1,
-                 "best": any(line.startswith("Best ") for line in lines),
-                 "mean": any(line.startswith("Mean ") for line in lines),
-                 "range": any(line.startswith("Range ") for line in lines)}
+                 "best": any(line.startswith(("Best ", "최적 ")) for line in lines),
+                 "mean": any(line.startswith(("Mean ", "평균 ")) for line in lines),
+                 "range": any(line.startswith(("Range ", "범위 ")) for line in lines)}
         updates = []
         by_id = {item.criterion_id: item for item in criteria}
         for item in evaluation.criteria:
@@ -413,7 +447,9 @@ class GoalExecutionAgent(GoalResearchAgent):
             if requirements and all(proof[key] for key in requirements):
                 updates.append(item.model_copy(update={
                     "status": CriterionStatus.MET,
-                    "reason": "All requested outputs are present in the validated sweep manifest and cited answer.",
+                    "reason": ("요청한 결과가 검증된 매개변수 계산과 출처가 표시된 답변에 포함되어 있습니다."
+                               if korean else
+                               "All requested outputs are present in the validated sweep manifest and cited answer."),
                     "supporting_evidence": [computation.computation_id, *computation.source_input_ids],
                 }))
             else:
@@ -429,6 +465,8 @@ class GoalExecutionAgent(GoalResearchAgent):
         self, run_id: str, request: GoalResearchRequest, *,
         is_canceled: Callable[[], bool] | None = None,
         on_progress: Callable[[GoalResearchResponse], None] | None = None,
+        resume_state: dict[str, Any] | None = None,
+        resume_result: GoalResearchResponse | None = None,
     ) -> GoalResearchResponse:
         autonomous_python = request.execution_mode == "autonomous_goal_execution"
         if autonomous_python:
@@ -443,35 +481,54 @@ class GoalExecutionAgent(GoalResearchAgent):
             re.search(r"공식|수식|관계식|\b(?:formula|equation|correlation)\b", request.goal or request.topic, re.I)
             and re.search(r"계산|구해|\b(?:calculat\w*|comput\w*)\b", request.goal or request.topic, re.I)
         )
-        users = UserFactRegistry.from_topic(request.topic)
+        user_text = request.topic + "\n" + "\n".join((resume_state or {}).get("user_replies", []))
+        users = UserFactRegistry.from_topic(user_text)
         simulation_spec = self._simulation_spec(request)
-        criteria = [item.model_copy(deep=True) for item in request.success_criteria]
-        source = "user" if criteria else "inferred"
-        if not criteria:
-            criteria = self._explicit_numeric_criteria(request, users, simulation_spec)
+        simulation_source_id = f"USERF{len(users.records) + 1}"
+        if resume_state and resume_result:
+            result = resume_result.model_copy(deep=True)
+            criteria = [item.model_copy(deep=True) for item in result.frozen_criteria]
+            criteria_hash = result.criteria_hash
+            state = GoalExecutionState.model_validate(resume_state["state"])
+            state.known_facts = list(dict.fromkeys(state.known_facts + [item.fact_id for item in users.records]))
+            state.no_progress_count = 0
+            accumulator = EvidenceAccumulator.restore(result.internal_sources, result.web_sources, result.figures)
+            seen_actions = set(resume_state["seen_actions"])
+            latest_candidate = str(resume_state.get("latest_candidate") or "")
+            research_validation = dict(resume_state.get("research_validation") or {})
+            clarification_attempts = int(resume_state.get("clarification_attempts") or 0)
+            result.run_status = GoalRunStatus.RUNNING
+            result.clarification_question = None
+            result.required_inputs = []
+            result.resume_checkpoint = {}
+        else:
+            criteria = [item.model_copy(deep=True) for item in request.success_criteria]
+            source = "user" if criteria else "inferred"
             if not criteria:
-                criteria = await self.planner.infer_criteria(request)
-        criteria_hash = self._criteria_hash(criteria)
-        result = GoalResearchResponse(
-            run_id=run_id, topic=request.topic, goal=request.goal, expected_result=request.expected_result,
-            run_status=GoalRunStatus.RUNNING, status=GoalStatus.PENDING,
-            max_iterations=request.max_iterations, criteria_source=source, criteria_hash=criteria_hash,
-            frozen_criteria=criteria,
-            expected_result_status=ExpectedResultStatus.INSUFFICIENT_EVIDENCE if request.expected_result
-            else ExpectedResultStatus.NOT_PROVIDED,
-        )
+                criteria = self._explicit_numeric_criteria(request, users, simulation_spec)
+                if not criteria:
+                    criteria = await self.planner.infer_criteria(request)
+            criteria_hash = self._criteria_hash(criteria)
+            result = GoalResearchResponse(
+                run_id=run_id, topic=request.topic, goal=request.goal, expected_result=request.expected_result,
+                run_status=GoalRunStatus.RUNNING, status=GoalStatus.PENDING,
+                max_iterations=request.max_iterations, criteria_source=source, criteria_hash=criteria_hash,
+                frozen_criteria=criteria,
+                expected_result_status=ExpectedResultStatus.INSUFFICIENT_EVIDENCE if request.expected_result
+                else ExpectedResultStatus.NOT_PROVIDED,
+            )
+            state = GoalExecutionState.from_criteria(run_id, request.goal or request.topic, criteria)
+            state.known_facts = [item.fact_id for item in users.records]
+            accumulator = EvidenceAccumulator()
+            seen_actions: set[str] = set()
+            latest_candidate = ""
+            research_validation: dict[str, Any] = {}
+            clarification_attempts = 0
         if autonomous_python:
             result.telemetry["python_authorization_source"] = "autonomous_execution_mode"
-        state = GoalExecutionState.from_criteria(run_id, request.goal or request.topic, criteria)
-        state.known_facts = [item.fact_id for item in users.records]
-        simulation_source_id = f"USERF{len(users.records) + 1}"
-        accumulator = EvidenceAccumulator()
-        seen_actions: set[str] = set()
-        latest_candidate = ""
-        research_validation: dict[str, Any] = {}
         self._notify(result, on_progress)
 
-        for iteration in range(1, request.max_iterations + 1):
+        for iteration in range(state.iteration + 1, request.max_iterations + 1):
             if is_canceled and is_canceled():
                 return self._finish(result, GoalRunStatus.CANCELED, GoalStatus.CANCELED,
                                     GoalStopReason.CANCELED, latest_candidate, started)
@@ -484,6 +541,17 @@ class GoalExecutionAgent(GoalResearchAgent):
                 evidence_rows, f"{request.goal or ''} {request.topic}",
                 [item.name for item in users.records],
             ) if formula_available else None
+            simulation_source = None
+            simulation_inputs: list[str] = []
+            missing_simulation: list[str] = []
+            if simulation_spec is None and re.search(r"\b(?:simulat\w*|sweep|vary\w*)\b|시뮬레이션|바꿔가며|바꾸면서|간격으로",
+                                                      f"{request.topic} {request.goal or ''}", re.I):
+                readiness = simulation_readiness(f"{user_text}\n{request.goal or ''}", evidence_rows,
+                                                  users, state.derived_facts)
+                simulation_spec = readiness.spec
+                simulation_source = readiness.formula_source_id
+                simulation_inputs = readiness.input_ids
+                missing_simulation = readiness.missing
             action = self.action_planner.select(request, state, user_fact_ids=[r.fact_id for r in users.records],
                                                 evidence_fact_ids=evidence_fact_ids,
                                                 formula_ready=selected_formula is not None,
@@ -491,6 +559,17 @@ class GoalExecutionAgent(GoalResearchAgent):
                                                 python_calls_used=result.python_calls_total,
                                                 simulation_spec=simulation_spec)
             if action.action_type == GoalActionType.STOP:
+                calculation_stalled = (action.reason_code == "no_progress" and not state.computation_ids
+                                       and bool(CALC_WORDS.search(f"{request.topic} {request.goal or ''}")))
+                needs_clarification = action.reason_code in {"simulation_spec_missing", "calculation_blocked"} or (
+                    action.reason_code == "no_progress" and (bool(missing_simulation) or calculation_stalled))
+                if needs_clarification and request.use_internal and clarification_attempts < 3:
+                    missing = (missing_simulation if missing_simulation else
+                               calculation_missing(selected_formula, evidence_rows, users, state.derived_facts))
+                    if missing:
+                        return self._pause(result, state, accumulator, seen_actions, research_validation,
+                                           latest_candidate, missing, korean, clarification_attempts + 1,
+                                           list((resume_state or {}).get("user_replies", [])))
                 reason = {
                     "no_progress": GoalStopReason.NO_PROGRESS,
                     "simulation_permission_required": GoalStopReason.SIMULATION_BLOCKED,
@@ -602,6 +681,11 @@ class GoalExecutionAgent(GoalResearchAgent):
                     computation = await run_parameter_sweep(get_settings(), request, run_id,
                                                             simulation_spec, f"CALC{len(result.computations) + 1}",
                                                             simulation_source_id)
+                    if simulation_source:
+                        computation.formula_evidence_ids = [simulation_source]
+                        computation.source_evidence_ids = [simulation_source]
+                        computation.source_input_ids = list(dict.fromkeys(
+                            [*computation.source_input_ids, *simulation_inputs]))
                     result.computations.append(computation)
                     calc_ids.append(computation.computation_id)
                     state.computation_ids.append(computation.computation_id)
@@ -634,7 +718,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                     simulation = next((item for item in result.computations
                                        if item.validation_passed and item.analysis_id.startswith("SIM-")), None)
                     latest_candidate = (self._simulation_answer(simulation, simulation_spec, evidence,
-                                                                simulation_source_id)
+                                                                simulation_source_id, korean)
                                         if simulation and simulation_spec else
                                         self._api_gravity_answer(request, result.computations, evidence)
                                         or await self._synthesize(request, criteria, evidence, [],
@@ -646,7 +730,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                                                                computations=result.computations)
                     if simulation:
                         evaluation = self._deterministic_simulation_criteria(
-                            evaluation, criteria, latest_candidate, simulation)
+                            evaluation, criteria, latest_candidate, simulation, korean)
                     self._assert_criteria_frozen(criteria, criteria_hash)
                     state.current_coverage = evaluation.coverage
                     state.unresolved_information = evaluation.gaps[:5]

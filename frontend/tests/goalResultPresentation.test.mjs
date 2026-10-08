@@ -62,3 +62,8 @@ test("simulation table and evidence counts come from validated manifests", () =>
   assert.deepEqual(evidenceCounts({ computations: [calc, { ...calc, validation_passed: false }] }),
     { userInputs: 2, calculations: 1 });
 });
+
+test("internal fact and formula identifiers are hidden from the chat answer", () => {
+  assert.equal(displayAnswer("근거 [EFACT2] [FORMULA1] [USERF3]", []),
+    "근거 [자료 수치] [자료 수식] [사용자 입력]");
+});

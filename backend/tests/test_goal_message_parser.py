@@ -45,7 +45,7 @@ def test_sourced_api_formula_and_missing_simulation_model_are_not_invented():
     state = GoalExecutionState.from_criteria("GR-TEST", simulation.goal or "", [GoalCriterion(criterion_id="C1", description="최적 조건")])
     approved = simulation.model_copy(update={"allow_python_execution": True, "python_execution_approved": True})
     action = GoalActionPlanner.select(approved, state, user_fact_ids=[], formula_ready=False, simulation_spec=None)
-    assert action.action_type == GoalActionType.STOP and action.reason_code == "simulation_spec_missing"
+    assert action.action_type == GoalActionType.RETRIEVE and action.reason_code == "simulation_model_or_inputs_missing"
 
 
 def test_deliverables_context_hypothesis_and_web_are_explicit_only():
@@ -91,7 +91,7 @@ def test_graph_and_range_words_select_tool_paths_without_inventing_a_model():
     state = GoalExecutionState.from_criteria("GR-SWEEP", sweep.goal or "", [GoalCriterion(criterion_id="C1", description="최적 조건")])
     approved = sweep.model_copy(update={"allow_python_execution": True, "python_execution_approved": True})
     action = GoalActionPlanner.select(approved, state, user_fact_ids=[], formula_ready=False, simulation_spec=None)
-    assert action.action_type == GoalActionType.STOP and action.reason_code == "simulation_spec_missing"
+    assert action.action_type == GoalActionType.RETRIEVE and action.reason_code == "simulation_model_or_inputs_missing"
 
 
 def test_inferred_criteria_do_not_invent_an_unprovided_hypothesis():

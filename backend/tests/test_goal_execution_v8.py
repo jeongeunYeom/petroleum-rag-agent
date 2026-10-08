@@ -18,6 +18,7 @@ from app.services.goal_action_planner import GoalActionPlanner
 from app.services.goal_evaluator import GoalEvaluationResult, GoalEvaluator
 from app.services.calculation_request_ir import parse_request_ir
 from app.services.calculation_requirements import select_formula_candidate
+from app.services.goal_clarification import simulation_readiness
 from app.services.goal_execution_agent import GoalExecutionAgent, _EvidenceSnapshot, _V8ToolPlanner
 from app.services.goal_execution_state import (
     ActionRecord, DerivedFact, GoalActionType, GoalExecutionState, SimulationParameter, SimulationSpec,
@@ -420,6 +421,34 @@ def test_autonomous_user_fact_calculation_reaches_sandbox_without_client_flags(t
     assert result.computations[0].output_manifest["OUT_mean"]["unit"] == "stb/d"
 
 
+def test_sourced_api_formula_retrieves_then_calculates_without_clarification(tmp_path, monkeypatch):
+    settings = Settings(data_dir=tmp_path / "data", agent_workspace_dir=tmp_path / "workspace")
+    monkeypatch.setattr("app.services.goal_execution_agent.get_settings", lambda: settings)
+
+    class DecliningOllama:
+        async def chat_structured(self, *_args, **_kwargs):
+            return '{"tool_needed":false,"tool_type":"none","reason":"No tool needed"}'
+
+    req = GoalResearchRequest(
+        topic="SG=0.918인 원유의 API gravity를 내부 교재 식으로 계산해줘.",
+        goal="내부 교재의 SG-API 관계식을 찾아 API gravity를 계산해줘.",
+        success_criteria=[GoalCriterion(criterion_id="C1", description="Calculate validated API gravity")],
+        execution_mode="autonomous_goal_execution", max_iterations=5,
+    )
+    agent = GoalExecutionAgent(
+        StaticResearch("API = (141.5 / SG) - 131.5"), DecliningOllama(),
+        evaluator=PassingEvaluator(), synthesizer=synthetic_synthesis,
+        analysis_factory=lambda run_id: GoalPythonAnalysis(settings, DecliningOllama(), run_id),
+    )
+    result = asyncio.run(agent.run("GR-API-SOURCE", req))
+    assert result.run_status == GoalRunStatus.COMPLETED
+    assert [item["action_type"] for item in result.action_history] == [
+        "retrieve", "calculate", "verify", "synthesize", "stop"]
+    assert result.computations[0].validation_passed
+    assert result.computations[0].formula_evidence_ids == ["KB1"]
+    assert result.computations[0].output_manifest["OUT_default_API_gravity"]["value"] == pytest.approx(22.64, abs=0.01)
+
+
 def test_autonomous_missing_specialist_formula_stops_without_python():
     req = GoalResearchRequest(topic="Xq=31 psi", goal="Find a cited equation for fictional Kappa-Zeta coupling, then calculate Zeta in psi.",
                               success_criteria=[GoalCriterion(criterion_id="C1", description="Calculate with a cited equation")],
@@ -494,3 +523,119 @@ def test_service_dispatches_autonomous_mode_without_legacy_fallback(tmp_path):
         time.sleep(0.01)
     assert result.status == GoalStatus.ACHIEVED
     assert called == ["autonomous"]
+
+
+def test_missing_simulation_model_searches_kb_before_clarification():
+    req = GoalResearchRequest(topic="공극률을 0.1~0.3으로 바꿔가며 CO2 저장량을 계산해줘",
+                              goal="공극률을 바꿔가며 CO2 저장량을 계산해줘",
+                              execution_mode="autonomous_goal_execution",
+                              allow_python_execution=True, python_execution_approved=True)
+    current = state()
+    first = GoalActionPlanner.select(req, current, user_fact_ids=[], formula_ready=False,
+                                     simulation_spec=None)
+    assert first.action_type == GoalActionType.RETRIEVE
+    current.completed_actions.extend([record(GoalActionType.RETRIEVE), record(GoalActionType.RETRIEVE)])
+    assert GoalActionPlanner.select(req, current, user_fact_ids=[], formula_ready=False,
+                                    simulation_spec=None).reason_code == "simulation_spec_missing"
+
+
+def test_clarification_batches_missing_step_and_all_sourced_formula_inputs():
+    text = "공극률을 0.1~0.3으로 바꾸면서 CO2 저장량을 계산해줘"
+    evidence = [{"evidence_id": "KB1", "source_type": "knowledge_base", "locator": "book p.1",
+                 "text": "CO2_storage = porosity * bulk_volume * CO2_density"}]
+    readiness = simulation_readiness(text, evidence, UserFactRegistry.from_topic(text))
+    assert readiness.spec is None
+    assert readiness.formula_source_id == "KB1"
+    assert readiness.missing == ["변수 변화 간격", "CO2_density 값", "bulk_volume 값"]
+    example = [{**evidence[0], "text": evidence[0]["text"] +
+                "\nWorked example: bulk_volume=1000 m3; CO2_density=700 kg/m3"}]
+    assert simulation_readiness(text, example, UserFactRegistry.from_topic(text)).missing == readiness.missing
+
+
+def test_clarification_resumes_same_run_with_sourced_formula_and_real_sandbox(tmp_path, monkeypatch):
+    settings = Settings(data_dir=tmp_path / "data", agent_workspace_dir=tmp_path / "workspace")
+    monkeypatch.setattr("app.services.goal_execution_agent.get_settings", lambda: settings)
+    source = StaticResearch("CO2_storage = porosity * bulk_volume * CO2_density")
+    agent = GoalExecutionAgent(source, object(), evaluator=PassingEvaluator())
+    service = GoalResearchService(settings, agent, agent)
+    req = GoalResearchRequest(
+        topic="공극률을 0.1~0.3으로 0.02 간격으로 바꿔가며 CO2 저장량을 계산하고 최적 조건을 찾아줘.",
+        goal="공극률을 바꿔가며 CO2 저장량을 계산하고 최적 조건을 찾아줘.",
+        success_criteria=[GoalCriterion(criterion_id="C1", description="Report all simulated cases and best case")],
+        execution_mode="autonomous_goal_execution", max_iterations=6,
+    )
+
+    def wait_for(*statuses):
+        deadline = time.monotonic() + 15
+        while time.monotonic() < deadline:
+            current = service.get(run_id)
+            if current.run_status in statuses:
+                return current
+            time.sleep(0.02)
+        pytest.fail(f"run did not reach {statuses}: {current.run_status}")
+
+    run_id = service.start(req).run_id
+    waiting = wait_for(GoalRunStatus.WAITING_FOR_USER_INPUT, GoalRunStatus.FAILED)
+    assert waiting.run_status == GoalRunStatus.WAITING_FOR_USER_INPUT, waiting.error
+    assert "bulk_volume" in waiting.clarification_question
+    assert "CO2_density" in waiting.clarification_question
+    assert [item["action_type"] for item in waiting.action_history] == ["retrieve", "retrieve"]
+    assert waiting.internal_sources[0].evidence_id == "KB1"
+    assert waiting.computations == []
+    checkpoint = json.loads(service._path(run_id).read_text(encoding="utf-8"))["checkpoint"]
+    assert checkpoint["state"]["evidence_ids"] == ["KB1"]
+    assert "private_chain_of_thought" not in json.dumps(checkpoint)
+
+    # A new service instance proves the checkpoint survives a backend restart.
+    service = GoalResearchService(settings, agent, agent)
+    service.resume(run_id, "부피는 1000 m3, 밀도는 700 kg/m3.")
+    done = wait_for(GoalRunStatus.COMPLETED, GoalRunStatus.STOPPED, GoalRunStatus.FAILED)
+    assert done.run_id == run_id
+    assert done.run_status == GoalRunStatus.COMPLETED, done.error or done.final_answer
+    assert [item["action_type"] for item in done.action_history] == [
+        "retrieve", "retrieve", "simulate", "analyze", "verify", "synthesize", "stop"]
+    assert done.computations[0].validation_passed
+    assert done.computations[0].formula_evidence_ids == ["KB1"]
+    assert set(done.computations[0].source_input_ids) >= {"USERF1", "USERF2"}
+    assert done.computations[0].output_manifest["OUT_BEST_RESULT"]["value"] == pytest.approx(210000)
+    assert "최적 porosity=" in done.final_answer
+    assert "요청한 결과가 검증된" in done.criteria[0].reason
+    assert json.loads(service._path(run_id).read_text(encoding="utf-8"))["checkpoint"] == {}
+
+
+def test_missing_kb_formula_waits_without_inventing_one(tmp_path):
+    settings = Settings(data_dir=tmp_path / "data", agent_workspace_dir=tmp_path / "workspace")
+    agent = GoalExecutionAgent(StaticResearch("No storage equation is present."), object(),
+                               evaluator=PassingEvaluator())
+    req = GoalResearchRequest(topic="공극률을 0.1~0.3으로 바꿔가며 CO2 저장량을 계산해줘",
+                              goal="공극률을 바꿔가며 CO2 저장량을 계산해줘",
+                              success_criteria=[GoalCriterion(criterion_id="C1", description="Report a sourced result")],
+                              execution_mode="autonomous_goal_execution", max_iterations=6)
+    result = asyncio.run(agent.run("GR-NO-FORMULA", req))
+    assert result.run_status == GoalRunStatus.WAITING_FOR_USER_INPUT
+    assert "모델/관계식" in result.clarification_question
+    assert not result.computations
+
+
+def test_user_cannot_supply_missing_model_and_ends_same_run_without_guessing(tmp_path):
+    settings = Settings(data_dir=tmp_path / "data", agent_workspace_dir=tmp_path / "workspace")
+    agent = GoalExecutionAgent(StaticResearch("No storage equation is present."), object(),
+                               evaluator=PassingEvaluator())
+    service = GoalResearchService(settings, agent, agent)
+    req = GoalResearchRequest(topic="공극률을 0.1~0.3으로 바꾸면서 CO2 저장량을 계산해줘",
+                              goal="공극률을 바꾸면서 CO2 저장량을 계산해줘",
+                              success_criteria=[GoalCriterion(criterion_id="C1", description="Report a sourced result")],
+                              execution_mode="autonomous_goal_execution", max_iterations=6,
+                              deliverables=["docx"])
+    run_id = service.start(req).run_id
+    deadline = time.monotonic() + 5
+    while service.get(run_id).run_status != GoalRunStatus.WAITING_FOR_USER_INPUT and time.monotonic() < deadline:
+        time.sleep(0.02)
+    stopped = service.resume(run_id, "모르겠어요")
+    assert stopped.run_id == run_id
+    assert stopped.run_status == GoalRunStatus.STOPPED
+    assert stopped.stop_reason == GoalStopReason.INSUFFICIENT_EVIDENCE
+    assert "추측하지" in stopped.final_answer
+    assert not stopped.computations
+    assert stopped.deliverable_status == {"docx": "skipped"}
+    assert json.loads(service._path(run_id).read_text(encoding="utf-8"))["checkpoint"] == {}
