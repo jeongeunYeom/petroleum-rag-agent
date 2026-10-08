@@ -11,7 +11,7 @@ from app.services.goal_intent import asks_for_api_gravity_calculation
 
 CALC_WORDS = re.compile(r"\b(?:calculat\w*|comput\w*|derive|mean|average|rank\w*|compare\s+numeric|difference|ratio)\b|계산|산출|평균|순위|그래프", re.I)
 ANALYZE_WORDS = re.compile(r"\b(?:rank\w*|best|worst|maximum|minimum|optim\w*|sensitiv\w*|compare|plot|graph|chart)\b|순위|최적|민감도|최대|최소|그래프|도표", re.I)
-SIMULATE_WORDS = re.compile(r"\b(?:simulat\w*|sweep|parameter\s+range|vary\w*)\b|시뮬레이션|매개변수\s*변화|범위\s*탐색|범위로\s*계산|바꿔가며|바꾸면서|간격으로", re.I)
+SIMULATE_WORDS = re.compile(r"\b(?:simulat\w*|sweep|parameter\s+range|vary\w*)\b|시뮬레이션|매개변수\s*변화|범위\s*탐색|범위로\s*계산|바꿔가며|바꾸면서|변화시키(?:며|면서|고|면|기|다|는|ㄴ)?|간격으로", re.I)
 
 
 class GoalActionPlanner:
@@ -33,10 +33,10 @@ class GoalActionPlanner:
         wants_simulation = bool(SIMULATE_WORDS.search(text) or simulation_spec)
         wants_calculation = bool(CALC_WORDS.search(text) or asks_for_api_gravity_calculation(request)) and not wants_simulation
         wants_analysis = bool(ANALYZE_WORDS.search(text))
-        specialist = bool(re.search(r"\b(?:formula|equation|correlation|productivity\s+index)\b|공식|수식|관계식", text, re.I)
+        specialist = bool(re.search(r"\b(?:formula|equation|correlation|productivity\s+index)\b|공식|수식|관계식|식(?:을|이|의)?\s*찾", text, re.I)
                           or asks_for_api_gravity_calculation(request))
         permission = request.allow_python_execution and request.python_execution_approved
-        numeric_inputs_ready = bool(user_fact_ids or evidence_fact_ids)
+        numeric_inputs_ready = bool(user_fact_ids or (evidence_fact_ids and not specialist))
         required = [item.criterion_id for item in state.criteria if item.required and item.status.value != "met"]
         counts = {kind: sum(item.action_type == kind for item in state.completed_actions)
                   for kind in GoalActionType}
@@ -79,10 +79,18 @@ class GoalActionPlanner:
                                   GoalActionPlanner.query(request, state))
                 return action(GoalActionType.STOP, "simulation_spec_missing")
             return action(GoalActionType.SIMULATE, "simulation_inputs_ready")
+        last_calculation = next((item for item in reversed(state.completed_actions)
+                                 if item.action_type == GoalActionType.CALCULATE), None)
         retry_after_gain = bool(last and last.action_type == GoalActionType.RETRIEVE and
-                                last.evidence_added and not state.computation_ids)
+                                last.evidence_added and not state.computation_ids and
+                                (last_calculation is None or
+                                 (formula_ready and formula_id != last_calculation.details.get("formula_id")) or
+                                 (not specialist and set(evidence_fact_ids or []) !=
+                                  set(last_calculation.details.get("evidence_fact_ids", [])))))
+        retry_after_user_input = bool(last_calculation and last_calculation.status != "completed" and
+                                      set(user_fact_ids) != set(last_calculation.details.get("user_fact_ids", user_fact_ids)))
         if (wants_calculation and not state.computation_ids and
-                (not counts[GoalActionType.CALCULATE] or retry_after_gain) and
+                (not counts[GoalActionType.CALCULATE] or retry_after_gain or retry_after_user_input) and
                 counts[GoalActionType.CALCULATE] < request.max_python_calls):
             if not permission:
                 if specialist and not counts[GoalActionType.RETRIEVE] and request.max_retrieval_actions:
@@ -91,6 +99,8 @@ class GoalActionPlanner:
                 return action(GoalActionType.STOP, "calculation_permission_required")
             if python_calls_used >= request.max_python_calls:
                 return action(GoalActionType.STOP, "python_call_budget_exhausted")
+            if specialist and formula_ready and not numeric_inputs_ready:
+                return action(GoalActionType.STOP, "calculation_blocked")
             if numeric_inputs_ready and (not specialist or formula_ready):
                 return action(GoalActionType.CALCULATE, "calculation_inputs_ready")
             if counts[GoalActionType.RETRIEVE] < request.max_retrieval_actions:
@@ -118,6 +128,9 @@ class GoalActionPlanner:
         missing = "; ".join(state.unresolved_information[:3])
         unmet = "; ".join(item.description for item in state.criteria if item.required and item.status.value != "met")
         terms = "\nspecific gravity SG API gravity conversion equation" if asks_for_api_gravity_calculation(request) else ""
+        if re.search(r"API(?:\s+gravity)?|API도", request.goal or request.topic, re.I) and re.search(
+                r"무거|가벼|중질|경질|heavy|light|dens", request.goal or request.topic, re.I):
+            terms += "\nheavy crude light crude API gravity density specific gravity"
         if SIMULATE_WORDS.search(f"{request.goal or ''} {request.topic}"):
             terms += "\nparameter sweep storage capacity model equation required variables"
         return f"{request.goal or request.topic}\nMissing: {missing or unmet or request.topic}{terms}"[:4000]

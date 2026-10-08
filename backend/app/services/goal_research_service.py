@@ -169,8 +169,10 @@ class GoalResearchService:
                 kwargs.update(resume_state=resume_state, resume_result=resume_result)
             result = asyncio.run(controller.run(run_id, request, **kwargs))
             result.timing["message_parsing_seconds"] = round(parsing_seconds, 6)
+            previous_seconds = (resume_result.timing.get("total_seconds", 0.0)
+                                if resume_result is not None else 0.0)
             result.timing["total_seconds"] = round(
-                result.timing.get("elapsed_seconds", 0.0) + parsing_seconds, 6)
+                previous_seconds + result.timing.get("elapsed_seconds", 0.0) + parsing_seconds, 6)
             if result.status == GoalStatus.ACHIEVED and request.deliverables:
                 frozen = result.model_copy(deep=True)
                 result.deliverable_status = {kind: "pending" for kind in dict.fromkeys(request.deliverables)}

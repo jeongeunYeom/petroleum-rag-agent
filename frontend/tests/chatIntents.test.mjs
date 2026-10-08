@@ -6,6 +6,9 @@ import { goalStageLabel, wantsFigureReview } from "../lib/chatIntents.ts";
 test("figure review opens only on an explicit viewer request", () => {
   assert.equal(wantsFigureReview("방금 추가한 문서의 Figure 보여줘"), true);
   assert.equal(wantsFigureReview("추출된 그림 확인하고 싶어"), true);
+  assert.equal(wantsFigureReview("최근 추가한 문서에서 추출된 Figure를 확인하고 싶어."), true);
+  assert.equal(wantsFigureReview("새로 등록한 PDF의 그림 검토 화면을 열어줘"), true);
+  assert.equal(wantsFigureReview("Please show the extracted figures from the new document"), true);
   assert.equal(wantsFigureReview("Open Figure Review"), true);
   assert.equal(wantsFigureReview("Figure 3의 의미를 설명해줘"), false);
   assert.equal(wantsFigureReview("저장량을 계산해줘"), false);

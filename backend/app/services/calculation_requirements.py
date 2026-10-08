@@ -57,10 +57,14 @@ def select_formula_candidate(evidence: list[dict[str, Any]], intent: str,
         if not record.expression_candidate:
             continue
         lhs = normalize_symbol(record.expression_candidate.split("=", 1)[0])
+        if re.fullmatch(UNIT, lhs, re.I):
+            continue
         variables = expression_variables(record.expression_candidate) or set()
         overlap = sum(any(name == normalize_symbol(variable) or name.endswith(normalize_symbol(variable))
                           for name in facts) for variable in variables)
-        score = (4 if lhs in tokens else 0) + overlap
+        if facts and not overlap:
+            continue
+        score = (4 if lhs in tokens else 0) + overlap + (1 if variables else 0)
         if score >= 2:
             ranked.append((score, record))
     ranked.sort(key=lambda pair: pair[0], reverse=True)

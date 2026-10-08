@@ -16,12 +16,14 @@ from app.models.goal_research_schemas import (
     GoalResearchResponse, GoalRunStatus, GoalStatus, GoalStopReason,
 )
 from app.models.research_schemas import EvidenceCounts, ResearchRequest, ResearchResponse, ResearchTiming
-from app.services.formula_source_registry import FormulaSourceRegistry
+from app.services.formula_source_registry import FormulaSourceRegistry, normalize_formula
 from app.services.calculation_requirements import select_formula_candidate
-from app.services.goal_clarification import calculation_missing, clarification_question, simulation_readiness
+from app.services.goal_clarification import (calculation_missing, clarification_question,
+                                             parse_user_simulation_spec, simulation_readiness)
 from app.services.evidence_fact_registry import EvidenceFactRegistry
 from app.services.calc_claim_grounding import validate_calc_claim
-from app.services.goal_action_planner import CALC_WORDS, GoalActionPlanner
+from app.services.citation_semantics import ground_research_claims
+from app.services.goal_action_planner import CALC_WORDS, SIMULATE_WORDS, GoalActionPlanner
 from app.services.goal_intent import asks_for_api_gravity_calculation, prefers_korean
 from app.services.goal_evaluator import GoalEvaluator
 from app.services.goal_execution_state import (
@@ -200,21 +202,7 @@ class GoalExecutionAgent(GoalResearchAgent):
         if request.simulation_spec:
             return SimulationSpec.model_validate(request.simulation_spec)
         text = "\n".join(filter(None, (request.topic, request.goal)))
-        interval = re.search(
-            r"\b(?P<name>[A-Za-z][A-Za-z0-9_]*)\s+from\s+(?P<start>[-+]?\d+(?:\.\d+)?)"
-            r"\s+to\s+(?P<stop>[-+]?\d+(?:\.\d+)?)\s+(?:in\s+)?steps?\s+(?:of\s+)?"
-            r"(?P<step>\d+(?:\.\d+)?)", text, re.I,
-        )
-        formula = re.search(r"\b(?:model|formula)\s+(?P<output>[A-Za-z][A-Za-z0-9_]*)\s*=\s*"
-                            r"(?P<expression>[^;,\n]+)", text, re.I)
-        if not interval or not formula:
-            return None
-        return SimulationSpec(
-            parameter=SimulationParameter(name=interval.group("name"), start=float(interval.group("start")),
-                                          stop=float(interval.group("stop")), step=float(interval.group("step"))),
-            output_name=formula.group("output"), expression=formula.group("expression").strip(),
-            objective="min" if re.search(r"\bminimi[sz]e\b|최소", text, re.I) else "max",
-        )
+        return parse_user_simulation_spec(text)
 
     @staticmethod
     def _record_stop(result: GoalResearchResponse, state: GoalExecutionState,
@@ -303,15 +291,20 @@ class GoalExecutionAgent(GoalResearchAgent):
             return None
         source_ids = {str(item["evidence_id"]) for item in evidence
                       if item.get("source_type") in {"knowledge_base", "figure", "web"}}
+        sourced_spans = {(item.source_id, item.normalized_span)
+                         for item in FormulaSourceRegistry.from_evidence(evidence).records}
         for calc in computations:
             if not calc.validation_passed or not calc.formula or not set(calc.formula_evidence_ids) & source_ids:
+                continue
+            if not any((source_id, normalize_formula(calc.formula)) in sourced_spans
+                       for source_id in calc.formula_evidence_ids):
                 continue
             for output_id, output in calc.output_manifest.items():
                 if "api" not in str(output.get("name", "")).casefold() or "gravity" not in str(output.get("name", "")).casefold():
                     continue
                 parents = list(dict.fromkeys([calc.computation_id, *calc.source_input_ids,
                                                *calc.formula_evidence_ids]))
-                value = f"{output['name']}: {output['value']} {output.get('unit') or ''}".strip()
+                value = f"{float(output['value']):.2f} °API"
                 claim = f"검증된 API도 {value}" if prefers_korean(request) else f"Validated API gravity {value}"
                 issues, _ = validate_calc_claim(claim, parents, [f"{calc.computation_id}:{output_id}"],
                                                 {calc.computation_id: calc}, evidence)
@@ -414,7 +407,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                accumulator: EvidenceAccumulator, seen_actions: set[str],
                research_validation: dict[str, Any], latest_candidate: str,
                missing: list[str], korean: bool, attempts: int,
-               user_replies: list[str]) -> GoalResearchResponse:
+               user_replies: list[str], started: float) -> GoalResearchResponse:
         result.run_status = GoalRunStatus.WAITING_FOR_USER_INPUT
         result.status = GoalStatus.PENDING
         result.current_stage = "waiting_for_user_input"
@@ -435,6 +428,8 @@ class GoalExecutionAgent(GoalResearchAgent):
         result.web_sources = accumulator.web
         result.figures = accumulator.figures
         result.state_history.append(state.snapshot())
+        result.timing["elapsed_seconds"] = round(time.perf_counter() - started, 6)
+        result.timing["total_seconds"] = result.timing["elapsed_seconds"]
         return result
 
     @staticmethod
@@ -593,8 +588,7 @@ class GoalExecutionAgent(GoalResearchAgent):
             simulation_source = None
             simulation_inputs: list[str] = []
             missing_simulation: list[str] = []
-            if simulation_spec is None and re.search(r"\b(?:simulat\w*|sweep|vary\w*)\b|시뮬레이션|바꿔가며|바꾸면서|간격으로",
-                                                      f"{request.topic} {request.goal or ''}", re.I):
+            if simulation_spec is None and SIMULATE_WORDS.search(f"{request.topic} {request.goal or ''}"):
                 readiness = simulation_readiness(f"{user_text}\n{request.goal or ''}", evidence_rows,
                                                   users, state.derived_facts)
                 simulation_spec = readiness.spec
@@ -620,7 +614,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                     if missing:
                         return self._pause(result, state, accumulator, seen_actions, research_validation,
                                            latest_candidate, missing, korean, clarification_attempts + 1,
-                                           list((resume_state or {}).get("user_replies", [])))
+                                           list((resume_state or {}).get("user_replies", [])), started)
                 reason = {
                     "no_progress": GoalStopReason.NO_PROGRESS,
                     "simulation_permission_required": GoalStopReason.SIMULATION_BLOCKED,
@@ -701,7 +695,8 @@ class GoalExecutionAgent(GoalResearchAgent):
                                                 tool_planner=self.tool_planner,
                                                 contract_builder=self.contract_builder,
                                                 analysis_factory=self.analysis_factory)
-                    subrequest = request.model_copy(update={"max_iterations": 1, "success_criteria": criteria,
+                    subrequest = request.model_copy(update={"topic": user_text, "max_iterations": 1,
+                                                    "success_criteria": criteria,
                                                     "max_python_calls": request.max_python_calls - result.python_calls_total,
                                                     "deliverables": []})
                     subresult = await adapter.run(f"{run_id}-A{iteration}", subrequest)
@@ -716,9 +711,39 @@ class GoalExecutionAgent(GoalResearchAgent):
                     details = {"subprocess_reached": bool(trace and trace.subprocess_reached),
                                "blocked_stage": trace.blocked_stage if trace else "no_trace",
                                "source_complete": trace.source_complete if trace else None,
-                               "python_calls": subresult.python_calls_total}
+                               "python_calls": subresult.python_calls_total,
+                               "user_fact_ids": [item.fact_id for item in users.records],
+                               "evidence_fact_ids": evidence_fact_ids,
+                               "formula_id": selected_formula.formula_id if selected_formula else None,
+                               "missing_variables": trace.missing_variables if trace else [],
+                               "unit_mismatch_variables": trace.unit_mismatch_variables if trace else []}
                     state.source_complete = trace.source_complete if trace else None
+                    source_map = {
+                        item.evidence_id: original.evidence_id
+                        for item in subresult.internal_sources
+                        for original in accumulator.internal
+                        if (item.document, item.page, item.chunk_id) ==
+                           (original.document, original.page, original.chunk_id)
+                    }
+                    source_map.update({
+                        item.evidence_id: original.evidence_id
+                        for item in subresult.web_sources
+                        for original in accumulator.web
+                        if item.url == original.url
+                    })
+                    source_formulas = {(item.source_id, item.normalized_span)
+                                       for item in FormulaSourceRegistry.from_evidence(accumulator.records()).records}
                     for computation in subresult.computations:
+                        computation.source_evidence_ids = [source_map.get(value, value)
+                                                           for value in computation.source_evidence_ids]
+                        computation.formula_evidence_ids = [source_map.get(value, value)
+                                                            for value in computation.formula_evidence_ids]
+                        for fact in computation.input_facts:
+                            fact["evidence_id"] = source_map.get(str(fact.get("evidence_id")), fact.get("evidence_id"))
+                        if (computation.formula and computation.formula_evidence_ids and not any(
+                                (value, normalize_formula(computation.formula)) in source_formulas
+                                for value in computation.formula_evidence_ids)):
+                            computation.validation_passed = False
                         computation.computation_id = f"CALC{len(result.computations) + 1}"
                         targets = set(computation.target_criteria)
                         computation.target_criteria = [item.criterion_id for item in criteria
@@ -801,6 +826,10 @@ class GoalExecutionAgent(GoalResearchAgent):
                     self._notify(result, on_progress)
                     if not result.computations:
                         latest_candidate = self._focus_research_answer(latest_candidate, criteria)
+                    rejected_claims: list[str] = []
+                    if not result.computations and callable(getattr(self.ollama, "chat_structured", None)):
+                        latest_candidate, rejected_claims = await ground_research_claims(
+                            self.ollama, request, latest_candidate, evidence)
                     evaluation_started = time.perf_counter()
                     evaluation = await self.evaluator.evaluate(request, criteria, latest_candidate,
                                                                evidence, research_validation,
@@ -811,6 +840,10 @@ class GoalExecutionAgent(GoalResearchAgent):
                     if simulation:
                         evaluation = self._deterministic_simulation_criteria(
                             evaluation, criteria, latest_candidate, simulation, korean)
+                    citation_semantic_passed = bool(latest_candidate.strip())
+                    if not citation_semantic_passed:
+                        evaluation = replace(evaluation, achieved=False,
+                                             gaps=[*evaluation.gaps, "Direct source support needed for the answer"])
                     self._assert_criteria_frozen(criteria, criteria_hash)
                     state.current_coverage = evaluation.coverage
                     state.unresolved_information = evaluation.gaps[:5]
@@ -835,6 +868,8 @@ class GoalExecutionAgent(GoalResearchAgent):
                     result.validation = {"engineering_validation_passed": evaluation.engineering_validation_passed,
                                          "engineering_contradiction_count": evaluation.engineering_contradiction_count,
                                          "unsupported_engineering_claim_count": evaluation.unsupported_engineering_claim_count,
+                                         "citation_semantic_passed": citation_semantic_passed,
+                                         "unsupported_citation_claim_count": len(rejected_claims),
                                          "criteria_frozen": True}
                     details = {"engineering_validation_passed": evaluation.engineering_validation_passed,
                                "goal_achieved": state.goal_achieved}
@@ -871,6 +906,19 @@ class GoalExecutionAgent(GoalResearchAgent):
             result.figures = accumulator.figures
             result.final_answer = latest_candidate
             self._notify(result, on_progress)
+            if (action.action_type == GoalActionType.CALCULATE and status == "blocked" and
+                    failure in {"calculation_contract_unit_missing", "missing_required_input",
+                                "variable_binding_missing", "simulation_input_missing"} and
+                    any(item.action_type == GoalActionType.RETRIEVE for item in state.completed_actions) and
+                    clarification_attempts < 3):
+                missing = [f"{value.split(':')[-1]} 값과 단위" for value in
+                           [*details["missing_variables"], *details["unit_mismatch_variables"]]]
+                missing = missing or calculation_missing(selected_formula, accumulator.records(),
+                                                         users, state.derived_facts)
+                return self._pause(result, state, accumulator, seen_actions, research_validation,
+                                   latest_candidate, missing or ["필수 입력값과 단위"], korean,
+                                   clarification_attempts + 1,
+                                   list((resume_state or {}).get("user_replies", [])), started)
             if state.synthesized and state.goal_achieved:
                 self._record_stop(result, state, "goal_achieved")
                 return self._finish(result, GoalRunStatus.COMPLETED, GoalStatus.ACHIEVED,

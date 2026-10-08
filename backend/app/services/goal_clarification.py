@@ -9,7 +9,8 @@ from typing import Any
 
 from app.services.calculation_requirements import normalize_symbol
 from app.services.evidence_fact_registry import EvidenceFactRegistry
-from app.services.formula_source_registry import FormulaSourceRecord, FormulaSourceRegistry, expression_variables
+from app.services.formula_source_registry import (EQUATION, FormulaSourceRecord, FormulaSourceRegistry,
+                                                  expression_variables, normalize_formula)
 from app.services.goal_execution_state import DerivedFact, SimulationParameter, SimulationSpec
 from app.services.goal_simulation import validate_expression
 from app.services.user_fact_registry import UserFactRegistry
@@ -18,8 +19,13 @@ from app.services.user_fact_registry import UserFactRegistry
 _NUMBER = r"[-+]?(?:\d+(?:\.\d*)?|\.\d+)"
 _RANGE = re.compile(rf"(?P<start>{_NUMBER})\s*(?:~|∼|부터|에서|to)\s*(?P<stop>{_NUMBER})", re.I)
 _STEP = re.compile(rf"(?P<step>{_NUMBER})\s*(?:간격|씩|step)", re.I)
+_ENGLISH_STEP = re.compile(rf"\bsteps?\s+(?:of\s+)?(?P<step>{_NUMBER})", re.I)
 _ENGLISH_RANGE = re.compile(rf"(?P<name>[A-Za-z][A-Za-z0-9_]*)\s+from\s+"
                             rf"(?P<start>{_NUMBER})\s+to\s+(?P<stop>{_NUMBER})", re.I)
+_NAMED_RANGE = re.compile(
+    rf"(?P<name>[A-Za-z][A-Za-z0-9_]*)\s*(?:를|을|은|는|이|가)?\s*"
+    rf"(?P<start>{_NUMBER})\s*(?:~|∼|부터|에서|to)\s*(?P<stop>{_NUMBER})", re.I,
+)
 
 
 @dataclass
@@ -41,17 +47,54 @@ def _requested_parameter(text: str, formula_variables: set[str]) -> str | None:
     return None
 
 
-def _formula_for_goal(text: str, evidence: list[dict[str, Any]]):
+def parse_user_simulation_spec(text: str) -> SimulationSpec | None:
+    """Accept one explicit, bounded single-parameter equation supplied by the user."""
+    interval = _ENGLISH_RANGE.search(text) or _NAMED_RANGE.search(text)
+    step = _STEP.search(text) or _ENGLISH_STEP.search(text)
+    if not interval or not step:
+        return None
+    parameter = interval["name"]
+    candidates = [match.group("equation").rstrip(" .\t") for match in EQUATION.finditer(text)]
+    candidates = [value for value in candidates if expression_variables(value) == {parameter}]
+    if len({normalize_formula(value) for value in candidates}) != 1:
+        return None
+    formula = candidates[0]
+    try:
+        spec = SimulationSpec(
+            parameter=SimulationParameter(name=parameter, start=float(interval["start"]),
+                                          stop=float(interval["stop"]), step=float(step["step"])),
+            output_name=formula.split("=", 1)[0].strip(), expression=formula.split("=", 1)[1].strip(),
+            objective="min" if re.search(r"최소|\bminimi[sz]e\b", text, re.I) else "max",
+        )
+        validate_expression(spec)
+        return spec
+    except ValueError:
+        return None
+
+
+def _formula_for_goal(text: str, evidence: list[dict[str, Any]], user_source_id: str):
     candidates = []
     words = {normalize_symbol(word) for word in re.findall(r"[A-Za-z][A-Za-z0-9_]*", text)}
     if re.search(r"CO₂?|이산화탄소", text, re.I) and re.search(r"저장량|저장\s*용량", text):
         words.update({"co2storage", "co2capacity", "co2storagecapacity"})
-    for record in FormulaSourceRegistry.from_evidence(evidence).records:
+    user_records = []
+    for match in EQUATION.finditer(text):
+        raw = match.group("equation").rstrip(" .\t")
+        if expression_variables(raw) is not None:
+            user_records.append(FormulaSourceRecord(
+                formula_id=f"USER_FORMULA{len(user_records) + 1}", source_id=user_source_id,
+                source_type="user_fact", raw_span=raw, normalized_span=normalize_formula(raw),
+                locator="user_message", span_start=match.start(), span_end=match.start() + len(raw),
+                expression_candidate=raw,
+            ))
+    for record in [*FormulaSourceRegistry.from_evidence(evidence).records, *user_records]:
         if record.expression_candidate:
             lhs = normalize_symbol(record.expression_candidate.split("=", 1)[0])
             if lhs in words:
                 candidates.append(record)
-    unique = {record.normalized_span: record for record in candidates}
+    unique = {}
+    for record in candidates:
+        unique.setdefault(record.normalized_span, record)
     return next(iter(unique.values())) if len(unique) == 1 else None
 
 
@@ -60,7 +103,7 @@ def simulation_readiness(text: str, evidence: list[dict[str, Any]],
                          derived_facts: list[DerivedFact] | None = None) -> SimulationReadiness:
     """Build a sweep only from a literal retrieved equation and explicit numeric facts."""
     missing: list[str] = []
-    formula = _formula_for_goal(text, evidence)
+    formula = _formula_for_goal(text, evidence, f"USERF{len(users.records) + 1}")
     if formula is None:
         missing.append("출처가 확인된 시뮬레이션 모델/관계식")
     found_range = _RANGE.search(text)
@@ -130,8 +173,8 @@ def calculation_missing(formula: FormulaSourceRecord | None, evidence: list[dict
                         users: UserFactRegistry, derived_facts: list[DerivedFact]) -> list[str]:
     if formula is None:
         return ["출처가 확인된 계산 관계식"]
-    available = {normalize_symbol(fact.name) for fact in [
-        *users.records, *EvidenceFactRegistry.from_evidence(evidence).records, *derived_facts]}
+    # A textbook example's values are not the user's reservoir or fluid inputs.
+    available = {normalize_symbol(fact.name) for fact in [*users.records, *derived_facts]}
     variables = expression_variables(formula.expression_candidate or "") or set()
     return [f"{variable} 값과 단위" for variable in sorted(variables)
             if normalize_symbol(variable) not in available]

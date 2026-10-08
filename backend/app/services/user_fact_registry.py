@@ -29,6 +29,10 @@ BARE_SERIES = re.compile(
     rf"\s*(?P<unit>stb/d|bbl/d|m\^?3/d)(?=$|[가-힣,;.\s])"
 )
 BARE_ITEM = re.compile(rf"\b(?P<label>[A-Z])\s+(?P<value>{NUMBER})")
+KOREAN_RATE = re.compile(
+    rf"\b(?P<label>[A-Z][A-Za-z0-9_]*)\s*(?:의\s*(?:생산량|유량)\s*)?"
+    rf"(?:은|는|이|가)\s*(?P<value>{NUMBER})\s*(?P<unit>stb/d|bbl/d|m\^?3/d)", re.I,
+)
 
 
 def _number(raw: str) -> float | None:
@@ -129,6 +133,9 @@ class UserFactRegistry(BaseModel):
                 for item in BARE_ITEM.finditer(series.group("body")):
                     add(f"{item.group('label')}_rate", item.group("value"), series.group("unit"),
                         series.group(0), series.group(0), offset + series.start())
+            for found in KOREAN_RATE.finditer(text):
+                add(f"{found.group('label')}_rate", found.group("value"), found.group("unit"),
+                    found.group(0), None, offset + found.start())
             offset += len(line)
         return cls(records=records)
 

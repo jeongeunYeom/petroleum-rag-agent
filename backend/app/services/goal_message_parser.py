@@ -7,6 +7,7 @@ import re
 from pydantic import BaseModel, Field
 
 from app.models.goal_research_schemas import GoalResearchRequest
+from app.services.goal_clarification import parse_user_simulation_spec
 
 
 class GoalMessageRequest(BaseModel):
@@ -47,6 +48,7 @@ def parse_goal_message(payload: GoalMessageRequest) -> GoalResearchRequest:
         use_internal=True,
         use_external=bool(WEB_REQUEST.search(message) and not WEB_NEGATION.search(message)),
         execution_mode="autonomous_goal_execution",
+        simulation_spec=(spec.model_dump(mode="json") if (spec := parse_user_simulation_spec(message)) else None),
         deliverables=deliverables,
         max_iterations=6,
         model=payload.model,

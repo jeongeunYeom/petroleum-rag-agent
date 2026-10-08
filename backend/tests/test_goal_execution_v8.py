@@ -18,7 +18,8 @@ from app.services.goal_action_planner import GoalActionPlanner
 from app.services.goal_evaluator import GoalEvaluationResult, GoalEvaluator
 from app.services.calculation_request_ir import parse_request_ir
 from app.services.calculation_requirements import select_formula_candidate
-from app.services.goal_clarification import simulation_readiness
+from app.services.goal_clarification import calculation_missing, simulation_readiness
+from app.services.citation_semantics import ground_research_claims
 from app.services.goal_execution_agent import GoalExecutionAgent, _EvidenceSnapshot, _V8ToolPlanner
 from app.services.goal_execution_state import (
     ActionRecord, DerivedFact, GoalActionType, GoalExecutionState, SimulationParameter, SimulationSpec,
@@ -26,6 +27,7 @@ from app.services.goal_execution_state import (
 from app.services.goal_research_agent import EvidenceAccumulator
 from app.services.goal_research_service import GoalResearchService
 from app.services.goal_simulation import validate_expression
+from app.services.goal_message_parser import GoalMessageRequest, parse_goal_message
 from app.services.goal_python_analysis import GoalPythonAnalysis
 from app.services.goal_tool_planner import ToolDecision
 from app.services.user_fact_registry import UserFactRegistry
@@ -131,6 +133,25 @@ def test_api_gravity_does_not_guess_missing_input_or_conflicting_formula():
                                     simulation_spec=None).action_type != GoalActionType.CALCULATE
 
 
+def test_missing_user_sg_asks_after_finding_symbolic_formula_not_using_book_example():
+    req = parse_goal_message(GoalMessageRequest(
+        message="내부 교재의 SG-API 관계식을 찾아 API gravity를 계산해줘."))
+    evidence = [{"evidence_id": "KB1", "source_type": "knowledge_base", "text":
+                 "API = (141.5 / SG) -131.5\nAPI = (141.5 / 0.744) -131.5\nSG = 0.744"}]
+    selected = select_formula_candidate(evidence, f"{req.goal} {req.topic}", [])
+    assert selected is not None and selected.expression_candidate == "API = (141.5 / SG) -131.5"
+    current = state()
+    current.completed_actions.append(record(GoalActionType.RETRIEVE))
+    current.evidence_ids.append("KB1")
+    effective = req.model_copy(update={"allow_python_execution": True, "python_execution_approved": True})
+    action = GoalActionPlanner.select(effective, current, user_fact_ids=[], evidence_fact_ids=["EFACT1"],
+                                      formula_ready=True, formula_id=selected.formula_id,
+                                      simulation_spec=None)
+    assert (action.action_type, action.reason_code) == (GoalActionType.STOP, "calculation_blocked")
+    assert calculation_missing(selected, evidence, UserFactRegistry.from_topic(req.topic), []) == [
+        "SG 값과 단위"]
+
+
 def test_api_gravity_uses_canonical_plan_when_llm_declines_explicit_calculation():
     class DecliningOllama:
         async def chat_structured(self, *_args, **_kwargs):
@@ -164,13 +185,14 @@ def test_api_gravity_korean_answer_uses_only_validated_calc_and_source():
         {"evidence_id": "KB1", "source_type": "knowledge_base", "locator": "book p.90",
          "text": calc.formula}]
     answer = GoalExecutionAgent._api_gravity_answer(req, [calc], evidence)
-    assert answer and "검증된 API도" in answer and "22.639433551198238" in answer
+    assert answer and "검증된 API도" in answer and "22.64 °API" in answer
+    assert calc.output_manifest["OUT_default_API_gravity"]["value"] == 22.639433551198238
     assert "[CALC1]" in answer and "[USERF1]" in answer and "[KB1]" in answer
     assert GoalEvaluator(None)._validate_candidate(req, answer, evidence, {"CALC1": calc})[
         "unsupported_engineering_claim_count"] == 0
     inverse_source = [evidence[0], {**evidence[1], "text": "SG = 141.5 / (API + 131.5)"}]
     cautious = GoalExecutionAgent._api_gravity_answer(req, [calc], inverse_source)
-    assert cautious and "관계식:" not in cautious and "22.639433551198238" in cautious
+    assert cautious is None
     assert GoalExecutionAgent._api_gravity_answer(req, [calc.model_copy(update={"validation_passed": False})], evidence) is None
 
 
@@ -294,13 +316,35 @@ def test_calculation_retries_only_after_new_retrieval_evidence():
                                                   target_criteria=["C1"], status="completed",
                                                   reason_code="missing_source", evidence_added=["KB1"]))
     action = GoalActionPlanner.select(request("Calculate with cited formula"), current,
-                                      user_fact_ids=["USERF1"], formula_ready=True,
+                                      user_fact_ids=["USERF1"], formula_ready=True, formula_id="FORMULA1",
                                       simulation_spec=None)
     assert action.action_type == GoalActionType.CALCULATE
     current.completed_actions[-1].evidence_added = []
     action = GoalActionPlanner.select(request("Calculate with cited formula"), current,
-                                      user_fact_ids=["USERF1"], formula_ready=True,
+                                      user_fact_ids=["USERF1"], formula_ready=True, formula_id="FORMULA1",
                                       simulation_spec=None)
+    assert action.action_type != GoalActionType.CALCULATE
+
+
+def test_unrelated_unit_equation_and_unchanged_blocker_do_not_retry_calculation():
+    evidence = [{"evidence_id": "KB1", "source_type": "knowledge_base",
+                 "text": "psi = 4. Another unrelated equation is z = 0.745."}]
+    assert select_formula_candidate(evidence, "Find Kappa-Zeta coupling and calculate Zeta for Xq=31 psi",
+                                    ["Xq"]) is None
+    current = state()
+    current.completed_actions.append(ActionRecord(
+        iteration=1, action_id="ACT-1", action_type=GoalActionType.CALCULATE,
+        target_criteria=["C1"], status="blocked", reason_code="calculation_inputs_ready",
+        failure_reason="planner_not_selected", details={"formula_id": None,
+                                                        "user_fact_ids": ["USERF1"],
+                                                        "evidence_fact_ids": []}))
+    current.completed_actions.append(ActionRecord(
+        iteration=2, action_id="ACT-2", action_type=GoalActionType.RETRIEVE,
+        target_criteria=["C1"], status="completed", reason_code="calculation_failed_replan",
+        evidence_added=["KB1"]))
+    req = request("Find Kappa-Zeta coupling formula and calculate Zeta from Xq")
+    action = GoalActionPlanner.select(req, current, user_fact_ids=["USERF1"],
+                                      formula_ready=False, simulation_spec=None)
     assert action.action_type != GoalActionType.CALCULATE
 
 
@@ -656,3 +700,217 @@ def test_user_cannot_supply_missing_model_and_ends_same_run_without_guessing(tmp
     assert not stopped.computations
     assert stopped.deliverable_status == {"docx": "skipped"}
     assert json.loads(service._path(run_id).read_text(encoding="utf-8"))["checkpoint"] == {}
+
+
+@pytest.mark.parametrize("message", [
+    "A는 187 stb/d, B는 234 stb/d, C는 163 stb/d야. 평균과 순위를 계산해줘.",
+    "A의 유량은 187 stb/d; B의 유량은 234 stb/d; C의 유량은 163 stb/d. 평균과 순위를 계산해줘.",
+    "A가 187 stb/d이고 B가 234 stb/d, C가 163 stb/d일 때 평균과 순위를 계산해줘.",
+])
+def test_korean_user_rates_enter_direct_calculation_without_client_python_flags(message):
+    req = parse_goal_message(GoalMessageRequest(message=message))
+    facts = UserFactRegistry.from_topic(req.topic)
+    assert [(row.name, row.value, row.unit) for row in facts.records] == [
+        ("A_rate", 187, "stb/d"), ("B_rate", 234, "stb/d"), ("C_rate", 163, "stb/d")]
+    assert req.execution_mode == "autonomous_goal_execution"
+    assert not req.python_execution_approved
+    effective = req.model_copy(update={"allow_python_execution": True, "python_execution_approved": True})
+    assert GoalActionPlanner.select(effective, state(), user_fact_ids=[row.fact_id for row in facts.records],
+                                    formula_ready=False, simulation_spec=None).action_type == GoalActionType.CALCULATE
+
+
+@pytest.mark.parametrize("message", [
+    "porosity를 0.10부터 0.30까지 0.02 간격으로 변화시켜. score = porosity * 50 + 10일 때 최적 조건을 찾아줘.",
+    "porosity는 0.10~0.30에서 0.02씩 변화시키며 결과식 score = porosity * 50 + 10을 계산해줘.",
+    "Vary porosity from 0.10 to 0.30 in steps of 0.02; model score = porosity * 50 + 10. Find the best.",
+])
+def test_user_equation_and_range_build_bounded_simulation_without_kb(message):
+    req = parse_goal_message(GoalMessageRequest(message=message))
+    assert req.simulation_spec is not None
+    spec = SimulationSpec.model_validate(req.simulation_spec)
+    assert (spec.parameter.name, spec.parameter.start, spec.parameter.stop, spec.parameter.step) == (
+        "porosity", 0.1, 0.3, 0.02)
+    assert spec.expression == "porosity * 50 + 10"
+    effective = req.model_copy(update={"allow_python_execution": True, "python_execution_approved": True})
+    assert GoalActionPlanner.select(effective, state(), user_fact_ids=[], formula_ready=False,
+                                    simulation_spec=spec).action_type == GoalActionType.SIMULATE
+
+
+@pytest.mark.parametrize("message", [
+    "공극률을 0.1~0.3으로 변화시키면서 CO₂ 저장량을 계산하고 최적 조건을 찾아줘.",
+    "공극률을 0.1부터 0.3까지 변화시키며 CO2 저장량을 시뮬레이션해줘.",
+    "공극률을 0.1~0.3으로 바꾸면서 이산화탄소 저장 용량을 계산해줘.",
+])
+def test_missing_simulation_input_variants_retrieve_before_question(message):
+    req = parse_goal_message(GoalMessageRequest(message=message))
+    effective = req.model_copy(update={"allow_python_execution": True, "python_execution_approved": True})
+    assert GoalActionPlanner.select(effective, state(), user_fact_ids=[], formula_ready=False,
+                                    simulation_spec=None).action_type == GoalActionType.RETRIEVE
+    assert simulation_readiness(message, [], UserFactRegistry.from_topic(message)).missing
+
+
+@pytest.mark.parametrize("message", [
+    "Xq=31 psi야. Kappa-Zeta coupling 식을 찾아 Zeta를 계산해줘.",
+    "Xq=31 psi. Kappa-Zeta coupling 공식을 찾아서 Zeta를 계산해줘.",
+    "Xq=31 psi이고 Zeta 계산용 Kappa-Zeta 관계식을 찾아줘.",
+])
+def test_unknown_formula_variants_do_not_start_calculation(message):
+    req = parse_goal_message(GoalMessageRequest(message=message))
+    effective = req.model_copy(update={"allow_python_execution": True, "python_execution_approved": True})
+    users = UserFactRegistry.from_topic(message)
+    assert GoalActionPlanner.select(effective, state(), user_fact_ids=[row.fact_id for row in users.records],
+                                    formula_ready=False, simulation_spec=None).action_type == GoalActionType.RETRIEVE
+
+
+def test_formula_source_survives_nested_run_id_renumbering(tmp_path, monkeypatch):
+    settings = Settings(data_dir=tmp_path / "data", agent_workspace_dir=tmp_path / "workspace")
+    monkeypatch.setattr("app.services.goal_execution_agent.get_settings", lambda: settings)
+
+    class TwoPages:
+        async def research(self, req):
+            return ResearchResponse(
+                query=req.query, answer="", internal_sources=[
+                    InternalEvidence(evidence_id="KB1", document="book.pdf", page=89, chunk_id="c89", score=1,
+                                     excerpt="Exercise: convert SG=0.744 to API gravity."),
+                    InternalEvidence(evidence_id="KB2", document="book.pdf", page=90, chunk_id="c90", score=1,
+                                     excerpt="API = (141.5 / SG) - 131.5"),
+                ], web_sources=[], figures=[], provenance=[], model=req.model, inference_used=False,
+                evidence_counts=EvidenceCounts(internal=2, external=0), routing_mode="internal_only",
+                retrieval_mode="hybrid", timing=ResearchTiming(retrieval_seconds=0, reasoning_seconds=0,
+                                                                 elapsed_seconds=0), validation={})
+
+    class DecliningOllama:
+        async def chat_structured(self, *_args, **_kwargs):
+            return '{"tool_needed":false,"tool_type":"none","reason":"No tool needed"}'
+
+    req = parse_goal_message(GoalMessageRequest(message="비중 0.918인 원유의 API도를 교재 식으로 계산해줘."))
+    agent = GoalExecutionAgent(TwoPages(), DecliningOllama(), evaluator=PassingEvaluator(),
+                               analysis_factory=lambda run_id: GoalPythonAnalysis(settings, DecliningOllama(), run_id))
+    result = asyncio.run(agent.run("GR-RENUMBER", req))
+    assert result.computations[0].validation_passed
+    assert result.computations[0].formula_evidence_ids == ["KB2"]
+    assert "22.64 °API" in result.final_answer
+    assert "[KB2]" in result.final_answer
+
+
+def test_missing_formula_input_resumes_same_run_with_new_user_fact(tmp_path, monkeypatch):
+    settings = Settings(data_dir=tmp_path / "data", agent_workspace_dir=tmp_path / "workspace")
+    monkeypatch.setattr("app.services.goal_execution_agent.get_settings", lambda: settings)
+
+    class DecliningOllama:
+        async def chat_structured(self, *_args, **_kwargs):
+            return '{"tool_needed":false,"tool_type":"none","reason":"No tool needed"}'
+
+    req = parse_goal_message(GoalMessageRequest(
+        message="내부 교재의 SG-API 관계식을 찾아 API gravity를 계산해줘."))
+    agent = GoalExecutionAgent(StaticResearch("API = (141.5 / SG) - 131.5"), DecliningOllama(),
+                               evaluator=PassingEvaluator(),
+                               analysis_factory=lambda run_id: GoalPythonAnalysis(settings, DecliningOllama(), run_id))
+    paused = asyncio.run(agent.run("GR-MISSING-SG", req))
+    assert paused.run_status == GoalRunStatus.WAITING_FOR_USER_INPUT
+    assert "SG" in paused.clarification_question
+    assert paused.python_calls_total == 0
+    checkpoint = paused.resume_checkpoint.model_copy(deep=True) if hasattr(paused.resume_checkpoint, "model_copy") else dict(paused.resume_checkpoint)
+    checkpoint["user_replies"] = ["SG는 0.918입니다."]
+    resumed = asyncio.run(agent.run(paused.run_id, req, resume_state=checkpoint, resume_result=paused))
+    assert resumed.run_id == paused.run_id
+    assert resumed.status == GoalStatus.ACHIEVED
+    assert resumed.computations[0].validation_passed
+    assert "22.64 °API" in resumed.final_answer
+
+
+@pytest.mark.parametrize("claim", [
+    "API gravity가 낮으면 무거운 원유다. [KB1] [FIG1]",
+    "낮은 API도는 더 무거운 원유를 뜻한다. [KB1] [FIG1]",
+    "Heavy crude has lower API gravity. [KB1] [FIG1]",
+])
+def test_citation_semantics_uses_relevant_evidence_not_merely_valid_ids(claim):
+    class JudgingOllama:
+        async def chat_structured(self, *_args, **_kwargs):
+            return json.dumps({"claims": [{"index": 0, "supported": True, "source_ids": ["KB2"]}]})
+
+    req = GoalResearchRequest(topic="API gravity와 원유 무거움 관계", goal="설명해줘")
+    evidence = [
+        {"evidence_id": "KB1", "source_type": "knowledge_base", "text": "API gravity is related to specific gravity."},
+        {"evidence_id": "FIG1", "source_type": "figure", "text": "API Gravity versus Watson Characterization Factor."},
+        {"evidence_id": "KB2", "source_type": "knowledge_base", "text": "Light crude is 40 API; heavy crude is below 20 API."},
+    ]
+    grounded, rejected = asyncio.run(ground_research_claims(JudgingOllama(), req, claim, evidence))
+    assert not rejected and "[KB2]" in grounded and "[KB1]" not in grounded and "[FIG1]" not in grounded
+
+
+@pytest.mark.parametrize("message", [
+    "API gravity와 원유의 무거움 관계를 내부 자료를 근거로 설명해줘.",
+    "내부 교재를 바탕으로 API도가 낮은 원유가 왜 더 무거운지 설명해줘.",
+    "Explain how API gravity relates to heavy and light crude using the internal KB.",
+])
+def test_oil_weight_research_variants_retrieve_before_answering(message):
+    req = parse_goal_message(GoalMessageRequest(message=message))
+    assert GoalActionPlanner.select(req, state(), user_fact_ids=[], formula_ready=False,
+                                    simulation_spec=None).action_type == GoalActionType.RETRIEVE
+
+
+def test_citation_semantics_removes_unsupported_claim_and_accepts_joint_kb_support():
+    class JudgingOllama:
+        async def chat_structured(self, messages, *_args, **_kwargs):
+            sources = json.loads(messages[1]["content"])["sources"]
+            support = [row["id"] for row in sources if row["id"].startswith("KB")]
+            return json.dumps({"claims": [{"index": 0, "supported": len(support) == 2,
+                                            "source_ids": support}]})
+
+    req = GoalResearchRequest(topic="API gravity and oil weight", goal="Explain")
+    claim = "Lower API gravity indicates heavier crude. [KB1]"
+    first = [{"evidence_id": "KB1", "source_type": "knowledge_base",
+              "text": "API gravity is related to specific gravity."}]
+    grounded, rejected = asyncio.run(ground_research_claims(JudgingOllama(), req, claim, first))
+    assert grounded == "" and len(rejected) == 1
+    second = [*first, {"evidence_id": "KB2", "source_type": "knowledge_base",
+                       "text": "Light crude is 40 API, heavy crude below 20 API."}]
+    grounded, rejected = asyncio.run(ground_research_claims(JudgingOllama(), req, claim, second))
+    assert not rejected and grounded.endswith("[KB1] [KB2]")
+
+
+def test_citation_semantics_checks_uncited_limitations_as_claims():
+    class JudgingOllama:
+        async def chat_structured(self, messages, *_args, **_kwargs):
+            claims = json.loads(messages[1]["content"])["claims"]
+            assert len(claims) == 2
+            return json.dumps({"claims": [
+                {"index": 0, "supported": True, "source_ids": ["KB1"]},
+                {"index": 1, "supported": False, "source_ids": []},
+            ]})
+
+    req = GoalResearchRequest(topic="API gravity", goal="Explain")
+    answer = ("The source gives an API gravity equation. [KB1]\n"
+              "Unresolved: the source gives no quantitative relation.")
+    evidence = [{"evidence_id": "KB1", "source_type": "knowledge_base",
+                 "text": "API = (141.5 / SG) - 131.5"}]
+    grounded, rejected = asyncio.run(ground_research_claims(JudgingOllama(), req, answer, evidence))
+    assert "Unresolved" not in grounded
+    assert rejected == ["Unresolved: the source gives no quantitative relation."]
+
+
+def test_research_goal_can_finish_after_unsupported_line_is_pruned():
+    class JudgingOllama:
+        async def chat_structured(self, *_args, **_kwargs):
+            return json.dumps({"claims": [
+                {"index": 0, "supported": True, "source_ids": ["KB1"]},
+                {"index": 1, "supported": False, "source_ids": []},
+            ]})
+
+    async def synthesize(*_args):
+        return ("Higher API gravity indicates lighter crude. [KB1]\n"
+                "Unresolved: the source gives no relation.")
+
+    req = GoalResearchRequest(topic="API gravity and crude weight",
+                              goal="Explain the relation between API gravity and crude weight",
+                              success_criteria=[GoalCriterion(criterion_id="C1", description="Explain the relation")],
+                              execution_mode="autonomous_goal_execution")
+    agent = GoalExecutionAgent(StaticResearch("Higher API gravity indicates lighter crude."),
+                               JudgingOllama(), evaluator=PassingEvaluator(), synthesizer=synthesize)
+    result = asyncio.run(agent.run("GR-PRUNE", req))
+    assert result.status == GoalStatus.ACHIEVED
+    assert result.validation["citation_semantic_passed"] is True
+    assert result.validation["unsupported_citation_claim_count"] == 1
+    assert "Unresolved" not in result.final_answer
+    assert result.final_answer.endswith("[KB1]")

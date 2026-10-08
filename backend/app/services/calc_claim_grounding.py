@@ -13,6 +13,18 @@ NUMERIC = re.compile(r"(?<![A-Za-z_\d.])[-+]?(?:\d+(?:,\d{3})*(?:\.\d*)?|\.\d+)(
 ARITHMETIC = re.compile(r"calculat|difference|change|average|mean|rms|ratio|percent|계산|차이|변화율|평균", re.I)
 
 
+def _matches_reported_value(match: re.Match[str], value: float) -> bool:
+    reported = float(match.group().replace(",", ""))
+    if math.isclose(reported, value, rel_tol=1e-5, abs_tol=1e-8):
+        return True
+    # Two-or-more decimal places are a display rounding, not a new measurement.
+    literal = match.group().replace(",", "")
+    if "." not in literal or "e" in literal.casefold():
+        return False
+    places = len(literal.split(".", 1)[1])
+    return places >= 2 and reported == round(value, places)
+
+
 def validate_calc_claim(claim: str, citations: list[str], output_ids: list[str],
                         computations: dict[str, ComputationRecord],
                         evidence: list[dict[str, Any]]) -> tuple[list[str], list[str]]:
@@ -62,8 +74,8 @@ def validate_calc_claim(claim: str, citations: list[str], output_ids: list[str],
             return issues, adopted
         output_ids = named or [value for value, (_, spec) in available.items()
                                if spec.get("semantic_type") == "numeric" and any(
-                                   math.isclose(number, float(spec["value"]), rel_tol=1e-5, abs_tol=1e-8)
-                                   for number in numbers)]
+                                   _matches_reported_value(match, float(spec["value"]))
+                                   for match in number_matches)]
         if not output_ids:
             issues.append("calc_output_not_found")
             return issues, adopted
@@ -82,7 +94,7 @@ def validate_calc_claim(claim: str, citations: list[str], output_ids: list[str],
             continue
         if spec.get("semantic_type") == "numeric":
             if not isinstance(value, (int, float)) or not any(
-                math.isclose(number, float(value), rel_tol=1e-5, abs_tol=1e-8) for number in numbers
+                _matches_reported_value(match, float(value)) for match in number_matches
             ):
                 issues.append("calc_value_mismatch")
                 continue
@@ -118,7 +130,7 @@ def validate_calc_claim(claim: str, citations: list[str], output_ids: list[str],
             issues.append("provenance_attribution_error")
             continue
         adopted.append(output_id)
-    if any(not any(math.isclose(number, value, rel_tol=1e-5, abs_tol=1e-8) for value in matched_numbers)
-           for number in numbers):
+    if any(not any(_matches_reported_value(match, value) for value in matched_numbers)
+           for match in number_matches):
         issues.append("calc_value_mismatch")
     return list(dict.fromkeys(issues)), list(dict.fromkeys(adopted))
