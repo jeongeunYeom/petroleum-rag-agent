@@ -26,6 +26,7 @@ def settings(tmp_path: Path, **overrides) -> Settings:
     values = {
         "data_dir": tmp_path / "data",
         "agent_workspace_dir": tmp_path / "workspace",
+        "retrieval_mode": "legacy",
         "web_fetch_enabled": True,
         "web_fetch_timeout_seconds": 1,
         "web_fetch_max_bytes": 10_000,
