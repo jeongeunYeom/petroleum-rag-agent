@@ -42,6 +42,7 @@ from app.services.required_outputs import checklist_from_ir, required_output_che
 from app.services.calculation_request_ir import parse_request_ir, resolve_request_ir, validate_ir
 from app.services.calculation_contract_skeleton import build_contract_skeleton, skeleton_diff
 from app.services.formula_resolver import FormulaIntent, resolve_formula
+from app.services.goal_intent import prefers_korean
 from app.services.goal_tool_planner import PythonAnalysisPlan
 from app.services.evidence_fact_registry import EvidenceFactRegistry
 from app.services.formula_source_registry import FormulaSourceRegistry
@@ -941,7 +942,9 @@ class GoalResearchAgent:
                     "If expected_hypothesis is null, do not assess or invent a hypothesis; "
                     "return an empty hypothesis_assessment. "
                     "List only limitations still unresolved by the current evidence, never resolved prior gaps. "
-                    "Do not invent evidence, values, tools, files, or actions. Return JSON."
+                    "Do not invent evidence, values, tools, files, or actions. "
+                    f"Write the final answer and limitations in {'Korean' if prefers_korean(request) else 'English'}. "
+                    "Keep source IDs and engineering units unchanged. Return JSON."
                 ),
             },
             {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
@@ -1122,7 +1125,8 @@ class GoalResearchAgent:
                 if qualified in final_adopted or not spec.get("required", output_id in record.required_output_ids):
                     continue
                 unit = spec.get("unit") or ""
-                claim = f"{spec['name']}: {spec['value']} {unit}".strip()
+                claim = (f"검증된 계산 결과 {spec['name']}: {spec['value']} {unit}"
+                         if prefers_korean(request) else f"{spec['name']}: {spec['value']} {unit}").strip()
                 citations = list(dict.fromkeys([calc_id, *[source_map.get(value, value)
                     for value in spec.get("source_fact_ids", [])], *record.formula_evidence_ids]))
                 failures, adopted_output = validate_calc_claim(claim, citations, [qualified], valid_calcs, evidence)
@@ -1176,7 +1180,7 @@ class GoalResearchAgent:
                 for source in calc_sources.get(calc_id, [])])), [], valid_calcs, evidence)[0]
         )]
         if limitations:
-            lines.append("Limitations: " + " ".join(limitations))
+            lines.append(("미해결 사항: " if prefers_korean(request) else "Limitations: ") + " ".join(limitations))
         return "\n\n".join(lines).strip()
 
     @staticmethod

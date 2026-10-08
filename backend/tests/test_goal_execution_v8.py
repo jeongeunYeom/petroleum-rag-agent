@@ -1,21 +1,24 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import time
 
 import pytest
 
 from app.core.config import Settings
 from app.models.goal_research_schemas import (
-    CriterionEvaluation, CriterionStatus, ExpectedResultStatus, GoalCriterion,
+    ComputationRecord, CriterionEvaluation, CriterionStatus, ExpectedResultStatus, GoalCriterion,
     GoalResearchRequest, GoalResearchResponse, GoalRunStatus, GoalStatus, GoalStopReason,
 )
 from app.models.research_schemas import (
     EvidenceCounts, InternalEvidence, ResearchRequest, ResearchResponse, ResearchTiming,
 )
 from app.services.goal_action_planner import GoalActionPlanner
-from app.services.goal_evaluator import GoalEvaluationResult
-from app.services.goal_execution_agent import GoalExecutionAgent, _EvidenceSnapshot
+from app.services.goal_evaluator import GoalEvaluationResult, GoalEvaluator
+from app.services.calculation_request_ir import parse_request_ir
+from app.services.calculation_requirements import select_formula_candidate
+from app.services.goal_execution_agent import GoalExecutionAgent, _EvidenceSnapshot, _V8ToolPlanner
 from app.services.goal_execution_state import (
     ActionRecord, DerivedFact, GoalActionType, GoalExecutionState, SimulationParameter, SimulationSpec,
 )
@@ -73,6 +76,128 @@ def test_missing_specialist_formula_chooses_retrieve_then_calculate():
     second = GoalActionPlanner.select(req, current, user_fact_ids=["USERF1"],
                                       formula_ready=True, simulation_spec=None)
     assert second.action_type == GoalActionType.CALCULATE
+
+
+@pytest.mark.parametrize("topic,goal", [
+    ("SG=0.918.", "Calculate API gravity for this crude oil."),
+    ("SG=0.918일 때 API gravity를 계산해줘", "API gravity를 계산해줘"),
+    ("비중 0.918인 원유", "API도를 구해줘."),
+    ("SG=0.918.", "내부 교재의 SG-API 관계식을 찾아 계산해줘."),
+    ("SG=0.918인 원유", "내부 교재의 SG-API 관계식을 찾아 계산해줘."),
+])
+def test_api_gravity_wording_preserves_sourced_formula_and_user_input(topic, goal):
+    req = GoalResearchRequest(
+        topic=topic,
+        goal=goal,
+        execution_mode="autonomous_goal_execution",
+        allow_python_execution=True,
+        python_execution_approved=True,
+    )
+    users = UserFactRegistry.from_topic(topic)
+    assert [(fact.name, fact.value) for fact in users.records] == [("SG", 0.918)]
+    ir = parse_request_ir(req, [])
+    assert ir.specialist_relation_required
+    assert ir.requested_outputs[0].semantic_name == "API_gravity"
+    current = state()
+    current.goal = goal
+    first = GoalActionPlanner.select(req, current, user_fact_ids=["USERF1"],
+                                     formula_ready=False, simulation_spec=None)
+    assert first.action_type == GoalActionType.RETRIEVE
+    assert "specific gravity SG API gravity" in first.query
+    evidence = [{"evidence_id": source_id, "source_type": "knowledge_base",
+                 "locator": f"book.pdf p.{page}", "text": "API = (141.5 / SG) - 131.5"}
+                for source_id, page in (("KB1", 90), ("KB2", 177))]
+    selected = select_formula_candidate(evidence, f"{goal} {topic}", ["SG"])
+    assert selected is not None and selected.source_id in {"KB1", "KB2"}
+    current.completed_actions.append(record(GoalActionType.RETRIEVE))
+    current.evidence_ids.append("KB1")
+    second = GoalActionPlanner.select(req, current, user_fact_ids=["USERF1"],
+                                      formula_ready=True, simulation_spec=None)
+    assert second.action_type == GoalActionType.CALCULATE
+
+
+def test_api_gravity_does_not_guess_missing_input_or_conflicting_formula():
+    req = GoalResearchRequest(topic="내부 교재의 SG-API 관계식", goal="API도를 계산해줘.")
+    assert not UserFactRegistry.from_topic(req.topic).records
+    evidence = [{"evidence_id": "KB1", "source_type": "knowledge_base", "locator": "book p.1",
+                 "text": "API = (141.5 / SG) - 131.5"},
+                {"evidence_id": "KB2", "source_type": "knowledge_base", "locator": "book p.2",
+                 "text": "API = (140 / SG) - 130"}]
+    assert select_formula_candidate(evidence, f"{req.goal} {req.topic}", ["SG"]) is None
+    current = state()
+    current.completed_actions.append(record(GoalActionType.RETRIEVE))
+    assert GoalActionPlanner.select(req, current, user_fact_ids=[], formula_ready=True,
+                                    simulation_spec=None).action_type != GoalActionType.CALCULATE
+
+
+def test_api_gravity_uses_canonical_plan_when_llm_declines_explicit_calculation():
+    class DecliningOllama:
+        async def chat_structured(self, *_args, **_kwargs):
+            return '{"tool_needed":false,"tool_type":"none","reason":"No tool needed"}'
+
+    req = GoalResearchRequest(topic="비중 0.918인 원유", goal="API도를 구해줘.",
+                              allow_python_execution=True, python_execution_approved=True)
+    evidence = UserFactRegistry.from_topic(req.topic).evidence() + [
+        {"evidence_id": "KB1", "source_type": "knowledge_base", "locator": "book p.90",
+         "text": "API = (141.5 / SG) - 131.5"}]
+    criteria = GoalExecutionAgent._explicit_numeric_criteria(req, UserFactRegistry.from_topic(req.topic), None)
+    decision = asyncio.run(_V8ToolPlanner(DecliningOllama()).decide(req, criteria, evidence, None))
+    assert decision.tool_needed and decision.plan is not None
+    assert decision.plan.input_facts[0].value == 0.918
+    assert decision.plan.formula_source_id is not None
+    assert decision.plan.supporting_evidence_ids == ["KB1"]
+
+    without_formula = asyncio.run(_V8ToolPlanner(DecliningOllama()).decide(req, criteria, evidence[:1], None))
+    assert not without_formula.tool_needed
+
+
+def test_api_gravity_korean_answer_uses_only_validated_calc_and_source():
+    req = GoalResearchRequest(topic="비중 0.918인 원유", goal="API도를 구해줘.")
+    calc = ComputationRecord(computation_id="CALC1", analysis_id="PA-1", purpose="API gravity",
+                             source_input_ids=["USERF1"], formula_evidence_ids=["KB1"],
+                             formula="API = (141.5 / SG) - 131.5", validation_passed=True,
+                             output_manifest={"OUT_default_API_gravity": {"name": "default_API_gravity",
+                                 "value": 22.639433551198238, "unit": "dimensionless",
+                                 "source_fact_ids": ["USERF1"], "semantic_type": "numeric"}})
+    evidence = UserFactRegistry.from_topic(req.topic).evidence() + [
+        {"evidence_id": "KB1", "source_type": "knowledge_base", "locator": "book p.90",
+         "text": calc.formula}]
+    answer = GoalExecutionAgent._api_gravity_answer(req, [calc], evidence)
+    assert answer and "검증된 API도" in answer and "22.639433551198238" in answer
+    assert "[CALC1]" in answer and "[USERF1]" in answer and "[KB1]" in answer
+    assert GoalEvaluator(None)._validate_candidate(req, answer, evidence, {"CALC1": calc})[
+        "unsupported_engineering_claim_count"] == 0
+    inverse_source = [evidence[0], {**evidence[1], "text": "SG = 141.5 / (API + 131.5)"}]
+    cautious = GoalExecutionAgent._api_gravity_answer(req, [calc], inverse_source)
+    assert cautious and "관계식:" not in cautious and "22.639433551198238" in cautious
+    assert GoalExecutionAgent._api_gravity_answer(req, [calc.model_copy(update={"validation_passed": False})], evidence) is None
+
+
+def test_criterion_reason_rejects_unvalidated_number_and_follows_korean():
+    class ReasonOllama:
+        async def chat_structured(self, *_args, **_kwargs):
+            return json.dumps({"criteria": [{"criterion_id": "C1", "status": "partial",
+                "reason": "API = (141.5 / 0.918) - 131.5 = 44.75", "supporting_evidence": ["KB1"]}],
+                "expected_result_status": "not_provided", "gaps": [], "next_research_need": None,
+                "goal_conflicts_with_evidence": False})
+
+    req = GoalResearchRequest(topic="비중 0.918인 원유", goal="API도를 계산해줘.")
+    criterion = GoalCriterion(criterion_id="C1", description="API도를 계산")
+    evidence = [{"evidence_id": "KB1", "source_type": "knowledge_base", "locator": "book p.90",
+                 "text": "API = (141.5 / SG) - 131.5"}]
+    result = asyncio.run(GoalEvaluator(ReasonOllama()).evaluate(req, [criterion], "", evidence, {}))
+    assert result.criteria[0].status == CriterionStatus.PARTIAL
+    assert result.criteria[0].reason == "계산 결과가 아직 검증되지 않았습니다."
+    assert "44.75" not in result.criteria[0].reason
+
+    calc = ComputationRecord(computation_id="CALC1", analysis_id="PA-1", purpose="API gravity",
+                             source_input_ids=["USERF1"], formula_evidence_ids=["KB1"],
+                             validation_passed=True,
+                             output_manifest={"OUT_default_API_gravity": {"name": "default_API_gravity",
+                                 "value": 22.639433551198238, "unit": "dimensionless"}})
+    supported = CriterionEvaluation(criterion_id="C1", status=CriterionStatus.MET,
+                                    reason="검증된 API도는 22.64입니다.", supporting_evidence=["KB1", "CALC1"])
+    assert GoalEvaluator._ground_reasons(req, [supported], evidence, {"CALC1": calc})[0].reason == supported.reason
 
 
 def test_simulation_precedes_retrieval_and_is_bounded():

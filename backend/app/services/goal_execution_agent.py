@@ -21,13 +21,14 @@ from app.services.calculation_requirements import select_formula_candidate
 from app.services.evidence_fact_registry import EvidenceFactRegistry
 from app.services.calc_claim_grounding import validate_calc_claim
 from app.services.goal_action_planner import GoalActionPlanner
+from app.services.goal_intent import asks_for_api_gravity_calculation, prefers_korean
 from app.services.goal_evaluator import GoalEvaluator
 from app.services.goal_execution_state import (
     ActionRecord, DerivedFact, GoalActionType, GoalExecutionState, SimulationParameter, SimulationSpec,
 )
 from app.services.goal_research_agent import EvidenceAccumulator, GoalResearchAgent
 from app.services.goal_tool_planner import (
-    AnalysisPlanSelection, GoalToolPlanner, materialize_analysis_plan_v4,
+    AnalysisPlanSelection, GoalToolPlanner, ToolDecision, materialize_analysis_plan_v4,
 )
 from app.services.goal_simulation import run_parameter_sweep
 from app.services.user_fact_registry import UserFactRegistry
@@ -74,6 +75,35 @@ class _V8ToolPlanner(GoalToolPlanner):
                      evidence: list[dict[str, Any]], previous_coverage: float | None,
                      prior_evaluations: list[Any] | None = None) -> Any:
         result = await super().decide(request, criteria, evidence, previous_coverage, prior_evaluations)
+        if (not result.tool_needed and asks_for_api_gravity_calculation(request)
+                and request.allow_python_execution and request.python_execution_approved):
+            # A phrasing-sensitive LLM "none" must not veto an explicit calculation
+            # when both canonical inputs and a parsed source formula are present.
+            sg_facts = [item for item in evidence if item.get("source_type") == "user_fact"
+                        and str(item.get("name", "")).casefold() == "sg"]
+            formula = select_formula_candidate(evidence, f"{request.goal} {request.topic}", ["SG"])
+            if len(sg_facts) == 1 and formula:
+                selection = AnalysisPlanSelection(
+                    purpose=request.goal or request.topic,
+                    target_criteria=[item.description for item in criteria if item.required],
+                    fact_refs=[str(sg_facts[0]["evidence_id"])], formula_ref=formula.formula_id,
+                    operation_hint=None, expected_outputs=["API_gravity"], create_chart=False,
+                )
+                try:
+                    plan = materialize_analysis_plan_v4(
+                        selection, evidence, EvidenceFactRegistry.from_evidence(evidence),
+                        FormulaSourceRegistry.from_evidence(evidence), allow_unbound=True)
+                except ValueError:
+                    pass
+                else:
+                    return ToolDecision(
+                        tool_needed=True, tool_type="python_calculation",
+                        reason="Explicit calculation with sourced formula and user SG",
+                        plan=plan, decision_status="selected", plan_status="materialized",
+                        plan_parsed=True, selected_fact_ids=selection.fact_refs,
+                        selected_user_fact_ids=selection.fact_refs,
+                        selected_formula_id=formula.formula_id,
+                    )
         if (result.plan_status != "materialization_failed" or
                 result.verification_failures != ["fact_id_unknown"] or
                 not result.selected_formula_id or
@@ -127,7 +157,12 @@ class GoalExecutionAgent(GoalResearchAgent):
         """Extract only requested machine-checkable outputs, never extra hypotheses."""
         goal = request.goal or request.topic
         descriptions = []
-        if simulation_spec:
+        if asks_for_api_gravity_calculation(request):
+            descriptions = (["교재의 비중-API도 변환 관계식을 근거와 함께 제시", "제공된 비중으로 API도를 계산하고 검증된 결과를 제시"]
+                            if prefers_korean(request) else
+                            ["Cite the source-backed specific gravity to API gravity equation",
+                             "Calculate API gravity from the supplied specific gravity with a validated result"])
+        elif simulation_spec:
             descriptions.append("Report all simulated cases from the validated parameter sweep")
             for word, phrase in ((r"\bbest\b|\bmaxim", "Identify the best case"),
                                  (r"\bmean\b|\baverage\b", "Report the mean simulated result"),
@@ -181,17 +216,22 @@ class GoalExecutionAgent(GoalResearchAgent):
 
     @staticmethod
     def _safe_unavailable_answer(candidate: str, state: GoalExecutionState,
-                                 reason: str = "", formula: Any = None) -> str:
+                                 reason: str = "", formula: Any = None,
+                                 korean: bool = False) -> str:
         if candidate.strip():
             return candidate
         if reason in {"calculation_permission_required", "simulation_permission_required"}:
-            source = (f"The retrieved source states {formula.raw_span} [{formula.source_id}]. "
+            source = ((f"검색 근거의 관계식: {formula.raw_span} [{formula.source_id}]. " if korean else
+                       f"The retrieved source states {formula.raw_span} [{formula.source_id}]. ")
                       if formula else "")
-            return source + "No numerical calculation was run because Python execution was not approved."
+            return source + ("Python 실행 승인이 없어 수치 계산을 수행하지 않았습니다." if korean else
+                             "No numerical calculation was run because Python execution was not approved.")
         if state.computation_ids:
-            return "The available validated results did not establish every required conclusion."
-        return ("The available sources did not establish the required equation or inputs. "
-                "No numerical result was calculated or inferred.")
+            return ("검증된 결과만으로 필요한 결론을 모두 확인하지 못했습니다." if korean else
+                    "The available validated results did not establish every required conclusion.")
+        return ("근거 자료에서 필요한 관계식이나 입력값을 확인하지 못해 수치 결과를 계산하거나 추정하지 않았습니다."
+                if korean else "The available sources did not establish the required equation or inputs. "
+                               "No numerical result was calculated or inferred.")
 
     @staticmethod
     def _evidence(accumulator: EvidenceAccumulator, users: UserFactRegistry,
@@ -231,6 +271,40 @@ class GoalExecutionAgent(GoalResearchAgent):
                             unit=row.get("unit"), underlying_provenance_ids=parents)
                 for output_id, row in computation.output_manifest.items()
                 if isinstance(row.get("value"), (int, float))]
+
+    @staticmethod
+    def _api_gravity_answer(request: GoalResearchRequest, computations: list[Any],
+                            evidence: list[dict[str, Any]]) -> str | None:
+        if not asks_for_api_gravity_calculation(request):
+            return None
+        source_ids = {str(item["evidence_id"]) for item in evidence
+                      if item.get("source_type") in {"knowledge_base", "figure", "web"}}
+        for calc in computations:
+            if not calc.validation_passed or not calc.formula or not set(calc.formula_evidence_ids) & source_ids:
+                continue
+            for output_id, output in calc.output_manifest.items():
+                if "api" not in str(output.get("name", "")).casefold() or "gravity" not in str(output.get("name", "")).casefold():
+                    continue
+                parents = list(dict.fromkeys([calc.computation_id, *calc.source_input_ids,
+                                               *calc.formula_evidence_ids]))
+                value = f"{output['name']}: {output['value']} {output.get('unit') or ''}".strip()
+                claim = f"검증된 API도 {value}" if prefers_korean(request) else f"Validated API gravity {value}"
+                issues, _ = validate_calc_claim(claim, parents, [f"{calc.computation_id}:{output_id}"],
+                                                {calc.computation_id: calc}, evidence)
+                if issues:
+                    continue
+                answer = claim + " " + " ".join(f"[{item}]" for item in parents)
+                formula_text = re.sub(r"\s+", "", calc.formula).casefold()
+                matching_source = next((str(item["evidence_id"]) for item in evidence
+                                        if item.get("source_type") in {"knowledge_base", "figure", "web"}
+                                        and formula_text in re.sub(r"\s+", "", str(item.get("text") or "")).casefold()), None)
+                if matching_source:
+                    relation = (f"근거 자료의 비중–API도 관계식: {calc.formula} [{matching_source}]"
+                                if prefers_korean(request) else
+                                f"Source-backed SG–API gravity equation: {calc.formula} [{matching_source}]")
+                    answer = relation + "\n\n" + answer
+                return answer
+        return None
 
     @staticmethod
     def _simulation_answer(computation: Any, spec: SimulationSpec,
@@ -345,6 +419,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                 "python_execution_approved": True,
             })
         started = time.perf_counter()
+        korean = prefers_korean(request)
         users = UserFactRegistry.from_topic(request.topic)
         simulation_spec = self._simulation_spec(request)
         criteria = [item.model_copy(deep=True) for item in request.success_criteria]
@@ -404,14 +479,14 @@ class GoalExecutionAgent(GoalResearchAgent):
                 self._record_stop(result, state, action.reason_code)
                 return self._finish(result, GoalRunStatus.STOPPED, GoalStatus.STOPPED,
                                     reason, self._safe_unavailable_answer(
-                                        latest_candidate, state, action.reason_code, selected_formula), started)
+                                        latest_candidate, state, action.reason_code, selected_formula, korean), started)
             input_ids = [r.fact_id for r in users.records] + state.evidence_ids + state.computation_ids
             signature = action.fingerprint(input_ids)
             if signature in seen_actions:
                 self._record_stop(result, state, "repeated_action_fingerprint")
                 return self._finish(result, GoalRunStatus.STOPPED, GoalStatus.STOPPED,
                                     GoalStopReason.NO_PROGRESS,
-                                    self._safe_unavailable_answer(latest_candidate, state), started)
+                                    self._safe_unavailable_answer(latest_candidate, state, korean=korean), started)
             seen_actions.add(signature)
             before = state.fingerprint()
             action_started = datetime.now(timezone.utc)
@@ -532,8 +607,9 @@ class GoalExecutionAgent(GoalResearchAgent):
                     latest_candidate = (self._simulation_answer(simulation, simulation_spec, evidence,
                                                                 simulation_source_id)
                                         if simulation and simulation_spec else
-                                        await self._synthesize(request, criteria, evidence, [],
-                                                               computations=result.computations))
+                                        self._api_gravity_answer(request, result.computations, evidence)
+                                        or await self._synthesize(request, criteria, evidence, [],
+                                                                  computations=result.computations))
                     if not result.computations:
                         latest_candidate = self._focus_research_answer(latest_candidate, criteria)
                     evaluation = await self.evaluator.evaluate(request, criteria, latest_candidate,
@@ -553,7 +629,8 @@ class GoalExecutionAgent(GoalResearchAgent):
                             item.support_ids = value.supporting_evidence
                             item.missing_requirements = [] if value.status == CriterionStatus.MET else evaluation.gaps[:3]
                     requires_computation = bool(re.search(r"\b(?:calculat|comput|simulat|sweep)\w*\b|계산|시뮬레이션",
-                                                          request.goal or request.topic, re.I))
+                                                          request.goal or request.topic, re.I)
+                                                or asks_for_api_gravity_calculation(request))
                     state.goal_achieved = bool(evaluation.achieved and
                                                (not requires_computation or state.computation_ids))
                     state.verified = True
@@ -607,4 +684,4 @@ class GoalExecutionAgent(GoalResearchAgent):
         self._record_stop(result, state, reason.value)
         return self._finish(result, GoalRunStatus.COMPLETED if state.goal_achieved else GoalRunStatus.STOPPED,
                             GoalStatus.ACHIEVED if state.goal_achieved else GoalStatus.STOPPED,
-                            reason, self._safe_unavailable_answer(latest_candidate, state), started)
+                            reason, self._safe_unavailable_answer(latest_candidate, state, korean=korean), started)

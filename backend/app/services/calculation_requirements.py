@@ -49,6 +49,8 @@ def select_formula_candidate(evidence: list[dict[str, Any]], intent: str,
                              fact_names: list[str]) -> FormulaSourceRecord | None:
     """Accept only one clearly relevant parsed source formula; ties remain unresolved."""
     tokens = {normalize_symbol(token) for token in re.findall(r"[A-Za-z][A-Za-z0-9_]*", intent)}
+    if re.search(r"API도", intent, re.I):
+        tokens.add("api")
     facts = {normalize_symbol(name) for name in fact_names}
     ranked: list[tuple[int, FormulaSourceRecord]] = []
     for record in FormulaSourceRegistry.from_evidence(evidence).records:
@@ -62,7 +64,8 @@ def select_formula_candidate(evidence: list[dict[str, Any]], intent: str,
         if score >= 2:
             ranked.append((score, record))
     ranked.sort(key=lambda pair: pair[0], reverse=True)
-    return ranked[0][1] if ranked and (len(ranked) == 1 or ranked[0][0] > ranked[1][0]) else None
+    return ranked[0][1] if ranked and (len(ranked) == 1 or ranked[0][0] > ranked[1][0] or
+                                     ranked[0][1].normalized_span == ranked[1][1].normalized_span) else None
 
 
 class FormulaVariableRequirement(BaseModel):

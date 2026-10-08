@@ -11,12 +11,13 @@ from pydantic import BaseModel, Field
 NUMBER = r"[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d*)?(?:[eE][-+]?\d+)?|[-+]?\.\d+(?:[eE][-+]?\d+)?|[-+]?\d+\s*/\s*\d+"
 UNIT = r"(?:stb/d|bbl/d|m\^?3/d|acres?|feet|ft|mD|md|psi|psia|psig|kPa|Pa|bbl|stb|days?|hours?|hr|m|%|cP)"
 ASSIGNMENT = re.compile(
-    rf"(?P<label>[A-Za-z][A-Za-z0-9 _/-]{{0,48}}?)\s*[:=]\s*(?P<value>{NUMBER})\s*(?P<unit>{UNIT})?(?=$|[,;.\s])",
+    rf"(?P<label>[A-Za-z][A-Za-z0-9 _/-]{{0,48}}?)\s*[:=]\s*(?P<value>{NUMBER})\s*(?P<unit>{UNIT})?(?=$|[,;\s]|\.(?!\d)|[가-힣])",
     re.IGNORECASE,
 )
 TUPLE_HEADER = re.compile(r"\((?P<header>[^()]+)\)\s*:")
 TUPLE_ROW = re.compile(r"(?P<label>[A-Za-z][A-Za-z0-9_]*)\s*=\s*\((?P<values>[^()]+)\)")
 WELL_HEADER = re.compile(r"\bWell\s+(?P<well>[A-Za-z][A-Za-z0-9_-]*)\s*:", re.IGNORECASE)
+KOREAN_SG = re.compile(rf"비중\s*(?:은|는|이|가|[:=])?\s*(?P<value>{NUMBER})")
 
 
 def _number(raw: str) -> float | None:
@@ -104,6 +105,8 @@ class UserFactRegistry(BaseModel):
                     continue
                 prefix = f"Well_{well}_" if well and label.casefold() not in {"well", "layer"} else ""
                 add(prefix + label, found.group("value"), found.group("unit") or "", found.group(0), f"Well {well}" if well else None, offset + found.start())
+            for found in KOREAN_SG.finditer(text):
+                add("SG", found.group("value"), "", found.group(0), None, offset + found.start())
             offset += len(line)
         return cls(records=records)
 

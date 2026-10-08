@@ -6,6 +6,7 @@ import re
 
 from app.models.goal_research_schemas import GoalResearchRequest
 from app.services.goal_execution_state import GoalAction, GoalActionType, GoalExecutionState, SimulationSpec
+from app.services.goal_intent import asks_for_api_gravity_calculation
 
 
 CALC_WORDS = re.compile(r"\b(?:calculat\w*|comput\w*|derive|mean|average|rank\w*|compare\s+numeric|difference|ratio)\b|계산|산출|평균|순위", re.I)
@@ -30,9 +31,10 @@ class GoalActionPlanner:
     ) -> GoalAction:
         text = " ".join(filter(None, (request.topic, request.goal)))
         wants_simulation = bool(SIMULATE_WORDS.search(text) or simulation_spec)
-        wants_calculation = bool(CALC_WORDS.search(text)) and not wants_simulation
+        wants_calculation = bool(CALC_WORDS.search(text) or asks_for_api_gravity_calculation(request)) and not wants_simulation
         wants_analysis = bool(ANALYZE_WORDS.search(text))
-        specialist = bool(re.search(r"\b(?:formula|equation|correlation|productivity\s+index)\b|공식|수식|관계식", text, re.I))
+        specialist = bool(re.search(r"\b(?:formula|equation|correlation|productivity\s+index)\b|공식|수식|관계식", text, re.I)
+                          or asks_for_api_gravity_calculation(request))
         permission = request.allow_python_execution and request.python_execution_approved
         numeric_inputs_ready = bool(user_fact_ids or evidence_fact_ids)
         required = [item.criterion_id for item in state.criteria if item.required and item.status.value != "met"]
@@ -112,4 +114,5 @@ class GoalActionPlanner:
     def query(request: GoalResearchRequest, state: GoalExecutionState) -> str:
         missing = "; ".join(state.unresolved_information[:3])
         unmet = "; ".join(item.description for item in state.criteria if item.required and item.status.value != "met")
-        return f"{request.goal or request.topic}\nMissing: {missing or unmet or request.topic}"[:4000]
+        terms = "\nspecific gravity SG API gravity conversion equation" if asks_for_api_gravity_calculation(request) else ""
+        return f"{request.goal or request.topic}\nMissing: {missing or unmet or request.topic}{terms}"[:4000]

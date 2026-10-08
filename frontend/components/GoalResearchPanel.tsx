@@ -175,7 +175,7 @@ export function GoalResearchPanel() {
               <div className="flex items-center gap-1">
                 <label htmlFor="goal-max-iterations" className="mr-1">최대 반복</label>
                 <button type="button" aria-label="반복 횟수 감소" disabled={maxIterations <= 1} onClick={() => setIterations(maxIterations - 1)} className="rounded border border-slate-200 px-2 py-0.5 disabled:opacity-40">−</button>
-                <input id="goal-max-iterations" type="number" min={1} max={8} step={1} value={iterationDraft} onChange={(event) => setIterationDraft(event.target.value)} onBlur={commitIterations} className="w-14 rounded border border-slate-200 px-1 py-0.5 text-center" />
+                <input id="goal-max-iterations" type="text" inputMode="numeric" pattern="[0-9]*" value={iterationDraft} onChange={(event) => setIterationDraft(event.target.value)} onBlur={commitIterations} onKeyDown={(event) => { if (event.key === "ArrowUp" || event.key === "ArrowDown") { event.preventDefault(); setIterations(clampIterations(iterationDraft, maxIterations) + (event.key === "ArrowUp" ? 1 : -1)); } }} className="w-14 rounded border border-slate-200 px-1 py-0.5 text-center" />
                 <button type="button" aria-label="반복 횟수 증가" disabled={maxIterations >= 8} onClick={() => setIterations(maxIterations + 1)} className="rounded border border-slate-200 px-2 py-0.5 disabled:opacity-40">+</button>
               </div>
             </div>

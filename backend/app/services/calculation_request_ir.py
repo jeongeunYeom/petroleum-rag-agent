@@ -9,6 +9,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from app.models.goal_research_schemas import GoalCriterion, GoalResearchRequest
+from app.services.goal_intent import asks_for_api_gravity_calculation
 from app.services.user_fact_registry import UserFactRegistry
 from app.services.user_fact_registry import UNIT
 
@@ -112,6 +113,16 @@ def _scenarios(topic: str, goal: str) -> list[str]:
 
 
 def parse_request_ir(request: GoalResearchRequest, criteria: list[GoalCriterion]) -> CalculationRequestIR:
+    if asks_for_api_gravity_calculation(request):
+        # This fixes only the requested output shape. The formula and SG value
+        # must still come from validated source evidence and user facts.
+        return CalculationRequestIR(
+            computation_class="specialist_formula", requested_operation_types=["convert"],
+            requested_outputs=[RequestedOutput(semantic_name="API_gravity", unit="dimensionless")],
+            specialist_relation_required=True, target_concepts=["API_gravity", "API"],
+            requested_units={"API_gravity": "dimensionless"},
+            evidence_requirements=["formula", "numeric_facts"],
+        )
     goal = " ".join([request.goal or request.topic, *(item.description for item in criteria if item.required)])
     found = [name for name, pattern in OPERATIONS.items() if re.search(pattern, goal, re.I)]
     if "std_population" in found or "std_sample" in found:
