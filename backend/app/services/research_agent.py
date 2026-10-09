@@ -35,11 +35,18 @@ from app.services.web_research import (
     WebResearchResult,
     WebResearchService,
 )
-from app.services.web_source_quality import LATEST_RE
-
-COMPARE_RE = re.compile(
-    r"\b(?:compare|comparison|versus|vs\.?|textbook|handbook|knowledge base)\b"
-    r"|비교|교재|핸드북|내부\s*(?:자료|문서|지식)",
+EXPLICIT_WEB_RE = re.compile(
+    r"웹에서|웹\s*(?:검색|자료|근거|최신\s*(?:연구|자료))|"
+    r"인터넷에서|인터넷\s*(?:검색|자료)|온라인\s*검색|"
+    r"외부\s*(?:웹|자료)|최신\s*웹\s*자료|"
+    r"\b(?:search\s+the\s+web|web\s+search|search\s+online|internet\s+search|"
+    r"online\s+sources?|web\s+sources?|external\s+web)\b",
+    re.IGNORECASE,
+)
+EXPLICIT_WEB_ONLY_RE = re.compile(
+    r"웹에서만|인터넷\s*자료만\s*사용|내부\s*문서(?:는|를)?\s*사용하지\s*말고"
+    r".{0,30}(?:웹|인터넷)|"
+    r"\b(?:web\s+only|only\s+web\s+sources?|use\s+only\s+online\s+sources?)\b",
     re.IGNORECASE,
 )
 FIGURE_RE = re.compile(
@@ -183,19 +190,44 @@ class ResearchAgent:
             return "internal_only"
         if use_external and not use_internal:
             return "external_only"
-        if LATEST_RE.search(query) and not COMPARE_RE.search(query):
+        if EXPLICIT_WEB_ONLY_RE.search(query):
             return "external_only"
-        if LATEST_RE.search(query) or COMPARE_RE.search(query):
+        if EXPLICIT_WEB_RE.search(query):
             return "hybrid_research"
         return "internal_only"
 
     async def research(self, request: ResearchRequest) -> ResearchResponse:
         started = time.perf_counter()
+        engineering_domains = (
+            self.engineering_validator.engineering_domains(request.query)
+            if request.engineering_validation
+            else []
+        )
+        engineering_validators = (
+            self.engineering_validator.engineering_validator_names(request.query)
+            if request.engineering_validation
+            else []
+        )
         mode = self.route_query(
             request.query,
             request.use_internal,
             request.use_external,
         )
+        web_search_requested = bool(
+            EXPLICIT_WEB_RE.search(request.query)
+            or (request.use_external and not request.use_internal)
+        )
+        web_search_triggered = mode in {"external_only", "hybrid_research"}
+        if not request.use_external:
+            web_search_reason = "external_disabled"
+        elif not request.use_internal:
+            web_search_reason = "api_external_only"
+        elif EXPLICIT_WEB_ONLY_RE.search(request.query):
+            web_search_reason = "explicit_web_only"
+        elif EXPLICIT_WEB_RE.search(request.query):
+            web_search_reason = "explicit_web_request"
+        else:
+            web_search_reason = "internal_first_default"
         retrieval_query = self.expand_engineering_retrieval_query(request.query)
         retrieval_started = time.perf_counter()
         internal_task = (
@@ -230,13 +262,20 @@ class ResearchAgent:
         }
 
         reasoning_started = time.perf_counter()
-        if evidence_ids:
+        if request.evidence_only:
+            # Goal execution synthesizes and validates its own final answer. Do not
+            # generate and validate an intermediate answer that is never displayed.
+            answer = ""
+            validation = {"evidence_only": True, "conflict_count": len(conflicts)}
+            inference_used = False
+        elif evidence_ids:
             messages = self.build_reasoning_messages(
                 request.query,
                 internal_sources,
                 web_sources,
                 figures,
                 conflicts,
+                engineering_validation=request.engineering_validation,
             )
             evidence_text = self._evidence_text(internal_sources, web_sources, figures)
             structured_chat = getattr(self.ollama, "chat_structured", None)
@@ -261,6 +300,7 @@ class ResearchAgent:
                     evidence_text,
                     conflicts,
                     request.query,
+                    request.engineering_validation,
                 )
             else:
                 raw_answer = await self.ollama.chat(
@@ -274,8 +314,10 @@ class ResearchAgent:
                     conflicts,
                     query=request.query,
                     evidence_text=evidence_text,
+                    engineering_validation=request.engineering_validation,
                 )
             repair_attempts = 0
+            engineering_repair_attempts = 0
             repair_error: str | None = None
             latest_draft = raw_answer
             latest_validation = validation
@@ -284,6 +326,10 @@ class ResearchAgent:
                 and repair_attempts < 2
             ):
                 repair_attempts += 1
+                engineering_repair_attempts += int(
+                    request.engineering_validation
+                    and self._engineering_repair_required(latest_validation)
+                )
                 try:
                     repair_messages = self.build_repair_messages(
                         messages,
@@ -306,6 +352,7 @@ class ResearchAgent:
                                 evidence_text,
                                 conflicts,
                                 request.query,
+                                request.engineering_validation,
                             )
                         )
                     else:
@@ -321,6 +368,7 @@ class ResearchAgent:
                                 conflicts,
                                 query=request.query,
                                 evidence_text=evidence_text,
+                                engineering_validation=request.engineering_validation,
                             )
                         )
                     latest_draft = repaired
@@ -338,9 +386,13 @@ class ResearchAgent:
                 repair_attempts == 2
                 and not self._final_answer_usable(validation)
             ):
-                fallback = self._grounded_false_premise_fallback(
-                    request.query,
-                    evidence_text,
+                fallback = (
+                    self._grounded_false_premise_fallback(
+                        request.query,
+                        evidence_text,
+                    )
+                    if request.engineering_validation
+                    else None
                 )
                 if fallback is not None:
                     answer, validation = fallback
@@ -353,9 +405,12 @@ class ResearchAgent:
             validation["conflict_disclosures_added"] = disclosed
             validation["repair_attempted"] = repair_attempts > 0
             validation["repair_attempts"] = repair_attempts
+            validation["engineering_repair_attempts"] = engineering_repair_attempts
             validation["figure_vision_calls"] = figure_vision_calls
             validation["engineering_validation_passed"] = (
                 self._engineering_validation_passed(validation)
+                if request.engineering_validation
+                else None
             )
             inference_used = True
         else:
@@ -367,12 +422,15 @@ class ResearchAgent:
                 "refused_without_evidence": True,
                 "repair_attempted": False,
                 "repair_attempts": 0,
+                "engineering_repair_attempts": 0,
                 "engineering_contradiction_count": 0,
                 "unsupported_engineering_claim_count": 0,
                 "false_premise_detected": False,
                 "false_premise_corrected": True,
                 "engineering_validation_reasons": [],
-                "engineering_validation_passed": False,
+                "engineering_validation_passed": (
+                    False if request.engineering_validation else None
+                ),
                 "figure_citation_rejections": 0,
                 "figure_association_rejections": 0,
                 "figure_citation_correctness": False,
@@ -380,6 +438,14 @@ class ResearchAgent:
                 "figure_vision_calls": figure_vision_calls,
             }
             inference_used = False
+        validation["engineering_domains_detected"] = engineering_domains
+        validation["engineering_validators_used"] = engineering_validators
+        validation["engineering_validation_enabled"] = (
+            request.engineering_validation
+        )
+        validation["web_search_requested"] = web_search_requested
+        validation["web_search_triggered"] = web_search_triggered
+        validation["web_search_reason"] = web_search_reason
         validation["web_research"] = web_result.stats
         answer = self.render_requested_source_details(
             answer,
@@ -1537,6 +1603,7 @@ class ResearchAgent:
         web: list[WebEvidence],
         figures: list[FigureEvidence],
         conflicts: list[dict[str, str]],
+        engineering_validation: bool = True,
     ) -> list[dict[str, str]]:
         blocks = []
         blocks.extend(
@@ -1562,22 +1629,42 @@ class ResearchAgent:
             for item in figures
         )
         conflict_text = json.dumps(conflicts, ensure_ascii=False)
-        false_premise = bool(
+        false_premises = (
             EngineeringValidator().detect_false_premises(query)
+            if engineering_validation
+            else []
+        )
+        false_premise = bool(false_premises)
+        well_test_false_premise = any(
+            item.get("domain") == "well_test" for item in false_premises
         )
         false_premise_instruction = (
-            "The question contains a false Well Test premise. The first claim must "
+            "The question contains a false engineering premise. The first claim must "
             "explicitly say that the premise is incorrect, identify the incorrect "
-            "attribution, then give the supported wellbore-storage relation and the "
-            "supported radial-flow relation with citations. Do not answer with a bare "
-            "refusal when the supplied evidence supports the correction. "
+            "relationship, and give the evidence-supported correction with citations. "
+            + (
+                "For a Well Test premise, state the supported wellbore-storage and "
+                "radial-flow relations. "
+                if well_test_false_premise
+                else ""
+            )
+            + "Do not answer with a bare refusal when the supplied evidence supports "
+            "the correction. "
             if false_premise
             else ""
         )
-        required_regimes = EngineeringValidator.regimes_in_text(query)
-        if re.search(r"unit[- ]?slope|단위\s*기울기", query, re.IGNORECASE):
+        required_regimes = (
+            EngineeringValidator.regimes_in_text(query)
+            if engineering_validation
+            else set()
+        )
+        if engineering_validation and re.search(
+            r"unit[- ]?slope|단위\s*기울기", query, re.IGNORECASE
+        ):
             required_regimes.add("wellbore_storage")
-        if re.search(r"plateau|평탄|수평", query, re.IGNORECASE):
+        if engineering_validation and re.search(
+            r"plateau|평탄|수평", query, re.IGNORECASE
+        ):
             required_regimes.add("radial")
         if false_premise:
             required_regimes.update({"wellbore_storage", "radial"})
@@ -1987,6 +2074,7 @@ class ResearchAgent:
         evidence_text: dict[str, str],
         conflicts: list[dict[str, str]],
         query: str = "",
+        engineering_validation: bool = True,
     ) -> tuple[str, dict[str, Any], list[str]]:
         """Validate claim-level provenance before deterministic answer rendering."""
         try:
@@ -2101,26 +2189,28 @@ class ResearchAgent:
                     )
                     for conflict in conflicts
                 )
-                engineering = self.engineering_validator.validate_claim(
-                    claim,
-                    evidence,
-                    evidence_conflict=evidence_conflict,
-                )
-                if not engineering.passed:
-                    engineering_contradiction_count += (
-                        engineering.engineering_contradiction_count
+                if engineering_validation:
+                    engineering = self.engineering_validator.validate_claim(
+                        claim,
+                        evidence,
+                        query=query,
+                        evidence_conflict=evidence_conflict,
                     )
-                    unsupported_engineering_claim_count += (
-                        engineering.unsupported_engineering_claim_count
-                    )
-                    engineering_validation_reasons.extend(
-                        {
-                            **reason,
-                            "relevant_evidence_ids": ids,
-                        }
-                        for reason in engineering.reasons
-                    )
-                    continue
+                    if not engineering.passed:
+                        engineering_contradiction_count += (
+                            engineering.engineering_contradiction_count
+                        )
+                        unsupported_engineering_claim_count += (
+                            engineering.unsupported_engineering_claim_count
+                        )
+                        engineering_validation_reasons.extend(
+                            {
+                                **reason,
+                                "relevant_evidence_ids": ids,
+                            }
+                            for reason in engineering.reasons
+                        )
+                        continue
                 candidates.append((section, claim, ids, evidence))
 
         similarities, semantic_check_applied = self._semantic_similarities(
@@ -2158,10 +2248,10 @@ class ResearchAgent:
 
         disclosed = self._add_conflict_claims(accepted, conflicts, evidence_text)
         answer, used_ids = self._render_structured_answer(accepted, evidence_text)
-        coverage_reasons = self._answer_coverage_reasons(
-            query,
-            answer,
-            evidence_text,
+        coverage_reasons = (
+            self._answer_coverage_reasons(query, answer, evidence_text)
+            if engineering_validation
+            else []
         )
         engineering_validation_reasons.extend(coverage_reasons)
         unsupported_engineering_claim_count += len(coverage_reasons)
@@ -2169,7 +2259,11 @@ class ResearchAgent:
             false_premise_detected,
             false_premise_corrected,
             false_premise_reasons,
-        ) = self.engineering_validator.false_premise_correction(query, answer)
+        ) = (
+            self.engineering_validator.false_premise_correction(query, answer)
+            if engineering_validation
+            else (False, True, [])
+        )
         engineering_validation_reasons.extend(
             {
                 **reason,
@@ -2221,15 +2315,19 @@ class ResearchAgent:
             "false_premise_detected": false_premise_detected,
             "false_premise_corrected": false_premise_corrected,
             "engineering_validation_reasons": engineering_validation_reasons,
-            "engineering_validation_passed": bool(
-                engineering_contradiction_count == 0
-                and unsupported_engineering_claim_count == 0
-                and figure_citation_rejections == 0
-                and figure_association_rejections == 0
-                and (
-                    not false_premise_detected
-                    or false_premise_corrected
+            "engineering_validation_passed": (
+                bool(
+                    engineering_contradiction_count == 0
+                    and unsupported_engineering_claim_count == 0
+                    and figure_citation_rejections == 0
+                    and figure_association_rejections == 0
+                    and (
+                        not false_premise_detected
+                        or false_premise_corrected
+                    )
                 )
+                if engineering_validation
+                else None
             ),
             "semantic_check_skipped": not semantic_check_applied,
             "structured_output": True,
@@ -2510,6 +2608,7 @@ class ResearchAgent:
         *,
         query: str = "",
         evidence_text: dict[str, str] | None = None,
+        engineering_validation: bool = True,
     ) -> tuple[str, dict[str, Any], list[str]]:
         disclosed_answer, disclosed = self.ensure_conflicts_disclosed(
             answer,
@@ -2578,9 +2677,13 @@ class ResearchAgent:
                 )
                 for conflict in conflicts
             )
+            if not engineering_validation:
+                kept_lines.append(line)
+                continue
             result = self.engineering_validator.validate_claim(
                 line,
                 evidence,
+                query=query,
                 evidence_conflict=evidence_conflict,
             )
             if result.passed:
@@ -2603,15 +2706,17 @@ class ResearchAgent:
                 "근거는 검색되었지만 공학적 의미와 인용의 정합성을 "
                 "검증하지 못했습니다. 근거 없는 결론을 제공하지 않습니다."
             )
-        coverage_reasons = self._answer_coverage_reasons(
-            query,
-            validated,
-            evidence_text,
+        coverage_reasons = (
+            self._answer_coverage_reasons(query, validated, evidence_text)
+            if engineering_validation
+            else []
         )
         reasons.extend(coverage_reasons)
         unsupported += len(coverage_reasons)
         detected, corrected, false_reasons = (
             self.engineering_validator.false_premise_correction(query, validated)
+            if engineering_validation
+            else (False, True, [])
         )
         reasons.extend(
             {
@@ -2640,12 +2745,16 @@ class ResearchAgent:
                 "figure_numeric_support_pass": bool(
                     figure_association_rejections == 0
                 ),
-                "engineering_validation_passed": bool(
-                    contradictions == 0
-                    and unsupported == 0
-                    and figure_citation_rejections == 0
-                    and figure_association_rejections == 0
-                    and (not detected or corrected)
+                "engineering_validation_passed": (
+                    bool(
+                        contradictions == 0
+                        and unsupported == 0
+                        and figure_citation_rejections == 0
+                        and figure_association_rejections == 0
+                        and (not detected or corrected)
+                    )
+                    if engineering_validation
+                    else None
                 ),
             }
         )
@@ -2680,6 +2789,17 @@ class ResearchAgent:
             or validation.get("unsupported_engineering_claim_count")
             or validation.get("figure_citation_rejections")
             or validation.get("figure_association_rejections")
+            or (
+                validation.get("false_premise_detected")
+                and not validation.get("false_premise_corrected")
+            )
+        )
+
+    @staticmethod
+    def _engineering_repair_required(validation: dict[str, Any]) -> bool:
+        return bool(
+            validation.get("engineering_contradiction_count")
+            or validation.get("unsupported_engineering_claim_count")
             or (
                 validation.get("false_premise_detected")
                 and not validation.get("false_premise_corrected")

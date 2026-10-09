@@ -1,3 +1,5 @@
+import pytest
+
 from app.services.benchmark_evaluator import (
     STRICT_REFUSAL,
     evaluate_benchmark_answer,
@@ -56,6 +58,51 @@ def test_correct_answer_passes():
     assert result.hallucination_detected is False
     assert result.preferred_page_hit is True
     assert result.expected_document_hit is True
+
+
+@pytest.mark.parametrize(
+    "answer",
+    [
+        "During wellbore storage, pressure and derivative overlap on a unit-slope line.",
+        "During wellbore storage, pressure and its derivative overlay on a unit-slope line.",
+        "During wellbore storage, pressure and derivative coincide on a unit-slope line.",
+        (
+            "During wellbore storage, pressure and derivative lie on top of one "
+            "another on the unit-slope line."
+        ),
+        "Wellbore storage에서 pressure와 derivative가 unit slope에서 겹친다.",
+    ],
+)
+def test_wellbore_storage_overlap_semantic_variants_pass(answer):
+    item = {
+        "expected_behavior": "answer",
+        "required_patterns": [WT1["required_patterns"][0]],
+        "forbidden_patterns": [],
+    }
+
+    result = evaluate_benchmark_answer(item, answer)
+
+    assert result.required_failures == []
+
+
+@pytest.mark.parametrize(
+    "answer",
+    [
+        "Radial flow pressure and derivative overlap on a unit-slope line.",
+        "Pressure and derivative coincide.",
+        "Wellbore storage has a unit-slope line.",
+    ],
+)
+def test_incomplete_or_wrong_overlap_relations_still_fail(answer):
+    item = {
+        "expected_behavior": "answer",
+        "required_patterns": [WT1["required_patterns"][0]],
+        "forbidden_patterns": [],
+    }
+
+    result = evaluate_benchmark_answer(item, answer)
+
+    assert result.required_failures
 
 
 def test_affirmative_forbidden_claim_fails():

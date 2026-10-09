@@ -97,9 +97,12 @@ pnpm dev
 
 ## 검색 동작
 
-- 일반 문서 질문: 내부 ChromaDB 검색
-- 최신·현재 동향 질문: 외부 웹 검색
-- 내부 자료와 최신 연구 비교: 내부 + 외부 통합 검색
+- 기본: 내부 ChromaDB만 검색
+- `최신`, `최근`, `현재`, `동향`만으로는 웹 검색을 시작하지 않음
+- `웹 검색`, `인터넷 검색`, `web sources`처럼 웹 자료를 명시적으로 요청할 때만 내부 + 외부 통합 검색
+- `웹에서만`, `web only`처럼 명시하면 외부 웹만 검색
+
+기본 정책은 **Internal knowledge is used by default. Web Research is only activated when the user explicitly requests web/online sources.** 입니다. 내부 근거가 없거나 검증에서 제거되더라도 자동으로 웹 검색으로 전환하지 않습니다.
 
 외부 검색은 DDGS를 URL discovery에 사용한 뒤, 안전성 검사를 통과한 HTML/PDF를 직접 열어 본문을 추출하고 질문 관련 passage만 WEB 근거로 사용합니다. 페이지 fetch가 모두 실패한 경우에만 검색 snippet을 별도 fallback provenance로 표시합니다. 외부 결과는 요청 중에만 사용하며 ChromaDB에 저장하지 않습니다.
 
@@ -120,7 +123,54 @@ fetch는 기본 5개 URL을 최대 3개씩 병렬 처리하며 URL당 최대 5 M
 `hybrid_rerank`는 `RERANKER_MODEL`을 최초 요청 때 지연 로딩합니다. 기본값은 `BAAI/bge-reranker-base`입니다.
 오프라인 모드에서 사용하려면 해당 모델을 Hugging Face 캐시에 먼저 받아 두어야 합니다.
 
-Research 답변은 retrieval mode와 무관하게 claim 단위 Well Test 규칙을 통과해야 합니다. Wellbore storage의 unit-slope/pressure-derivative overlap, radial-flow derivative plateau, linear-flow `+1/2`, spherical-flow `-1/2`, late-time boundary/recharge의 조건부 unit-slope를 구분합니다. 질문에 잘못된 전제가 있으면 이를 명시적으로 반박해야 하며, citation의 공학적 의미가 claim과 일치하지 않거나 근거가 상충하는데 단정하면 해당 claim을 제거하고 최대 2회까지만 재작성합니다.
+Research 답변은 retrieval mode와 무관하게 claim 단위 공학 검증을 통과해야 합니다. 질의에 따라 registry가 Well Test와 Reservoir validator를 하나 이상 선택하고, 각 validator의 이슈를 domain과 rule code가 보존된 상태로 합칩니다.
+
+```text
+Query -> Engineering Validator Registry
+          |-- Well Test
+          `-- Reservoir
+```
+
+Well Test validator는 wellbore storage의 unit-slope/pressure-derivative overlap, radial-flow derivative plateau, linear-flow `+1/2`, spherical-flow `-1/2`, late-time boundary/recharge의 조건부 unit-slope를 구분합니다. Reservoir validator는 porosity, permeability, saturation, Darcy-flow 방향, formation-volume factor, material balance와 대표 drive mechanism의 명백한 모순을 검사합니다. 질문에 잘못된 전제가 있으면 이를 명시적으로 반박해야 하며, citation의 공학적 의미가 claim과 일치하지 않거나 근거가 상충하는데 단정하면 해당 claim을 제거하고 최대 2회까지만 재작성합니다.
+
+Validator는 답변의 사실 근거가 아니라 consistency/contradiction guard입니다. 최종 claim은 계속 KB, WEB 또는 FIG evidence로 뒷받침되어야 합니다. 향후 Drilling, Petrophysics, Production validator도 같은 registry에 추가할 수 있지만 현재 구현 범위에는 포함하지 않습니다.
+
+## Goal-Directed Research Agent
+
+Goal Research는 주제, 연구 목표, 선택적 예상 결과와 성공 조건을 받아 bounded goal-directed iterative research를 수행합니다.
+
+```text
+Topic + Goal + Optional Expected Result + Success Criteria
+  -> ResearchAgent
+  -> evidence-grounded synthesis
+  -> criterion evaluation
+  -> gap-directed replanning
+  -> achieved / unsupported / insufficient evidence / bounded stop
+```
+
+예상 결과는 확인해야 할 **가설**이며 강제로 만들어야 하는 결론이 아닙니다. 근거가 가설과 반대이면 연구 목표를 달성하면서도 `expected_result_status=contradicted`로 끝날 수 있습니다. 성공 조건을 생략하면 Iteration 0에서 operational criteria를 생성한 뒤 고정하며, 실행 중 목표나 기준을 변경하지 않습니다.
+
+Goal loop는 최대 1~8회이며 기본 4회입니다. coverage가 의미 있게 개선되지 않고 새 근거도 추가되지 않으면 조기에 중단합니다. 각 run은 `data/agent_runs/goal-research/GR-*.json`에 query, 새 근거, criteria 평가, gap, coverage, timing과 stop reason을 저장합니다.
+
+API는 background run 방식입니다.
+
+```text
+POST /api/research/goal-runs
+GET  /api/research/goal-runs/{run_id}
+POST /api/research/goal-runs/{run_id}/cancel
+```
+
+웹 근거는 요청에서 `use_external=true`로 명시한 경우에만 사용합니다. 목표가 미달이어도 Agent가 웹 사용 권한이나 파일·코드 실행 권한을 임의로 확대하지 않습니다.
+
+### Autonomous Analysis
+
+Goal Research는 정량 성공 조건에 계산이 필요한 경우, 근거에 적힌 수치와 출처 ID를 확인한 뒤 제한된 Python 분석 코드를 생성할 수 있습니다. 기본값은 꺼져 있으며 `allow_python_execution=true`와 `python_execution_approved=true`가 모두 필요합니다. 기존 `PythonTools`의 AST·라이브러리 허용 목록, 네트워크 차단, 제한 시간 및 작업공간 경계를 그대로 사용하고, 각 실행의 작업공간은 `workspace/results/goal-research/<run_id>/analysis/`로 더 좁힙니다. 기본 최대 4개 분석, 분석당 최대 2회 시도입니다. 검증된 결과만 `CALC1` 등의 ID로 기록하며 원본 KB/WEB/FIG 근거와 함께 인용합니다. 코드와 실행 기록은 run 로그에 남지만 환경변수나 비밀값은 코드 생성 입력으로 전달하지 않습니다.
+
+Python 도구 판단과 분석 계획은 각각 최대 2회 구조화 응답으로 처리합니다. 사용자 수치는 `topic`의 명확한 `key=value`, `key: value`, 단위가 적힌 tuple 행에서 결정적으로 추출해 `USERF*` 계산 입력으로 기록합니다. 계획은 이 ID를 선택할 뿐 값·단위를 바꾸지 못하며, 모호한 숫자열은 계산 입력으로 추측하지 않습니다. `USERF*`는 과학적 문헌이나 전문식의 근거가 아니고, 전문식에는 별도의 KB/FIG/WEB 근거가 필요합니다. 실행 trace에는 파싱 시도 횟수와 차단 사유를 남깁니다.
+
+### Research Deliverables
+
+`deliverables: ["docx", "pptx"]`를 요청하면 연구가 종료된 후 고정된 최종 결과를 DOCX 보고서와 PPTX 발표자료로 표현합니다. 생성 단계에서는 새 검색·계산·가설 평가를 하지 않습니다. 산출물은 재열기 검증 후 run별 작업공간에 저장되며, 연구 상태와 독립적으로 성공/실패가 기록됩니다. 다운로드는 `GET /api/research/goal-runs/{run_id}/artifacts/{artifact_id}`를 사용합니다. 취소되거나 실패한 연구에서는 기본적으로 생성하지 않습니다.
 
 ## 테스트
 
@@ -159,8 +209,12 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 python backend/scripts/run_well_test_benchmark.py `
   --mode research `
   --retrieval-mode legacy `
-  --model qwen3:8b
+  --model qwen3:8b `
+  --temperature 0 `
+  --seed 42
 ```
+
+논문 benchmark는 기본적으로 Web Search를 비활성화하여 실시간 검색 변동성을 제거합니다. `--use-external`을 명시한 경우에만 웹 검색을 사용합니다. Engineering Validator ablation은 같은 조건에서 기본 ON 실행과 `--disable-engineering-validator` 실행을 비교합니다.
 
 세 실행 결과를 한 표로 합칩니다.
 
@@ -171,7 +225,7 @@ python backend/scripts/compare_benchmark_runs.py `
   data/evaluation/<hybrid_rerank.json>
 ```
 
-결과 JSON/CSV에는 retrieval mode, 답변 정확도, hallucination rate, citation correctness, retrieval recall, engineering contradiction count, false-premise correction success, unsupported engineering claim count, 평균 retrieval/전체 시간이 기록됩니다.
+결과 JSON/CSV에는 retrieval mode, `use_external`, web evidence/search 여부, `engineering_validation_enabled`, 답변 정확도, hallucination rate, citation correctness, retrieval recall, engineering contradiction count, false-premise correction success, unsupported engineering claim count, 평균 retrieval/전체 시간이 기록됩니다.
 
 ## 안전 범위
 

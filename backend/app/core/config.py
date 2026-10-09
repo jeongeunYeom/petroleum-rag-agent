@@ -315,6 +315,10 @@ class Settings:
         return self.data_dir / "agent_runs"
 
     @property
+    def goal_research_runs_dir(self) -> Path:
+        return self.agent_runs_dir / "goal-research"
+
+    @property
     def agent_conversations_dir(self) -> Path:
         return self.data_dir / "agent_conversations"
 
@@ -339,6 +343,7 @@ def get_settings() -> Settings:
         settings.ontology_dir,
         settings.evaluation_dir,
         settings.agent_runs_dir,
+        settings.goal_research_runs_dir,
         settings.agent_conversations_dir,
         settings.agent_backups_dir,
         settings.agent_workspace_dir,

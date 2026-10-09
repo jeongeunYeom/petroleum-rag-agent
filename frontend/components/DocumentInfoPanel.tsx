@@ -84,7 +84,11 @@ export function DocumentInfoPanel({
             <div className="flex min-w-0 items-start gap-2">
               <span className="mt-0.5 shrink-0">📄</span>
               <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold text-slate-800" title={cleanTitle(document)}>{cleanTitle(document)}</p>
+                <p
+                  className="overflow-hidden break-words font-semibold text-slate-800"
+                  style={{ display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2 }}
+                  title={document.filename}
+                >{document.title || document.filename}</p>
                 <p className="mt-0.5 truncate text-[11px] text-slate-500" title={document.filename}>{document.pages} pages · {document.chunks} chunks</p>
               </div>
               <button

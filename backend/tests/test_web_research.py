@@ -26,6 +26,7 @@ def settings(tmp_path: Path, **overrides) -> Settings:
     values = {
         "data_dir": tmp_path / "data",
         "agent_workspace_dir": tmp_path / "workspace",
+        "retrieval_mode": "legacy",
         "web_fetch_enabled": True,
         "web_fetch_timeout_seconds": 1,
         "web_fetch_max_bytes": 10_000,
@@ -619,7 +620,9 @@ def test_external_only_and_hybrid_research_use_fetched_web_passages(tmp_path: Pa
     )
     hybrid = asyncio.run(
         hybrid_agent.research(
-            ResearchRequest(query="latest compare internal web pressure monitoring")
+            ResearchRequest(
+                query="latest compare internal knowledge base and web sources"
+            )
         )
     )
     assert hybrid.routing_mode == "hybrid_research"

@@ -142,6 +142,23 @@ def make_agent(
     )
 
 
+def test_evidence_only_keeps_sources_and_provenance_without_intermediate_llm(tmp_path: Path) -> None:
+    store = FakeVectorStore(dense=[{
+        "id": "chunk-1", "text": "Higher API gravity indicates lighter crude.",
+        "metadata": {"document": "handbook.pdf", "page": 90},
+    }])
+    ollama = FakeOllama()
+    response = asyncio.run(make_agent(tmp_path, vector_store=store, ollama=ollama).research(
+        ResearchRequest(query="API gravity crude oil", use_external=False, evidence_only=True)
+    ))
+    assert response.internal_sources
+    assert response.provenance[0].evidence_id == response.internal_sources[0].evidence_id
+    assert response.validation["evidence_only"] is True
+    assert response.answer == ""
+    assert response.inference_used is False
+    assert ollama.calls == []
+
+
 def test_retrieval_modes_switch_only_the_internal_retriever(tmp_path: Path) -> None:
     dense = [{"id": "dense", "text": "wellbore storage", "metadata": {}}]
     keyword = [{"id": "keyword", "text": "wellbore storage", "metadata": {}}]
@@ -164,6 +181,208 @@ def test_retrieval_modes_switch_only_the_internal_retriever(tmp_path: Path) -> N
     assert hybrid_store.calls == [
         "dense", "bm25", "dense", "bm25", "dense", "bm25"
     ]
+
+
+@pytest.mark.parametrize(
+    "query,domains,validators",
+    [
+        ("공극률과 투과도의 차이", ["reservoir"], ["ReservoirValidator"]),
+        (
+            "pressure transient test에서 permeability를 추정",
+            ["well_test", "reservoir"],
+            ["WellTestValidator", "ReservoirValidator"],
+        ),
+        ("summarize the project", [], []),
+    ],
+)
+def test_research_validation_metadata_reports_routed_engineering_domains(
+    tmp_path: Path,
+    query: str,
+    domains: list[str],
+    validators: list[str],
+) -> None:
+    response = asyncio.run(
+        make_agent(tmp_path).research(
+            ResearchRequest(
+                query=query,
+                use_internal=True,
+                use_external=False,
+            )
+        )
+    )
+    assert response.validation["engineering_domains_detected"] == domains
+    assert response.validation["engineering_validators_used"] == validators
+
+
+@pytest.mark.parametrize(
+    "query,use_internal,use_external,expected",
+    [
+        ("pressure derivative 설명", True, True, "internal_only"),
+        ("최근 CO2 storage 기술을 설명해줘", True, True, "internal_only"),
+        ("최신 well testing 연구 동향", True, True, "internal_only"),
+        ("웹에서 최신 CO2 storage 연구를 찾아줘", True, True, "hybrid_research"),
+        ("인터넷 자료를 사용해서 설명해줘", True, True, "hybrid_research"),
+        ("내부 교재와 웹 최신 연구를 비교해줘", True, True, "hybrid_research"),
+        ("웹에서만 찾아줘", True, True, "external_only"),
+        ("웹에서 찾아줘", True, False, "internal_only"),
+        ("pressure derivative", False, True, "external_only"),
+        ("A와 B를 비교해줘", True, True, "internal_only"),
+    ],
+)
+def test_internal_first_routing_requires_explicit_web_opt_in(
+    query: str,
+    use_internal: bool,
+    use_external: bool,
+    expected: str,
+) -> None:
+    assert ResearchAgent.route_query(query, use_internal, use_external) == expected
+
+
+@pytest.mark.parametrize(
+    "query,expected_calls,expected_triggered",
+    [
+        ("pressure derivative 설명", 0, False),
+        ("최근 연구를 설명해줘", 0, False),
+        ("웹에서 최근 연구를 찾아줘", 1, True),
+    ],
+)
+def test_ddgs_runs_only_for_explicit_web_requests(
+    tmp_path: Path,
+    query: str,
+    expected_calls: int,
+    expected_triggered: bool,
+) -> None:
+    calls = []
+
+    def searcher(search_query: str, limit: int):
+        calls.append((search_query, limit))
+        return []
+
+    response = asyncio.run(
+        make_agent(tmp_path, web_searcher=searcher).research(
+            ResearchRequest(query=query)
+        )
+    )
+
+    assert len(calls) == expected_calls
+    assert response.validation["web_search_requested"] is expected_triggered
+    assert response.validation["web_search_triggered"] is expected_triggered
+    assert response.validation["web_search_reason"] == (
+        "explicit_web_request" if expected_triggered else "internal_first_default"
+    )
+
+
+def test_engineering_validation_toggle_disables_only_domain_validator(
+    tmp_path: Path,
+) -> None:
+    query = "Radial flow has a unit-slope pressure derivative. Explain."
+    evidence = (
+        "Wellbore storage has pressure and pressure-derivative overlap on a "
+        "unit-slope line. Radial flow has a horizontal constant pressure-derivative "
+        "plateau."
+    )
+    hit = {
+        "id": "chunk-1",
+        "text": evidence,
+        "metadata": {"filename": "welltest.pdf", "page": 1},
+    }
+    wrong = json.dumps(
+        {
+            "internal": [
+                {
+                    "claim": "Radial flow has a unit-slope pressure derivative.",
+                    "citations": ["KB1"],
+                }
+            ],
+            "external": [],
+            "synthesis": [],
+            "limitations": [],
+        }
+    )
+    corrected = json.dumps(
+        {
+            "internal": [
+                {
+                    "claim": (
+                        "The unit-slope radial-flow premise is incorrect; radial flow "
+                        "has a horizontal constant pressure-derivative plateau."
+                    ),
+                    "citations": ["KB1"],
+                },
+                {
+                    "claim": (
+                        "During wellbore storage, pressure and pressure derivative "
+                        "overlap on a unit-slope line."
+                    ),
+                    "citations": ["KB1"],
+                },
+            ],
+            "external": [],
+            "synthesis": [],
+            "limitations": [],
+        }
+    )
+
+    disabled = asyncio.run(
+        make_agent(
+            tmp_path,
+            vector_store=FakeVectorStore(dense=[hit]),
+            ollama=StructuredOllama([wrong]),
+        ).research(
+            ResearchRequest(
+                query=query,
+                use_external=False,
+                engineering_validation=False,
+            )
+        )
+    )
+    enabled = asyncio.run(
+        make_agent(
+            tmp_path,
+            vector_store=FakeVectorStore(dense=[hit]),
+            ollama=StructuredOllama([wrong, corrected, corrected]),
+        ).research(
+            ResearchRequest(query=query, use_external=False)
+        )
+    )
+
+    assert disabled.validation["engineering_validation_enabled"] is False
+    assert disabled.validation["engineering_validators_used"] == []
+    assert disabled.validation["engineering_repair_attempts"] == 0
+    assert disabled.validation["false_premise_detected"] is False
+    assert disabled.validation["valid_citations"] == ["KB1"]
+    assert enabled.validation["engineering_validation_enabled"] is True
+    assert enabled.validation["engineering_validators_used"] == ["WellTestValidator"]
+    assert enabled.validation["engineering_repair_attempts"] > 0
+    assert enabled.validation["false_premise_detected"] is True
+
+
+def test_validator_toggle_keeps_figure_grounding(tmp_path: Path) -> None:
+    raw = json.dumps(
+        {
+            "internal": [
+                {
+                    "claim": "Figure 2 shows 0.34 psi/ft.",
+                    "citations": ["KB1"],
+                }
+            ],
+            "external": [],
+            "synthesis": [],
+            "limitations": [],
+        }
+    )
+
+    _, validation, _ = make_agent(tmp_path).validate_structured_answer(
+        raw,
+        {"KB1": "Figure 2 shows 0.34 psi/ft."},
+        [],
+        "Explain Figure 2.",
+        engineering_validation=False,
+    )
+
+    assert validation["figure_citation_rejections"] == 1
+    assert validation["valid_citations"] == []
+    assert validation["engineering_validation_passed"] is None
 
 
 def test_well_test_query_expansion_is_retrieval_only() -> None:

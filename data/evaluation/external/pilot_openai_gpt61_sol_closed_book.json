@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "dry_run": false,
+  "metadata": {
+    "created_at": "2026-10-02T07:40:03.124567+00:00",
+    "provider": "openai",
+    "model": "gpt-6.1-sol",
+    "condition": "gpt61_sol_closed_book",
+    "question_count": 5,
+    "web_used": false,
+    "tools_used": false,
+    "parameters": {
+      "max_output_tokens": 1200,
+      "temperature": null,
+      "reasoning_effort": "low",
+      "thinking_level": null,
+      "qwen_think": null,
+      "max_retries": 2
+    },
+    "pricing": {
+      "pricing_date": "2026-10-02",
+      "service_tier": "standard",
+      "openai": {
+        "input_per_million": 2.0,
+        "output_per_million": 10.0
+      },
+      "gemini": {
+        "input_per_million": 0.75,
+        "output_per_million": 3.75
+      },
+      "qwen": {
+        "input_per_million": 0.0,
+        "output_per_million": 0.0
+      }
+    },
+    "estimated_cost_usd": 0.021892,
+    "projected_full_cost_usd": 0.4772456,
+    "planned_request_count": 109,
+    "budget_approved_for_full_run": true,
+    "budget_stop_reason": null,
+    "latency_seconds": {
+      "mean": 12.9526602,
+      "median": 12.412341,
+      "p95": 21.795349,
+      "min": 5.774915,
+      "max": 21.795349
+    },
+    "question_sha256": "37f9440357379901cec6fe587151f0fcc2e6d11bdb66ef128fda9f046cfe2bfc",
+    "evidence_sha256": "cebed9e8b6e8b831621245fee4d91939a7d9a2554a5207c8aba9dab5c63043fe"
+  },
+  "results": [
+    {
+      "question_id": "PH-WT-001",
+      "provider": "openai",
+      "model": "gpt-6.1-sol",
+      "condition": "gpt61_sol_closed_book",
+      "answer": "Well-test 해석에서 **무차원 스킨 계수(dimensionless skin factor, \\(s\\))**는 이상적인 방사형 유동과 비교하여 **유정 근처에서 발생하는 추가 압력손실 또는 압력손실 감소**를 나타내는 지표입니다. 즉, 유정 주변의 유동 저항이 생산성에 미치는 영향을 무차원화한 값입니다.\n\n단상 액체의 방사형 유동에서 스킨에 의한 추가 압력강하는 다음과 같이 표현됩니다.\n\\[\n\\Delta p_{\\text{skin}}=\\frac{q\\mu B}{2\\pi kh}\\,s\n\\]\n여기서 \\(q\\)는 지상 기준 생산유량, \\(\\mu\\)는 점도, \\(B\\)는 체적계수, \\(k\\)는 투과도, \\(h\\)는 유효층 두께이며, 식에는 일관된 단위계를 사용해야 합니다.\n\n- **\\(s=0\\)**: 이상적인 기준 유정에 비해 추가적인 유동 저항이 없는 상태입니다.\n- **\\(s>0\\), positive skin**: 유정 근처의 유동 저항이 증가한 상태입니다. 따라서 **같은 유량을 생산하려면 더 큰 압력강하가 필요하고, 같은 압력강하에서는 생산량과 생산성지수(PI)가 감소**합니다.\n- **\\(s<0\\)**: 산처리나 수압파쇄 등으로 유정 주변 유동이 개선되어 기준 유정보다 압력손실이 작은 상태입니다.\n\nPositive skin의 대표 원인은 굴착이수 침투, 미립자 이동, 스케일 침전 등에 의한 **지층 손상**입니다. 다만, well-test에서 추정한 스킨에는 제한된 천공, 부분 관통 등 **완결 형상에 따른 추가 저항**도 포함될 수 있으므로, **positive skin을 반드시 지층 손상만의 증거로 해석해서는 안 됩니다.**",
+      "latency_seconds": 14.296514,
+      "input_tokens": 109,
+      "output_tokens": 445,
+      "reasoning_tokens": 0,
+      "estimated_cost_usd": 0.004668,
+      "web_used": false,
+      "tools_used": false,
+      "figure_image_available": null,
+      "error": null
+    },
+    {
+      "question_id": "PH-WT-002",
+      "provider": "openai",
+      "model": "gpt-6.1-sol",
+      "condition": "gpt61_sol_closed_book",
+      "answer": "아니요. **설명이 반대로 되어 있습니다.**\n\n- **양의 스킨(positive skin, \\(s>0\\))**은 유정 근처의 추가 유동 저항을 나타냅니다. 따라서 같은 생산량에서 **추가 압력강하가 발생**하며, 같은 생산 압력차에서는 생산량과 생산성지수(\\(J\\))가 낮아집니다. 지층 손상, 천공 불완전 등이 원인일 수 있습니다.\n- **음의 스킨(negative skin, \\(s<0\\))**은 기준 상태보다 유동 저항이 감소한 상태로, 일반적으로 생산성 개선을 뜻합니다. 산처리나 수압파쇄 등으로 나타날 수 있습니다.\n- **스킨이 0**이면 기준 유동 모델 대비 스킨에 의한 추가 압력강하가 없습니다.\n\n단상 방사형 유동에서 스킨에 의한 압력강하는 다음과 같이 표현됩니다.\n\\[\n\\Delta p_{\\text{skin}}=\\frac{q\\mu B}{2\\pi kh}s\n\\]\n여기서 단위계에 따라 환산계수가 필요합니다.\n\n따라서 올바른 설명은 **“양의 스킨은 추가 압력강하를 증가시키고 생산성을 저하시킨다”**입니다.",
+      "latency_seconds": 10.484182,
+      "input_tokens": 112,
+      "output_tokens": 288,
+      "reasoning_tokens": 0,
+      "estimated_cost_usd": 0.003104,
+      "web_used": false,
+      "tools_used": false,
+      "figure_image_available": null,
+      "error": null
+    },
+    {
+      "question_id": "PH-RE-005",
+      "provider": "openai",
+      "model": "gpt-6.1-sol",
+      "condition": "gpt61_sol_closed_book",
+      "answer": "문서가 제공되지 않아 해당 문서의 표현은 확인할 수 없지만, **표준적인 one-darcy(1 D)의 정의**는 다음과 같습니다.\n\n| 항목 | 수치와 단위 |\n|---|---|\n| 유체 점도(fluid viscosity), \\(\\mu\\) | **1 cP** (= \\(10^{-3}\\) Pa·s) |\n| 체적 유량(flow rate), \\(Q\\) | **1 cm³/s** (= \\(10^{-6}\\) m³/s) |\n| 유동 단면적(area), \\(A\\) | **1 cm²** (= \\(10^{-4}\\) m²) |\n| 압력 구배(pressure gradient), \\(\\Delta P/L\\) | **1 atm/cm** (= \\(1.01325\\times10^7\\) Pa/m) |\n\n즉, **점도가 1 cP인 유체가 1 atm/cm의 압력 구배에서 단면적 1 cm²를 통해 1 cm³/s로 흐르게 하는 다공성 매질의 투과도**가 **1 darcy**입니다. 이는 Darcy 법칙이 성립하는 유동을 전제로 합니다.\n\n\\[\nk=\\frac{Q\\mu}{A(\\Delta P/L)}\n\\qquad\\Rightarrow\\qquad\n\\boxed{1\\ \\mathrm{D}=9.86923\\times10^{-13}\\ \\mathrm{m^2}}\n\\]",
+      "latency_seconds": 12.412341,
+      "input_tokens": 112,
+      "output_tokens": 363,
+      "reasoning_tokens": 44,
+      "estimated_cost_usd": 0.003854,
+      "web_used": false,
+      "tools_used": false,
+      "figure_image_available": null,
+      "error": null
+    },
+    {
+      "question_id": "PH-RE-011",
+      "provider": "openai",
+      "model": "gpt-6.1-sol",
+      "condition": "gpt61_sol_closed_book",
+      "answer": "현재 대화에는 해당 문서가 제공되지 않아, **문서에 열거된 네 가지 방법이나 문서명·페이지를 정확히 확인할 수 없습니다.**\n\n문서 PDF 또는 관련 페이지를 보내주시면 다음 형식으로 정리하겠습니다.\n\n| 측정 방법 | 측정 원리 및 주요 특징 | 출처 |\n|---|---|---|\n| 문서에 기재된 방법 | 원리, 적용 조건 및 한계 | 문서명, p. ○ |\n\n일반적으로 알려진 방법을 임의로 선택해 해당 문서의 내용으로 제시하거나 페이지 번호를 추정하지는 않겠습니다.",
+      "latency_seconds": 5.774915,
+      "input_tokens": 110,
+      "output_tokens": 140,
+      "reasoning_tokens": 0,
+      "estimated_cost_usd": 0.00162,
+      "web_used": false,
+      "tools_used": false,
+      "figure_image_available": null,
+      "error": null
+    },
+    {
+      "question_id": "PH-XD-001",
+      "provider": "openai",
+      "model": "gpt-6.1-sol",
+      "condition": "gpt61_sol_closed_book",
+      "answer": "Well-test의 **type-curve pressure match로 얻는 \\(kh\\)**는 저류층의 **유동능력(flow capacity)**, 즉 유체가 저류층에서 우물로 얼마나 쉽게 흐를 수 있는지를 나타냅니다. **\\(kh\\) 자체가 permeability \\(k\\)는 아니라는 점**이 중요합니다.\n\n### 1. \\(kh\\)의 물리적 의미\n\\[\nkh = k \\times h\n\\]\n- \\(k\\): 유동에 기여하는 저류층의 유효 투과도\n- \\(h\\): 유동에 참여하는 유효 두께\n- 단위: 보통 \\(\\mathrm{mD\\cdot ft}\\) 또는 \\(\\mathrm{mD\\cdot m}\\)\n\n일반적인 단상 방사형 유동 모델에서는 압력응답의 크기가 대략 다음과 비례합니다.\n\\[\n\\Delta p \\propto \\frac{q\\mu B}{kh}\n\\]\n따라서 유량과 유체 물성이 같으면, **\\(kh\\)가 클수록 같은 유량을 유지하는 데 필요한 압력강하가 작습니다.**\n\n### 2. Permeability 해석에 어떻게 사용하는가?\n독립적으로 평가한 유효 유동 두께 \\(h_{\\mathrm{eff}}\\)를 사용해\n\\[\nk_{\\mathrm{WT}}=\\frac{(kh)_{\\mathrm{match}}}{h_{\\mathrm{eff}}}\n\\]\n로 well-test permeability를 계산합니다. 예를 들어 \\(kh=2{,}000\\ \\mathrm{mD\\cdot ft}\\), \\(h_{\\mathrm{eff}}=50\\ \\mathrm{ft}\\)이면 \\(k_{\\mathrm{WT}}=40\\ \\mathrm{mD}\\)입니다.\n\n**시험에 실제로 기여하는 두께와 계산에 사용한 두께가 일치해야 합니다.** 비생산층까지 포함해 \\(h\\)를 크게 잡으면 \\(k\\)를 과소평가하고, 반대로 \\(h\\)를 작게 잡으면 과대평가합니다.\n\n### 3. 어떤 permeability를 대표하는가?\n이 값은 코어 한 점의 투과도가 아니라, **시험 중 압력응답이 감지한 영역의 연결성과 이질성을 반영하는 동적·등가 투과도**입니다. 따라서 코어 또는 로그 기반 \\(k\\)와 반드시 같지는 않습니다.\n\n- 이상적인 균질 저류층에서는 주로 수평·방사방향 투과도를 반영합니다.\n- 층들이 동일한 압력강하 아래 병렬로 유동하는 이상적인 경우에는\n  \\[\n  kh_{\\mathrm{total}}=\\sum_i k_i h_i\n  \\]\n  로 해석할 수 있습니다.\n- 균열, 층간 연결성, 이방성, 부분 관통, 다상 유동 등이 있으면 추정값의 의미는 적용한 모델과 유동 조건에 따라 달라집니다. 다상 조건에서는 절대 투과도보다 해당 유체의 유효 투과도·이동성을 반영할 수 있습니다.\n\n### 4. 해석상 주의점\n\\(kh\\)는 **선택한 type curve와 입력한 유량·점도·용적계수에 의존하는 모델 추정값**입니다. Wellbore storage와 skin을 적절히 구분하고, 가능하면 방사형 유동 구간과 압력 미분 응답으로 검증해야 합니다. Skin에 의한 추가 압력강하를 낮은 저류층 투과도로 잘못 해석해서는 안 됩니다.\n\n**요약하면, pressure match의 \\(kh\\)는 우물 주변 저류층의 동적 유동능력이며, 이를 신뢰할 수 있는 유효 유동 두께로 나눈 값이 well-test 기반의 등가 permeability입니다.**",
+      "latency_seconds": 21.795349,
+      "input_tokens": 108,
+      "output_tokens": 843,
+      "reasoning_tokens": 0,
+      "estimated_cost_usd": 0.008646,
+      "web_used": false,
+      "tools_used": false,
+      "figure_image_available": null,
+      "error": null
+    }
+  ]
+}

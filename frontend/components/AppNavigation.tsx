@@ -5,8 +5,6 @@ import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
   { href: "/", icon: "✦", label: "통합 Research Agent", match: (path: string) => path === "/" },
-  { href: "/review", icon: "▧", label: "Figure Review", match: (path: string) => path.startsWith("/review") },
-  { href: "/evaluation", icon: "◫", label: "평가", match: (path: string) => path.startsWith("/evaluation") },
 ];
 
 export function AppIconRail() {

@@ -1,0 +1,62 @@
+{
+  "version": "1.1",
+  "policy": "Only demonstrable final-answer review errors are corrected; benchmark ground truth, criteria, raw agent outputs, and original blind judgments remain unchanged. Numeric presence and units are checked from the final answer. The original v1.0 comparison remains separately available.",
+  "corrections": [
+    {
+      "task_id": "AG-Q-006",
+      "condition": "single_shot",
+      "criterion_scores": {"C2": 0, "C3": 1},
+      "reason": "The answer states the arithmetic formula and a kh-share method but gives neither 35 ft nor 208.57 mD nor 34.25%; the share interpretation is incomplete."
+    },
+    {
+      "task_id": "AG-Q-007",
+      "condition": "single_shot",
+      "criterion_scores": {"C2": 0, "C3": 0},
+      "reason": "The answer distinguishes harmonic from arithmetic averaging but supplies none of the required 89.29 mD, 133 mD, or 48.96% numerical results."
+    },
+    {
+      "task_id": "AG-Q-008",
+      "condition": "single_shot",
+      "criterion_scores": {"C2": 0},
+      "reason": "The answer defines productivity index and ranks the wells but omits all three numerical indices and their units."
+    },
+    {
+      "task_id": "AG-Q-009",
+      "condition": "single_shot",
+      "criterion_scores": {"C2": 0, "C3": 0},
+      "reason": "The answer provides volumetric relationships but none of the required OOIP, recoverable, changed-Sw volume, or percentage results."
+    },
+    {
+      "task_id": "AG-Q-010",
+      "condition": "single_shot",
+      "criterion_scores": {"C1": 0, "C2": 0, "C3": 0},
+      "judgment_fields": {"claim_results": {"GT1": false, "GT2": false}},
+      "reason": "The final answer is only a safety refusal; it gives no RFT rows, OLS method, slopes, ratio, or relevant ground-truth claims."
+    },
+    {
+      "task_id": "AG-FP-012",
+      "condition": "single_shot",
+      "criterion_scores": {"C3": 0},
+      "reason": "The answer rejects the false premise and identifies the harmonic relation, but does not report either 89.29 mD or 133 mD."
+    },
+    {
+      "task_id": "AG-IE-015",
+      "condition": "single_shot",
+      "criterion_scores": {"C1": 0},
+      "judgment_fields": {"claim_results": {"GT1": false, "GT2": true}, "insufficient_evidence_handling_correct": true},
+      "reason": "The answer correctly refuses to invent recoverable reserves without RF but does not calculate 1.8 million stock-tank m^3 initial oil in place or state its full formula."
+    },
+    {
+      "task_id": "AG-IE-015",
+      "condition": "goal_agent",
+      "judgment_fields": {"insufficient_evidence_handling_correct": true},
+      "reason": "The answer explicitly gives calculable 1.8 million m^3 STOIIP and repeatedly states that recoverable reserves cannot be uniquely inferred without a missing recovery factor; it does not invent reserves."
+    },
+    {
+      "task_id": "AG-IE-015",
+      "condition": "full_agent",
+      "judgment_fields": {"insufficient_evidence_handling_correct": true},
+      "reason": "The answer explicitly gives calculable 1.8 million m^3 STOIIP and repeatedly states that recoverable reserves cannot be uniquely inferred without a missing recovery factor; it does not invent reserves."
+    }
+  ]
+}
