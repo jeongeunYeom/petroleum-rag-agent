@@ -1,0 +1,45 @@
+{
+  "benchmark_id": "petroleum-final-v1",
+  "benchmark_path": "evaluation/final_benchmark_v1.json",
+  "benchmark_sha256": "03ea4db7b7aa91a886ee454e2c7ed45c22d31bff84b9e4bb447e030ab376c89f",
+  "evaluated_product_main_sha": "fcd89e6e93fc866f4a237ee13c7910dcedac44c3",
+  "created_utc": "2026-10-09T09:13:05Z",
+  "task_count": 50,
+  "category_distribution": {
+    "petrophysics": 6,
+    "reservoir_engineering": 6,
+    "drilling": 3,
+    "reservoir_simulation": 2,
+    "well_testing": 4,
+    "cross_domain": 3,
+    "direct_calculation": 7,
+    "kb_calculation": 4,
+    "simulation": 2,
+    "clarification": 4,
+    "false_premise": 3,
+    "unsupported_formula": 2,
+    "figure": 4
+  },
+  "evaluation_policy": {
+    "freeze_before_outputs": true,
+    "question_gold_edits_after_freeze": "prohibited; invalid tasks must be logged and excluded without changing frozen file",
+    "product_code_edits": "prohibited",
+    "web_for_agent": false,
+    "end_to_end_tracks": ["agent", "qwen_closed_book", "openai_closed_book", "gemini_closed_book"],
+    "same_evidence_tracks": ["agent_reference", "qwen_same_evidence", "openai_same_evidence", "gemini_same_evidence"],
+    "baseline_tools": "no retrieval, no Python, no web; same-evidence prompts include only captured agent evidence",
+    "semantic_adjudication": "single-reviewer AI-assisted semantic adjudication, distinct model if accessible",
+    "numeric_matching": "field-specific absolute tolerance from task, units checked separately",
+    "statistics": "paired task bootstrap with 95% percentile intervals; exploratory, not a significance claim",
+    "scoring_missing_or_blocked": "missing output is not imputed as success; report denominator and BLOCKED separately"
+  },
+  "pre_api_budget": {
+    "task_count": 50,
+    "estimated_openai_calls": 150,
+    "estimated_gemini_calls": 100,
+    "estimated_qwen_calls": 100,
+    "estimated_agent_runs": 50,
+    "assumptions": "One call per task per baseline/track; one separate OpenAI reviewer call per task covering all outputs; plus up to two model-list preflight calls; no automatic content retries. Four clarification tasks may resume the same agent run.",
+    "estimated_total_paid_generation_calls": 250
+  }
+}
