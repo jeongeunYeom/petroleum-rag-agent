@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -12,9 +14,18 @@ from app.core.config import get_settings
 settings = get_settings()
 app = FastAPI(title=settings.app_name)
 
+
+def cors_origins() -> list[str]:
+    origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    lan_origin = os.getenv("PETROLEUM_LAN_TEST_ORIGIN")
+    if lan_origin:
+        origins.append(lan_origin)
+    return origins
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
