@@ -72,6 +72,14 @@ $frontendHealthy = Test-Http 'http://127.0.0.1:3000/'
 Write-Host "사전 상태 | IP: $ServerIp ($($ip.InterfaceAlias), $($network.NetworkCategory))"
 Write-Host "Ollama localhost:11434: $ollamaHealthy | Backend localhost:8000: $backendHealthy | Frontend localhost:3000: $frontendHealthy"
 if (-not $ollamaHealthy) { throw 'Ollama localhost:11434가 응답하지 않습니다. 기존 Ollama 서비스를 먼저 실행하세요.' }
+if ($network.NetworkCategory -notin @('Private', 'DomainAuthenticated')) {
+    throw "현재 네트워크 프로필은 $($network.NetworkCategory) 입니다. 인증 없는 API를 Public 네트워크에 열지 않습니다. 관리자에게 Private/Domain 프로필 설정을 요청하세요."
+}
+$firewallProfileName = if ($network.NetworkCategory -eq 'DomainAuthenticated') { 'Domain' } else { 'Private' }
+$firewallProfile = Get-NetFirewallProfile -Name $firewallProfileName
+if (-not $firewallProfile.Enabled) {
+    throw "$firewallProfileName 방화벽이 꺼져 있습니다. 방화벽을 켠 뒤 다시 실행하세요."
+}
 
 $python = Join-Path $backendDir '.venv\Scripts\python.exe'
 if (-not (Test-Path -LiteralPath $python)) {
@@ -185,9 +193,6 @@ try {
     Write-Host 'Ollama: localhost:11434 (LAN 비노출)' -ForegroundColor Green
     Write-Host "종료: .\scripts\stop_lan_test.ps1"
     Write-Host "========================================`n" -ForegroundColor Green
-    if ($network.NetworkCategory -notin @('Private', 'DomainAuthenticated')) {
-        Write-Warning "현재 네트워크 프로필은 $($network.NetworkCategory) 입니다. Private/Domain 전용 규칙은 이 프로필에서 적용되지 않아 다른 PC 접속이 차단될 수 있습니다. 프로필은 자동 변경하지 않습니다."
-    }
     Write-Warning '현재 API에는 별도 로그인 기능이 없습니다. 신뢰하는 LAN에서만 사용하세요.'
 } catch {
     foreach ($started in @($frontendProcess, $backendProcess)) {
