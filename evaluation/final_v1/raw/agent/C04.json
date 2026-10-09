@@ -1,0 +1,963 @@
+{
+  "task_id": "C04",
+  "model_id": "qwen3:8b",
+  "run_id": "GR-20261009-094532-A38171",
+  "initial_response": {
+    "run_id": "GR-20261009-094532-A38171",
+    "topic": "저류층 부피 기반 STOIIP 민감도 분석을 해줘. φ를 0.10부터 0.20까지 0.05 간격으로 바꾸고 싶지만 bulk volume, Sw, Bo는 아직 몰라.",
+    "goal": "저류층 부피 기반 STOIIP 민감도 분석을 해줘. φ를 0.10부터 0.20까지 0.05 간격으로 바꾸고 싶지만 bulk volume, Sw, Bo는 아직 몰라.",
+    "expected_result": null,
+    "run_status": "waiting_for_user_input",
+    "status": "pending",
+    "stop_reason": null,
+    "final_answer": "",
+    "clarification_question": "계산을 계속하려면 관계식에서 변화시킬 변수 이름이(가) 필요합니다. 값과 단위를 한 번에 알려주세요.",
+    "required_inputs": [
+      "관계식에서 변화시킬 변수 이름"
+    ],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "2a0bddcd71b23f7835ec0dc8a95e3602f4d12533289be144915fa0db2ded4eec",
+    "criteria": [],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "사용자가 제공한 저류층 부피 기반 STOIIP 민감도 분석의 목표에 따라 φ 값의 변화에 따른 결과를 시뮬레이션할 수 있는 모델 구축 여부",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "φ 값을 0.10부터 0.20까지 0.05 간격으로 변화시키는 과정에서 필요한 bulk volume, Sw, Bo 등의 파라미터가 사용자에게 제공되지 않았음에도 불구하고, 필요한 정보를 추정하거나 대체할 수 있는 방법이 존재하는지 여부",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "φ 값의 변화에 따른 STOIIP의 민감도 분석 결과를 시각화하거나 정량적으로 표현할 수 있는 방법이 존재하는지 여부",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 2,
+    "current_iteration": 2,
+    "max_iterations": 6,
+    "current_stage": "waiting_for_user_input",
+    "current_action": null,
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "simulation_model_or_inputs_missing",
+        "started_at": "2026-10-09T09:45:36.056423Z",
+        "finished_at": "2026-10-09T09:45:48.953167Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "blocked",
+        "reason_code": "simulation_model_or_inputs_missing",
+        "started_at": "2026-10-09T09:45:49.001953Z",
+        "finished_at": "2026-10-09T09:45:49.043771Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "retrieve_no_progress",
+        "details": {
+          "new_evidence_count": 0,
+          "retrieval_mode": "hybrid",
+          "cache_hit": true
+        }
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "EFACT1",
+          "EFACT2",
+          "EFACT3",
+          "EFACT4"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "EFACT1",
+          "EFACT2",
+          "EFACT3",
+          "EFACT4"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "EFACT1",
+          "EFACT2",
+          "EFACT3",
+          "EFACT4"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "관계식에서 변화시킬 변수 이름"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 42,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p42:c1",
+        "score": 0.01639344,
+        "excerpt": "Year 2010 (stb)  \nto Base Case\n Base Case\nkhi  = 400 mD\nkhi  = 1600 mD\n∆Zhi  = 20 ft\nZhi  = 40 ft\nφhi  = 0.18\nφhi  = 0.25\nNote: The OIIP will vary somewhat from case to case since the thickness of the high \npermeability layer and its porosity both change.\nIn Table 2, we have noted the % change in the varied parameters relative to its base \ncase value.  Not that different physical quantities such as k and φ, vary by different \npercentages for realistic min./max. values.  A useful way to plot the variation in recovery \nis against this % change in input value since all three factors can be represented on the \nsame scale in a so-called “spider diagram”.  Such a plot is shown in Figure 18.\n                       \nX\nX\nLayer Thickness\nPorosity\nPermeability\n% Change in Parameter\nChange in Recovery From Base Case (STB)\nFigure 18\n“Spider diagram” showing \nthe sensitivity of the \ncumulative oil to various \nuncertainties in the \nreservoir model parameters \n(khi; ΔZhi; φhi) in Figure 17.\nTable 2\nResults of sensitivity \nsimulations described in the \ntext."
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 529,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p529:c2",
+        "score": 0.01612903,
+        "excerpt": "mall change in signal level. The value used for liquid density in the holdup calculation does\nnot make much difference as long as it is in the range common to liquids. Thus, the correspond-\ning  error  in  holdup  is  at  worst  10  to  15%  and  probably  better  because  only  backscattered\nradiation is involved. To compensate for pipe size, variable spacing between source and detec-\ntor and/or shield should be used to eliminate backscatter from the formation outside the pipe.\nFor  a  limited  range  of  gas-holdup  values,  flow-loop  data  for  the  backscatter  tool  show  a\nlinear response over the range of the data. Sensitivity to small gas concentrations is sufficient.\nThese data do not shed any light on the matter of compensation for variable pipe size, howev-\ner. If formation backscatter is high, then the gas point will show a much higher count rate and\nthe small difference in liquid signal at zero gas holdup will become a relatively large differ-\nence.  In-situ  calibration  in  a  shut-in  well  is  therefore  recommended  for  this  tool  if  it  is  to\nfunction quantitatively.\nBaker Atlas Multi-Capacitance Flowmeter.  This centralized tool includes a spinner flowme-\nt"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+        "page": 24,
+        "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p24:c1",
+        "score": 0.01587302,
+        "excerpt": "and its evaluation of p\nis of significance for material balance.\nTo improve the prediction of material balance, the model can be reformulated\nnumerically as a 1-3 dimensional system and include time dependency, which is the\nbasis of numerical reservoir simulation.\nOne of the major applications of material balance studies is the prediction of the\ncumulative recovery of hydrocarbons from the reservoir unit.\nSTOIIP = N = V φ  (1− Swc)\nBoi\n(1)\nwhere STOIIP defines the total volume of oil inside the reservoir unit.\nV\n=reservoir pore volume\nφ\n= porosity\nBoi\n= FVF at initial reservoir conditions\nSwc\n= Connate water saturation\nIn particular, the amount of recoverable reserves is of more realistic interest since it\ndefines total profit and cash flow.  Hence:\nUltimate Recovery = STOIIP x RF\nRecoverable Reserves =  V φ  \n  \n  \n  \n  \n(1− Swc)\nBoi\nRF\n(2)\nThe recovery factor, RF, is influenced by the technical method chosen for the recovery\nprocess, the application of which depends upon technical and non-technical constraints,\nsuch as:"
+      }
+    ],
+    "web_sources": [],
+    "figures": [
+      {
+        "evidence_id": "FIG1",
+        "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+        "page": 263,
+        "figure_number": "Figure 3",
+        "title": "Log-Log Plot",
+        "image_index": 2,
+        "filename": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p263_fig2.jpeg",
+        "image_path": "D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p263_fig2.jpeg",
+        "url": "/api/figures/01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p263_fig2.jpeg",
+        "excerpt": "Figure 2: [Figure Note Metadata]\ndocument_name: Heriot-Watt_University_-_Well_Test_Analysis.pdf\ndocument_id: 01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462\npage_number: 263\nimage_index: 2\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p263_fig2.jpeg\nimage_type: graph\nconfidence: 0.9\ntitle: Log-Log Plot\ntitle_verified: false\nanalysis: The graph shows a log-log plot with data points representing pressure (psi) and equivalent time (hours).\nx_axis: Delta P (psi)\nx_axis_unit: psi\nx_axis_scale: Logarithmic\nx_axis_verified: false\ny_axis: Equivalent Time (hours)\ny_axis_unit: hours\ny_axis_scale: Logarithmic\ny_axis_verified: false\nseries_count: 2\nseries_count_verified: true\nseries_descriptions:\n  - US: blue circles, downward trend\n  - DP: red squares, downward trend\nlegend: null\nlegend_verified: false\nreference_lines:\n  - two horizontal dashed lines\nplateaus: []\npeaks: []\ndeclines:\n  - downward trend\nslope_changes:\n  - consistent downward slope\ntrend_summary: do",
+        "source_note": "Figure 2: [Figure Note Metadata]\ndocument_name: Heriot-Watt_University_-_Well_Test_Analysis.pdf\ndocument_id: 01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462\npage_number: 263\nimage_index: 2\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p263_fig2.jpeg\nimage_type: graph\nconfidence: 0.9\ntitle: Log-Log Plot\ntitle_verified: false\nanalysis: The graph shows a log-log plot with data points representing pressure (psi) and equivalent time (hours).\nx_axis: Delta P (psi)\nx_axis_unit: psi\nx_axis_scale: Logarithmic\nx_axis_verified: false\ny_axis: Equivalent Time (hours)\ny_axis_unit: hours\ny_axis_scale: Logarithmic\ny_axis_verified: false\nseries_count: 2\nseries_count_verified: true\nseries_descriptions:\n  - US: blue circles, downward trend\n  - DP: red squares, downward trend\nlegend: null\nlegend_verified: false\nreference_lines:\n  - two horizontal dashed lines\nplateaus: []\npeaks: []\ndeclines:\n  - downward trend\nslope_changes:\n  - consistent downward slope\ntrend_summary: do\n[Focused vision extraction]\ntitle: Log-Log Plot\nanalysis: Pressure vs. Equivalent Time\nx_axis: Equivalent Time (hours)\nx_axis_unit: hours\ny_axis: Delta P (psi)\ny_axis_unit: psi\nseries_count: 2\nseries_descriptions: Delta P, Pressure derivative\nlegend: Not visible\nreference_lines: Not visible",
+        "related_page_text": "Institute of Petroleum Engineering,  Heriot-Watt University  \n77\n33\nWellbore Storage And Type Curve Matching\nDP\nUS\nFigure 3",
+        "x_axis": "Equivalent Time (hours)",
+        "x_axis_unit": "hours",
+        "y_axis": "Delta P (psi)",
+        "y_axis_unit": "psi",
+        "series_count": 2,
+        "series_descriptions": [
+          "Delta P, Pressure derivative"
+        ],
+        "legend": [],
+        "quantities": []
+      },
+      {
+        "evidence_id": "FIG2",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 19,
+        "figure_number": "Figure 8",
+        "title": "RESERVOIR SIMULATION",
+        "image_index": 1,
+        "filename": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94_p19_fig1.jpeg",
+        "image_path": "D:\\petroleum-rag-agent\\data\\figures\\3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94_p19_fig1.jpeg",
+        "url": "/api/figures/3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94_p19_fig1.jpeg",
+        "excerpt": "Figure 1: [Figure Note Metadata]\ndocument_name: Heriot-Watt_University_-_Reservoir_Simulation.pdf\ndocument_id: 3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94\npage_number: 19\nimage_index: 1\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94_p19_fig1.jpeg\nimage_type: diagram\nconfidence: 0.9\ntitle: Reservoir Simulation\ntitle_verified: true\nanalysis: null\ncomponents:\n  - Reservoir\ncomponent_labels:\n  - Reservoir\nconnections: []\nflow_directions: []\nannotations: []\nlegend: null\nlegend_ve",
+        "source_note": "Figure 1: [Figure Note Metadata]\ndocument_name: Heriot-Watt_University_-_Reservoir_Simulation.pdf\ndocument_id: 3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94\npage_number: 19\nimage_index: 1\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94_p19_fig1.jpeg\nimage_type: diagram\nconfidence: 0.9\ntitle: Reservoir Simulation\ntitle_verified: true\nanalysis: null\ncomponents:\n  - Reservoir\ncomponent_labels:\n  - Reservoir\nconnections: []\nflow_directions: []\nannotations: []\nlegend: null\nlegend_ve\n[Focused vision extraction]\ntitle: RESERVOIR SIMULATION\nanalysis: Reservoir Simulation\nx_axis: Pressure\nx_axis_unit: MPa\ny_axis: Pressure Derivative\ny_axis_unit: MPa/s\nseries_count: 2\nseries_descriptions: Pressure series, Pressure derivative series\nlegend: Not visible\nreference_lines: Not visible",
+        "related_page_text": "Institute of Petroleum Engineering,  Heriot-Watt University  \n19\n11\nIntroduction and Case Studies\nIt is during the initial appraisal stage that many of the biggest - i.e. most expensive \n- investment decisions are made e.g. the type of platform and facilities etc.  Therefore, \nit is the most helpful time to have accurate forward predictions of the reservoir \nperformance.  But, it is at this time when we have the least amount of data and, \nof course, very little or no field performance history (there may be some extended \nproduction well tests).  Therefore, it seem that reservoir simulation has a built-in \nweakness in its usefulness; just when it can be at its most useful during appraisal is \nprecisely when it has the least data to work on and hence it will usually make the \npoorest forward predictions.  So, does reservoir simulation let us down just when we \nneed it most?  Perhaps.  However, even during appraisal, reservoir simulation can \ntake us forward with the best current view of the reservoir that we have at that time, \nalthough this view may be highly uncertain.  As we have already noted, if major \nfeatures of the reservoir model (e.g. the stock tank oil initially in place,\ne have at that time, \nalthough this view may be highly uncertain.  As we have already noted, if major \nfeatures of the reservoir model (e.g. the stock tank oil initially in place, STOIIP) are \nuncertain, then the forward predictions may be very inaccurate.  In such cases, we \nmay still be able to build a range of possible reservoir models, or reservoir scenarios, \nthat incorporate the major uncertainties in terms of reservoir size (STOIIP), main \nfault blocks, strength of aquifer, reservoir connectivity, etc.  By running forward \npredictions on this range of cases, we can generate a spread of predicted future field \nperformance cases as shown schematically in Figure 9.  How to estimate which of \nthese predictions is the most likely and what the magnitude of the “true” uncertainties \nare is very difficult and will be discussed later in the course.  \n                        \nTime (Year)\nMost Probable Case\n\"Pessimistic\" Case\n\"Optimistic\" Case\nCumulative Oil Recovery (STB)\n2005\n2010\n2015\nFor example, scenarios for various cases may involve:\n• \nDifferent assumptions about the original oil in place (STOIIP; Stock Tank Oil \nOriginally In Place).\n• \nDifferent values of the reservoir parame\ns for various cases may involve:\n• \nDifferent assumptions about the original oil in place (STOIIP; Stock Tank Oil \nOriginally In Place).\n• \nDifferent values of the reservoir parameters such as permeability, porosity,\nnet-to-gross ratio, the effect of an aquifer, etc..\n \n• \nMajor changes in the structural geology or sedimentology of the reservoir\ne.g. sealing vs. “leaky” faults in the system, the presence/absence of major\nfluvial channels, the distribution of shales in the reservoir etc..\nFigure 9\nSpread of future predicted \nfield performances from a \nrange of scenarios of the \nreservoir at appraisal.\n18\n(g)  Economic evaluation of options - NPV or IRR\nNow consider what we are actually trying to do in a typical full field reservoir simulation \nstudy.  There is a short answer to this is often said in one form or another: it is that the \ncentral objective of reservoir simulation is to produce future predictions (the output \nquantities listed above) that will allow us to optimise reservoir performance.  At the \ngrander scale, what is meant by “optimise reservoir performance” is to develop the \nreservoir in the manner that brings the maximum economic benefit to the company. \nReservoir simulation may be used in many smaller ways to decide on various \ntechnical matters although even these - for example the issue illustrated in Figure 8 \n- are usually reduced to economic calculations and decisions in the final analysis as \nindicated in Figure 8(g).   \n3 FIELD APPLICATION OF RESERVOIR SIMULATION \n3.1 Reservoir Simulation at  Appraisal and in Mature Fields\nUp to this point, we have ",
+        "x_axis": "Pressure",
+        "x_axis_unit": "MPa",
+        "y_axis": "Pressure Derivative",
+        "y_axis_unit": "MPa/s",
+        "series_count": 2,
+        "series_descriptions": [
+          "Pressure series, Pressure derivative series"
+        ],
+        "legend": [
+          "legend_ve"
+        ],
+        "quantities": []
+      }
+    ],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 3.242272,
+      "retrieval_seconds": 12.856726,
+      "llm_generation_seconds": 6.5e-05,
+      "python_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "evaluation_seconds": 0.0,
+      "synthesis_seconds": 0.0,
+      "retrieve_action_seconds": 12.938648,
+      "elapsed_seconds": 16.297985,
+      "total_seconds": 16.298133,
+      "message_parsing_seconds": 0.000148
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode"
+    },
+    "validation": {},
+    "cancel_requested": false,
+    "error": null
+  },
+  "resume_response": {
+    "run_id": "GR-20261009-094532-A38171",
+    "topic": "저류층 부피 기반 STOIIP 민감도 분석을 해줘. φ를 0.10부터 0.20까지 0.05 간격으로 바꾸고 싶지만 bulk volume, Sw, Bo는 아직 몰라.",
+    "goal": "저류층 부피 기반 STOIIP 민감도 분석을 해줘. φ를 0.10부터 0.20까지 0.05 간격으로 바꾸고 싶지만 bulk volume, Sw, Bo는 아직 몰라.",
+    "expected_result": null,
+    "run_status": "waiting_for_user_input",
+    "status": "pending",
+    "stop_reason": null,
+    "final_answer": "",
+    "clarification_question": "계산을 계속하려면 출처가 확인된 시뮬레이션 모델/관계식이(가) 필요합니다. 값과 단위를 한 번에 알려주세요.",
+    "required_inputs": [
+      "출처가 확인된 시뮬레이션 모델/관계식"
+    ],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "2a0bddcd71b23f7835ec0dc8a95e3602f4d12533289be144915fa0db2ded4eec",
+    "criteria": [],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "사용자가 제공한 저류층 부피 기반 STOIIP 민감도 분석의 목표에 따라 φ 값의 변화에 따른 결과를 시뮬레이션할 수 있는 모델 구축 여부",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "φ 값을 0.10부터 0.20까지 0.05 간격으로 변화시키는 과정에서 필요한 bulk volume, Sw, Bo 등의 파라미터가 사용자에게 제공되지 않았음에도 불구하고, 필요한 정보를 추정하거나 대체할 수 있는 방법이 존재하는지 여부",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "φ 값의 변화에 따른 STOIIP의 민감도 분석 결과를 시각화하거나 정량적으로 표현할 수 있는 방법이 존재하는지 여부",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 2,
+    "current_iteration": 2,
+    "max_iterations": 6,
+    "current_stage": "waiting_for_user_input",
+    "current_action": null,
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "simulation_model_or_inputs_missing",
+        "started_at": "2026-10-09T09:45:36.056423Z",
+        "finished_at": "2026-10-09T09:45:48.953167Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "blocked",
+        "reason_code": "simulation_model_or_inputs_missing",
+        "started_at": "2026-10-09T09:45:49.001953Z",
+        "finished_at": "2026-10-09T09:45:49.043771Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "retrieve_no_progress",
+        "details": {
+          "new_evidence_count": 0,
+          "retrieval_mode": "hybrid",
+          "cache_hit": true
+        }
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "EFACT1",
+          "EFACT2",
+          "EFACT3",
+          "EFACT4"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "EFACT1",
+          "EFACT2",
+          "EFACT3",
+          "EFACT4"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "EFACT1",
+          "EFACT2",
+          "EFACT3",
+          "EFACT4"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "관계식에서 변화시킬 변수 이름"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "EFACT1",
+          "EFACT2",
+          "EFACT3",
+          "EFACT4",
+          "USERF1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "출처가 확인된 시뮬레이션 모델/관계식"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 42,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p42:c1",
+        "score": 0.01639344,
+        "excerpt": "Year 2010 (stb)  \nto Base Case\n Base Case\nkhi  = 400 mD\nkhi  = 1600 mD\n∆Zhi  = 20 ft\nZhi  = 40 ft\nφhi  = 0.18\nφhi  = 0.25\nNote: The OIIP will vary somewhat from case to case since the thickness of the high \npermeability layer and its porosity both change.\nIn Table 2, we have noted the % change in the varied parameters relative to its base \ncase value.  Not that different physical quantities such as k and φ, vary by different \npercentages for realistic min./max. values.  A useful way to plot the variation in recovery \nis against this % change in input value since all three factors can be represented on the \nsame scale in a so-called “spider diagram”.  Such a plot is shown in Figure 18.\n                       \nX\nX\nLayer Thickness\nPorosity\nPermeability\n% Change in Parameter\nChange in Recovery From Base Case (STB)\nFigure 18\n“Spider diagram” showing \nthe sensitivity of the \ncumulative oil to various \nuncertainties in the \nreservoir model parameters \n(khi; ΔZhi; φhi) in Figure 17.\nTable 2\nResults of sensitivity \nsimulations described in the \ntext."
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 529,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p529:c2",
+        "score": 0.01612903,
+        "excerpt": "mall change in signal level. The value used for liquid density in the holdup calculation does\nnot make much difference as long as it is in the range common to liquids. Thus, the correspond-\ning  error  in  holdup  is  at  worst  10  to  15%  and  probably  better  because  only  backscattered\nradiation is involved. To compensate for pipe size, variable spacing between source and detec-\ntor and/or shield should be used to eliminate backscatter from the formation outside the pipe.\nFor  a  limited  range  of  gas-holdup  values,  flow-loop  data  for  the  backscatter  tool  show  a\nlinear response over the range of the data. Sensitivity to small gas concentrations is sufficient.\nThese data do not shed any light on the matter of compensation for variable pipe size, howev-\ner. If formation backscatter is high, then the gas point will show a much higher count rate and\nthe small difference in liquid signal at zero gas holdup will become a relatively large differ-\nence.  In-situ  calibration  in  a  shut-in  well  is  therefore  recommended  for  this  tool  if  it  is  to\nfunction quantitatively.\nBaker Atlas Multi-Capacitance Flowmeter.  This centralized tool includes a spinner flowme-\nt"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+        "page": 24,
+        "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p24:c1",
+        "score": 0.01587302,
+        "excerpt": "and its evaluation of p\nis of significance for material balance.\nTo improve the prediction of material balance, the model can be reformulated\nnumerically as a 1-3 dimensional system and include time dependency, which is the\nbasis of numerical reservoir simulation.\nOne of the major applications of material balance studies is the prediction of the\ncumulative recovery of hydrocarbons from the reservoir unit.\nSTOIIP = N = V φ  (1− Swc)\nBoi\n(1)\nwhere STOIIP defines the total volume of oil inside the reservoir unit.\nV\n=reservoir pore volume\nφ\n= porosity\nBoi\n= FVF at initial reservoir conditions\nSwc\n= Connate water saturation\nIn particular, the amount of recoverable reserves is of more realistic interest since it\ndefines total profit and cash flow.  Hence:\nUltimate Recovery = STOIIP x RF\nRecoverable Reserves =  V φ  \n  \n  \n  \n  \n(1− Swc)\nBoi\nRF\n(2)\nThe recovery factor, RF, is influenced by the technical method chosen for the recovery\nprocess, the application of which depends upon technical and non-technical constraints,\nsuch as:"
+      }
+    ],
+    "web_sources": [],
+    "figures": [
+      {
+        "evidence_id": "FIG1",
+        "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+        "page": 263,
+        "figure_number": "Figure 3",
+        "title": "Log-Log Plot",
+        "image_index": 2,
+        "filename": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p263_fig2.jpeg",
+        "image_path": "D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p263_fig2.jpeg",
+        "url": "/api/figures/01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p263_fig2.jpeg",
+        "excerpt": "Figure 2: [Figure Note Metadata]\ndocument_name: Heriot-Watt_University_-_Well_Test_Analysis.pdf\ndocument_id: 01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462\npage_number: 263\nimage_index: 2\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p263_fig2.jpeg\nimage_type: graph\nconfidence: 0.9\ntitle: Log-Log Plot\ntitle_verified: false\nanalysis: The graph shows a log-log plot with data points representing pressure (psi) and equivalent time (hours).\nx_axis: Delta P (psi)\nx_axis_unit: psi\nx_axis_scale: Logarithmic\nx_axis_verified: false\ny_axis: Equivalent Time (hours)\ny_axis_unit: hours\ny_axis_scale: Logarithmic\ny_axis_verified: false\nseries_count: 2\nseries_count_verified: true\nseries_descriptions:\n  - US: blue circles, downward trend\n  - DP: red squares, downward trend\nlegend: null\nlegend_verified: false\nreference_lines:\n  - two horizontal dashed lines\nplateaus: []\npeaks: []\ndeclines:\n  - downward trend\nslope_changes:\n  - consistent downward slope\ntrend_summary: do",
+        "source_note": "Figure 2: [Figure Note Metadata]\ndocument_name: Heriot-Watt_University_-_Well_Test_Analysis.pdf\ndocument_id: 01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462\npage_number: 263\nimage_index: 2\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p263_fig2.jpeg\nimage_type: graph\nconfidence: 0.9\ntitle: Log-Log Plot\ntitle_verified: false\nanalysis: The graph shows a log-log plot with data points representing pressure (psi) and equivalent time (hours).\nx_axis: Delta P (psi)\nx_axis_unit: psi\nx_axis_scale: Logarithmic\nx_axis_verified: false\ny_axis: Equivalent Time (hours)\ny_axis_unit: hours\ny_axis_scale: Logarithmic\ny_axis_verified: false\nseries_count: 2\nseries_count_verified: true\nseries_descriptions:\n  - US: blue circles, downward trend\n  - DP: red squares, downward trend\nlegend: null\nlegend_verified: false\nreference_lines:\n  - two horizontal dashed lines\nplateaus: []\npeaks: []\ndeclines:\n  - downward trend\nslope_changes:\n  - consistent downward slope\ntrend_summary: do\n[Focused vision extraction]\ntitle: Log-Log Plot\nanalysis: Pressure vs. Equivalent Time\nx_axis: Equivalent Time (hours)\nx_axis_unit: hours\ny_axis: Delta P (psi)\ny_axis_unit: psi\nseries_count: 2\nseries_descriptions: Delta P, Pressure derivative\nlegend: Not visible\nreference_lines: Not visible",
+        "related_page_text": "Institute of Petroleum Engineering,  Heriot-Watt University  \n77\n33\nWellbore Storage And Type Curve Matching\nDP\nUS\nFigure 3",
+        "x_axis": "Equivalent Time (hours)",
+        "x_axis_unit": "hours",
+        "y_axis": "Delta P (psi)",
+        "y_axis_unit": "psi",
+        "series_count": 2,
+        "series_descriptions": [
+          "Delta P, Pressure derivative"
+        ],
+        "legend": [],
+        "quantities": []
+      },
+      {
+        "evidence_id": "FIG2",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 19,
+        "figure_number": "Figure 8",
+        "title": "RESERVOIR SIMULATION",
+        "image_index": 1,
+        "filename": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94_p19_fig1.jpeg",
+        "image_path": "D:\\petroleum-rag-agent\\data\\figures\\3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94_p19_fig1.jpeg",
+        "url": "/api/figures/3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94_p19_fig1.jpeg",
+        "excerpt": "Figure 1: [Figure Note Metadata]\ndocument_name: Heriot-Watt_University_-_Reservoir_Simulation.pdf\ndocument_id: 3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94\npage_number: 19\nimage_index: 1\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94_p19_fig1.jpeg\nimage_type: diagram\nconfidence: 0.9\ntitle: Reservoir Simulation\ntitle_verified: true\nanalysis: null\ncomponents:\n  - Reservoir\ncomponent_labels:\n  - Reservoir\nconnections: []\nflow_directions: []\nannotations: []\nlegend: null\nlegend_ve",
+        "source_note": "Figure 1: [Figure Note Metadata]\ndocument_name: Heriot-Watt_University_-_Reservoir_Simulation.pdf\ndocument_id: 3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94\npage_number: 19\nimage_index: 1\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94_p19_fig1.jpeg\nimage_type: diagram\nconfidence: 0.9\ntitle: Reservoir Simulation\ntitle_verified: true\nanalysis: null\ncomponents:\n  - Reservoir\ncomponent_labels:\n  - Reservoir\nconnections: []\nflow_directions: []\nannotations: []\nlegend: null\nlegend_ve\n[Focused vision extraction]\ntitle: RESERVOIR SIMULATION\nanalysis: Reservoir Simulation\nx_axis: Pressure\nx_axis_unit: MPa\ny_axis: Pressure Derivative\ny_axis_unit: MPa/s\nseries_count: 2\nseries_descriptions: Pressure series, Pressure derivative series\nlegend: Not visible\nreference_lines: Not visible",
+        "related_page_text": "Institute of Petroleum Engineering,  Heriot-Watt University  \n19\n11\nIntroduction and Case Studies\nIt is during the initial appraisal stage that many of the biggest - i.e. most expensive \n- investment decisions are made e.g. the type of platform and facilities etc.  Therefore, \nit is the most helpful time to have accurate forward predictions of the reservoir \nperformance.  But, it is at this time when we have the least amount of data and, \nof course, very little or no field performance history (there may be some extended \nproduction well tests).  Therefore, it seem that reservoir simulation has a built-in \nweakness in its usefulness; just when it can be at its most useful during appraisal is \nprecisely when it has the least data to work on and hence it will usually make the \npoorest forward predictions.  So, does reservoir simulation let us down just when we \nneed it most?  Perhaps.  However, even during appraisal, reservoir simulation can \ntake us forward with the best current view of the reservoir that we have at that time, \nalthough this view may be highly uncertain.  As we have already noted, if major \nfeatures of the reservoir model (e.g. the stock tank oil initially in place,\ne have at that time, \nalthough this view may be highly uncertain.  As we have already noted, if major \nfeatures of the reservoir model (e.g. the stock tank oil initially in place, STOIIP) are \nuncertain, then the forward predictions may be very inaccurate.  In such cases, we \nmay still be able to build a range of possible reservoir models, or reservoir scenarios, \nthat incorporate the major uncertainties in terms of reservoir size (STOIIP), main \nfault blocks, strength of aquifer, reservoir connectivity, etc.  By running forward \npredictions on this range of cases, we can generate a spread of predicted future field \nperformance cases as shown schematically in Figure 9.  How to estimate which of \nthese predictions is the most likely and what the magnitude of the “true” uncertainties \nare is very difficult and will be discussed later in the course.  \n                        \nTime (Year)\nMost Probable Case\n\"Pessimistic\" Case\n\"Optimistic\" Case\nCumulative Oil Recovery (STB)\n2005\n2010\n2015\nFor example, scenarios for various cases may involve:\n• \nDifferent assumptions about the original oil in place (STOIIP; Stock Tank Oil \nOriginally In Place).\n• \nDifferent values of the reservoir parame\ns for various cases may involve:\n• \nDifferent assumptions about the original oil in place (STOIIP; Stock Tank Oil \nOriginally In Place).\n• \nDifferent values of the reservoir parameters such as permeability, porosity,\nnet-to-gross ratio, the effect of an aquifer, etc..\n \n• \nMajor changes in the structural geology or sedimentology of the reservoir\ne.g. sealing vs. “leaky” faults in the system, the presence/absence of major\nfluvial channels, the distribution of shales in the reservoir etc..\nFigure 9\nSpread of future predicted \nfield performances from a \nrange of scenarios of the \nreservoir at appraisal.\n18\n(g)  Economic evaluation of options - NPV or IRR\nNow consider what we are actually trying to do in a typical full field reservoir simulation \nstudy.  There is a short answer to this is often said in one form or another: it is that the \ncentral objective of reservoir simulation is to produce future predictions (the output \nquantities listed above) that will allow us to optimise reservoir performance.  At the \ngrander scale, what is meant by “optimise reservoir performance” is to develop the \nreservoir in the manner that brings the maximum economic benefit to the company. \nReservoir simulation may be used in many smaller ways to decide on various \ntechnical matters although even these - for example the issue illustrated in Figure 8 \n- are usually reduced to economic calculations and decisions in the final analysis as \nindicated in Figure 8(g).   \n3 FIELD APPLICATION OF RESERVOIR SIMULATION \n3.1 Reservoir Simulation at  Appraisal and in Mature Fields\nUp to this point, we have ",
+        "x_axis": "Pressure",
+        "x_axis_unit": "MPa",
+        "y_axis": "Pressure Derivative",
+        "y_axis_unit": "MPa/s",
+        "series_count": 2,
+        "series_descriptions": [
+          "Pressure series, Pressure derivative series"
+        ],
+        "legend": [
+          "legend_ve"
+        ],
+        "quantities": []
+      }
+    ],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 3.243419,
+      "retrieval_seconds": 12.856726,
+      "llm_generation_seconds": 6.5e-05,
+      "python_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "evaluation_seconds": 0.0,
+      "synthesis_seconds": 0.0,
+      "retrieve_action_seconds": 12.938648,
+      "elapsed_seconds": 0.060547,
+      "total_seconds": 16.35868,
+      "message_parsing_seconds": 0.0
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode"
+    },
+    "validation": {},
+    "cancel_requested": false,
+    "error": null
+  },
+  "response": {
+    "run_id": "GR-20261009-094532-A38171",
+    "topic": "저류층 부피 기반 STOIIP 민감도 분석을 해줘. φ를 0.10부터 0.20까지 0.05 간격으로 바꾸고 싶지만 bulk volume, Sw, Bo는 아직 몰라.",
+    "goal": "저류층 부피 기반 STOIIP 민감도 분석을 해줘. φ를 0.10부터 0.20까지 0.05 간격으로 바꾸고 싶지만 bulk volume, Sw, Bo는 아직 몰라.",
+    "expected_result": null,
+    "run_status": "waiting_for_user_input",
+    "status": "pending",
+    "stop_reason": null,
+    "final_answer": "",
+    "clarification_question": "계산을 계속하려면 출처가 확인된 시뮬레이션 모델/관계식이(가) 필요합니다. 값과 단위를 한 번에 알려주세요.",
+    "required_inputs": [
+      "출처가 확인된 시뮬레이션 모델/관계식"
+    ],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "2a0bddcd71b23f7835ec0dc8a95e3602f4d12533289be144915fa0db2ded4eec",
+    "criteria": [],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "사용자가 제공한 저류층 부피 기반 STOIIP 민감도 분석의 목표에 따라 φ 값의 변화에 따른 결과를 시뮬레이션할 수 있는 모델 구축 여부",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "φ 값을 0.10부터 0.20까지 0.05 간격으로 변화시키는 과정에서 필요한 bulk volume, Sw, Bo 등의 파라미터가 사용자에게 제공되지 않았음에도 불구하고, 필요한 정보를 추정하거나 대체할 수 있는 방법이 존재하는지 여부",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "φ 값의 변화에 따른 STOIIP의 민감도 분석 결과를 시각화하거나 정량적으로 표현할 수 있는 방법이 존재하는지 여부",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 2,
+    "current_iteration": 2,
+    "max_iterations": 6,
+    "current_stage": "waiting_for_user_input",
+    "current_action": null,
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "simulation_model_or_inputs_missing",
+        "started_at": "2026-10-09T09:45:36.056423Z",
+        "finished_at": "2026-10-09T09:45:48.953167Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "blocked",
+        "reason_code": "simulation_model_or_inputs_missing",
+        "started_at": "2026-10-09T09:45:49.001953Z",
+        "finished_at": "2026-10-09T09:45:49.043771Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "retrieve_no_progress",
+        "details": {
+          "new_evidence_count": 0,
+          "retrieval_mode": "hybrid",
+          "cache_hit": true
+        }
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "EFACT1",
+          "EFACT2",
+          "EFACT3",
+          "EFACT4"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "EFACT1",
+          "EFACT2",
+          "EFACT3",
+          "EFACT4"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "EFACT1",
+          "EFACT2",
+          "EFACT3",
+          "EFACT4"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "관계식에서 변화시킬 변수 이름"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "EFACT1",
+          "EFACT2",
+          "EFACT3",
+          "EFACT4",
+          "USERF1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "출처가 확인된 시뮬레이션 모델/관계식"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 42,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p42:c1",
+        "score": 0.01639344,
+        "excerpt": "Year 2010 (stb)  \nto Base Case\n Base Case\nkhi  = 400 mD\nkhi  = 1600 mD\n∆Zhi  = 20 ft\nZhi  = 40 ft\nφhi  = 0.18\nφhi  = 0.25\nNote: The OIIP will vary somewhat from case to case since the thickness of the high \npermeability layer and its porosity both change.\nIn Table 2, we have noted the % change in the varied parameters relative to its base \ncase value.  Not that different physical quantities such as k and φ, vary by different \npercentages for realistic min./max. values.  A useful way to plot the variation in recovery \nis against this % change in input value since all three factors can be represented on the \nsame scale in a so-called “spider diagram”.  Such a plot is shown in Figure 18.\n                       \nX\nX\nLayer Thickness\nPorosity\nPermeability\n% Change in Parameter\nChange in Recovery From Base Case (STB)\nFigure 18\n“Spider diagram” showing \nthe sensitivity of the \ncumulative oil to various \nuncertainties in the \nreservoir model parameters \n(khi; ΔZhi; φhi) in Figure 17.\nTable 2\nResults of sensitivity \nsimulations described in the \ntext."
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 529,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p529:c2",
+        "score": 0.01612903,
+        "excerpt": "mall change in signal level. The value used for liquid density in the holdup calculation does\nnot make much difference as long as it is in the range common to liquids. Thus, the correspond-\ning  error  in  holdup  is  at  worst  10  to  15%  and  probably  better  because  only  backscattered\nradiation is involved. To compensate for pipe size, variable spacing between source and detec-\ntor and/or shield should be used to eliminate backscatter from the formation outside the pipe.\nFor  a  limited  range  of  gas-holdup  values,  flow-loop  data  for  the  backscatter  tool  show  a\nlinear response over the range of the data. Sensitivity to small gas concentrations is sufficient.\nThese data do not shed any light on the matter of compensation for variable pipe size, howev-\ner. If formation backscatter is high, then the gas point will show a much higher count rate and\nthe small difference in liquid signal at zero gas holdup will become a relatively large differ-\nence.  In-situ  calibration  in  a  shut-in  well  is  therefore  recommended  for  this  tool  if  it  is  to\nfunction quantitatively.\nBaker Atlas Multi-Capacitance Flowmeter.  This centralized tool includes a spinner flowme-\nt"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+        "page": 24,
+        "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p24:c1",
+        "score": 0.01587302,
+        "excerpt": "and its evaluation of p\nis of significance for material balance.\nTo improve the prediction of material balance, the model can be reformulated\nnumerically as a 1-3 dimensional system and include time dependency, which is the\nbasis of numerical reservoir simulation.\nOne of the major applications of material balance studies is the prediction of the\ncumulative recovery of hydrocarbons from the reservoir unit.\nSTOIIP = N = V φ  (1− Swc)\nBoi\n(1)\nwhere STOIIP defines the total volume of oil inside the reservoir unit.\nV\n=reservoir pore volume\nφ\n= porosity\nBoi\n= FVF at initial reservoir conditions\nSwc\n= Connate water saturation\nIn particular, the amount of recoverable reserves is of more realistic interest since it\ndefines total profit and cash flow.  Hence:\nUltimate Recovery = STOIIP x RF\nRecoverable Reserves =  V φ  \n  \n  \n  \n  \n(1− Swc)\nBoi\nRF\n(2)\nThe recovery factor, RF, is influenced by the technical method chosen for the recovery\nprocess, the application of which depends upon technical and non-technical constraints,\nsuch as:"
+      }
+    ],
+    "web_sources": [],
+    "figures": [
+      {
+        "evidence_id": "FIG1",
+        "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+        "page": 263,
+        "figure_number": "Figure 3",
+        "title": "Log-Log Plot",
+        "image_index": 2,
+        "filename": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p263_fig2.jpeg",
+        "image_path": "D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p263_fig2.jpeg",
+        "url": "/api/figures/01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p263_fig2.jpeg",
+        "excerpt": "Figure 2: [Figure Note Metadata]\ndocument_name: Heriot-Watt_University_-_Well_Test_Analysis.pdf\ndocument_id: 01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462\npage_number: 263\nimage_index: 2\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p263_fig2.jpeg\nimage_type: graph\nconfidence: 0.9\ntitle: Log-Log Plot\ntitle_verified: false\nanalysis: The graph shows a log-log plot with data points representing pressure (psi) and equivalent time (hours).\nx_axis: Delta P (psi)\nx_axis_unit: psi\nx_axis_scale: Logarithmic\nx_axis_verified: false\ny_axis: Equivalent Time (hours)\ny_axis_unit: hours\ny_axis_scale: Logarithmic\ny_axis_verified: false\nseries_count: 2\nseries_count_verified: true\nseries_descriptions:\n  - US: blue circles, downward trend\n  - DP: red squares, downward trend\nlegend: null\nlegend_verified: false\nreference_lines:\n  - two horizontal dashed lines\nplateaus: []\npeaks: []\ndeclines:\n  - downward trend\nslope_changes:\n  - consistent downward slope\ntrend_summary: do",
+        "source_note": "Figure 2: [Figure Note Metadata]\ndocument_name: Heriot-Watt_University_-_Well_Test_Analysis.pdf\ndocument_id: 01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462\npage_number: 263\nimage_index: 2\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p263_fig2.jpeg\nimage_type: graph\nconfidence: 0.9\ntitle: Log-Log Plot\ntitle_verified: false\nanalysis: The graph shows a log-log plot with data points representing pressure (psi) and equivalent time (hours).\nx_axis: Delta P (psi)\nx_axis_unit: psi\nx_axis_scale: Logarithmic\nx_axis_verified: false\ny_axis: Equivalent Time (hours)\ny_axis_unit: hours\ny_axis_scale: Logarithmic\ny_axis_verified: false\nseries_count: 2\nseries_count_verified: true\nseries_descriptions:\n  - US: blue circles, downward trend\n  - DP: red squares, downward trend\nlegend: null\nlegend_verified: false\nreference_lines:\n  - two horizontal dashed lines\nplateaus: []\npeaks: []\ndeclines:\n  - downward trend\nslope_changes:\n  - consistent downward slope\ntrend_summary: do\n[Focused vision extraction]\ntitle: Log-Log Plot\nanalysis: Pressure vs. Equivalent Time\nx_axis: Equivalent Time (hours)\nx_axis_unit: hours\ny_axis: Delta P (psi)\ny_axis_unit: psi\nseries_count: 2\nseries_descriptions: Delta P, Pressure derivative\nlegend: Not visible\nreference_lines: Not visible",
+        "related_page_text": "Institute of Petroleum Engineering,  Heriot-Watt University  \n77\n33\nWellbore Storage And Type Curve Matching\nDP\nUS\nFigure 3",
+        "x_axis": "Equivalent Time (hours)",
+        "x_axis_unit": "hours",
+        "y_axis": "Delta P (psi)",
+        "y_axis_unit": "psi",
+        "series_count": 2,
+        "series_descriptions": [
+          "Delta P, Pressure derivative"
+        ],
+        "legend": [],
+        "quantities": []
+      },
+      {
+        "evidence_id": "FIG2",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 19,
+        "figure_number": "Figure 8",
+        "title": "RESERVOIR SIMULATION",
+        "image_index": 1,
+        "filename": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94_p19_fig1.jpeg",
+        "image_path": "D:\\petroleum-rag-agent\\data\\figures\\3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94_p19_fig1.jpeg",
+        "url": "/api/figures/3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94_p19_fig1.jpeg",
+        "excerpt": "Figure 1: [Figure Note Metadata]\ndocument_name: Heriot-Watt_University_-_Reservoir_Simulation.pdf\ndocument_id: 3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94\npage_number: 19\nimage_index: 1\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94_p19_fig1.jpeg\nimage_type: diagram\nconfidence: 0.9\ntitle: Reservoir Simulation\ntitle_verified: true\nanalysis: null\ncomponents:\n  - Reservoir\ncomponent_labels:\n  - Reservoir\nconnections: []\nflow_directions: []\nannotations: []\nlegend: null\nlegend_ve",
+        "source_note": "Figure 1: [Figure Note Metadata]\ndocument_name: Heriot-Watt_University_-_Reservoir_Simulation.pdf\ndocument_id: 3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94\npage_number: 19\nimage_index: 1\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94_p19_fig1.jpeg\nimage_type: diagram\nconfidence: 0.9\ntitle: Reservoir Simulation\ntitle_verified: true\nanalysis: null\ncomponents:\n  - Reservoir\ncomponent_labels:\n  - Reservoir\nconnections: []\nflow_directions: []\nannotations: []\nlegend: null\nlegend_ve\n[Focused vision extraction]\ntitle: RESERVOIR SIMULATION\nanalysis: Reservoir Simulation\nx_axis: Pressure\nx_axis_unit: MPa\ny_axis: Pressure Derivative\ny_axis_unit: MPa/s\nseries_count: 2\nseries_descriptions: Pressure series, Pressure derivative series\nlegend: Not visible\nreference_lines: Not visible",
+        "related_page_text": "Institute of Petroleum Engineering,  Heriot-Watt University  \n19\n11\nIntroduction and Case Studies\nIt is during the initial appraisal stage that many of the biggest - i.e. most expensive \n- investment decisions are made e.g. the type of platform and facilities etc.  Therefore, \nit is the most helpful time to have accurate forward predictions of the reservoir \nperformance.  But, it is at this time when we have the least amount of data and, \nof course, very little or no field performance history (there may be some extended \nproduction well tests).  Therefore, it seem that reservoir simulation has a built-in \nweakness in its usefulness; just when it can be at its most useful during appraisal is \nprecisely when it has the least data to work on and hence it will usually make the \npoorest forward predictions.  So, does reservoir simulation let us down just when we \nneed it most?  Perhaps.  However, even during appraisal, reservoir simulation can \ntake us forward with the best current view of the reservoir that we have at that time, \nalthough this view may be highly uncertain.  As we have already noted, if major \nfeatures of the reservoir model (e.g. the stock tank oil initially in place,\ne have at that time, \nalthough this view may be highly uncertain.  As we have already noted, if major \nfeatures of the reservoir model (e.g. the stock tank oil initially in place, STOIIP) are \nuncertain, then the forward predictions may be very inaccurate.  In such cases, we \nmay still be able to build a range of possible reservoir models, or reservoir scenarios, \nthat incorporate the major uncertainties in terms of reservoir size (STOIIP), main \nfault blocks, strength of aquifer, reservoir connectivity, etc.  By running forward \npredictions on this range of cases, we can generate a spread of predicted future field \nperformance cases as shown schematically in Figure 9.  How to estimate which of \nthese predictions is the most likely and what the magnitude of the “true” uncertainties \nare is very difficult and will be discussed later in the course.  \n                        \nTime (Year)\nMost Probable Case\n\"Pessimistic\" Case\n\"Optimistic\" Case\nCumulative Oil Recovery (STB)\n2005\n2010\n2015\nFor example, scenarios for various cases may involve:\n• \nDifferent assumptions about the original oil in place (STOIIP; Stock Tank Oil \nOriginally In Place).\n• \nDifferent values of the reservoir parame\ns for various cases may involve:\n• \nDifferent assumptions about the original oil in place (STOIIP; Stock Tank Oil \nOriginally In Place).\n• \nDifferent values of the reservoir parameters such as permeability, porosity,\nnet-to-gross ratio, the effect of an aquifer, etc..\n \n• \nMajor changes in the structural geology or sedimentology of the reservoir\ne.g. sealing vs. “leaky” faults in the system, the presence/absence of major\nfluvial channels, the distribution of shales in the reservoir etc..\nFigure 9\nSpread of future predicted \nfield performances from a \nrange of scenarios of the \nreservoir at appraisal.\n18\n(g)  Economic evaluation of options - NPV or IRR\nNow consider what we are actually trying to do in a typical full field reservoir simulation \nstudy.  There is a short answer to this is often said in one form or another: it is that the \ncentral objective of reservoir simulation is to produce future predictions (the output \nquantities listed above) that will allow us to optimise reservoir performance.  At the \ngrander scale, what is meant by “optimise reservoir performance” is to develop the \nreservoir in the manner that brings the maximum economic benefit to the company. \nReservoir simulation may be used in many smaller ways to decide on various \ntechnical matters although even these - for example the issue illustrated in Figure 8 \n- are usually reduced to economic calculations and decisions in the final analysis as \nindicated in Figure 8(g).   \n3 FIELD APPLICATION OF RESERVOIR SIMULATION \n3.1 Reservoir Simulation at  Appraisal and in Mature Fields\nUp to this point, we have ",
+        "x_axis": "Pressure",
+        "x_axis_unit": "MPa",
+        "y_axis": "Pressure Derivative",
+        "y_axis_unit": "MPa/s",
+        "series_count": 2,
+        "series_descriptions": [
+          "Pressure series, Pressure derivative series"
+        ],
+        "legend": [
+          "legend_ve"
+        ],
+        "quantities": []
+      }
+    ],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 3.243419,
+      "retrieval_seconds": 12.856726,
+      "llm_generation_seconds": 6.5e-05,
+      "python_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "evaluation_seconds": 0.0,
+      "synthesis_seconds": 0.0,
+      "retrieve_action_seconds": 12.938648,
+      "elapsed_seconds": 0.060547,
+      "total_seconds": 16.35868,
+      "message_parsing_seconds": 0.0
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode"
+    },
+    "validation": {},
+    "cancel_requested": false,
+    "error": null
+  },
+  "wall_seconds": 18.398,
+  "same_run_resume": true
+}

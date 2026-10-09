@@ -1,0 +1,992 @@
+{
+  "task_id": "F01",
+  "model_id": "qwen3:8b",
+  "run_id": "GR-20261009-094551-097565",
+  "initial_response": {
+    "run_id": "GR-20261009-094551-097565",
+    "topic": "FWL과 oil-water contact는 정의상 항상 같은 깊이이므로 압력-깊이 해석에서 하나로 표시해도 되는 거지? 내부 자료로 확인해줘.",
+    "goal": "FWL과 oil-water contact는 정의상 항상 같은 깊이이므로 압력-깊이 해석에서 하나로 표시해도 되는 거지? 내부 자료로 확인해줘.",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "insufficient_evidence",
+    "final_answer": "FWL과 oil-water contact는 정의상 항상 같은 깊이를 가지지 않는다. [KB1] [KB2] [KB3]\n압력-깊이 해석에서 FWL과 oil-water contact를 하나로 표시할 수 있는 조건은 내부 자료에 명시되어 있지 않다. [KB1] [KB2] [KB3]\n내부 자료에서 FWL과 oil-water contact의 깊이가 일치하는 경우와 불일치하는 경우가 존재하며, 통계적으로 두 개념이 항상 같은 깊이를 가지는지 검증할 수 없다. [KB3] [KB4] [KB5]",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "fed69adf455b4c91792b85267d14c1ffda4ab2394935a995f42cbd4f2725202f",
+    "criteria": [
+      {
+        "criterion_id": "C1",
+        "status": "unmet",
+        "reason": "FWL과 oil-water contact는 정의상 항상 같은 깊이를 가지지 않으며, 이는 KB1에서 명시된 바와 같이 capillary pressure와 관련된 요인에 따라 깊이가 달라질 수 있음을 나타냅니다. 이로 인해 두 개념이 항상 같은 깊이를 가지는지에 대한 정의적 관계가 성립하지 않습니다.",
+        "supporting_evidence": [
+          "KB1"
+        ]
+      },
+      {
+        "criterion_id": "C2",
+        "status": "unmet",
+        "reason": "압력-깊이 해석에서 FWL과 oil-water contact를 하나로 표시할 수 있는 조건이 내부 자료에 명시되어 있지 않습니다. KB2와 KB4에서는 FWL과 oil-water contact의 구분이 필요하다고 언급하고 있으며, 이는 두 개념을 하나로 표시할 수 있는 조건이 명시되지 않았음을 나타냅니다.",
+        "supporting_evidence": [
+          "KB2",
+          "KB4"
+        ]
+      },
+      {
+        "criterion_id": "C3",
+        "status": "unmet",
+        "reason": "내부 자료에서 FWL과 oil-water contact의 깊이가 일치하는 경우와 불일치하는 경우가 존재하며, 통계적으로 두 개념이 항상 같은 깊이를 가지는지 검증할 수 없습니다. KB3과 KB5에서는 FWL과 oil-water contact의 깊이가 서로 다르게 나타나는 경우가 있으며, 이는 통계적 검증이 불가능함을 나타냅니다.",
+        "supporting_evidence": [
+          "KB3",
+          "KB5"
+        ]
+      }
+    ],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "FWL과 oil-water contact의 정의적 관계를 내부 자료를 통해 확인하여, 두 개념이 항상 같은 깊이를 가지는지 평가한다.",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "압력-깊이 해석에서 FWL과 oil-water contact를 하나로 표시할 수 있는 조건이 내부 자료에 명시되어 있는지 확인한다.",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "내부 자료에서 FWL과 oil-water contact의 깊이가 일치하는 경우의 수와 불일치하는 경우의 수를 비교하여, 두 개념이 항상 같은 깊이를 가지는지 통계적으로 검증한다.",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 5,
+    "current_iteration": 5,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "initial_evidence_needed",
+        "started_at": "2026-10-09T09:45:53.802207Z",
+        "finished_at": "2026-10-09T09:45:58.024741Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "verify",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "verify_current_support",
+        "started_at": "2026-10-09T09:45:58.057593Z",
+        "finished_at": "2026-10-09T09:46:16.234858Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "engineering_validation_passed": true,
+          "goal_achieved": false
+        }
+      },
+      {
+        "iteration": 3,
+        "action_id": "ACT-3",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "missing_requirement",
+        "started_at": "2026-10-09T09:46:16.269188Z",
+        "finished_at": "2026-10-09T09:46:20.406102Z",
+        "new_evidence_count": 1,
+        "evidence_added": [
+          "KB6"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 1,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 4,
+        "action_id": "ACT-4",
+        "action_type": "verify",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "verify_current_support",
+        "started_at": "2026-10-09T09:46:20.454879Z",
+        "finished_at": "2026-10-09T09:46:46.904029Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "engineering_validation_passed": true,
+          "goal_achieved": false
+        }
+      },
+      {
+        "iteration": 5,
+        "action_id": "ACT-5",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "missing_requirement",
+        "started_at": "2026-10-09T09:46:46.943250Z",
+        "finished_at": "2026-10-09T09:46:50.985577Z",
+        "new_evidence_count": 1,
+        "evidence_added": [
+          "KB7"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 1,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 5,
+        "action_id": "ACT-STOP-5",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "verification_budget_exhausted",
+        "started_at": "2026-10-09T09:46:51.034364Z",
+        "finished_at": "2026-10-09T09:46:51.034364Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "FWL과 oil-water contact의 정의적 관계에 대한 명확한 내부 자료가 부족하여, 두 개념이 항상 같은 깊이를 가지는지 확인할 수 없다.",
+          "압력-깊이 해석에서 FWL과 oil-water contact를 하나로 표시할 수 있는 조건에 대한 명시된 내부 자료가 부족하다.",
+          "FWL과 oil-water contact의 깊이가 일치하는 경우와 불일치하는 경우의 통계적 검증을 위한 데이터가 부족하여, 두 개념이 항상 같은 깊이를 가지는지 확정적으로 판단할 수 없다."
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "FWL과 oil-water contact의 정의적 관계에 대한 명확한 내부 자료가 부족하여, 두 개념이 항상 같은 깊이를 가지는지 확인할 수 없다.",
+          "압력-깊이 해석에서 FWL과 oil-water contact를 하나로 표시할 수 있는 조건에 대한 명시된 내부 자료가 부족하다.",
+          "FWL과 oil-water contact의 깊이가 일치하는 경우와 불일치하는 경우의 통계적 검증을 위한 데이터가 부족하여, 두 개념이 항상 같은 깊이를 가지는지 확정적으로 판단할 수 없다."
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 4,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "FWL과 oil-water contact의 정의적 관계에 대한 명확한 설명이 부족합니다.",
+          "압력-깊이 해석에서 FWL과 oil-water contact를 하나로 표시할 수 있는 조건에 대한 명확한 기준이 없습니다.",
+          "통계적으로 FWL과 oil-water contact의 깊이가 일치하는지 검증할 수 있는 데이터가 부족합니다."
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 5,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6",
+          "KB7"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "FWL과 oil-water contact의 정의적 관계에 대한 명확한 설명이 부족합니다.",
+          "압력-깊이 해석에서 FWL과 oil-water contact를 하나로 표시할 수 있는 조건에 대한 명확한 기준이 없습니다.",
+          "통계적으로 FWL과 oil-water contact의 깊이가 일치하는지 검증할 수 있는 데이터가 부족합니다."
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 5,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6",
+          "KB7"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "FWL과 oil-water contact의 정의적 관계에 대한 명확한 설명이 부족합니다.",
+          "압력-깊이 해석에서 FWL과 oil-water contact를 하나로 표시할 수 있는 조건에 대한 명확한 기준이 없습니다.",
+          "통계적으로 FWL과 oil-water contact의 깊이가 일치하는지 검증할 수 있는 데이터가 부족합니다."
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 70,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p70:c0",
+        "score": 0.01639344,
+        "excerpt": "10\nThe free water level, FWL, is not coincident with the oil-water contact OWC.  The \nwater contact corresponds to the depth at which the oil saturation starts to increase \nfrom water zone.  The free water level is the depth at which the capillary pressure \nis zero.\nThe difference in depth between the oil-water contact and the free water level depends \non the capillary pressure which in turn is a function of permeability, grain size etc.\nProviding the phase is continuous the pressures in the respective phases are:\n Po = PFWL - ρogh \n \n \n \n \n \n \n(11)\n Pw = PFWL - ρwgh \n \n \n \n \n \n \n(12)\nOn the depth-pressure diagram the intersection of the continuous phase pressure line \noccurs at the free water level.\n5. TECHNIQUES FOR PRESSURE MEASUREMENT\nEarlier tests for vertical pressure logging have been replaced by open-hole testing \ndevices that measure the vertical pressure distribution in the well, and recover for-\nmation samples.\nOne such device which was introduced in the mid seventies which has established \nitself in reservoir evaluation is the repeat formation tester RFT (Schlumberger trade \nname).  It was initially developed as a device to take samples.  Over the years however \nits mai"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 459,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p459:c3",
+        "score": 0.01612903,
+        "excerpt": "be determined very accurately by identifying the depths at which the\ncharacteristic pressure gradients change. See the chapter on reservoir pressure and temperature\nin this volume of the Handbook for additional information on fluid-contact depth determination\nusing pressure information.\nOverall, the formation-pressure-survey data should be the primary source of data for defin-\ning the FWL fluid contacts. The other data should be used to complement these pressure data,\nor should be used together to define the fluid contacts if no pressure-survey data are available.\nIn reservoirs with sand/shale sequences, sometimes the fluid contact is determined to be within\na  shale  interval,  even  if  that  interval  is  only  10  ft  thick  or  less.  If  this  is  the  case,  the  best\nestimate depth of the fluid contact is at the mid-depth of the shale interval (unless the pressure-\nsurvey data indicate otherwise). The fluid contact may be different from the FWL, and it is the\nFWL  depth  that  is  important  commercially  and  important  when  making  Sw  calculations  from\nPc /Sw data.\nChapter 3H—Petrophysical Applications\nV-451\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 4\nChapter 3G"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+        "page": 405,
+        "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p405:c1",
+        "score": 0.01587302,
+        "excerpt": "wever in the right-hand \nfault block the logs will register the paleo-contact which may be considerably deeper \nthan the common new WROC.  Hence there will be an apparently different log contact \nin the two blocks which may be used to infer a lack of communication between \nthem.  In fact the true contact is the same in both blocks.\nIn general four explanations are possible for variable water oil contacts over \na field.  These are:\n(a)   Variation in the distance between a common FWL and the WOC caused by \n       differences in threshold capillary pressure, pt\nc .  This is due to changes in \n       rock quality, particularly pore size distribution.\n(b)   The occurrence of residual hydrocarbon as described here.\n(c)   Non-communicating fault blocks or reservoir units.\n(d)   Dynamic conditions in the aquifer.\nField - wide wireline formation tester surveys can be of great help in deciding if \nsuch phenomena are present.  Note that items a) and d) are the possible explanations \nfor a log contact which is variable across a field.  In the case of situation (a) the FWL \nis at a fixed depth throughout the reservoir and it is variations in threshold capillary \npressure which account for the"
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+        "page": 422,
+        "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p422:c1",
+        "score": 0.015625,
+        "excerpt": "the WFT has also been correctly depth matched \nto the open hole logs so that OPGI can be compared to log contacts.  It is surprising \nhow often these two tasks have not been well handled.  When the OPGIs in different \nwells are compared it is the absolute true vertical depth accuracy of the open hole \nlogs which is important.  Obviously any error here will show up as a difference \nin the OPGIs in different wells.  This may be real (different reservoirs) but it is \nessential that depth inaccuracy does not lead the reservoir engineer to believe \nthe contact is different.\n7.4. MULTIPLE WELL ANALYSIS\nIn the exploration phase a WFT survey is run in each appraisal well in order to \nelucidate reservoir structure.  The simplest situation is illustrated in Figure 34 where \ntwo wells in the same reservoir both intersect the water oil contact.  In this case \nwhen the two WFT surveys are plotted on the same pressure-depth diagram the \ndata should overlay as indicated.  However the exact correspondence depends on \nFigure 33.\nTight reservoir RFT survey."
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+        "page": 406,
+        "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p406:c1",
+        "score": 0.01538462,
+        "excerpt": "dication.\n  \nWater\nOil\nDepth\nO/H LOG\nPressure\nRFT\nIndicates\nOil\nGradient\nA related problem occurs when the formation water is relatively fresh i.e. of \nlow salinity.  Again the resistivity logs may not be able to properly distinguish \nbetween oil and water.  In this case the WROC is best determined from WFT \ngradient intersections.\n7.2.3. Oil Wet Behaviour\nThe classical pressure - depth diagram of Figure 1 refers to a strongly water-wet \ncondition in which water is imbibed upwards from the FWL into the porous medium.  \nThus the capillary transition zone lies above the FWL.  The reverse situation is \na strongly oil-wet rock where oil will be imbibed down from the FWL against \nbuoyancy.  In this case the capillary pressure as defined by equation (1) is negative \ni.e. the oil phase pressure is less than water phase pressure.  This situation is \nillustrated in Figure 17 where the capillary transition zone is now seen to lie below \nthe FWL.  The theory of Desbrandes and Gualdron suggests that in the capillary \ntransition zone a large hole will fill with water and hence a pressure tapping will \nregister the water phase pressure.  The large hole observer is shown diagrammatically \nin Figu"
+      },
+      {
+        "evidence_id": "KB6",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 639,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p639:c1",
+        "score": 0.01538462,
+        "excerpt": "oil contact can be logged in the well. \nHowever if edge water drive is occurring then actual well observations may not be \npossible.  Material balance provides an opportunity to determine the support from \nwater drive, but translating this information into specific aquifer characteristics is not \nstraightforward.\nThe size of gas cap although more accessible is not always easy to determine, since \nit may be preferred for development reasons during drilling to drill through the gas \ncap.\nUp until recently, water and rock compressibility terms of cw and cf have largely been \nassumed to be of little importance and their value if not readily available obtained \nfrom text book type sources.  Such assumptions can be very costly particularly for \nthose fields where compaction drive is very significant. \nThe material balance equation, a zero dimensional model, or tank model, requires \nan average pressure and this average pressure is reflected implicitly in relation to \nPVT parameters and explicitly in relation to compressibility of water and rock. This \naverage pressure determination may be obtained from a range of pressures from wells \nwithin the drainage area.  We will discuss this in th"
+      },
+      {
+        "evidence_id": "KB7",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 458,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p458:c1",
+        "score": 0.01538462,
+        "excerpt": "tion of the open-fracture porosity, which may be approximately 0.1 to 1.0%\nBV, is highly uncertain. Production testing and test analysis are recommended to determine the\nnature and extent of any fracture system within the reservoir interval.\n3H.6 Fluid-Contacts Identification\nDefining the depths of the fluid contacts, GWC, OWC, and gas/oil contact (GOC), or defining\nboth of the latter in some reservoir situations, is essential for volumetrics calculations and im-\nportant for detailed petrophysical calculations. For example, for more-accurate porosity calcula-\ntions,  the  reservoir’s  vertical  interval  needs  to  be  subdivided  by  fluid  type  to  account  for\ndifferences in the average fluid saturation and, hence, differences in fluid density or sonic trav-\nel time in the various fluid intervals: gas cap, oil column, or aquifer. For the Sw calculations,\nthe depth of the OWC or GWC, or more particularly the related free water level (FWL), is a\nrequired input for any Sw calculations using capillary pressure, Pc, data. These depths need to\nbe defined in every wellbore, to the extent that they occur. This section addresses the methods\nused to make the most accurate determination o"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 2.588416,
+      "retrieval_seconds": 12.304592,
+      "llm_generation_seconds": 39.886103,
+      "python_seconds": 0.0,
+      "verification_seconds": 44.624504,
+      "evaluation_seconds": 28.781247,
+      "synthesis_seconds": 11.104677,
+      "retrieve_action_seconds": 12.401033,
+      "verify_action_seconds": 44.624497,
+      "elapsed_seconds": 59.829693,
+      "total_seconds": 59.829838,
+      "message_parsing_seconds": 0.000145
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 59.829693,
+      "python_seconds": 0.0
+    },
+    "validation": {
+      "engineering_validation_passed": true,
+      "engineering_contradiction_count": 0,
+      "unsupported_engineering_claim_count": 0,
+      "citation_semantic_passed": true,
+      "unsupported_citation_claim_count": 1,
+      "criteria_frozen": true
+    },
+    "cancel_requested": false,
+    "error": null
+  },
+  "resume_response": null,
+  "response": {
+    "run_id": "GR-20261009-094551-097565",
+    "topic": "FWL과 oil-water contact는 정의상 항상 같은 깊이이므로 압력-깊이 해석에서 하나로 표시해도 되는 거지? 내부 자료로 확인해줘.",
+    "goal": "FWL과 oil-water contact는 정의상 항상 같은 깊이이므로 압력-깊이 해석에서 하나로 표시해도 되는 거지? 내부 자료로 확인해줘.",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "insufficient_evidence",
+    "final_answer": "FWL과 oil-water contact는 정의상 항상 같은 깊이를 가지지 않는다. [KB1] [KB2] [KB3]\n압력-깊이 해석에서 FWL과 oil-water contact를 하나로 표시할 수 있는 조건은 내부 자료에 명시되어 있지 않다. [KB1] [KB2] [KB3]\n내부 자료에서 FWL과 oil-water contact의 깊이가 일치하는 경우와 불일치하는 경우가 존재하며, 통계적으로 두 개념이 항상 같은 깊이를 가지는지 검증할 수 없다. [KB3] [KB4] [KB5]",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "fed69adf455b4c91792b85267d14c1ffda4ab2394935a995f42cbd4f2725202f",
+    "criteria": [
+      {
+        "criterion_id": "C1",
+        "status": "unmet",
+        "reason": "FWL과 oil-water contact는 정의상 항상 같은 깊이를 가지지 않으며, 이는 KB1에서 명시된 바와 같이 capillary pressure와 관련된 요인에 따라 깊이가 달라질 수 있음을 나타냅니다. 이로 인해 두 개념이 항상 같은 깊이를 가지는지에 대한 정의적 관계가 성립하지 않습니다.",
+        "supporting_evidence": [
+          "KB1"
+        ]
+      },
+      {
+        "criterion_id": "C2",
+        "status": "unmet",
+        "reason": "압력-깊이 해석에서 FWL과 oil-water contact를 하나로 표시할 수 있는 조건이 내부 자료에 명시되어 있지 않습니다. KB2와 KB4에서는 FWL과 oil-water contact의 구분이 필요하다고 언급하고 있으며, 이는 두 개념을 하나로 표시할 수 있는 조건이 명시되지 않았음을 나타냅니다.",
+        "supporting_evidence": [
+          "KB2",
+          "KB4"
+        ]
+      },
+      {
+        "criterion_id": "C3",
+        "status": "unmet",
+        "reason": "내부 자료에서 FWL과 oil-water contact의 깊이가 일치하는 경우와 불일치하는 경우가 존재하며, 통계적으로 두 개념이 항상 같은 깊이를 가지는지 검증할 수 없습니다. KB3과 KB5에서는 FWL과 oil-water contact의 깊이가 서로 다르게 나타나는 경우가 있으며, 이는 통계적 검증이 불가능함을 나타냅니다.",
+        "supporting_evidence": [
+          "KB3",
+          "KB5"
+        ]
+      }
+    ],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "FWL과 oil-water contact의 정의적 관계를 내부 자료를 통해 확인하여, 두 개념이 항상 같은 깊이를 가지는지 평가한다.",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "압력-깊이 해석에서 FWL과 oil-water contact를 하나로 표시할 수 있는 조건이 내부 자료에 명시되어 있는지 확인한다.",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "내부 자료에서 FWL과 oil-water contact의 깊이가 일치하는 경우의 수와 불일치하는 경우의 수를 비교하여, 두 개념이 항상 같은 깊이를 가지는지 통계적으로 검증한다.",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 5,
+    "current_iteration": 5,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "initial_evidence_needed",
+        "started_at": "2026-10-09T09:45:53.802207Z",
+        "finished_at": "2026-10-09T09:45:58.024741Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "verify",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "verify_current_support",
+        "started_at": "2026-10-09T09:45:58.057593Z",
+        "finished_at": "2026-10-09T09:46:16.234858Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "engineering_validation_passed": true,
+          "goal_achieved": false
+        }
+      },
+      {
+        "iteration": 3,
+        "action_id": "ACT-3",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "missing_requirement",
+        "started_at": "2026-10-09T09:46:16.269188Z",
+        "finished_at": "2026-10-09T09:46:20.406102Z",
+        "new_evidence_count": 1,
+        "evidence_added": [
+          "KB6"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 1,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 4,
+        "action_id": "ACT-4",
+        "action_type": "verify",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "verify_current_support",
+        "started_at": "2026-10-09T09:46:20.454879Z",
+        "finished_at": "2026-10-09T09:46:46.904029Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "engineering_validation_passed": true,
+          "goal_achieved": false
+        }
+      },
+      {
+        "iteration": 5,
+        "action_id": "ACT-5",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "missing_requirement",
+        "started_at": "2026-10-09T09:46:46.943250Z",
+        "finished_at": "2026-10-09T09:46:50.985577Z",
+        "new_evidence_count": 1,
+        "evidence_added": [
+          "KB7"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 1,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 5,
+        "action_id": "ACT-STOP-5",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "verification_budget_exhausted",
+        "started_at": "2026-10-09T09:46:51.034364Z",
+        "finished_at": "2026-10-09T09:46:51.034364Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "FWL과 oil-water contact의 정의적 관계에 대한 명확한 내부 자료가 부족하여, 두 개념이 항상 같은 깊이를 가지는지 확인할 수 없다.",
+          "압력-깊이 해석에서 FWL과 oil-water contact를 하나로 표시할 수 있는 조건에 대한 명시된 내부 자료가 부족하다.",
+          "FWL과 oil-water contact의 깊이가 일치하는 경우와 불일치하는 경우의 통계적 검증을 위한 데이터가 부족하여, 두 개념이 항상 같은 깊이를 가지는지 확정적으로 판단할 수 없다."
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "FWL과 oil-water contact의 정의적 관계에 대한 명확한 내부 자료가 부족하여, 두 개념이 항상 같은 깊이를 가지는지 확인할 수 없다.",
+          "압력-깊이 해석에서 FWL과 oil-water contact를 하나로 표시할 수 있는 조건에 대한 명시된 내부 자료가 부족하다.",
+          "FWL과 oil-water contact의 깊이가 일치하는 경우와 불일치하는 경우의 통계적 검증을 위한 데이터가 부족하여, 두 개념이 항상 같은 깊이를 가지는지 확정적으로 판단할 수 없다."
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 4,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "FWL과 oil-water contact의 정의적 관계에 대한 명확한 설명이 부족합니다.",
+          "압력-깊이 해석에서 FWL과 oil-water contact를 하나로 표시할 수 있는 조건에 대한 명확한 기준이 없습니다.",
+          "통계적으로 FWL과 oil-water contact의 깊이가 일치하는지 검증할 수 있는 데이터가 부족합니다."
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 5,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6",
+          "KB7"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "FWL과 oil-water contact의 정의적 관계에 대한 명확한 설명이 부족합니다.",
+          "압력-깊이 해석에서 FWL과 oil-water contact를 하나로 표시할 수 있는 조건에 대한 명확한 기준이 없습니다.",
+          "통계적으로 FWL과 oil-water contact의 깊이가 일치하는지 검증할 수 있는 데이터가 부족합니다."
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 5,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6",
+          "KB7"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "FWL과 oil-water contact의 정의적 관계에 대한 명확한 설명이 부족합니다.",
+          "압력-깊이 해석에서 FWL과 oil-water contact를 하나로 표시할 수 있는 조건에 대한 명확한 기준이 없습니다.",
+          "통계적으로 FWL과 oil-water contact의 깊이가 일치하는지 검증할 수 있는 데이터가 부족합니다."
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 70,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p70:c0",
+        "score": 0.01639344,
+        "excerpt": "10\nThe free water level, FWL, is not coincident with the oil-water contact OWC.  The \nwater contact corresponds to the depth at which the oil saturation starts to increase \nfrom water zone.  The free water level is the depth at which the capillary pressure \nis zero.\nThe difference in depth between the oil-water contact and the free water level depends \non the capillary pressure which in turn is a function of permeability, grain size etc.\nProviding the phase is continuous the pressures in the respective phases are:\n Po = PFWL - ρogh \n \n \n \n \n \n \n(11)\n Pw = PFWL - ρwgh \n \n \n \n \n \n \n(12)\nOn the depth-pressure diagram the intersection of the continuous phase pressure line \noccurs at the free water level.\n5. TECHNIQUES FOR PRESSURE MEASUREMENT\nEarlier tests for vertical pressure logging have been replaced by open-hole testing \ndevices that measure the vertical pressure distribution in the well, and recover for-\nmation samples.\nOne such device which was introduced in the mid seventies which has established \nitself in reservoir evaluation is the repeat formation tester RFT (Schlumberger trade \nname).  It was initially developed as a device to take samples.  Over the years however \nits mai"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 459,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p459:c3",
+        "score": 0.01612903,
+        "excerpt": "be determined very accurately by identifying the depths at which the\ncharacteristic pressure gradients change. See the chapter on reservoir pressure and temperature\nin this volume of the Handbook for additional information on fluid-contact depth determination\nusing pressure information.\nOverall, the formation-pressure-survey data should be the primary source of data for defin-\ning the FWL fluid contacts. The other data should be used to complement these pressure data,\nor should be used together to define the fluid contacts if no pressure-survey data are available.\nIn reservoirs with sand/shale sequences, sometimes the fluid contact is determined to be within\na  shale  interval,  even  if  that  interval  is  only  10  ft  thick  or  less.  If  this  is  the  case,  the  best\nestimate depth of the fluid contact is at the mid-depth of the shale interval (unless the pressure-\nsurvey data indicate otherwise). The fluid contact may be different from the FWL, and it is the\nFWL  depth  that  is  important  commercially  and  important  when  making  Sw  calculations  from\nPc /Sw data.\nChapter 3H—Petrophysical Applications\nV-451\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 4\nChapter 3G"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+        "page": 405,
+        "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p405:c1",
+        "score": 0.01587302,
+        "excerpt": "wever in the right-hand \nfault block the logs will register the paleo-contact which may be considerably deeper \nthan the common new WROC.  Hence there will be an apparently different log contact \nin the two blocks which may be used to infer a lack of communication between \nthem.  In fact the true contact is the same in both blocks.\nIn general four explanations are possible for variable water oil contacts over \na field.  These are:\n(a)   Variation in the distance between a common FWL and the WOC caused by \n       differences in threshold capillary pressure, pt\nc .  This is due to changes in \n       rock quality, particularly pore size distribution.\n(b)   The occurrence of residual hydrocarbon as described here.\n(c)   Non-communicating fault blocks or reservoir units.\n(d)   Dynamic conditions in the aquifer.\nField - wide wireline formation tester surveys can be of great help in deciding if \nsuch phenomena are present.  Note that items a) and d) are the possible explanations \nfor a log contact which is variable across a field.  In the case of situation (a) the FWL \nis at a fixed depth throughout the reservoir and it is variations in threshold capillary \npressure which account for the"
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+        "page": 422,
+        "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p422:c1",
+        "score": 0.015625,
+        "excerpt": "the WFT has also been correctly depth matched \nto the open hole logs so that OPGI can be compared to log contacts.  It is surprising \nhow often these two tasks have not been well handled.  When the OPGIs in different \nwells are compared it is the absolute true vertical depth accuracy of the open hole \nlogs which is important.  Obviously any error here will show up as a difference \nin the OPGIs in different wells.  This may be real (different reservoirs) but it is \nessential that depth inaccuracy does not lead the reservoir engineer to believe \nthe contact is different.\n7.4. MULTIPLE WELL ANALYSIS\nIn the exploration phase a WFT survey is run in each appraisal well in order to \nelucidate reservoir structure.  The simplest situation is illustrated in Figure 34 where \ntwo wells in the same reservoir both intersect the water oil contact.  In this case \nwhen the two WFT surveys are plotted on the same pressure-depth diagram the \ndata should overlay as indicated.  However the exact correspondence depends on \nFigure 33.\nTight reservoir RFT survey."
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+        "page": 406,
+        "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p406:c1",
+        "score": 0.01538462,
+        "excerpt": "dication.\n  \nWater\nOil\nDepth\nO/H LOG\nPressure\nRFT\nIndicates\nOil\nGradient\nA related problem occurs when the formation water is relatively fresh i.e. of \nlow salinity.  Again the resistivity logs may not be able to properly distinguish \nbetween oil and water.  In this case the WROC is best determined from WFT \ngradient intersections.\n7.2.3. Oil Wet Behaviour\nThe classical pressure - depth diagram of Figure 1 refers to a strongly water-wet \ncondition in which water is imbibed upwards from the FWL into the porous medium.  \nThus the capillary transition zone lies above the FWL.  The reverse situation is \na strongly oil-wet rock where oil will be imbibed down from the FWL against \nbuoyancy.  In this case the capillary pressure as defined by equation (1) is negative \ni.e. the oil phase pressure is less than water phase pressure.  This situation is \nillustrated in Figure 17 where the capillary transition zone is now seen to lie below \nthe FWL.  The theory of Desbrandes and Gualdron suggests that in the capillary \ntransition zone a large hole will fill with water and hence a pressure tapping will \nregister the water phase pressure.  The large hole observer is shown diagrammatically \nin Figu"
+      },
+      {
+        "evidence_id": "KB6",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 639,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p639:c1",
+        "score": 0.01538462,
+        "excerpt": "oil contact can be logged in the well. \nHowever if edge water drive is occurring then actual well observations may not be \npossible.  Material balance provides an opportunity to determine the support from \nwater drive, but translating this information into specific aquifer characteristics is not \nstraightforward.\nThe size of gas cap although more accessible is not always easy to determine, since \nit may be preferred for development reasons during drilling to drill through the gas \ncap.\nUp until recently, water and rock compressibility terms of cw and cf have largely been \nassumed to be of little importance and their value if not readily available obtained \nfrom text book type sources.  Such assumptions can be very costly particularly for \nthose fields where compaction drive is very significant. \nThe material balance equation, a zero dimensional model, or tank model, requires \nan average pressure and this average pressure is reflected implicitly in relation to \nPVT parameters and explicitly in relation to compressibility of water and rock. This \naverage pressure determination may be obtained from a range of pressures from wells \nwithin the drainage area.  We will discuss this in th"
+      },
+      {
+        "evidence_id": "KB7",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 458,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p458:c1",
+        "score": 0.01538462,
+        "excerpt": "tion of the open-fracture porosity, which may be approximately 0.1 to 1.0%\nBV, is highly uncertain. Production testing and test analysis are recommended to determine the\nnature and extent of any fracture system within the reservoir interval.\n3H.6 Fluid-Contacts Identification\nDefining the depths of the fluid contacts, GWC, OWC, and gas/oil contact (GOC), or defining\nboth of the latter in some reservoir situations, is essential for volumetrics calculations and im-\nportant for detailed petrophysical calculations. For example, for more-accurate porosity calcula-\ntions,  the  reservoir’s  vertical  interval  needs  to  be  subdivided  by  fluid  type  to  account  for\ndifferences in the average fluid saturation and, hence, differences in fluid density or sonic trav-\nel time in the various fluid intervals: gas cap, oil column, or aquifer. For the Sw calculations,\nthe depth of the OWC or GWC, or more particularly the related free water level (FWL), is a\nrequired input for any Sw calculations using capillary pressure, Pc, data. These depths need to\nbe defined in every wellbore, to the extent that they occur. This section addresses the methods\nused to make the most accurate determination o"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 2.588416,
+      "retrieval_seconds": 12.304592,
+      "llm_generation_seconds": 39.886103,
+      "python_seconds": 0.0,
+      "verification_seconds": 44.624504,
+      "evaluation_seconds": 28.781247,
+      "synthesis_seconds": 11.104677,
+      "retrieve_action_seconds": 12.401033,
+      "verify_action_seconds": 44.624497,
+      "elapsed_seconds": 59.829693,
+      "total_seconds": 59.829838,
+      "message_parsing_seconds": 0.000145
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 59.829693,
+      "python_seconds": 0.0
+    },
+    "validation": {
+      "engineering_validation_passed": true,
+      "engineering_contradiction_count": 0,
+      "unsupported_engineering_claim_count": 0,
+      "citation_semantic_passed": true,
+      "unsupported_citation_claim_count": 1,
+      "criteria_frozen": true
+    },
+    "cancel_requested": false,
+    "error": null
+  },
+  "wall_seconds": 60.448,
+  "same_run_resume": false
+}

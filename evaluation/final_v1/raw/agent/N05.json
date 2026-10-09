@@ -1,0 +1,730 @@
+{
+  "task_id": "N05",
+  "model_id": "qwen3:8b",
+  "run_id": "GR-20261009-093726-FBCE2F",
+  "initial_response": {
+    "run_id": "GR-20261009-093726-FBCE2F",
+    "topic": "시추 작업에서 기록한 압력이 7,000 ft에서 3,150 psi, 9,000 ft에서 4,050 psi였다. 이 구간의 평균 pressure gradient를 psi/ft로 계산해줘.",
+    "goal": "시추 작업에서 기록한 압력이 7,000 ft에서 3,150 psi, 9,000 ft에서 4,050 psi였다. 이 구간의 평균 pressure gradient를 psi/ft로 계산해줘.",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "calculation_blocked",
+    "final_answer": "근거 자료에서 필요한 관계식이나 입력값을 확인하지 못해 수치 결과를 계산하거나 추정하지 않았습니다.",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "7edee9677d2b3634afaa0c72fca0ac39264117b82c64ada9d04b6226c625e552",
+    "criteria": [],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "정확한 압력 값과 깊이 값이 제공되었는지 확인",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "두 점 간의 평균 압력 기울기를 계산하는 수식이 올바르게 적용되었는지 확인",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "계산 결과가 psi/ft 단위로 표현되었는지 확인",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 3,
+    "current_iteration": 3,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "calculation_source_missing",
+        "started_at": "2026-10-09T09:37:28.543677Z",
+        "finished_at": "2026-10-09T09:37:39.834854Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "blocked",
+        "reason_code": "calculation_source_missing",
+        "started_at": "2026-10-09T09:37:39.868706Z",
+        "finished_at": "2026-10-09T09:37:39.904548Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "retrieve_no_progress",
+        "details": {
+          "new_evidence_count": 0,
+          "retrieval_mode": "hybrid",
+          "cache_hit": true
+        }
+      },
+      {
+        "iteration": 3,
+        "action_id": "ACT-3",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "blocked",
+        "reason_code": "calculation_source_missing",
+        "started_at": "2026-10-09T09:37:39.949352Z",
+        "finished_at": "2026-10-09T09:37:47.850636Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "retrieve_no_progress",
+        "details": {
+          "new_evidence_count": 0,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 3,
+        "action_id": "ACT-STOP-3",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "calculation_blocked",
+        "started_at": "2026-10-09T09:37:47.894445Z",
+        "finished_at": "2026-10-09T09:37:47.894445Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 165,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p165:c1",
+        "score": 0.01639344,
+        "excerpt": "be :\n                 2.3 x 0.433 psi/ft  =  0.9959 psi/ft\nThis figure is normally rounded up to 1 psi/ft and is commonly quoted as the \nmaximum possible overburden pressure gradient, from which the maximum \noverburden pressure, at any depth, can be calculated. It is unlikely that the pore \npressure could exceed the overburden pressure.  However, it should be remembered \nthat the overburden pressure may vary  with depth, due to compaction and changing \nlithology, and so the gradient cannot be assumed to be constant."
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 73,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p73:c2",
+        "score": 0.01612903,
+        "excerpt": "ng to KPa = 3478 / 0.145 = 23986 Kpa\nConverting to MPa = 23986 / 1000 = 23.99 MPa\nPressure gradient  \n= 0.47 psi/ft = (0.47 / 0.145) KPa/ft = 3.2414 KPa/ft\n  = (3.2414 /0.3048) KPa/m\n  = 10.63 KPa/M"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 64,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p64:c1",
+        "score": 0.01587302,
+        "excerpt": "ssured \nreservoirs.\nEXERCISE 1\nIf the average pressure gradient in a region is 0.47 psi/ft, calculate the pore \npressure in a normally pressurised formation at 7400ft. Convert the pressure from \npsi to KPa, then express the pressure in MPa. What is the pressure gradient in \nKPa/m?"
+      }
+    ],
+    "web_sources": [],
+    "figures": [
+      {
+        "evidence_id": "FIG1",
+        "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+        "page": 445,
+        "figure_number": "Figure 9",
+        "title": "DEPTH (ft)",
+        "image_index": 2,
+        "filename": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p445_fig2.jpeg",
+        "image_path": "D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p445_fig2.jpeg",
+        "url": "/api/figures/01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p445_fig2.jpeg",
+        "excerpt": "ot-Watt_University_-_Well_Test_Analysis.pdf\ndocument_id: 01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462\npage_number: 445\nimage_index: 2\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p445_fig2.jpeg\nimage_type: diagram\nconfidence: 0.9\ntitle: DEPTH (ft)\ntitle_verified: true\nanalysis: Pressure gradient analysis\ncomponents:\n  - Depth, Pressure\ncomponent_labels:\n  - DEPTH (ft), PRESSURE (psi)\nconnections: []\nflow_directions:\n  - Downward\nannotations:\n  - LR GRADIENT = 0.542 ± 0.018 psi/ft\nlegend: null\nlegend_verified: false\nengineering_meaning: Pressure gradient measurement in a borehole.\nengineering_meaning_verified: true\nvision_model: qwen2.5vl:7b\ncreated_at: 2026-09-19T15:24:14.554163+00:00\nlegacy_note_backup: null",
+        "source_note": "ot-Watt_University_-_Well_Test_Analysis.pdf\ndocument_id: 01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462\npage_number: 445\nimage_index: 2\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p445_fig2.jpeg\nimage_type: diagram\nconfidence: 0.9\ntitle: DEPTH (ft)\ntitle_verified: true\nanalysis: Pressure gradient analysis\ncomponents:\n  - Depth, Pressure\ncomponent_labels:\n  - DEPTH (ft), PRESSURE (psi)\nconnections: []\nflow_directions:\n  - Downward\nannotations:\n  - LR GRADIENT = 0.542 ± 0.018 psi/ft\nlegend: null\nlegend_verified: false\nengineering_meaning: Pressure gradient measurement in a borehole.\nengineering_meaning_verified: true\nvision_model: qwen2.5vl:7b\ncreated_at: 2026-09-19T15:24:14.554163+00:00\nlegacy_note_backup: null",
+        "related_page_text": "1\n10\nA zone in a developed reservoir which exhibits an essentially hydrostatic fluid \ngradient, even when vertical flow is occurring, is said to be in vertical pressure \nequilibrium.  It should be emphasised that uz values in reservoirs are very small \nbecause of the extremely large areas available for vertical flow and the frictional \ncomponent of the pressure gradient is only detectable when the effective vertical \npermeability, kz, is also very low.\nThe interpretation of a WFT survey in a developed reservoir should commence by \na statistical analysis of the pressure-depth data firstly to identify zones with linear \nprofiles and then to determine the best-fit slope, m, and its uncertainty, εm, for each \nlinear zone.  It is very important that the cumulative set of observations presented \non a pressure-depth diagram be displayed at the well-site so that testing can be \ncontinued until a statistically adequate number of data points has been obtained.  \nThe measured gradient is then compared to the hydrostatic gradient corresponding \nto the known in-situ fluid density.  When the difference is significant the viscous \ncomponent may be calculated and finally if uz is available from re\natic gradient corresponding \nto the known in-situ fluid density.  When the difference is significant the viscous \ncomponent may be calculated and finally if uz is available from reservoir modelling \nan estimate of kz can be made.  However it should be emphasised that the \ndemonstration of the occurrence of vertical pressure equilibrium, even although kz \ncannot be obtained quantitatively, is also a useful piece of information concerning \nreservoir behaviour.\nFigure 9 shows the pressure depth data for a well drilled into the water zone below \nthe OOWC. In this case the pressure profile is linear and has a gradient quite different \nfrom hydrostatic. Before interpretation of the viscous component it is essential to \nensure that the well deviation through the formation has been accurately measured \nand the vertical depth scale is correct.\nFigure 9\nField example of a linear \npressure profile in a water \nzone with significant \nupflow",
+        "x_axis": null,
+        "x_axis_unit": null,
+        "y_axis": null,
+        "y_axis_unit": null,
+        "series_count": null,
+        "series_descriptions": [],
+        "legend": [],
+        "quantities": [
+          {
+            "value": "0.018",
+            "unit": "psi/ft"
+          }
+        ]
+      },
+      {
+        "evidence_id": "FIG2",
+        "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+        "page": 444,
+        "figure_number": "Figure 8",
+        "title": "Uncertainty in Gradients on the Pressure-Depth Diagram",
+        "image_index": 2,
+        "filename": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p444_fig2.jpeg",
+        "image_path": "D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p444_fig2.jpeg",
+        "url": "/api/figures/01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p444_fig2.jpeg",
+        "excerpt": "Figure 2: [Figure Note Metadata]\ndocument_name: Heriot-Watt_University_-_Well_Test_Analysis.pdf\ndocument_id: 01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462\npage_number: 444\nimage_index: 2\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p444_fig2.jpeg\nimage_type: diagram\nconfidence: 0.9\ntitle: Uncertainty in Gradients on the Pressure-Depth Diagram\ntitle_verified: true\nanalysis: The grap",
+        "source_note": "Figure 2: [Figure Note Metadata]\ndocument_name: Heriot-Watt_University_-_Well_Test_Analysis.pdf\ndocument_id: 01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462\npage_number: 444\nimage_index: 2\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p444_fig2.jpeg\nimage_type: diagram\nconfidence: 0.9\ntitle: Uncertainty in Gradients on the Pressure-Depth Diagram\ntitle_verified: true\nanalysis: The grap\n[Focused vision extraction]\ntitle: Uncertainty in Gradients on the Pressure-Depth Diagram\nanalysis: Analysis of pressure gradients and their uncertainty on a pressure-depth diagram.\nx_axis: Pressure\nx_axis_unit: psi/ft\ny_axis: Vertical Depth\ny_axis_unit: ft\nseries_count: 3\nseries_descriptions: Linear Regression Gradient, Extreme Limits of Error in Computed Gradient\nlegend: Not applicable\nreference_lines: Not applicable\nfigure_label: Fig 4.3.3",
+        "related_page_text": "Department of Petroleum Engineering,  Heriot-Watt University  \n9\n88\nField Development Applications of Distributed Pressure Measurement\nThe general expression for the local pressure gradient in monophasic conditions is:\n \np\nD\nu\nk k\ng\np\nD\np\nD\nz\nz\nr\nf\ng\n∂\n∂\n=\n+\n=\n∂\n∂\n\n\n\n+\n∂\n∂\n\n\n\n\nµ\nρ\n0\n \n(5)\nIn a homogeneous section of reservoir over which the vertical flux component \nremains essentially constant the pressure profile will be linear since both kz and uz do \nnot vary.  Data points obtained in an WFT survey, when plotted, will deviate from a \nstraight line due to errors in the measurement of pressure and depth as illustrated in \nFigure 8.  The scatter due to measurement error is random and the computed slope, \nm, obtained from a least squares linear regression is subject to some uncertainty, \nparticularly when the data points are not sufficiently spaced in depth. The measured \ngradient over the zone is therefore obtained as:\n \np\nD\np\nD\nmeasured\ntrue\nm\n∂\n∂\n\n\n\n\n=\n∂\n∂\n\n\n\n\n± ε\n \n(6)\nwhere εm is the error in the computed gradient and depends on the number of \ndata points, the depth interval over which they are obtained and the precision \nof pressure and depth detection.\nis the error in the computed gradient and depends on the number of \ndata points, the depth interval over which they are obtained and the precision \nof pressure and depth detection.\nIn many circumstances the effective vertical permeability, kz, is sufficiently high in \nrelation to the vertical flux component, uz, that the viscous component of the true \npressure gradient is less than the statistical uncertainty in the computed slope of the \npressure-depth plot.  In this case the observed pressure gradient is indistinguishable \nfrom that which would occur in a static reservoir, i.e.\nIf \nu\nk k\nthen\np\nd\ng\nz\nz\nr\nm\n<\n∂\n∂\n=\nµ\nε\nρ\n0\n \n(7)\nFigure 8\nUncertainty in gradients on \nthe pressure-depth diagram",
+        "x_axis": "Pressure",
+        "x_axis_unit": "psi/ft",
+        "y_axis": "Vertical Depth",
+        "y_axis_unit": "ft",
+        "series_count": 3,
+        "series_descriptions": [
+          "Linear Regression Gradient, Extreme Limits of Error in Computed Gradient"
+        ],
+        "legend": [
+          "Not applicable"
+        ],
+        "quantities": []
+      }
+    ],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 2.114886,
+      "retrieval_seconds": 19.12378,
+      "llm_generation_seconds": 7.2e-05,
+      "python_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "evaluation_seconds": 0.0,
+      "synthesis_seconds": 0.0,
+      "retrieve_action_seconds": 19.228296,
+      "elapsed_seconds": 21.475989,
+      "total_seconds": 21.476182,
+      "message_parsing_seconds": 0.000193
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 21.475989,
+      "python_seconds": 0.0
+    },
+    "validation": {},
+    "cancel_requested": false,
+    "error": null
+  },
+  "resume_response": null,
+  "response": {
+    "run_id": "GR-20261009-093726-FBCE2F",
+    "topic": "시추 작업에서 기록한 압력이 7,000 ft에서 3,150 psi, 9,000 ft에서 4,050 psi였다. 이 구간의 평균 pressure gradient를 psi/ft로 계산해줘.",
+    "goal": "시추 작업에서 기록한 압력이 7,000 ft에서 3,150 psi, 9,000 ft에서 4,050 psi였다. 이 구간의 평균 pressure gradient를 psi/ft로 계산해줘.",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "calculation_blocked",
+    "final_answer": "근거 자료에서 필요한 관계식이나 입력값을 확인하지 못해 수치 결과를 계산하거나 추정하지 않았습니다.",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "7edee9677d2b3634afaa0c72fca0ac39264117b82c64ada9d04b6226c625e552",
+    "criteria": [],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "정확한 압력 값과 깊이 값이 제공되었는지 확인",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "두 점 간의 평균 압력 기울기를 계산하는 수식이 올바르게 적용되었는지 확인",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "계산 결과가 psi/ft 단위로 표현되었는지 확인",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 3,
+    "current_iteration": 3,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "calculation_source_missing",
+        "started_at": "2026-10-09T09:37:28.543677Z",
+        "finished_at": "2026-10-09T09:37:39.834854Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "blocked",
+        "reason_code": "calculation_source_missing",
+        "started_at": "2026-10-09T09:37:39.868706Z",
+        "finished_at": "2026-10-09T09:37:39.904548Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "retrieve_no_progress",
+        "details": {
+          "new_evidence_count": 0,
+          "retrieval_mode": "hybrid",
+          "cache_hit": true
+        }
+      },
+      {
+        "iteration": 3,
+        "action_id": "ACT-3",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "blocked",
+        "reason_code": "calculation_source_missing",
+        "started_at": "2026-10-09T09:37:39.949352Z",
+        "finished_at": "2026-10-09T09:37:47.850636Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "retrieve_no_progress",
+        "details": {
+          "new_evidence_count": 0,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 3,
+        "action_id": "ACT-STOP-3",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "calculation_blocked",
+        "started_at": "2026-10-09T09:37:47.894445Z",
+        "finished_at": "2026-10-09T09:37:47.894445Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "FIG1",
+          "FIG2"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 165,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p165:c1",
+        "score": 0.01639344,
+        "excerpt": "be :\n                 2.3 x 0.433 psi/ft  =  0.9959 psi/ft\nThis figure is normally rounded up to 1 psi/ft and is commonly quoted as the \nmaximum possible overburden pressure gradient, from which the maximum \noverburden pressure, at any depth, can be calculated. It is unlikely that the pore \npressure could exceed the overburden pressure.  However, it should be remembered \nthat the overburden pressure may vary  with depth, due to compaction and changing \nlithology, and so the gradient cannot be assumed to be constant."
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 73,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p73:c2",
+        "score": 0.01612903,
+        "excerpt": "ng to KPa = 3478 / 0.145 = 23986 Kpa\nConverting to MPa = 23986 / 1000 = 23.99 MPa\nPressure gradient  \n= 0.47 psi/ft = (0.47 / 0.145) KPa/ft = 3.2414 KPa/ft\n  = (3.2414 /0.3048) KPa/m\n  = 10.63 KPa/M"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 64,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p64:c1",
+        "score": 0.01587302,
+        "excerpt": "ssured \nreservoirs.\nEXERCISE 1\nIf the average pressure gradient in a region is 0.47 psi/ft, calculate the pore \npressure in a normally pressurised formation at 7400ft. Convert the pressure from \npsi to KPa, then express the pressure in MPa. What is the pressure gradient in \nKPa/m?"
+      }
+    ],
+    "web_sources": [],
+    "figures": [
+      {
+        "evidence_id": "FIG1",
+        "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+        "page": 445,
+        "figure_number": "Figure 9",
+        "title": "DEPTH (ft)",
+        "image_index": 2,
+        "filename": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p445_fig2.jpeg",
+        "image_path": "D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p445_fig2.jpeg",
+        "url": "/api/figures/01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p445_fig2.jpeg",
+        "excerpt": "ot-Watt_University_-_Well_Test_Analysis.pdf\ndocument_id: 01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462\npage_number: 445\nimage_index: 2\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p445_fig2.jpeg\nimage_type: diagram\nconfidence: 0.9\ntitle: DEPTH (ft)\ntitle_verified: true\nanalysis: Pressure gradient analysis\ncomponents:\n  - Depth, Pressure\ncomponent_labels:\n  - DEPTH (ft), PRESSURE (psi)\nconnections: []\nflow_directions:\n  - Downward\nannotations:\n  - LR GRADIENT = 0.542 ± 0.018 psi/ft\nlegend: null\nlegend_verified: false\nengineering_meaning: Pressure gradient measurement in a borehole.\nengineering_meaning_verified: true\nvision_model: qwen2.5vl:7b\ncreated_at: 2026-09-19T15:24:14.554163+00:00\nlegacy_note_backup: null",
+        "source_note": "ot-Watt_University_-_Well_Test_Analysis.pdf\ndocument_id: 01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462\npage_number: 445\nimage_index: 2\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p445_fig2.jpeg\nimage_type: diagram\nconfidence: 0.9\ntitle: DEPTH (ft)\ntitle_verified: true\nanalysis: Pressure gradient analysis\ncomponents:\n  - Depth, Pressure\ncomponent_labels:\n  - DEPTH (ft), PRESSURE (psi)\nconnections: []\nflow_directions:\n  - Downward\nannotations:\n  - LR GRADIENT = 0.542 ± 0.018 psi/ft\nlegend: null\nlegend_verified: false\nengineering_meaning: Pressure gradient measurement in a borehole.\nengineering_meaning_verified: true\nvision_model: qwen2.5vl:7b\ncreated_at: 2026-09-19T15:24:14.554163+00:00\nlegacy_note_backup: null",
+        "related_page_text": "1\n10\nA zone in a developed reservoir which exhibits an essentially hydrostatic fluid \ngradient, even when vertical flow is occurring, is said to be in vertical pressure \nequilibrium.  It should be emphasised that uz values in reservoirs are very small \nbecause of the extremely large areas available for vertical flow and the frictional \ncomponent of the pressure gradient is only detectable when the effective vertical \npermeability, kz, is also very low.\nThe interpretation of a WFT survey in a developed reservoir should commence by \na statistical analysis of the pressure-depth data firstly to identify zones with linear \nprofiles and then to determine the best-fit slope, m, and its uncertainty, εm, for each \nlinear zone.  It is very important that the cumulative set of observations presented \non a pressure-depth diagram be displayed at the well-site so that testing can be \ncontinued until a statistically adequate number of data points has been obtained.  \nThe measured gradient is then compared to the hydrostatic gradient corresponding \nto the known in-situ fluid density.  When the difference is significant the viscous \ncomponent may be calculated and finally if uz is available from re\natic gradient corresponding \nto the known in-situ fluid density.  When the difference is significant the viscous \ncomponent may be calculated and finally if uz is available from reservoir modelling \nan estimate of kz can be made.  However it should be emphasised that the \ndemonstration of the occurrence of vertical pressure equilibrium, even although kz \ncannot be obtained quantitatively, is also a useful piece of information concerning \nreservoir behaviour.\nFigure 9 shows the pressure depth data for a well drilled into the water zone below \nthe OOWC. In this case the pressure profile is linear and has a gradient quite different \nfrom hydrostatic. Before interpretation of the viscous component it is essential to \nensure that the well deviation through the formation has been accurately measured \nand the vertical depth scale is correct.\nFigure 9\nField example of a linear \npressure profile in a water \nzone with significant \nupflow",
+        "x_axis": null,
+        "x_axis_unit": null,
+        "y_axis": null,
+        "y_axis_unit": null,
+        "series_count": null,
+        "series_descriptions": [],
+        "legend": [],
+        "quantities": [
+          {
+            "value": "0.018",
+            "unit": "psi/ft"
+          }
+        ]
+      },
+      {
+        "evidence_id": "FIG2",
+        "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+        "page": 444,
+        "figure_number": "Figure 8",
+        "title": "Uncertainty in Gradients on the Pressure-Depth Diagram",
+        "image_index": 2,
+        "filename": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p444_fig2.jpeg",
+        "image_path": "D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p444_fig2.jpeg",
+        "url": "/api/figures/01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p444_fig2.jpeg",
+        "excerpt": "Figure 2: [Figure Note Metadata]\ndocument_name: Heriot-Watt_University_-_Well_Test_Analysis.pdf\ndocument_id: 01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462\npage_number: 444\nimage_index: 2\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p444_fig2.jpeg\nimage_type: diagram\nconfidence: 0.9\ntitle: Uncertainty in Gradients on the Pressure-Depth Diagram\ntitle_verified: true\nanalysis: The grap",
+        "source_note": "Figure 2: [Figure Note Metadata]\ndocument_name: Heriot-Watt_University_-_Well_Test_Analysis.pdf\ndocument_id: 01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462\npage_number: 444\nimage_index: 2\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p444_fig2.jpeg\nimage_type: diagram\nconfidence: 0.9\ntitle: Uncertainty in Gradients on the Pressure-Depth Diagram\ntitle_verified: true\nanalysis: The grap\n[Focused vision extraction]\ntitle: Uncertainty in Gradients on the Pressure-Depth Diagram\nanalysis: Analysis of pressure gradients and their uncertainty on a pressure-depth diagram.\nx_axis: Pressure\nx_axis_unit: psi/ft\ny_axis: Vertical Depth\ny_axis_unit: ft\nseries_count: 3\nseries_descriptions: Linear Regression Gradient, Extreme Limits of Error in Computed Gradient\nlegend: Not applicable\nreference_lines: Not applicable\nfigure_label: Fig 4.3.3",
+        "related_page_text": "Department of Petroleum Engineering,  Heriot-Watt University  \n9\n88\nField Development Applications of Distributed Pressure Measurement\nThe general expression for the local pressure gradient in monophasic conditions is:\n \np\nD\nu\nk k\ng\np\nD\np\nD\nz\nz\nr\nf\ng\n∂\n∂\n=\n+\n=\n∂\n∂\n\n\n\n+\n∂\n∂\n\n\n\n\nµ\nρ\n0\n \n(5)\nIn a homogeneous section of reservoir over which the vertical flux component \nremains essentially constant the pressure profile will be linear since both kz and uz do \nnot vary.  Data points obtained in an WFT survey, when plotted, will deviate from a \nstraight line due to errors in the measurement of pressure and depth as illustrated in \nFigure 8.  The scatter due to measurement error is random and the computed slope, \nm, obtained from a least squares linear regression is subject to some uncertainty, \nparticularly when the data points are not sufficiently spaced in depth. The measured \ngradient over the zone is therefore obtained as:\n \np\nD\np\nD\nmeasured\ntrue\nm\n∂\n∂\n\n\n\n\n=\n∂\n∂\n\n\n\n\n± ε\n \n(6)\nwhere εm is the error in the computed gradient and depends on the number of \ndata points, the depth interval over which they are obtained and the precision \nof pressure and depth detection.\nis the error in the computed gradient and depends on the number of \ndata points, the depth interval over which they are obtained and the precision \nof pressure and depth detection.\nIn many circumstances the effective vertical permeability, kz, is sufficiently high in \nrelation to the vertical flux component, uz, that the viscous component of the true \npressure gradient is less than the statistical uncertainty in the computed slope of the \npressure-depth plot.  In this case the observed pressure gradient is indistinguishable \nfrom that which would occur in a static reservoir, i.e.\nIf \nu\nk k\nthen\np\nd\ng\nz\nz\nr\nm\n<\n∂\n∂\n=\nµ\nε\nρ\n0\n \n(7)\nFigure 8\nUncertainty in gradients on \nthe pressure-depth diagram",
+        "x_axis": "Pressure",
+        "x_axis_unit": "psi/ft",
+        "y_axis": "Vertical Depth",
+        "y_axis_unit": "ft",
+        "series_count": 3,
+        "series_descriptions": [
+          "Linear Regression Gradient, Extreme Limits of Error in Computed Gradient"
+        ],
+        "legend": [
+          "Not applicable"
+        ],
+        "quantities": []
+      }
+    ],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 2.114886,
+      "retrieval_seconds": 19.12378,
+      "llm_generation_seconds": 7.2e-05,
+      "python_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "evaluation_seconds": 0.0,
+      "synthesis_seconds": 0.0,
+      "retrieve_action_seconds": 19.228296,
+      "elapsed_seconds": 21.475989,
+      "total_seconds": 21.476182,
+      "message_parsing_seconds": 0.000193
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 21.475989,
+      "python_seconds": 0.0
+    },
+    "validation": {},
+    "cancel_requested": false,
+    "error": null
+  },
+  "wall_seconds": 22.081,
+  "same_run_resume": false
+}
