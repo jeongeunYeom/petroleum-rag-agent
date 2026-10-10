@@ -1,0 +1,201 @@
+{
+  "task_id": "U01",
+  "prompt_version": "final-v1-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_032f60804bc2c710016ac9fabb442487d0b827d32f13c6559d",
+  "wall_seconds": 9.67,
+  "mapping": {
+    "A": "openai_same_evidence",
+    "B": "qwen_same_evidence",
+    "C": "qwen_closed_book",
+    "D": "openai_closed_book",
+    "E": "agent"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":true,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"Correctly refuses to invent a formula/result, states it cannot be verified from the provided material, and asks for the formula/source.\"},\"B\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":true,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"Correctly refuses to calculate without the formula, but omits the follow-up request for the relation/source.\"},\"C\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":true,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Correctly states the formula is not available in the internal material, refuses to compute, and requests the formula.\"},\"D\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":true,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Appropriate safe refusal: says the formula cannot be confirmed, does not invent a result, and asks the user to provide the exact relation.\"},\"E\":{\"exact_correct\":false,\"partial_or_better\":false,\"claim_coverage\":0.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Missing answer.\"}}}",
+  "usage": {
+    "input_tokens": 3403,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 642,
+    "output_tokens_details": {
+      "reasoning_tokens": 138
+    },
+    "total_tokens": 4045
+  },
+  "provider_payload": {
+    "id": "resp_032f60804bc2c710016ac9fabb442487d0b827d32f13c6559d",
+    "object": "response",
+    "created_at": 1791621819,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791621828,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are the single independent AI-assisted semantic reviewer for a fixed\npetroleum-engineering benchmark. This is not human review. Judge ONLY the five\nanonymized answers against the supplied expected claims, numeric gold, source spans,\nquestion, and evidence. Do not infer system identity. Do not repair answers.\n\nFor every answer return:\n- exact_correct (boolean): all material requested parts correct; no critical omission.\n- partial_or_better (boolean): at least one substantive correct requested part.\n- claim_coverage (0..1): fraction of expected claims accurately conveyed.\n- unsupported_claim_count (integer): unsupported *specific* engineering assertions.\n  A closed-book answer is NOT automatically unsupported solely because no source\n  was provided; only count a clearly invented, source-incompatible, or unjustified\n  specific assertion. Do not penalize uncertainty or a cautious statement.\n- hallucination (boolean): at least one fabricated factual, numerical, formula,\n  source, or engineering assertion; missing citations alone do not qualify.\n- engineering_contradiction_count (integer): explicit engineering relations contrary\n  to expected claims or cited evidence.\n- safe_refusal_correct (boolean or null): applicable only to unsupported_formula.\n- false_premise_handled (boolean or null): applicable only to false_premise;\n  requires explicit rejection and corrected relation, not vague hedging.\n- formula_accuracy (boolean or null): applicable to calculations or explicit models.\n- numeric_accuracy (boolean or null): applicable when numeric gold is supplied;\n  check the correct output-to-value association, not mere presence of an input number.\n- citation_semantic_support (number 0..1 or null): among actual citations in the\n  answer, fraction whose *specific cited evidence excerpt* supports the adjacent\n  engineering claim. Null if no citations or no evidence supplied. Citation ID\n  existence is independently checked, so here evaluate meaning, not formatting.\n- note: brief reason, no chain-of-thought.\n\nKeep all named keys in every score object, using JSON null for non-applicable\nfields. Be conservative about unsupported or contradictory statements. For missing answers,\nscore exact_correct=false, partial_or_better=false, claim_coverage=0, and leave\nnon-applicable fields null. Return only a JSON object with key 'scores' containing\none object per anonymous answer label. No Markdown or extra text.",
+    "max_output_tokens": 5000,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_032f60804bc2c710016ac9fabbf9a487d08df33826736c1bdb",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyfrE3QA5KqevRpstgDmEOAvv42wU0homVAfLrt0jDslPjID_4yq7_riOAUYLOjsEJLYVigg95Ctg5n_X4ckw6_zF9CrUUSswbk13HcZaZtinXdcqKy-9rWcjqt_9E-bBP9OjFoCOoK1LiXV9Rlt7YQZ2VJYJffUQgkJIK6RyehXjlEcybOEYE3hN90Q8GdHqqyX_-tQ_da2V16mH2UsSKhsGLUYbNyzV2oM935BMRfrtFTmAdzVIpEp8V5h-4npY8tMFcazYB0Y2oSrG6774NwXUNpRsnwuCbG5GZDAJhuaa57xMRAve8edhAajTVzv4Ye3m6bK-thCtNz6TzO9h3lf6pl_Sntay38WGA8ibkomw8mNGTnEvBUnkSo80PYYAQvFjb_RWVMMcA5yXeqL5iH05BxsQkkbaLGs8F-bRsAA46bEiQ2P9KUxgQlJG-JDK1--qXk_Trq-xR_4WcI1dN8RlUwpf812lIgzEjbhWPuPxPSI8p16rOGnhImSfiZ0T8_SA7S8c9r_MdnmnX-uPwCkW2fYYiPme7khUJyJMYtzkDkdBiQTuQFcxdwCUtwhf1i3nME_wJITCgXmApLIYp5BBdcyfMdJrNS_28OsvmLCdVir_EyvNIv0o0T5eOPZLUd6urUJFRUoRdiW1PM58glxy6DYV0PXm-Tj3TmQW_3v2sT7vy6iIDcOGPBx8FcFqrNhTKuDUbuhFBQ3DemrwxMq7xkBe9zXKumfkSTPVZuV9N9q7AEL5tuRdG337o9ql0jO0qTIMjPKTXPuph_wbUsj6IcDo-VlGerpxdVOZvUqgVEMO1OnLRKnuMELskRQm-PnsqyexhDFqawPcq-q-sv2U15lratK1UXmmiMp84OdKFY39OU00DMMdqm463ZUW-fN0Py-_YdEY-1LL0cjgxZ3GvRMgMF8mIxAihab5IUt7Rw-4-F7xzeafViidd318Q6s2e9aGCEGOOSaJ2Is6jihxwNLRYkmIPHj_p5CCjqiHfmTOJhT4t6AoayPmsi2nRC8hEiSerj1oz6WnD1bTS9JW-mvyoZRuW7fUMlQK33lE7mXfODO5IOML93bsQMYNfSG0WrVk71gzPMelw5ur7iKSIF9-VM1b9t7cfwS8OgGsjKIgbGhoPV-UYX7fDwu81ouQwv1I3lMo9282zFnCpyZpr2yqyC7QSJaZP56hVy3F9iTpGGA7-zrCY2sOggv4T3E7r_-w7hKMPitBXAb1GjI46EE1mBZrnbh0qr475M7FS2UGdgHIbEHTSXyGxi4F3UiK6L-2fMI_StYRNn2BYHtZsgwDaIlWvB4QQSvIcTTLOiAZOmVyiiCnySB0JeRA24Q0aSSVPTCU4t-VDCRhmGR479k39RbWiMY1ijlI1jXvoJWjvx1-EkVyLqD7F8zkVfXWC5EYVk6RCk2qhWC-a5ncbDiC0mX_PGSdUcbO8mOzd8r-e4f-I5hIm6R9MTb_CQpYA0N0hkuvZ90ffdikQg2AF70EarayokmZ2zLS-kHOW1k30PbqYk_914XGypjNUt8Toeq2HZ46mfH4EUEb_VJYXcZ4WMs0wLtekDZ0zyt9q_ejgrWuFRzgZT-7jKGAJIAHHrfNkJvqB4SgtdFC2VyVTSzKbyzsibTb0U2YWPtIzU5hVYKSn3WLEkiCadvGHiEkl983kpka3ePLBmiKcBxK1HTeXMyl3qbpoqdc0G-qjKGEeJP6oxwy67PU1y2vfvo9-BcvDsogd_3vrduwwd5n3nGKySG9R3QBJ-R_xtPoQNngEFVWRhETZ7vTBow5YGDAh9eGrnR2UO82QUdoN9glPSw5A4cvY2wELMxJBHnFmRxdcDSiU8QfuOChd94hLfBYUjf7zXUmGnUpEa36eoIatDDOoeTyEGfSB0SA9L1CEm-UZPA1FgVX_IcGw9qGlUWpcTlqb0YmuOGmJKWaJ94-j9HAAHNFTT8TmIXEenIiqQlbNaV5C5OjfHm0M2PDFx-dc_bLPdFV9QZu1cIhritaXWmL8vpKqqlsyrINJZrhkIRIs2BP42NNLBGOZiOB0wgQLibX8vKtqrHtRAFR6KFwpnWM-D-WtnpUiT6PRXBoWJRVZ9IIlYtE33PcLKUl2FF9SFwsmDfx3uVFso1hIxOMyq2twXAsvUOqCoxhnJu2BRIzMoEDRBkqufzTY981bGeJ_BPHhnVjIlOAKZVfX8va0ORTQ6K4E95nIBwvGyDGJ7nHpK2J8nPrw7dcacfURJFkIBrFiX7rRh_pQaVDRbyhMA_dzLqFDmO_LXIxZPEQP0hYT9dObOVHOluqsoKcDPCBAkRNyq9bu9OKhT80oe4W70OfYjsbX68X1fXJ0yEi5labJ8ZzemnuUKLA5uoN71oTzZE_AhL8t8gZehZQNb346XFM-H2R24oBsLnsUzIHXqyDVXBKX-Ae6HDCG53UtToo5U0FQys5fNWtEEqEoRjF4pNlFdnv1AGEYl43tr_DB9sMIB1cDZdD-O6RAJXP464MAAyiRHOQECtGD_MCMe5Sg_CGX_qevPfOeUKfOHQ1UYkRxBGQwvicDlxKtzGJsuIyGRZNdeYNqyVboF7gt4jv2zHRDlXKpq92Tl28TAeI9gaSsR0X_4Q2D5hpP_yIyeTReg-FAoTYv1eMYBVxGJt2l2eAfcPUyPRT9DeViSAzpQg8YvqD8h8FY1XYfWszX8-q_5dDOfDWpoMTcKqlyZ_LaPpPgC91FWt11K1uV1IjAmmPjip3dpoqs-OKANnFIpBStSZkIk8QTvyFPKSMYg7u05QRv5U6osNUC39tSduL9Z_fK3HqssN95e5vrAfK52Yxfam1mGjH29W_p3zOmQMAe6kR6XcHMZw4FVB3JwuBAjjKkJBxDDE9_kH9n_Uw0xwNePneN3CIBxLYqycuBqIAKrMQOXd-fWrvlBXkGEy-lLxRpSIiHQ-R_ihN7q7oF2r-hM3ArFsGJm0yEX48S1qZw8OEJyPRYJkyduEoLcHRmybb0xVPbdDEvNviByKSkZ7kYE_t2qMEmZCh7iMyE2NG_WjaMdZG8tvNJep7Di9syLi9WllpsJ093yS54TZF-xaHlg0fzBEuB8CxOKSmwoKJsqcRG_fku1R7rTDt6XwHa-Nf5NfqdIa44jT12ddMqY6DUwTUqAtPGwR1ozWf40ydx55LJchM3Kd2OZXN4V6RIfOGo2g8DljGUZtcJj9zS7XsJOeEUk0peuejR5cGILcABlm0YRsigdlhtcRtRH4Z79k=",
+        "summary": []
+      },
+      {
+        "id": "msg_032f60804bc2c710016ac9fabf0f9487d0a08ee049c93a2464",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":true,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"Correctly refuses to invent a formula/result, states it cannot be verified from the provided material, and asks for the formula/source.\"},\"B\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":true,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"Correctly refuses to calculate without the formula, but omits the follow-up request for the relation/source.\"},\"C\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":true,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Correctly states the formula is not available in the internal material, refuses to compute, and requests the formula.\"},\"D\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":true,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Appropriate safe refusal: says the formula cannot be confirmed, does not invent a result, and asks the user to provide the exact relation.\"},\"E\":{\"exact_correct\":false,\"partial_or_better\":false,\"claim_coverage\":0.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Missing answer.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 3403,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 642,
+      "output_tokens_details": {
+        "reasoning_tokens": 138
+      },
+      "total_tokens": 4045
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "openai_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": true,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 1.0,
+      "note": "Correctly refuses to invent a formula/result, states it cannot be verified from the provided material, and asks for the formula/source."
+    },
+    "qwen_same_evidence": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.5,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": true,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 1.0,
+      "note": "Correctly refuses to calculate without the formula, but omits the follow-up request for the relation/source."
+    },
+    "qwen_closed_book": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": true,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "Correctly states the formula is not available in the internal material, refuses to compute, and requests the formula."
+    },
+    "openai_closed_book": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": true,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "Appropriate safe refusal: says the formula cannot be confirmed, does not invent a result, and asks the user to provide the exact relation."
+    },
+    "agent": {
+      "exact_correct": false,
+      "partial_or_better": false,
+      "claim_coverage": 0.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "Missing answer."
+    }
+  }
+}

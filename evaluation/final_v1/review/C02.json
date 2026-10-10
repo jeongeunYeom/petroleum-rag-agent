@@ -1,0 +1,201 @@
+{
+  "task_id": "C02",
+  "prompt_version": "final-v1-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_09db64993e992ab9016ac9fa63f1f887d0af26655a1545702d",
+  "wall_seconds": 13.524,
+  "mapping": {
+    "A": "agent",
+    "B": "openai_same_evidence",
+    "C": "qwen_same_evidence",
+    "D": "openai_closed_book",
+    "E": "qwen_closed_book"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":null,\"citation_semantic_support\":0.5,\"note\":\"Correct API relation given, but it invents a final API value despite no SG at 60°F being provided.\"},\"B\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"Provides the correct API formula and appropriately asks for SG at 60°F before calculating.\"},\"C\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Correctly notes SG is needed and does not invent a value, but omits the API relation and 60°F specificity.\"},\"D\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Correct formula given and correctly requests SG at 60°F instead of inventing a number.\"},\"E\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Correctly refuses to calculate without a measured value, but omits the API relation and does not specify SG at 60°F.\"}}}",
+  "usage": {
+    "input_tokens": 6030,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 934,
+    "output_tokens_details": {
+      "reasoning_tokens": 421
+    },
+    "total_tokens": 6964
+  },
+  "provider_payload": {
+    "id": "resp_09db64993e992ab9016ac9fa63f1f887d0af26655a1545702d",
+    "object": "response",
+    "created_at": 1791621731,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791621744,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are the single independent AI-assisted semantic reviewer for a fixed\npetroleum-engineering benchmark. This is not human review. Judge ONLY the five\nanonymized answers against the supplied expected claims, numeric gold, source spans,\nquestion, and evidence. Do not infer system identity. Do not repair answers.\n\nFor every answer return:\n- exact_correct (boolean): all material requested parts correct; no critical omission.\n- partial_or_better (boolean): at least one substantive correct requested part.\n- claim_coverage (0..1): fraction of expected claims accurately conveyed.\n- unsupported_claim_count (integer): unsupported *specific* engineering assertions.\n  A closed-book answer is NOT automatically unsupported solely because no source\n  was provided; only count a clearly invented, source-incompatible, or unjustified\n  specific assertion. Do not penalize uncertainty or a cautious statement.\n- hallucination (boolean): at least one fabricated factual, numerical, formula,\n  source, or engineering assertion; missing citations alone do not qualify.\n- engineering_contradiction_count (integer): explicit engineering relations contrary\n  to expected claims or cited evidence.\n- safe_refusal_correct (boolean or null): applicable only to unsupported_formula.\n- false_premise_handled (boolean or null): applicable only to false_premise;\n  requires explicit rejection and corrected relation, not vague hedging.\n- formula_accuracy (boolean or null): applicable to calculations or explicit models.\n- numeric_accuracy (boolean or null): applicable when numeric gold is supplied;\n  check the correct output-to-value association, not mere presence of an input number.\n- citation_semantic_support (number 0..1 or null): among actual citations in the\n  answer, fraction whose *specific cited evidence excerpt* supports the adjacent\n  engineering claim. Null if no citations or no evidence supplied. Citation ID\n  existence is independently checked, so here evaluate meaning, not formatting.\n- note: brief reason, no chain-of-thought.\n\nKeep all named keys in every score object, using JSON null for non-applicable\nfields. Be conservative about unsupported or contradictory statements. For missing answers,\nscore exact_correct=false, partial_or_better=false, claim_coverage=0, and leave\nnon-applicable fields null. Return only a JSON object with key 'scores' containing\none object per anonymous answer label. No Markdown or extra text.",
+    "max_output_tokens": 5000,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_09db64993e992ab9016ac9fa64a27487d0b232d3f1a24164bc",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyfpwhde9kqbmkg3p0LmgC3G5o4PVbro0C1CAEuobTLY-3-mZeF8juQnh24j7ITHitxvikO64HVgVjRH4SJv7Vvl4OTYm3QWtcosyvgz1ZBDxuRC5eOY1iVCiaitrMJ8PiC-QYPjR6KQ76KqeckODcmVPcePqYv1MVuHQAn32r2xjV4mLHyiPs6BIgeXkt4mQJX8Xgjtcwz0fQE2y2_Ydt_RS6bhUg8fPmbOPeeB5WI28RmZRwqItPtFAeRvPpWz-0ktfXfsdb6Izs3H1m3ECkELgnvMnnqCBX7EOuXxYMlkLYHkUPYPX_duqns3w0YYTt3IH2GQg5Pam0ex7bVWFkxhKJGKH7W1ER9D67nm4Owj7tnvSydzqnjW4Jktz3_QxQ1NpV7BhjHNKbUVMWz68d7uB5VZ0rKyPYkcjIP9BRB7zGi6rBijTeLNxX8SqrTfwz_Nmn4CxQRC1oDh3eINRstQAikoDjc9hyJYlGGRdDeAENjVPWyrCWchp-lgbT_F-Q9Xq8Atva1bym202HVRas8dWL0O6tsiDIY97Cr2LB2GoWU2SFrUaLRPoOFYDEhvLZEvmhT1uWNVq5W6gaEzoSPVz-lFgj7VXfUxvC7ZZj29HowgX2RJfGj39RnJkO6unbJ7mLW7mKBTIiDEjEubIe1r6HNkgcRy1Mi5WW0GZk7brhuNGy8t0m2PYV8mlNJyVC-MT0YvbOig8I-jfV4gajecrPJtHFiJgBVvt8ssNe2NYeuXLyiYHl19TlUHLYBX8_XD9W1M05qKqJ0CVi6lbHgjv06jIIfUgRDB-WJXONW8hIPp-q8KQQYVeb4cftek0jYPmK-7qQwZEyg_zJox2viOO2t4u6SbCMSYyiU4l1N_3My981hxA4RDTuR4y0xY3qHfpwau813ctpvKHcGCmlZmYasA5pVfVfx1-7n_kRP_r2pLwA6Wx-bbesWIdwTtrfaXQQNmFEXG9g1WKIgdGjX61N0Mw9XNJ2YqTHq44w6EQ-uvCi9uAxH4z5EZOvA5E9h8ehk5VWRWiTM32nUAThfPHQB6yzsB5Vt4YyAHMFkbqO524HTFyL-haAxFH2MJc8hIb6jseIW9HYwiGLJ5M6ma_aO7LfVVJlaC89GOlryLIjY-adJpQIapkfNu3a3leiVMpap92O6xQWPst_BrZ5aRNI6zgGPikt8jaT2Rhc3kPekyoeCcQlGQjFsxDRsbgkMG16sqPhTRoXXv06EQZyj5n5Eq2qrsOycgWKxUcpYPTDJE6WW1coxczJ88Qd5JiWEeW9v7zYjNPFC1Lky4Jc68iJsRzNQ7IBi8ZJUBZ7V0c5X0VPPr1t-dIcUIrVsA9qZkW-dIVlJVmathw88__qVryDRWsQb6TtZtwU7L0qzuGGfEFvIifXJEHLxNqVi1gjx37zULKyeIo4uvR7S0eTrpDePtXJUsIjAhOB-IPuo8a6st3YyXtwFn9rDchoRawUbzwLio2QuKdgKg_sOMplhZg6hlAN0MGnVs3z9OIebudh4iFBper0e8QsYpF9GO46i9FyCLI3ce20CQ3LYETpGB1gmFp9DkesjkGnV0lGspIW2Oa4V6hPhwXC55yaESUIfoSouGK8jS_11hrOdPsYVW2Jf1BGHK8iI8Hb0YIX5_Q33bLsz6nGbKfSlgRy7M8zHvSVNqBaLdbYishvXaK-2YRjnUNmG7ujOM9ld-ouEvowrSh1uW_0CujDt8s0OEz9JAvLBhwAO6_H3PV5X9xaVA8CXTUwgbEz6so1Jur-8Gv0JXruGphbpGKaK1usAW50kIw2FX3xoC0CwDdMgdPLtwtA-9588X5QCRKEvM8Qqzq6RYBXJEaYGUl8-uKtoyxwmjJ5jn2h315t91sXU_7rrylwFM-j2OVLM-18cH7GzuTo7PoAcdNdPSgM4nm0_FTm1xhG-4UJAfL6JoEsXDDPMMunbcKga_458XBQPlTWA59oxsAt3Z8HQcvTH6IC-z14U7NLxMR5-LavHnkiS7loUpnB2TZxhcULlxERZ9cKr_bC1DOO5CobBEEOI-BPdOLSuIeSU6HdV_4cZq8Wrb-TN_aaIFqo9UmbDjoX6ADvNnATM-TbrlqZKnf2PFW3yMGh3Chuo6enbypno-wxXnKssQRMf2vC4lRdVC7u-1h2hXVToYeuwIgQDrH0cPZYXd2Edcl5a-T4XVHCPU14rg-lEv1LR8fm7CavKdyN0URUjHjR1RWPIg5O2rtCes6_7Hw9O0qjWOWubBGeYSXAotdY9noH2SL0XWHuAm8daEpncy5Z2VKnA-cQvXaZAOnJbFhW3OmGxD_8K4VQj6u3w1IiBpB8B75NZrW9sNIAOcWJLijj_vkSFpiVL0CmUv1XzfbR_EUG2Y5smd0L_zxaZIZSDJOZiZO0qnSlXiCkCvds7f92o-d7PMiFqCFVaXDvWl8cUf7GR2nk4rfKoBfq0ZK2_viCQ-HDprhOAaNK46fshXZ089XdWnwH-2_1IOyZSqavT6PN5jgIodRXH6ZHjp-idn9UORpUXgk2YVHBjpmVM9f9HDF_CsmiQAia0pa_FMneqNcXfN9PHWPmpdJ1G-a9SUgrwUJEIeyjwudx-N_BBu-5jnJ7ZTFR6bBCtPgTmSg9bjxQYIEtekf-Ed-3njCXGT3sPOX_1hPBLo01vhXp51F-hMaW18Ch3jdva8A_dqIycdeOMG1U3DN5fbhjL4ps78GBfO3zPxHFtYBHfKWIpNXspML8iBA3u50BiszlIp1rSZtm5HVprIOsRAd8StkWZl6ZxyX_M3kf9DTKQ4KxElNCvNHFg7APZdVOpk4QN_wqMOKVDB4nIewIm2ab51rmNv156V-zWwm4i08Z46ENGZSfhSwEIMeCAvOCeAOhmsP89sX3s4IQZ1PzqaxN3aYrBsnEarGXzpJ_2a14eJO9OmCMoRdjqrkQA6Ug7cYv0GgV0Zz1Xi27F_u9edJSfQ6WzpOJByPTQqjK-yoGJbeNpUPqA7UgKRNb75FamFWdaMls8Rgm21ma1Rwe4CBYkRHMtWjBLZyEV13mVD11kOZJFajkJGKioWDngWhRwTz2Zpo8FFFOCf2LAzawebo0TQp7wgj34NXmT8TtGEOq4HxlpI7fCSIYDCQESzxn3ahAN_-J0ok_pVCsDvBc_irqSLsAveYZzq_gSHoNF5-g_MOFZcBclHeN4r0v6XlOATo87fd8R17MVdF4Ga_ckto9L6eYwHBHAQ5rcM1MDHBleD1Sg9d2nM0QPLQ7HKiYRoiPalgF12VfrbYSYJACB68If02860JcwXGbjjo4npVV977k1cqa_IVICvgCzyPFJmj6h7zNwLd7FkUBtapyBkVA-qlO89kKmZCgWDGNavRMF8krlU4oUR_sjP8xBh6JqprdjglPhbFitfqt0hcaSYnX-3eP_I0R2ZpQA6VacYlTZLIyIRv6nQFNUpTwBj8F4GWiD2ywOiwE13xWlU3GOQXzb6SEDE6LdCVe1TUiDH718QxLKiDHt_SMyrVgMWMP-EviwJYYBzqemnftK2fDBO_SUpf4enMGe1ciWzn7_zziWxPpj-Ax3pbVkqIPKEbOx0Ki8rNCpVmjfZCEsczi3aG6EUGt_AQVYJ5fkMbY9NDoO7JVosfQzUGW40VBIfey9qP9T7Et0DqM7xMAd4O8n2aGWSSqjD57u1yQKRAcs-aZcKwtxrmObLN5hWdDdmfmYS_f7CFNLvv5NfWguJByI6Cq9m11Swq9-xF7X1jXL3c_R6v3-5P9fZlNl2ufgQ_x-Kk68KfVqdJjIRJwQIfs5e0Eh1PEEJqyCopzqd8WzfUwn4v1QU8TWZgOhaeX967IBprXGhdX3gWHFNJ64ZR9O1QoqLVeimFUv52NjMgiwyUu4LKhBeExFHE-N-lWC11rSshyhHtd0zn-5klrAv07yCUfsl-jRmWHa14sKPFsMOXcIXytYu6siTkdv2mWEQ9TIMwO2m346-I-zYesnRc84TxkU7Eg81sT9X3Z5tyI6JkgwSPWGfomu0qXpfW1ntVEmH0LMzT3IDgvBRauTo5i6PtrpJ9GZMW5E6UeHOqyCojTf14KJH9dPyDBeUlgWi_jPS7fKTNr9-_5EWRV5beHZgCTB5812MggLeeTbTcaPVbgFY_Kl5LDBvXXMuefFyFRN2mqGIiMhgcejBBlDzyyJOxvpwh7XNwNO_7HghviQrInBayXP-qzMF3oii4ld-LKV6JfgXQC7A4Kzh0cSvOsojznJmiFym7v-G-b-gzK5H2jJ2dIwb2u8DKbR7sfh08AYXDZ3F1Q9ARWlkX6ClEBxGOc4mHfTXwnlL4THB1QkriMYFTrc7Ws9fT2PONp76zsYs4S2Tg4kG1i6vGxAzm9u-sFfuyd-XGUPOdsv95JbYRcfmpyjkOLsZ92NphbPjWkx5ihK00P6Kn0E5raP6PCxPWis_uiDWAjtehgaZBE_D_AT1H1xMqdVeIvp8cu9Nz16_TIRlbuJiJV66OJIDcSDrGqPfSr2giLADGu4Vqg5_jL5VHkU14fvajHYQ5g6CBz9WbRK8P1s5f7IlYoI3ZufMt9S5mOz4DJfvjq98Lo2Lg6Cpm961OOjNhcu3P9JLkJJfuD4mOQDKkc3gu3jCImv-8C8nRmpJOmxKY9iFpaOZZ4js4k8b4RN8gI3yGLIQHJ_He4vil38omWJf8Vyu6Z-nYfcKf44Ja8jDUYVxQN_CA0ZC4TVWmsA719GuHgyEFGXTMH80IJ7M3DprKpS4KSc0nVLP-p9yNpargOcRVQfbevaKSNqYk9hoxQ_91skgWUxXgQWcAZJgT1BwyyWaztRLnjVfmdlb7zpU4cIN54OQjljVHQqMXalYAX3hws_b4DNjeB7Of0zm5HICz3MaCPYBbHOTK97AUnDraV5nu56OHupEgQmbuFIBPutoHsspGpkZ1ygEr9JkbJAHTSjc5gdQuACO_r687qSCL6e6mnb26vbuufekSIWYpbyYrPV0gjyYWBsyAzc6AGe9rBp8B7T8lSoC6Frg3lCaytHt0BQ8Zqcgv5JEhg0zrc0d6yLmWpIEV9ethopDgSdF31ebTkaaJiNHvtI12x58Wfp95vjd63MgjOaq2k7BkiNL4r8T2JnWeqBUE1VkYFav10aHEIJ5vABh6hTP2pERSAxd8Co7SfnXX5St6GOf3flYTTljBHh9TF1OLJBY6VX-XupZLNS_Cc9ubVRh3T5Oj2OSEAgWUCT7UPDf93oYb7T1o_9fj_Gyaa23G-s53vEYJ_yGJjrt9jRabbTywXQ9z5CT7vdhODpOQ6u-X8juqDmUzZyfJ61gYBFgDEzlyTcoI-aF--iSZheeqsqJDD7yH3hNUVDDf6o4ZRjhpjpnFV-oiFvvV1736gmS79wCAxIiQkC1V5KotKR3LDCe5KVJ1CUcVQr50UBXneNbrY6vK3cB3hXA78TJBW1MbQNn_RIkk6jlNbe69e6tQqBlitIaim7SCSrI6fvT4cf-OhCEv4nUMQdhLLBLvdAPu7TryD57yeOlAjP2d_joEuyV4_OgdQPkiMjetg63rv4psqszVup2CiLfzdRJBS3qb3LbVzC1sXsb55zwa6HLrTWqUV2pMX-YKM0NQYAH39Y29m0WoM_oJcGDhkwhEVXXdyldGaJooOGa_7vSRnyLnsBWWc05XLmY0GXyED6OI3FRdGJlb6UEYDbFib5SeIeX6FjzEO3U53rD3BkqR9wkS3z4s6FVaCrxCVOJAN8FtRE5UjRfEHEXC_JIMweoxI1VcxfVWDgQZfb_iryDsDF9c1HSnyBcBIfVC6c2_5x3YBFXyOstdHCyBDYnwQNUYsJevTZL_9ThtgoPthW1B-q4YhH5TKPsqH1SEcCOJfTfI7S6QKqRDXGyKRLKomqjSyvHyivKICguk2uSWa0J--epzBZttXJo51AoiA5vHcD0xiSqibv_WnxbvZ-L8Zp5Y1wxWdI3nRykpmzMUIgvmDZY5URlyhEVVFQAOkZ9UfuMcFe_Tu5L6xwsBHWadjwhvgbE-yKl6jFyLjVTm67EZ8jZuIyFl35c6ulHDyz8_GUWxPOjIUDyg5to2wpsW8f-Slhi3UhZdVwPHI6tUbA0u0JyxGjM22kgUkcLCKGHlT-Azq3Q3ukKYbArtnF3gXozIe3AHSv6oS-VxO-pRvEPotQL3npcfjYcKFoA6UIIl1ZOW0pil4nsfRF5dtjFLwrrnPkH42DPcxH-jrK51FR2fsLneYHDNqSkJA6nFE_vHwg9ZnZuXyWvC3pcE3WkgwuNrfqiH9ai_is8kVDkzbbg5dc3egLzrEh_e97V8Zo8YTkbpq5-9sJmd2rqiNhaYw_GOqHBFTi6cPXmncEgg1bICnWKQsChkf3bUvgVCR9HTstwGjLShreuqRBbhdF6IfkGMpFaN9b8kfaglLLyXKR4EQ4Dc8ErSfBRGMHRgO2URQMyTMX0UiGEU55zjXcVwnescva8KL5hfnMPNMIg8LGfbS9vfgA1YPemWpd_MiAbJ2EsLTS2CCyq-78x86BVIcSti4uVlPR53C-NuZd9Uv-AbPddvPq4yF28rv8jRD_MvWkajYGGxLT9I-vg6jKjSYu8wE14mzXLdzeWEteKgMgJR1_ZVvS7cNZ8v7zCeLo5wqbc4aiSD7JxtfBpW06QGsR1PoanSN02x-xoJu1T_XkKrKLEOAZ0tIA==",
+        "summary": []
+      },
+      {
+        "id": "msg_09db64993e992ab9016ac9fa6bf18887d09b9ccd9b09b3ba63",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":null,\"citation_semantic_support\":0.5,\"note\":\"Correct API relation given, but it invents a final API value despite no SG at 60°F being provided.\"},\"B\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"Provides the correct API formula and appropriately asks for SG at 60°F before calculating.\"},\"C\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Correctly notes SG is needed and does not invent a value, but omits the API relation and 60°F specificity.\"},\"D\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Correct formula given and correctly requests SG at 60°F instead of inventing a number.\"},\"E\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Correctly refuses to calculate without a measured value, but omits the API relation and does not specify SG at 60°F.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 6030,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 934,
+      "output_tokens_details": {
+        "reasoning_tokens": 421
+      },
+      "total_tokens": 6964
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "agent": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.5,
+      "unsupported_claim_count": 1,
+      "hallucination": true,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 0.5,
+      "note": "Correct API relation given, but it invents a final API value despite no SG at 60°F being provided."
+    },
+    "openai_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 1.0,
+      "note": "Provides the correct API formula and appropriately asks for SG at 60°F before calculating."
+    },
+    "qwen_same_evidence": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.5,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "Correctly notes SG is needed and does not invent a value, but omits the API relation and 60°F specificity."
+    },
+    "openai_closed_book": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "Correct formula given and correctly requests SG at 60°F instead of inventing a number."
+    },
+    "qwen_closed_book": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.5,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "Correctly refuses to calculate without a measured value, but omits the API relation and does not specify SG at 60°F."
+    }
+  }
+}

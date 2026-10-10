@@ -37,7 +37,7 @@ for (const [name, data] of Object.entries(input)) {
   if (readback.length !== matrix.length || readback[0].join('|') !== data.columns.join('|')) {
     throw new Error(`Artifact-tool validation failed: ${name}`);
   }
-  const inspection = await workbook.inspect({ kind: 'sheet', include: 'id,name', sheetId: sheet.id, range: 'A1:C2' });
+  const inspection = await workbook.inspect({ kind: 'sheet', include: 'id,name' });
   if (!inspection) throw new Error(`Artifact-tool inspect failed: ${name}`);
   const csv = readback.map(row => row.map(csvCell).join(',')).join('\r\n') + '\r\n';
   await fs.writeFile(path.join(root, `${name}.csv`), '\ufeff' + csv, 'utf8');

@@ -1,0 +1,201 @@
+{
+  "task_id": "G02",
+  "prompt_version": "final-v1-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_04e03573968122c0016ac9fae6c30887d0a4da30bd7f65ff15",
+  "wall_seconds": 12.501,
+  "mapping": {
+    "A": "openai_same_evidence",
+    "B": "agent",
+    "C": "openai_closed_book",
+    "D": "qwen_same_evidence",
+    "E": "qwen_closed_book"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"Correctly states 5-layer shows no bypassed oil, 67-layer shows bypassed oil, and avoids inventing quantities; citation supports the claims.\"},\"B\":{\"exact_correct\":false,\"partial_or_better\":false,\"claim_coverage\":0.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"No answer provided.\"},\"C\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.33,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Correctly avoids inventing quantitative values, but incorrectly claims the figure is unavailable and misses the actual 5-layer/67-layer distinction present in evidence.\"},\"D\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":0.67,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"Correctly states the figure note difference between models and does not invent quantities; citation supports the stated claim.\"},\"E\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.33,\"unsupported_claim_count\":3,\"hallucination\":true,\"engineering_contradiction_count\":1,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Adds unsupported generalizations about layer-resolution effects and claims 5-layer visually shows bypassed oil by layer, which conflicts with the figure note that 5-layer has no bypassed oil; only the non-quantification caution is acceptable.\"}}}",
+  "usage": {
+    "input_tokens": 6440,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 849,
+    "output_tokens_details": {
+      "reasoning_tokens": 312
+    },
+    "total_tokens": 7289
+  },
+  "provider_payload": {
+    "id": "resp_04e03573968122c0016ac9fae6c30887d0a4da30bd7f65ff15",
+    "object": "response",
+    "created_at": 1791621862,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791621874,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are the single independent AI-assisted semantic reviewer for a fixed\npetroleum-engineering benchmark. This is not human review. Judge ONLY the five\nanonymized answers against the supplied expected claims, numeric gold, source spans,\nquestion, and evidence. Do not infer system identity. Do not repair answers.\n\nFor every answer return:\n- exact_correct (boolean): all material requested parts correct; no critical omission.\n- partial_or_better (boolean): at least one substantive correct requested part.\n- claim_coverage (0..1): fraction of expected claims accurately conveyed.\n- unsupported_claim_count (integer): unsupported *specific* engineering assertions.\n  A closed-book answer is NOT automatically unsupported solely because no source\n  was provided; only count a clearly invented, source-incompatible, or unjustified\n  specific assertion. Do not penalize uncertainty or a cautious statement.\n- hallucination (boolean): at least one fabricated factual, numerical, formula,\n  source, or engineering assertion; missing citations alone do not qualify.\n- engineering_contradiction_count (integer): explicit engineering relations contrary\n  to expected claims or cited evidence.\n- safe_refusal_correct (boolean or null): applicable only to unsupported_formula.\n- false_premise_handled (boolean or null): applicable only to false_premise;\n  requires explicit rejection and corrected relation, not vague hedging.\n- formula_accuracy (boolean or null): applicable to calculations or explicit models.\n- numeric_accuracy (boolean or null): applicable when numeric gold is supplied;\n  check the correct output-to-value association, not mere presence of an input number.\n- citation_semantic_support (number 0..1 or null): among actual citations in the\n  answer, fraction whose *specific cited evidence excerpt* supports the adjacent\n  engineering claim. Null if no citations or no evidence supplied. Citation ID\n  existence is independently checked, so here evaluate meaning, not formatting.\n- note: brief reason, no chain-of-thought.\n\nKeep all named keys in every score object, using JSON null for non-applicable\nfields. Be conservative about unsupported or contradictory statements. For missing answers,\nscore exact_correct=false, partial_or_better=false, claim_coverage=0, and leave\nnon-applicable fields null. Return only a JSON object with key 'scores' containing\none object per anonymous answer label. No Markdown or extra text.",
+    "max_output_tokens": 5000,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_04e03573968122c0016ac9fae792e887d0ba4c1f099d66237e",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyfryn9H87nlGgTYhLDFl6nhgM1-uTad0zbyI63ZevthkyUa5dryKSeKxsAShfhVQdh_VMuVFe3Bb1loam_CSmLRkT0BB_sBly2NQtdz9KrmHHI-0PipkYpJtZ_B8sP1TTl9CaDx8bpMiOyx4TJvQ5ZTNCwFmnyMysi51KbGdXbIZVhe2ur8VBbCUccdeLeX0jmZSF7-zSJ2elS3oBvvxnJcKoH00jXNnziZnjJ-cmTS-8fs6VTwDDY7tVZ2ZQ39OVeMyRQYb2RJM-n_Mo0NW331JwgcFwDm5oX1j7wTnGyjgf66hGrR0pMSc8_H048wZYRg3mwfttfMnS4fphcHHsZwAmbgm6B7hncK2amskml7M1MWifHI3AyXd47amoFqjR9C1TkA6USHsEpZyZlVTT4IhRdT17qqDGvhN5-EQX93JNshfBIpEuzecSV5E-vDq7dIZ0WIaPRL7ck9cVufqP_a_rZkB_WZR49MzHxWC8GvVez3EAEDBgGRjtnWRtVqf2JkU7PunCGjFTyiE2GbN6MXi7YE6sZ8xOpu3rxcWa2t19THMB_3cEC7kO_lFeoz9OUvU-JC2Xx3L89Sjb2Dy6LGopJxNRPAeOw7sLwBJzoPcw0KGGginx-Cp7MU1W04ET9Wa8E4YZldS_lsf3kszWCg_mWrLmnMBcTmx5rhC5v67AGsaLzkZ9A4dwTBAvoK70s6SYIp8BWotSp51vNj1DmZojloyCo_XwimJ2WWVSaosTbPAeSqqHHvWF0Df7IP-YuiOQAC-WgwPsH38Kyc4wtsnZVZR9AuwGUNEyGzJjcwj73Y8rOKAnkalQwKjqcchQP4GqG6stXsff4sk3mqca5fK3ENw37nIr444c-43Ie2jGIa_1Sk7jl0_unH6afTR2v6QmN_QP9iK6fMPSj2dPQAWEedoagB6OsKkFAHBFtQRW0Tbdoj-PU6dQEy0eAbR27SI0yfVHPUkciDs9vGFXqbI5CoGdqbEpaWeTpbz1wz4cF0uZpx85Aj1aMd9_CaI5t-XO6ax5PWJ9gcIFWPRAggGhsePtw7sTeObPAT54fPl5A2yKUl3xb0fGzj_Pz3kM-dZKBoFao-Lxm1pA8pe9NHmnWJHmzj_sUHKxCzMMSiujgY8ITRiDgwStWzuDofy2XbUYVLV6CcAToN9Ubc7BphQVeTbIKXI1Q1upu3f8vzr9zdqYws4-e0I4VbXCnXK-iOoZFep23RuBRNR5kE5vOuItcv7GDVy-MHeU13_3qNh0ryqGnOfjdQRrFCG1a1vjdk9DdpeYbjbmijHAFcUtD9eW5hgHY0XfFWv7V_OS5IVh7ptvhkJImfyBCmxxFL7C_aSIzAIeGmVIB5zaERPt0AxOd62hSJ9Z9AEsXmT5tjz0yJ2wnUS5gyzGfLNNj1Chp4r0pwWVcQazLmZks31UMU8UvfGSW9nG673SeoDJMGhuUsKB8fXm0toFoiieAqMeCwXaa6CQtuqZjsez-X-mqlFDOQb8j_jyJkaiDvbAFTqnI-cnduKVvV42unBuGh34XymtT4ToEXwAO7QFDkuZAC2xkV3Pcb1eegD-wSTaNScHGRN5I6B6-EoG2iWFFOu7Ij2v9c1Vsxtc0C_X7VYgNLydPQM8Q7D75Sx8Ml-Eme5wP3-HNYgGZbmUrsVgE-S_LnfWuaNEPXlvs_x8Tqhu_VcdMz39vVAiDad8qRRT5bBSpsoXN3nhPcrDCPlnuufNgxXYHBMSJ9_ptcbeJYIbulV9_0bc0pyx-vQMzhFqO89WgTOtZyhjUuAPeIaZK1zOM-50JVhwwCTHfLcgmo4WXJj7Ca59hc4n24DcS1Ae3HU4B7Ns0tgVO6jl89TxyrHcLKVjC0xM-LbPp1axzryAZIh8VWW7LnboX00tUg0Yv97DhoJFFdHJps4McHnWho303o2DCW41be-5Jx1iZv_jWCaYWi6xMS_Q_DX4barB6wq6u2EavDDgA6u181BAXkMObLFOmTUNw4kwWxbMesxXIW0mnECDIAt2qPWNaybaBp0_1FADvctE5Ua_rqyw6Ny_AT7PyZ_Df9_99_wucxzSX6krBxn6kFop4uy1aMHzcBXkYOG5ltY1A-NU5OO6IvqZiDfo3R_bUqE7VwQLBq2eWwTZaTx1pTJSpawoHz-cYiorRRYldm5B3RLvQKqdjPBFXu4gRQkJrPQcCtqkGmodNWLp6D9oJtozdKdGZzqYgwq9qGsdJFJqmNZYPjAWHB-bFLqlZneC46vSg0vVrVuqAtBIdJ56Sa47_pu_fW5BjjntNTDkSOY27vGfJn7vNfGivM6w0RuNHDkDDE6dAjgt9sR3je7yjySHYFX9obTOZ-y--fgKBHhldiECXPUkqcicL8v4ht4IIe7gULrJ7Y-US0rt0TOl0A4D-8utXkIVv_deIls2fogF4qKzjYIrPxmKWV6A2Jd5E70O9SKFa2ct2Zgn4LYb5udqP7MTt0n7ViFVmBH23z0FegQFjG3xLVW6GO2j0L-85FF7C6abMEK6th_GFebgv7TGUD5SWNQD4C-pQgVb6-5JWPSk4YjcCtKD2D92M7cx6zIGVHiEjpSLzwVB5WzgCkgPb4DHkHIGjMYajRAubFWOGgHlcuHuglEq9DFgLsuB0ENIVLncT2hoL_F6KPpVkoIipHnJ6lfmvYh_aUOOLWBhHbtZMsrAodkE6zOJjmFeXySYD8SKRYYFnASffTYYMgK-hrH-2vpJf1qFfP3VUPa6AwwJDPhBkXazVritVovhtnDDHwOZGs2SVcXvzeMhn9vhkzskF1DYU5V-f62e6KT_NeP82kpx4NEWzR05AIg_1_w7K4O62c1PgJGcM2SYvhggG0lRxDPrvwn0rrYecRL139LgasD_u4IXRKF3kwKD_ZXAmrLOWvwGEZdT7tZWIEH239JKD8nL2ZJtpreGApTLwJP3TX5mkE2ipcpoT6zN3lwZ0GMJDL8ynJZcyl-i1sn0gV2h0O6-47spRocysxJs6jVHqu5D9KxtqL-zozf8L3wVk7MtYcHottKEO4ADVo-OOB8a4mBH5D1aB9ZC9SO5LmtYp1FUG81b7Y6ajIfk3YoG5v83L949Hl9cafQZ_O_5vcNQCHCb0WiAkBGRiVMgP8vWem6ND6lbNwGdyEaBPhRwJ91H6qwNpGTePziyG5W7CK-ME6IueU9JD7UIhjRWNZtflHGJzPF18Xd3IeQG0og153_g8btNlDwCLJcFGiRVrsJkSY0EpHPDGk547BHIYnDJNM-1u7fcNgX8ubc82vFg19XofJs7dkbu3HCpXkRhHjH3mlFQpLQDRc_Fy29DjwbsuUgOjQX99f0VCTo5wUwVapgD0GPaVLxXQ3_mDBinVq40lly8H3QOG7-Y7uQkGm6Ud0gGxa6xu5LDr9hS55zOk9eRbInY4pFgqMA0mE6qT763NxVffmHm73xHRIfLcVIC8FmSjAcXZPPIEM3fSsT3KL0z1w7N-WudxkzSi_FH9pqzIw4WtKfauUDNGUpZ1NL0aXBFXnvsFsVYE-O1Uh-4IkesooNYsWWAWqqd97Ud2RFyR0Yvy1iLbv_evHsDaSRzyAttqQmcmEGyf4shajK5Sdv7VqdurwAjOhIqTphIAMN36oBrhAyozEwPTRh_o82i8lLyrGlF1bqMyygmmQ3Xhe7cfIE18PeULrkaHcNCgDYmE9Tp7VOVUBFWz7RHihcK8oqu9Kdweij5nwasSbJncqvVEniyVVptehL_i9GDa7Mmmr2f-voEr2kazyXdKg204uZu6LismdcSyzM9ql9WXndrn8RIDL6qaL4KC4bn5soHYntY4W1075aJuWbEt4rSpi-0LWmB8Z_HJ930YsN3wnXSvc4cQ8uHFg1gZDe6TZanDB_lcDrgsdlmFoeD-Zs0QYwrQ_4lY5TkS6J5FOJYUG2iZ2aZSZbXYsfwW7r9PDeeifz1sC_Eiq65UtrrsSwPrJYQ80gq3EoBRyTA7RqZ-UdiBloJPyagfidj2hmNVF6FYS8dFMHE1GiFU9QrVnpaTOPjZAOtwhzc3FaVPtLzwqXodUmW_TqTeElAK_9crFIQDXcMHJ6N5K4pY9ypzYTd14kQz3bLi5NqF7zEoF4UogIm3jW2Dz-bHJPftoZQ2l3Scn9-KfbfOJWCwozL4Ah4wAQmncW7lGsKywuuMIOlSueJOIqNm0TGn8MoKAzCLVkW66y7hEVS0QgDtmVSj4PmIxl0pn9N7LOKtWTcVNrI9Bk3HSbfOLIc5Ewc7fiUyc0Y4kRQp3cQ3zAPLpIeTOjIEwbrJuL3UU24b09fdz2Pt-MnU0P2da46oESrONxHEATf6wU4vOzYfQw1_aIsQpwicKrzeJLv_8wkzYvE1CWL6XatsLGaq0lx_9JsooVCBmQ6igQawWaxedkaj4jbOki0U6GOlZr4Kw1AYY87LCPTHjnbmGUdddqk3XBHc9WmSMJcrpRY2Xx1TMyuznbZPhVNQVM6Md6hlA74LkOvuPw8IWHD3XjPWJk3jEYSgx1nrQmP7NblJgu2g2-rNZV3NKcXVF2KJ6SWhXuLfwCDYip5w0mlsWr6TrzssIrzUFGdWdyTmYi85GxZwrNMnT9iKlugNkVu4hd0im72XsenyUXhmkfscd4S53Hm9RXz0zK0GqIVcGIbQcvNdHq0ost581Um2y638eV7UgzHCSITf4NgrOrGRKoN01DUdvtvs3w_3EWBZ-uKce21cPRctbzdCvuVlq7LEcAQvoYJqOZlYTlpXoLf7154DuTolZDqUkpb1Kb_i_laxByQt78zDJyGSvKOjIdZhURyAMGJKsfeLy6g-hWIEgIAF0642j9cgbjz8Y2uUoFXq0hZJ7DX-Y4mAuJWwNH9qch_CGsxf_Is9YUIjDIxX8aUxOdWk10epHorbygbBRxJa5i_u9jPQJUyfUlXYV_8KU6tYScJigmssP8pgGGVmd41zXLEPvytYOdrC_QL3O9GyAx_W4gIwYAREQrMABmszRjheifatRQbsSO6YKG6Ha7Ra5CFq91moqanomqP1P27G7QslS6N1zPdAf1-CbFD_DyxSU6Z16ar1A-khmxSB12ltdzKhcs0Ehh3rnYhXTeVWYi4JLHSiBNSQB9c9YaW9dzYDXN4LsW2-22KOzQ_v5KU5hwQCsRFHeNWlebyz8Mys8zXNEguMLHOXL0qhqfd67OXjuqdjUrr-MooOe_sNhucnz0V_hI1xEck8V0HEbtQWFIOMLGBqhS1izI_X7tQNegp8ROUvZNM02VtO62Jb5yPpGH-IJ3KeVD-pvqgFd2Wpl6gQ7MOA8YAPUQhnu4qfCW-exy98GmUKd-syIzv5zuqI4-R09pjuRuLfkWh1BZ53Jk2h9bGJn5M1Y7vfbWLMhy5r8Akm7QbgRA_jn-D0TyIUYBt_8I4x0gsGH05fw7ilG1F4FMRsh1iX0obuuT29lxWcxI70syc19Mp9397XfpC6BGa5vd3X3vIymgI8iXYAmRgYeguqy5j9MA8tjDlXsmOvZil3D7IAw0LupodFD1I4ellg==",
+        "summary": []
+      },
+      {
+        "id": "msg_04e03573968122c0016ac9faed1b9087d0a8ff2b7ea74c53a0",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"Correctly states 5-layer shows no bypassed oil, 67-layer shows bypassed oil, and avoids inventing quantities; citation supports the claims.\"},\"B\":{\"exact_correct\":false,\"partial_or_better\":false,\"claim_coverage\":0.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"No answer provided.\"},\"C\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.33,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Correctly avoids inventing quantitative values, but incorrectly claims the figure is unavailable and misses the actual 5-layer/67-layer distinction present in evidence.\"},\"D\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":0.67,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"Correctly states the figure note difference between models and does not invent quantities; citation supports the stated claim.\"},\"E\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.33,\"unsupported_claim_count\":3,\"hallucination\":true,\"engineering_contradiction_count\":1,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Adds unsupported generalizations about layer-resolution effects and claims 5-layer visually shows bypassed oil by layer, which conflicts with the figure note that 5-layer has no bypassed oil; only the non-quantification caution is acceptable.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 6440,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 849,
+      "output_tokens_details": {
+        "reasoning_tokens": 312
+      },
+      "total_tokens": 7289
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "openai_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 1.0,
+      "note": "Correctly states 5-layer shows no bypassed oil, 67-layer shows bypassed oil, and avoids inventing quantities; citation supports the claims."
+    },
+    "agent": {
+      "exact_correct": false,
+      "partial_or_better": false,
+      "claim_coverage": 0.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "No answer provided."
+    },
+    "openai_closed_book": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.33,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "Correctly avoids inventing quantitative values, but incorrectly claims the figure is unavailable and misses the actual 5-layer/67-layer distinction present in evidence."
+    },
+    "qwen_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 0.67,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 1.0,
+      "note": "Correctly states the figure note difference between models and does not invent quantities; citation supports the stated claim."
+    },
+    "qwen_closed_book": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.33,
+      "unsupported_claim_count": 3,
+      "hallucination": true,
+      "engineering_contradiction_count": 1,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "Adds unsupported generalizations about layer-resolution effects and claims 5-layer visually shows bypassed oil by layer, which conflicts with the figure note that 5-layer has no bypassed oil; only the non-quantification caution is acceptable."
+    }
+  }
+}

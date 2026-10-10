@@ -223,9 +223,14 @@ def main() -> None:
     benchmark = load_benchmark()
     same = args.phase.startswith("same-")
     provider = args.phase.removeprefix("same-")
+    invalid = {item["task_id"] for item in json.loads(
+        (HERE / "invalid_tasks.json").read_text(encoding="utf-8"))["invalid"]}
     outdir = HERE / (f"same_evidence/{provider}" if same else f"raw/{provider}")
     print(f"PHASE={args.phase} TASKS={len(benchmark['tasks'])} MODEL={MODELS['qwen' if provider=='agent' else provider]}", flush=True)
     for index, task in enumerate(benchmark["tasks"], 1):
+        if same and task["task_id"] in invalid:
+            print(f"{index:02d}/50 {task['task_id']} INVALID SKIP", flush=True)
+            continue
         path = outdir / f"{task['task_id']}.json"
         if path.exists():
             print(f"{index:02d}/50 {task['task_id']} EXISTING", flush=True)

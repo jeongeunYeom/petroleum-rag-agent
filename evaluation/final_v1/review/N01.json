@@ -1,0 +1,201 @@
+{
+  "task_id": "N01",
+  "prompt_version": "final-v1-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_05e663559536fbc9016ac9f997b69887d09f13c134e18073f2",
+  "wall_seconds": 13.332,
+  "mapping": {
+    "A": "qwen_closed_book",
+    "B": "qwen_same_evidence",
+    "C": "openai_same_evidence",
+    "D": "agent",
+    "E": "openai_closed_book"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":1,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":false,\"numeric_accuracy\":false,\"citation_semantic_support\":null,\"note\":\"Water cut 30% is correct, but oil rate is incorrectly stated as 70% instead of 980 stb/d.\"},\"B\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"Correct oil rate and water cut with correct calculations; no material omission.\"},\"C\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":0.0,\"note\":\"Computed oil rate 980 stb/d and water cut 30% correctly; cited excerpts do not specifically support these adjacent calculation claims.\"},\"D\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":0.0,\"note\":\"Both requested values are correct; cited evidence is not semantically supporting the specific adjacent calculation statements.\"},\"E\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"Correct oil rate and water cut with correct arithmetic and complete answer.\"}}}",
+  "usage": {
+    "input_tokens": 9506,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 767,
+    "output_tokens_details": {
+      "reasoning_tokens": 266
+    },
+    "total_tokens": 10273
+  },
+  "provider_payload": {
+    "id": "resp_05e663559536fbc9016ac9f997b69887d09f13c134e18073f2",
+    "object": "response",
+    "created_at": 1791621527,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791621540,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are the single independent AI-assisted semantic reviewer for a fixed\npetroleum-engineering benchmark. This is not human review. Judge ONLY the five\nanonymized answers against the supplied expected claims, numeric gold, source spans,\nquestion, and evidence. Do not infer system identity. Do not repair answers.\n\nFor every answer return:\n- exact_correct (boolean): all material requested parts correct; no critical omission.\n- partial_or_better (boolean): at least one substantive correct requested part.\n- claim_coverage (0..1): fraction of expected claims accurately conveyed.\n- unsupported_claim_count (integer): unsupported *specific* engineering assertions.\n  A closed-book answer is NOT automatically unsupported solely because no source\n  was provided; only count a clearly invented, source-incompatible, or unjustified\n  specific assertion. Do not penalize uncertainty or a cautious statement.\n- hallucination (boolean): at least one fabricated factual, numerical, formula,\n  source, or engineering assertion; missing citations alone do not qualify.\n- engineering_contradiction_count (integer): explicit engineering relations contrary\n  to expected claims or cited evidence.\n- safe_refusal_correct (boolean or null): applicable only to unsupported_formula.\n- false_premise_handled (boolean or null): applicable only to false_premise;\n  requires explicit rejection and corrected relation, not vague hedging.\n- formula_accuracy (boolean or null): applicable to calculations or explicit models.\n- numeric_accuracy (boolean or null): applicable when numeric gold is supplied;\n  check the correct output-to-value association, not mere presence of an input number.\n- citation_semantic_support (number 0..1 or null): among actual citations in the\n  answer, fraction whose *specific cited evidence excerpt* supports the adjacent\n  engineering claim. Null if no citations or no evidence supplied. Citation ID\n  existence is independently checked, so here evaluate meaning, not formatting.\n- note: brief reason, no chain-of-thought.\n\nKeep all named keys in every score object, using JSON null for non-applicable\nfields. Be conservative about unsupported or contradictory statements. For missing answers,\nscore exact_correct=false, partial_or_better=false, claim_coverage=0, and leave\nnon-applicable fields null. Return only a JSON object with key 'scores' containing\none object per anonymous answer label. No Markdown or extra text.",
+    "max_output_tokens": 5000,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_05e663559536fbc9016ac9f9989ae087d087ff34c4ea1997d5",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyfmkDRAHS24c2MPDSZO2uqx_ITsFsY4lv-yrW13nwbGpoKzD2mZEHQzuIi6Lezmqr_CgtUXmh2cVvHWYvDuO1W1WPz5svZdBrae5drjHYJfrJ5-aL8hPie_9HSY1SNgwyurP4iFrFWEZzCfSFdklFntl8mrqVOYB6s2vgVyynAFCD-DCNKI1BEKiiG7yso66XIRQejeX8uNj49rhjXCMGn9m_0Ef1SXKU7T_gGQopFwBFgpqa-DIO1yFtEJvGJDlhmYd2DABQ49bhTwmvl3JkrGIFzD4NsjY3OkzvPyy_bEn1hnE7lAswxrkf5fZMJ6-PQ4hzAsuNrlvOwm8job9pYNiP9wzOrIskgkDPdntYHp5mtmDPv-KgV1JROgPwnlYSQJ0sv3AW1uO3qaKkT2_A7Ym_cDxWedCZQQ79yyrYAgzhs33Po97A4PBBqexbdA7Qpc-PrirvVfgZHjCecIW2_j0BSyitWysMInPXCIakL9x6h8nAwSwejpOv3mGcKjtYcwpeqSPPAr6gjkjPD_zUicMxwK2W7Ir9RnBHhcyxvfbKLk1SkX06rRUuV9DuqM5gjrqQiyo9xC9-0webQujI2q-TcHeCpADRqn6N-ui8vRcqYgv8agY30DytMfld6UcaF_ZII3b610NJUSQVlIKsBKzFNKQ_zLUZeKuh_2qxdjoBMUlatQH-toXmMZVeSfawnU_VQtdjHay3HAs9mrDlWTR4RYckZuL8TvAD_0wQVMDOvMYYAe-aCCmJ1_DD03OAgeYd3AWdbtAJ424T0J6n1-kcKeN2mUN1UxaW_M3LW7FNxPVJyyaR6ljBGZrv3UBVP_nS7NmKO-lfUMmckWB6F6lsbTzljES5zRi-nQEvkSvlWRl8_x_4M5ZeMltfrANdERrPj7D_TGt_gTxcO2xka-uT_PeUdR3YzhILbqM2UNjsQH1trl_4waw2G5iZyjORwfm-lsoHnFraE28U204DKbmIfJ8Zp46MNsh5jhAhu96bWecZFel_y9jtYAjkK84d7iuMzkokd85jE-bvdylDxCSItjIPxeUU9arm8E1ma3mSnP7G2DmUpCMRpNgbMQL-s_1RlpKEimvgzKXwiadISgF1djAi-eEHjVi82k9nlWb8H3LDOlUI-WcNVo_GwosIn4Ei7s7S4SSF0Omgcs6OvnRUp0ig1hf_E27PonDiUjQFV-VQ03QSLfvZ_6AQkuE9SHPXXGtlNRQIDkBkTx7I09z1yxq2ylVIO-9LRaOqZCUnX0C8h8tQZO0ZW3zaK_wYhogQad39ngAPu3lHVkz0JOwpptkx7WvPNLLjIK2VbRMPkx8RKwZJ4dwoqJMJPDwCwcc32s415DbD-cJRO4_PnixMdx31K81e85sDKKdure2G6CtJCykRy1zOGUA47M06w2dP6MTocar5l6iPy2PRgKzjLbPAuSxHf4NHlwSYcMJd7cxl7Mt5haAuNGGHzPPApdQfRU_wSkyz1y7WRZgFKfwUTvHpo_VFo764mISBThiPiAyFXmj6avduUB2aevLjNuc-fVnDFNz3qxIdymzqkI6tnnEr4Nf0jn10JX2oqbR9p2nLdDNDxVIDmYObcoSORo9vFtQAaZrFinWou2oPABFbsJQhebLk1FeUDdrpbBPtlxF0ZxSUWEIH2_VemeH8BOAQWBmPofi-y5ilZRVNQh3GYTlNN2bCTY_o52Jg0FGKERwotNRDNtwPU_WIAiO_g7paCz3hekuohAr5r4sAP0Exg2aVjj-ghLKn__fxX_L6NZ2P7gK2WUPrRmyAwdYLkXDdYjV6BCDtpNPA6HEH8iQ_yyetoeROGQew3FXf25f8tqc_bOBM4JbPUbyVbx4cglu7UqwChXaB6ToClnKLGI-urnA893PIq7Jza__UBCOI-wkkzERDv_-QJM7Y8Z_-BoD1kSgX88AY1z5dVxGs1J9rlCB5M4NlvKoPQtfY8oKiRbsWIjNfBw7u3Q4yRZFdDEhcI0pmvlmVxf0ypwKb4VI6EpQ1tm_SxkuUDPkzr0dqCu0TaH2l6YCeGsXDAwO99zOTem0qxuyoGNnReTQ9EfIV7uZEaP5JQxiQTuyGvj3zXsq7B_OhZQv2HrfdITSvTCwM-C0f83khiWfSTJ7d30UDS_Fqq9aXsmB2-uBYwFiocVerrv8rKf8eexEjeZNVL5qxj5OPgvvuUUJ8WVkT3-_MXAkB5_MJQLEu-CEm2X7JSPr5EPZXyO5gS8HOgHMezmckANanOE9GdxLXb094nNuar8zgrKqkixbzhQFMCbx3U-1qxhjrOeUsywr2JeITwvsa8_iKoVFh42290sq00916l5FmKGSw7eZtuYla2MuUMlUpbU7t6AKon9tDmHBk3eJGKjtA49ywNJpONmkLQ5eauIBfUeYdlymQvzjIEoqc7kot3KnboVCwua5e76oINS9hOtOhShLNzrnNzsa4TwXpn9T3gxHMvuztYcc7CRoWhaTWnFT5eLlNMpq9rikRQD4dTweRIszA4bQwkx7mmkBH7HItUpvm0PBYqE2NyooRL_3US8qOv_fjrizS4YnTd_ckZMluqEOX5QR3Yj4j5AcRF7t5ou3CmbcKsq4vUXlRIQ95KwPBSzBUeHCxY1Om8VHRw--rGGVcwsIHgxwfRUu-FeiEQjzZ8DR5-LIXfWEUkzyGx9vDQnFqQj6kWxQhunMFZYayaXdlbcAlsG1RfA_mMnNhWHErRZYSnANHjshoozqWo2yspS7osTR6ttuT88dxE7mtAFliczLhi0AK83YagdvwpRwhT_9pqJ9S4j2fV8p2HMB4YOdgnIO0DJD-HzT_NT1f1J0hobgofl9GoGUvOfZo1IhUNfYF_fzLym0T4MIhGfZU1SSZRBXWwLws6awtygEQS3sfOhdP12o3xMFgnyYo4LL86XY_DwnMLc9eHgxtRQK4n7mLzLcGMlDJLJz43Va7NM1WY8bVjRGNgNZLowXRqgdsDGZr26or0Q7oXXDAzndHbT-I1MDhX1d1fwVTtqo0Om-HKfF9-_1wyZxWnCm9terk8iBuhMdBeQ6P74cJxClLzfOO49SGuqS2eJ-6-tS0qWl47thdIUg-Mo-Tr8PCoZLUCYCSYBEFXkbFr7tNVBBu76CaxfdxBxrjo0zB3nsv2yRtFpg144PukbmefPY-rqodqLg9pMSM7boUD4IxvV3l4GN-zPqXLAyzvrdIIB6f6G9G8gFo4DV-PNA-syjrZBLRiwphHrsut1I8zB3W3Fkw-7POcRllgJQcskWujlFtIxmU34BrfwsDDYXe5B8depzSyS1SUQim5R4Fu42z9BowDFcPYPrP8W6GAMNwA6obbWXbVJAHq7ul6g2f-pkXsO_VuGnN9onafFxlDOE3OnzruU9wYMjUEbCTlA-EAHIHZ38R9giWLulFFVmMz4UILqFe0qHapUOPTBZg_pSGJLJwZK3ewAUr526jlvl6XkY6bXrULtXpiWRqW4BufLyFqsGzbcCOW7E7lsM3vHbZcVD8aqVjtQH_75W5avmtru4omVMOkGSehARnYGHZa9658pWwbWs-aQ5E2L9pPMmNgloyHdwi3N0omo4GSZ9mevsxppdqn3iketv6veY1EIhBu_P60BdNcXlu0yCMw_ue2xDZg8WmtU-QKEWTnNKf5Chv3448pDEIesLplUHwVtAlMQQYtuHMyoTGqFj7OHq133H2NUavp0IVrwu5YAtDPRv3iZlvUvz_pZA0tTk-4cJcoaVs_IsYDoNZZFCuyil4cXWMsVaahWikdRtAjS3mb4Sb1mljH3SNVrr7DlTzFMavmTVtGQNAq27u49hEUTT_mBlQevfUsIXwrYqazYP_RoV3xdZd0BeJMpcq6vX_QKyGbeltx9A8qLmn8DsM7WFJ9qFtTMJFgZUwDRmHDmKYge3q4qHETBgQL02zvL-rmSh0Dbeim3IFDzJbyZyYp_h93zC6o9KYYt8x5dcrcie28wcF5Ty2S_o5_Qva60tGpiljA8nMPOz9L7OKQ47hHfFvjtE7BXrPbcRX0CjdWzo1-EpeDZeyFEHcC18TkdbdbtFbNYT7JJzJkJEWGU4JDB6TbSaRbX6qmIgkEmIBwKaDE1uloeqV0KWUHOPwt30cQ9zPiue44sWKFSpvTAf4nuCJI73FuxhNN3vaONd1VywT1wEiAra-4q5nCSYnAykcvh1Osfo0C2UdfuIwCMB_ddcsvGOIk_lW4eAI6INMYFR49FA9K15vTVPT5b295hK3Df4kznQ0QGDm2T1lirNdZxOH4OdGDjOe1-ul28uSgDsEY6XJ7ZAG13ADo8rlfbqWpOlu6aK9RQ0qVGBO_nKCFIlG7utH-epNLB2sfdAs_mGIVLbIaqMmAAo_Wp6-eRVVklBQyxFiSNNcSJqLsyoKllXIisRkF3ny7-vDR0BlG6kui87OOwMo-9O-f8Glf4mZMwYkaq_FRzjXpxl6pZ5711kw4a_4sJQdh4cZz7o4XNxB8zKcTS2lGuacjxQPIJUC2c5k8Sve5AWGNXmcfTh9Htnm-0UUBZMVrPd29vzYl3fgogYwUKsebjBThFyLpb2O54tOAnst3fmHxlko3Z7uLaXoFf39g0myjiFTrut1xeug8oFiD-4bYhQWpHxxGpH276ynsgvc78zQAZo4_1YflofBOlszQQ-Pw3D19sYeoauBXuwjOCNwXxXtUKsxY41487wNe9hX67jE5q874r7Yycth5zERNXDw0SxRcQsDuSvef8ael2Cs83fkK_7_QxMCsatUyz1ujpj93Hv6uV16fjXakUDBh0S16APScVgkI8XadCsuWTPm1ylhGGvvGl-ywhaW3ejXzT_My6IUZEvvPtbxsn0LoHKXSPL73TWMSM3TStHtehZUxs_KGHty1w1R3bPrwnc5B5s3T-yX0qJZDdKAMPe3TiI5FBAn6AsI4d5vSaWUnhgcujlRz93gTJ20_GqIGW73YZE__Hr8AsMpyQ=",
+        "summary": []
+      },
+      {
+        "id": "msg_05e663559536fbc9016ac9f99ebc5c87d096873051d1bdcdbb",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":1,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":false,\"numeric_accuracy\":false,\"citation_semantic_support\":null,\"note\":\"Water cut 30% is correct, but oil rate is incorrectly stated as 70% instead of 980 stb/d.\"},\"B\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"Correct oil rate and water cut with correct calculations; no material omission.\"},\"C\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":0.0,\"note\":\"Computed oil rate 980 stb/d and water cut 30% correctly; cited excerpts do not specifically support these adjacent calculation claims.\"},\"D\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":0.0,\"note\":\"Both requested values are correct; cited evidence is not semantically supporting the specific adjacent calculation statements.\"},\"E\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"Correct oil rate and water cut with correct arithmetic and complete answer.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 9506,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 767,
+      "output_tokens_details": {
+        "reasoning_tokens": 266
+      },
+      "total_tokens": 10273
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "qwen_closed_book": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.5,
+      "unsupported_claim_count": 1,
+      "hallucination": true,
+      "engineering_contradiction_count": 1,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": false,
+      "numeric_accuracy": false,
+      "citation_semantic_support": null,
+      "note": "Water cut 30% is correct, but oil rate is incorrectly stated as 70% instead of 980 stb/d."
+    },
+    "qwen_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": null,
+      "note": "Correct oil rate and water cut with correct calculations; no material omission."
+    },
+    "openai_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": 0.0,
+      "note": "Computed oil rate 980 stb/d and water cut 30% correctly; cited excerpts do not specifically support these adjacent calculation claims."
+    },
+    "agent": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": 0.0,
+      "note": "Both requested values are correct; cited evidence is not semantically supporting the specific adjacent calculation statements."
+    },
+    "openai_closed_book": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": null,
+      "note": "Correct oil rate and water cut with correct arithmetic and complete answer."
+    }
+  }
+}

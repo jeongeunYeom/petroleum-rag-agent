@@ -18,10 +18,8 @@ TRACKS = {
     "agent": HERE / "raw/agent",
     "qwen_closed_book": HERE / "raw/qwen",
     "openai_closed_book": HERE / "raw/openai",
-    "gemini_closed_book": HERE / "raw/gemini",
     "qwen_same_evidence": HERE / "same_evidence/qwen",
     "openai_same_evidence": HERE / "same_evidence/openai",
-    "gemini_same_evidence": HERE / "same_evidence/gemini",
 }
 NUMBER = re.compile(r"(?<![\w.])[-+]?\d[\d,]*(?:\.\d+)?(?![\w.])")
 CITE = re.compile(r"\[((?:KB|FIG|WEB)\d+)\]")

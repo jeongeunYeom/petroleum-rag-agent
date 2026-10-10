@@ -19,7 +19,7 @@ from score_deterministic import TRACKS
 
 PROMPT_VERSION = "final-v1-reviewer-1"
 INSTRUCTIONS = """You are the single independent AI-assisted semantic reviewer for a fixed
-petroleum-engineering benchmark. This is not human review. Judge ONLY the seven
+petroleum-engineering benchmark. This is not human review. Judge ONLY the five
 anonymized answers against the supplied expected claims, numeric gold, source spans,
 question, and evidence. Do not infer system identity. Do not repair answers.
 
@@ -155,7 +155,12 @@ def main() -> None:
     rows = json.loads(deterministic.read_text(encoding="utf-8"))
     if len(rows) != len(benchmark["tasks"]) * len(TRACKS):
         raise RuntimeError("Deterministic rows incomplete")
+    invalid = {item["task_id"] for item in json.loads(
+        (HERE / "invalid_tasks.json").read_text(encoding="utf-8"))["invalid"]}
     for index, task in enumerate(benchmark["tasks"], 1):
+        if task["task_id"] in invalid:
+            print(f"{index:02d}/50 {task['task_id']} INVALID SKIP", flush=True)
+            continue
         path = HERE / "review" / f"{task['task_id']}.json"
         if path.exists():
             print(f"{index:02d}/50 {task['task_id']} EXISTING", flush=True)

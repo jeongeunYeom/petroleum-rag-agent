@@ -1,0 +1,158 @@
+{
+  "task_id": "L24",
+  "track": "same_evidence",
+  "provider": "openai",
+  "question": "유체 상의 압력차와 FWL 정의를 함께 사용해, oil-water contact와 capillary pressure=0인 깊이를 혼동하면 왜 안 되는지 설명해줘.",
+  "system_prompt": "You are answering a petroleum-engineering question in Korean. Give a concise, directly responsive answer. Do not use tools, Python, browsing, or hidden retrieval. If the question lacks essential values or a verifiable model, ask for the missing information or state that a numeric result cannot be established. Do not invent facts, equations, numbers, or citations. Correct a false premise explicitly. Use only the supplied evidence and values in the question for sourced engineering claims. Cite supporting evidence IDs in square brackets. Do not add other sources. An empty evidence list means no KB support was supplied.",
+  "user_prompt": "유체 상의 압력차와 FWL 정의를 함께 사용해, oil-water contact와 capillary pressure=0인 깊이를 혼동하면 왜 안 되는지 설명해줘.\n\n=== Identical Agent-retrieved KB/FIG evidence ===\n[{\"evidence_id\": \"KB1\", \"document\": \"Heriot-Watt University - Reservoir Engineering.pdf\", \"page\": 70, \"chunk_id\": \"f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p70:c0\", \"kind\": \"KB\", \"excerpt\": \"10\\nThe free water level, FWL, is not coincident with the oil-water contact OWC.  The \\nwater contact corresponds to the depth at which the oil saturation starts to increase \\nfrom water zone.  The free water level is the depth at which the capillary pressure \\nis zero.\\nThe difference in depth between the oil-water contact and the free water level depends \\non the capillary pressure which in turn is a function of permeability, grain size etc.\\nProviding the phase is continuous the pressures in the respective phases are:\\n Po = PFWL - ρogh \\n \\n \\n \\n \\n \\n \\n(11)\\n Pw = PFWL - ρwgh \\n \\n \\n \\n \\n \\n \\n(12)\\nOn the depth-pressure diagram the intersection of the continuous phase pressure line \\noccurs at the free water level.\\n5. TECHNIQUES FOR PRESSURE MEASUREMENT\\nEarlier tests for vertical pressure logging have been replaced by open-hole testing \\ndevices that measure the vertical pressure distribution in the well, and recover for-\\nmation samples.\\nOne such device which was introduced in the mid seventies which has established \\nitself in reservoir evaluation is the repeat formation tester RFT (Schlumberger trade \\nname).  It was initially developed as a device to take samples.  Over the years however \\nits mai\"}, {\"evidence_id\": \"KB2\", \"document\": \"Heriot-Watt_University_-_Well_Test_Analysis.pdf\", \"page\": 399, \"chunk_id\": \"01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p399:c0\", \"kind\": \"KB\", \"excerpt\": \"10\\nOil Zone\\nVertical\\nDepth\\nD\\nCapillary\\nTransition\\nZone\\nWOC\\nFWL\\nWater\\nGradient\\nOil\\nGradient\\nWater\\nZone\\nOil Phase\\nPressure\\nh = 0\\n0\\n1\\nPc = 0\\nSwc\\npFWL\\nWater Phase\\nPressure\\npw = pFWL - ρwgh\\npo = pFWL - ρogh\\npc (Sw)\\n∆ρg\\npc\\nThe implications of this theory are illustrated in Figure 7.  Firstly the intersection \\nof the measured oil gradient (in the oil zone and capillary transition zone) and the \\nmeasured water gradient (in the aquifer) is synonymous with the free water level \\nwhich lies below the WOC.  This will be termed the observed pressure gradient \\nintersection (OPGI).  The free water level is coincident with observed pressure \\ngradient intersection (OPGI) and also lies below the WOC by an amount which \\ndepends on the threshold capillary pressure pt\\nc ; this in turn depends on the largest \\npore size.  In principle there should be a discontinuity in the registered pressure as \\nillustrated in Figure 7.  However, it is only in very tight formations that the FWL \\nwill be significantly below the WOC and in these cases the supercharging effect \\nwill considerably complicate matters.\\n7.2.1. Effect of a Residual Oil Saturation, Sor\\nThe classical gravity capillary equilibrium diagram (Figure 1)\"}, {\"evidence_id\": \"KB3\", \"document\": \"Heriot-Watt_University_-_Well_Test_Analysis.pdf\", \"page\": 406, \"chunk_id\": \"01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p406:c1\", \"kind\": \"KB\", \"excerpt\": \"dication.\\n  \\nWater\\nOil\\nDepth\\nO/H LOG\\nPressure\\nRFT\\nIndicates\\nOil\\nGradient\\nA related problem occurs when the formation water is relatively fresh i.e. of \\nlow salinity.  Again the resistivity logs may not be able to properly distinguish \\nbetween oil and water.  In this case the WROC is best determined from WFT \\ngradient intersections.\\n7.2.3. Oil Wet Behaviour\\nThe classical pressure - depth diagram of Figure 1 refers to a strongly water-wet \\ncondition in which water is imbibed upwards from the FWL into the porous medium.  \\nThus the capillary transition zone lies above the FWL.  The reverse situation is \\na strongly oil-wet rock where oil will be imbibed down from the FWL against \\nbuoyancy.  In this case the capillary pressure as defined by equation (1) is negative \\ni.e. the oil phase pressure is less than water phase pressure.  This situation is \\nillustrated in Figure 17 where the capillary transition zone is now seen to lie below \\nthe FWL.  The theory of Desbrandes and Gualdron suggests that in the capillary \\ntransition zone a large hole will fill with water and hence a pressure tapping will \\nregister the water phase pressure.  The large hole observer is shown diagrammatically \\nin Figu\"}, {\"evidence_id\": \"KB4\", \"document\": \"Heriot-Watt_University_-_Reservoir_Simulation.pdf\", \"page\": 338, \"chunk_id\": \"3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p338:c1\", \"kind\": \"KB\", \"excerpt\": \"jump at\\nwhich this balance is attained is given by Laplace’s equation:\\np\\np\\np\\nr\\nr\\nc\\no\\nw\\n=\\n−\\n=\\n+\\n\\n\\n\\n\\nσ\\n1\\n1\\n1\\n2\\n(33)\\nwhere s is the interfacial tension between the two fluids, and r1 and r2 are the two\\nprincipal radii of curvature (see section 3.1).  The pressure difference Pc is the\\ncapillary pressure and, in oil-water systems,  is conventionally taken to be the pressure\\nin the oil phase minus the pressure in the water phase.  For drainage of a water-wet\\ncircular capillary (radius R) and zero contact angle, this relationship becomes:\\np\\np\\np\\nR\\nc\\no\\nw\\n=\\n−\\n= 2σ\\n(34)\\nNotice, however, that for water to invade an oil-wet capillary, the capillary pressure\\nmust become negative (i.e. pw must become greater than po)  The combination of the\\nwords “negative” and “pressure” may at first seem confusing, but the term is merely\\nan artefact of conventional terminology.  The concept of negative capillary pressure\\nis central to displacements in heterogeneously-wet media.\\nFigure 62\"}, {\"evidence_id\": \"KB5\", \"document\": \"Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf\", \"page\": 735, \"chunk_id\": \"d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p735:c2\", \"kind\": \"KB\", \"excerpt\": \"Introduction, capillary pressure refers to the difference in pressure across the\\ninterface between two phases. With Laplace’s equation, the capillary pressure Pcow between ad-\\njacent oil and water phases can be related to the principal radii of curvature R1 and R2 of the\\nshared interface and the interfacial tension σow for the oil/water interface:\\nPcow = po −pw = σow(\\n1\\nR1\\n+ 1\\nR2). ............................................. (15.5)\\nThe relationship between capillary pressure and fluid saturation could be computed in princi-\\nple, but this is rarely attempted except for very idealized models of porous media. Methods for\\nmeasuring the relationship are discussed later in this chapter.\\nFig.  15.1  shows  a  sketch  of  a  typical  capillary  pressure  relationship  for  gas  invading  a\\nporous medium that is initially saturated with water; the gas/water capillary pressure is defined\\nas  Pcgw = pg −pw.  For  this  example,  water  is  the  wetting  phase,  and  gas  is  the  nonwetting\\nphase. As shown in Figs. 15.2 and 15.3, a wetting phase spreads out on the solid, and a non-\\nwetting phase does not. Wettability of a solid with respect to two phases is characterized by\\nthe contact ang\"}]",
+  "evidence": [
+    {
+      "evidence_id": "KB1",
+      "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+      "page": 70,
+      "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p70:c0",
+      "kind": "KB",
+      "excerpt": "10\nThe free water level, FWL, is not coincident with the oil-water contact OWC.  The \nwater contact corresponds to the depth at which the oil saturation starts to increase \nfrom water zone.  The free water level is the depth at which the capillary pressure \nis zero.\nThe difference in depth between the oil-water contact and the free water level depends \non the capillary pressure which in turn is a function of permeability, grain size etc.\nProviding the phase is continuous the pressures in the respective phases are:\n Po = PFWL - ρogh \n \n \n \n \n \n \n(11)\n Pw = PFWL - ρwgh \n \n \n \n \n \n \n(12)\nOn the depth-pressure diagram the intersection of the continuous phase pressure line \noccurs at the free water level.\n5. TECHNIQUES FOR PRESSURE MEASUREMENT\nEarlier tests for vertical pressure logging have been replaced by open-hole testing \ndevices that measure the vertical pressure distribution in the well, and recover for-\nmation samples.\nOne such device which was introduced in the mid seventies which has established \nitself in reservoir evaluation is the repeat formation tester RFT (Schlumberger trade \nname).  It was initially developed as a device to take samples.  Over the years however \nits mai"
+    },
+    {
+      "evidence_id": "KB2",
+      "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+      "page": 399,
+      "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p399:c0",
+      "kind": "KB",
+      "excerpt": "10\nOil Zone\nVertical\nDepth\nD\nCapillary\nTransition\nZone\nWOC\nFWL\nWater\nGradient\nOil\nGradient\nWater\nZone\nOil Phase\nPressure\nh = 0\n0\n1\nPc = 0\nSwc\npFWL\nWater Phase\nPressure\npw = pFWL - ρwgh\npo = pFWL - ρogh\npc (Sw)\n∆ρg\npc\nThe implications of this theory are illustrated in Figure 7.  Firstly the intersection \nof the measured oil gradient (in the oil zone and capillary transition zone) and the \nmeasured water gradient (in the aquifer) is synonymous with the free water level \nwhich lies below the WOC.  This will be termed the observed pressure gradient \nintersection (OPGI).  The free water level is coincident with observed pressure \ngradient intersection (OPGI) and also lies below the WOC by an amount which \ndepends on the threshold capillary pressure pt\nc ; this in turn depends on the largest \npore size.  In principle there should be a discontinuity in the registered pressure as \nillustrated in Figure 7.  However, it is only in very tight formations that the FWL \nwill be significantly below the WOC and in these cases the supercharging effect \nwill considerably complicate matters.\n7.2.1. Effect of a Residual Oil Saturation, Sor\nThe classical gravity capillary equilibrium diagram (Figure 1)"
+    },
+    {
+      "evidence_id": "KB3",
+      "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+      "page": 406,
+      "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p406:c1",
+      "kind": "KB",
+      "excerpt": "dication.\n  \nWater\nOil\nDepth\nO/H LOG\nPressure\nRFT\nIndicates\nOil\nGradient\nA related problem occurs when the formation water is relatively fresh i.e. of \nlow salinity.  Again the resistivity logs may not be able to properly distinguish \nbetween oil and water.  In this case the WROC is best determined from WFT \ngradient intersections.\n7.2.3. Oil Wet Behaviour\nThe classical pressure - depth diagram of Figure 1 refers to a strongly water-wet \ncondition in which water is imbibed upwards from the FWL into the porous medium.  \nThus the capillary transition zone lies above the FWL.  The reverse situation is \na strongly oil-wet rock where oil will be imbibed down from the FWL against \nbuoyancy.  In this case the capillary pressure as defined by equation (1) is negative \ni.e. the oil phase pressure is less than water phase pressure.  This situation is \nillustrated in Figure 17 where the capillary transition zone is now seen to lie below \nthe FWL.  The theory of Desbrandes and Gualdron suggests that in the capillary \ntransition zone a large hole will fill with water and hence a pressure tapping will \nregister the water phase pressure.  The large hole observer is shown diagrammatically \nin Figu"
+    },
+    {
+      "evidence_id": "KB4",
+      "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+      "page": 338,
+      "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p338:c1",
+      "kind": "KB",
+      "excerpt": "jump at\nwhich this balance is attained is given by Laplace’s equation:\np\np\np\nr\nr\nc\no\nw\n=\n−\n=\n+\n\n\n\n\nσ\n1\n1\n1\n2\n(33)\nwhere s is the interfacial tension between the two fluids, and r1 and r2 are the two\nprincipal radii of curvature (see section 3.1).  The pressure difference Pc is the\ncapillary pressure and, in oil-water systems,  is conventionally taken to be the pressure\nin the oil phase minus the pressure in the water phase.  For drainage of a water-wet\ncircular capillary (radius R) and zero contact angle, this relationship becomes:\np\np\np\nR\nc\no\nw\n=\n−\n= 2σ\n(34)\nNotice, however, that for water to invade an oil-wet capillary, the capillary pressure\nmust become negative (i.e. pw must become greater than po)  The combination of the\nwords “negative” and “pressure” may at first seem confusing, but the term is merely\nan artefact of conventional terminology.  The concept of negative capillary pressure\nis central to displacements in heterogeneously-wet media.\nFigure 62"
+    },
+    {
+      "evidence_id": "KB5",
+      "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+      "page": 735,
+      "chunk_id": "d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p735:c2",
+      "kind": "KB",
+      "excerpt": "Introduction, capillary pressure refers to the difference in pressure across the\ninterface between two phases. With Laplace’s equation, the capillary pressure Pcow between ad-\njacent oil and water phases can be related to the principal radii of curvature R1 and R2 of the\nshared interface and the interfacial tension σow for the oil/water interface:\nPcow = po −pw = σow(\n1\nR1\n+ 1\nR2). ............................................. (15.5)\nThe relationship between capillary pressure and fluid saturation could be computed in princi-\nple, but this is rarely attempted except for very idealized models of porous media. Methods for\nmeasuring the relationship are discussed later in this chapter.\nFig.  15.1  shows  a  sketch  of  a  typical  capillary  pressure  relationship  for  gas  invading  a\nporous medium that is initially saturated with water; the gas/water capillary pressure is defined\nas  Pcgw = pg −pw.  For  this  example,  water  is  the  wetting  phase,  and  gas  is  the  nonwetting\nphase. As shown in Figs. 15.2 and 15.3, a wetting phase spreads out on the solid, and a non-\nwetting phase does not. Wettability of a solid with respect to two phases is characterized by\nthe contact ang"
+    }
+  ],
+  "answer": "혼동하면 안 되는 이유는 **정의가 다르기 때문**입니다.\n\n- **FWL (free water level)**은 **모세관압 \\(P_c\\)가 0인 깊이**입니다. 즉, oil-water 계면에서 \\(P_c = P_o - P_w = 0\\)인 기준면입니다. [KB1][KB4][KB5]\n- **OWC (oil-water contact)**는 **유전에서 오일 포화도가 물층에서 증가하기 시작하는 실제 접촉/전이의 기준 깊이**입니다. 즉, 관측되는 유체 분포의 경계이지, 반드시 \\(P_c=0\\)인 깊이는 아닙니다. [KB1]\n\n왜 다르냐면, 유체 압력은 각 상의 밀도에 따라 깊이와 함께 달라지지만,\n\\[\nP_o = P_{FWL} - \\rho_o g h,\\quad P_w = P_{FWL} - \\rho_w g h\n\\]\n처럼 **같은 FWL을 기준으로 오일과 물 압력선이 각각 다른 기울기**를 갖기 때문입니다. 두 압력선의 교점이 FWL이고, OWC는 그보다 위에 있을 수 있습니다. 그 차이는 **모세관압과 암석 특성(투과도, 입자 크기 등)**에 의해 결정됩니다. [KB1][KB2]\n\n즉,\n- **FWL = \\(P_c=0\\)인 깊이**\n- **OWC = 오일이 나타나기 시작하는 실제 접촉 깊이**\n- 둘은 **일반적으로 일치하지 않음** [KB1][KB2]\n\n따라서 “OWC = capillary pressure가 0인 깊이”라고 단정하면 안 됩니다.  \n다만 **특정 조건에서 전이대가 매우 얇거나 모세관 효과가 작으면** 둘이 거의 가까워질 수는 있지만, **원칙적으로 동일한 개념은 아닙니다**. [KB2]\n\n원하시면 제가 이걸 **압력-깊이 도식**으로 3줄짜리 그림 설명처럼 정리해드릴게요.",
+  "model_id": "gpt-5.4-mini-2026-03-17",
+  "input_tokens": 2168,
+  "output_tokens": 518,
+  "response_id": "resp_0c4adf6c07cdff7a016ac9f7bf012487d0af5329d2e78f5219",
+  "provider_payload": {
+    "id": "resp_0c4adf6c07cdff7a016ac9f7bf012487d0af5329d2e78f5219",
+    "object": "response",
+    "created_at": 1791621055,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791621057,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are answering a petroleum-engineering question in Korean. Give a concise, directly responsive answer. Do not use tools, Python, browsing, or hidden retrieval. If the question lacks essential values or a verifiable model, ask for the missing information or state that a numeric result cannot be established. Do not invent facts, equations, numbers, or citations. Correct a false premise explicitly. Use only the supplied evidence and values in the question for sourced engineering claims. Cite supporting evidence IDs in square brackets. Do not add other sources. An empty evidence list means no KB support was supplied.",
+    "max_output_tokens": 1800,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-mini-2026-03-17",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_0c4adf6c07cdff7a016ac9f7bf58a487d09b94336930609f7f",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyffBADeVXRN3GQkHLKf9KUjEZiaKJSNcsHX4GiSPrv2ecbZ_OPMPa6zI_0XB1brQdFvnStGQR76Jf5gxBehMu_LAqM6yYxk0bOam5VP0EPurPcJAtGifI18CDJDsy5DijqhzaAwV8mLD13eu1IPCWcw3xDw-rMyn0NRbsoN1Bza49lZRRHtsWthYteyQlxQSSs5sE6kv_6z0hWj3z7uE5Wsc8-ccxeok-l1xgUyKwhKZ47TeGYEA2laFB0rlZiNsZDslm_Ki790C_MHC_m9GzZXGQGxWwL0dcXrso6kg6hCtElMPG43RvDWE-TrtEh1xaiwwJVNjCe3Ax3GDlcSj03HKludCCTHfQuHPiccLPdBomMeFx69Wp9vZzTDDXJ9eXmgvX8TGwH735ZXuHE2jdVvhOcxaSckUACEe2BeOwtKNb0YD0yQSfHo1M8IR8pSKhXg-v2qeZtxoaSNFW_Z7tvMW2GsmEoe2SncI0K40Gd-UROxvkdJYTUKJKVjGYoVEEYq64tDPBnHkF-6NXruxipH9vLHMksz3Llqr71KZxQdDInGlIv0g-QTc4a22EKNKM1zLnj7_vISMLeyEzMlYxC6XIe4n8ajv3lCK9FyEo0-WT19fzYgI6lr-OoQjoCoc-oHti6ddB6vWelYs_8PagntCd5vj3iGg8O_P-2JjYMjunPaMv3qDuKbHXi_rDth3sOVvff5RcLcZnSRO6HOvoVsJqczBUX_u0L9YmNZsOeVn6H_lzpDzlnMbQFFyOyIrZe_qPH9TDdM1ygMNJBpdXbAsHopkbwNLB00JQCQ7cLYIT-S2lfg5-jEnA7yuI4A7_tvvEdivQF6obR6I5Ht5GY73Ttqyn_CUzm9nlFFF9Dd4vEf7K_PpOBCFte1S9VES3CKrzQIrpETZhSP-YXdtwJzw-UK_T1ygxQcR8aubWHAvO9I45iDnuQJg0U5rrkjxtfW1wYeOH4TqJKRYCMl9Cvg1UB0cNBeGB9Gci73MUdF8x6LkIK66PJtpht9opaQkb0EjqYwRWgLery62gITantOnUAwjf0yGlcZ09o3on8g-xUO_-5_GvdT1vxjsD6DM5HvYaNt-M0897y6WLo_2Hoc5YHxj6kfLPW7RrYyt-G8pMXPg7gEhCE6fdj6bD3LVaI8jnp6Wt0wpEe8zLPQmABBdwZ9LFEXtPlyTB782SNOF6PYZEQZY71x_EZ48i0Cm4YLhQojkVUIB23l6myH-ISkfh_AFHc811XyFnEsYS_WK-c8Fxa0qUFGkV30pHQDE74SzXNvOnOLOm4t0wpLt7GTyUs8ny3RDjKtfnFLn153Pn7cLYZX0kOohMNZIdSvMI23KYmg4IBRNLNO2mWGu-UBwLmJYwxA7qVWHV22pPA1JsSL7BomZ-2ibDCKvpFtjavBLH8nwByK0lsqxWi6Ix54y-Ljhvb3vywgonYd0sS0g3QSrhQfALnPD3dSBGkOKZVjydtSStLx_-VOQyhfIEuKR-G3xN9EPrgr23w6-Disa4ofiD3LLcmseGcfnstHUolb10cG8AqfmPde6X7TJRuBNmmawov_4pAq010KffG_9wfo7ZxSQmnqj5ioCzzstkW2Qb01ExMeVpn4E1HiGxgnoj8ok2X0PA3TaLBIpPlu-NEa3XdcVrXLV5FHlzkhgb965TN7hW7i_S--F_YNJMKbBTqPIDqD4q1EBNEEUawvM8D2Pd4-OaxBNMY5PqxOJx8fb8gjDEDCk1H6PHi7XreAjQRozOdkTHKkVgsWKBNGMlmUXYY27VSqAZy4Q1AR9PCjn_CYedY6jizB1wlwgRp-JAAqAApNrf7LexnbJcwElD2zZd4leEA6rQaItC01iUKAKlsC94hty2MLYDABEarJwVLfOdxBe6NMy1fO10OhtyNsDRTNYrftpbaxDpaloqmBV6OeQZN8qP-hzOICdkeCSslz0FzbCVVo1eBvcdrC_5LM=",
+        "summary": []
+      },
+      {
+        "id": "msg_0c4adf6c07cdff7a016ac9f7bf7e8c87d0a5202709817e1b06",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "혼동하면 안 되는 이유는 **정의가 다르기 때문**입니다.\n\n- **FWL (free water level)**은 **모세관압 \\(P_c\\)가 0인 깊이**입니다. 즉, oil-water 계면에서 \\(P_c = P_o - P_w = 0\\)인 기준면입니다. [KB1][KB4][KB5]\n- **OWC (oil-water contact)**는 **유전에서 오일 포화도가 물층에서 증가하기 시작하는 실제 접촉/전이의 기준 깊이**입니다. 즉, 관측되는 유체 분포의 경계이지, 반드시 \\(P_c=0\\)인 깊이는 아닙니다. [KB1]\n\n왜 다르냐면, 유체 압력은 각 상의 밀도에 따라 깊이와 함께 달라지지만,\n\\[\nP_o = P_{FWL} - \\rho_o g h,\\quad P_w = P_{FWL} - \\rho_w g h\n\\]\n처럼 **같은 FWL을 기준으로 오일과 물 압력선이 각각 다른 기울기**를 갖기 때문입니다. 두 압력선의 교점이 FWL이고, OWC는 그보다 위에 있을 수 있습니다. 그 차이는 **모세관압과 암석 특성(투과도, 입자 크기 등)**에 의해 결정됩니다. [KB1][KB2]\n\n즉,\n- **FWL = \\(P_c=0\\)인 깊이**\n- **OWC = 오일이 나타나기 시작하는 실제 접촉 깊이**\n- 둘은 **일반적으로 일치하지 않음** [KB1][KB2]\n\n따라서 “OWC = capillary pressure가 0인 깊이”라고 단정하면 안 됩니다.  \n다만 **특정 조건에서 전이대가 매우 얇거나 모세관 효과가 작으면** 둘이 거의 가까워질 수는 있지만, **원칙적으로 동일한 개념은 아닙니다**. [KB2]\n\n원하시면 제가 이걸 **압력-깊이 도식**으로 3줄짜리 그림 설명처럼 정리해드릴게요."
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 2168,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 518,
+      "output_tokens_details": {
+        "reasoning_tokens": 40
+      },
+      "total_tokens": 2686
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "wall_seconds": 2.845
+}

@@ -1,0 +1,201 @@
+{
+  "task_id": "N03",
+  "prompt_version": "final-v1-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_09e2a4ffb1f5bb09016ac9f9b43c3887d0948942e37ac5fb85",
+  "wall_seconds": 7.38,
+  "mapping": {
+    "A": "qwen_same_evidence",
+    "B": "qwen_closed_book",
+    "C": "agent",
+    "D": "openai_same_evidence",
+    "E": "openai_closed_book"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"정의와 계산이 모두 맞고 최종값 300 scf/stb가 정확합니다.\"},\"B\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"계산식과 결과 300 scf/stb가 정확합니다.\"},\"C\":{\"exact_correct\":false,\"partial_or_better\":false,\"claim_coverage\":0.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"실질적인 답변이 없어 요청된 계산 결과를 제시하지 않았습니다.\"},\"D\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":1.0,\"note\":\"계산 결과가 정확하고, KB2 인용은 cumulative GOR를 Gps/Np로 정의하는 주장과 의미상 부합합니다.\"},\"E\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"간단하지만 계산과 최종값 300 scf/stb가 정확합니다.\"}}}",
+  "usage": {
+    "input_tokens": 7097,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 550,
+    "output_tokens_details": {
+      "reasoning_tokens": 45
+    },
+    "total_tokens": 7647
+  },
+  "provider_payload": {
+    "id": "resp_09e2a4ffb1f5bb09016ac9f9b43c3887d0948942e37ac5fb85",
+    "object": "response",
+    "created_at": 1791621556,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791621563,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are the single independent AI-assisted semantic reviewer for a fixed\npetroleum-engineering benchmark. This is not human review. Judge ONLY the five\nanonymized answers against the supplied expected claims, numeric gold, source spans,\nquestion, and evidence. Do not infer system identity. Do not repair answers.\n\nFor every answer return:\n- exact_correct (boolean): all material requested parts correct; no critical omission.\n- partial_or_better (boolean): at least one substantive correct requested part.\n- claim_coverage (0..1): fraction of expected claims accurately conveyed.\n- unsupported_claim_count (integer): unsupported *specific* engineering assertions.\n  A closed-book answer is NOT automatically unsupported solely because no source\n  was provided; only count a clearly invented, source-incompatible, or unjustified\n  specific assertion. Do not penalize uncertainty or a cautious statement.\n- hallucination (boolean): at least one fabricated factual, numerical, formula,\n  source, or engineering assertion; missing citations alone do not qualify.\n- engineering_contradiction_count (integer): explicit engineering relations contrary\n  to expected claims or cited evidence.\n- safe_refusal_correct (boolean or null): applicable only to unsupported_formula.\n- false_premise_handled (boolean or null): applicable only to false_premise;\n  requires explicit rejection and corrected relation, not vague hedging.\n- formula_accuracy (boolean or null): applicable to calculations or explicit models.\n- numeric_accuracy (boolean or null): applicable when numeric gold is supplied;\n  check the correct output-to-value association, not mere presence of an input number.\n- citation_semantic_support (number 0..1 or null): among actual citations in the\n  answer, fraction whose *specific cited evidence excerpt* supports the adjacent\n  engineering claim. Null if no citations or no evidence supplied. Citation ID\n  existence is independently checked, so here evaluate meaning, not formatting.\n- note: brief reason, no chain-of-thought.\n\nKeep all named keys in every score object, using JSON null for non-applicable\nfields. Be conservative about unsupported or contradictory statements. For missing answers,\nscore exact_correct=false, partial_or_better=false, claim_coverage=0, and leave\nnon-applicable fields null. Return only a JSON object with key 'scores' containing\none object per anonymous answer label. No Markdown or extra text.",
+    "max_output_tokens": 5000,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_09e2a4ffb1f5bb09016ac9f9b4f19487d0a8430c63adb8702f",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyfm7NyxwPL-ie7l1oBgkO4ZyNGp_XAgAcZiQYvMy3x_qt7QXY8VQzyuwpoz2_SCtBOf5tZQsi7BNO_jRKOIjhBFCsgFvGOutJGqSdx1REftwQynZaMDk-UF5zUH2bttDnKk6UUCfZ_5M9wVueL8eLyqV9xlZCpHLBqOHcM-LuwgzEkGz3orEeK-H4k7YcWQEWQ6iuWfi5ceOsMUL5buflRyFihPKLGmiJqmoGUJDO2SjUZ46qCqJBs9mjcQi7aJ7BmFq7iKliblP_lTFfJ-9uxfgJb7dIowCwAk1v8VgFPOhk-k14qiTzZ0nQOFw8Q4Pn5NCoOLAfTfmCoSFjVt5K1SdZzce8gb1N1v_cxYVaOWkLUJ2uZZyUqwv9RhWCaI43HDdPeEiNjZmEU3lAefTTaP_Z9VbPh1K4y9eD41KxUr46cP4OFX-XuFiJKxSdzKivmNvJGTaWUWX7yxnQADQJCg6nmbwq-u7rTSqVEkPXKHP2tWRtKy_KcTUYeWiZA3nzA_qHzlZWpaocDUFdIhrGwG-MAY6W_TyzKpw6Z0fvvfGQLpBYiZpCsyiJB6ycUkfxR7NpAD5Cnu4fFKaw7RByCZ4f5Ye7fFJyjEvnyXeDTgRmO7guVRBw_wmhZ9RxzYXTFzRcf5Wyk7Lmhfi1PC6EZIwiwDOOgnR8knz9Z2Nu1HNGxlcAtk_k6YojHCvU9BwJ8dbf2P3l2iF5ZGUi_olb88qXLELedwZ7atO-O6PjH3c-FVTkt_0bPbFxGu7eWDkKZBNVoQPQGPhQUuQynC3vh3J2-cAOEcUZTXmHE3rutciaqC94aDBq6O7WJ_gqLbPLEChlUWRBgXVBP08U4fJlzDLcJAQ8R_EcyPKuUVnAabQjLjhQYynhsmz3vB_P9i-Ik2A56FmInKxfW9aAE5aYTam3mS-5wjCTC9fX2Ii_WEDMurzLZHsL-idXB96F_FYT7-KjJCxz4yFv8kPRHnNUeN8U7a5F4ogL7lCQEbs8muHMzlrrmA1uKOWz-Q4-4yF6xXyTyrF-XrXkaFM4K0AI8GvAaJ1ixlo9dYh5otib3axp3Ka2tv2JI3l0OHCx8yKSI0xiP1bLnMtO-IUlWV1AJC9M0AQQ5uM9NF2Jq04ZakaD84LwBRToH6RorGljOYbjh2fKFnK8iyE6wWIYKDhOovXOatJ0k6rnkmOKhLB2KtZRf7V6uMgMMZnyTtvSK9hPMvhhY2KbJyPSw7inpW6OYF968QfYPxrtu3TUaEFTtordH9mpL4FNLvqfnURLtOAsrp4ADu5PUUSwxX3Aj4KjFjb36p0LeKARP49-e_7oW8lQw2VHmUlVFCNeIe0pJzxUvcNa_8TknqJecTC2n0zsMOFyhP0SwohujniaysRuZC9jZx-V7Cy0SjPEPu81DCcifQkY1S6xFCJUkDNE8nLzDqn3jym1U0zuIf4DJY0u1htmNwFd-ePIvdtd8rPX31wLdz2IoklsY1SAQARHDtnRL2OdguJ79NUr_avyti9M96CtGCjPKBMwAnC90G_sXjrATNTFYZTWsHPYJFOV5xrpTZOowCIL9j03_qegGteDYqmlErHKjkwsXAl5gqb1S3oE_E_bcyQf6_uyMYSJB7INps91eKL6gGviZG7CMCDuDb4spY7_PLs8SmEai0PGtZxRYEbcWf279cWhkDtZnuSMf9zYkiQgn_Bn04vSQLQQEWrCrdktOZING4xUtUTVe8PKmAniMR8_IXcH9uqsUh9wyhJs3ejq-S7BW0u-jqYbyTf1q9hnx_Hc56FC7bTTrjH_VWg1wW0VbR-4qcQw7SvyaSVhhI57AE-KYIYN3SOdGBiQbPstoD6w_VQRlqFQ1kXFLLv0qoYE96IsDBB7XM6p-mTneC_SienZdILrASoVD_3V62jOxoiKuH8WQDdxyfdtRA-eqTGYnC0cwCNPMTrw8SwBE5se4mHooxAvUTxwtiGVJ8W7le5hj6ByBlrEr_Ks1rp9DDYcx5Z2InOyGvutVvKXA==",
+        "summary": []
+      },
+      {
+        "id": "msg_09e2a4ffb1f5bb09016ac9f9b5f00887d08afd0a6b52d50a85",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"정의와 계산이 모두 맞고 최종값 300 scf/stb가 정확합니다.\"},\"B\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"계산식과 결과 300 scf/stb가 정확합니다.\"},\"C\":{\"exact_correct\":false,\"partial_or_better\":false,\"claim_coverage\":0.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"실질적인 답변이 없어 요청된 계산 결과를 제시하지 않았습니다.\"},\"D\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":1.0,\"note\":\"계산 결과가 정확하고, KB2 인용은 cumulative GOR를 Gps/Np로 정의하는 주장과 의미상 부합합니다.\"},\"E\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"간단하지만 계산과 최종값 300 scf/stb가 정확합니다.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 7097,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 550,
+      "output_tokens_details": {
+        "reasoning_tokens": 45
+      },
+      "total_tokens": 7647
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "qwen_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": null,
+      "note": "정의와 계산이 모두 맞고 최종값 300 scf/stb가 정확합니다."
+    },
+    "qwen_closed_book": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": null,
+      "note": "계산식과 결과 300 scf/stb가 정확합니다."
+    },
+    "agent": {
+      "exact_correct": false,
+      "partial_or_better": false,
+      "claim_coverage": 0.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "실질적인 답변이 없어 요청된 계산 결과를 제시하지 않았습니다."
+    },
+    "openai_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": 1.0,
+      "note": "계산 결과가 정확하고, KB2 인용은 cumulative GOR를 Gps/Np로 정의하는 주장과 의미상 부합합니다."
+    },
+    "openai_closed_book": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": null,
+      "note": "간단하지만 계산과 최종값 300 scf/stb가 정확합니다."
+    }
+  }
+}

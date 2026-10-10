@@ -2,10 +2,17 @@
 
 import unittest
 
-from score_deterministic import citation_check, numeric_hit, recall, unit_hit
+from score_deterministic import TRACKS, citation_check, numeric_hit, recall, unit_hit
+from summarize import supplementary_gemini
 
 
 class DeterministicScoringTests(unittest.TestCase):
+    def test_main_tracks_exclude_incomplete_gemini(self):
+        self.assertEqual(set(TRACKS), {"agent", "qwen_closed_book", "openai_closed_book",
+                                       "qwen_same_evidence", "openai_same_evidence"})
+        self.assertEqual(supplementary_gemini()["status"], "EXTERNAL_PROVIDER_BLOCKED")
+        self.assertTrue(supplementary_gemini()["excluded_from_main_denominator"])
+
     def test_numeric_tolerance_and_input_mismatch(self):
         self.assertTrue(numeric_hit("22.64 °API", 22.64, 0.01))
         self.assertFalse(numeric_hit("22.40 °API", 22.64, 0.01))

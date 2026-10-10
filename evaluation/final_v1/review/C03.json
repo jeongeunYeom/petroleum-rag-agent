@@ -1,0 +1,201 @@
+{
+  "task_id": "C03",
+  "prompt_version": "final-v1-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_016d54eabcb80169016ac9fa71821c87d0985f02fe07297b93",
+  "wall_seconds": 12.729,
+  "mapping": {
+    "A": "qwen_same_evidence",
+    "B": "agent",
+    "C": "openai_same_evidence",
+    "D": "openai_closed_book",
+    "E": "qwen_closed_book"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":null,\"citation_semantic_support\":0.75,\"note\":\"Correctly relies on Archie context and asks for saturation exponent n before giving a numeric Sw.\"},\"B\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":0.8,\"note\":\"Correct that Archie applies in clean sandstone, but critically omits asking for n before a numeric result.\"},\"C\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":1,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":false,\"numeric_accuracy\":null,\"citation_semantic_support\":0.2,\"note\":\"It notes n is needed, but uses the Archie relation incorrectly with F in the denominator, leading to a wrong conditional value and wrong n=2 example.\"},\"D\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":1,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Formula and conditional computation are correct, but it should have stopped to ask for n before giving a numeric example; also adds an uncited typical n=2 assumption.\"},\"E\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Uses the correct Archie form with formation factor F and properly asks for n before producing a numeric Sw.\"}}}",
+  "usage": {
+    "input_tokens": 8751,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 854,
+    "output_tokens_details": {
+      "reasoning_tokens": 326
+    },
+    "total_tokens": 9605
+  },
+  "provider_payload": {
+    "id": "resp_016d54eabcb80169016ac9fa71821c87d0985f02fe07297b93",
+    "object": "response",
+    "created_at": 1791621745,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791621757,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are the single independent AI-assisted semantic reviewer for a fixed\npetroleum-engineering benchmark. This is not human review. Judge ONLY the five\nanonymized answers against the supplied expected claims, numeric gold, source spans,\nquestion, and evidence. Do not infer system identity. Do not repair answers.\n\nFor every answer return:\n- exact_correct (boolean): all material requested parts correct; no critical omission.\n- partial_or_better (boolean): at least one substantive correct requested part.\n- claim_coverage (0..1): fraction of expected claims accurately conveyed.\n- unsupported_claim_count (integer): unsupported *specific* engineering assertions.\n  A closed-book answer is NOT automatically unsupported solely because no source\n  was provided; only count a clearly invented, source-incompatible, or unjustified\n  specific assertion. Do not penalize uncertainty or a cautious statement.\n- hallucination (boolean): at least one fabricated factual, numerical, formula,\n  source, or engineering assertion; missing citations alone do not qualify.\n- engineering_contradiction_count (integer): explicit engineering relations contrary\n  to expected claims or cited evidence.\n- safe_refusal_correct (boolean or null): applicable only to unsupported_formula.\n- false_premise_handled (boolean or null): applicable only to false_premise;\n  requires explicit rejection and corrected relation, not vague hedging.\n- formula_accuracy (boolean or null): applicable to calculations or explicit models.\n- numeric_accuracy (boolean or null): applicable when numeric gold is supplied;\n  check the correct output-to-value association, not mere presence of an input number.\n- citation_semantic_support (number 0..1 or null): among actual citations in the\n  answer, fraction whose *specific cited evidence excerpt* supports the adjacent\n  engineering claim. Null if no citations or no evidence supplied. Citation ID\n  existence is independently checked, so here evaluate meaning, not formatting.\n- note: brief reason, no chain-of-thought.\n\nKeep all named keys in every score object, using JSON null for non-applicable\nfields. Be conservative about unsupported or contradictory statements. For missing answers,\nscore exact_correct=false, partial_or_better=false, claim_coverage=0, and leave\nnon-applicable fields null. Return only a JSON object with key 'scores' containing\none object per anonymous answer label. No Markdown or extra text.",
+    "max_output_tokens": 5000,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_016d54eabcb80169016ac9fa72378887d098ce69b689c85386",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyfp9sqCkzupTiVRIJSNpu7eqmc6lea2OgNamA-VvYrq38ihRyZlYcIBB52wx0cxRDORxJVUPbgIZYWTqpnCcsVslzCgi4iwtPJUQXpCDUpce7qdEaxN2GGTjECnw42DN4A-6_kNepC-q5dXIMBLlaR3UA4pjpFnzRTcLHXDWQQN07xzXvcJxzA5yMO8e8Dk_yHXJet_BVwtdx6DAGDTFjm0YiJtYU4eW_XowpIo-RyqF1SsI9OKV1vr8o8g1JUady9YrVRZCN5uRXnFz4nqpijDvV_rAc1apG7czGIh0ic-a9ba01oQV0lhHlpwxsftttORYX1gSlF0b77B4UnvIRv918deJe84ngCqMw300wPng5-AyE9JESOOhiQXzEXYITocIKrdvWsjqWO9qoAJC1BElxzlf8UWaD_gZHuHbS0OqseG-PWRJAylqhth79HEDyXdGJgBFufK9Rf5CyaxPTI7HwEAwirXDflyhVLbx6d0DW93LcykBXTB1EEBNhrLuFSzFDK55d6_kR3-5zyAw_zV6eZh8JeuQOLLgb5JQyfzDk5MGoUTm13sCk1uLk06CoOrkvB-XGgFQgNx0hcymeUAKLMti-UgzNuRzyvFELNcKGEil7co2POMWkRvl7Aq3AkVt5TpV0U1EG0uXSO21K02ssVXADe9g2it4F7xVdEEOCq32gOVBiZICIhIhlLlUHggBJJkbbwnn5TDvM5UkUKJ4UoWlhLCMim_6m5xxzyO8APuyL_CIim8aZ6rNyv0t-Z5TdQ3MmJe4eFt3ZuDPgreXKOJyZ0O3YVogSOqwlhApyqNUg8C3hIJttgzdZm9jUQwv5QdY2MYUtgm6oaQbWyj2R-pwSvuo7CDdXJuZPt1VlGTU8KoI29HWFEnSnrOmIdKQEdyRXpALwC-nrSnz9Q5uMTlmD4LmgQm8CMDk-GcmY8ce9KlkdbyzzccEFrl661cNbKuh0qTt2eHEga090uJSQ3AbPmcVA7Dt1Fa3neN1ajHaBltaw1_eI-cK0boEcs1gBCIrI0YdKy0v55ZUHUDELZPbvKchYFUDMCcIa3dXWe3k4CUCg5ScajDSD1kr4dNGSS-dM0H8X6BoyvKRJWXgWQJB0IJrfnn86pAVly-9k5udUhL0euGv3oTQy5dLbHEl-hpIOiY-a-wCVVzmipJfuZJBLy1pK9ooKO1jN_0rP4UAbQSzMzlPoQi7FbAu6USwtHgKYSjfj7LuE1_ozc7NiaqSwIOMeZBiflrbPZqTAHnJfSFTTbWbVnpNuXcdK6JTNSbdnXBTIdnmLd3cQObJJEjmwk6K0nBHHkbtEVy5AtqwcG3ZZ5ErfycDU3kWVSx_eVJVo3P8I87um2oMTDRWZMFmBI7QlWh_2v_tMqb-1xJMfpcdJHCNirrpY5c5SYQ-gE9-k_I9SEacuy1G3GFdV51odsQqphIqYu13I1Ombbtk0bNTTfRzXAQFz4r9friIZVxcuohjROXMm8F2sgmegjM8Opxu9b2_frY5S9ucuduzxAO0x2STANqJbhQiShnGIv3hc0oBPC2TlRNtqaEhq3_qp9nuWn-CNNyb36BF2nQ7DEUHtRmYd5uKsAUc16y-iCQDXOwvXE7uOT_UPCedXgzankL5uFkrdkhSEXnt5gNGFRbFKo7JRPepRfKqIYHJA0h_JZZ2eD3MwlL_ujI_Z026wTzLsskN0gndvX2KwHXtUXIpUnEn9iF5TJXqQU5QhUhWtSzXQzjbedLmG8U5MUwpB4RWdhZUvkegSAbgjsqcgJHYObWj7dS7II4yjR5liQ6KOSuFHk7v7aYfgoLZYSWgBWgzzxm2gndJNwe4Tqx1tMaeMao6JRLXwaRXoZfPlyrqmF2sUGUnmze9Ia7DPCTkDIRh0Gf_e25qSGO6WVrk17oMgAQXLikTC7eb4EK7yCVqfKLQBtuDXFMuR2YMr9jTt25njuiCmZ-V_c5vGAdl31XC7oNlZ9AbLd_do8PBbMilwGH_nHv8Hhbb1aZB74pXeYatve0j6q2lhv8WP8Lst8eNx7UVrsHrx78g3EvN5OaIDWbz1-yJ-_PlHIo5AyQ9k98hlnjIcPGyGY6J16QUUCTcfJJvCdYuzBC9H3l_DMfXQKD_uP3aLUXQP4ugX7ruX_Pf35jL2kmUP_Y7cLxWaA_vTY1BRSEo_oXpY5qgs8s5uvQtVNenYqZeZx87XLf2lTAbV7x0hPySejZoCQrUMQd_5j3qkCLTtvmLZQrJCFVMQEQdjfw7b2xWxUyFXgAquL9A0o_1_YGcLcFPKSuLNy4PtLyLpYXMi2MQHosrBkv8QpJZeCi2uxnb6NiSEkYojVXOoCtLUtfycHt9bCyJ3wJIu54Fkb5oUgo7vqIwJLQ4RuD2Pk7cdXOtBGwU0HFJM6vBOq4NP0TTUVN0hOaPpHih90zwcQ7f2Qj7tNJ3U4xZA8ZX1Sp0Y_EaLnPF2lpzdKu6FJFi1hBYWpQFMlx7ExUNCPeJ4DdtgPO-QyvUqcPIncxjI5NM7X106M50ISpBsh2sO1KtTN4BpveFP2Yzu1MRMa-ilW-thvbBBTTkMRE6K4a6f5qSLINubYddjb84lWZUUB2OjM68E6flbd7tUbU758L9r1tse62gL_2DHCh_7KAnOBXnVKzNIK_LW3u0M_OWA13yUhYpFbcGkIqGvzIzJowvHiXC8mEQAMDnt50QgL8UMGv37zdwPSU38WLNyd_poXvWtQ-MNNlyNJExqi5I7Y8UbXiRftx_KfWHlWqFrMO3fwxzQJQzGUOJeFolzhkyyh-kCySuS2ODQhiAEt0snZDDxf8pJN0EbHgp77B7Jfofisar9Ga_EY8CLnLMEd3nt78tvDrakRdFyOgZBMulFApP8AVujlFDyAWrVXajmeOJMBg4vlIvp4UXha9X2azk-a7aZGR2RXjqwCdLvnK9q0IUE-J-folRnqCC26Sqn8MrUeYn7Lv8VAepgWE2Y2LZkA3JmlSZAm6oyqQD8C2nGZKBCyT5wGG1wou1jk1qu6ySM7TdLslKRZNfc2P2qrEuKQub8pr6sy8O22hPjH6V_v7LvjeLoEJDA_DjwFJGXpi-y60CmlH0GfBK0egBrnWeR-LTatZJYg6zSMCWT-fR3MPc6Ek8rvFg4ksaGzLPpkgMRAFV_BM6yfPMib1B1RddmtYLtll3B6a_QM1Iklcj2p3ur_P9zKacTu_eq5aGMb9FXSSpR-nIOV18HIo5aZo6_5tPaK7LQ1OeMenXn0Ij67SzR7Xbpv0QqBMTWVP6yNY0xSoTlNNbOlkYYeCMcVHwyKbJY_X9pgiMqwves24u5-YFMM1zPPytqjhH240TRSXdq2Y3iiwQRBLdt_IsKMHxgFCs3ECcQuOq7wRq5pSc0hr9alnhTdEnWQFJ7uUoD9arhyoFtp1wveuzxo6ktcMnpTsggfA_wz1R9vU4wisz3meV_LVCuy-iypYrm9vA6wWRXdM7E3SrLiDJFrYo_eH90LoprIsYpZTEELY7JFGVcYRjloDZzhWssjrmSxQSPYGdRuY5bZ7qArcTXfYABnYvO0llFNM25KGuSWWZg85IMGetbxPooKhcDOrOLrR4Xur6s9kxSLIkyqDH6eal8mkl8AmS-g2SZkavyb8NNg5O4c6BImY2Um5L1XP8VBcixCv-BNnDgTzk7VKZ6CyaKHw9aBvYhcT2sxiZBYlt8arz7vLa1NdjEBWkwuaAQbOStQafuqAeNpN5RZjOwhxDhrTzdXomIuw66OUvoI6kol9DERwBOWiGz0suUPYV8ubMGjfFOLb75cmlv1JTJgdjLBJ3pv3RsiFbX7Lda6v5YLYxpZ3K6BOFsg55IyK8lFX9msINnCOqKvUKAw2anxlEiI7PcJmX1b1bDxVBx3JCbVwDOx72vuQxS1cxD2Q7eU3au-MUPcFxaXqzzcBehDyrx-T71gVNkU8SA0vCjGhHSIwhWTIMAkkfb8UH60Ht3Wv94nNW5MIh9QOKDGmkSezL0DbeWHlES9gcP3rVYtYwRqcx77YmJLFMr5NwvmkhSvA2wDTALbUBq2dokLYcTmG_94KTiZwZ5Pg3htUhc8JeBTttKQfyf2iCdsBszWx6omTvbO476QctMOU0djtv5nBskJue96991bYC9lt25SP30zLAqLa1kgHYH7Gc2PWGBk8fnwLp3GGT7uIja6s1MggGDfnG_c5jPSWIDHmJYbWqotw3obV6_38S5MRHgwITWNXNEwz5pcR9ynd8EHJH4Yi9v_CwuSVuAupyZ7H02vuif5lXZKvF73Z70zvnkwx0wI39y1mPmUVz1ntO-VDwZihV7rVDHIqmMjYkk8I7IvSqHkXiSUouEiVY-JkX6HFPSaNhHW6RmXlAPIILepcCyw9-_yHR3zriW3O6uLPDG8Wid_BtG71Si6Uf_EDcGYBek5I4QK3O22Skhrf_2j0zwBzHvsUzZaTeEjmBUjSFuQXu34Abef1DZa2lkfufReQYvyzp9jQ2AkEdORbjiYtiVC76E66jjmSRCuIJ16b7CIj-WFtM51zQ24KRuLQGBlnNvgB7oqTDCEr1KPTJfFcQkGx_OGpxrzDoQQDaeaa5GMXcWPxRdPOgbvgW87T8taRImuvElynTi4Gu-kDmsQBH3kODd4RYEPOrgSDbho4Y4QzM1aJLgHSHCoBfq9EyaZ3kQ91VTXjlnxRVZBPnlCUGfp-1nUKuiGsWV8tD3-S0c4igav1U3tYR3v7xAwQpLp-zjqgWS0r9GZz2rXybgzLE09NyUxEhHcr8o1m3HPk-Va8IaaKt5PpFYzJzYBbZwcsySe_N8UWU5L-QV5yD8OUJeUPVFv2OzY98PyYqraHDltm8Y6AQTt4BKKj2tP_5k-YJzjCpUqWdLzso6fBKquFokT953HD0tzqiIFFoiG0SujfpKGrCPHPmzqmWP6PaMxMNRnfhJ7orq-lWOnOLlpeQtXB4wcb39lLSsmJAx7WcZ5ti2jlH6oAOVAAXhc_14xPaY-dLplC8yL7t4tgQ804uuktjjsl7OBxkVGk32tCdMTt-2yP3iwq2VAD8tStx0zQ4ncrXGCwyqcMLJc0F7bkb5VAKJSLDygZWkaIu69LvKO-VMx95NtYYU9jMr9JhnA-bdxiMZGx_F69u81Xm2EsO9qr9pONcZJRe52YaB3z0_SFdiICA1RcQebAbaOXQk8vwne5DjQx3jQxgpoPmz4veawarzJR30xa7znF6zFrCQnS2AZjnQ1F78d0-cEyzh9ALf1A37TAyGEekjp4vxeAsM8sezL4mVAH-rOxDkSOP6q7NFg-kdF8CzL8FrKu2gKcwH5MlDR4qBcvYZmWXinB9f6E8r_3iYW5CHB62ymD2qGuwR7YjZCkPJEuM_nf-_Yaz9P7uE71M38GX4FmDSykzewRm75XbQANUuftNnTHC3P_msDdVZ3faNKHHn4GEAgdusFXsvNJyGswQDL5IlvEceWn9VFgaHm0YMT7ECAyAJ-tojDqGA3J8UfeBgyabPN6GLXbpg0YYrygOaCxp06kWmcMbZWL1nmvFksdaaBS1k9IFONgHICywB942lwht87uUmbQQ-REF3-g2paBge278Hwc8Xq9szPq2bP_165mSAZXeHDeMXhqB0--cQeMbNfSvR40IlruIUPXkpnJhJssCXFEAHMG78pm4I4ZsBiajr1dVnZ5e6y0aD0pdVti-lpr7_aAt_V8yx2ZFbFXIhJI8uw==",
+        "summary": []
+      },
+      {
+        "id": "msg_016d54eabcb80169016ac9fa781d1c87d0864d7fa23a674a1d",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":null,\"citation_semantic_support\":0.75,\"note\":\"Correctly relies on Archie context and asks for saturation exponent n before giving a numeric Sw.\"},\"B\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":0.8,\"note\":\"Correct that Archie applies in clean sandstone, but critically omits asking for n before a numeric result.\"},\"C\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":1,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":false,\"numeric_accuracy\":null,\"citation_semantic_support\":0.2,\"note\":\"It notes n is needed, but uses the Archie relation incorrectly with F in the denominator, leading to a wrong conditional value and wrong n=2 example.\"},\"D\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":1,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Formula and conditional computation are correct, but it should have stopped to ask for n before giving a numeric example; also adds an uncited typical n=2 assumption.\"},\"E\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Uses the correct Archie form with formation factor F and properly asks for n before producing a numeric Sw.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 8751,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 854,
+      "output_tokens_details": {
+        "reasoning_tokens": 326
+      },
+      "total_tokens": 9605
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "qwen_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 0.75,
+      "note": "Correctly relies on Archie context and asks for saturation exponent n before giving a numeric Sw."
+    },
+    "agent": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.5,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 0.8,
+      "note": "Correct that Archie applies in clean sandstone, but critically omits asking for n before a numeric result."
+    },
+    "openai_same_evidence": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.5,
+      "unsupported_claim_count": 1,
+      "hallucination": true,
+      "engineering_contradiction_count": 1,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": false,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 0.2,
+      "note": "It notes n is needed, but uses the Archie relation incorrectly with F in the denominator, leading to a wrong conditional value and wrong n=2 example."
+    },
+    "openai_closed_book": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.5,
+      "unsupported_claim_count": 1,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "Formula and conditional computation are correct, but it should have stopped to ask for n before giving a numeric example; also adds an uncited typical n=2 assumption."
+    },
+    "qwen_closed_book": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "Uses the correct Archie form with formation factor F and properly asks for n before producing a numeric Sw."
+    }
+  }
+}

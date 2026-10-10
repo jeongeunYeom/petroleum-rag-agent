@@ -1,0 +1,150 @@
+{
+  "task_id": "L17",
+  "track": "same_evidence",
+  "provider": "openai",
+  "question": "수치 저류층 시뮬레이션에서 Newton-Raphson 방법은 단일 비선형 방정식뿐 아니라 무엇으로 확장되는가?",
+  "system_prompt": "You are answering a petroleum-engineering question in Korean. Give a concise, directly responsive answer. Do not use tools, Python, browsing, or hidden retrieval. If the question lacks essential values or a verifiable model, ask for the missing information or state that a numeric result cannot be established. Do not invent facts, equations, numbers, or citations. Correct a false premise explicitly. Use only the supplied evidence and values in the question for sourced engineering claims. Cite supporting evidence IDs in square brackets. Do not add other sources. An empty evidence list means no KB support was supplied.",
+  "user_prompt": "수치 저류층 시뮬레이션에서 Newton-Raphson 방법은 단일 비선형 방정식뿐 아니라 무엇으로 확장되는가?\n\n=== Identical Agent-retrieved KB/FIG evidence ===\n[{\"evidence_id\": \"KB1\", \"document\": \"Heriot-Watt_University_-_Reservoir_Simulation.pdf\", \"page\": 153, \"chunk_id\": \"3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p153:c0\", \"kind\": \"KB\", \"excerpt\": \"Institute of Petroleum Engineering,  Heriot-Watt University  \\n3\\n66\\nNumerical Methods in Reservoir Simulation\\n•  explain how to apply (without derivation) the Newton-Raphson method for \\nsolving a single non-linear algebraic equation, f x\\n( ) = 0; Newton-Raphson scheme \\n=> x\\nx\\nf x\\nf\\nx\\n(\\n)\\n( )\\n( )\\n'\\n( )\\n(\\n)\\n(\\n)\\nν\\nν\\nν\\nν\\n+\\n=\\n−\\n1  \\n \\n \\n.   \\n•  extend the application of the Newton-Raphson to sets of non-linear algebraic \\nequations such as those arising from the discretisation of the two-phase pressure and \\nsaturation equations; F X\\nwhere X\\nS\\nP\\n( ) =\\n= \\n\\n\\n0, \\n \\n and S and P are the (unknown)\\n \\nvectors of saturation and pressure; (given the Newton-Raphson expression, \\nX\\nX\\nJ X\\nF X\\n(\\n)\\n( )\\n( )\\n( )\\n.\\nν\\nν\\nν\\nν\\n+\\n−\\n=\\n−\\n(\\n)\\n[\\n]\\n(\\n)\\n1\\n1\\n).\\n•  understand, but not be able to reproduce the detailed derivation of, the more \\nmathematical explanation of numerical dispersion.  \\nNUMERICAL METHODS IN RESERVOIR SIMULATION\\nAs noted in Chapter 5, the multi-phase flow equations for real systems are so complex \\nthat it is not remotely possible to solve them analytically. In practice these equations \\ncan only be solved numerically.  The most commonly applied numerical methods \\nare based on finite difference\"}, {\"evidence_id\": \"KB2\", \"document\": \"Heriot-Watt_University_-_Reservoir_Simulation.pdf\", \"page\": 202, \"chunk_id\": \"3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p202:c0\", \"kind\": \"KB\", \"excerpt\": \"52\\nUsing all of the above definitions, the Newton-Raphson algorithm for a set of non-\\nlinear equations, F x( ) = 0, is given by the following expression:\\n              \\nx\\n(ν+1) = x\\n(ν) −J x (ν)\\n(\\n)\\n[\\n]\\n−1.F x\\n(ν)\\n(\\n)\\n \\n(88)\\nWe first demonstrate how this is applied to a simple example (equations 73) before \\ngoing on to show how it is applied to the more complicated non-linear sets of \\nequations which arise in the fully implicit discretisation of the reservoir simulation \\nequations.   \\nExample:  Returning to the simple example, where N = 2 (rearranged equations \\n73):\\n              \\nF x\\nx\\nx\\nx e\\nF x\\nx\\nx\\nx\\nx\\nx\\nx\\n1\\n1\\n2\\n1\\n2\\n2\\n1\\n2\\n2\\n1\\n2\\n1\\n2\\n2\\n2\\n2\\n5\\n1\\n,\\n.\\n,\\n.\\n.\\n \\n \\n    \\n   \\n \\n \\n \\n \\n \\n(\\n) =\\n+\\n−\\n(\\n) =\\n( ) −\\n(\\n) +\\n−\\n \\n(89)\\nIn the notation developed above, these equations become:\\n              \\nF x\\nF x\\nx\\nF x\\nx\\nx\\nx e\\nx\\nx\\nx\\nx\\nx\\n( ) =\\n(\\n)\\n(\\n)\\n\\n\\n\\n\\n\\n\\n\\n\\n=\\n+\\n−\\n( ) −\\n(\\n) +\\n\\n\\n\\n\\n\\n\\n\\n\\n−\\n1\\n1\\n2\\n2\\n1\\n2\\n1\\n2\\n2\\n1\\n2\\n1\\n2\\n2\\n2\\n2\\n5\\n1\\n,\\n,\\n.\\n.\\n.\\n \\n \\n \\n \\n   \\n   \\n \\n \\n \\n(90)\\nWe note that the 2x2  Jacobian matrix is given by:\\n              \\nJ x\\nF x\\nx\\nF x\\nx\\nF x\\nx\\nF x\\nx\\n( )\\n( )\\n( )\\n( )\\n( )\\nν\\nν\\nν\\nν\\nν\\n(\\n) =\\n∂(\\n)\\n∂\\n∂(\\n)\\n∂\\n∂(\\n)\\n∂\\n∂(\\n)\\n∂\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n1\\n1\\n1\\n2\\n2\\n1\\n2\\n2\\n   \\n   \\n \\n(91)\\nwhere each of t\"}, {\"evidence_id\": \"KB3\", \"document\": \"Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf\", \"page\": 1443, \"chunk_id\": \"779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1443:c3\", \"kind\": \"KB\", \"excerpt\": \"(or recompute the difference parame-\\nter) and check the performance gap. If necessary, repeat this step using an increasingly larger\\nbuffer region until the upscaling uncertainty reaches acceptable limits, at least as far as practi-\\ncally possible.\\n4. If  for  some  reason  none  of  the  previous  alternatives  are  an  option,  then  one  needs  to\\napply the method that best satisfies the wanted flow behavior of a given cell or cells in a given\\nregion. In other words, a combination of the outer bound techniques within one and the same\\nmodel may be a fourth alternative.\\nThe multistep procedure of the relative upscaling approach is graphically illustrated in Fig.\\n17.30.\\nChapter 17—Reservoir Simulation\\nV-1435\\nPrint\\nSearch\\nHome\\nBookmarks\\nHelp\\nChapter 18\\nChapter 16\"}, {\"evidence_id\": \"KB4\", \"document\": \"Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf\", \"page\": 1132, \"chunk_id\": \"779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1132:c1\", \"kind\": \"KB\", \"excerpt\": \"numerical reservoir simulation study is lacking, the\\nfollowing  methods  are  presented  as  useful  for  screening  studies  and  in  situations  when  more\\ndetailed studies are inappropriate.\\nVertical Sweep Efficiency.  Several authors have presented methods for determining vertical\\nsweep efficiency based on statistical treatments of routine core analysis data. Some of the most\\nfrequently used methods are adaptations of the Stiles43 method for evaluating the effect of per-\\nmeability variations on waterflood performance. The same assumptions and calculation proce-\\ndures may be used for immiscible gas/oil displacements. The relative permeability ratio used in\\nsuch  calculations  is  considered  to  be  a  constant  equal  to  the  relative  permeability  to  gas  at\\nresidual oil saturation (krg@Sor) divided by the relative permeability to oil at initial gas satura-\\ntion (kro@Sgi).\\nAreal Sweep Efficiency.  Several  investigators  have  shown  that  areal  sweep  efficiency  is\\nprimarily a function of injection/production well pattern arrangement, mobility ratio, and vol-\\nume  of  displacing  phase  injected.  Various  studies  have  confirmed  what  would  be  expected\\nintuitively,\"}]",
+  "evidence": [
+    {
+      "evidence_id": "KB1",
+      "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+      "page": 153,
+      "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p153:c0",
+      "kind": "KB",
+      "excerpt": "Institute of Petroleum Engineering,  Heriot-Watt University  \n3\n66\nNumerical Methods in Reservoir Simulation\n•  explain how to apply (without derivation) the Newton-Raphson method for \nsolving a single non-linear algebraic equation, f x\n( ) = 0; Newton-Raphson scheme \n=> x\nx\nf x\nf\nx\n(\n)\n( )\n( )\n'\n( )\n(\n)\n(\n)\nν\nν\nν\nν\n+\n=\n−\n1  \n \n \n.   \n•  extend the application of the Newton-Raphson to sets of non-linear algebraic \nequations such as those arising from the discretisation of the two-phase pressure and \nsaturation equations; F X\nwhere X\nS\nP\n( ) =\n= \n\n\n0, \n \n and S and P are the (unknown)\n \nvectors of saturation and pressure; (given the Newton-Raphson expression, \nX\nX\nJ X\nF X\n(\n)\n( )\n( )\n( )\n.\nν\nν\nν\nν\n+\n−\n=\n−\n(\n)\n[\n]\n(\n)\n1\n1\n).\n•  understand, but not be able to reproduce the detailed derivation of, the more \nmathematical explanation of numerical dispersion.  \nNUMERICAL METHODS IN RESERVOIR SIMULATION\nAs noted in Chapter 5, the multi-phase flow equations for real systems are so complex \nthat it is not remotely possible to solve them analytically. In practice these equations \ncan only be solved numerically.  The most commonly applied numerical methods \nare based on finite difference"
+    },
+    {
+      "evidence_id": "KB2",
+      "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+      "page": 202,
+      "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p202:c0",
+      "kind": "KB",
+      "excerpt": "52\nUsing all of the above definitions, the Newton-Raphson algorithm for a set of non-\nlinear equations, F x( ) = 0, is given by the following expression:\n              \nx\n(ν+1) = x\n(ν) −J x (ν)\n(\n)\n[\n]\n−1.F x\n(ν)\n(\n)\n \n(88)\nWe first demonstrate how this is applied to a simple example (equations 73) before \ngoing on to show how it is applied to the more complicated non-linear sets of \nequations which arise in the fully implicit discretisation of the reservoir simulation \nequations.   \nExample:  Returning to the simple example, where N = 2 (rearranged equations \n73):\n              \nF x\nx\nx\nx e\nF x\nx\nx\nx\nx\nx\nx\n1\n1\n2\n1\n2\n2\n1\n2\n2\n1\n2\n1\n2\n2\n2\n2\n5\n1\n,\n.\n,\n.\n.\n \n \n    \n   \n \n \n \n \n \n(\n) =\n+\n−\n(\n) =\n( ) −\n(\n) +\n−\n \n(89)\nIn the notation developed above, these equations become:\n              \nF x\nF x\nx\nF x\nx\nx\nx e\nx\nx\nx\nx\nx\n( ) =\n(\n)\n(\n)\n\n\n\n\n\n\n\n\n=\n+\n−\n( ) −\n(\n) +\n\n\n\n\n\n\n\n\n−\n1\n1\n2\n2\n1\n2\n1\n2\n2\n1\n2\n1\n2\n2\n2\n2\n5\n1\n,\n,\n.\n.\n.\n \n \n \n \n   \n   \n \n \n \n(90)\nWe note that the 2x2  Jacobian matrix is given by:\n              \nJ x\nF x\nx\nF x\nx\nF x\nx\nF x\nx\n( )\n( )\n( )\n( )\n( )\nν\nν\nν\nν\nν\n(\n) =\n∂(\n)\n∂\n∂(\n)\n∂\n∂(\n)\n∂\n∂(\n)\n∂\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n1\n1\n1\n2\n2\n1\n2\n2\n   \n   \n \n(91)\nwhere each of t"
+    },
+    {
+      "evidence_id": "KB3",
+      "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+      "page": 1443,
+      "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1443:c3",
+      "kind": "KB",
+      "excerpt": "(or recompute the difference parame-\nter) and check the performance gap. If necessary, repeat this step using an increasingly larger\nbuffer region until the upscaling uncertainty reaches acceptable limits, at least as far as practi-\ncally possible.\n4. If  for  some  reason  none  of  the  previous  alternatives  are  an  option,  then  one  needs  to\napply the method that best satisfies the wanted flow behavior of a given cell or cells in a given\nregion. In other words, a combination of the outer bound techniques within one and the same\nmodel may be a fourth alternative.\nThe multistep procedure of the relative upscaling approach is graphically illustrated in Fig.\n17.30.\nChapter 17—Reservoir Simulation\nV-1435\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 18\nChapter 16"
+    },
+    {
+      "evidence_id": "KB4",
+      "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+      "page": 1132,
+      "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1132:c1",
+      "kind": "KB",
+      "excerpt": "numerical reservoir simulation study is lacking, the\nfollowing  methods  are  presented  as  useful  for  screening  studies  and  in  situations  when  more\ndetailed studies are inappropriate.\nVertical Sweep Efficiency.  Several authors have presented methods for determining vertical\nsweep efficiency based on statistical treatments of routine core analysis data. Some of the most\nfrequently used methods are adaptations of the Stiles43 method for evaluating the effect of per-\nmeability variations on waterflood performance. The same assumptions and calculation proce-\ndures may be used for immiscible gas/oil displacements. The relative permeability ratio used in\nsuch  calculations  is  considered  to  be  a  constant  equal  to  the  relative  permeability  to  gas  at\nresidual oil saturation (krg@Sor) divided by the relative permeability to oil at initial gas satura-\ntion (kro@Sgi).\nAreal Sweep Efficiency.  Several  investigators  have  shown  that  areal  sweep  efficiency  is\nprimarily a function of injection/production well pattern arrangement, mobility ratio, and vol-\nume  of  displacing  phase  injected.  Various  studies  have  confirmed  what  would  be  expected\nintuitively,"
+    }
+  ],
+  "answer": "단일 비선형 방정식에서 **비선형 연립방정식(sets of non-linear algebraic equations)**으로 확장됩니다. 저류층 시뮬레이션에서는 특히 **압력과 포화도에 대한 방정식계**에 적용됩니다 [KB1][KB2].",
+  "model_id": "gpt-5.4-mini-2026-03-17",
+  "input_tokens": 2189,
+  "output_tokens": 99,
+  "response_id": "resp_004c1b33367f29d8016ac9f7af44a487d08ecdeb4bdd082f37",
+  "provider_payload": {
+    "id": "resp_004c1b33367f29d8016ac9f7af44a487d08ecdeb4bdd082f37",
+    "object": "response",
+    "created_at": 1791621039,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791621040,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are answering a petroleum-engineering question in Korean. Give a concise, directly responsive answer. Do not use tools, Python, browsing, or hidden retrieval. If the question lacks essential values or a verifiable model, ask for the missing information or state that a numeric result cannot be established. Do not invent facts, equations, numbers, or citations. Correct a false premise explicitly. Use only the supplied evidence and values in the question for sourced engineering claims. Cite supporting evidence IDs in square brackets. Do not add other sources. An empty evidence list means no KB support was supplied.",
+    "max_output_tokens": 1800,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-mini-2026-03-17",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_004c1b33367f29d8016ac9f7afe0f487d0966738785a5187cd",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyfew2J4BKQJWUKlXaW1RiYOQu88h0YinBbSbNeAnSK4WfV_sUFBWURPja2VC8UYVbLHeEpct57ajxwOsd0h95GLoeAQr1J66_Alkb0XwPaejWn8hb3QxDT5W3CCsZF1dFjA3IzyyNcobchIkpov-cjoILnqt0EpXkKuOA7Lnpu8ReiTZXbTJk8MQbKWu1GP3Q8o3uW4jesLTmLs5Sekb3RzgjBPztnFYXxQyVvF29ENQX7oc7yLZmHJv3PSYDjKueADdDgW3t9_yDD6-XArw34zW-gGEd8kY-DddBFrrlHv8r6N1UJAtq8slpJH0GgoVxk7xfoSeOIO8qmOgRizUOO9A_3TkjK1bqJXEhdXwM2aP0nsiz5o1R35L0LxQxxtGl1nLzMfZrTAUBQJhaVDZ8Xs1Im-_SU35XjLC-ehGza-u8JD2eKrbQ23zs1K_K_lkkArPUs6XicyFuf6b4BHjhUOvnnwQSaU_UxeBncXc8khSe6W9RZlIIbkx5Nz8_uutsbnUPiy1mLl37Ke1pKe12Wmsuz6-hLyR4XqVDH69bFE63jTNZ5KUfGyNy6L4KZFtKEaPDEsxzy5AOsyHt_d5f_hF-cIE91dY2QywXeUKF2DlUOFya3nkmUz8fjwETOrCEA9HESyGM4ALXKYPisKgTHiDRPmGtl5iD8zQ-yTw5dZTAI40n63gC0Zpr24P1X6FEKMBCL-BnB_3Go2ZvIX_9-24wty8UlutIAQKlDQhQoN2ryifwH3p4F_a7MlO0URwbwkeM1yrnb3zKh5IUve52bQAvogfwpvKo0fyWepEUXTuKlxmWUKi-ThWIuYlVgL6B2OEX9LKXfRc_WQ-Bk4AY5oY_JVtjFC32SwKGz-9g9snVVSzUrEz6iR45_Ye2oU0xNLN92c8jBQBm8vaM0ynDzeetxzrd2CmU3Kbpac_9B4lAepkJ1c1-975xCXgh3gUeeOHgXO3SI84kFOYq1bEKTrQE6NPWueUDVCSuFmK4Rl2pnu8rZO5M_PuhxxXYosMbyq4-JU7B_R-ktGqlHoOyiSfUbql8qjA0pHgELqZxEtOZMT8o8aDad_s9iAYZ5yed0mjONs28ImOfqZKpsKgiutoewf9p47zn3lmmOPWR-7_SHw39GRUiGekaywm9IfgJTiqNJk20HnpVQIE2O7-xit6SjekheEJbHwP0vUARR8iJZgyXKIMgW5v92v8pkbsMdV5NZ4pnTeSRyP6pwve6znX2wCvvLa_Xqr4psObO1KWTVhP9cDMwPEpA67qW98nK4IrsGCfL8B1MoKxoMMHe_apw7WEdrBwBP9OmLS3nAeojMOjkRo8X6JOcu0WFVIalkBbF_OHHfmvDZZkcgtzPOZf8G-3WFN0_beX_mMK1XWGUCgBkfF71ArMVoNwCJ-HR5v7qEJUqzzfopUAIxm-JofXVPNlDitrWJhN-0sARoLNx0ZzXudnSyoLvsE74mKq8iCMxyNedgk4jMZcH1x3_5clHtCgiuujQ2wLRzwvzZxRddUm_l-keyvYYQlXUcf_1BvhK-m5oJ_7zea91A5oZNaeZnQojoA24hU-PtvVRakdyQIxog3JzVwjFYbZljL_jOtWh3HsUy2g87NcCmmeutDWD5TmWzNI4WaBtYgT11H2UCITHH9TgseAecduEhcX3yWAaE7xmiDpyGUqsuoyKCDo6JoRCh7HuN4rbeC1GzvB_Fl2JxKWAtk6fLNQyVL102Axqx1CM1IvoXIxE1D4dDtlAKuChMUNSEGB5ND0RtThGvA=",
+        "summary": []
+      },
+      {
+        "id": "msg_004c1b33367f29d8016ac9f7aff79487d08c1e9e0e378df146",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "단일 비선형 방정식에서 **비선형 연립방정식(sets of non-linear algebraic equations)**으로 확장됩니다. 저류층 시뮬레이션에서는 특히 **압력과 포화도에 대한 방정식계**에 적용됩니다 [KB1][KB2]."
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 2189,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 99,
+      "output_tokens_details": {
+        "reasoning_tokens": 26
+      },
+      "total_tokens": 2288
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "wall_seconds": 1.447
+}

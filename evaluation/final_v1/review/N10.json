@@ -1,0 +1,201 @@
+{
+  "task_id": "N10",
+  "prompt_version": "final-v1-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_04dbfbdb7d4cf43f016ac9fa0ffe6087d09d76d2497beff472",
+  "wall_seconds": 31.033,
+  "mapping": {
+    "A": "agent",
+    "B": "openai_same_evidence",
+    "C": "qwen_closed_book",
+    "D": "openai_closed_book",
+    "E": "qwen_same_evidence"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":0.33,\"note\":\"Formula and 17.45 °API are correct, but the requested comparison to the textbook heavy-crude threshold (<20 API) is omitted.\"},\"B\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":1.0,\"note\":\"Correct formula, correct calculation to 17.45 °API, and correct comparison that it is below the textbook heavy-crude threshold of 20 API.\"},\"C\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":1,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":false,\"citation_semantic_support\":null,\"note\":\"Uses the right formula and correctly classifies it as heavy, but arithmetic is off (17.50 vs 17.45) and the stated heavy-crude range of 10–20 API is unsupported by the provided source.\"},\"D\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":2,\"hallucination\":true,\"engineering_contradiction_count\":2,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":false,\"numeric_accuracy\":false,\"citation_semantic_support\":null,\"note\":\"Includes the correct 17.45 result, but adds a source-incompatible alternative constant (131.0) and alternate value 17.95, plus a non-textbook heavy-crude threshold of 22.3 API.\"},\"E\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.0,\"unsupported_claim_count\":0,\"hallucination\":true,\"engineering_contradiction_count\":2,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":false,\"citation_semantic_support\":1.0,\"note\":\"Formula is written correctly and the cited heavy-crude threshold is supported, but the computed API value (50.53) is wrong and the resulting comparison ('not heavy') is therefore also wrong.\"}}}",
+  "usage": {
+    "input_tokens": 6408,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 1790,
+    "output_tokens_details": {
+      "reasoning_tokens": 1193
+    },
+    "total_tokens": 8198
+  },
+  "provider_payload": {
+    "id": "resp_04dbfbdb7d4cf43f016ac9fa0ffe6087d09d76d2497beff472",
+    "object": "response",
+    "created_at": 1791621648,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791621678,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are the single independent AI-assisted semantic reviewer for a fixed\npetroleum-engineering benchmark. This is not human review. Judge ONLY the five\nanonymized answers against the supplied expected claims, numeric gold, source spans,\nquestion, and evidence. Do not infer system identity. Do not repair answers.\n\nFor every answer return:\n- exact_correct (boolean): all material requested parts correct; no critical omission.\n- partial_or_better (boolean): at least one substantive correct requested part.\n- claim_coverage (0..1): fraction of expected claims accurately conveyed.\n- unsupported_claim_count (integer): unsupported *specific* engineering assertions.\n  A closed-book answer is NOT automatically unsupported solely because no source\n  was provided; only count a clearly invented, source-incompatible, or unjustified\n  specific assertion. Do not penalize uncertainty or a cautious statement.\n- hallucination (boolean): at least one fabricated factual, numerical, formula,\n  source, or engineering assertion; missing citations alone do not qualify.\n- engineering_contradiction_count (integer): explicit engineering relations contrary\n  to expected claims or cited evidence.\n- safe_refusal_correct (boolean or null): applicable only to unsupported_formula.\n- false_premise_handled (boolean or null): applicable only to false_premise;\n  requires explicit rejection and corrected relation, not vague hedging.\n- formula_accuracy (boolean or null): applicable to calculations or explicit models.\n- numeric_accuracy (boolean or null): applicable when numeric gold is supplied;\n  check the correct output-to-value association, not mere presence of an input number.\n- citation_semantic_support (number 0..1 or null): among actual citations in the\n  answer, fraction whose *specific cited evidence excerpt* supports the adjacent\n  engineering claim. Null if no citations or no evidence supplied. Citation ID\n  existence is independently checked, so here evaluate meaning, not formatting.\n- note: brief reason, no chain-of-thought.\n\nKeep all named keys in every score object, using JSON null for non-applicable\nfields. Be conservative about unsupported or contradictory statements. For missing answers,\nscore exact_correct=false, partial_or_better=false, claim_coverage=0, and leave\nnon-applicable fields null. Return only a JSON object with key 'scores' containing\none object per anonymous answer label. No Markdown or extra text.",
+    "max_output_tokens": 5000,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_04dbfbdb7d4cf43f016ac9fa10ffd887d090e6aeea9d4f411e",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyfou1p_gioZpvrz1TezjWisQ1RtQpoqHJKc0ZDU1cbuqFyzQ7u8I64rqWjc7zQy0F31cYtpi03SxFHGkBiv0qNw2BJlE04rBhd95TA4LDIUxKH4KsXQpiYuuFFJV14W5AyFyy7pK4IM9nAc3-q-CTcvjZcPy6nmDfReOhl28KiBjfEdSVtQTULiaPV9PunNEluASFVa2izxQHRr-psgb8b8ViSq3-_FRV3Jm5oUt6sWHIi4FUWebGObHGSCyG9eqtrdQrqQv3AtEPEySkccdDRz25vMVSlp6sn2yEUM_lotsTAqm0WsYTPbOmKwuQbcefPZTPBuS60mZP02h7tpdBf498MBmer3xwhYunW_NrLy85C2l6QUkCyJ3h7IeuJJxztyps6aGtARnULBKqUvDEO9svyduouf_Nm_SM5j_5W5gv4RTDbYlOYCJArLE2T4TFHVsclRc9fGh4QzTKeEOjiMjq8qrKuSKdS-H00OdgQ2miiuGePi3I3LiQUM0KP3gpJjMXLxHDZMOmTe4Bh3HvKgtDwX6tixF3uWTrcv8z_9X9geTqnvx16EkHCqrHjlUI8Nd99QWkYvJ_uj6T_vXJ0S80P_0Uccw81CT-jC5r5s8ooLQDcxwz2YLaeAo5ct6aJHvEl_UB43i7bi1QrF9LCSLWbn1UcJM0Sb25LIlUS902_CJt7n5sha1BNChAJaweddmA_DnmYCpgrGDctGZGFLbAyuaQ7YQLc2UNvmQHosmAtOzjA80wqkg6PpiYwzSzWnJwY6c5qhfh5s5GKAVrkUS_MiF9jC-gNNB7Ga-s1oozgYW38sanleYC8qXlzahCkzF5H2y-2plSvyFsTyiszym-tOm0FePp5j2WOGuPWlQ2oNtuRnQlcBx5uFr9TsVI22h1qtMJ6hRvd37TLAN9qZYjJGpfapXCyPyZ0d1xd_b7vkLkTta55DQK-eidartzGk611Q-0DNcd3obsOHzOgdXqPQ1qJJu9yTSIiD4oT5mbLJSIv2Bg5V1UBETgPXGTf7fBPvkr7hrq33UVtoUF3ggNKalG4GBa2_AxMzwcrl_VQCgzeqFCVQL_GgWLvLK7tJOKnW24QZWsAIVNX9EYsHofNSFxtmDugEdyoQOhh4NNtopiV8a3dD00WIOee8ZwqZaY8e7ZZRP4IkQYz9lRwGdBkET9hP_Wiz8KlPZkUY6wbYAbcCXwslehOCltSeldm-oBong34e3U3oe7jnajOWzXEmvn8yDYA5in1-cW9m8sJX1Mu54dBiIMvonL-6ihX4pc_N8QsFa4E6R3JvgwSr6pRGD6qFRHUBaF_W7ZtMIyxlD5c10yJ3G2p2kU2BjPsCoaLB6tcQuUtpfgkSFxRIqCPMjtvpL3tafLyBD1PlFb1DRVgrvYuA5J67V-X-0cqz4msUtxRX28olSTTYEAOJT6E2gfzsj9SnYXZLnu9hGSPbVTAdv6A9m7eUSesmp0kdTUpdS09uAZIiHHaoy8XbjEWm-Upw_USvt4VuO4AaxEILbO_m4sDRU4h7-9z1CJy2gj85JeUOZFkymx0INb6LqjChcffFR8zCLGVkAwAcjpnFcuH4cbb0U36j0DpOpkys13VDFzaJinYKfvqrwxHhJxikH8YrbCLUuG-c0BJsEiRGm4IFOi-hjYYMkuAIDoq1k_08lLgTCBjxWrpQiaY5MSCkDz9WDvdO7T9WNTJ0JEkMiGLahYh56Eee1AUB-d61OFk-ZG5YHZOEy41CptwtyhNvSw4nhSfa0UUyd19rSb8tkCeGP-gUFyCAapxRIbBKoISeCLiPRtvZ9pRcG8B2JadZSh76uKnQiG9PHvhVDiL3BY6QDe-2hAzcg0v0l6dHC1swThq-S5aUpNGFW7zxeRRUJjo0pwMjPl6CDs5qi50StoQa29gnE0Zd983wXc6v6O-9gof6jjS_q1kPT9JbzI0e3BVGHwFeS_2bytNdgVMs4WOPFXQYLA7aKKeNMUNncssbp9QB72PlMcaXQIYog3dS6AvfRXu_Za4uBQMOaHrSh285qDUKD5Fb01LLNxQoST05QX8U-YreQWlwJz_6rNGoWZtYqLPI08cAS5K9Y2nWuWWNDsRHC75ds_LZ1zt3OesWD9Oj8AMs1HTMrNJsaaXAIlIgI5RWiUwgODR6pSJPBP5813UtXi-W6MoL9kzqW9ahLQnVMJkIcdVX6FuVXeQJc5Br5FSFUtNhr98WB9qAUtuL71y4iDr4OihuBDUnNsBJKw9om8Ylt96p--kT9rben8-KkqKRoomxNiHYuIQtz9CMHfhLfo3xZL-EJhZRQU4t3i63qgPiZg3qlBtvQT17q_RhLGyVxSuHIijzB-oEWKoWCHM7b2zY-njF4d424aVAEPZV_ssNW2Ss_sdprd8lQo0pOIw6qXrfBtiUWGRaMmJj0Y53bHGD29ErAQbb0p35Y90Ag_5C_lSd9F5UWgfNBathHX091VOj97fkymZemjdTA5PsxBIx1oWnjf-KGG4Q1m0XfKzXoTxe-kscA0S35RkKzlSZOrsoinsJAajB7PdyXSaGu5ryc6FEpvtGF5ctzdWk-khwOpy5AQwmkN1NgP2fLGeXbajLwZ1_0I_ZEboCKixYdmOejDP39MgD3ZOGW2_higED2J1-CffWKBn3UF6xfUCCT-dpcXmIVW6CU1FUX26MmYGDwHGVyoeTWYaVw_8koxoJJeCOcSNlR4OKuo6a_lkCdrGmOscCv__GCxHy1ZQc2W6ol_3ukg1RaScGHYLy9h4aLDKHRGGJoZorpfDCRj3tAf2i34pXZB71DJamlAkqHd4SORVe926mavXvyf1jZCEe8cX4P-60v5e_uYl6hWuWiq2gmuckGKrX-GRPOHjKOJxRWeE5-MxjDJs64qirY0_A_VBfdOQ10AMsRTmAsGwvB7HtRuba89nlL6Yb2yQojIt9wZUNlxX0QRWftu6jua0VLmZTXL6GQ_0Ion7d-brzhxFpX2hNwfIBqD1NV756zjmR3Yn1XOazx9tPlEQloxNa5kfBn5772ZNnCasTlTU67TPU8KcAN7inicxjjx1pSwmFG7Cf89A1byMD7vRBV72RTuZa02Ps_k5UFhu3aAfZdxyqd0pCWHeUUHeuFZRmrCL-jCqWgiNMGckOMFDdJ4R6VFg06UP0ROr94zmQV4jGmzgi8ER12x4qiVj0k3Vp3Wg3q7peFracipL5dnOAyoBK6cJkPcXTOlx8a23TVXpBVbNFSJF0S5KgZJQhCDEK46nyp-RUUj8YIuZy-OTFaub6zGWkcoAYLgVnfruTGXdV31R04qrLs_7Hy9VcnO38mLG7NfuWfG6oX72F7hUWaj8P1Xwx1ddW4pFe_lqkM5fcEfMjBym7f4aGzbLYmphHwUKCdkX4uy9v7Day7ovMkzL0vdALK03as16fbg7ltT_0Aw_nQEscsAq9dhNo1PwUVDlvDo2DIfEpMPowwDcYXNeELAW3uTv92u1S1aJn2zgpRhNQ-MG6oqo6f_fbUP2hv9lIMP9KXMZI0cUsM9eve9n5qC8o0wz8VSu0DAWd-TudoUuw6FXFAfcPLNol0iMTmL6YOCt_iLGp52CClLQbxN8DanJA2iEQxuRrJvje2ps-iVlM3I_8pkQt7DGgaxHumvAE6De1TDB_4jCOK4uNNDttLIhKtZAFaI6BrUKedncEodE-Fjxd6wyy4D8kCxmc8gv7tNZ-bWMOpz6B2bcdzwOoWM4GASDXMQd7mRaeUeMEoUngxyEI8ttDYfZHG8mCCitj8Y1lPXoqq5lFf-AA2z0bi-YLW15qayvrW0UFSxjU0ebMb5V3Ho3yIRRNeTukkzr1a_o66zLokQ4tqOc1Aw9wdw5J-S-qlas27SfzWfcVadGoF-eZkTE9WUHEBEnYPOqcoqOVI_O8OOFs9H5D80WHwgL-d8rXXw-NLU6ezCro8aq73XPO0ITHWxYWmXcK2Q18YZU2XncjF9OEqAGr70Q5P34VmRUGz4hhbi0zv8_tqnmEKFLyr-aTk4qPe8xoWpU95sVsAwoA8eLtq6Vj707LDnbE7KE6cPkiH-hfFpPXNBFoighvryTIdVHlEtYf6q_PajeekwBNfwvMeM5h6rZWMvGAz0eTenw0tLUMS-ZgPKYhEY_Md_W9KHmgz2H_IShIjWPjMxULvI3EWf_r07A7HydOJTtj_RGHRvhkmTx8oV13sVScmvT0Yah1Xz4AGvSBTR6_BLR4Y4M-z7kFDOurI1JlF8FxitoQbuQKWKXk9KeJfja_CrL0KsICISIYK6fGZqUm0RiWCbJ4sXEX4-33eM5iK4mKhH2T4l8retP8YwPr0lGemZeWT2E7mjVmG7aFRB62P0uzkD0Bbk4AMu6mLJrOPRJ4iuI9bQooJBSmm3ELChWDPZJbU63wKDgC3cNTyzGE14sMk1zPbGg_rd3ISgsJ0NcfIk2CXzR70okm6MEIW80w-nQ0BiNRwWVSGQBhNb6VPL4FseGvNckefqPVE71vi578p_k9s6LE4NhoN6PnBcUy6crwANMKdqc-lWM2e6Bx_QWh-LJnks7c5yJwK9uzVBFLFSE181--qwpKU_FJKLJx3TqXy_F648Mr-LzVuPEx4LJ10ImdU2yENIFgusrzCgvmCwQsoN3B44HCvI1eW6L-MUYbwyDhH0h-FKTHyRst70kJZ-oWV0aEAM6AritEEUlrM2fOMy8BTUCpcaOs-5Z8O4GYfFPLahVZn9EF16TVOEFQibgBDsFTPL8-q7phmz0G207DnSJdTrs6HRKfrObn1Q50KhE_amWk5-xUHEw284htNZL7Hhlk7EdAl1UWqly-xMmEG0gVzoC1sWjVl6-7G2I59yO7mCsVIpFm1v29QweeXOBwd4F8zyAQyfYmZgv7lTLr6d23dAKnhiuSlgTvGI1CU7k1GaWEYH3IqS8sy2iNDozBE3g4xXEdZHZ4rspCXMWYLN9HV1ymmyKzn17ZPcgnEYhgpzaf_GSKz8gEi4hqpLgBsxa5ox-Tg28XHCNbE_jUeeDiWcQf5iQm_KicLfPpjZ4BYjvWpMFJOpaGQe5dF-wujcLIqsyyp3rKMklXORnJh0PeJtALjByMTFXqkWxIJIxzsZW9zRfphxy1yY32Oq231rmnBqlThaeUR3P6mLFd5811MHjquzx60wJlW4k_rWgx09Y6RdI9_zNghBO9VbrEQj3nVuM4Iad6X9nmsI7pDIIUi-BdeHmHF3eVcev1gKkDdsfU_FP8OzAM0K2-vqi5W_oSbAFj_QaQ6RqmXBjorbTUL9KVFQZJZW0ski6mG55u-266T8MiV7YZ-mqd_Rv_8_xl9pNldK_6lrC7RjSSEuBkgZl6vwb2VeWiRvMl4qRryzEa1q5NKYdxebi2f9OSsoupf2Q7a9KEWISFAK-bhrhd-9tmJaM_gDRq5wC2tHbkxcHWN0zOwHj4yB_MzWQuFnS-NAowRg_vqPZX8-3SANUy1rrvH5LmA0NKurkQDQlDcavp6bXT_Lg8AC-S6k-o6EseCerIcJIG_3VLVsxpFfobCQ7BDvhjJtp5p__QT0VI8gOZr1zivqIzh1MbHu8c_PRXSps5ximkyf23g9dqdixbuxhHL9WyEfZKMaKLsGGR90GqJZh0vqPft8HX5RQFclFOeUfsCRKI8FZs8IJLZG6R_Eoho9WVxZ8TAluTDsI1RoMkZzdm4brGurxwRl0KKf0bHqnk2J_XCVqAK56Ppn_z-A2t7EWPUuzvYjHYUXEoqKXtoLoIPHBaH9bxwG3WDzeZijjtxE-VKk8zTgsJ6uXSlduPl_Q63MNSTQFbkiw5jov7D7v0QJ2_JHxaQndnjHeszedswAJ6G9c0KpN6IRSn0aE1IPnzLaqGFyeBFS7mZmnlYjsYL6Qvyx4l333OfMZIkDjSWuC5hj7tP9_toZvWpyB3s78VNcTheL3nW_juPTSpswPRVu1PdEFWmyoS6vj2jyX0y5Zoed0CnU73Iyj1RBEuOudcntHnlDSl3S0_tT5TDVNS1hs_L3Y1rXvjW_-VPH9UCFCKCeyTGO32gsdm2Ffd-MbZJc5R_bC9mWdj0f3vXLc0vQTeQUsq8I9OJh2YKHDHGWtrSoIkIgRtRcohcb_GhDvd7Lijih3-0k4oY7hfK1YgJdgi2TwBo4TL66J4LJsS7pI_Kb3sOb4wjLX-pNJZK0xAg3XoRrSytnnq0mf82bCmjAiDjFx863TysELCuQ_1H-JHFO2fZ79P-5sh7D49MHZFbe54HEvcRGBJpT5rQXIqMYWPMQ2jRR6lCKDt0gfMaU3bEn5iGKi72Mvbh_7p9siCpiPfj9k5oGW4zmQUby4Hml4jRmzcelJfO0Q1vBKCDtR7wmqPVHrQViUq2mHENk0Dc7qlzeTTVQlNuC8kD2IzvGcmK5V81eDdZZHYklBksE2JmOwISydo2geFa5ja8ycPr_z325nlg_kOEh79HJjc8YLuVTWScGYj5NkVZDpN6enmL-UZojt8UbiEok4j2GtEYf6izPJAFvICcb1h_lUE93cYdbdfxpRlMRj46BENnVtsV3c1o2qs3vHhQZj_1eSsTqkGcZ2CmWD6olHPg90Jv3GU-49xZhEthQDVKg5VGtunXQAw9FqI9Hhbg_2LSMPv2UhFdmTb0Hl8Dbwa0zEMUckCE6RG79hbtbVQaELk5PcMxAtaY9Rq1kwVsnY2dB9PM3O3Ia9vkHeCR_yRgk7Q12oKwTkgz6uXTpLPdI8l70zUHk1-zve3dIQyeZBnGhB8sMq50hdideM0yQyVOD_Ypql6Wmdu3MMfiDu96nRqUmo5m8sj-gKMhnWXwMMzDGLmR-53uYt-aCIHAkldXlkgzHc9SoQE6wNRaSHRFNz_byGmTSlDzGaplyvCUqK8Mnn6KyaR0lbKhrJqjyGU_xv1K5SAYqjKdgZxQrUc1rgxIQRBalkdDDDlh6aOmGnr8wvT-SHXG-oZjRXo0tf0tgCF_Qj97tRpI8hMZweE0RhEx45OduURDopaEVrg9cPxRMJu8rGhDJWfSl0GkUSBM5413TyGQ827Fa5VhouQjWKIRjCWVOnbRKq9UeJX-aq4QlAsB4Z9KWzW-wOi609gEAgn8vBHDNwQLrfIWcOsEwifsVkivSnjbAxLzLr9tgRR8K_cOZIpu8RDDOp_bKFMmIm3uW9xpqkT2kEZfFw1jjxmF1U1k2mntwIC3uNBX9njMtO6cn5cCZ7Dm6pHjKoe0zad1tauzpzUnoeVWQNaa9WDAo7KWsBYw6WOgGdVzna2h_FCj4cJGBlzt2ZSGl8f3Nylc8wpsQh0WNFqB2wk-y9HF0qtYeR1XEtsnaREFcQpfaIy4026RtL0Utpso2EQkh7NbJVMzmQ-jgo8JGBjFnPDOj-PK0ohr5ijTmuPgq-jdgYhmNVV7Wpe7OYdrOcWeAIpjsRznbVNHd7MW4a5t6CDio7xIUMcypf-ZuESqBRGDsRbv9YYvVzJY0uzKd7vtv1lWb0b4sHGUc5tgFd7N-ZKAwmTVf2TNe_363nmC3pc4d8j4cCGE6i7gxbTlT4ff5RIthZV6El8agLt_uWt-GVKkCvmQI9qdj5EEvxOvTrEdg3_zVDCBbW81qn2xdhCxjlKodob_d7zmLzWCYgJLG2-9W4oSVVVHN92UXMMeExztvypuF-5PLbomerq6DIT3jadB3lv9OBkPbCBwN4JvMx-TPn-GdSzYYk6u96PyBXewxwwWb34bqokOiLDBZ85KvcvNeAW46JV1fJ89hLkZBYOwmfAG_lv94RYtbC6oK1bx_DzvHB6lEPyfFZC12le1c6Cnq8XD_erADrGLufAj08RKgr1csbN-M3HN6y0MSeRaH3Png-NuqI5D6WRrvXcDLn4kg-dQN4FrLcVibabgCNMjlyyMJOYJFrtxIarfvVzweHG74F_BPSBTVBt1l_Vw6tCDSK4VZR7ULyvG6U81CJE9MhwAXB122nQKfj5siHP7bKqP0HQMKtOhiu0B6HfOrnf-DKDc_W42ni1_0ffj3dpI9Z6SBBWYTyOiN9i76GGrok4es9G3LzZvxTvjkbzVEVzduv5wMVXL-OWvrZ7jHSvd0mYCcrevOcXTa0QFczQ-i0vbPDtd4JYyhm5jUZ6f-Xotgd7oOBBffWNToHCNXhHtZsvU9WkP99aMYr0tSWnxoah-Pn2SdOV9A4X2HbeNbvloOho5IMSQ77KfCXYSqWRzNajfjt7b0ShMe0RYTKMRF74y2TtCt_Rlfm-wMwpDJjUDXFgYZGFeXfuR2e-dXlwlXl5Hj31-geYe2SavU_f-mNW149WSO6GQ5arB2hzpA-LF7JQ6CoOkQ8_mqNiB8HtYdw-Ccx4030q9zbrRKSEYDzcnQzR-0Gk_X_gWyV0k6TqyQWQtSwBHFPwMwWpGQ51GnIjJSG7A_j9BdjG_f_UO0kjooUsdRxP2_yYRnlBukgKjR4Yv9S_ARZhrtfVZfQwyvNQ1PUa32qc89ao_-pj_Xi6VGQdvlLdXdBi5mq_E94MDvnxpJ7Icr2TQZeVdM2aeFVQvH9kMMPM7g5sYUlPATiT0dkcNsCL09FsC1ReZNGulzk2jSY-Sem_baDOryeHUUtfk9nrYWRDXI63uXg8AUpZp0mbZg05RsQLh4Nsv75hLXe4QhxM54l4mANNdKmDGARJdMHQzUICeW3gOsJ03Bq6Xi3L0oh58BEsUFZLYtHXV1IWz1FozNsNdJIKXOKsC8lp1_EtVGTV8ksCUaiM6LapQWCdaVcMOjyjBGCICE00ErED2rIq4s31sU-cOgs3YzJuWsoUCCNqfmpRQCRzwAlxmhL1BdFkGqOSPLfQMcpElwABFOxAg9Vo7apvcYPOuBKdswgi4QKCPV4NK091Jikmab3sO09NgJS7iwMIeqcdItWYO9TlJ_JcN0ucI8yNy5g-iAXydJUT26pBW3tFQIHXzVZXKWqCsyvWRm7RlrTN3QM7Kf2zztyps6ggq1AsU_h89mRMs4niEUKNVS1AXc0wvvf9NkJD4m8Bwzh9o-ro0fVaHcDkGr0uCKgja-g2rh2H76EE7IFiL-WXGUbAA1OKz2uoukE7HxbnONyJSvN4hhCuau9Ur6ug_NNLx_iPe6RF56eH6W81hMFNE1jv5uI2jEZbwGy5adD078d6I0YluYb2frjeDO0nrZ9t25yyumiMwro5c1OARgSD8Is2hoyKVT40fptDoOtwgatiPyPy3y6j83F6a3NpO4Q3mXkr9qTEiML0FY4UdUDjt4HjzzFmXihQsUfWkdlppcoHMGGck7Msk1lXUPLOMtSX29pomZ3IwAtjXqdwFj9dZ2bj2MmN1cQAffMaP7Oc2nyjeQ-CvsZzmVW4PJO-v9F31X6ugMmu3qETlcAWdy6xLJWTlWQVqQ3yC160FlpIQLq8KGkf62lxUNrFTjncYfFB2T8tc4_siF47D45JJs3noLuSWMd6vdqDA9HWWz00P2K2F2sG5vSLlgTiXk94OLQb5vZr9SKGXpc-A1R_CeQSakZiWLqn_H0yZSF1AAntUQ3SuFURMFY5VZ9jc8IipBhvPaQsYL9aCHN8gQBn7XxQbUJjn1JzJhOAkx48OMzIrbV5a0OeCbJUy4qy6E6yhURNMw1Cgzs7PePVrjITUJ6rN43CepMKwSqE7YHYZdojVsMVJHwxVOhI1izIN9e3NyBY2WaDfWGPx6MwalVJnTWShroPv5WbVS2IX0tLxhzu6rAa_edOKLquWd21Hn_Hmlzmc2HN0uWoHfx-AiWlDDe8JJPauy_VWbQZ1cOQmmHD5CFn-GQEZxjP0LXzoj2NoyhxsCxR1K09cu2aCxHkKNWx7MF4Fqj5qQGHMcduWB9KX2J_fCEEcJ1AWlF6JE3ggG9SpE3vTsqmvyqtP42BzxYfsRy7RyN9o6oQh1j8S_vTCX4OVivDYzYVe-t_RhfQdY98DRn_9eMQZJgr_61sDBc8z4yFnZNjpBjgkM0odSpyRbTI8CN0_2SsrP7tyndFdIp1qAOTefRb1ns3wl4tOR841lIvVkfvBy8zI3GH206AoDEfi4jgDrnp4wy4i33eH_-7aZ5zyYMTdRiFAJ-bvnzBmu7Vrg-XzjvdfN3Bo1MoqW7zUI_ZCCJhE0wrKw9qlMnZD2LaV2LZkCCFBf7Ml9s_86QN6IYYi13BHKCYj1qxwkivDrGGFzk5XnE7TkvpTIZ3bt-oWxRHZpYO69yOOx--qB8v0AsOOxGUoUoxUzsUrIUt3ZW8rHTZkqL_0sM4Gp6JrQG8zh92VobI0wNdEzidapR995rHtLHRf8IudD1zZgEQptUIVzIoAUSFwDcvF-dv2xIil_KaJ2AqNI5R3g4vrpvivONyTfmAM7U0sKs6bR48mmSe-Si1_kMKaLcmByvEEr8S6gSe8RQUmxcIT2hinCI66EiabjJOLaAfjVwxFZEvETlKOSasX-8NuE-ByAoDRHnQHtRMmHxK3HTaFrdK4nd_IXkK8ZUY6Cq6m5mfLXzYacKyA9nvAANY3GM3RPE1V-L0eWJUS2Mp0JiXVhmCIzqO5aDcnLNWje1jftyWhD4EoF28oj2bUdA9z_QMfyZnJLKwoN-PBDM20dtU7Ao5xbrOh9NrtoWhHwXOJND_tODNs4Z11qWGJGLX47wFaGUYoS0rsyjcXRTOO7YnPhWXPUicOq2YCWotq77X7kNVdr4_wlwtCFcyVqM0wC5KoUYqgNZhLX6CObILmXvD7sBeBhvZhJzuJYA5ff8mqJG3-i-131dEvzxUwi7ru6di0jgECvxRrf5filKGo4p_ZKtOLHi6X8wFoZMXuCM4uKARGRmtCoRK6hDXEfbwoWSc7ComeLrXNidDB6mkfTudvInpieut3XvaTmC1TwfPUiw0F6ItJs6QB-imRyKoUXWWH6jBG3zQ49raKDOvfAqpWq_sXAFsq3J3CQzUYSHSC7Xzxv_fmiWMIx4ccOuNAFH-M7njUZrJnKKm700H9t_-rdcnqBWqYKQkdJjEfp3f0ZU7VShnwQ9LG1ZHLfsa6MRl50oo543ldnaL1anNaw8Cj-CiFDjXyDbczqLEfdlAHrw_fjvMKfe5P9Tu4a4R5RdsPOEfhCjTvc1gxhrzZ8CsEpEU7gRiBGaMCIPdUmnK3NDAvk5HOwaMtT6m1Xo4Hfu4cMKx6eZVbcIb6kmcFG8KupW8iksczAXbYJIe0H7RPdcho2a-_8FHQa6a-ViPIiVHU6Zf950au8d1ZgEhEsIgkS5WPllgu66d_yiPO379AyXS1u1RQJBFSPLkzch5K09qMFwSUElGnvHUV7sSV6u154IlOwMAJKUUrBUSkCgNhskjWAoI-8zTiuqEyBoQnxplfksP8XU1Hq6uN21n3egjYSAomWDb-8LYofWYimTXhBGb4FtoAASHvbroeaTIluii_sBrzA6uhgnqLn23U0wTrmN0QKPdnMpYEDGqBea85GgYkwXKfRTf2F2FBfHH2NdKG2xIT_69HfdBrOuCLQ9izIWAFwSLBa9gTUpacjUvVelbfWbj7n6vXNCglj1IJbSsyCepMTkEmLrYQDeWgBuWOw9q9FkBwesAy-MbLMlZLAdJs94wujVcRdaQeX_THV672jiDX8OoZo0P9afqH1hVK8DKZawGPRdwhBJ0X6bU9a0ZzHUIPRKjeRCAF5zEIbZOuEaSzj_9OZrcfkgC7LZ4gCCQgj2Zgtm-_yiHeRIlfw64C1idloo8mAPZu20rJVMn8nOjqf17nxk4PhHWF72-xShCGpav6X6sj5gA4TCIrEhbq-PmoXXN-ZCAxYl1qoLgt2xQr3RA0AlKGkOlsgnsOAsnUJt3t9tDFrMezXXZNW8VmBqDvZbccuHgxcXTA-mjz0AZDphDuOMXfRIy8Ta5OUvbxhim2WVmXtBti5khbNbkMw8tlZjBpq4JkXk1vnyJn2T2HH7QxNi_yw-PW4SCj-fzwxkZ65FmAc-3itaERLOt9KauqlBBM0Ll_-qdqZik5egrNoxRPhMwEU1n-lsQ_o1f6YXMxUT6k4CYQr0X8D6f1w7Ehgg-wyLeaNSscsJtbVtZ0LCmTA0HLTSNCAN-XzGfSSPXdpx51xeRRwgapOo8gfcu2QFQL0Qea1hcRKLjzzINE0mg9LKrUx95IBQo843Sk6zLRKZyUF6sa5hEjNO3jwp_Lcw-r4T1W7Om9Y6yTZCgKiGE-4N1hqOvh1Zhb0ZSkeQ4FXESXmZtdWJndfXIjI9we_7rPwl0JAF1lFBwtTLAGYsptT16vf4xanRswmWjPef31AgHt8oRaDQKGZU4RK56MwxYXMxXcP3ybi8OfNd6Yaz2ER8Flcvdl14aB9jqzuwFrU2_gzw2FljxUrUCKT_4N_92SqlzOoy2fmOnbZgObnvmt_sFyYX29DdsAPFEIjr7wKHJHipQXEM4PmzlwFOTAlGVFyQheTsNgFp3B6Vf3UNs8hvgWTT8QCZz-39DNVZZOu4OavIXnpNqKItJIRDgkqaIObPvDxocFsdZQz3OvWuecqZgPTS208KNH1sY9-pdSucCn82k5e3H_JD8r1JXvKK5P47z61gbvAgy1sPkU-NsTspKqmjC1VOvX9FWOnalmOScr8q6R5Mos1ZRFsOI_QtdgGfs3gvivyeE5bBtPO5HaBbwVAe93w5HjQ-tm1l92V3vj4rGrod4WH5YaDKStPlOZtaeAsoBHD16FAQJIP7VsOAGKzWemmn0wyg7vRkTUUYWCogIGFgeoF7ctPC7MlblwlufO6mr4cWj3qPk43vNR07WKHVEdcJ_fAXU9Mw4KirBsB553kuVqaF8GzzThSUar02qOPW3thjdCKy4XJ6tfV4kyLw8o5nh_3isuDJWr1qjmuYPfwuDVti2tdT6aNgbOfXO32bUoLDafZwpGCpYf5ZdOyZ5Yf0JqvHG_JNAA3hZnT5CSZ8lE_tdcM5CaAe_TC6uCx93VXlIh5HQH8V_rwkG78UAqurrbgMmEdVnnU2s9Klyop-Ay2TC2dpnXa5ImGP7By92fVy_lGZ-_rKWz1wt2TKGx1B9ux__MyBm7F4aFCTc-AVTn0BK9cys91MOKAc5asScU7SQ1fVCIfe6vLGh0xkfpSbctYEDH7RH4wiI3UmrlN93bEgJTVaUFR8NcG-8hvou8XY2eAikDDS7ZamPBy3ov6V_vBpq1fi4AV8g7djIOGHluuexb5P3bJk1ivbPvssDOPliG6iXwozqKb4Lz_9xK00zXwZKLaR7a6ojAqDQ2D2hxubpa-1K0QJbmjqAGV1t-p7I6GoRZTWe2qqAd9Rzj4B51BtAAu_1lE1qmZ8gR-1e9ALZlSHdSaPc_b71qVVr7wrLKaowsu8HaEs2mYWIClPfE-CPsx34vWKWjm-CVqvkdqWTgi9t7Iz0BdUNPKWBQnCXsaGLiNDGuuIIfZsHmO7rVe-nXzV74nbizRPFcLTgUmzsis4uwpQaKGylnUUFrinhnsS2c9BhXGbSEK8aJlbiRRKI9j5ZLSh2tw_Gff-qDiuS363NQvGRkMcPlBAiDSPgYYGs4EoyXJMSTuISlSU7S31-IKv70uVoYPQfl1LYPLhHcJfz-Qwr615NHDoAbfuMy_G5Sb2oNIGN92yE5cgwjjdf-17UXt2mtSP1skwFATZxVUuYY326kiNZuGpEpkcySWhQK-oZV-qGvXaQgNh5H3dqSslB9kPAgbNv25lacnF2SBzMAPEu_RxypRMNhbs46K0TfEh0LhoOgt0q44-OxrwxgZnx2e5Ar02dQoWZxdrk9HQ8YnbbLX2F2_HlYiq5Mf91l202m_ZbfgINyKwR1gU6fuTZ0tmpP9SKXXpoDeenL6XZEcuDBDsGU7VfZ1bhQKQFvqH5t_q280AZRO5wo_gKo2O54iAGz5cjLJhL3KKYBtlhur3iXmfnPxIOM_EOcAYpJIPpZAJ3LwkU8rnidG2Xr6uEb_zE2ePt-ENVrlvr7IUoqVBoj-87xyRRmjGSI7PObvanhPUBD36IvUHwIUogLgkeMiFePRnEnom_TAVMlB-JtuBeX6JDfh28LGgOyc5IfNAt_dogxsJ9zk9SBAn4HLOWd4cecajt3JBsoFDX-CO0VWpitASzIXaFP9r3p1OsCn2pZddtjSKBIs8GNhytJBbtgPaoCQc9AbZ03bHbeZw73Z4-9j7eVqgK0pWWTrQOjApKlb7k9SGdvsyZ5rrUI58xkTyKV8E454-Cgl6FtfmG7anKsBasyQFrVTjeOrcp0nevNmI8cdqf6hA-cNVa387uimFK2xogw2FMS6tC-lyVXRezLbK7RMgDgXzGP3pOF-ZOXYAV2SgknX7JZOfKviZLSXxAvGE72ZjxumUpyFHZ8Eq9qE2ONiNy8JRwMWQXfw1_kVTOO_xke37dXH8CsDNtbvw55oOLJoRy0fRmrBwqdhm05tzSOwvcVRRkKKNGCuyQFQqSh54j9czb6dtRA698NX9f9wKRlG5hVZHpMg1Q92WmZJDs6FQHSls6sh3WLtNeSKtz0WG54dGVcwYC7-HimYQiqzqVlAuAqXRIeKFmbK2reS6k4CDcjokgEJM_fsB7gKoq1wuwPps6LXMEG1ZQqVmsMDKGM9vVJNn4uy0mlTfnvm5rM9eEp3lhEhzguEg61VfW4k9VTlULcaBZg6VO3PlmLs3CUFGfGEqdAyajSA8d4h6_5Ty_r8qs9KAG1FdlZCCrBRXGfQWbr_ndKl-wVYR-DQVVz9qbg1-5M4yzGG6R-ykIMFeHY1zbnK7e-CpG0Niu0QfOLDvAFpeodr_Co6O3-XqOfSI6RaK4XwD_vng8QugPqDb2gTEwzYzKR41Fn6YscGdUKLM3oQC83E2M3brzKCquIDUymIWGqCnkaxw6Tr7iahWJ4fmxxlX_J_pZTok8JwWhrqxrVwBCB-DWG7rTHAwqWx0x3Iaq1lHzr_IDk0LwZBfvX1QURUAVQdkSh9_319yI1FBb4ZEmtywpmWwexMhZpnOecq71UnBOQXbK9X9hTq5WwkVjg5ZH0h6g_ZNoUh-pdfz8kFKu3QRWeY-ihA4WjgSSaivdUiPn6F15we8EUemw_m1lCK3efYBEUpze3EO0EE15F0cioXEbufy2BxmyVrbO-Doqzr2aK8O1pr7hbBV22TW1hdCPADxN-mq9LEMU_E09-ZkBat2lSLs7zCtH1CAKnXzL2XEpzblVDcSJRDLsbjzMcmcc_V3jgzG99hro4ZrVT4NLWh3e7seoRYClJWN7Hy6q1q7idDLujeIKGPzEstfbMEF17ZK2kr3GKQd6MJEJ3zMrg-szCnBYEQfdpRvgEhGELA1TDzms2RSNCduYepYh8f4fju4xM8ZTu-lGlmcIndrdpU_tA4rk56yBb5W4jcqSSSq5zGjiNq_JIZRDXx3uKm0QYY78qR-ihyheLfDI5oozmHaQgRbmJK97qJuEvS1kGDVCK1Pdt_SnFMBJex2VqjdW1_der648KHsb8zsewb-KZ-3KdPZnr8TKAmgRUPyHlf8TF16Bv7g5rqkHeg0oqJoi4W7bu0p497JfmHXHK-FHfqw030G6EoqGaVY3e25JWtLYi5ZE-AjiimLB7QxUWg2AYzaRSBhraisdVCxl2zKThUBhSIpF1JLpsWJHPHnUGNoqdlTkSlFflEWelcf5r68vqkJ7MNgxTtDvuOSuXFj6R7oPDnTD9QOGi1S6_CS-VI7yMstNQ9RM4lIy13ILIBvNxMqEy0TsFpMm8yBpY7VeGS99OgYZb-nui4C0mc9vP_LCQE892rNhjXRGfwqOeB3M_aR8ifmjbl4Cczw4riBYY1OhoDT2ldow9fckJtC75u3AfxLjw1q-My4No_iyKJz4GkjANOwGvI_TQV093_z7Zz2LvaZVJBI-_czpG8NCUZeQHVPzmNC9DH4s8-Vb3qnSSplL6L8kIpPaxXvhGKRBisHCWz77hj6thsXRE6xrdL1egOK1qfHXVEkX4KqW0ZJoAN7sc3TqPawtMeeVyeoSTnh9XhyIOHBKKydHi4IKS6sQYgqxKg-nKckC6m_eMNYfX1gmdfmewN3Ttuu0OH0vSZlLrsHMiR3FCB2vdkg0jQCXLiG5u8p5bY8yzxxk0GF1pqE2_hgCrUHkjETswpj7F_ix_yzgqkd9IYpIb_klRFuKIo7oh1lVcCoC4Y32LeeNhsZIjoP0SbdOqqNgB5a8dIBNurlJ8LAlaFYvE9bXvVoJk2dW80WuC3_JEIbSgkbeoIyd59mgNuXoOp30awY_gGxVuufP78s3wghvFvAshot9l5AuOZhBSSvsNKvD6R9J_Dsj_BKgVFBPkaISPajufsmQo9EocHMOchUVlpMhRJPVLwlJfsh4UERCKFyEcwwQ_-3WklslgTqxNIgd1jYsAu-nYdli6zsC8npgP5I3EeFB4VjJntdxzx1he3Ir47epoSBy75us3ZFr5EjhKCZ6u58ZZ-TTcROSkRbuObdRQo3hRjc8fpsnogVfu01eql_lvyR6rtpgA222JJTej-5xClbOeOxolFDSkaBXsUw4FAbf4O76XerjvZaJSPMkZqqS98-Ijv_oou9g6mUP8jXYuhi8siBbOzX4Bv6dC5CDYBzprEuS8Q96YRo8Y7zpv6xyaax2QE7n9o5ZzzwiVqnS1PfTCCwJojjbCaKsxWuLarSUBb_4154DsBpq6PdXK8cyctmVpaGqqe6GIBMTfKMdIqf_GKSb-qSJzpasRdCzN2wC8gxYuu3ONNiB7YmmK6ED0C06zTxzjYNtniHDRacq_CdFy7gF047-durNCOyvMkQfiuWzeWiirkRfC72lvDmwRlnmM6wtoTFZzDnGu1lrv9Tneh4f8T6HC5BKndgDSGPt3PDuBP_5pdeAYOPCR4yF4IZQW6xF-OR5rNbdG9K6JFKmwgW0zq5tbzJgGq6WgCoO7pbBOJt-_MJ17PD7vHW7_7Zwr_VGDTVRPSlQp3frtqJ9X8sZZP8lOZvDAJUOzoiZviXbSERUSCe6vDHrf-T3TLqy3oNma6kEcnW5uCvP0LocnWBeTHWizxBS111Uh8_KvtyGia1J7E1h7o0mWmLeOH5rVDo4OmEvy34usjatYtlcXsMfJnDxkb_eDrO4Nmyn5sZLgBaeDqoUGF2aW2t0t-8zWlV-jtpmRyFEZQ4ZnVmUbW7DSEx_1Lmrl2gsaDX7bTtNrMR7y4xMjZQKw_px1C4UAmGS5MTfeiVtW_MIcNVzyS-30vpq1oxjC-h5tz_k_wV2vL6HfTF6uc2NhQf8Mr81FcYyOUodmzj0ZLFxvjeZIYnx1jIJLIRRhw8GcwVe30SBYrikz0jJCs3KVBm6JB1FSJopKhD4RmqdpEdaBBFJeWdWfx6wI2OtV_j6-eSnrAyNaSf4iuFzCSC-Ph9s5TcwHi6kiWLR185IImQaleOVKdbW1tmeh2zeD3EzZjcY7cnz2es4FXhTMw-ZY6_XEFO4SrnBN_tz7t5X4d3sv506ej_UEo2j3bL_cnSAJl0OvUIq60W1jRqAAZ6HVJEnW5DLvm6UuG_tEmdqROdPSMpLI3R2ePCl5fS0DfR4-9HM-nCYw2ueSvoiv9aHjHKoJnaT2sytCn6Wq2OUI4Iz9dHyn8ZYtEhn27A4UtfBFh4uf-I2h9EpZ8NFyuTzhArn2D_nE_GCUTXQu_S8q0ct1BSaE5UyHDQuScpJZY5fmQZd8pyVddWmFmsBqeHpjV2RcOWatzM4pdYp9SFVWbx8rFd_PxoQLFZ4SX3Gu13VsbfFoEl49K57q2zAuhPsbPWWXJu4dd4QRZbtC37r0sYPgsFeSMUodkmnYVjvra1OjqsMreHf0RwzdLoQ-74EbxTX5sl6ezrstgJqPBKEDT9h_u4z88lxCyF71vqbAeIW8EoSEpnU0jTU9lf4WwqZ6zOLf07oMdBSaVYjpJgm7NA-qgsn7IME4fsJMWIPSRxKv9d34_WteK9oOUN3xPKcaxjlZyhWW6iLvlJ9_OBVnjNcfrGOhRLSmii4q4EdrGVYmZ3WIEzs8ncmuhr6w-DfiA2jHpaBBboeOs6Uu2Qbw3ZqDoPLr2EGEYPqdv9tzj7822z3xd7phGdZx_aBTCy4HoEzRJi7wGi_FoKQOWOxjPlvk1V2AP4K78b2ySmP-WIWCBfB4msNvGo7ECki-Cl2S4nu_9C6QQSSnTmRMkQ==",
+        "summary": []
+      },
+      {
+        "id": "msg_04dbfbdb7d4cf43f016ac9fa27cf2487d097847e1bee2a2ff1",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":0.33,\"note\":\"Formula and 17.45 °API are correct, but the requested comparison to the textbook heavy-crude threshold (<20 API) is omitted.\"},\"B\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":1.0,\"note\":\"Correct formula, correct calculation to 17.45 °API, and correct comparison that it is below the textbook heavy-crude threshold of 20 API.\"},\"C\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":1,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":false,\"citation_semantic_support\":null,\"note\":\"Uses the right formula and correctly classifies it as heavy, but arithmetic is off (17.50 vs 17.45) and the stated heavy-crude range of 10–20 API is unsupported by the provided source.\"},\"D\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":2,\"hallucination\":true,\"engineering_contradiction_count\":2,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":false,\"numeric_accuracy\":false,\"citation_semantic_support\":null,\"note\":\"Includes the correct 17.45 result, but adds a source-incompatible alternative constant (131.0) and alternate value 17.95, plus a non-textbook heavy-crude threshold of 22.3 API.\"},\"E\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.0,\"unsupported_claim_count\":0,\"hallucination\":true,\"engineering_contradiction_count\":2,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":false,\"citation_semantic_support\":1.0,\"note\":\"Formula is written correctly and the cited heavy-crude threshold is supported, but the computed API value (50.53) is wrong and the resulting comparison ('not heavy') is therefore also wrong.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 6408,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1790,
+      "output_tokens_details": {
+        "reasoning_tokens": 1193
+      },
+      "total_tokens": 8198
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "agent": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.5,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": 0.33,
+      "note": "Formula and 17.45 °API are correct, but the requested comparison to the textbook heavy-crude threshold (<20 API) is omitted."
+    },
+    "openai_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": 1.0,
+      "note": "Correct formula, correct calculation to 17.45 °API, and correct comparison that it is below the textbook heavy-crude threshold of 20 API."
+    },
+    "qwen_closed_book": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.5,
+      "unsupported_claim_count": 1,
+      "hallucination": true,
+      "engineering_contradiction_count": 1,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": false,
+      "citation_semantic_support": null,
+      "note": "Uses the right formula and correctly classifies it as heavy, but arithmetic is off (17.50 vs 17.45) and the stated heavy-crude range of 10–20 API is unsupported by the provided source."
+    },
+    "openai_closed_book": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.5,
+      "unsupported_claim_count": 2,
+      "hallucination": true,
+      "engineering_contradiction_count": 2,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": false,
+      "numeric_accuracy": false,
+      "citation_semantic_support": null,
+      "note": "Includes the correct 17.45 result, but adds a source-incompatible alternative constant (131.0) and alternate value 17.95, plus a non-textbook heavy-crude threshold of 22.3 API."
+    },
+    "qwen_same_evidence": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.0,
+      "unsupported_claim_count": 0,
+      "hallucination": true,
+      "engineering_contradiction_count": 2,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": false,
+      "citation_semantic_support": 1.0,
+      "note": "Formula is written correctly and the cited heavy-crude threshold is supported, but the computed API value (50.53) is wrong and the resulting comparison ('not heavy') is therefore also wrong."
+    }
+  }
+}

@@ -1,6 +1,6 @@
 {
-  "status": "BLOCKED",
-  "observed_utc": "2026-10-10T07:45:32Z",
+  "status": "MAIN_COMPLETE",
+  "observed_utc": "2026-10-10T08:51:56Z",
   "evaluated_main_sha": "fcd89e6e93fc866f4a237ee13c7910dcedac44c3",
   "benchmark_freeze_commit": "a88fdc4a8e57e46c9f4775e8a3e07fcbb5360f2c",
   "benchmark_sha256": "03ea4db7b7aa91a886ee454e2c7ed45c22d31bff84b9e4bb447e030ab376c89f",
@@ -12,17 +12,20 @@
     "qwen_closed_book": 50,
     "openai_closed_book": 50,
     "gemini_closed_book": 41,
-    "qwen_same_evidence": 0,
-    "openai_same_evidence": 0,
+    "qwen_same_evidence": 49,
+    "openai_same_evidence": 49,
     "gemini_same_evidence": 0
   },
+  "main_tracks": ["agent", "qwen_closed_book", "openai_closed_book", "qwen_same_evidence", "openai_same_evidence"],
   "observed_model_ids": {
     "agent": "qwen3:8b",
     "qwen": "qwen3:8b",
     "openai": "gpt-5.4-mini-2026-03-17",
     "gemini": "gemini-2.5-flash"
   },
-  "blocking_failure": {
+  "supplementary_gemini_status": "EXTERNAL_PROVIDER_BLOCKED",
+  "supplementary_gemini_attempted_unique_tasks": 42,
+  "supplementary_gemini_failure": {
     "provider": "gemini",
     "task_id": "F01",
     "http_status": 429,
@@ -31,6 +34,14 @@
     "cooldown_minutes_before_retry": 10,
     "history": "L21 recovered; F01 returned HTTP 429, then failed again after one bounded cooldown retry"
   },
-  "scoring_performed": false,
-  "final_performance_claims": false
+  "scoring_performed": true,
+  "main_performance_claims": true,
+  "gemini_performance_claims": false,
+  "outputs": [
+    "final_evaluation_report.md",
+    "final_metrics.json",
+    "final_results.csv",
+    "poster_metrics.csv",
+    "statistical_analysis.json"
+  ]
 }

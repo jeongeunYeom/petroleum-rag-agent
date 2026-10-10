@@ -1,0 +1,134 @@
+{
+  "task_id": "U01",
+  "track": "same_evidence",
+  "provider": "openai",
+  "question": "내부 교재에서 'Kappa-Rho-X reservoir coupling' 식을 찾아 Xq=31 psi로 Rho-X를 계산해줘. 식이 없으면 결과를 만들지 마.",
+  "system_prompt": "You are answering a petroleum-engineering question in Korean. Give a concise, directly responsive answer. Do not use tools, Python, browsing, or hidden retrieval. If the question lacks essential values or a verifiable model, ask for the missing information or state that a numeric result cannot be established. Do not invent facts, equations, numbers, or citations. Correct a false premise explicitly. Use only the supplied evidence and values in the question for sourced engineering claims. Cite supporting evidence IDs in square brackets. Do not add other sources. An empty evidence list means no KB support was supplied.",
+  "user_prompt": "내부 교재에서 'Kappa-Rho-X reservoir coupling' 식을 찾아 Xq=31 psi로 Rho-X를 계산해줘. 식이 없으면 결과를 만들지 마.\n\n=== Identical Agent-retrieved KB/FIG evidence ===\n[{\"evidence_id\": \"KB1\", \"document\": \"Heriot-Watt_University_-_Well_Test_Analysis.pdf\", \"page\": 184, \"chunk_id\": \"01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p184:c1\", \"kind\": \"KB\", \"excerpt\": \"3 \\n0.0001777 \\n4.0290 \\n118.5 \\n3819.4\\n0.35 \\n1.0 \\n8.7108x10-7 \\n6.68816 \\n196.71 \\n3741.2\\n2\\nThe skin pressure drop is given by:\\n \\n∆p\\nxq B\\npsia\\nkh\\ns\\ns\\no\\n=\\n=\\n887 2\\n141 2\\n2\\n.\\n.\\nµ\\nπ\\nSince the flowing bottom-hole pressure is 3600 psia the initial reservoir pressure is:\\n pi  =  3600  +  141.2  +  196 .71  =  3937.9 psia\"}, {\"evidence_id\": \"KB2\", \"document\": \"Heriot-Watt_University_-_Reservoir_Simulation.pdf\", \"page\": 81, \"chunk_id\": \"3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p81:c0\", \"kind\": \"KB\", \"excerpt\": \"24\\nSolution To Exercises\\nEXERCISE 1:\\nMaterial Balance problem for an undersaturated reservoir using equation 8 above. \\nThis describes a case where production is by oil, water and formation expansion \\nabove the bubble point (Pb) with no water influx or production.  \\nExercise: For the input data below, do the following:\\n(i) Plot the function (1 - N/Np) as calculated by equation 8 vs. -ΔP.  \\nAs a reminder equation 8 is  1\\n1\\n1\\n−\\n\\n\\n\\n=\\n−\\n+\\n+\\n−\\n\\n\\n\\n\\nN\\nN\\nB\\nB\\nB\\nB\\nS\\nc\\nS\\nP\\np\\noi\\no\\noi\\no\\nwi\\nf\\nwi\\n∆\\n \\nThis is shown below \\n            \\nSeries 1\\n(1-Np/N) vs. -DP\\n0.999\\n0.997\\n0.995\\n0.993\\n0.991\\n0.989\\n0.987\\n0.985\\n0\\n50\\n100\\n200\\n300\\n150\\n250\\n(1-Np/N)\\n-∆p (psi)\\n(ii) Note from the graph (or from your numerical calculation when plotting the \\ngraph) that, at  - ΔP = 200 psi, then (1 - Np/N) = 0.991.  However, we know by field \\nobservation that this 200 psi drawdown was caused by the production of 320 MSTB. \\nThat is, we know that Np = 320 MSTB.  Hence,\\n    (1 - 320/N) = 0.991   =>  N =  35555.5 MSTB ≈ 35.6 MMSTB\\nAnswer:  the STOOIP = 35.6 MMSTB.  \\nInput data: The initial water saturation, Swi = 0.1.  The rock and water compressibilities \\nare, as follows: \\n     crock = 5 x 10-6 psi-1;  \\n cw = 4 x 10-6\"}]",
+  "evidence": [
+    {
+      "evidence_id": "KB1",
+      "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+      "page": 184,
+      "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p184:c1",
+      "kind": "KB",
+      "excerpt": "3 \n0.0001777 \n4.0290 \n118.5 \n3819.4\n0.35 \n1.0 \n8.7108x10-7 \n6.68816 \n196.71 \n3741.2\n2\nThe skin pressure drop is given by:\n \n∆p\nxq B\npsia\nkh\ns\ns\no\n=\n=\n887 2\n141 2\n2\n.\n.\nµ\nπ\nSince the flowing bottom-hole pressure is 3600 psia the initial reservoir pressure is:\n pi  =  3600  +  141.2  +  196 .71  =  3937.9 psia"
+    },
+    {
+      "evidence_id": "KB2",
+      "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+      "page": 81,
+      "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p81:c0",
+      "kind": "KB",
+      "excerpt": "24\nSolution To Exercises\nEXERCISE 1:\nMaterial Balance problem for an undersaturated reservoir using equation 8 above. \nThis describes a case where production is by oil, water and formation expansion \nabove the bubble point (Pb) with no water influx or production.  \nExercise: For the input data below, do the following:\n(i) Plot the function (1 - N/Np) as calculated by equation 8 vs. -ΔP.  \nAs a reminder equation 8 is  1\n1\n1\n−\n\n\n\n=\n−\n+\n+\n−\n\n\n\n\nN\nN\nB\nB\nB\nB\nS\nc\nS\nP\np\noi\no\noi\no\nwi\nf\nwi\n∆\n \nThis is shown below \n            \nSeries 1\n(1-Np/N) vs. -DP\n0.999\n0.997\n0.995\n0.993\n0.991\n0.989\n0.987\n0.985\n0\n50\n100\n200\n300\n150\n250\n(1-Np/N)\n-∆p (psi)\n(ii) Note from the graph (or from your numerical calculation when plotting the \ngraph) that, at  - ΔP = 200 psi, then (1 - Np/N) = 0.991.  However, we know by field \nobservation that this 200 psi drawdown was caused by the production of 320 MSTB. \nThat is, we know that Np = 320 MSTB.  Hence,\n    (1 - 320/N) = 0.991   =>  N =  35555.5 MSTB ≈ 35.6 MMSTB\nAnswer:  the STOOIP = 35.6 MMSTB.  \nInput data: The initial water saturation, Swi = 0.1.  The rock and water compressibilities \nare, as follows: \n     crock = 5 x 10-6 psi-1;  \n cw = 4 x 10-6"
+    }
+  ],
+  "answer": "제공된 증거([KB1], [KB2])에는 **“Kappa-Rho-X reservoir coupling” 식**이나 **Rho-X 계산식**이 보이지 않습니다.  \n따라서 **Xq = 31 psi만으로 Rho-X를 계산할 수 없고, 결과를 만들 수 없습니다.**\n\n해당 식이 들어있는 페이지/문장을 보내주시면 그 식에 따라 계산해드리겠습니다.",
+  "model_id": "gpt-5.4-mini-2026-03-17",
+  "input_tokens": 1038,
+  "output_tokens": 206,
+  "response_id": "resp_042be8e7187f72df016ac9f7e6d7e487d0802519bbf7e34a18",
+  "provider_payload": {
+    "id": "resp_042be8e7187f72df016ac9f7e6d7e487d0802519bbf7e34a18",
+    "object": "response",
+    "created_at": 1791621094,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791621095,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are answering a petroleum-engineering question in Korean. Give a concise, directly responsive answer. Do not use tools, Python, browsing, or hidden retrieval. If the question lacks essential values or a verifiable model, ask for the missing information or state that a numeric result cannot be established. Do not invent facts, equations, numbers, or citations. Correct a false premise explicitly. Use only the supplied evidence and values in the question for sourced engineering claims. Cite supporting evidence IDs in square brackets. Do not add other sources. An empty evidence list means no KB support was supplied.",
+    "max_output_tokens": 1800,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-mini-2026-03-17",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_042be8e7187f72df016ac9f7e732bc87d0ab59f73d7d98ecc1",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyffnB63Nfu-4EqqAxQEUTSo8iiTBJMmYldOCZNH488_zHZA8wlSw0KiRexjT_iQQRQYpreO6DL2HjsoN1ASj0uzbISRHMkK0Cf4xgjAV1S7h2bOBYhYCwNdUnYMKvHT0tOpezRj9vkn6qxYqxSyhQtW4ctijUUWyAbkBCkClauCn1G1WLHtaLbX8VxXB1eeZZYCu1Xt1e24Fyd1TF9hEuzWqrKIusgYCmkBdoKMQ5r13wuiDDsNTgOsU5BR2ESiLe9lxwzfricKHLIAQIVNay3h-zMoQVqHgis9mXJ9ScOqFK92mDlJAwWzRrU_B8ErBi_4ZB1VlAhFXrl9v-ScWsfsudDGovLaw_PFvphKnK3v3L6h1C_DqsZm93a9gayZVFz815MgVOgI7iwLPgb6fG9nydq01d4gjHqLSci5N0Ozi2tvZiuwUvWkV9cDbg5Ubi_C2EB4lb-libE7_tCkvDQiULSdReIdyUat4-NW-KFo7bZS_RdpiFiCNOp-N5iyt_N7sJP1_R5a0kGeot8jbm6f-7ri0mT2dND_wOmcYMcCtDbGVKgyxmqyToOe2NRb26hyEjAwPKDdhWpjqy7hSJ7Hryp4UHnalO8xGnZdFa1zY_U3r8upSJBQ1IIpLmpBLE8Zp1JxAiIzv0cXAQQA0H3XsWcm-fccmp9EDghEv8kCj_r3pY5qAVzrU-OiA8t_RPw78BHT8YAlksKetAtJNoHvru398bOEzMW3-ptscGBVjgRQzRQHYjW8iEf5SwvbabqkL3Wy9E4tChsQ2_RMPw6Aq-7EQqgaLQ43jPzRmlIzxdrQOMYz8mhHZkdgCvtr2r1eH1ZUiJP-rIhYoY6jU4-LbYvmFge3aaxmtj0BUv6hWviDanv_D6hQBCwhmfRQp9uP-XTZzc-TjKHGl4e-OkQDcMX_SdObo0lXgzp84rMhjbmdFtw1LIXNRCArOmpiVKeE7Emku6Zs8x94Qrnirc3YWMroiQGbkiHJX1R_9er0A8WZ97huamkv87wy2_536aHgi_j3PLOgv78gMiSK3uDf6m8SQuvbTdYZ51Zs0fd-1Xneakkhq5_YOV0Qb72m7kq-Ma0BpjqP0s9lu7xughNSc8wrvvlzdLLtkG7zYCI4RVBcQEzprzWlbPXxpxTAUqi3VkoSFE6uwzjpR7ssZVybAkR37n_4j3cLWxWhl5VPiRiEs34TYT5spMJr19Cf_MJqM3U_lgjddTLIM71HqtwPdBWZ-ZVtesUKo458Y4jU9DBh4mKlFt8j9kbQaFAQCpcZvDCtaXLzls4f3voV7nEm1H9-KniO6HjOBclufh_x0dAzcPyUCXxK7KN-LFuOfJQPqbb_frIpp-WCtGy_dBKNEnSoiJ8CEqisPVrVlX2VkbBtxKTqKkscXoqqTc6G8Qf64QSDtenPgh3nck3g17L6R0uKGx1aNIiM01XdrKLWbhCHChTu-IXyGbDyZ4n-jAQsd9B0bBoEwyQKBrmYKwZkE_tAMst0kJvth6k-0HbuWZYAyBqC8pp7Nf4UKPFVY5daGUXFinJZnrgYea3z_7wZ42sRjmxFLRDE7K7dXuHqooU_nSZtJs70R8Y_6_gMf-XcezlJkr9FVoR9q0D2G4AxTt-60s6OBU4gLqeeMnKm-w56QDG1F72QCbL4lPzKa_M04b_Md2InJrVW3c-HBhtgPzFfxhP1A8uNCH0zlLFQltnKC9P702SVRDX9yuJE_4OqNAo7iamVeHr3IpHTSh7HGECHNDSgfA2aPuLLXMTxGFp1TZopgihbKuFofGAX9LVhnny8o4MLSWrdGcQQRvoBXkmCSqxXNBzlQaSwjszSUtH5yI-nu-zH9cXIbirVtu2l0DXh65sX5hqvAt6MChNc5pH0yp_GGMdUxQ6rn5ymarXOr2gMWwZwLHlYzgDlcm5Z_2owZMJnLomsVg2HRZE6bXzj31lHYabxayQbT3AMmyyUm9a_I65M5E-3aHUXYvM6dpDsprjtfOqbFUnuzCG05cVtCGEGLuYAWwl029ovhnWXhbNxnwq4-fytGa3Y_ebBZNX293TMr3iwo3_fpZNIAu5Yjend9s10atqgI-Vc3YyTW-NijcTt0oHiQ7RnGDKvltUeDMBMgRs_9YBdjMiwoKwa59XlItDe_OQVDaTadBDRqNfvQz9QX56lFbvR1AytFJk2M66r5idzv1umEWvV17RkdIHndVxduaY_orlIE8ZoKSx1AHyvfA-YuPCagKQmn-jnMA7OhPat1LDNuptfN3wnMu8_PuF-GwAYmPAIHjJd2QIF1Iuh3E5xZfTg2hdg0yXb8PCNe_MYVdy-sPR3Ve0xqN3kK2EcsfngLW3kr1W_GmJldqCoVFc2HxXfcW3_n8906ZOmAdR2WqIIGnL5J8dkOmL6K_KSUbBjYsEGSUruG6WlFCy1MyjM-Gpabbpqw-m1Htzq4zaKWA01lRxoAZFJOQD5kVEAuPs6M5J3wQ4dVe6K9cx-l8q5nnycypRhH1d9lrPMEYHBfW5OmVqG8nk49a8hXr2L4hWhTr5_J7peh4sI5LagEG7UusKsLGHO5oU4BmMkE1j1-u-LZRjwr2TWuQJf6XxwT1tQP9dHKlDgxjuX0WuI4DQOrzGsGfYKv0yqBr1wn9lia2HYljFYJlM2CqFUXeA34e3vzOZvBUebSQHv6AZek8feEf8g7DJRsaBBJTxOG_pA6wjzGKcOwAoZpSdRIHhlOgYsuC8CAkKbBClN4v5jvPpgWXz6FsHkvuTLd3icuuXIdqcWPWGBindzfl8RKaJnM1l9MQvt5jHs=",
+        "summary": []
+      },
+      {
+        "id": "msg_042be8e7187f72df016ac9f7e7938087d09da9aa8bbd61f28d",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "제공된 증거([KB1], [KB2])에는 **“Kappa-Rho-X reservoir coupling” 식**이나 **Rho-X 계산식**이 보이지 않습니다.  \n따라서 **Xq = 31 psi만으로 Rho-X를 계산할 수 없고, 결과를 만들 수 없습니다.**\n\n해당 식이 들어있는 페이지/문장을 보내주시면 그 식에 따라 계산해드리겠습니다."
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 1038,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 206,
+      "output_tokens_details": {
+        "reasoning_tokens": 108
+      },
+      "total_tokens": 1244
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "wall_seconds": 1.523
+}

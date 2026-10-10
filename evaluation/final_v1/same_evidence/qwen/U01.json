@@ -1,0 +1,48 @@
+{
+  "task_id": "U01",
+  "track": "same_evidence",
+  "provider": "qwen",
+  "question": "내부 교재에서 'Kappa-Rho-X reservoir coupling' 식을 찾아 Xq=31 psi로 Rho-X를 계산해줘. 식이 없으면 결과를 만들지 마.",
+  "system_prompt": "You are answering a petroleum-engineering question in Korean. Give a concise, directly responsive answer. Do not use tools, Python, browsing, or hidden retrieval. If the question lacks essential values or a verifiable model, ask for the missing information or state that a numeric result cannot be established. Do not invent facts, equations, numbers, or citations. Correct a false premise explicitly. Use only the supplied evidence and values in the question for sourced engineering claims. Cite supporting evidence IDs in square brackets. Do not add other sources. An empty evidence list means no KB support was supplied.",
+  "user_prompt": "내부 교재에서 'Kappa-Rho-X reservoir coupling' 식을 찾아 Xq=31 psi로 Rho-X를 계산해줘. 식이 없으면 결과를 만들지 마.\n\n=== Identical Agent-retrieved KB/FIG evidence ===\n[{\"evidence_id\": \"KB1\", \"document\": \"Heriot-Watt_University_-_Well_Test_Analysis.pdf\", \"page\": 184, \"chunk_id\": \"01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p184:c1\", \"kind\": \"KB\", \"excerpt\": \"3 \\n0.0001777 \\n4.0290 \\n118.5 \\n3819.4\\n0.35 \\n1.0 \\n8.7108x10-7 \\n6.68816 \\n196.71 \\n3741.2\\n2\\nThe skin pressure drop is given by:\\n \\n∆p\\nxq B\\npsia\\nkh\\ns\\ns\\no\\n=\\n=\\n887 2\\n141 2\\n2\\n.\\n.\\nµ\\nπ\\nSince the flowing bottom-hole pressure is 3600 psia the initial reservoir pressure is:\\n pi  =  3600  +  141.2  +  196 .71  =  3937.9 psia\"}, {\"evidence_id\": \"KB2\", \"document\": \"Heriot-Watt_University_-_Reservoir_Simulation.pdf\", \"page\": 81, \"chunk_id\": \"3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p81:c0\", \"kind\": \"KB\", \"excerpt\": \"24\\nSolution To Exercises\\nEXERCISE 1:\\nMaterial Balance problem for an undersaturated reservoir using equation 8 above. \\nThis describes a case where production is by oil, water and formation expansion \\nabove the bubble point (Pb) with no water influx or production.  \\nExercise: For the input data below, do the following:\\n(i) Plot the function (1 - N/Np) as calculated by equation 8 vs. -ΔP.  \\nAs a reminder equation 8 is  1\\n1\\n1\\n−\\n\\n\\n\\n=\\n−\\n+\\n+\\n−\\n\\n\\n\\n\\nN\\nN\\nB\\nB\\nB\\nB\\nS\\nc\\nS\\nP\\np\\noi\\no\\noi\\no\\nwi\\nf\\nwi\\n∆\\n \\nThis is shown below \\n            \\nSeries 1\\n(1-Np/N) vs. -DP\\n0.999\\n0.997\\n0.995\\n0.993\\n0.991\\n0.989\\n0.987\\n0.985\\n0\\n50\\n100\\n200\\n300\\n150\\n250\\n(1-Np/N)\\n-∆p (psi)\\n(ii) Note from the graph (or from your numerical calculation when plotting the \\ngraph) that, at  - ΔP = 200 psi, then (1 - Np/N) = 0.991.  However, we know by field \\nobservation that this 200 psi drawdown was caused by the production of 320 MSTB. \\nThat is, we know that Np = 320 MSTB.  Hence,\\n    (1 - 320/N) = 0.991   =>  N =  35555.5 MSTB ≈ 35.6 MMSTB\\nAnswer:  the STOOIP = 35.6 MMSTB.  \\nInput data: The initial water saturation, Swi = 0.1.  The rock and water compressibilities \\nare, as follows: \\n     crock = 5 x 10-6 psi-1;  \\n cw = 4 x 10-6\"}]",
+  "evidence": [
+    {
+      "evidence_id": "KB1",
+      "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+      "page": 184,
+      "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p184:c1",
+      "kind": "KB",
+      "excerpt": "3 \n0.0001777 \n4.0290 \n118.5 \n3819.4\n0.35 \n1.0 \n8.7108x10-7 \n6.68816 \n196.71 \n3741.2\n2\nThe skin pressure drop is given by:\n \n∆p\nxq B\npsia\nkh\ns\ns\no\n=\n=\n887 2\n141 2\n2\n.\n.\nµ\nπ\nSince the flowing bottom-hole pressure is 3600 psia the initial reservoir pressure is:\n pi  =  3600  +  141.2  +  196 .71  =  3937.9 psia"
+    },
+    {
+      "evidence_id": "KB2",
+      "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+      "page": 81,
+      "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p81:c0",
+      "kind": "KB",
+      "excerpt": "24\nSolution To Exercises\nEXERCISE 1:\nMaterial Balance problem for an undersaturated reservoir using equation 8 above. \nThis describes a case where production is by oil, water and formation expansion \nabove the bubble point (Pb) with no water influx or production.  \nExercise: For the input data below, do the following:\n(i) Plot the function (1 - N/Np) as calculated by equation 8 vs. -ΔP.  \nAs a reminder equation 8 is  1\n1\n1\n−\n\n\n\n=\n−\n+\n+\n−\n\n\n\n\nN\nN\nB\nB\nB\nB\nS\nc\nS\nP\np\noi\no\noi\no\nwi\nf\nwi\n∆\n \nThis is shown below \n            \nSeries 1\n(1-Np/N) vs. -DP\n0.999\n0.997\n0.995\n0.993\n0.991\n0.989\n0.987\n0.985\n0\n50\n100\n200\n300\n150\n250\n(1-Np/N)\n-∆p (psi)\n(ii) Note from the graph (or from your numerical calculation when plotting the \ngraph) that, at  - ΔP = 200 psi, then (1 - Np/N) = 0.991.  However, we know by field \nobservation that this 200 psi drawdown was caused by the production of 320 MSTB. \nThat is, we know that Np = 320 MSTB.  Hence,\n    (1 - 320/N) = 0.991   =>  N =  35555.5 MSTB ≈ 35.6 MMSTB\nAnswer:  the STOOIP = 35.6 MMSTB.  \nInput data: The initial water saturation, Swi = 0.1.  The rock and water compressibilities \nare, as follows: \n     crock = 5 x 10-6 psi-1;  \n cw = 4 x 10-6"
+    }
+  ],
+  "answer": "제공된 정보에 'Kappa-Rho-X reservoir coupling' 식이 없어 Rho-X를 계산할 수 없습니다.",
+  "model_id": "qwen3:8b",
+  "input_tokens": 1195,
+  "output_tokens": 30,
+  "provider_payload": {
+    "model": "qwen3:8b",
+    "created_at": "2026-10-10T08:29:41.0268908Z",
+    "message": {
+      "role": "assistant",
+      "content": "제공된 정보에 'Kappa-Rho-X reservoir coupling' 식이 없어 Rho-X를 계산할 수 없습니다."
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 794179900,
+    "load_duration": 4865000,
+    "prompt_eval_count": 1195,
+    "prompt_eval_cached_count": 126,
+    "prompt_eval_duration": 228006000,
+    "eval_count": 30,
+    "eval_duration": 250182000
+  },
+  "wall_seconds": 0.796
+}

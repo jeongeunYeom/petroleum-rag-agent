@@ -1,0 +1,201 @@
+{
+  "task_id": "L09",
+  "prompt_version": "final-v1-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_0827cd79c65a5c1f016ac9f8a1975887d080c6a7a070fd2a2e",
+  "wall_seconds": 13.568,
+  "mapping": {
+    "A": "qwen_closed_book",
+    "B": "qwen_same_evidence",
+    "C": "agent",
+    "D": "openai_closed_book",
+    "E": "openai_same_evidence"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.33,\"unsupported_claim_count\":3,\"hallucination\":true,\"engineering_contradiction_count\":2,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"물 10°API만 맞음. 교재 예시는 light 40, heavy <20인데 20~40, 10~20 및 대표값 30/15로 바꿔 말해 핵심 예시를 틀림.\"},\"B\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.67,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":0.67,\"note\":\"물 10°API와 heavy <20은 맞음. 다만 교재 예시는 light crude가 about 40°API인데, 답은 일반적으로 40° 이상이라고 바꾸어 정확한 예시값을 놓침.\"},\"C\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.33,\"unsupported_claim_count\":3,\"hallucination\":true,\"engineering_contradiction_count\":2,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":0.25,\"note\":\"직접 답하지 않고 확인 요청 형태임. 물 10은 맞지만 light 30~40, heavy 15~25라는 범위는 제시 근거와 맞지 않음; cited KB1은 이를 지지하지 않음.\"},\"D\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.33,\"unsupported_claim_count\":3,\"hallucination\":true,\"engineering_contradiction_count\":2,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"물 10°API만 맞음. light ≥31.1, heavy ≤22.3은 교재 예시인 light about 40, heavy <20과 다르고 근거도 없음.\"},\"E\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"요구된 세 항목을 정확히 전달함: 물 10°API, light crude 약 40°API, heavy crude 20°API 미만. 추가 설명도 제시 근거와 양립함.\"}}}",
+  "usage": {
+    "input_tokens": 6894,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 966,
+    "output_tokens_details": {
+      "reasoning_tokens": 316
+    },
+    "total_tokens": 7860
+  },
+  "provider_payload": {
+    "id": "resp_0827cd79c65a5c1f016ac9f8a1975887d080c6a7a070fd2a2e",
+    "object": "response",
+    "created_at": 1791621281,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791621294,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are the single independent AI-assisted semantic reviewer for a fixed\npetroleum-engineering benchmark. This is not human review. Judge ONLY the five\nanonymized answers against the supplied expected claims, numeric gold, source spans,\nquestion, and evidence. Do not infer system identity. Do not repair answers.\n\nFor every answer return:\n- exact_correct (boolean): all material requested parts correct; no critical omission.\n- partial_or_better (boolean): at least one substantive correct requested part.\n- claim_coverage (0..1): fraction of expected claims accurately conveyed.\n- unsupported_claim_count (integer): unsupported *specific* engineering assertions.\n  A closed-book answer is NOT automatically unsupported solely because no source\n  was provided; only count a clearly invented, source-incompatible, or unjustified\n  specific assertion. Do not penalize uncertainty or a cautious statement.\n- hallucination (boolean): at least one fabricated factual, numerical, formula,\n  source, or engineering assertion; missing citations alone do not qualify.\n- engineering_contradiction_count (integer): explicit engineering relations contrary\n  to expected claims or cited evidence.\n- safe_refusal_correct (boolean or null): applicable only to unsupported_formula.\n- false_premise_handled (boolean or null): applicable only to false_premise;\n  requires explicit rejection and corrected relation, not vague hedging.\n- formula_accuracy (boolean or null): applicable to calculations or explicit models.\n- numeric_accuracy (boolean or null): applicable when numeric gold is supplied;\n  check the correct output-to-value association, not mere presence of an input number.\n- citation_semantic_support (number 0..1 or null): among actual citations in the\n  answer, fraction whose *specific cited evidence excerpt* supports the adjacent\n  engineering claim. Null if no citations or no evidence supplied. Citation ID\n  existence is independently checked, so here evaluate meaning, not formatting.\n- note: brief reason, no chain-of-thought.\n\nKeep all named keys in every score object, using JSON null for non-applicable\nfields. Be conservative about unsupported or contradictory statements. For missing answers,\nscore exact_correct=false, partial_or_better=false, claim_coverage=0, and leave\nnon-applicable fields null. Return only a JSON object with key 'scores' containing\none object per anonymous answer label. No Markdown or extra text.",
+    "max_output_tokens": 5000,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_0827cd79c65a5c1f016ac9f8a26a5487d0ac7063c207e801aa",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyfiuFif7aI3HiYTP76sZnDm9aZOlL35UQv19sOxorR3KlY9vD3URA0Tdt-EuJz1DtPVGNhzHxhyURhIrjXAecDjkfXrByn6kNo8hYXxUWApbFY4DvcfrAhpMwUq05m2-BeZ-ypxqRLtxsdywsjF2XtQtgV1a7yvpydl0C-D6yDbC-8cOLWdaO7NNeTzP6x3_brrahvtu8b0vCB_kIFHBt6k-Qn3R6tD3UwGybttGBbH1dKkWXcO9kg2cdj42zCqDPinZwf5x1JTlbP-b5MfbTe4n5bcdWP9iPFIS8YKhirhVwAMq2EY9oPRW1zkZ1vHO65l6GkV30M-DtAwmrxgfziBBiT1KzGN39sMoyXi0RV31IeMWy024-_kUR6Vo5yBWHbr4eT-51NHeO1qu5EBKM-mnvmrGN1mhAs5K2Rw1lxrFnzh7OqRXZTLPjfr5W6gBUZmv3fnVwnucTZXIuXuACi3_LraXERUC9wCe1aQ9uFGw42-6m_upgLaFKr5kGHNlQKM-p8QjT9EN4mOt3gto3EshTGylKU_sdImUfd9lHG_qvP8PZcTsm4Z6GURaMnTu8l4fDMA0iYXfotxKEbIFXQX3R8aaZSe02XZCRnevJtnCkaiAkLatb04gpvxelU09I4iEsH9VgKznj32ALnh2VCrRq6X-0G6YyPhW2FIkoxPlwHmkRNsOHEyf03kKJMBiUHTYYVsIcuIxlDw71fHsXHwVlLLQWsVkN0cqkn_Pdk2dm-uD8AsIbN5Q9nfi9IH8EI-M5aShrZ_p5SAYpGf03RD6V1zZp-Qgr4lzx3_KxAhcPq9irOlMVqf7gIQDJ5KUwE_TTjD_Zn3pYyTvim5BchVLiaSqltmuHIBLi3dTJXKG3C_MZHXTzf538aiulMHFglWI1PV3AOfgzGrPpnAtQ3bkOVuFZDoAe-xT78BPPP-SZz9XonvY25AA-aEurpQmO7_796VMRJM7wYTY3JgIVkDc9hZ-cI3ugZnDih7k9HtfclIy8oDSyrniXGAmQtNaMWAWSEz88GOMfDbZFymOJ2nVR18b5_4rbEClzxp1w9UtSzpV9DGMsPHYpye6IL2Zsnbeo8RZURMbElwdl0T6XlHM9Gf9ysG3qMIY-Yl8LsXR10inoNjkGX_cbvJogMXbrE0HdA5eWdsJ5xfc52EV9xcYjHKevKebVQAlKZpMEoEN6hGMONQUqPY9367RJZCCgr8qKQ38ZB6P-ItoF5rcoL2LueheR1StMX5k_XQ5R5Z8ar8JzuuG31eXRHmydFxO3x03OV4PrfBnEGThQ6rD6dA1CjDDC-rNC9ju0T2_vg5TeFuCesTZAi3G8jN5l3neT6bDBBv91x92gHel7n0IcdCY84xDVn71oEr5XBnCNCuZDxVVx6JIdK_jFUcYNAvbRcussgTsdw0ZsqpB1DyfeeasUUB71J3PXWr7LIcr7eoKTVmcHrB9DCH2GWD8iaadzz8cUTC9su-NSlwZUBLHaJ6MYHJfgW9uqYXVgcEWeoP7AOOODVZvsGIwMThCNUXPK3uZjJGp9gj-HLoowcl_PHqtDeDySXiXbQe85vsAfqoAgBP1G1Fl3D7_IflxLPkeRSB7kkis72YmnH1jEcx1Wq00LdgT4sZglHDJZYasPo4XAILRi0zfKWOE6luUsExtKOTelpgWflTmuMGAWnphoTvn4pzEpz0UNQG3k6ZZaQMW9BfBtHPDMe_zEO2o31fVVvHlTWBertjCZvGH-y3brELiNeJk1pvTdFh83ODJSJFGmYzTneTN4PUEfNodZzpThFq4bes_xgvxKzLilQX2xenkV9_o6OEL35WGKX73W0MeVS_hWJJBj4X0h2ySC5vhGx8ojic6f4F0Jm-ZVxToauSrRERUdlYs8xiCRZ9OklDcjuQ80w2v2e8wtnEO9mdAiipg7wmZ-nB1SGoUlumGS-YsvDdjZCaGQHLYyrZJZxC9PKsXPz7QF2xCUqXx3oMp-UyUoJ1Cca3MMYm6fmoWv1ZlDEKmmjadPxSsPp1_PjKdNyQZMV-LV5_wO83tLLb_4-o1Lu6ncu9kNRoxP7nO2_d261g-gYtHY4hKK25AIn6RZILEr0wcdKUJdaM0Ozq7Ko6Kpnx7od0xLavuTWklPrSHL0XWZD-YY6n75P16koG1Y3MNZX9V3_Z8Y26ejQgv4uiULJhlQRXXwg9Yg3jKGVj99zNEqyBnoT4hDoz8Y8XlDTBrYZMa2hjT3ck7QTNGAKbtuVOXj1c3zceWAuvnilcoI0im8N_zRDappauHifmhdMZO3h69waxAs1N0Z0pST8ENVqLI5gs8qu25xgQj1Rcwv7bnFhj6S_ajjig_eQD0ZKP-SO3vpMIYmuSVLmHuK5ZvY3_ddKYbV6p-rH6J9auQDF6iGVWVuk6q0ELXC5eDNqZ1GjaTXi5bRfgZVlSpSJc3RUq4HrtMBDBQLQ8Ud6y1YZT_AqKpbKN46Ly5xe6s_aRmZpd-NX_e5IEjvJdb47zVzY_PVGBHfTHZ0ApCvmEB2Z2ZiF9cPKHCam3PVkAzgEDzBNKKObyUy9vofP0uEvSgXU3nBh0qR0G0zVBuX7xIN-c6JtJwKnvt8KFymwRpvmyGyk9t2WdHXUod5epimYVRTgx5awVjQF7uEcaWvEs2rggDMj5bYAFR7_wsKePZKtAjCFgA32i0e0A7WUrR5CMioVOeKElps600P9u5NtVIAOxezRp9hEB-UCzUK89ZJfs3l3Q3_DOGGHvHDnQGBMUYsBDHsKwcFelRMIdviEBiuXVeF6AmtMUwPGTM1vax8vvxhY45TypXgjm3Z97xPzSd1agcb0UcQlEEZiATgvWAIk6OOs6D3aYo9xxzGaW9IM06bQAKdymw77XNpzfwDKYW6eMoazKrh_onwRaC6XlbEv1a2xYdgdD7OvcIiL_AQ1rs8aJdYThgiBfzFlW0tNXJeTNHYhmF6x7gO4LGo6uTN8QmvQK0KU2TQjrWEgmu6hFdyCiYVrnJuLrarUlMRe_JGLuo56bNOXg4PJaRYA_d35I851MHE5ZZ3A643zNoPPXRIcBgaslB_1NQUOS-7ZKswaO1kiwAyUlq1FLWuaCmDLJ4dQb1a_HSuffhkme4PJrQ-o72bWX9j4MP90PPa8uMx8b4KXJVlJ2PoPOyUgZ9M9TE5DgkE6oTY5osOKtMFp46JcxDCBi69V0DK5iwuznRb3w94tTLywRyCbVyj_t3OA97C71FpcR5MNxm4UhBnnJ9t8vCb5JT1YLAP0pBKpqlzl0WuDG70976pbrW-trBkoObt25gzz9GK5JCGiRGT3pf3mJzkJArRvrjO3Xgmi1p1EhhBynUS2SGQ3MhYvhQr6_RiPuBpeohURA9Y207vOHxwsvlpwBKkSINJCZNt99ISLAKydE5wdPSjzxDCNRt4f_1Tzcw5H4u1iBGsCCRCxuzB_Ugz5ytr2zlYiHoKs7nEJPoGHClSrRDjFsAti71bLY4GvKozmNDsA4eOQ3Vr8G1p_fEJdj6I8Gi96XmDQJn78X7aPjdiYHf_xnnrKsXS0yr5jgVj6-dRrzdbo9cB2U1sGHjVkRpmrYZBW34mL7UNTM0_gB8jbRPJ6PFwQPYOSn4-QcloJviVsDfHyXPnQ8uTQOl0K5tRWOclR_iKvKxfnw87hwdaOT5WL-VHIEHckaHJoksXeZXS-boSvVTqG9t4jh83M7ZAivwHLXvJB4oAqzXRhijy9hN90bVZAdSFSbXDgiI3qytTRCvAZeSy3zPeW1bKLzIPQSyIU1LOHpfO0qRrPjJs5hfGjKfR0hoMkjGzEu81C2Eey_VcXt0wk6gx9nwdV8pyvctU4fwSq95HiUCnjtbv4wFgEtRg8b8ergs4IaZzEZKV9FtHp5drELcaBopVQri_LztPAhBr70YPSQJS8_gUZYG8phnsGWnjrFp2EmHjDaIS40T3ibUFSk3cy3M6fMjKBDrzAqwj8g4Uc1VZRoBBbktghTNzcJsN0nKfH_424-IVA1bvvpldiV-Ju1UXgMawP_CfNti5JLwKtx_dJLRwyGpWIfcOV3ul7jSGZNYzSu85qtP-BDzAD0_ik1Dnismj_zyM53dSCWX0evKWFUnL4o4jxZRvIbkZYMVuuJDyqcMhsdmTPJhFdSfZWZW9NyaEj9e_Kr_CQXtdWGF6nUAMRbsK5M39WDPrTimn_2EBw9yYekfaEx5MzUvlRbGHBzAmXae98oxFc1TE-I8tJllCs9M9HChTm6kkeTEgHsR-_wlPiJ3YPMHj9beebNyl6WNAV0mmItLfpTQqNJsCsQnkycEQYdJCALss_59UVreUVJmBmb7AK2RI_l0bWfTlTVYgZolN6ZFIpnFQiVUlmZ4lk9AHnG7l0ZHIUVz4zqwgaJLa6AZ2aipOyDlIpGoh4ZjmMSwk7iWT70XVObp-19OGUR0RduAo87WMICPZkJFyi2cEpIsDFmOWV65JEcXK7zs-4SOZeVNYABkghC8zvtr5k6FIWnY_5srTh9M0W1iH7EwgOjNLs_38jgjMlUvrQnl41-1f18GKu0obkAiGKltVxCN8GLPa3LL8AVoC0px_Dz1YKBEhCt7H6LR3-gnhpjrOWl1XFrsf1iU2RkMqAjJJ8gRAnTEluuz_RYsx7sSPg3kcSNd2HxmKYdCVhznqja1qYVSBOQTaYuPv4TdTV-AwgcttHBepa81GNdxSrZQkr36Pc2dAchC-dX-HXhgmIw7D-efOEkKjBvHph6bzSBm02DcmydY0ghccZ7EPLoWK7_SycW7vwNHJa4kolBTZP2EFW8hLfm7V8IhebeUoTqAPSy-Md4B89ZZx2Yi6K7K67xC7cJEvNK0HSA-sBNl2195zI_w5Tu6e5THTLAep4JGVMqkEPpRhmbnMCzQnCm8JJDirOFktYVfbeZJT_3Dv4qwKLpimEMsSA4KzmdtlwLlfCMAGVXs8vyeKL357Q3W26XW_rvdrtRwugvLbxYQW2509nVPfMWHgJ64548cjN3oZugWf1RIbVo38LfVmfHG14hsaFOnYKd4hTuTGpBv4yNnpK12oXmideq1OG_XB-3U3v0-aZvkzR7XOSwgamJ7kYbQcCKB6T06P1lNa5aJB4eq9DyCijWG3k_d8PHIfhBF6gbufcuURXeubsQD3eWQUSxMhH2bU0auJP8tRbgsMghPSOkLDJOvPWTmoYfFDDrgEkOZLqSy1XZYEwA6WLrsEdQMNQ-dZmgE3QQa6XZBn8hLv5nGhAzfiaFW",
+        "summary": []
+      },
+      {
+        "id": "msg_0827cd79c65a5c1f016ac9f8a7cb9487d0a6ef6fbd00896eff",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.33,\"unsupported_claim_count\":3,\"hallucination\":true,\"engineering_contradiction_count\":2,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"물 10°API만 맞음. 교재 예시는 light 40, heavy <20인데 20~40, 10~20 및 대표값 30/15로 바꿔 말해 핵심 예시를 틀림.\"},\"B\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.67,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":0.67,\"note\":\"물 10°API와 heavy <20은 맞음. 다만 교재 예시는 light crude가 about 40°API인데, 답은 일반적으로 40° 이상이라고 바꾸어 정확한 예시값을 놓침.\"},\"C\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.33,\"unsupported_claim_count\":3,\"hallucination\":true,\"engineering_contradiction_count\":2,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":0.25,\"note\":\"직접 답하지 않고 확인 요청 형태임. 물 10은 맞지만 light 30~40, heavy 15~25라는 범위는 제시 근거와 맞지 않음; cited KB1은 이를 지지하지 않음.\"},\"D\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.33,\"unsupported_claim_count\":3,\"hallucination\":true,\"engineering_contradiction_count\":2,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"물 10°API만 맞음. light ≥31.1, heavy ≤22.3은 교재 예시인 light about 40, heavy <20과 다르고 근거도 없음.\"},\"E\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"요구된 세 항목을 정확히 전달함: 물 10°API, light crude 약 40°API, heavy crude 20°API 미만. 추가 설명도 제시 근거와 양립함.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 6894,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 966,
+      "output_tokens_details": {
+        "reasoning_tokens": 316
+      },
+      "total_tokens": 7860
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "qwen_closed_book": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.33,
+      "unsupported_claim_count": 3,
+      "hallucination": true,
+      "engineering_contradiction_count": 2,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "물 10°API만 맞음. 교재 예시는 light 40, heavy <20인데 20~40, 10~20 및 대표값 30/15로 바꿔 말해 핵심 예시를 틀림."
+    },
+    "qwen_same_evidence": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.67,
+      "unsupported_claim_count": 1,
+      "hallucination": true,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 0.67,
+      "note": "물 10°API와 heavy <20은 맞음. 다만 교재 예시는 light crude가 about 40°API인데, 답은 일반적으로 40° 이상이라고 바꾸어 정확한 예시값을 놓침."
+    },
+    "agent": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.33,
+      "unsupported_claim_count": 3,
+      "hallucination": true,
+      "engineering_contradiction_count": 2,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 0.25,
+      "note": "직접 답하지 않고 확인 요청 형태임. 물 10은 맞지만 light 30~40, heavy 15~25라는 범위는 제시 근거와 맞지 않음; cited KB1은 이를 지지하지 않음."
+    },
+    "openai_closed_book": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.33,
+      "unsupported_claim_count": 3,
+      "hallucination": true,
+      "engineering_contradiction_count": 2,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "물 10°API만 맞음. light ≥31.1, heavy ≤22.3은 교재 예시인 light about 40, heavy <20과 다르고 근거도 없음."
+    },
+    "openai_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 1.0,
+      "note": "요구된 세 항목을 정확히 전달함: 물 10°API, light crude 약 40°API, heavy crude 20°API 미만. 추가 설명도 제시 근거와 양립함."
+    }
+  }
+}

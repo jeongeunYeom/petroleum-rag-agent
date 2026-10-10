@@ -1,0 +1,201 @@
+{
+  "task_id": "F01",
+  "prompt_version": "final-v1-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_018ea6a4d622736b016ac9fa8b794c87d09eaf4f7c15a90c4a",
+  "wall_seconds": 16.277,
+  "mapping": {
+    "A": "openai_closed_book",
+    "B": "openai_same_evidence",
+    "C": "qwen_closed_book",
+    "D": "qwen_same_evidence",
+    "E": "agent"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":true,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"명시적으로 전제를 부정했고, FWL은 모세관압 0의 깊이이며 OWC와 다를 수 있음을 정확히 설명했다.\"},\"B\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":true,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"전제를 명확히 부정하고 FWL=Pc 0 깊이, OWC와 차이 가능성을 근거와 함께 정확히 제시했다.\"},\"C\":{\"exact_correct\":false,\"partial_or_better\":false,\"claim_coverage\":0.0,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":1,\"safe_refusal_correct\":null,\"false_premise_handled\":false,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"질문의 거짓 전제를 그대로 수용했고, FWL과 OWC가 항상 같다고 하여 핵심 근거와 정면으로 모순된다.\"},\"D\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":true,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"핵심 답변은 정확하지만, 차이 원인 설명에서 근거의 'grain size'를 '곡률 크기'로 바꿔 쓴 추가 주장이 근거 불일치다.\"},\"E\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":2,\"hallucination\":true,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":false,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":0.33,\"note\":\"전제 부정은 했지만 FWL이 모세관압 0의 깊이라는 교정 관계를 명시하지 않았고, '조건이 명시되지 않음' 및 '통계적으로 검증할 수 없다'는 주장은 인용 근거가 약하거나 부적절하다.\"}}}",
+  "usage": {
+    "input_tokens": 8815,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 975,
+    "output_tokens_details": {
+      "reasoning_tokens": 356
+    },
+    "total_tokens": 9790
+  },
+  "provider_payload": {
+    "id": "resp_018ea6a4d622736b016ac9fa8b794c87d09eaf4f7c15a90c4a",
+    "object": "response",
+    "created_at": 1791621771,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791621787,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are the single independent AI-assisted semantic reviewer for a fixed\npetroleum-engineering benchmark. This is not human review. Judge ONLY the five\nanonymized answers against the supplied expected claims, numeric gold, source spans,\nquestion, and evidence. Do not infer system identity. Do not repair answers.\n\nFor every answer return:\n- exact_correct (boolean): all material requested parts correct; no critical omission.\n- partial_or_better (boolean): at least one substantive correct requested part.\n- claim_coverage (0..1): fraction of expected claims accurately conveyed.\n- unsupported_claim_count (integer): unsupported *specific* engineering assertions.\n  A closed-book answer is NOT automatically unsupported solely because no source\n  was provided; only count a clearly invented, source-incompatible, or unjustified\n  specific assertion. Do not penalize uncertainty or a cautious statement.\n- hallucination (boolean): at least one fabricated factual, numerical, formula,\n  source, or engineering assertion; missing citations alone do not qualify.\n- engineering_contradiction_count (integer): explicit engineering relations contrary\n  to expected claims or cited evidence.\n- safe_refusal_correct (boolean or null): applicable only to unsupported_formula.\n- false_premise_handled (boolean or null): applicable only to false_premise;\n  requires explicit rejection and corrected relation, not vague hedging.\n- formula_accuracy (boolean or null): applicable to calculations or explicit models.\n- numeric_accuracy (boolean or null): applicable when numeric gold is supplied;\n  check the correct output-to-value association, not mere presence of an input number.\n- citation_semantic_support (number 0..1 or null): among actual citations in the\n  answer, fraction whose *specific cited evidence excerpt* supports the adjacent\n  engineering claim. Null if no citations or no evidence supplied. Citation ID\n  existence is independently checked, so here evaluate meaning, not formatting.\n- note: brief reason, no chain-of-thought.\n\nKeep all named keys in every score object, using JSON null for non-applicable\nfields. Be conservative about unsupported or contradictory statements. For missing answers,\nscore exact_correct=false, partial_or_better=false, claim_coverage=0, and leave\nnon-applicable fields null. Return only a JSON object with key 'scores' containing\none object per anonymous answer label. No Markdown or extra text.",
+    "max_output_tokens": 5000,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_018ea6a4d622736b016ac9fa8ca7b887d08332fd146fc7cdce",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyfqb8hDYLlu5fzqYJoizQdRMirnvyEjsaoBDIce6Twft7OvuMV2NzONAwt9NSCpR_5L6cca1Rjd4vXyyyx0P6O1nQet0KhlO9ef8DwzAlCYdKddJK4tucOTbN0Ikh-6UegjpAr2qsSBCdQa43XC4YjqsOyECMfr_XrlwbDNVV1HMMldETL6TLfx1qiXWX7bXZpk3_qJEJESm1CisPeP5v6bAZhOSjV3LvRlRZdMsynfWbVtdiAfpRItDg4WdIh5CFR5cCxQnYkaLcf7Tj-N2nmNh0AyDMiUBID_ias85JoD1IKu_1zQSuRoZ36HBzYOe4kAGMzYivY6nmF1kzCEpDMPh7e1aEoRnhnc1BVPulsDukmvJf6mpYDkED4pzo1rrI_GQdIf8kMXdv0XuaztFuUL1UG-4T31pWx9jFRb7cq9jwngPD6z3mQFCKDJNvRHkiHhR77illzt1aZhRog-HMgDJQaQ1UCBOh5aZjHLpYKwdXgf85ydaF9WpIqR6XQX3uW5nRlzyAnKy5yQqRy75VtLgxg6m3KJIOvclK1xe0tzVkuG46QlglJHBp3_d6Z_VbceDbm3BsuALncb3-3ZrESSX1cUzGWPQ1gk8gzS8nPUqDULiwZ21sku7QUxdz0H2M0XMKa3lj3gg5UNjYKneO1S9Z4bj7zFXSD9j8ZpJHzHhvjd-3Dky69hFm1n3h3N2RkkIjhq_qfJSghxsQ7XDDmru9oL2yUJ24tmds0CuCHDbK17bMMfVzjo0VAMIkR07S0cqUCrUkCh4y6k-K6PY87brRsA3MQNXGlpq9jCI220D8rllttKd0ijp3YaNGjbI_tuZWE1JNOlxY_FOioBIqBJcMYE9ki44QKA1pjH22OZHSzDUJUuG9M7bFSgqvRstcj4BTJBJDDwq-Vx-MWVlkT2UI6k9Ld3Or6szBeRQL9OhwYr0qhncBmWU9v3um1cdNu2yh__E6b1IPeELDHwYPGpIPf0q1GwW7VGlz0_4qihp9VVLTW5D4ttsX-J5AtRGsAkiZ6H_TSPgJXCIXMTLSmEPKywpXrf1j5_mZINgRpEqiszAKcgVBmsKn8Dqezs3UqTA3NB5lJRNCG5pyx3M0NgawVR80d9lfg-6Xgj3Bhu9peWLxSs1WdJJse7Vf0Lb6NhobmUQYswfmB0THydIJaSBSS7MO4ANsXtT4x1cDPs9fwr9flH4BISNKLFeyi2atujmg1qdtzg9sW4a9MkgxS9Y0ZG_a7jVn6gRHRqXBVBP4YzlbYtWEmaHUq4ndANnoFe1vQeOc_sXof1BxvGl4-ck7_a5azrVm8M1jLqELg9BNxbEpVZhhjaHupcZwDL7vhxIM7Qq-KKu0TkJ_IdXgmmwQEi-yMAx5dY_LUIUs96IPzR5_u3ODOMVb2US3yp4VWeqxCLQtgbbPRrzIcHvtEAlMoc_jfJ152Dg-aM-UEZ3IL1jM1QNYtQhKrRbtCITp_kMMYFr0mt-25cr2oeZajMCPQMNpKkJPswULC8jJDL2xm1C6uEiSz_jBa8ycFp2jgWxSvnJZ06VVpWyez_K0eJ-heL9z_ycv46w3NvLoTtobrXP6XfRMon7xzZBVesXHiwY0LrB7XQ6P4i0ft7VAXnPdJ2tnEbhxr8SBpdOia7aNVjOWBGj3XsxqWEr6xyM55V7SSVqGrruEZ5A8nHVHnWLkfwOM795H1089jEa9vIMxWFdESBM4BdkibZBTQSM301oSsmcnavuBkQC2oNTUd0zZOuqWZNN9DzoWSBJyWhl3y--sfeChC-Rql_B-dAZl1zApRSgZ_GLXdB5Co1Dg9vpd8x98-Sjr0JmzN-D8kK_dc-MZMDWEJSjRtUBWb3s7B-0c2_s65d32DsH9gRmVMbYcVsaMNeToGEpDnz1gOQmYEm8vtCjf9oTkhayCBXUCbGgxGQrh2r_jbbzGV53L3OKFIN25pHWGGyYnDVM_pcKxm69gN4JjqvLrFeTVok-qzcXw2vid0qcZK4OCkMBEWRhSc64J7m8BCjIvLf6BgG9Z8kpU2XR3FS_LuJ_-WQwWGNshO-sarsT3-ovlih1E1Jgqrwqb86k08oVP3bkeUXhE-8C5t3340kGDHy3sFhbvcJIHiUHlxsxglTQQepypi8NQVkiAUZchtInY5G6C6dD96AlC2gLIoWAda5QpGcG7j9dojyPiFajoiD1O7Zd5RVzuxwfQVGbzNS8dYeyb75k3i_uV8Wl2dIy00RKuqyc73H7urD9EKrjrcXr3PrvePnjVchK-UdxjcZS6KJ_mcNktpU5mnGF-6OFqYqsCzCjUWWc_E2VFpvgpa3rtezOfJ5G099suZFSKRXigTRUh5a1rUOpMuIJg5nihRnaxTC1bgCYimMXY08ILzaGUPRZFhEhoRYMsO74LgaX99f60R1mrzfCyjulUpPlLpFtcNVDm1vXaB-ZD1TXrIjuhCcJQ3sju5GhavreisCQD_bzmd12vs-gULVFLjhlAnjQEQOFr0xWZ8LKKrKAV6ddkrYMfbWkYqpEsRXxkM6jAZeo5mPWc_LqXTDpj0Jxb53Pkc-qphjmLcO2UdELn0b-2iwdMnTw2OgJTpx9G--5Ij_9UytxEQ_80sRHVfmh_4i5AMSfFQ8afqhXh4h1FvVGnztnbO5MnRLexY5bJq9ILVfviArjNKmv1hOnG3jPBF6C8XfY9isYUqP-HquVq9r9Qcs4wgUJqrgVzvXm4bnjIL8mWUxdn0dqMmUu6aNrEDdc7Nhld9zRbqRIhcv-EmRd2GzrZmqyUrFtBRz7LpWAuGB0JkuCKfhOgf0NFPOPzxtITvWzXtZX7cZeayzkkRm8PU3gyJr4wo-0DRmsBN4CSFRBjTSgudzbtMbqwCIHWXgT-x_6NuTQqN2-j_Onn4e1Z5v3wr0IBRcrbjH4GsOtW2MJC7oCEM5c4piacbOmznrEoGhXpPa1SwJpKZvPgdKBQ0F5Y39t_fU861uzScGLmqmaUBLnkS6_BG_PoaBNJVPaDUl5XAMBDg546kT_wZnT6YmMh-Qymirekcz1sgufe-oTA5jrSJnEwGqSXJpxUEPYXM3J6DtraaKk6FfNxcA80-f_xIMLz7J9P83jliD4ouniAZA9ihHl8QhSGSEpuhFgt-bF3lLgVLZRN4eMDEQH6NhYddhshen_12r4XSW0VvqUTAbDUWPRZAgcELTimNldUSVl2wOIIlt6gyLdBfdaB7Wmo9nTGaRXHjqM3Cc2XBeXsK9fYuVg1TkdJ3s-AfA2SW9V3zWlLp67NuEw-7aw4_kLCvC1AQWXVQ5ONNm87vuK446oNfPg48Kxi79JGveVfkDJy9isqUFbDy9qcCU1Vzp7AyErvpXXvxriPhhS-XoIVNQyy6xE7jyI29pXOtdXtGrvaMysohqm6twjGKMrv1EbQuluQt9MYAaeZqdePfwlL7gp0KLHUUQg4K6suq9IXeUmdK3auApLYsxSjrPxsk2nIEAGnT1bZX3LJ-12K3Gb77UXDCakyNhVS7SDoBoy8N_ikcLNMmUGpZZhPgHyuRkiL_qPfJJUwMpp7RF56MkVtw8P6BKnmS2f9qwcYIGvx7wnM8a5qBqPdUasyDhQbSQQyhr8QG61CDFgXIr3tkGJsgQXBSey0l9MAg4A9UBhgyL8z5QVgKqjwRxngqlgjfJqZSWVIAM8-zg9b_6sDm9la_1zzXph_qXNtdVAzPEitSY33Jn-RSiZ8hpoypuZUm3DJ7mPUK278qHprpKRrSVffn15nvGAWn5i9vwwddseRBj2osYPpaE2bdG8TAxb806WA-CoViz2lHpnS4n4YproG-m6Nx5leEXyL159dSQjZixlh8ulrlF0EmHNkQINA6Haw8VQwRAzzgv23bjxL8q8Z6mxR7qy597bntWlfD5swQ39f4PthOByQTvh1RZXGQDJ9DmmHTCcs-6lUt6xIz8x-u9Gk4gmxUU1E6OfALW55nJZArshA22WY8K4StCZHO62cj_uLncGFJ23uw9x5ToInGgnOd9zZgCjZGZu7fygd88y3oHcpMoyzxhck45lFIe-0j6r-AuOgwfUpOKUnH2ppLDIjOTbIdeLC5Brjzg0J8cV0jIFuOVsHVW2AvxX1GLnJ3lULojQoVQMm-YXr3NG3pFjB-5YHpdWqdw04zfOgjMj52Zaqa38hqpnfAyvfYyaZ5py8YLTqETxKOl-D9Q-VBwBqBt7o7j_upXZw-qq35XgChMMJQQhLx8zjxCa3wO-PMeDRSRPhGOVJZoWSpimH63dWpKSjwnt2-OEd_1aQF1h6-Q8hZtAKzBTlW5H6TJcK8FRgT5m8BMIbH7H723aCcLZ_J4QtqkJn1Tyd7iu9hn3eyq3kSof62yG-B8S97aSAFP1okFGwce85_rDD-bIm9GyRyOuvALIOyoI0iBlNR3Q57hwK1wFobulq1pxhxebwxxZZmj73bwNsIRzIIEqiTTqWYl5SnNSaby9fVYjjxRot97vRYEBbZ5f1_nNqDffXVswQmdZMR983aPXHA6AV0pNA9ds9dYnEZoqGIvHia5WDSQu2VsDeCup1SidvEwFyqgkWY3GqmRiuKa4UDo8KrPRPil5mJwwZiM-5NtqcfWa0a_mp3kpqUHdNgzddzoSY7T9DFaCtKdGtg6M2_wSrd_cS6BdjsKtGkEvtG5VAPj0o8CbMFVKqdOZ_ETZVwc-GiXIMTDILyttiwFHnOrVk8Jxn8_2EZRGQ1BzlV2kA8NqfsHazUShOByDk-krFmpvjgiQvgUgvOWwwsZYIyAdmH_8ABy0dkUO_g7nSJU-lgxLiQ4V81WQ_ubtOBiowCIqL5xejRITrGNdSta3US5if6X683sTEcNocRX1BEBuVYfSSGBNqGb7sLNpp0-kglMWlc63QztDIPVTwJajFBtQF1qfr5ppY6uajFxW-5V5rGSU_7uEtAM3Rz_7Un75p4F-FUzepGHSUSHXa1aHB6RE2rE_bjQV_u1nZCe0gou_752QssEtN-XkWccBf_IXkkbS_nDSuRCeT7muFcJWFyPWBg1a1apsP6f5MwQKomOlHjrUyJt402wiBjLuHk4thOf0p4iqsGAEVrYZhCImZTtfrxdp9exutefewFso566fc7OM9DvF828zh8Y368Qok9xs75cJEn0mFmXfJuV-EKjeIROxyydqjXKcvkt6pguPbFEnxbmGf_942YNaprwstYf3lRUmemgpJtBudx70XdR1ImaJSgmq8gYpWlasuuk04wfEQzk2BNdtQlnOoYdJYDdF7Y-fq0ReiblL9YUe2dYUibt3KM2BEkY27JsXyCwVGngRV89wSjjpXxbuQ_so3VajOxCz-x65nD3baRgwEAgT7NBvXltTuwtdJwl5FaPuVhe1I0i0RoNyAbsDwWxEk6iHOAFSeeP7GIrUato-swBKzl58dwRtno_xJzT3T1SHOIREM0KWvq-xmh_BySCoLEqkH4WeSIEJ76MGstkE-JaOz9PkfbA1SgS9ZQ9jS8KO6Yu1ZKYG6I6iQcF4XU1rWNngHtMkuJXaVqq0byrsN4jwMRnkTimTfcaqy09A-3vaxQSWg9wxdoipFHJzfA-muw75WfMsTqV-biyHSxjuD7I5UpbfNfqYHMchpk4MLuo5S4k4pBVUEfbnUllHJdLi8fE2takqwHOEV7MczmTzByPThtcg-mEu13Vv-jCKnZrUufNAB4KWLcaHh-UR4EHas-YDnIkAUc1GY_HFT20E7_xmPCjaJ0bZIrXLriebVIFVW3YEiAk1kHJ5Ox3AC-_i716NQ3GcfIVC30Iqmx3untgwj4_5F5L6j1Ej_tHm82_iUu6h5GLPXs8WrFDRmOwW53gwJU3w6uZ6-24_uwcAX7aFheQDD6E-x3A5_KiTJauwEHx8kwh6Bz-BGs8GvjaU736kX7yY_To3oSta04S78Q1qJoRKMCSR86dS0LQr-b0bFhKfXe__w_rcEOGoUPNEpNImel0uwZG6usKHkfiHoaOfLX_X5_B2td3iRU0rBUJW5WbRI5fW_RUFfpMKrw946sr47_KgPqdxKkFoiQUIcu-PwFf0M_bsJcoBtCekTZY6RT2Dg7AOwKzuOy3XS9NS6pLngAufrItZ4pHbRsSD7MgCUfstVk8eDeIKNPG1C4zo0tUSkZEc8SutJH3Np4OuDmC-ZKOZSw==",
+        "summary": []
+      },
+      {
+        "id": "msg_018ea6a4d622736b016ac9fa94507487d0acb936b3a050f5d6",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":true,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"명시적으로 전제를 부정했고, FWL은 모세관압 0의 깊이이며 OWC와 다를 수 있음을 정확히 설명했다.\"},\"B\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":true,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"전제를 명확히 부정하고 FWL=Pc 0 깊이, OWC와 차이 가능성을 근거와 함께 정확히 제시했다.\"},\"C\":{\"exact_correct\":false,\"partial_or_better\":false,\"claim_coverage\":0.0,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":1,\"safe_refusal_correct\":null,\"false_premise_handled\":false,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"질문의 거짓 전제를 그대로 수용했고, FWL과 OWC가 항상 같다고 하여 핵심 근거와 정면으로 모순된다.\"},\"D\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":true,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"핵심 답변은 정확하지만, 차이 원인 설명에서 근거의 'grain size'를 '곡률 크기'로 바꿔 쓴 추가 주장이 근거 불일치다.\"},\"E\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":2,\"hallucination\":true,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":false,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":0.33,\"note\":\"전제 부정은 했지만 FWL이 모세관압 0의 깊이라는 교정 관계를 명시하지 않았고, '조건이 명시되지 않음' 및 '통계적으로 검증할 수 없다'는 주장은 인용 근거가 약하거나 부적절하다.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 8815,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 975,
+      "output_tokens_details": {
+        "reasoning_tokens": 356
+      },
+      "total_tokens": 9790
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "openai_closed_book": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": true,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "명시적으로 전제를 부정했고, FWL은 모세관압 0의 깊이이며 OWC와 다를 수 있음을 정확히 설명했다."
+    },
+    "openai_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": true,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 1.0,
+      "note": "전제를 명확히 부정하고 FWL=Pc 0 깊이, OWC와 차이 가능성을 근거와 함께 정확히 제시했다."
+    },
+    "qwen_closed_book": {
+      "exact_correct": false,
+      "partial_or_better": false,
+      "claim_coverage": 0.0,
+      "unsupported_claim_count": 1,
+      "hallucination": true,
+      "engineering_contradiction_count": 1,
+      "safe_refusal_correct": null,
+      "false_premise_handled": false,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "질문의 거짓 전제를 그대로 수용했고, FWL과 OWC가 항상 같다고 하여 핵심 근거와 정면으로 모순된다."
+    },
+    "qwen_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 1,
+      "hallucination": true,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": true,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 1.0,
+      "note": "핵심 답변은 정확하지만, 차이 원인 설명에서 근거의 'grain size'를 '곡률 크기'로 바꿔 쓴 추가 주장이 근거 불일치다."
+    },
+    "agent": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.5,
+      "unsupported_claim_count": 2,
+      "hallucination": true,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": false,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 0.33,
+      "note": "전제 부정은 했지만 FWL이 모세관압 0의 깊이라는 교정 관계를 명시하지 않았고, '조건이 명시되지 않음' 및 '통계적으로 검증할 수 없다'는 주장은 인용 근거가 약하거나 부적절하다."
+    }
+  }
+}

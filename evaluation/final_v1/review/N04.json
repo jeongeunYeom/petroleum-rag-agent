@@ -1,0 +1,201 @@
+{
+  "task_id": "N04",
+  "prompt_version": "final-v1-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_08b9e64c87220e52016ac9f9bb9a1c87d09f307cc94081f04c",
+  "wall_seconds": 9.95,
+  "mapping": {
+    "A": "qwen_closed_book",
+    "B": "openai_closed_book",
+    "C": "openai_same_evidence",
+    "D": "qwen_same_evidence",
+    "E": "agent"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"Correct formula and correct recovery factor: 25%.\"},\"B\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"Correctly computes recovery factor as 25%.\"},\"C\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":0.0,\"note\":\"Answer is correct at 25%, but the cited excerpt does not support the recovery-factor calculation.\"},\"D\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":0.0,\"note\":\"Correct recovery-factor calculation and result, but the cited evidence is semantically irrelevant.\"},\"E\":{\"exact_correct\":false,\"partial_or_better\":false,\"claim_coverage\":0.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":false,\"citation_semantic_support\":1.0,\"note\":\"Does not answer the calculation; only notes the cited excerpt is not directly relevant.\"}}}",
+  "usage": {
+    "input_tokens": 1667,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 652,
+    "output_tokens_details": {
+      "reasoning_tokens": 174
+    },
+    "total_tokens": 2319
+  },
+  "provider_payload": {
+    "id": "resp_08b9e64c87220e52016ac9f9bb9a1c87d09f307cc94081f04c",
+    "object": "response",
+    "created_at": 1791621563,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791621573,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are the single independent AI-assisted semantic reviewer for a fixed\npetroleum-engineering benchmark. This is not human review. Judge ONLY the five\nanonymized answers against the supplied expected claims, numeric gold, source spans,\nquestion, and evidence. Do not infer system identity. Do not repair answers.\n\nFor every answer return:\n- exact_correct (boolean): all material requested parts correct; no critical omission.\n- partial_or_better (boolean): at least one substantive correct requested part.\n- claim_coverage (0..1): fraction of expected claims accurately conveyed.\n- unsupported_claim_count (integer): unsupported *specific* engineering assertions.\n  A closed-book answer is NOT automatically unsupported solely because no source\n  was provided; only count a clearly invented, source-incompatible, or unjustified\n  specific assertion. Do not penalize uncertainty or a cautious statement.\n- hallucination (boolean): at least one fabricated factual, numerical, formula,\n  source, or engineering assertion; missing citations alone do not qualify.\n- engineering_contradiction_count (integer): explicit engineering relations contrary\n  to expected claims or cited evidence.\n- safe_refusal_correct (boolean or null): applicable only to unsupported_formula.\n- false_premise_handled (boolean or null): applicable only to false_premise;\n  requires explicit rejection and corrected relation, not vague hedging.\n- formula_accuracy (boolean or null): applicable to calculations or explicit models.\n- numeric_accuracy (boolean or null): applicable when numeric gold is supplied;\n  check the correct output-to-value association, not mere presence of an input number.\n- citation_semantic_support (number 0..1 or null): among actual citations in the\n  answer, fraction whose *specific cited evidence excerpt* supports the adjacent\n  engineering claim. Null if no citations or no evidence supplied. Citation ID\n  existence is independently checked, so here evaluate meaning, not formatting.\n- note: brief reason, no chain-of-thought.\n\nKeep all named keys in every score object, using JSON null for non-applicable\nfields. Be conservative about unsupported or contradictory statements. For missing answers,\nscore exact_correct=false, partial_or_better=false, claim_coverage=0, and leave\nnon-applicable fields null. Return only a JSON object with key 'scores' containing\none object per anonymous answer label. No Markdown or extra text.",
+    "max_output_tokens": 5000,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_08b9e64c87220e52016ac9f9bc49c887d0b651a4d18f096342",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyfnF7cRslgGVLy7bIOVIAhSWwT9txGvKVP79H4o9SWZwg05QY7So_TjAyYB4YDqqRVu5xbIZqie16PzEtnoCwQe-tErjLl4VhGeOHsP1YHaU88zT1uhmio3MvzOixpU7uTbWOCtCKGs2DFfh0HGf55VuNXnc_h4dshpx4sZWUmqul79RmwouelKwocxMb2cmv25B0JCFFLe2M4J8IuOW8Jmhg49gXuQJFf6MoiM2KKtdoizfX4H9RBKa7Mt3h3xVBNrr9SL-qRLstRywZbdHs679F5Q5-2wqhsBiYpx7UdHp7_PKUne8T9s40JozPNrCM-yQrreQLaFvhAJEPLx80DfhGGxAyhJsjskKQwfQ13CzEZ_Rb-_leeUpv_ktN7q8nqnTyO1G5NG8nMzpi6hRD0SzdymsgBck1aNblSAztLX3X9LH66iJZlefOWT04mmAzbNGztOgiFOQf0ROBTbLCZRBJa0E_qghxmlPzqw8sZOtqztzrOemWDWDKet3h-29wLVFSlCkzAd6JZtJR1h2uPgklRq7ctUMHeOQewmKsWhVdxUtI5Y6LLP_5wMtGswy6Zr_q1IK61OSCW6My044thPkexpiM27hm5U_8THOQ6fIbbNt5eilcOCsvE563kohmeTt_jSztCwQjOS-jskfY6j31D1_LblRRCP5qToXr4fSYyLjkc5AaqiMw9THWJ0cBu9WfJueiu9XtsB2QC0E8TRmxYflNQ66OSsB-bA7BlK4HhIbhL6HM2BycjhRlbygH3jviAbvlprNoqYlnyyygKmmnfpLeTh0nEz99LPjG9PYgFkpRJ-hTd4cYxC4xB3nPHxGV738cWJcESqjDx2MmJq9-QDmhV33Y2PPnvRzfEr87FJzv7jP3x5dPouwDxqzUOpvsahiCoDnsIf6KHfsxMp2n9uIj-hU9to0zvC-xkU4vKo20jHBPpIrtuLvgNKYHZn4cF81Y75BwnIYgmnjKtmNmrvGOr6CKGur2K2uPolKvCsJj6R14zuJ-Zzm4hsiDyHT3txXrHW2CcjIPg-JUYuzNxe4YELzAE97r_Ke5UB6R4sjjjpu2FwXMo8ofGyXWZ3yRsRF_0wXyLfAdtiM1sMwZ2F__j8l3K5PongmJSnh2kUFTHT5hZt2wpzE6HH6LzXObfin67auUJv7OOPRweWj4TB7wskaxiS0vb02jh3vb6Gd-oMlzscWVhF2IpqJIBT1Xhjg2wBfGsY7ufcyv38SS5f0PprOL-QHEAz4gn63iXBY4iPXZSC9IYabAk9HbzyzSFt_Wov7j_-8SW22dEJ9j6jZwjIECjMm2SGDu8AkbMVH6ZIfkQKV0sH-xUTXre1dwSgrv8f9Tx4TFbl7oA5Xid6SbC7IMqxE1Y_p4Pio1XX_lmpHN2a-JYyYBWOz-Mt5rsW7E-uat-wW_nFBXB1FyTKkk1Oq0zwexF7kY8gafef7tmp5gRmCzQX-jfZLNqK_K9L0plOudGULLMfFxKTYrVSHSp0zkLFBYtGRMm4HcxIC1BilNB4CzRe-gwUmZopPg-9Kf0hMWffnHAzCx3UnmeP266gR7fcCATOF7TryXfThe61pTUr-MJDfJl2rYff7KXbVA1nmxrertEwN3H5FwFa5WEfe-uP1D6cux9sjgzlUyY6nzrU4K7cjpbD2vP7uffhJSFioC8Bw0b_cpvJe4NK8IHq_F0YjVyr4Vw-lE5zXttHcVu5lItK_tYDAS9uNNPIwPUyLMtQtu1o2HgwkIdGXQt-IzOFOH2cstsZxPZCRMu90CuH3v-iSuWYvAVhHFOSXSUHRTRVzcLQF5XKMrWAeMV4p7lFRELuYZpNy1s-xbBG4zV3wy0WfLxElRz3vaP8MR_6q3N1qiT5XZbaFd7oOxmSqap7Y-j-k5WJpXMRCQ7ajL-5fvIOS-rx686cuEftWY2LNbIehEvOzTtdJ7sDX7ZT6oSIS57jr6mPfpN5kz8DYxnA9ygnRfPRzlFaepVcUfQEfLERKena79MMdAqdNFielNVKuhHE_b8lqdNcXfV0lqR7wdywb3H5rnwEUDCnPyzBpn-kkM5SDo_hA3pRXZHOqAK3KkYnVpbutTgxyDGpEuu_w66sEUtSTQONQyKp_he15v7ZEoU399KhXuGW4RFRNcs7GtOtsfJJwEhu_AJB2rFp8jMGH3EJe5XedReRJca7Winj8GJZHBntuU9pgb_CZJWuwhZNXRkbifaHBx1BMDirUaZtWGWvMFuaHUoVTViFTtoqAlpUBCmMgA-6SLCubgUSVGaPmkXpDWi8IDhZb_rVqeuqHtkBpqUoA7fF-6TtNA2c3mQHPJk_tfQgMidRm4innt3eHynqXos4gz-8G2Ld04BNU3_6fIKfCo_lnfxtJfv0fEgb3Oyw0WhE-omVJPgd_WgaFAsNkbPWiPbb-mmtX4B5aU9kYNK3HT523UPDRhGZ1FHsLVUL_nok0m41jknSVQF25ffWCgOS9MkCw1g69zpZdKGaeKKmy-yLa6DS-VXe4k6iA4VANW5VKAjAWQbowfGXYQevl1BdsgLJZ5OR9xRwBDZ7haguP4lpeCM8neOLLYBp5nkji4l1CsrSt4ByCQU-7N7dnrNhohqMSMpzQi2kamjeny9vCvYpmpigOvq9SN9tFTlnl_akTu5GpX6HwqEx7BMNnZog4uIjsUc-u6ipwCMN1yKiLqeyZs8S2huz81NGWXoryIMuOTBZwJEa4zUFmCNxNWfGY6gd0HLjjyixWKxG-Higo9guRubk5qxIpmP7BClIcyKL6Co_Eu9P82WDsXTWlIJETpGIQ-DUstgPdT667o34Q7PKG609wMcVrbeV78_ivtFLA1M52Gi3ZELXQzilM52yQh59EeYFA7uKN6oEw6Ch-8HIC88mkiUd37SOl-08K65LJaw_md_rwr2QNdseB8TMenrBaQt7f1E7xRG1VWxRhSRPDM_KuNeYXXqwCEQYXzx9l1-0-9wCEgfpfd0qXBX_lCcoOBOWx4jk8LQ-Uz979cNyqyGE8tLICtqbsZ1_a2eul-I21441XdFNGnMW3Z3gJ3TkyNuFbLBy3couBs5ALprKNVwwdtM1oNT6JuX3HFKS6A5fmaQ90kkbLF29FCS5ThV3kKyGLpyzpA3YYLErxb4pxoXGoxJDE7_5CdG4q72rZH7ucQEOWfx4ff6yfLa1CiWVGRe1NtRo8rgfxoAHSMhpn67-wxKer3aYA_0p6nmPUOk9mpJr8R_V96mC50FNjKTuNcXwwHOkpMafYrvU9l7OZhLSxv1waBi5bs_3p4Wtu4SCcBJQnn1Up3K-cJQONumnfxumHcT2-n3_7NkO474zrKEIYVmndD-pU3eHVzDyk9dv-OiM-ZTUGMDODDIKDF8TX1aC_MifAw46t5bxAA7D5X76rPey2IEOVmrjGwtdwyAfJGMgMlHPGIBugzIm8TIm5Q_Ip1g-6rvn6y_kUD57hrNKF5pCrHHkG5WHs8znBS4G4qYgDkPajv4HG_0vQOKod6O-pBaJoFR3wrC7WG6lQfUSexNt2EXOhWGn75sz8QFuPSUwTZXcsSi9tkfgwlNV9YqKq-oPXATpfn2iE8uLCKWSOY0aXyA0PnOc3Z8x6UzccxKLzd8GzaYOSoaNruEURD2zJpAWYkVQjOg-JIERW3WhzR3Bv0w1BXutGN8JaTjYRvvBWXMlC7gKNpGIAXWF8dRPQpHjSMHAp5RNH62fF2yecfnA430oxcFEGtWAOY3Kl8AtCcSU8j4mL3XCfOHRBbaB38zK_P56ffciY",
+        "summary": []
+      },
+      {
+        "id": "msg_08b9e64c87220e52016ac9f9c056b087d0a4da724aa5337327",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"Correct formula and correct recovery factor: 25%.\"},\"B\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"Correctly computes recovery factor as 25%.\"},\"C\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":0.0,\"note\":\"Answer is correct at 25%, but the cited excerpt does not support the recovery-factor calculation.\"},\"D\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":0.0,\"note\":\"Correct recovery-factor calculation and result, but the cited evidence is semantically irrelevant.\"},\"E\":{\"exact_correct\":false,\"partial_or_better\":false,\"claim_coverage\":0.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":false,\"citation_semantic_support\":1.0,\"note\":\"Does not answer the calculation; only notes the cited excerpt is not directly relevant.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 1667,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 652,
+      "output_tokens_details": {
+        "reasoning_tokens": 174
+      },
+      "total_tokens": 2319
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "qwen_closed_book": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": null,
+      "note": "Correct formula and correct recovery factor: 25%."
+    },
+    "openai_closed_book": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": null,
+      "note": "Correctly computes recovery factor as 25%."
+    },
+    "openai_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": 0.0,
+      "note": "Answer is correct at 25%, but the cited excerpt does not support the recovery-factor calculation."
+    },
+    "qwen_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": 0.0,
+      "note": "Correct recovery-factor calculation and result, but the cited evidence is semantically irrelevant."
+    },
+    "agent": {
+      "exact_correct": false,
+      "partial_or_better": false,
+      "claim_coverage": 0.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": false,
+      "citation_semantic_support": 1.0,
+      "note": "Does not answer the calculation; only notes the cited excerpt is not directly relevant."
+    }
+  }
+}

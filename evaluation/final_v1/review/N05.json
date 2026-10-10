@@ -1,0 +1,201 @@
+{
+  "task_id": "N05",
+  "prompt_version": "final-v1-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_080be89212d7c8a3016ac9f9c58e4887d0bd1d90451514655c",
+  "wall_seconds": 12.918,
+  "mapping": {
+    "A": "agent",
+    "B": "openai_same_evidence",
+    "C": "qwen_closed_book",
+    "D": "qwen_same_evidence",
+    "E": "openai_closed_book"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"exact_correct\":false,\"partial_or_better\":false,\"claim_coverage\":0.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":false,\"numeric_accuracy\":false,\"citation_semantic_support\":null,\"note\":\"답변이 계산을 거부하여 압력차 900 psi 및 평균 기울기 0.45 psi/ft를 제시하지 못함.\"},\"B\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":0.0,\"note\":\"압력차 900 psi, 깊이차 2000 ft를 사용해 0.45 psi/ft를 정확히 계산했다. 다만 인용된 근거 발췌는 해당 수치 계산 자체를 직접 뒷받침하지 않는다.\"},\"C\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"압력 변화량 900 psi와 깊이 변화량 2000 ft를 정확히 계산해 평균 기울기 0.45 psi/ft를 제시함.\"},\"D\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"ΔP/Δh로 900/2000을 계산하여 0.45 psi/ft를 정확히 제시함.\"},\"E\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"주어진 두 압력과 깊이 차이로 평균 pressure gradient 0.45 psi/ft를 정확히 계산했다.\"}}}",
+  "usage": {
+    "input_tokens": 4750,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 882,
+    "output_tokens_details": {
+      "reasoning_tokens": 298
+    },
+    "total_tokens": 5632
+  },
+  "provider_payload": {
+    "id": "resp_080be89212d7c8a3016ac9f9c58e4887d0bd1d90451514655c",
+    "object": "response",
+    "created_at": 1791621573,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791621586,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are the single independent AI-assisted semantic reviewer for a fixed\npetroleum-engineering benchmark. This is not human review. Judge ONLY the five\nanonymized answers against the supplied expected claims, numeric gold, source spans,\nquestion, and evidence. Do not infer system identity. Do not repair answers.\n\nFor every answer return:\n- exact_correct (boolean): all material requested parts correct; no critical omission.\n- partial_or_better (boolean): at least one substantive correct requested part.\n- claim_coverage (0..1): fraction of expected claims accurately conveyed.\n- unsupported_claim_count (integer): unsupported *specific* engineering assertions.\n  A closed-book answer is NOT automatically unsupported solely because no source\n  was provided; only count a clearly invented, source-incompatible, or unjustified\n  specific assertion. Do not penalize uncertainty or a cautious statement.\n- hallucination (boolean): at least one fabricated factual, numerical, formula,\n  source, or engineering assertion; missing citations alone do not qualify.\n- engineering_contradiction_count (integer): explicit engineering relations contrary\n  to expected claims or cited evidence.\n- safe_refusal_correct (boolean or null): applicable only to unsupported_formula.\n- false_premise_handled (boolean or null): applicable only to false_premise;\n  requires explicit rejection and corrected relation, not vague hedging.\n- formula_accuracy (boolean or null): applicable to calculations or explicit models.\n- numeric_accuracy (boolean or null): applicable when numeric gold is supplied;\n  check the correct output-to-value association, not mere presence of an input number.\n- citation_semantic_support (number 0..1 or null): among actual citations in the\n  answer, fraction whose *specific cited evidence excerpt* supports the adjacent\n  engineering claim. Null if no citations or no evidence supplied. Citation ID\n  existence is independently checked, so here evaluate meaning, not formatting.\n- note: brief reason, no chain-of-thought.\n\nKeep all named keys in every score object, using JSON null for non-applicable\nfields. Be conservative about unsupported or contradictory statements. For missing answers,\nscore exact_correct=false, partial_or_better=false, claim_coverage=0, and leave\nnon-applicable fields null. Return only a JSON object with key 'scores' containing\none object per anonymous answer label. No Markdown or extra text.",
+    "max_output_tokens": 5000,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_080be89212d7c8a3016ac9f9c63a0c87d0b5ac4f3f91720d15",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyfnSN5k6tzJzc0XxXspfgUfHlATawLRA7B9pip5QXkp-o45VPndnpT4Q5zrrecdKdinOYPAlnUk-Pzceau07iv-m3-WcXU3xXHSE_Th6kmD99D-0GCxyvPkVaeZbDSbASug3AzL79AySzGuqZaBqzaJ8v6fYg6V4sHqOX6NabX0uT9JDmULWOlgS6qJYtua3aeDNbkGLvvBJIOJ61nL1RleEnjW4ORaZ7KSaKANtWHCL0gHyV_4V-scpeqeGDZGcTOznv3iyClHOzebU4kaw52sDag-7CoJLqQZ-LlDhJuxzkvi5wBUaS_aBe34409MP25EiU3PEvqvX1-B-I4i6cWUDzzna4Hskr11-H9vwNSd5eAwB_btInp-h7jbjA1nrCJFCZ9E6MIvMvUgor1MWLNmmERrT0v3Mh1ydbLa3cYrwejjoWHbN95pXOd8sA22Yo_oi_vOr5dAM0ymkuSYbkUHuV3Du7OFLTaPiC-hHGEZJlH5npPyz-eIq48hvJzu1dMTKpy-ip6R1IQ8555l3K7leuAKq8j0azoqvpfvzhtaigmQ1GYK-YAGXe3yH_KxwWtDRQzFnl20iTqvL3rZd_YbkodCueJZr4dDdAkpmjpKUdAfWpbQaOglEYxhst2r1hKB48JgeDW3uGKjQwVZgsZVtwdfpfssEqK-Luq8_QL67mSxXB04RhxXN0L7H3T72M3h7LfJcSBdbF7X2KL1mFG8MLMKjT8Qu8yzX1N1L3TlZbfjpt3fPViRVLjDzl9072HqrDbbI_KmvSxawEXyK5gCnv5kg-caXSkg2i9iiKfuLvs53dNFEMFCIqG7t_kS_-73nAN7-yQkF4JbA2GjxMRkvx7_OegaXG6VwX-YeXEKjBHUaaZokuX_JjZakAzNRETWScdzDhVs_C9C4ATj-dhAqKW0u657iUrFRMaF0kTBAS61x3DrrhCHwbDtlYkLrd2PjYztGg8MpywuDga3ME2Qaf1AhmSOe3om8Cm-LVQajcCciCqHSGqOaC0OI5efrgIF95LQk2TsnydiobvQFDn4_m-bzWN-oQcsLxHgJEhlYP2W-B0S-BvtbFhDrDDBZB10lIHfOUmX2SWlyR-edxQKZEfqmpURaHy1J_nBINCyT2m9zQNHlcoiCcjoh9EWi6DoH9RlMSxT7vI1CJoFcvciXuzJ7Q-ib1mq0vZU5TS-RTADqAJnQQdFQBr95JRybc3gk9kKvcQXP2TsWmdZ3fQj8iRlQvHWg-y6V93N7__TJmotTBNYBJz3dqLpbxothQgQF9nCq5ezRX3-O5ZnJSruZCegnOUEst0dbPzzhoqRKsymn-XDcX345SSiTnyFoHTUXC0NkBakkyc4Cn0D9Vz9d02e8MYG0tBa9ev7usQiofH5kuMupX3y6m4WK0ODTrcSC8e5l-NZWctkZdG69vyBT_deFESQcsrEmuogtzIrfUQf1uWO43fHluMbeeDzlyKmRHHznxmxIHmKsLgOjBXydQH-G_BcI-jvLruWkHUmGP1lxXtdT7pFq3wJY5GMIgVwgabQrqMRD3L3b67TcY86Le7GytqOEOaoO18yoKJS8vnotzGQbAfSarZwgAsKUow_WP2Mft2zQImQAc8W5GrzqINtnwdEKnK0IoDvMvLDKzxlLxOkvT9va0_xXmd5a9CYyGHRWoXrQBJRt_BL3MFz_fRaDkkLDKzMSRt4Oa-slPm_MILkErnrPtyi2Qh5dI2efguZ7gEoo0hEppa1cZkta6hFTrkGTZOAW9k1AMoJfW5VdEDK2O30VjJnlNJpMvUvQHBTQL8dhR18tNYH--z69P98eck3NM3iG6dMh4hkNZf_HbopMNKTxky2fw9biU-7LqqWwYby7v53Vea6VIzMXPGcs50UIp_Ke4ZoLO4ZS2j3xhIIG_9nqw1JFO4pFvNoj-yJql99ymR5wscG1cumdTN2aSK2BFTtOQENZwI6sgWzTnRjX42IjeNfNedXIuX_HuCodZ3VNwvDQYCcKlrmJwOXQErZ8ZwWEUIsZKu03Na8NIoGAo78FFgpxHb7CoK5NAYzEgulogiDsXHlhFBgvdnFAmP1b3_ikYwSqicKpf_7hjr-2oIw0zEutqchxhCBEHZRDBf71yS4iCBjr4zyRni1F-fTtlsItSMMGulRGaHiUxka98TAI4IRvW_4E3tYKpPZGxJvQpD4ZxoKOFYVrwvCvOBPyRSbfgesUOn3dLe_JezyjXk9oDzJItzUm9PLuDxxJC1Hp950VOqBRmO20kj-JthZiZka5TopMyRFpXaSJV57LAYLhR_3eh28ERBQeeSWF6IQwNJDLmPvxOsedGEkcIdU-bBrMs8OVs9RA7Q-bpQX-Kihy55sa1Z4OfpUaJRrkpaHljeTYInheCtUcA_WHljyZSvNJbiMhCfVFh9Sm8giIOJna73mD1ZNsKiVGPrkgKgQhLtcl8HRtilEao4f7JHE06R0FTx8D3HlfBZUAZHvRLEVukdb-L0oEi5G6xXHs3QL9gz8TaTftGjwsYdJelUp-TdCLG443PzcWcS4PTs9nITqqL9tHsM5Y--t7GfjjOsAn4CGGDpm5N9C3s_sXtafzRzvxSvm6Pfmks-aVNk4k9hefuQzpiXERZFSRmQSG_yROC7BaakADNzmrmEh32Kh336eHNNpB2dROq1nYw1TvVFr8OwPgJ0A9Too-gW2rNi48rd6H1G8V66KbFoMT4V77aePiEVrWDEYFbCyue08bdQc8oyIEaFmSw5GsK_Ci4LZgVVPyYSKhGDKBJd5aGsfOLL4S37qkvOPyEgyDDWbr7Ba9SYqt--XaiGPqYj94VQ9HYEDcIM0C0YwEPJIw6GQQ2Hfzr4ox1k3bdFlAtAInsAWINGTny8G7avaZRTFl_5DoqPqxCrXJ3oEkt01AdxK1720EN9mUhyiJ92fQWywK4htAZ82DBLAnFLw1QUsITQ3gdQdAi5YQT--klWPKRGARaCqfMEuDgGebLJjqqTHCuq35h-2tjl5Y3SDtb2XX7qFxnDgm5WVEIUwZEjzbdGPv993u2Q7nt-OrKFX-uhlbwe_aQdzWPnYX82FVWb8cw5LMbuXGh3owveXrP0AR6C0yYRY63gJHTjCJO-aQ4aZGgUg_2UBcgjy70ytr1gFhgPNUukJIxy-1bJSG0QkP7lMl8C8RDNm5E1VehxQa0weTkwn88qxReZOtIlN-lgvn6BaXhi-R7xKDtl-GbVaL15fkTS73xNd0nwCUNadjJe3QY6YUWBKyPOQXjst3rVEVXdhAVfUu_4Wf38q7AGEJgq2370FdRA6m4z0Wr9VzKhe9DBtXTstsrCWPKfjUDUqCuIGIWa5eIpe70oWSKnloh3gBnroB30W3DDBDxZpVtJaEjy0-GtVbiKiyMevchumK_qgddbKkkxImeogs2nSB1PJcB2m0eFIb4TGawwkbyllZqQfaysHiqGFW8K4ubBcSA1huRTtvNNImTSCB5asGUwT6TDYu8k5gJgYjghrr8AXvqiopKl545uBA_maIcb9yImoDB_kOBOw5segksqaFzkA6aX7i2y3yLV1BCUroG7PUuv-fQTtTkUbodbM2MEDOq667TxXg7nEg0-SJvqqSmJDxpvZDAnVHCU7ljw1K-gFssrgcmQHPbH8mz_V7k2JTdAIwT4yQyPksMEP8GYnDovDS_NBh2mR9mHnCzYQbvfd3znIXUQTI90GqdHexqkZG3TMYgXRzkykICWNKcuT9F4LhKd_Fc_vXadZGtG8CT7jvAsEsm7FK1D8O6aFh0uFWQ3EQ20Uymu3rpyJP5H93YWkPd4QDbri80BHX6LhWd9BZaKyF0rkAz8D0RRLH2TDY-FRGQWZ9dDPOW6-JKzhIDi0AdoG2qijXWD9KLEWjNeUOAIGGx6dfLmUULBwQCIsscDovyIGM4mQOKaNLR-8YUbgX9JC7JNNQ__YpEQCo-V2305Yj18eq7YJxOdEjLf57HqbcyNp_VnyirOnVWS80CralyvCh38BUlVSJ8Fza6G_SNexKXYiJcvYijhIktWe6NlMHPFU33-S6EsZFLg0ku6IrGqx798J4dUnU-FpoORvpMMqZTuzBkpU3f8kNh2pbvFLdNcmDgc8tK9P5Xs6qP4-EPmqGR3NF62WCWn5Q-slIuKmVl_CtOgIQibgLIfrlQhbsPd2EywJHGqbpxH7YEy5CzJMN4p2ENWtg8rAg0PA6U6y2ll_gt7DfX6IyETdOgg-dlY1SAZ_yOUbSV6AjeQIBouEoHZlXte9odlSd0MEBczzR0_0JYOg4NjDmT5fA9CMSyXZUWhcbtXcElNoiXk89aAU4tuzOfkNLhWbuJ2y6IgFWfc4WX-94dhAlxBF-SruvxjcXJyLrVo8yyEXYGXAlrvZq_JeBvA5x3vO99s4x2MKgkSmVbnr7_IrUP2Rzl_98totwMzdEARhuuBYPatStcoFSdyeHOxHBGlmGwrjmsPmtc48SQcfZ4s5D6h6QHwTu-JR5RexiZdCh6xGARW6KUPOw2D3SKO15UqVTFOlwfXkNjRSQ3fjB4quby2rXbIQDe2Inzl4mSV_nNRepZm-5VOkmKC2WqfzwkZI2o5lcpRQcLK5l4Fe9rDDI1xNzEvD258ojdQt5PsGv7Uo2R_xGYf_Tp7Jb_JT2ay0LwIR5pr0eHh_xa55GEr5vvvwMLBnIyHv3NbQXB_7u2yLNVrJ2nJ-ZqCnyI15rx-ZKzfy6zZh5QASDYrIbhWH2Y2Yncrxwy1yyLv0PFXL0mWOYcOm9mh8Zc0pB7HcudwhUKuqhBUqhRYi6ZLQaf_lYJR-jYs1_xtqjOycPewdLRyAFXJ5S6a75ifTjqEr8rnQYgJ8CWxgf5miqgMp4mAvErqMouoah-Tk6BCtSQ1VUdprwrXRlZ_aJsQiDO6kLh8RpyOuvvzEU93h4-rjqs7SiMRdIwJ03Qg1aKeLQ4NnRfqD0hSIWb2mF2LN3JfP5WtDRrhFb7hk5eMWiGssHcGLj9nrZrMoPcFQmtD8BngA2hHxbNzWGJDJqmQack1Okcnd6DgsxHemObouRxzondXy2wAcNCol9DuSQ-Y0W4HkWHWVD7Jrl1BhinxCLGPIS_PRunjfqZSzVzuCLXao4JqrzFg_jDXcTYchDojjB2wfVIPhmkeMT_bLXc6BoF51aUM8P15_1MN5F0BH3OUR4qMBeryie4lyh5tNaqH7NTffezHd0QQffG2t280HmIYR1pwCiqleaSWzff04xQscumr1oqNMwS9DnGx6PcB7rwcaGGY3x5IK-aUjsX_m6_ZefntYcABsa5_AG2rCN33RRiS6JYoQSQf1SephZpLJFIaUpGoOHK6QPB_UgRmLIpsAfsBeLDXTVKHJJfcuQs_ggQhM1AJhKsFbNsvNQYXuL9ExwZxaJP99zAcHs25NpH-EVRak=",
+        "summary": []
+      },
+      {
+        "id": "msg_080be89212d7c8a3016ac9f9cc0c4487d09c6756cf8460d6d3",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"exact_correct\":false,\"partial_or_better\":false,\"claim_coverage\":0.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":false,\"numeric_accuracy\":false,\"citation_semantic_support\":null,\"note\":\"답변이 계산을 거부하여 압력차 900 psi 및 평균 기울기 0.45 psi/ft를 제시하지 못함.\"},\"B\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":0.0,\"note\":\"압력차 900 psi, 깊이차 2000 ft를 사용해 0.45 psi/ft를 정확히 계산했다. 다만 인용된 근거 발췌는 해당 수치 계산 자체를 직접 뒷받침하지 않는다.\"},\"C\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"압력 변화량 900 psi와 깊이 변화량 2000 ft를 정확히 계산해 평균 기울기 0.45 psi/ft를 제시함.\"},\"D\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"ΔP/Δh로 900/2000을 계산하여 0.45 psi/ft를 정확히 제시함.\"},\"E\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"주어진 두 압력과 깊이 차이로 평균 pressure gradient 0.45 psi/ft를 정확히 계산했다.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 4750,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 882,
+      "output_tokens_details": {
+        "reasoning_tokens": 298
+      },
+      "total_tokens": 5632
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "agent": {
+      "exact_correct": false,
+      "partial_or_better": false,
+      "claim_coverage": 0.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": false,
+      "numeric_accuracy": false,
+      "citation_semantic_support": null,
+      "note": "답변이 계산을 거부하여 압력차 900 psi 및 평균 기울기 0.45 psi/ft를 제시하지 못함."
+    },
+    "openai_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": 0.0,
+      "note": "압력차 900 psi, 깊이차 2000 ft를 사용해 0.45 psi/ft를 정확히 계산했다. 다만 인용된 근거 발췌는 해당 수치 계산 자체를 직접 뒷받침하지 않는다."
+    },
+    "qwen_closed_book": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": null,
+      "note": "압력 변화량 900 psi와 깊이 변화량 2000 ft를 정확히 계산해 평균 기울기 0.45 psi/ft를 제시함."
+    },
+    "qwen_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": null,
+      "note": "ΔP/Δh로 900/2000을 계산하여 0.45 psi/ft를 정확히 제시함."
+    },
+    "openai_closed_book": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": null,
+      "note": "주어진 두 압력과 깊이 차이로 평균 pressure gradient 0.45 psi/ft를 정확히 계산했다."
+    }
+  }
+}

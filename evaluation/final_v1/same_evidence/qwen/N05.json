@@ -1,0 +1,72 @@
+{
+  "task_id": "N05",
+  "track": "same_evidence",
+  "provider": "qwen",
+  "question": "시추 작업에서 기록한 압력이 7,000 ft에서 3,150 psi, 9,000 ft에서 4,050 psi였다. 이 구간의 평균 pressure gradient를 psi/ft로 계산해줘.",
+  "system_prompt": "You are answering a petroleum-engineering question in Korean. Give a concise, directly responsive answer. Do not use tools, Python, browsing, or hidden retrieval. If the question lacks essential values or a verifiable model, ask for the missing information or state that a numeric result cannot be established. Do not invent facts, equations, numbers, or citations. Correct a false premise explicitly. Use only the supplied evidence and values in the question for sourced engineering claims. Cite supporting evidence IDs in square brackets. Do not add other sources. An empty evidence list means no KB support was supplied.",
+  "user_prompt": "시추 작업에서 기록한 압력이 7,000 ft에서 3,150 psi, 9,000 ft에서 4,050 psi였다. 이 구간의 평균 pressure gradient를 psi/ft로 계산해줘.\n\n=== Identical Agent-retrieved KB/FIG evidence ===\n[{\"evidence_id\": \"KB1\", \"document\": \"Heriot-Watt_University_-_Drilling_Engineering.pdf\", \"page\": 165, \"chunk_id\": \"9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p165:c1\", \"kind\": \"KB\", \"excerpt\": \"be :\\n                 2.3 x 0.433 psi/ft  =  0.9959 psi/ft\\nThis figure is normally rounded up to 1 psi/ft and is commonly quoted as the \\nmaximum possible overburden pressure gradient, from which the maximum \\noverburden pressure, at any depth, can be calculated. It is unlikely that the pore \\npressure could exceed the overburden pressure.  However, it should be remembered \\nthat the overburden pressure may vary  with depth, due to compaction and changing \\nlithology, and so the gradient cannot be assumed to be constant.\"}, {\"evidence_id\": \"KB2\", \"document\": \"Heriot-Watt University - Reservoir Engineering.pdf\", \"page\": 73, \"chunk_id\": \"f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p73:c2\", \"kind\": \"KB\", \"excerpt\": \"ng to KPa = 3478 / 0.145 = 23986 Kpa\\nConverting to MPa = 23986 / 1000 = 23.99 MPa\\nPressure gradient  \\n= 0.47 psi/ft = (0.47 / 0.145) KPa/ft = 3.2414 KPa/ft\\n  = (3.2414 /0.3048) KPa/m\\n  = 10.63 KPa/M\"}, {\"evidence_id\": \"KB3\", \"document\": \"Heriot-Watt University - Reservoir Engineering.pdf\", \"page\": 64, \"chunk_id\": \"f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p64:c1\", \"kind\": \"KB\", \"excerpt\": \"ssured \\nreservoirs.\\nEXERCISE 1\\nIf the average pressure gradient in a region is 0.47 psi/ft, calculate the pore \\npressure in a normally pressurised formation at 7400ft. Convert the pressure from \\npsi to KPa, then express the pressure in MPa. What is the pressure gradient in \\nKPa/m?\"}, {\"evidence_id\": \"FIG1\", \"document\": \"Heriot-Watt_University_-_Well_Test_Analysis.pdf\", \"page\": 445, \"image_path\": \"D:\\\\petroleum-rag-agent\\\\data\\\\figures\\\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p445_fig2.jpeg\", \"kind\": \"FIG\", \"excerpt\": \"ot-Watt_University_-_Well_Test_Analysis.pdf\\ndocument_id: 01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462\\npage_number: 445\\nimage_index: 2\\nimage_path: D:\\\\petroleum-rag-agent\\\\data\\\\figures\\\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p445_fig2.jpeg\\nimage_type: diagram\\nconfidence: 0.9\\ntitle: DEPTH (ft)\\ntitle_verified: true\\nanalysis: Pressure gradient analysis\\ncomponents:\\n  - Depth, Pressure\\ncomponent_labels:\\n  - DEPTH (ft), PRESSURE (psi)\\nconnections: []\\nflow_directions:\\n  - Downward\\nannotations:\\n  - LR GRADIENT = 0.542 ± 0.018 psi/ft\\nlegend: null\\nlegend_verified: false\\nengineering_meaning: Pressure gradient measurement in a borehole.\\nengineering_meaning_verified: true\\nvision_model: qwen2.5vl:7b\\ncreated_at: 2026-09-19T15:24:14.554163+00:00\\nlegacy_note_backup: null\"}, {\"evidence_id\": \"FIG2\", \"document\": \"Heriot-Watt_University_-_Well_Test_Analysis.pdf\", \"page\": 444, \"image_path\": \"D:\\\\petroleum-rag-agent\\\\data\\\\figures\\\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p444_fig2.jpeg\", \"kind\": \"FIG\", \"excerpt\": \"Figure 2: [Figure Note Metadata]\\ndocument_name: Heriot-Watt_University_-_Well_Test_Analysis.pdf\\ndocument_id: 01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462\\npage_number: 444\\nimage_index: 2\\nimage_path: D:\\\\petroleum-rag-agent\\\\data\\\\figures\\\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p444_fig2.jpeg\\nimage_type: diagram\\nconfidence: 0.9\\ntitle: Uncertainty in Gradients on the Pressure-Depth Diagram\\ntitle_verified: true\\nanalysis: The grap\\n[Focused vision extraction]\\ntitle: Uncertainty in Gradients on the Pressure-Depth Diagram\\nanalysis: Analysis of pressure gradients and their uncertainty on a pressure-depth diagram.\\nx_axis: Pressure\\nx_axis_unit: psi/ft\\ny_axis: Vertical Depth\\ny_axis_unit: ft\\nseries_count: 3\\nseries_descriptions: Linear Regression Gradient, Extreme Limits of Error in Computed Gradient\\nlegend: Not applicable\\nreference_lines: Not applicable\\nfigure_label: Fig 4.3.3\"}]",
+  "evidence": [
+    {
+      "evidence_id": "KB1",
+      "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+      "page": 165,
+      "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p165:c1",
+      "kind": "KB",
+      "excerpt": "be :\n                 2.3 x 0.433 psi/ft  =  0.9959 psi/ft\nThis figure is normally rounded up to 1 psi/ft and is commonly quoted as the \nmaximum possible overburden pressure gradient, from which the maximum \noverburden pressure, at any depth, can be calculated. It is unlikely that the pore \npressure could exceed the overburden pressure.  However, it should be remembered \nthat the overburden pressure may vary  with depth, due to compaction and changing \nlithology, and so the gradient cannot be assumed to be constant."
+    },
+    {
+      "evidence_id": "KB2",
+      "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+      "page": 73,
+      "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p73:c2",
+      "kind": "KB",
+      "excerpt": "ng to KPa = 3478 / 0.145 = 23986 Kpa\nConverting to MPa = 23986 / 1000 = 23.99 MPa\nPressure gradient  \n= 0.47 psi/ft = (0.47 / 0.145) KPa/ft = 3.2414 KPa/ft\n  = (3.2414 /0.3048) KPa/m\n  = 10.63 KPa/M"
+    },
+    {
+      "evidence_id": "KB3",
+      "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+      "page": 64,
+      "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p64:c1",
+      "kind": "KB",
+      "excerpt": "ssured \nreservoirs.\nEXERCISE 1\nIf the average pressure gradient in a region is 0.47 psi/ft, calculate the pore \npressure in a normally pressurised formation at 7400ft. Convert the pressure from \npsi to KPa, then express the pressure in MPa. What is the pressure gradient in \nKPa/m?"
+    },
+    {
+      "evidence_id": "FIG1",
+      "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+      "page": 445,
+      "image_path": "D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p445_fig2.jpeg",
+      "kind": "FIG",
+      "excerpt": "ot-Watt_University_-_Well_Test_Analysis.pdf\ndocument_id: 01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462\npage_number: 445\nimage_index: 2\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p445_fig2.jpeg\nimage_type: diagram\nconfidence: 0.9\ntitle: DEPTH (ft)\ntitle_verified: true\nanalysis: Pressure gradient analysis\ncomponents:\n  - Depth, Pressure\ncomponent_labels:\n  - DEPTH (ft), PRESSURE (psi)\nconnections: []\nflow_directions:\n  - Downward\nannotations:\n  - LR GRADIENT = 0.542 ± 0.018 psi/ft\nlegend: null\nlegend_verified: false\nengineering_meaning: Pressure gradient measurement in a borehole.\nengineering_meaning_verified: true\nvision_model: qwen2.5vl:7b\ncreated_at: 2026-09-19T15:24:14.554163+00:00\nlegacy_note_backup: null"
+    },
+    {
+      "evidence_id": "FIG2",
+      "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+      "page": 444,
+      "image_path": "D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p444_fig2.jpeg",
+      "kind": "FIG",
+      "excerpt": "Figure 2: [Figure Note Metadata]\ndocument_name: Heriot-Watt_University_-_Well_Test_Analysis.pdf\ndocument_id: 01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462\npage_number: 444\nimage_index: 2\nimage_path: D:\\petroleum-rag-agent\\data\\figures\\01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462_p444_fig2.jpeg\nimage_type: diagram\nconfidence: 0.9\ntitle: Uncertainty in Gradients on the Pressure-Depth Diagram\ntitle_verified: true\nanalysis: The grap\n[Focused vision extraction]\ntitle: Uncertainty in Gradients on the Pressure-Depth Diagram\nanalysis: Analysis of pressure gradients and their uncertainty on a pressure-depth diagram.\nx_axis: Pressure\nx_axis_unit: psi/ft\ny_axis: Vertical Depth\ny_axis_unit: ft\nseries_count: 3\nseries_descriptions: Linear Regression Gradient, Extreme Limits of Error in Computed Gradient\nlegend: Not applicable\nreference_lines: Not applicable\nfigure_label: Fig 4.3.3"
+    }
+  ],
+  "answer": "주어진 두 점(7,000 ft에서 3,150 psi, 9,000 ft에서 4,050 psi)을 사용하여 평균 pressure gradient를 계산하면 다음과 같습니다:\n\n$$\n\\text{Pressure gradient} = \\frac{\\Delta P}{\\Delta h} = \\frac{4,050 - 3,150}{9,000 - 7,000} = \\frac{900}{2,000} = 0.45 \\, \\text{psi/ft}\n$$\n\n따라서, 이 구간의 평균 pressure gradient는 **0.45 psi/ft**입니다.",
+  "model_id": "qwen3:8b",
+  "input_tokens": 1842,
+  "output_tokens": 159,
+  "provider_payload": {
+    "model": "qwen3:8b",
+    "created_at": "2026-10-10T08:29:14.768259Z",
+    "message": {
+      "role": "assistant",
+      "content": "주어진 두 점(7,000 ft에서 3,150 psi, 9,000 ft에서 4,050 psi)을 사용하여 평균 pressure gradient를 계산하면 다음과 같습니다:\n\n$$\n\\text{Pressure gradient} = \\frac{\\Delta P}{\\Delta h} = \\frac{4,050 - 3,150}{9,000 - 7,000} = \\frac{900}{2,000} = 0.45 \\, \\text{psi/ft}\n$$\n\n따라서, 이 구간의 평균 pressure gradient는 **0.45 psi/ft**입니다."
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 1765061400,
+    "load_duration": 4511500,
+    "prompt_eval_count": 1842,
+    "prompt_eval_cached_count": 126,
+    "prompt_eval_duration": 363060000,
+    "eval_count": 159,
+    "eval_duration": 1340665000
+  },
+  "wall_seconds": 1.767
+}

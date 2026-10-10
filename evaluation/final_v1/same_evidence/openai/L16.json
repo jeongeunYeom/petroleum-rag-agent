@@ -1,0 +1,158 @@
+{
+  "task_id": "L16",
+  "track": "same_evidence",
+  "provider": "openai",
+  "question": "Reservoir Simulation 교재가 예시로 드는 격자 geometry 중 1D, 2D, 3D 형태를 각각 하나씩 알려줘.",
+  "system_prompt": "You are answering a petroleum-engineering question in Korean. Give a concise, directly responsive answer. Do not use tools, Python, browsing, or hidden retrieval. If the question lacks essential values or a verifiable model, ask for the missing information or state that a numeric result cannot be established. Do not invent facts, equations, numbers, or citations. Correct a false premise explicitly. Use only the supplied evidence and values in the question for sourced engineering claims. Cite supporting evidence IDs in square brackets. Do not add other sources. An empty evidence list means no KB support was supplied.",
+  "user_prompt": "Reservoir Simulation 교재가 예시로 드는 격자 geometry 중 1D, 2D, 3D 형태를 각각 하나씩 알려줘.\n\n=== Identical Agent-retrieved KB/FIG evidence ===\n[{\"evidence_id\": \"KB1\", \"document\": \"Heriot-Watt_University_-_Reservoir_Simulation.pdf\", \"page\": 115, \"chunk_id\": \"3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p115:c0\", \"kind\": \"KB\", \"excerpt\": \"2\\nLEARNING OBJECTIVES:\\nHaving worked through this chapter the student should: \\n•  understand and be able to describe the basic idea of gridding and of spatial and \\ntemporal discretisation.\\n•  be aware of all the main types of grid in 1D, 2D and 3D used in reservoir simulation \\nand be able to describe examples of where it is most appropriate to use the different \\ngrid types.\\n•  be able to give a short description with simple diagrams of the phenomena of \\nnumerical dispersion and grid orientation and to explain how these numerical problems \\ncan be overcome.\\n•  be familiar with more sophisticated issues in gridding such as the use of local grid \\nrefinement (LGR), distorted, PEBI and corner point grids\\n•  given a specific task for reservoir simulation, the student should be able to select \\nthe most appropriate grid dimension (1D, 2D, 3D) and geometry/structure (Cartesian, \\nr/z, corner point etc.).  \\n•  be able to discuss the issues of grid fineness/coarseness (i.e. how many grid blocks \\ndo we need to use) in terms of some examples of what can happen if an inappropriate \\nnumber of grid blocks are used in a reservoir simulation calculation. \\n•  be able to describe the basic ideas behind\"}, {\"evidence_id\": \"KB2\", \"document\": \"Heriot-Watt_University_-_Reservoir_Simulation.pdf\", \"page\": 116, \"chunk_id\": \"3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p116:c0\", \"kind\": \"KB\", \"excerpt\": \"Institute of Petroleum Engineering,  Heriot-Watt University  \\n3\\n44\\nGridding And Well Modelling\\n•  describe a well model for a multi layer system where there is two phase flow into \\nthe wellbore.  \\n•  understand and be able to describe the various types of well constraint that can be \\napplied e.g. injection volume constrained wells, well flowing pressure constraints \\nand voidage replacement constraints. \\nGRIDDING AND WELL MODELLING IN RESERVOIR \\nSIMULATION   \\nThis chapter deals with the related issues of grid selection and well modelling in \\nreservoir simulation.  \\nGridding: Examples of various grid geometries are presented including 1D linear, \\n2D areal,  2D cross-sectional , 2D radial (r/z) and 3D Cartesian cases. Selection \\nof grid geometry, how fine a grid to take and potential problems are discussed. \\nNon-mathematical introductions to the concepts of numerical dispersion and grid \\norientation are given along with some examples of the consequences of these \\neffects.  More sophisticated gridding such as PEBI grids, distorted grids and local \\ngrid refinement (LGR) are illustrated with examples. A brief discussion of streamline \\nsimulation is also presented.   Treatment of the bloc\"}, {\"evidence_id\": \"KB3\", \"document\": \"Heriot-Watt_University_-_Reservoir_Simulation.pdf\", \"page\": 12, \"chunk_id\": \"3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p12:c0\", \"kind\": \"KB\", \"excerpt\": \"12\\nreservoir.  Within a grid block the properties are uniform (porosity, permeability, \\nrelative permeability etc.) although they may change with time as the reservoir \\nprocess progresses.  Blocks are generally connected to neighbouring blocks are fluid \\nmay flow in a block-to-block manner.  The model incorporates data on the reservoir \\nfluids (PVT) and the reservoir description (porosities , permeabilities etc.) and their \\ndistribution in space.  Sub-models within the simulator represent and model the \\ninjection/producer wells.  \\nAn example of numerical reservoir simulation gridded model is shown in Figure 6, \\nwhere some of the features in the above definition are evident.  We now list what \\nneeds to be done in principle to run the model and then the things which a simulator \\ncalculate, if it has the “correct” data. \\n \\nTo run a reservoir simulation model, you must:\\n(a)  Gather and input the fluid and rock (reservoir description) data as outlined above;\\n(b)  Choose certain numerical features of the grid (number of grid blocks, time\\nstep sizes etc);\\n(c)  Set up the correct field well controls (injection rates, bottom hole pressure\\nconstraints etc.); it is these which drive the model\"}, {\"evidence_id\": \"KB4\", \"document\": \"Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf\", \"page\": 1407, \"chunk_id\": \"779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1407:c2\", \"kind\": \"KB\", \"excerpt\": \"g  Handbook1  included  a  general  description  of  reservoir\\nsimulation  models,  a  discussion  related  to  how  and  why  they  are  used,  choice  of  different\\ntypes of models for different-reservoir problems, and reliability of simulation results in the face\\nof model assumptions and uncertainty in reservoir-fluid and rock-description parameters. That\\nmaterial is largely omitted here. Instead, this chapter attempts to summarize current practices\\nand trends related to development and application of reservoir simulation models.\\nPrint\\nSearch\\nHome\\nBookmarks\\nHelp\\nChapter 18\\nChapter 16\"}, {\"evidence_id\": \"KB5\", \"document\": \"Heriot-Watt_University_-_Reservoir_Simulation.pdf\", \"page\": 390, \"chunk_id\": \"3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p390:c1\", \"kind\": \"KB\", \"excerpt\": \"ocesses in porous media; it treats the phases rather like components; \\nit does not model full compositional effects; instead, it allows the gas to dissolve\\nin the other two phases (described by Rso and Rsw); however, no “oil” is allowed to\\nenter the gas phase.\\nGrid Structure:  This refers to the geometry of the grid being used in the numerical \\nsimulation of the system. This grid may be Cartesian, radial or distorted and may be \\n1D, 2D or 3D (see notes).\\nSpatial Discretisation: This is the process of dividing the grid in space into divisions \\nof Δx, Δy and Δz. In reservoir simulation, we always “chop up” the reservoir into \\nblocks as shown in the gridded examples below and then we model the block →\\nblock fl ows.  \\nFigure 27\\nSchematic showing vertical \\nsweep effi ciency\"}]",
+  "evidence": [
+    {
+      "evidence_id": "KB1",
+      "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+      "page": 115,
+      "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p115:c0",
+      "kind": "KB",
+      "excerpt": "2\nLEARNING OBJECTIVES:\nHaving worked through this chapter the student should: \n•  understand and be able to describe the basic idea of gridding and of spatial and \ntemporal discretisation.\n•  be aware of all the main types of grid in 1D, 2D and 3D used in reservoir simulation \nand be able to describe examples of where it is most appropriate to use the different \ngrid types.\n•  be able to give a short description with simple diagrams of the phenomena of \nnumerical dispersion and grid orientation and to explain how these numerical problems \ncan be overcome.\n•  be familiar with more sophisticated issues in gridding such as the use of local grid \nrefinement (LGR), distorted, PEBI and corner point grids\n•  given a specific task for reservoir simulation, the student should be able to select \nthe most appropriate grid dimension (1D, 2D, 3D) and geometry/structure (Cartesian, \nr/z, corner point etc.).  \n•  be able to discuss the issues of grid fineness/coarseness (i.e. how many grid blocks \ndo we need to use) in terms of some examples of what can happen if an inappropriate \nnumber of grid blocks are used in a reservoir simulation calculation. \n•  be able to describe the basic ideas behind"
+    },
+    {
+      "evidence_id": "KB2",
+      "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+      "page": 116,
+      "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p116:c0",
+      "kind": "KB",
+      "excerpt": "Institute of Petroleum Engineering,  Heriot-Watt University  \n3\n44\nGridding And Well Modelling\n•  describe a well model for a multi layer system where there is two phase flow into \nthe wellbore.  \n•  understand and be able to describe the various types of well constraint that can be \napplied e.g. injection volume constrained wells, well flowing pressure constraints \nand voidage replacement constraints. \nGRIDDING AND WELL MODELLING IN RESERVOIR \nSIMULATION   \nThis chapter deals with the related issues of grid selection and well modelling in \nreservoir simulation.  \nGridding: Examples of various grid geometries are presented including 1D linear, \n2D areal,  2D cross-sectional , 2D radial (r/z) and 3D Cartesian cases. Selection \nof grid geometry, how fine a grid to take and potential problems are discussed. \nNon-mathematical introductions to the concepts of numerical dispersion and grid \norientation are given along with some examples of the consequences of these \neffects.  More sophisticated gridding such as PEBI grids, distorted grids and local \ngrid refinement (LGR) are illustrated with examples. A brief discussion of streamline \nsimulation is also presented.   Treatment of the bloc"
+    },
+    {
+      "evidence_id": "KB3",
+      "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+      "page": 12,
+      "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p12:c0",
+      "kind": "KB",
+      "excerpt": "12\nreservoir.  Within a grid block the properties are uniform (porosity, permeability, \nrelative permeability etc.) although they may change with time as the reservoir \nprocess progresses.  Blocks are generally connected to neighbouring blocks are fluid \nmay flow in a block-to-block manner.  The model incorporates data on the reservoir \nfluids (PVT) and the reservoir description (porosities , permeabilities etc.) and their \ndistribution in space.  Sub-models within the simulator represent and model the \ninjection/producer wells.  \nAn example of numerical reservoir simulation gridded model is shown in Figure 6, \nwhere some of the features in the above definition are evident.  We now list what \nneeds to be done in principle to run the model and then the things which a simulator \ncalculate, if it has the “correct” data. \n \nTo run a reservoir simulation model, you must:\n(a)  Gather and input the fluid and rock (reservoir description) data as outlined above;\n(b)  Choose certain numerical features of the grid (number of grid blocks, time\nstep sizes etc);\n(c)  Set up the correct field well controls (injection rates, bottom hole pressure\nconstraints etc.); it is these which drive the model"
+    },
+    {
+      "evidence_id": "KB4",
+      "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+      "page": 1407,
+      "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1407:c2",
+      "kind": "KB",
+      "excerpt": "g  Handbook1  included  a  general  description  of  reservoir\nsimulation  models,  a  discussion  related  to  how  and  why  they  are  used,  choice  of  different\ntypes of models for different-reservoir problems, and reliability of simulation results in the face\nof model assumptions and uncertainty in reservoir-fluid and rock-description parameters. That\nmaterial is largely omitted here. Instead, this chapter attempts to summarize current practices\nand trends related to development and application of reservoir simulation models.\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 18\nChapter 16"
+    },
+    {
+      "evidence_id": "KB5",
+      "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+      "page": 390,
+      "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p390:c1",
+      "kind": "KB",
+      "excerpt": "ocesses in porous media; it treats the phases rather like components; \nit does not model full compositional effects; instead, it allows the gas to dissolve\nin the other two phases (described by Rso and Rsw); however, no “oil” is allowed to\nenter the gas phase.\nGrid Structure:  This refers to the geometry of the grid being used in the numerical \nsimulation of the system. This grid may be Cartesian, radial or distorted and may be \n1D, 2D or 3D (see notes).\nSpatial Discretisation: This is the process of dividing the grid in space into divisions \nof Δx, Δy and Δz. In reservoir simulation, we always “chop up” the reservoir into \nblocks as shown in the gridded examples below and then we model the block →\nblock fl ows.  \nFigure 27\nSchematic showing vertical \nsweep effi ciency"
+    }
+  ],
+  "answer": "교재 예시로 들는 격자 geometry는 다음처럼 하나씩 들 수 있습니다.\n\n- **1D:** 선형(Linear) 격자 [KB2]  \n- **2D:** areal 격자 또는 cross-sectional 격자 중 하나 [KB2]  \n- **3D:** Cartesian 격자 [KB2]\n\n원하시면 제가 이 3가지를 그림 없이도 바로 구분되게 짧게 설명해드릴게요.",
+  "model_id": "gpt-5.4-mini-2026-03-17",
+  "input_tokens": 1814,
+  "output_tokens": 182,
+  "response_id": "resp_088a522c6663d246016ac9f7ad7d2487d08ef6da76048af7f6",
+  "provider_payload": {
+    "id": "resp_088a522c6663d246016ac9f7ad7d2487d08ef6da76048af7f6",
+    "object": "response",
+    "created_at": 1791621037,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791621038,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are answering a petroleum-engineering question in Korean. Give a concise, directly responsive answer. Do not use tools, Python, browsing, or hidden retrieval. If the question lacks essential values or a verifiable model, ask for the missing information or state that a numeric result cannot be established. Do not invent facts, equations, numbers, or citations. Correct a false premise explicitly. Use only the supplied evidence and values in the question for sourced engineering claims. Cite supporting evidence IDs in square brackets. Do not add other sources. An empty evidence list means no KB support was supplied.",
+    "max_output_tokens": 1800,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-mini-2026-03-17",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_088a522c6663d246016ac9f7add3e087d085da9f50e4830263",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyfeuFpiFIHjjy4hEN7jbg3gRf7p-Iqg1XGb6_kbu--PdpF0t53pBneBqAbihMu3gg5LbAMdPLRFhae2IcwAUVbqBi1JlXHYT6dRi6sGaxu0DR5INha0eNA7g_lE4GPsAkgSuFZ8iz69W7TmzhSiZAnyhgZ_T8NbHr_yKISUFWuS60cBAJ0DlVtDyVX1E51176jNdtPetkPt2FJ9xX0dMuhZ1lZG2zKrWTuxqzWi8OFHhdFqH8fi8UaCiPo0XnqrtteO8jd2tB6iVB_32fkWA4deibjw42BD8yOOgztE9qIvFJAdaiBMid2Wp65QCWJJQouCcwqkskwRpdhV9NTNlw62T8u_5xy-MuTskcqJCc4tP_cpmpxQT1HnqeDI-8hNnzJfrSJcWT8Ee_xElt6lz_CuIzmK-xLed-FQBrEHZHh3jukkGNXDHwPoxLbnnoV31pO6i5kbdysHs7FmSDb7_5ONG1iwhgzaarqm8MbMPBvkLWOyOsvPC8T0pAjv827dbU4_3kjtR9lSd9QVDbyz6JnpzhvW_X_yLbmMEcg3IThYKJp_xPEBrY8lmdNbPV9J_S4ERzRio3VEHkZKWHZt2tccy8lalSLiLOC9654tDJbeyzNMXk06huDXbGDLtyknF-SQJhmDvqJ0ZJF2WGdKUqVUC4P82OIbyyAP8ZcnZN-n2fip34oXjKVT4Mvd2GQhhWgv86JT0Xclsz63AdnxvXbQDFpibLPFEj0Gy_3TqO9r5VJJvHEL7JHcc6KTc-STibSjJoH-e5cQFTGNYds4xv8c2zk9B8_S9kcRvZHY4FsrT5o7EMC7GjpD4BEBx4MAERjKKt9za9Z94zE4BhEnGfazCu9FAUfsJB4gmqYYCDpnyLuCX3bwg_fxzIqyjflfI6qmQtCn6XgJIghcfVO77i7p15-mAESDiam5GybxAQ_qbWnVXzIeS2j8jDdcv1voE5-oEpa_hTDnRibOtkmHlEoARTwYpnw_RoopfhKBZRODE8QEaKF1vmpt-LbbQM2MeM8OYu-yKdw9ExEsFbqGzQN6qVSrmjt8LUZtpLFx-SpI9Gl_JOxrQXCzOMEsyxkL3fzM2QBU6K3e2ZXEQoK_WC7Txjh9MArswoj6zK7KCbHHedZhaNbx3_9LA8ZLXG7exEuGfn8OoLFHDL2Ld4PnbTaXYWKxJvjfRUDAAOhN5777X33kEDdR9YnnkmANanCIL0mZnLAPK4BTFSc04xup8LKI-owhhmUeWcykWHKeJSXYSwIjnfPUqCRGDjQpevE0QmJe0bXK4UnZ3BUVs5prPOwAuysx7CqwFXVx_8Pvrw_4PCwLge-wG500bcouVACNCpm5qy6IknrY6oi2AhJXHoxAdspAvJ7TLF7-1zPhUZLBnIpOWryH-BTKP5m1Ae3uZ0ZAq2rw_oCFl0rl1nnpW4HjTNOY1kjVfia7FVrJGwn1Fccsij29CnuZo067ZYjzRCmGbNL6B_vIzFNTueCKUzUe0xPOucGzX8TsYVs0x0fsEfiVHiTJvIQDu_F3_sJkMJXVQYLE69yjlM8QeCPVOo9MCwWu6LFY1D5aMNa8a1PAtGAqoPZtzYEGAoO2hcWMGrDJ7O76_ITzKW5KgPYFukTH33gMnRladC9klrBJBlaxVTd6OhBH11lppyiRT1Z5UKn_AuL96JLHemf_PQiwk09eZKOJuO2fz3HGcoYqPoU8pN54qBy0gXOEXS6CiIL4vjzIv6DWPyIk30ezDin0qUYd2VFRj7nHTrIr-6TJxidt07mKl2GPKr_Pde36WdRa40Y8nMSCzsmwlBet1CemtHjRflQhPWtVDVTHpGOyGEaOTIPhPu_g6H4t6SdmXX2JegmnygcBYMVseEeO62qDpzZSQ6_c7qZ4e40QMANF-p4b4TNPoJPajs-WLfpSpphJ67fhEL4G2mHNfl6CqlcLWSD5QqQACtkVVY7w5Gv2TL47OsCmDMJZ15gMBRFYRgHY9f3ImBVQAT7xQ6l1qAC1AL5haEJA202JRx5L49vdgAmDTK835A86cCc_Gqhv0SYjtLkbHwdwD9hH4aRtQ5c9TiK0XsqRmSCtk6PR4Ewm6YO_aA_7iEVNlXf1PsBC2OK_5FSZ-z-05VouGB3-cMUi3aqhfs1yuWuC_AK2K7bIPKOlT7qUNICxIp4A7o9eDe8DPF-AK_ngEhPAth2x1Om9KDok9y1xGu7fQ6PhOwqbBw-O4anbNGTyuYwkwNWwq5QQis0Oxm8QRK5JtCKYsFehDq3Gk9Q==",
+        "summary": []
+      },
+      {
+        "id": "msg_088a522c6663d246016ac9f7ae17d887d0b7963bd0b68a5abc",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "교재 예시로 들는 격자 geometry는 다음처럼 하나씩 들 수 있습니다.\n\n- **1D:** 선형(Linear) 격자 [KB2]  \n- **2D:** areal 격자 또는 cross-sectional 격자 중 하나 [KB2]  \n- **3D:** Cartesian 격자 [KB2]\n\n원하시면 제가 이 3가지를 그림 없이도 바로 구분되게 짧게 설명해드릴게요."
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 1814,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 182,
+      "output_tokens_details": {
+        "reasoning_tokens": 75
+      },
+      "total_tokens": 1996
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "wall_seconds": 1.781
+}

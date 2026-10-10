@@ -1,0 +1,201 @@
+{
+  "task_id": "L10",
+  "prompt_version": "final-v1-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_0f49d4a9cb97542c016ac9f8af2bd087d0af87fa900c662579",
+  "wall_seconds": 20.401,
+  "mapping": {
+    "A": "qwen_closed_book",
+    "B": "qwen_same_evidence",
+    "C": "openai_same_evidence",
+    "D": "agent",
+    "E": "openai_closed_book"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"핵심 상변화 설명은 맞지만, 교재적 표현으로 'bubble point depression'이라고 한 부분은 근거 없고 부정확합니다.\"},\"B\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"압력 저하 시 용해가스가 분리되어 기상이 생긴다는 핵심은 맞습니다. 다만 bubble point에서 포화 상태라는 교재 요지를 충분히 설명하지 않았습니다.\"},\"C\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"포화 원유에서 bubble point 이하 감압 시 용해가스가 빠져나와 기상이 나타나고 2상이 시작된다고 정확히 설명했습니다.\"},\"D\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":4,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":0.2,\"note\":\"기상 생성 시작은 맞지만, KB2는 단상 액체 구간에서 압력이 더 빨리 감소한다고 말합니다. 답변은 기상 생성 후 더 빨라진다고 반복해 핵심 공학 관계를 여러 번 반대로 진술했습니다.\"},\"E\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"포화 원유가 bubble point 이하에서 자유가스를 형성하며 단일 액상에서 액상+기상 2상으로 전이된다고 정확히 설명했습니다.\"}}}",
+  "usage": {
+    "input_tokens": 5874,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 1235,
+    "output_tokens_details": {
+      "reasoning_tokens": 621
+    },
+    "total_tokens": 7109
+  },
+  "provider_payload": {
+    "id": "resp_0f49d4a9cb97542c016ac9f8af2bd087d0af87fa900c662579",
+    "object": "response",
+    "created_at": 1791621295,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791621314,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are the single independent AI-assisted semantic reviewer for a fixed\npetroleum-engineering benchmark. This is not human review. Judge ONLY the five\nanonymized answers against the supplied expected claims, numeric gold, source spans,\nquestion, and evidence. Do not infer system identity. Do not repair answers.\n\nFor every answer return:\n- exact_correct (boolean): all material requested parts correct; no critical omission.\n- partial_or_better (boolean): at least one substantive correct requested part.\n- claim_coverage (0..1): fraction of expected claims accurately conveyed.\n- unsupported_claim_count (integer): unsupported *specific* engineering assertions.\n  A closed-book answer is NOT automatically unsupported solely because no source\n  was provided; only count a clearly invented, source-incompatible, or unjustified\n  specific assertion. Do not penalize uncertainty or a cautious statement.\n- hallucination (boolean): at least one fabricated factual, numerical, formula,\n  source, or engineering assertion; missing citations alone do not qualify.\n- engineering_contradiction_count (integer): explicit engineering relations contrary\n  to expected claims or cited evidence.\n- safe_refusal_correct (boolean or null): applicable only to unsupported_formula.\n- false_premise_handled (boolean or null): applicable only to false_premise;\n  requires explicit rejection and corrected relation, not vague hedging.\n- formula_accuracy (boolean or null): applicable to calculations or explicit models.\n- numeric_accuracy (boolean or null): applicable when numeric gold is supplied;\n  check the correct output-to-value association, not mere presence of an input number.\n- citation_semantic_support (number 0..1 or null): among actual citations in the\n  answer, fraction whose *specific cited evidence excerpt* supports the adjacent\n  engineering claim. Null if no citations or no evidence supplied. Citation ID\n  existence is independently checked, so here evaluate meaning, not formatting.\n- note: brief reason, no chain-of-thought.\n\nKeep all named keys in every score object, using JSON null for non-applicable\nfields. Be conservative about unsupported or contradictory statements. For missing answers,\nscore exact_correct=false, partial_or_better=false, claim_coverage=0, and leave\nnon-applicable fields null. Return only a JSON object with key 'scores' containing\none object per anonymous answer label. No Markdown or extra text.",
+    "max_output_tokens": 5000,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_0f49d4a9cb97542c016ac9f8aff7a887d0a503a13e7f34ce3c",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyfjDumUs9_QQg67qxRhAmjATpg2yAXRp-_fhF_VrOGpK7Bgu-6QBZOhlELVnW63Y3AFwxKe4aKWZOa3gWIPh_y0aAe0PRgki9aiO229Juu4IS-tEVL8aXJYvdZUuFXVhuhku003ZDMm_jhrC0FpvDyERwUxkKQxAu-baDbnxAMzq7wq80gnP8I_El-ZAcExtmAivGv7ju3coj3HqiOMoG9n36OfiXUon-rHUskIaBTzIEiQbTpcADoPxHzF9RJcizbD2VKLAWETxW1POrCKAf9fn_Vh-gesUfd7oS9gxTsXKzXcAW0DGoi_7UyxKHfT-5qiFqXoJFPs1bvi0plCxrALbZZkDnN5m3Bdb8I5vCOGT8l8GVHlwxmNRloTEz0gf8LpoaDwUtHTXJ2vJj6pngt3vHyUbBkvTQ3gI5oMN9C3abw9mM-IYevAHRLidMIxENyt_SsORLNBteVcP-p9xmOAnpallQmRiSuOQBY6gwmAl_wUd05XbxotmqGjv1_sPQLUUV91PXmmyTDZpNx2WlCSHh_69TLjxhsJTld-vgPOeDCl9m1t06edfy2WLUnYfpqNcd5qOMbXkgnR_qVqqHXndqezNTKTUzc0MFRn7bd2SqEhEXgfPrpacXSlKugzfqD2ykX1AkQNePYV75g1D_NfSHvFNTXQfbGW66GpL7J12BzLFS9Lky7kdLbuPcbEKEZ4qUEvkgTb7kYaGpzeOzB5bCglHrKq-KyYG4h9Run5aXQkd3mnS7Dz6SjMcPgmp0iiRbTop-GK0rZOR9gRhTFM0-5Vb4Z8_0oQcMGjjdq4nMibJ976M6krO_hXGGZUQ-J1-dI6_xgqlBfyb6oY3QBYDRO5anPTgA0GDWuqFFa2U7qEsJQU8TNm9aEspi9CNNFPRFEVS_houqA_kiovDz0hAOgvrA9IHitCV6ah9nC5IOPRv2AcOVJfUsNR-HCXVyjLSNEDzfdvr33U0j1Yib-fR2wF8_fGPleBFGqhn9VY0fkQbVbTnCafbQBgNoOLnI9oRZzgdHMmL0RAb_R7ieP7K8WzGB6IzYKx8Tv00ohWYc-nfyWYwmOIg-JPcgMkH36XikL9_YODB99klZTJzW0pHEpyPCiajXAxlIwvHVeTohnHWkOoZmMLIjZvz7OuMl53B-zp7lrEvWCMAunfKmX9f7KOGo8WUERJPXQiRzc-d5H0uz7INd7zko9h-5_n5W9Ad6XxVI7gVPrrm9clNHtZtuUrEzGOY2X2pMx0aej2ZfoKn3lbkNt-nwA2zULiaKr1LtAlCT3374GzRPXYBmHQAcEFmRZB3BawY3nXN01XSaxkIm6bEc3ZNjp-scf4ZaEedKg4ERdW7gVFaPrWxRsN4hLPLKTIC_MlHABdpfDZyglv-oX6PZOLWnakH4va2bjzi0ohYIUrfDWmbZ8Sc0X33iAsDFn7QNKc32IJsKNG21GdViu3B3sKztDp_USk1KEK1Wv7z4j0qIpj8bwTy6WM7jtJPXVAA6QAlnpjimUPgrrcl7ERnlOmev7vP_OvAS4b1vwdfhiliLUflRJ33QJJiL9n7FDHZYqu7gHDwQmRAktWgu5a2K5VSiv070ERhJTRd2XCdoh9v6BzXRyalCHcxkiPRbZ2lVUFkoeBECLB2QumB_LyopUUBwIWJAdOvar8z6BjKqjLsQ4mB0IJCFFFZdJ9gYrsxJtcs4iL3Rete4RTzSZfbAT-_S9v0XZptXO_fq9DwyQ6Ijzb_Xrc3PhzSZ3q4ga-fF05zAlVY1-QGNvRyNHDG8QXa9WnI8xiTZIcxHh5kXujgKeWXSeuDvzQQ-9Z93HPp091MsYr82woWT7I_0uaWVcsQ_RyJfrkqoaMgCtDLyRtpX8vSQsdHB92UL6G8UW03ElM8eIS5h3r4dgYJUVguwj_hRwiO0MKyVhe8dtbZgIIr-Ilgb_bTtxdJE6plxisjfn0N4tc7cbd2q7-XDrpWJMOM0JNtrtc4khesZ1Ltjpvy65kivIVw2TJn9vRMNulRxqNccOSz2t48MAkpzdSjuw5dfKriQWjcKVKGeC-gfZ87BBwG8BzY7K_O66uVmjtt9B6J5UEhv67w2kNtTnvm0ZLyH3MV-qj0r9nKtzHRr4rdJyVYv1IKiuIxpGx5Y3q48Mth-tcrq7ILmOhc7EjzTTC9_57zI68JHlVPsWekHWMcFT0_3hYWAa3PdyIDNZRH0Z6Xd8jw_hZ-G0bYj08gLsBBH7lty1pO0rNd6mUfA7ILi0SzH52ocMQwGsfd2wgQsqQV_dIj9iMMpAo7logCUzAimsE8e0xrzEE4I36sKJ4980bRHv9Bpthp2lf_C_FOqanFgXtuVGu3y4tp1xT-DGfWQqXdG7NBZ__ux9Ol-rN1Y3MfKGKO0GGxI_uowwTr46HTA6tSn21LbbPXJ25r5afZeXb_LvorPtmplI8hdFN0yQfz-U5frDAOY2Aexb0fgBxFdbF6ZKRPQRxH-wQOlXZhqj-6tQyEImA1D-iSLLwE22zl08aMjJBiz4TVgkvKFtxWUNv7nTakf3RgkPrgO4Pk0oczUCmBclOyIt7TwWtNqkwU0p1IuG8dv_sxKN9MWaWGh3S_aKWqZHywi1xuFqKM6ihX6cMBnivD1OIzsJ36hKw6QH69qTKfaJg1QB9T6OrQAofz6wG-di-h-beoTQLqmLx4tK6zmBdbJmAbYgPNKizSE7x5q6iOPP57W1N9o1kkW662NHy6JCfpASSkUriS-WopsxIfosLc36RdTy0aH6Kh5xIFk_Z8Ftgag5Dg4_ISsgMoLGoVVE5xB_y75mkdyPvxLd3JBdDQemOGzIsg3iNf-no67DWko_MOFIE6JHplaeA7ZjNDKz16EGMevUO70Kn0cZqYR3O0-FuD-R1GJC5yX9kP6tqqhT57akcKqIIWiIizwqsfV62Vy-k7Hgkp7aWBpxtvxDpVwc3lSZkiB1CIsSE9hEn2hafdNuGqv6B_hWVNM_BdCOkZKnZWKc5Xd-fiBSmRIcji1n8_dXCED8PIcUp5gOajNEt2RfoEbOriuxNn_ABAtrMzYUnJibT3HpF4O3Wftcup2NdH4GXmgdJkMwZwrXVnthMXit3FXfaDGmEmYp80MqG9yR_i4cmFBtmVxmgpoGvADgRP2phtMlAM6ozenD23YfuB_Xu2d7yBxp2b-eXm0TGyC8Xv70u4K377K2_r9uONYdTL9wbJhXylcyljE0BVWnpRYrZe0bDZW11Dqasn_g78-1H6yDx1z_fLg9DDIt8yuHM5nbtv3v01tc-U1P24AD68ZfHFwqV-Dg_6hsYRTcXCo2Pi8978DWEqk-mOOX9O5B1FV0fVid0x4dqOwFkIqgNWEQRf77Yo3k6ZFJLPgi6nH_B1jKIXD4UmhbKanGn3LlwyilN9ACHBjBw-yXERCkys9-HaGgMrxjZPpfoffnCFSoZzH1g2d7qJX2plOV_kpOaa7xsmmTFI085vdFbXJy6kaoq-ELovDT-P7ClqOkwZ3k9NRdDp2hLqQ-xbAobN977LiNZyNq5kyqDRJK6kWDPfJUcFoe0AvX9CpBhMnPPg4H_sA62qb3kguoyvgqSfTsDHTwRJVDI1HQSmQIWXUPdPz6EcO3ceAbc1W5R69Osjf8qoH4OWWRwwEoyKlu2P2sColatGUEkoI8t7Z6Njsyq4PWGRkgB9G-Zk8EdrRzyblH2ccRbbamF6fNQV86WjMnSLiOOcSogoUUaQTafet_MpyEU_6A07cFK0kjpeBT6l01rRRpUN0iAS-YDqf0ec-TrVWpIXnSqp46-zg_Kz1M35vZf9-RSl6f5AaInONSQQ9evObfgsD9molz-P2im_v0Ta-EApPhga5J_23gwKuCTf7zMhd2btA2z9vRlCw2yNhMmCvQAx0ysAn69R4UvXjPyYhBkw_tLIED2fyEUkRsj5WDwDQqNmrLNKXuXPVn6IX2HKuUCVRYN_ZEphU0nXZeJIdCD0GdomBG739xZDKSWSp9rZtspal-e1Fg2TfJNEp18tqZw1ycXPbutcXBWLt8HLo-5rn807JIiyw2FrEY8rcoacdUyhBJiYwosAJbs56SwULQfqf_swB7Ot_Fso5gWmf9NrsjwQ1YTtkVC7oSG0wy4pXPb-Qy3gFhpg4d_VTdTDtlF0wj0S1TlxqoM61dzIrN6aW9M_vudxLPZMnqjmjlYzom4WhzwbtQsFjGABzvRjuTvK0Qu2PmFqvdiY31tj8Sn-FE5OPl-9AViUhnV1ieLwbr51_D55e7b5z07L_OJ2BKHxBrXEjCsy6L7mHx2o8ytuNi_KyU6cgbLrwUmyQOl7WGae7adYz-Jxtz3qZSVTrQkaO7p8zhA69uWXYeqClrjlXt816TBlmFeyNe0ygpQz7p4sBRDmpm5aN7soxPjEknQB6JPzpw9QrkW6h4H5Kva-k8upOuB8d_p5sEnktnBeUIxcxRdNFUL0F1oVH0F00dwrLkszMC1aZq_dkpDFygpavKAtYaAdfEHDNzvEla_6ESOQCRXY0Sp3GGLn7esUGeuT2hVW_-9d6Y3l0oI-Qjnc0fl8I-e-ZAEcweL4IXl__j-bTh1NTUQVBf7TeaA936NkEABaVcbiG4PYlEnzoWPAtysLYE32Cw16OiU-nuvb6WzZ4b7_ientBTJCpOWlph57nKeWFoKIuXzHv91AsrNnY6kU4eIrlh2SeqFpqs3no-i0XmexA0wA1tt4UHKhQ2Gppz2SZCMZ4QKMmVvJaBo0P34AuWWxq2QuM9UWbsQcfKH4uMzzobyMXpOlKVt-UwOy3swegfRGEwGBsf80HT7PkxoIvbUU0GK0N2n5iR3DagRxSS8Azv1uwF_wo0lV3u2FUJQeDR8P9H6uts6gwMstx4pGviAx_dOkmxKHticS8ZeRKvv3Hh_t_OMIw6PYsJlfqXp04Oj4Ved8L1jv1lOj-XNl6Eue-Q6edyWLCF0E3ZbDL9-8bja0kDZdDsHXIA6yTumPp0gEZyv8tLwJ0aptMr17K-LMGdjIDkELsDtlAJqv2bfvuXY2eR4IfQX6v3S4eZ4aBLJKNdZh1vve_IE7G6dJaESWD0DQR6LJdw9Oss0wdEWIGRBkFxAK5LzLikA8_a-8rWiXjeo8bn3TGcdkSjtIOUFJOzDKuuFiuz2pBBpQSlnhzyF5Z7wY34Bnz5lipKvSbowq3uP3CZuR28YtNLR3eOnVH9Ty0W5-uyrkcd8abj_V4w6je-I2owKaQBUZMhQT_JYUECCXFuUVIa1HCqDIECk1cSCwYGJlCYp_jXSBhMQwB-J4TomT_VMh8wjHcCwR2Yyumm9Q0DeUL7xMvp7NvOXzjCYuDpEXGEXmYnT2Zk2WEw-rUibJS0Yke-r3YEuYpriEFfG71Jm0-80mwBR0m2wRVeX2LJuT-_5YoM-SkaI8Ldyq72QGjTyKz9ISk7T-8hVV6Y_aERjjvaive9z27KO0mllRF7G7MTAaqrHVip2anfXxEK1JCDG-ZnylNLIRp4RDsyOwioy0zoiK9ruZAZwsbOcFeVYeKY9UdyhO2JiJWTIH8pS_7azWr_Df8-MhbJBbNm9Ky_-n1O1TcAn1kXAmf8bh7fJQyg__AJTZpCeOm2ICEge6kQIucNHxbdzLsP9OfdC42_xkK-wqJ4S5F6UNCgO37TQrZxC7lHjFanIEHN5eESZjT6KF4EYrJIBBmtKu1WVQoq6QOubg225hqBrpaSENZpxhtHeeXIVhFEELJiy9uFqqeHU2iy5wOY4mTfKKpzVvzhFh1Z3q6R0bhnU82Fgmpo6F007O6fXNuEMYIUVnSzYueR3V_ZFaigX7b8qdgnlK3rDmnuMgM5szcwZuRwnjYh9UBZAouGoZF_OElNL1B5Y7ZKx4mT8DpATKbz3w1P52DFshWrbNWzwKjd-Il9Yl19CjQGOiJT_xqMSImX4zluAhzNvuhKj1gtiPJY8bPwDkhSemoJsMbnOgKpKf-gjLunwcx0PNbN3j2nX6jjA0O5gUK4ftVwPWMazoq_BcVF3zNJhnlbHINK6gri679xZQjt-7eseS5RsQdXbdxGcaz1JKwFk9l0rLS5qF7adnNT4GjfTajIKLG5a77GzNtQ7eRIOLKCJu5xsNHw1CKDvuxVysYXWSbQd2V7dh3m2XA2_B8bjHGn9W1oO5unIJg-RqvFn-_XXTA9uFgWK0AJu3_NFP1PALOGsPD9YkKOE2Mxl82Z-UeWp3sggrtbQvB3saSC1r1xZ2xXoHL4opH3a2QalhQFWwLJyqyr3r0Rz6JYBsuJ4_BXu2T8D94XNRNSgFuskQ9RyIUh8oxl__x0mMzjHKcU1PniD8YBgPcC3Dyjp9OYkLImOZbpIA_yQBNvceE6dxvWXaH2NJPcv_Ur7zuO55eu6X8jmAtlMZZNoGVogSLrh7EJPOw3RanATVIdXIFCrc5Z96WOEUFkHK2mBFms_hRWpDYFLBRTHf7gw8oPf5oC_l_oTqUWHppcX6MH65CqnGhq6UmAAT1K60FRqX21JbEMN70xXnewO7mOCAxOfhaW6_3kfbusX9yjad-V8evvwGHU0teUIJEj2nvvNWhlTaYM2axDw5Q-0GiZ704bfVgm1dduQ9y93NG60BuOjOthTfyTzWCnieJYdBiviNQvKehECM7scLIf7eMM-UenJT05XGPWQxqs7YMDrkuXxT-ePuUMLYSLAtlBsqmJUHniegUippeX81uCwHxQp0a7AvYjdMt5EmaGueHykPN99DXLC1LJgZW3cPktsSSKUkrMxl8aep5OAxV7ibV8K_Bi91nAXuCcTUe1waHm90SP9fJnzzX0ZgTczEraInWFcka2MJafCbQPfZ8a9YeJrU-ZKB1_fhgiKArYsaqx17P2wl8JTuIzqNlcmMSrN9-CuQp_k-LvP09nH2LaULZrUNYTZZ7zePBfBe6HOpF37LhwiyP_qlFUDL07ryvpyTpW81Z-irAo81NvIA03V7NUnUew_hp_13Yct0VQOsMtDl_jl4t2JMLZDFd11vJHEXvXTGGlLpgnJSKTkA1bvCKH83W4dRy4pbGss579PSHT8atsQs0KHxWwUF82R1HdvsSvvlNYtFXkZn2SBsSb2qwcX5g1j_E86rfCu9udKLMoQvjeouhFvrzA5zwpWZfG-P9JmHZjbqZ2U0M0Y6NnDdG06tpTuC3r0k2H2sNOyfM4uZ7i2gKmv9e20ixbcT8Tg24iLjFUu1RThQ8O80pWjSgTHqDWjpsH3HB-oiKRwKM6FaTn8KyzhSbGwa4oM-1uwBCx1ukqbxhuegxoGDDJyUtGRHuw0xFGi8tBdmqT5Miwz9LHyzPVDNtHwwaZK8PA3yKB-zO4lwwmTELlPatR-sPKU-eMXzMOtzjab9V_fQWsvCTur_QZ3ClnQg_2xFCHeVcJR-trq4x-bW3LAjH5c1e2Bip0NhmpPD1stnH9P_ej0Dg8rBalfgqN-Am9eLD-QJJKdY-fApVil546kXe_byvoHGlE8nzLYUNvr1TuTn7ltj3MbLKw1oDCRm-5URb6IfKeFQuJv3oaskkUukMHb0C2ThQZ2WYXqtos6iwPeH7GV_UOnDFYYibCgzPd4GxR-ymHeoZgqZ_87qwezZ1ufT_8uQVYXkZcX9_GCG2WcgM_9jTZJ6OTplQCTFse70Sw2AjQioYJU1XG5wXeK2M8h5esLlp7gKEWoj2-Tqz__YBCU_g9QYvAnmONK8UggDc7bllcI8EG7MvgNCJyNn3lbtmDd7qOMEkVMijlxzqzYPp8zhIfvc-rDDH9RYGv_fzJEDXExhH-leVVt4m8HY2hKSOF_GCJCcELKaVXEA5suQdE5oExV_MNjwHI8PzTt4yPicWEVqZTlyIWEVqDS9GP9cc34VZAIVGx1cl7WTCJxeFXDo-9TzHVF-dxdr7p-eNTL84zwqn6KW6aeeOhkjk7JEeYf2sMC5RM-xrqCZH9V6vOu432yl51IoCc-b5v33NAnKVhWkzl0k1eZlH9_LEuWDieCft9WPsHwGyPQIDmKkBadbVDYGI4NcUU_OxIYiFV1Imr8i7XM6kbnfpKfKt49vylJ_-P4aj-f-KumjujtL3TtuZOG9XgLDYpN-FAkJdm941DCRYq03lPeeuqSp8jTvdJCkqcaoeOzxCjB9jjfGdZjNeK7x90KTyoKRCCFmD2MGjfF4re4HdLsaHEr-xExchJrT2bRlAqCVX__TqWypKVW3fAQZeBL1Eoeb-CVjRZOsv0mLESqSTzhegXQYnSNIanNgQG_CavogzWsge7ysgodFO3tLE9dbGdfFGXmJ_6NhL1oAxO6J1u7yQM5seXDdgBfhsmqI6GyL-pT5IVHxZzFfmlkSwUWw5zB6ohHWr_v2UZ5Ks69zhKJqXOUy3aXaYJT3JrbshFDhuMWVvnWsbV_ZYPEUKqqdQKx3k20t5X2IVg132Z2Tbq2cGJaPaUAbWgjvCA1cL0Rr1XyqJnNgA66201wa_4Z6-ozJ5KfzcA3wSbv0OJYjyEooqLWCx_8QyCtumYf2OOBG6ulOXMsYTNiFzQZBv1_uRXS12fgccItLS96VmM6DVVQsb_Gcxh-KIYxPg93VKDfKgT3HlLUfO6c6rDHr-I9VlxwC1evVVetN0AWgYbIhdMn7DoGzy7x-cDOJxMrgJBDX7-8ZSoMm9VxGD1tClJYjixXKuzWc0tYEzXovut4-2IgnoQRQDksUBZ0lnkDuicYfw7c3ddzgJ9mra0BM9N_8PO2lepa3-OGVq-352noQwgwDVxpC6eVNOyVBKfW0aO_Kmi3sP4r_uskNh-2zfjM02Z01JKSmYhlFuNBrzq5uOPNXpWmq1zZ25DzQo1-BP59oQA9dbf083tZGDHwgh5sOgPB_OIYLdzfsWr73VPklcZ0riIMBeuo0ugDkdJDyI8OhkAezkZDGbBGJoSIi_ZpAt2WWlrmb3sTe7Piloz4reZ6blK1HShDo4--6KdUemNWI3puCZcNB6rO9XCP9OAp7icbPHU_uIeD6ueofU6sdFOfRQxQnMBqiGTVCb8tbmpZYNGNL6h2GB5qPv4YCdDmTaoPsUOa8RHkEcfBelT1GW4R8dR6YDjmXIi5LIhpcfZWOt2nNJwaV2wHvEU9mjvL4bwDy-gzbfLG-YYj-6fHjdOJ22cXg7sbZ--1yNoi6eQAE_rnjvuDIoMSWGpMNbZ1ZAeeY4qsNYz5RnlzQ5aqiFHMpg3qiwizZxMkRZUP4RhaX9E6j-62ZPnKWagYAJ1mBLmzJjQAN4d95ec-VXEZTRTYojrtkiZU2j4evMH5BotmoS-rVsAucRLAEPa0_Z-xTRQwtzTzUxNTJTg6zweeb2efPmHBJNHlRHINclox9MqspzsQVaphvjHDTQUvfP6QaXIaKcnqE0R1prJkxpzUfQL5BYEtG_V9jeX2gkm3CT4omMPAeeQXPS7OpgjEwpxTd0NdtWfWbfPZ-1HiKWRzYJbPqBfKMmRIKdoxTKH4e0H022egFcKvb1ANfGeVQj6JkSiQrzTcsVriqVxh7HxgpDi2mxgwiQ1WIuSMLbJxJdYIqtz0w5kZOxeboQNHSPCtaViEndiog5mr2pewcSt-KPlR6Y3rx2FMT3dJ6LM8qi7AXlBJedhnFSthPScvZQbEIv4sdVZccWdZQ-dTf5zjrkgjVGmBI7XL9yPZBE-oLbX-t_fVX9sbEGOGWqkccKPs0y-fUc8a9bnv5Nq8HfeXEiTKYyEIcV8ZUNQTCFAqhSsyotc35AYCbognBEsW8iWXMo5fq-pPVTfOQJiCwsPorKy2vzyAKp6CbVAqzibTyvocoaeTC_lzEufCXy7d65u_tw0KEKhsGlCK1IxMUTmjf3meodPNsQrkFh30FPZ6i_fsXa-oTV_LsIzAuj59qCzaMnG3J4UGJxtcgrv1rlY0G2qnez8I3n9U0Ds35QXsuvL5nFSdweY2KcK1lRhB3j8KwOSoP6DtXAIt0wHkhMCY9RBpcqi6PWWG0yzOSE2uC-2-hqSH5d50_p39PSZx-_CnJrRSchAhRgYhq21m_cJmm-CJ0EqlombXHpKrcqCZyrztNnetTcUrdrJCFKwp50HQJbr3zwT3qp9pOHP0nbOFx2w3q2pASYuEMz4kFnttmwxYZoo_Rxrz-yi8uI5The5b0g4-O78TC-uAGNMQ_JfamI4THurc-37m-tky06RLpnFziCpeEaH3qe2sAmXAwBKSmITQKu6uIg2rLdyeQTAX4pygtWozsxBDJ431S0othUUgIbfbRp1ctMQxBkGkyXJpJirJ9rzTaxcY5XcsGZuPvCdDtHwadkTAhKo2iEQaa",
+        "summary": []
+      },
+      {
+        "id": "msg_0f49d4a9cb97542c016ac9f8bc124887d08f3d101285ca8292",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"핵심 상변화 설명은 맞지만, 교재적 표현으로 'bubble point depression'이라고 한 부분은 근거 없고 부정확합니다.\"},\"B\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"압력 저하 시 용해가스가 분리되어 기상이 생긴다는 핵심은 맞습니다. 다만 bubble point에서 포화 상태라는 교재 요지를 충분히 설명하지 않았습니다.\"},\"C\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"포화 원유에서 bubble point 이하 감압 시 용해가스가 빠져나와 기상이 나타나고 2상이 시작된다고 정확히 설명했습니다.\"},\"D\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":4,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":0.2,\"note\":\"기상 생성 시작은 맞지만, KB2는 단상 액체 구간에서 압력이 더 빨리 감소한다고 말합니다. 답변은 기상 생성 후 더 빨라진다고 반복해 핵심 공학 관계를 여러 번 반대로 진술했습니다.\"},\"E\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"포화 원유가 bubble point 이하에서 자유가스를 형성하며 단일 액상에서 액상+기상 2상으로 전이된다고 정확히 설명했습니다.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 5874,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1235,
+      "output_tokens_details": {
+        "reasoning_tokens": 621
+      },
+      "total_tokens": 7109
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "qwen_closed_book": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 1,
+      "hallucination": true,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "핵심 상변화 설명은 맞지만, 교재적 표현으로 'bubble point depression'이라고 한 부분은 근거 없고 부정확합니다."
+    },
+    "qwen_same_evidence": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.5,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 1.0,
+      "note": "압력 저하 시 용해가스가 분리되어 기상이 생긴다는 핵심은 맞습니다. 다만 bubble point에서 포화 상태라는 교재 요지를 충분히 설명하지 않았습니다."
+    },
+    "openai_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 1.0,
+      "note": "포화 원유에서 bubble point 이하 감압 시 용해가스가 빠져나와 기상이 나타나고 2상이 시작된다고 정확히 설명했습니다."
+    },
+    "agent": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.5,
+      "unsupported_claim_count": 1,
+      "hallucination": true,
+      "engineering_contradiction_count": 4,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 0.2,
+      "note": "기상 생성 시작은 맞지만, KB2는 단상 액체 구간에서 압력이 더 빨리 감소한다고 말합니다. 답변은 기상 생성 후 더 빨라진다고 반복해 핵심 공학 관계를 여러 번 반대로 진술했습니다."
+    },
+    "openai_closed_book": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "포화 원유가 bubble point 이하에서 자유가스를 형성하며 단일 액상에서 액상+기상 2상으로 전이된다고 정확히 설명했습니다."
+    }
+  }
+}

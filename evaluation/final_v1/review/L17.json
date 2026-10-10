@@ -1,0 +1,201 @@
+{
+  "task_id": "L17",
+  "prompt_version": "final-v1-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_0d1872f606525e56016ac9f920cf7887d0b62846002a1ef776",
+  "wall_seconds": 11.752,
+  "mapping": {
+    "A": "openai_closed_book",
+    "B": "agent",
+    "C": "qwen_same_evidence",
+    "D": "qwen_closed_book",
+    "E": "openai_same_evidence"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"정답 취지인 연립 비선형 대수방정식계로의 확장을 설명했고 압력/포화도 맥락과 부합한다. 다만 조성까지 포함한 서술은 제시 근거에는 직접 없다.\"},\"B\":{\"exact_correct\":false,\"partial_or_better\":false,\"claim_coverage\":0.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"답변 내용이 없다.\"},\"C\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"비선형 방정식 집합으로의 확장과 이산화된 두상 압력/포화도 방정식 맥락을 정확히 말했다.\"},\"D\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"연립 비선형 방정식계로의 확장은 맞지만, 이산화된 압력·포화도 방정식에서 나온다는 핵심 맥락이 빠졌다.\"},\"E\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"연립 비선형 대수방정식과 압력·포화도 방정식계 적용을 정확히 서술했고 인용도 의미상 적절하다.\"}}}",
+  "usage": {
+    "input_tokens": 6842,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 796,
+    "output_tokens_details": {
+      "reasoning_tokens": 218
+    },
+    "total_tokens": 7638
+  },
+  "provider_payload": {
+    "id": "resp_0d1872f606525e56016ac9f920cf7887d0b62846002a1ef776",
+    "object": "response",
+    "created_at": 1791621408,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791621420,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are the single independent AI-assisted semantic reviewer for a fixed\npetroleum-engineering benchmark. This is not human review. Judge ONLY the five\nanonymized answers against the supplied expected claims, numeric gold, source spans,\nquestion, and evidence. Do not infer system identity. Do not repair answers.\n\nFor every answer return:\n- exact_correct (boolean): all material requested parts correct; no critical omission.\n- partial_or_better (boolean): at least one substantive correct requested part.\n- claim_coverage (0..1): fraction of expected claims accurately conveyed.\n- unsupported_claim_count (integer): unsupported *specific* engineering assertions.\n  A closed-book answer is NOT automatically unsupported solely because no source\n  was provided; only count a clearly invented, source-incompatible, or unjustified\n  specific assertion. Do not penalize uncertainty or a cautious statement.\n- hallucination (boolean): at least one fabricated factual, numerical, formula,\n  source, or engineering assertion; missing citations alone do not qualify.\n- engineering_contradiction_count (integer): explicit engineering relations contrary\n  to expected claims or cited evidence.\n- safe_refusal_correct (boolean or null): applicable only to unsupported_formula.\n- false_premise_handled (boolean or null): applicable only to false_premise;\n  requires explicit rejection and corrected relation, not vague hedging.\n- formula_accuracy (boolean or null): applicable to calculations or explicit models.\n- numeric_accuracy (boolean or null): applicable when numeric gold is supplied;\n  check the correct output-to-value association, not mere presence of an input number.\n- citation_semantic_support (number 0..1 or null): among actual citations in the\n  answer, fraction whose *specific cited evidence excerpt* supports the adjacent\n  engineering claim. Null if no citations or no evidence supplied. Citation ID\n  existence is independently checked, so here evaluate meaning, not formatting.\n- note: brief reason, no chain-of-thought.\n\nKeep all named keys in every score object, using JSON null for non-applicable\nfields. Be conservative about unsupported or contradictory statements. For missing answers,\nscore exact_correct=false, partial_or_better=false, claim_coverage=0, and leave\nnon-applicable fields null. Return only a JSON object with key 'scores' containing\none object per anonymous answer label. No Markdown or extra text.",
+    "max_output_tokens": 5000,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_0d1872f606525e56016ac9f921b87c87d0bbb66fd1bf2107f5",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyfksKWRzQbvPgbH_eSK47q2EicCGXObmu8xaI45jA1DxoVKJgX7W7EX5yhoM64PtJWuRnmcf8nmZ9m-N0DMgcXP6ev3rh99SgkGvpksqW-hvarVqTYq8K0Sr2Z0-8TLHRAUoRH1EUGPkC5MwuswqLGd7z_q6Q5b4ycLDVut_zeQ-4vzeW34laHz62a4283GtQlSp3o0fa_ZRGZMHOIYV6BeLhQLry5jiKcNJ8EVniinHLxm3pbr8oj-8pL_do50Fs8z-dSF0XkV-brwbyacuT_chLSl4SHxn39ogUbJOGfkVKmmnTegLaqLLIZW2LrWK2wE6AysL54ImN-ZKJww23m21Etza_7EuIJDWED8QDhh5zo1fszCxH5nPL-9G2AYE-lW5aSXEXt2cGtLbx91nY4mJOFvcjBt_g997l_LhtV_f_V8_23mi4yStIGOAXX1e8OD69nfslmo2DdGe_7RytLNw9THrvXWf02s8SI62a87GDOcxNUOtbEgg4jBxzYgtnGKQcQRf6RdVSp3ls3wy56OdU83oSd9a_b4dBN21ITtpc6fPZyYuYPTqOlj0c9mNSOB8249v2kZ_nPqpUmyL5AknCAQOPEsk-OKFpjLqDZ-TI9x5h-hYbOhVnpZgnt0e8QoySOYPVxDT_fBLQohJQUul0pA-iXqLBEtW-78dg4goCDXupjyOWDm7tyTjHyWW1anPyp4rtKgecLUWr_knZAZGiuuGwLi5fFijVCZQ01G9y6NIewrJruomcxy9hSMXl6gPofYAmqOLU3S8pOvjhj88l4ep4VvUzcHkxd0vRDaPpaz2e8M4_oeztiYjUdZT5_1PNRYQxKZG3FqPfHJaGLeB9DV0C_dXeexbjGNjQkPS2qxST1FbN_gxH8kgaEWbZ7gzDXKOsEUFTRcYhzsCUlnaeg9sTa5n-P0jZnGylJfaH40oguuE23p8M_DBsNN12NcodiENTsqWO_egpZ6JPlnyFAyjLMbePrhKXwcKm4JvZ2wHftXii8_85dNc_1oXeUF-XC9k-4sTQee73dWtjodFoQSAs9fe4JScCm0bnEDv2NWTl0OKCBmOw6W5scCmSqsG5nU_Ejz1jJL6WU7PJG6wJJzdUXKBjEoo3YDbPspbh_VCI5iBQdDGsnejk7G7tT3uUv72ZxRRFXiIPGhB7P7x-dvaJke2T3VaZ-sXnCvjv5xARL78gsc2fs9a2nH7kRNuPidHbo7zTiJx5E2c4c0-7oa333OE-rpJgqt7VijbZFtHvApXAzi_QyFryzTnmFFN505igmzjqzSfbl13kLCwBiRk_t8ezV6ikDptrxykv9CI97E1trvvHoFAw06c14hayUpp1aO1eoTTTWBiOGAKaX53_PJX7QVQrvul267q8z_xVHxUkh-R1VxPyUEg0fN7NeLtMHSehZvZf26G2K7T9RZflMtMKg1UNPYGc7sz9bBVLQJTbH0xXyZTEddtRtSu99CbSKmhmlevwvE7S4b7om4KNK_FeYl40NXqNiQIZRs2tJug33yJNNg9ISux7O0ffYgCIaGH7TkrOS49Qa4F2y9qfKcCI23dFVCpKRvSe8iECSupykz-bVsXC7HJg4HuPuOeut4kW57PqnqT-ZyYP4CPth_Tr1xEo0e1rS1Z5hYgzGUn_GP2U1rIR84Yq7Z7IXquevt5Ns22IixOLVtCAwBTjAzBqXEQ7eb5EjCxpV0glrCQS08l58uQ9-tZ3r_fxLkZihNZICdaImEfjgvrw-o6WC-gKYICeu93_ia7aaV9-iloP3J7net6YCC2Jbl45ToqySK7a6Rah1I7f3SwpLkUr2C7_rB3cRX0pKmwY7siBLu6e0d_pcQrwFRuK9tqzfyTJTEKVNAJhkg3ZG_ly0EUToeMu9EGmOJKUlgiGIeN9ubN0zoe1pvZxWHahsSpmZzZ1Z17ZEDdJAgtXONMKBgCIWcUuYX0bZvI8qPZt-fHxS63lEil1WOTyFq5WzkU1Z2DVgs6J8FAmYkcb3bIqdEwHP4dEiHCNl3_QfQWfOWv7mKd-UljcgDIPqdbD9SQWw9VQ0Pb_qvwtGMydOwoGvY9wVfpjdmcBKyWciHo3XrEY_5x4D2ggG14ah0fMzH7f_SlbRSwB-1x_zBU4TkDvDtFoUfQ4S3arpuZAZS5TyO8_ofMBVgbBE77fLovxhkea2s-vXj0746CtTSCTcKflZj23wMHUOv0dpsGN5FXxMpdz0JHYlTqBG60-BqXcV6z0kaLb8194WAv6wqD9tEp9tmU8HZ0cPSVOU-oeuPJUtCAb7UiOL5onIfiHjCb8Or40J99oydw7YNEEe6LnTZ5BG4oa3p1wdHO4Rf6Z9pRaoojufHvASMBwRe4rn_ec_6T_ESiNsHWgT1IPBytEaYUExCj7oRtcKMuIgC471KMgUkEmNHBbc22mvq0FFP_e5xxW91HqUhI3e8CH2z8stwqC2UnNc76oKYvTxJOaPmLR4PtH6y6pr_8_wfdh8ZUEcZciz6uydhatxKx0lm5N_iy9QANZPiM7hhBJC-Ro4KFV10-DhfZq4txtjNTLPo6x4ikswoRe46B3s5vHm8QA__riUqCTdRQoYHYRFzN24sRq9y-cF4_OZU4jzKqPV5z8lQGPkuiFmiQYS-tANlovNoHbi58I7S-EndIGOra3ICJsIqKECDOmRWbtCTjlCCkCG7LiGK-okS5wC98e-frUVcDzwDQmlRZanNxuRCFr6BjwPHxE_zJXNadRCDgFqrmaR59wt5X0bqmhCQx6w420ihE7veoy6o7Da8-5s7J9Bt--NYG2-7LFvZuu-LdtJPdpbYHJZo1fHp4FGTmztOIM9oxoR4nz1kCUkCb0ck-9aV2PpKXk8Q9ZZnycdbeKRez6tIENHfbh6tkAEQp0j68jbIVFekfs_w3GZutfQvnhMKmiNsdfVb80lh9SfdMr2vE86OXktlijJtR-QLdvomhG_7vBP8gvoHpUE618PZxFnVwJutCemhfZlLm4YlSeaklHMKprOhbsHygQZ6gwk755BpsDCWe5rFeCpZVwAiYmnfkkjbeiNvkAqTHdBgIOfliZ8_x_kmFqWAcLSeuPr8q9fkPi47kaoVU1f6VpM5R_ERWcD4eLgwemS5EUtxLV6ogyftQm8sAqL3IOGKeHE-OIAmCYgqKvWzPbJNpTS1tPziqrFiFLwTdFNoeptqSBo4pDzk0oZi5E2eQKzwYtRzB2lQ7HsEg2ikYNe3K0Y341bUdurc3DLDhFisz-TegWUzhZCZQOlU16Q_dte84P57Cm4a_MHg8dI6-jHgCTYdhkMA_jX_DsLsr9pnCTEkRZwlyc0hXwK_DxZQ9iQWg0KvzPUEctu4q1AhZFj6REPFMqAmD1niUqHG30dbpj_Fi5tFzB58wk_b1oFpTI12-20Dl3QV2fGnJqHU6k2xUSbsRZfra7IhptlWj0u_6fIdCvJ1q87AzsWdHgYNE8jb7Wbun6P0BQG2OrRGnJd5T_IoTZjWstRZtwnMclUfGlb1Tl1JaJP2CSwo2-lKS6hcqWM1unnx8aNHMLwM6ha6_lvD4QCrV8B7kE0isAFGLbFgGhTSocfN78J9kEWu5FGp9sKuHltjcO5YIVZlawKXOrJ4OUHAJhXSsEbxYMLGDkCTWNQcH9E0Vs1rJtPyKHtQOXcpKaBHuSerbsyVhDs_lcXQcMDBfUxJgpM30yB2u4YOT_0e-r-ytq0ldv4cnvXV39hVwzz0pgDeZX9u5PXNXdHyycIVzBF9oZaDlxJHgW3XsJQ9239PqjDnLL_5pCjwYj5wcnvPfmBdIP5ytVVBM7kB-GdrdKQkU57YbdKQR4o8Znh-37r4zLHC0rDxY9RPJbI4UE1iSvzg8H2u98HNg1bOgoUGpS7ylHKuJ0xfq0vfl2NnY7PfQXDmA1NHYb8CtwCXkAH3finzWG8S1YFiA7MMIfN3qYbKsej3VP30uJIKhLyR2ts1qKExT9U8TRgG5VJeNP-Br1sf6jTusLW2AEe6DMqwyjLpduhYADq4Qw43PEhh1I209TWSS5Lh85tzQM4PC5Pd98g193PNE1pUt65yD-manH8DLmJsuxLwmO_s0CNxQPq4Ds1RwYr-YQyE4-wh68x3gjIH0xWSZ745Ex-r4gNxY3k-wF3InA8x6SnoY75exOU7Ed2M71iIitRW0qfNR0uQpnrPKyeNHg9dSN9X46N973Ig=",
+        "summary": []
+      },
+      {
+        "id": "msg_0d1872f606525e56016ac9f925823887d09e60629a5e537445",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"정답 취지인 연립 비선형 대수방정식계로의 확장을 설명했고 압력/포화도 맥락과 부합한다. 다만 조성까지 포함한 서술은 제시 근거에는 직접 없다.\"},\"B\":{\"exact_correct\":false,\"partial_or_better\":false,\"claim_coverage\":0.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"답변 내용이 없다.\"},\"C\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"비선형 방정식 집합으로의 확장과 이산화된 두상 압력/포화도 방정식 맥락을 정확히 말했다.\"},\"D\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"연립 비선형 방정식계로의 확장은 맞지만, 이산화된 압력·포화도 방정식에서 나온다는 핵심 맥락이 빠졌다.\"},\"E\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"연립 비선형 대수방정식과 압력·포화도 방정식계 적용을 정확히 서술했고 인용도 의미상 적절하다.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 6842,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 796,
+      "output_tokens_details": {
+        "reasoning_tokens": 218
+      },
+      "total_tokens": 7638
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "openai_closed_book": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 1,
+      "hallucination": true,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "정답 취지인 연립 비선형 대수방정식계로의 확장을 설명했고 압력/포화도 맥락과 부합한다. 다만 조성까지 포함한 서술은 제시 근거에는 직접 없다."
+    },
+    "agent": {
+      "exact_correct": false,
+      "partial_or_better": false,
+      "claim_coverage": 0.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "답변 내용이 없다."
+    },
+    "qwen_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 1.0,
+      "note": "비선형 방정식 집합으로의 확장과 이산화된 두상 압력/포화도 방정식 맥락을 정확히 말했다."
+    },
+    "qwen_closed_book": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.5,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "연립 비선형 방정식계로의 확장은 맞지만, 이산화된 압력·포화도 방정식에서 나온다는 핵심 맥락이 빠졌다."
+    },
+    "openai_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 1.0,
+      "note": "연립 비선형 대수방정식과 압력·포화도 방정식계 적용을 정확히 서술했고 인용도 의미상 적절하다."
+    }
+  }
+}

@@ -1,0 +1,201 @@
+{
+  "task_id": "N11",
+  "prompt_version": "final-v1-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_0834112cabb8f9af016ac9fa2ed4fc87d0b0d488a3537f4bc1",
+  "wall_seconds": 9.286,
+  "mapping": {
+    "A": "openai_closed_book",
+    "B": "qwen_same_evidence",
+    "C": "qwen_closed_book",
+    "D": "openai_same_evidence",
+    "E": "agent"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"증가량 60 m³/d와 증가율 25%를 모두 정확히 계산했다.\"},\"B\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":0.0,\"note\":\"정답은 정확하다. 다만 제시된 인용문은 증가량/증가율 계산을 의미상 직접 뒷받침하지 않는다.\"},\"C\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"증가량과 원래 대비 증가율을 모두 정확히 제시했다.\"},\"D\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":0.0,\"note\":\"계산 결과는 정확하다. 그러나 첨부 인용은 해당 계산 주장과 의미상 관련이 없다.\"},\"E\":{\"exact_correct\":false,\"partial_or_better\":false,\"claim_coverage\":0.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"답변 내용이 비어 있어 채점 가능한 계산 결과가 없다.\"}}}",
+  "usage": {
+    "input_tokens": 4087,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 634,
+    "output_tokens_details": {
+      "reasoning_tokens": 119
+    },
+    "total_tokens": 4721
+  },
+  "provider_payload": {
+    "id": "resp_0834112cabb8f9af016ac9fa2ed4fc87d0b0d488a3537f4bc1",
+    "object": "response",
+    "created_at": 1791621678,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791621687,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are the single independent AI-assisted semantic reviewer for a fixed\npetroleum-engineering benchmark. This is not human review. Judge ONLY the five\nanonymized answers against the supplied expected claims, numeric gold, source spans,\nquestion, and evidence. Do not infer system identity. Do not repair answers.\n\nFor every answer return:\n- exact_correct (boolean): all material requested parts correct; no critical omission.\n- partial_or_better (boolean): at least one substantive correct requested part.\n- claim_coverage (0..1): fraction of expected claims accurately conveyed.\n- unsupported_claim_count (integer): unsupported *specific* engineering assertions.\n  A closed-book answer is NOT automatically unsupported solely because no source\n  was provided; only count a clearly invented, source-incompatible, or unjustified\n  specific assertion. Do not penalize uncertainty or a cautious statement.\n- hallucination (boolean): at least one fabricated factual, numerical, formula,\n  source, or engineering assertion; missing citations alone do not qualify.\n- engineering_contradiction_count (integer): explicit engineering relations contrary\n  to expected claims or cited evidence.\n- safe_refusal_correct (boolean or null): applicable only to unsupported_formula.\n- false_premise_handled (boolean or null): applicable only to false_premise;\n  requires explicit rejection and corrected relation, not vague hedging.\n- formula_accuracy (boolean or null): applicable to calculations or explicit models.\n- numeric_accuracy (boolean or null): applicable when numeric gold is supplied;\n  check the correct output-to-value association, not mere presence of an input number.\n- citation_semantic_support (number 0..1 or null): among actual citations in the\n  answer, fraction whose *specific cited evidence excerpt* supports the adjacent\n  engineering claim. Null if no citations or no evidence supplied. Citation ID\n  existence is independently checked, so here evaluate meaning, not formatting.\n- note: brief reason, no chain-of-thought.\n\nKeep all named keys in every score object, using JSON null for non-applicable\nfields. Be conservative about unsupported or contradictory statements. For missing answers,\nscore exact_correct=false, partial_or_better=false, claim_coverage=0, and leave\nnon-applicable fields null. Return only a JSON object with key 'scores' containing\none object per anonymous answer label. No Markdown or extra text.",
+    "max_output_tokens": 5000,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_0834112cabb8f9af016ac9fa2fd53c87d0823fba7fe55ab5eb",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyfo3yqT5j95XumoduLB0Td72QQ7OmQSfTYOHgG6lFMEm09siwk0eEpppx6JH6DfFnJm3XP5Diddrjp0ha9EyX7PD93oL5LjCdQljKA9lqoJXU22nRkCY-OBfY_784YNcHsvg7LOdI1Nl3I8lqSaH5UFFPIe3-a-fQ-j7MNSp_B2jZv9cgPXEyx2-hgGvEh1-4qxBXOLdO0pOul3Wt5ZZrGYmquyicYkcYsRIu20b3Ajcc7_Cyk5ifm4pcYVdx2IU8vwdG52y7uNqdPgtiasNYGXBU9H19NLMBX0U90dO6EhCJ20lr2R0OmoF6pgZJn_6HpAgtx7_zOjGZxI02LPcf9BPJhODzrKY_uZ21CwaD3LfTiQa7SRlxvdQPAxThwNig3cOw2UaiJxnd0HUo-fqge8gQugSdRxCCo_UVAAAyXxCpd4bpww2QS1KTp3Oj5oFwLzw7fzRcz5VvrK_8dWAXiU2UIxLl6DXxyHbwR46GncGlbXmG9ELPhdnm8nq7-oPSqh8nwOxWM5hxBEXh6OKuurAgu4CyGCafPPepmueLwhIN8h6jEPlCkHkVs15w0B3nFILncN2dbj50dYMPf6Fsa1tPnZzrQHgUvKcXVW2mxSUyWs6ju-mYUcgyEkd0u5usyM1O-LK7gZ6bR--Pmq35f84xezqxTbKV7Xm1mNIhijcD6P6LEWewnsPQ3mFMgcybT2ivptRhZ5O1FLF_LOSPOVaOhZG8PdEqzkl58XDfVjd26owtV-1f2Z3wjo9e-PurS75HUVbEkIpdb4_zZmB5TIZbTpD4l_hdUbcwe-hdOz8fWxqCkXHQZ15YccNJTYfQqD7YRparGbnfW7kvblqAOXlnyat0UlM8vnAY2Vf6LZIq8VRhY0SHrICIPJOuzz1k71jJf8ppJdQh9OzPySB14nWS3EsY5Mhpt2_X5vjF3TotMrN8J_uKk764JQp4m53fBXvCOogvpYUr0p7ffCbSKid8besoukNvXBePerVRhQjyaDVL8kiTxNgJ6rZspawI4cYhK3gU9FLQQGOZpEIq6N2Kqw8zdTUS76iO7aUHjYqlO4sR3RGIb4AqiObwueTnSPbcRYTI9jYd1NGS5Uz9IPaZEBL94vIK6-8ItIbNdmrErm2oJSzxR9_-VvKYMhoRRXWJIqoJ57YQjISUe2YRLx1gnGgF1Rngywj_pPzxkjvo7B5OxtY1bEZr2QqKo9oCHDh24P3aF9uIJCxmmzaqXLUedjS1Dh_uIO3VBe6HrXe0OOvmssuOTgpGSgZ6ObS6Hmd02I09AEmI5cVLJpU7zX2SHSG1X44kzbsomcf0A-Q-FgDHPSEh9_Pw-4aQaQ2ID1BoUau-5oZB9rmmUn7Lb4MMPx-W63g886sA2rsZqHZCOUpzV7yEHE684vwJ4OLQXLkVRdjcPE3VP2eLsBN_OgvL5WW9a4swUV9NxO4OpD-Xgie8m3OF3Y_IajEgWXR-Ylc1uyKHhQmC58Zrc6azzW6lcQsnA8j5Xm7fZkaGoxIwNc3sL632g7fBqWeTtRqWdZzdmLd48E9arbDjGS9UBjuhYgrq58WcPQBFUSZ-Hswz0FYwgoie1B0XBEzH4bJKYwl2mbl1BL2Nx8ErjTbnFImBmEoFnn4rSS5DzMFo6uEH3ignAikp0imkBPhCuEuqsMRJ4RTi4s63pHRwNJfdUssG3Qpji-nSJeo5TrognUKrjkSfv-dmIQC136F59uAuQ9o5Dk9s6gvZQ79xQQIrLL5dgYTT3i1xaOj-VzsapFKj-1NMyTaXkfCOrhJg8DNDCm_-zDoiHnteAXSrfLUZ0FmQF6o0XdN6BoVXr0dkfcrkM68aTsOKcTivGglgBRon_aAhP5NJJMEIe5BZ6KKUslKcexLN4lur0a1yFSpj98UlPZyrLcYWvmv8Lp1ouK26_zziRzc-7HRDtjxVqjkN2YLQWmontJUxP1v4NJJIsKIioTkSGEAnrtN5fqQaKnlfuiJz0jJ340Y3rAh0GBmbKdwd5vqxlcfLTZc90IlAzYo-3vDBcrIcFt-VAJoDbfKwDNytLZ43vZ0FiGJgcIamQEByXMsDWlUUdgfBcOBmrPG-tESAafiruxwoFNTYNxTIkzn42c8q3YUrzeXc_YowFn0ItKeBWvpxFCvlQ5pF3e228jc42tBbrPsepd_iWVMxIPPViTkKjktGVV6T6LDv8z6cbBHiTNMHoxN4sVHT4vXnoST9JVaGxbFeyLyRH9GddNVEuxjSdoigkmQwMN9lx8e_G7fC9X9OEa8hD7SRnfRrgNQECKR4FlquA7m-CUNXQ2ATqoMLzg2D7aco3UkZrSEvJ9koSFpgOgnbj3fM5bShLNIfkuB9QbPaef2i_nNCgtFDDm0X8jRH6ZXPTdJil1v0VC-g4IwPL3Fbs3ixJn4LtvSxpHW22UnLHSiaWVVuwRxV_MhgDqljkw9-GzTairj9rOMLsfOI0oSsO9VQUwNCxW88pYlJyAksWZ2KjNJXHYpzmy5hFpf9wbeGA6eifciYyZUvAglb2qYEEui-VOIqh3EFAnDuEkMAxvOluaRe-zNhWd47w06JCE9MCvd1nF1u8oBB3vkTTNhJglmxgjxsW5m1AZ2vZJ4oNnUsVx7LKbPq6CczmG9c4t6vCMzCgytSLucZfIypnspEU2mOS6DWalwWLxdRi5FV8rE1-UF_AEl6Bldi3l_Fk9S7SGLHV5CD0T3uTs2TZJS2vT4pmbZ18pO7h0qNWxMcGEuqOr0okJ_EOSM_OXWo6irXGe5Sym3C62GCZy5X3FwKum8aIys6Lfw7CproZNWOPmiLZfPL9SapliaxxQk5yF_IbFO9MaXhg8w2eNJE6AUMBwoxj9VlbmHJ4QlSsMFGz-A3x8kOylH0rvYFtcvmHA3l9hind3N4jz6-HA-NtLedcJCVUNdFY47taSs3LlaVRe2SKf-pAnBuaQ007gbQf49Ae1idOhw0lFHsyTTs96fJjk3Kyg-gcuSKOSIBNlMYfh1FBMvbYEkXNcufkCDwiU6Fg6I8zLTi3wrme_pbhia6i0qRCI-Da4=",
+        "summary": []
+      },
+      {
+        "id": "msg_0834112cabb8f9af016ac9fa32772c87d086ee78efc8fa55cb",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"증가량 60 m³/d와 증가율 25%를 모두 정확히 계산했다.\"},\"B\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":0.0,\"note\":\"정답은 정확하다. 다만 제시된 인용문은 증가량/증가율 계산을 의미상 직접 뒷받침하지 않는다.\"},\"C\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"증가량과 원래 대비 증가율을 모두 정확히 제시했다.\"},\"D\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":0.0,\"note\":\"계산 결과는 정확하다. 그러나 첨부 인용은 해당 계산 주장과 의미상 관련이 없다.\"},\"E\":{\"exact_correct\":false,\"partial_or_better\":false,\"claim_coverage\":0.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"답변 내용이 비어 있어 채점 가능한 계산 결과가 없다.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 4087,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 634,
+      "output_tokens_details": {
+        "reasoning_tokens": 119
+      },
+      "total_tokens": 4721
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "openai_closed_book": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": null,
+      "note": "증가량 60 m³/d와 증가율 25%를 모두 정확히 계산했다."
+    },
+    "qwen_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": 0.0,
+      "note": "정답은 정확하다. 다만 제시된 인용문은 증가량/증가율 계산을 의미상 직접 뒷받침하지 않는다."
+    },
+    "qwen_closed_book": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": null,
+      "note": "증가량과 원래 대비 증가율을 모두 정확히 제시했다."
+    },
+    "openai_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": 0.0,
+      "note": "계산 결과는 정확하다. 그러나 첨부 인용은 해당 계산 주장과 의미상 관련이 없다."
+    },
+    "agent": {
+      "exact_correct": false,
+      "partial_or_better": false,
+      "claim_coverage": 0.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "답변 내용이 비어 있어 채점 가능한 계산 결과가 없다."
+    }
+  }
+}

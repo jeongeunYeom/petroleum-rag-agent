@@ -1,0 +1,201 @@
+{
+  "task_id": "S01",
+  "prompt_version": "final-v1-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_094fd1cb76fe3636016ac9fa381b4087d0acb078e0a751224b",
+  "wall_seconds": 17.991,
+  "mapping": {
+    "A": "openai_closed_book",
+    "B": "openai_same_evidence",
+    "C": "qwen_same_evidence",
+    "D": "agent",
+    "E": "qwen_closed_book"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"모든 5개 porosity 점과 score 계산이 정확하고 최대값/해당 porosity도 정확합니다.\"},\"B\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"계산 결과와 최대값이 모두 정확합니다. 첨부 evidence는 답변 계산을 직접 뒷받침하지 않지만 본문에 실제 인용은 없습니다.\"},\"C\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":6,\"hallucination\":true,\"engineering_contradiction_count\":6,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":false,\"numeric_accuracy\":false,\"citation_semantic_support\":null,\"note\":\"평가한 porosity 점들은 맞지만 모든 score 계산이 +1.8씩 잘못되었고 최대 score도 오답입니다.\"},\"D\":{\"exact_correct\":false,\"partial_or_better\":false,\"claim_coverage\":0.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"사용자가 모델식을 명시했는데 계산을 수행하지 않아 요구된 결과를 제공하지 못했습니다.\"},\"E\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.0,\"unsupported_claim_count\":38,\"hallucination\":true,\"engineering_contradiction_count\":38,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":false,\"numeric_accuracy\":false,\"citation_semantic_support\":null,\"note\":\"요구된 0.03 간격의 5점 계산이 아니며 제시된 거의 모든 score 값과 최대 score가 식 score=100*porosity-2와 모순됩니다.\"}}}",
+  "usage": {
+    "input_tokens": 8168,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 1058,
+    "output_tokens_details": {
+      "reasoning_tokens": 501
+    },
+    "total_tokens": 9226
+  },
+  "provider_payload": {
+    "id": "resp_094fd1cb76fe3636016ac9fa381b4087d0acb078e0a751224b",
+    "object": "response",
+    "created_at": 1791621688,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791621705,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are the single independent AI-assisted semantic reviewer for a fixed\npetroleum-engineering benchmark. This is not human review. Judge ONLY the five\nanonymized answers against the supplied expected claims, numeric gold, source spans,\nquestion, and evidence. Do not infer system identity. Do not repair answers.\n\nFor every answer return:\n- exact_correct (boolean): all material requested parts correct; no critical omission.\n- partial_or_better (boolean): at least one substantive correct requested part.\n- claim_coverage (0..1): fraction of expected claims accurately conveyed.\n- unsupported_claim_count (integer): unsupported *specific* engineering assertions.\n  A closed-book answer is NOT automatically unsupported solely because no source\n  was provided; only count a clearly invented, source-incompatible, or unjustified\n  specific assertion. Do not penalize uncertainty or a cautious statement.\n- hallucination (boolean): at least one fabricated factual, numerical, formula,\n  source, or engineering assertion; missing citations alone do not qualify.\n- engineering_contradiction_count (integer): explicit engineering relations contrary\n  to expected claims or cited evidence.\n- safe_refusal_correct (boolean or null): applicable only to unsupported_formula.\n- false_premise_handled (boolean or null): applicable only to false_premise;\n  requires explicit rejection and corrected relation, not vague hedging.\n- formula_accuracy (boolean or null): applicable to calculations or explicit models.\n- numeric_accuracy (boolean or null): applicable when numeric gold is supplied;\n  check the correct output-to-value association, not mere presence of an input number.\n- citation_semantic_support (number 0..1 or null): among actual citations in the\n  answer, fraction whose *specific cited evidence excerpt* supports the adjacent\n  engineering claim. Null if no citations or no evidence supplied. Citation ID\n  existence is independently checked, so here evaluate meaning, not formatting.\n- note: brief reason, no chain-of-thought.\n\nKeep all named keys in every score object, using JSON null for non-applicable\nfields. Be conservative about unsupported or contradictory statements. For missing answers,\nscore exact_correct=false, partial_or_better=false, claim_coverage=0, and leave\nnon-applicable fields null. Return only a JSON object with key 'scores' containing\none object per anonymous answer label. No Markdown or extra text.",
+    "max_output_tokens": 5000,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_094fd1cb76fe3636016ac9fa38d64887d091d25b8dadeb1032",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyfpJOzf00-sBodOWxbmuFsiDrIy97rSApSTxeKaU1AN0hi1b91hi0HlM4gQii3z9eh1CdCQpY9FZ5lNTz96bZ5EaDgA39KMrOtQmYNnQuJm6F440Auk5Qsueb0xB4i4la-Oc9vgXE38JIrYCqjhABSDp7SPq-Pu8qyv1QNrUn6UY1ez5rcQJaJNpbe-yXuYbiMCXvur8povtQdaoOFeO207b_YK11QHOZV9W2L6HhdTXDR44t_rC_orkhlOYuU7rML_szwn5h9EX4qE8INLG7f_XpIK7-n1ORXQO18QmO_ETYtL5QYWkKMMwMGVq82azWmy7df9gl4laP7JdlvrgyUR_m2WBTKsoYVvCK84swgqbxT0FIrfAL8LDwQcZzLEEBWAy5gmGYZBjkP1h5FS7b8Syvx34coCYRVLrRSgvob1rndh5PYcux3NuWldFeYsxayfBYys3_HEoqkf36tYY9I54-PBSxs_ZR2N3PzXd0tTaCa_hXZCAJeTHeKJrZ8H-SnzkWSnzKVGNDQ0ynLqISsKnvv87D5lypNcMe9FZLQWrxE8sCegSLrme9BqqXd7PNS9Jv9nvbAiFZ2dJAXqfiplizs279tPWuRQDwRbpf3D0xtNVyFNqAfjLGqfeBMddONAV1NZdXDK93PS6u665dxPS_gep13F8KuUVKB3pAOlPo1w5KmarCwFeNnjMOfsurt-ef6VL9LaZGg-mLs8OpPLkfLzzSzeVW380A73pzlqB0h1ECVaXdxzlBYO0AC4oY_QnHJ3agHnLY7IXIR3Z9Up5OPnDFx1fLFzJwBvQOcE6E1hTliWY9-eZCWI2k2P3ZX6zc2Lr08740DQYxrkYioeRgjK1Bi99Bo_hQFsXJz1R2Uv3VM1wVfTsX2op69QiCbR6P3eR3OloJCGv6fyDR7zbrspMwnhwFNHLi_rPCAAdeMo9MeTZKJ9oBfaun_Eeo0gUtDW7I8DNuvbPo96aKaRwqlkjN8Yk6YI-KNc2nDOFmBlNBeJDePzQ0f5ZiC7P9TQnLrYLTD9dPZ8-aT4ckhQwgyK1JfwjyLRXUOvLqagf41K8Hp3Moy9LqK5jQXVQVIjSnn-WKJWjiQFmrxB0uJZA5UL_RixB_tI8w7k0liJ2Wpo8bxe-lupxqFaLJcKWq29mi01tUQzywEFrYbmAHCAv0lbZQx6uuyOSVsmRn-biN5_00jOpoyGXP6vCoAhHeneh-JsrqZ1ywzMuqMWVtQKHF7Cx4FDvEC1HfSHaZu_UzL7jfiviEvouH_Tnvtq9ybZaUABqCmue7Omp7tTwvepI_YxhfojbxYc6pOssLIMPLYDh7Nt7IjA169ScgjmMJkQdOD-hXK4eFcKJmSiwtj3aiQ6deQ_1r7RPGP2dUACPkwFsZTjJvmqRmlDvXVOfvhIQc2Gw_kIHkmqc2SPkHN6uFzC7U8hTd72byDO_i0Hgr2PMiH6EzDG0Go8_x6FRhdScNverh55w8WuW3nhqRei-ikeC2IPmXuvIHC-JrPC87aT9Bxw7PNZ87s_65d_dvdb9-AUhQ9lRZuMSZxfq5Plcn8e5TJXPNWqZg_JmDNWgPfBIOPtr3oc_oA77Uhyizy7W9utbdbnRXHwSsPklcYU29WfrV5mjGbLl3fegc4aeLfQLdq6ZSkmpmMgdSUtjBlTegWQB4Al62YEuloquQ1rLl0nEYvAMIBzy1E3puLFHVRrN1zX-bSa8lds0qCXfCJlEgpUU2q9vedsZgk0XHWa3dbcfghRvkR_nD38uDE1BQQqLKZ1LUe3Px8fMtQFH9pD0VQDuXYG8XkYCtLT3s4OHgsqFfUa_2gDDh7X22XZ5XoD-U7vL1zP6TRujtj8gLC55wKdOeBH4O5hRQ3tUTGEx6oYBkVS50OvfKeMvkaPBQ880zN82pkjQioUZ7NpC1ha_x_YoonBJDZehiUveTyU5i08vK8UovN_OxQdBO6I3XXvbIg7kdN4ZteWlOOrQvTSY2EaYXobbHx4AkHOjIBJn0fI9vbkjIaeyxJojwnjF8J3sWJCZB9hBB6JicW9BIG_xahNN8i_mW_cPax5ihdIAcon9HF6GFqcq6hCiDVGkDMtUBpY86C64T-3BMbwh-yC7JTqrthNbF3EVqQe5DxH1UYgfd_o-x5YCzPfyFqxKICGhN3BxluL_eP-YV1fO8nlNgeb6PNyXPnebAnlmrtabHpNJutO6a4g9gDb_lhqDq6RsvK9ie57vrfI1tzWfSRrCAHHfob_fibUzh9zZj8CMOatt_YYjicbFe7Ha__7CMmrew0_57_Mz2M_1cKcgrNP2bQz--UzxWjrNh4OwcILh-w9fd8DJPZMcevJSnqMxIyiohA0CrYTzTmLdtu9s-ixi9NiQR5kwWzqnzD0VEmGYvVngj00Sqe5Jfxf2cV_5j5KTxIycx27xi6PJGnOXXGdVGBXJ2JYr9B9Kt-7kVwus4apqA6XOhngKrpmtn8EGf3-ArPy5La5ur9omu5iqID5EqOOpaqnA5GXSfREgs4PUKJsd28U502_1sztRxg9R9NrmyXxi6gf4b0XoHqSAm0K6Js4TIrLHtA12BQx1j43-vMsBIMMb2-EDivQej40tNl-8EEFpal_kJa0URS6HHyoatk-iHlkGpkyaK1RbINgasUMYf0e3d529S67UbX_Br0ED8Enjv6wT2wGhfuUuSjvubKokpjs-YL4zg6YmrLjYClRFQZZwFK1eIrHf_3Wm9x4R36SAKjVqohtsLxgylfEwyRo_SW0HmhcxZchF7onUiNp45MhO6F8LrQML3JHg_ZllCXtF91LW6oHKeX1hYBsbSWUIFAHk5tTx5u6UkvaKw2ANVGBeEws5IkSi3kzcEp2CfxmGqjh_NzITn9WebPjbbSOwLCA9GG6grL5R2uVedh-5_LybuFIuubdndJNNOUYlz52-QCVLiNyyxoe9NifarXtZ0RHCO3KDBD5RA7NDclIgM3wwShRNlo73LcpB_Au61l4OqFScFnRQDYsDy4gEea1W8fRUxZZ2BJ5RlLn2EqivSQI2COhzj8LdsNoeMPsATR5-y6473tGrqDlFgSWEH9noz38bXHsDRel846UBsaoCCLw3_etEFG89aA4h3xPwAdXyWwqCOQ4WSXvJRHz8KHOaxveuEeyZ1K5kpjwIfbmL5RSOJgPNDkEe8f762l7er0QMxo_YwpzhIW7c8-AQ_I0DkpjC9jWw_Ee8TQcNnT3S2r232Ljzr70MTTxqgvxXtIU6-bEe3jw3JyaZwjtC5VGnGNvhUnnsIv1TI8lMRf41KdSqr1z7RZNdKVoEiNcqDmkZeEjle-lRXeLL6XT6ULhBYAdXXqbkkT372yWflzDHzq6obJfjxn_MkTX81KGNCH3w1p8UwDAISwXn0k_GxaUMsReNggrPVxCLmndJEvPUd1ZullQN8fPwkGWCoB6cA2iT7QHUAghZsLKwr_vnWy_xe4JD6xIllG23311yqq68L8v-oFjKaS8dDC-hLwjwJc2BUJnyyFLoldFE88Wub5_Jl-tbIjNIQxzeEg9_oGAkmvPxHF2zhTno0ZKLML3wzlc9P2_6100dhhjk2V2fV5eiqp3tpIqVgT22eI3ALRi2cWzi3HyXvgF5k0OdkmKjN6gshHb_VI2TXWN53-deRWOJfbbXTOFHZA2cqoUq8ln05TMs_IrucGpZLZOl1w7GpLzIW8Nf4QFif6RGgQxZulLxftfRKh1zC8GH4HhjNMhg4brREu-XR931V7djBdNGxU7uRm_pQy3Gv5z1-Ll3Ac3QYFoCt_gkcc10voWvuOWeHN6B-OpA4aHs9REHIQW6wh-j2HRQLugEfhvgsZ5YkjOHrw_J7eoVvsCHy3YeLy94LeF_Coi3cu_BahTi0U4RTih0zrauNjlJ0N-RbOMdwvCzlfMqF4ZsFUqSH1pKDp3rJi6XzdE2A-7uEHf30DZKki6jVeIfraDo7v9ddEjRf7qHqnz6L8qYiCufRgbBN3DYU9z6aqEogsCxHmLDLrzh_Fu9xvLEP5Sdb58Pg6waAxoAhtRs0UgCJmi0e7DJG50jjL3klHvl4Y-CYq4VmWPVMSmu-LmwZJMKqIaxazgg_zhw2xH3qz7bBDDGaaPE_l6jftnm6VRSm4WLAXBEGGvYdHEBRLQI1XfHsUVSjsAY8m9aSJSP82WL6tSRaW2PzbX3Niqa6VFyDxhWT4xgsuTFTZppb_9FaonyCb7lWtM5PI_kXV_p2yQpKGYkPpaP7daOCJorp6qrV7MEfl1AurWrZWr3yCjHSEtMONPJ03cvD2Hg87BskuUiKAEt5KDfXZ5vy_5AC8bN8zDF0sUApwmvf8wNTemjx7MZ8EMuQEbxD2w2fjtlH5GMZphc-NyxFERaRF6s_-dJfLnyubaJS7IgedLBZ1eoAeOo5ZunYe7nvxrbQ839KTl4SKBQBIKENwifX9EVaNmP_InIGc538reI0eEpra-wdhewd6yMP1Y3fDS0MpFufNogQes48DVGLHz51W5ZnPQ_F3OoLoGdltiE--gLzM9HT4M21MI2x2TJqOdX1yXtct9zSlLoF6MfRcR4HjxuQyrpY5ak34FpKBDMks1XrwZO_VEluBneVhz7pL7vYpihez3R8b1-oiu7bTkN6SiDw3e_NGqwf0m0T1TcPsZoPf63-Q_rB74XOexhKbtZBV-vEvkrB7ERlEYZhuC2e60JvuakXem0iRIy8VVUMnqrTJKBoKR0q70rAVcdAHD6NBtDeW0pX4Kit7iQ1eDGkmUZlp4LL6-XZyXkqQVVgQgEpSltR8Ko5-fl2EqRzI9sI1G34wE4pYWA8X6nd_501EdHRyAwfKPOJyGXXbx1tYEpo1PvMULM9jajjWVj8VtIh0JzhAQZuEvc5Fdr5VmY0yWUYKMU2iSElcuj8g0VuL4tkNrWK48bdBh0dY-mJfPiqI7HAoCjLEdy-JJrOnRQTs8R3aobpsutNdHY84fQn33MdhfddyZF5AEOvvkbTXrfmJv0Kl2vkIILo9VQSwBNC8g6l5QtfMFV8O-gplUgvPy0_fExlDkh93MtjNuj4GM9L59KZsLEBxcrGtz7NMfj82xJ2QfFoH4IkTa1dsSguG3JoK3wIgzkiJna9AQNXcgTk0ubXjc3TmrWc336IdfsLHer9d-LoQcNL_LzxuAHRMic9Dqdgi-1IcETL7KoWvBqqIOA69YxjaI2jE5uDNyrkxQ_3dltR-4lGAG2TCng296PmLTNlWkwit5wKwE0wRKg5Eg4vwCxWd7G3kuWPqywzXRD82XpCDOuoeaBLMTmRdeTdeuoScXj-7UwQivs8_eN1kSEUD4kG5togpiz_edKAHH6woz4cCVEzfCSgeOZOlfKWWW3zV40FD1sjMbWQuNibInDBvP-Otuz8hddOiCM3bS3x0Kk5M-C_Egnu9MqBs4aRG7gPG5I0WY2cJn3qgs4ahRdbeFjWUAjJweSUwdE1svdKjJIGG019fW75sWOpro6PGyxQC6teJo92iEgrpJmpJLDxiAfn2dCt5h8Lx3Nw95hBOQ0UR3VXsB__60DPUYZRpViP7-0OGt_k3yPzQ5qBWMrUB4InNYTmXx-uHvceyC-GnDwac4feShRWZwjgjdElGJBSv2YEfe3zvM2AgjDMMmV-SvNsN_8gBF8-1FZAXzreoV25neT8u8AYjAgbvklKICISgbXmPR1qfBkC3FpYrmActmUJhcK7rfnKR9eYyDl9WKyhlfj7rqU_uBQpxkAqlIQ9oCcotERmJz0Z4ITIy7IJEv9FO74B2lmstFEAfATyVhHaIWVW721kqUAr5-bEJC2TuIF8QQQijYEglzcpVPjo60GUN2h3E19GfTKSVcogGZfvXKDjavQCoexNDqgU5rQk0AoP9ZIu6vYsIlMw0Y991p3hfHtDPdfd0M2xFk6bZQyrU8xrvyUalsER3P0vIhAFtwYaVfMVt4G6O-xJOTWFaBY_lKSW-m6UlJkcZVxqUTYVbm3_lqVeNuG3HJqHgzYYPMbWU7vYtnfJE6tfXAa8exF_XBcL5UAeTjzlnc6hbpoZmfbnlTvd9rE5T7RAgPPy6iUhnNmN4YFpvvhDa-DAaak0_T-W5sqptS3ZLKOYK-ZAuQKrgA94pnkYTCpJ_JGfuJY-5fHR-NflLekranPZSa5npWf2Kva8PUSZfA2kVh39oHu2rqGy4WysqxwV7e0kgiKSdY0X_jm6up80SHVmvVec6lDHBHCn3uoRjuHqxxetKNA3Ubvn-sS_izC-oiag24-I4o9mpwXaZAyJmS0yfXOUJTwcd1knE6EHNeJEKMwabGXGBsEHfSZ32Cge5rv1w2Q2SveDXXpMTB_MVaEkpq-lI4ajgbkrbaI2-pTs7fqe9RqDmv5IndNCthyUzdlhzTXZivKJ8G7ImvF9jHiQf2hEbW2YYjfdoCvcbXI14Dw-KT4u62m2zZYYbEsFCe6PBbbGGpfEWf_eGFGQkuCA7ET04VY52bSwYb3tcdewaam2CQGrTDzKUjGV9FNw46gHhnB_8m9mw3aFc-vii_HXCR1fOrUqColj6UqhvFizsmTDJtMo7D-2VPNAANELm-WG9SuvbFzfjzoGgwTUEL_HLX-E4Zi_fDXNjq35XUJ1nAuNNef6xfnvDCQ4e6zhoCBdIlAD9XJ7yozyjtv6TN7gPC7BIv-fXim8SfJtLs01ulv3gt0P4i8qunmR9gyqTXu8jeEYjl_X30qFSnuCP40K4Eo0qk00MgLzccqcuDn7rKXo5VOSdjPcY_RlcaChkv8OgPK39CcvJ5ls-qLohIOOVKexOVAYtDfnPkVf__HYH7jYz8TUVT4KrqI1_pdQePcUsGE-Oxj9AvoRxlp_eaCdMoPUF7fo9rsB-pbNNSOpHiGAQLl1L1IsYTITNBKX5dhBNKbvZHOtZ7sMOxphvc4ohVA-2PjdDBWyps57sIRAxDbFQjYZc7S2gKJNV_6tZicgaFcnvubAxvcjWWXDu9xuoL4PVr5TViaZXXm8_o3dXYMoAlJHyOvA-QiE_qnrlXWJi0urqYJKz2G1ToeIRI7BlM16WAytpJoqtOyleDW7h1vc2KMJ0FLVdATt37fkrhNw4tlRHj28OGieoIW8m6pgx6AASwo9Rb3nBb9gEkrmA6Tgl4sduROUZeHzn6Qj4cHVY1s6tpafV7GnU9_lLeQqBpCwho8dsXlc43cl8t2afPsJMF30LtN71rczTa34vcDCGbRk-DYd47JGtLylLACFvEpsI7g022cOeaL2KX_SdVtpSpF4iUUIuFh-6mJwiXafVwye3l4iU2tzfb6-7pYZLilTx436zM2qeedUN6dS6MvJZtE9CZ-htqAtuH5IRS0mddfQ8H8BFj4uBRl3KqffPLa-sHMCFBf0BnormK4uA_LiKx_K7vc0Rz0249dRvUolh0C_FCZ2Te9sfJ95s55C4OQYVqyDxiAXT8NltHEHWx_4PVh3dtXds7wCSzf2xS2_zk_N44LLd2G",
+        "summary": []
+      },
+      {
+        "id": "msg_094fd1cb76fe3636016ac9fa43519887d097a1db19b55fc3fa",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"모든 5개 porosity 점과 score 계산이 정확하고 최대값/해당 porosity도 정확합니다.\"},\"B\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":true,\"citation_semantic_support\":null,\"note\":\"계산 결과와 최대값이 모두 정확합니다. 첨부 evidence는 답변 계산을 직접 뒷받침하지 않지만 본문에 실제 인용은 없습니다.\"},\"C\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":6,\"hallucination\":true,\"engineering_contradiction_count\":6,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":false,\"numeric_accuracy\":false,\"citation_semantic_support\":null,\"note\":\"평가한 porosity 점들은 맞지만 모든 score 계산이 +1.8씩 잘못되었고 최대 score도 오답입니다.\"},\"D\":{\"exact_correct\":false,\"partial_or_better\":false,\"claim_coverage\":0.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"사용자가 모델식을 명시했는데 계산을 수행하지 않아 요구된 결과를 제공하지 못했습니다.\"},\"E\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.0,\"unsupported_claim_count\":38,\"hallucination\":true,\"engineering_contradiction_count\":38,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":false,\"numeric_accuracy\":false,\"citation_semantic_support\":null,\"note\":\"요구된 0.03 간격의 5점 계산이 아니며 제시된 거의 모든 score 값과 최대 score가 식 score=100*porosity-2와 모순됩니다.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 8168,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1058,
+      "output_tokens_details": {
+        "reasoning_tokens": 501
+      },
+      "total_tokens": 9226
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "openai_closed_book": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": null,
+      "note": "모든 5개 porosity 점과 score 계산이 정확하고 최대값/해당 porosity도 정확합니다."
+    },
+    "openai_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": true,
+      "citation_semantic_support": null,
+      "note": "계산 결과와 최대값이 모두 정확합니다. 첨부 evidence는 답변 계산을 직접 뒷받침하지 않지만 본문에 실제 인용은 없습니다."
+    },
+    "qwen_same_evidence": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.5,
+      "unsupported_claim_count": 6,
+      "hallucination": true,
+      "engineering_contradiction_count": 6,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": false,
+      "numeric_accuracy": false,
+      "citation_semantic_support": null,
+      "note": "평가한 porosity 점들은 맞지만 모든 score 계산이 +1.8씩 잘못되었고 최대 score도 오답입니다."
+    },
+    "agent": {
+      "exact_correct": false,
+      "partial_or_better": false,
+      "claim_coverage": 0.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "사용자가 모델식을 명시했는데 계산을 수행하지 않아 요구된 결과를 제공하지 못했습니다."
+    },
+    "qwen_closed_book": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.0,
+      "unsupported_claim_count": 38,
+      "hallucination": true,
+      "engineering_contradiction_count": 38,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": false,
+      "numeric_accuracy": false,
+      "citation_semantic_support": null,
+      "note": "요구된 0.03 간격의 5점 계산이 아니며 제시된 거의 모든 score 값과 최대 score가 식 score=100*porosity-2와 모순됩니다."
+    }
+  }
+}

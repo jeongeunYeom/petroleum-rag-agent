@@ -1,5 +1,9 @@
 # Final benchmark v1 — BLOCKED (not a performance result)
 
+Historical snapshot only. The three-system main evaluation was subsequently completed;
+see `final_evaluation_report.md`. Gemini remains `EXTERNAL_PROVIDER_BLOCKED` and is
+excluded from the main results.
+
 The benchmark was frozen before system outputs. The evaluated product remains `main` at
 `fcd89e6e93fc866f4a237ee13c7910dcedac44c3`; the evaluation branch did not alter
 product code or older evaluation records.

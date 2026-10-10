@@ -30,7 +30,8 @@ METRIC_KEYS = ["goal_success", "exact_accuracy", "partial_or_better", "claim_cov
                "llm_generation_seconds", "calculation_simulation_seconds", "verification_seconds"]
 POSTER_COLUMNS = ["Goal Success %", "Exact Accuracy %", "Partial-or-better %",
                   "Claim Coverage %", "Hallucination %", "Engineering Contradiction %",
-                  "Numeric Accuracy %", "Citation Correctness %", "Median Latency (s)"]
+                  "Numeric Accuracy %", "Citation ID Validity %",
+                  "Citation Semantic Support %", "Median Latency (s)"]
 
 
 def mean(values: list[float | bool | None]) -> float | None:
@@ -165,7 +166,7 @@ def fmt(value: float | None, *, percent: bool = True) -> str:
 
 
 def markdown_table(metrics: dict, tracks: list[str]) -> str:
-    lines = ["| System | N | Goal success | Exact | Claim coverage | Hallucination | Numeric | Citation | Median s |",
+    lines = ["| System | N | Goal success | Exact | Claim coverage | Hallucination | Numeric | Citation ID | Median s |",
              "|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
     for track in tracks:
         value = metrics[track]
@@ -179,8 +180,23 @@ def markdown_table(metrics: dict, tracks: list[str]) -> str:
     return "\n".join(lines)
 
 
+def supplementary_gemini() -> dict:
+    records = [json.loads(path.read_text(encoding="utf-8"))
+               for path in (HERE / "raw/gemini").glob("*.json")]
+    completed = [item for item in records if not item.get("error")]
+    errors = [item for item in records if item.get("error")]
+    return {
+        "status": "EXTERNAL_PROVIDER_BLOCKED",
+        "attempted_unique_tasks": len(records),
+        "completed_unique_tasks": len(completed),
+        "model_ids_observed": sorted({item["model_id"] for item in completed if item.get("model_id")}),
+        "http_429_observed": any("HTTP 429" in item.get("error", "") for item in errors),
+        "excluded_from_main_denominator": True,
+    }
+
+
 def write_report(benchmark: dict, rows: list[dict], metrics: dict, stats: dict,
-                 invalid: list[dict], model_ids: dict) -> None:
+                 invalid: list[dict], model_ids: dict, gemini: dict) -> None:
     by_cat = defaultdict(list)
     for row in rows:
         if row["valid"] and row["track"] == "agent":
@@ -203,7 +219,7 @@ def write_report(benchmark: dict, rows: list[dict], metrics: dict, stats: dict,
                                     f"{' → '.join(row.get('action_sequence') or []) or 'none'} | "
                                     f"{fmt(float(row['goal_success']) if row.get('goal_success') is not None else None)} |")
     agent = metrics["agent"]
-    other = [(name, metrics[name]) for name in ("qwen_closed_book", "openai_closed_book", "gemini_closed_book")]
+    other = [(name, metrics[name]) for name in ("qwen_closed_book", "openai_closed_book")]
     best_baseline = max(other, key=lambda pair: pair[1].get("goal_success") or -1)
     main_sha = json.loads((HERE.parent / "final_benchmark_v1_manifest.json").read_text(encoding="utf-8"))["evaluated_product_main_sha"]
     category_table = "\n".join(category_lines)
@@ -234,23 +250,31 @@ def write_report(benchmark: dict, rows: list[dict], metrics: dict, stats: dict,
 - Evaluated product: merged `main` at `{main_sha}`; evaluation branch only, product code unchanged.
 - Frozen benchmark SHA-256: `{json.loads((HERE.parent / 'final_benchmark_v1_manifest.json').read_text(encoding='utf-8'))['benchmark_sha256']}`; freeze commit `a88fdc4a8e57e46c9f4775e8a3e07fcbb5360f2c`.
 - Frozen tasks: {len(benchmark['tasks'])}; invalid: {len(invalid)}; valid: {len(benchmark['tasks'])-len(invalid)}. Invalid records are preserved in `invalid_tasks.json`, not silently revised.
-- Actual models: Agent and local closed-book `{model_ids.get('qwen')}`; OpenAI `{model_ids.get('openai')}`; Google `{model_ids.get('gemini')}`; semantic reviewer `{model_ids.get('reviewer')}`.
+- Actual main models: Agent and local closed-book `{model_ids.get('qwen')}`; OpenAI `{', '.join(model_ids.get('openai', []))}`; semantic reviewer `{', '.join(model_ids.get('reviewer', []))}`.
 - Agent used autonomous `POST /api/research/goal-runs/from-message`, local Qwen3:8b, `hybrid` retrieval, 12-document/18,976-chunk ChromaDB, web disabled, Python as product policy allows. Four clarification tasks had one prewritten reply and same-run resume attempted.
 - All baselines were one-shot, no tools or web. Track A closed-book models saw only the question. Track B received the *Agent's captured KB/FIG text evidence* for each identical question; this does not independently evaluate their retrieval. Figure pixels were not supplied to the text baselines, only retrieved figure notes.
 - Temperature was zero where accepted; Qwen additionally used seed 42. Runs were sequential by system, not randomized in time. No output-driven product or benchmark tuning.
-- Scoring combines deterministic numeric/unit/action/provenance checks, structured expected claims, and **single-reviewer AI-assisted semantic adjudication** (`{model_ids.get('reviewer')}`, prompt `{stats['reviewer_prompt_version']}`). This is not human review. The reviewer saw anonymized system labels and source spans; all raw reviews are retained.
+- Scoring combines deterministic numeric/unit/action/provenance checks, structured expected claims, and **single-reviewer AI-assisted semantic adjudication** (`{', '.join(model_ids.get('reviewer', []))}`, prompt `{stats['reviewer_prompt_version']}`). This is not human review. The reviewer saw anonymized system labels and source spans; all raw reviews are retained.
 
 ## Track A — End-to-End Product Comparison
 
-{markdown_table(metrics, ['agent','qwen_closed_book','openai_closed_book','gemini_closed_book'])}
+{markdown_table(metrics, ['agent','qwen_closed_book','openai_closed_book'])}
 
 These are *not equal-information conditions*: only the Agent had retrieval and tools. Closed-book citation/retrieval metrics are N/A, not zero.
 
 ## Track B — Same-Evidence Comparison
 
-{markdown_table(metrics, ['agent','qwen_same_evidence','openai_same_evidence','gemini_same_evidence'])}
+{markdown_table(metrics, ['agent','qwen_same_evidence','openai_same_evidence'])}
 
 The Agent row is the identical product output from Track A, not a second Agent run. The supplied evidence is whatever the Agent actually retrieved, including retrieval misses.
+
+## Supplementary Gemini evaluation — incomplete due to provider rate limiting
+
+- Status: `{gemini['status']}`; model ID: `{', '.join(gemini['model_ids_observed'])}`.
+- Attempted unique tasks: {gemini['attempted_unique_tasks']}/50; completed unique tasks: {gemini['completed_unique_tasks']}/50.
+- The earlier blocked snapshot had 20 completed tasks; 21 additional tasks were captured before the next 429. All 41 successful files remain untouched.
+- HTTP 429 observed: {gemini['http_429_observed']}. Earlier successful raw responses and error history are preserved.
+- Gemini is excluded from the 49-task main denominator, all performance tables, bootstrap comparisons, and ranking. No Gemini performance rate is calculated.
 
 ## Secondary quality and latency measures
 
@@ -273,6 +297,8 @@ The Agent row is the identical product output from Track A, not a second Agent r
 
 {acceptance_table}
 
+Example tasks are the first frozen-order item in each category, not selected successes.
+
 ## Statistical analysis
 
 Task-paired, nonparametric bootstrap percentile 95% intervals use {BOOTSTRAP_REPLICATES} resamples and seed {BOOTSTRAP_SEED}. Full differences and denominators are in `statistical_analysis.json`. With about 49 valid tasks, category subsets and rare behaviors (especially four clarifications and four figures) are too small for strong significance claims. Intervals are exploratory uncertainty summaries, not independent repeated-system measurements.
@@ -292,9 +318,9 @@ Task-paired, nonparametric bootstrap percentile 95% intervals use {BOOTSTRAP_REP
 
 ## Poster-safe conclusions
 
-1. Agent goal success was {fmt(agent['goal_success'])} on valid tasks, versus the highest closed-book baseline, {best_baseline[0]}, at {fmt(best_baseline[1]['goal_success'])}. This is an unequal-information end-to-end comparison and does not isolate the benefit of retrieval.
-2. Track B holds the Agent's retrieved text evidence constant; compare the same-evidence rows above to assess orchestration effects conditional on *that* retrieval, not on ideal evidence.
-3. Agent median response time was {fmt(agent['median_latency_seconds'], percent=False)} s. Any accuracy gain should be interpreted alongside this latency and the small, single-reviewer benchmark limitations.
+1. Agent goal success was {fmt(agent['goal_success'])} on valid tasks, below {best_baseline[0]} at {fmt(best_baseline[1]['goal_success'])}. This unequal-information end-to-end comparison does not establish a retrieval benefit.
+2. With the Agent's retrieved text evidence supplied to both systems, Agent goal success remained {fmt(agent['goal_success'])} versus {fmt(metrics['openai_same_evidence']['goal_success'])} for OpenAI. This is a generation/orchestration gap conditional on the captured evidence, not a causal isolation of either component.
+3. Agent median response time was {fmt(agent['median_latency_seconds'], percent=False)} s. Local-versus-remote latency is not a controlled hardware comparison; the 49-task, single-reviewer results need independent replication.
 
 All per-task grades are in `final_results.csv`; raw responses, traces, source IDs, citations, calculations, latency, and reviews are under `raw/`, `same_evidence/`, and `review/`.
 """
@@ -315,15 +341,17 @@ def main() -> None:
     metrics = {track: track_metrics([row for row in rows if row["track"] == track]) for track in TRACKS}
     invalid = json.loads((HERE / "invalid_tasks.json").read_text(encoding="utf-8"))["invalid"]
     model_ids = {"qwen": MODELS["qwen"]}
-    for provider in ("openai", "gemini"):
+    for provider in ("openai",):
         ids = {json.loads(path.read_text(encoding="utf-8")).get("model_id")
                for path in (HERE / f"raw/{provider}").glob("*.json")}
         model_ids[provider] = sorted(str(value) for value in ids if value)
     reviewer_ids = {item.get("reviewer_model_id") for item in reviews.values()}
     model_ids["reviewer"] = sorted(str(value) for value in reviewer_ids if value)
+    gemini = supplementary_gemini()
     final = {"benchmark_sha256": json.loads((HERE.parent / "final_benchmark_v1_manifest.json").read_text(encoding="utf-8"))["benchmark_sha256"],
              "frozen_tasks": len(benchmark["tasks"]), "valid_tasks": len(benchmark["tasks"])-len(invalid),
              "invalid_tasks": invalid, "model_ids_observed": model_ids,
+             "supplementary_gemini": gemini,
              "definitions": {"hallucination": "AI-reviewer flagged fabricated claim, not missing citation alone",
                              "unsupported_claim": "fraction of answers with at least one unsupported specific engineering assertion",
                              "goal_success": "correct complete goal with deterministic numeric and applicable tool/provenance/clarification gates",
@@ -362,13 +390,17 @@ def main() -> None:
                           for name, key in zip(POSTER_COLUMNS[:-1], ["goal_success", "exact_accuracy",
                                                              "partial_or_better", "claim_coverage",
                                                              "hallucination", "engineering_contradiction",
-                                                             "numeric_accuracy", "citation_correctness"])},
+                                                             "numeric_accuracy", "citation_correctness",
+                                                             "citation_semantic_support"])},
                        "Median Latency (s)": round(value["median_latency_seconds"], 3)
                        if value["median_latency_seconds"] is not None else None})
+    agent_same_evidence = dict(poster[0])
+    agent_same_evidence["Track"] = "B Same-Evidence"
+    poster.insert(3, agent_same_evidence)
     (HERE / "metrics/csv_input.json").write_text(json.dumps({"final_results": {"columns": columns, "rows": csv_rows},
                                                                "poster_metrics": {"columns": list(poster[0]), "rows": poster}},
                                                               ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    write_report(benchmark, rows, metrics, stats, invalid, model_ids)
+    write_report(benchmark, rows, metrics, stats, invalid, model_ids, gemini)
     print(f"valid_tasks={final['valid_tasks']} output_rows={len(rows)}")
 
 

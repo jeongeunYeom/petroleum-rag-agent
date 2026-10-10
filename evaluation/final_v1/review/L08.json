@@ -1,0 +1,201 @@
+{
+  "task_id": "L08",
+  "prompt_version": "final-v1-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_0e9952f0a185251d016ac9f8940d7c87d09932923026218a72",
+  "wall_seconds": 13.512,
+  "mapping": {
+    "A": "qwen_same_evidence",
+    "B": "openai_same_evidence",
+    "C": "openai_closed_book",
+    "D": "qwen_closed_book",
+    "E": "agent"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":1,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":false,\"numeric_accuracy\":null,\"citation_semantic_support\":0.75,\"note\":\"정답 핵심인 OWC-FWL 차이와 FWL에서 Pc=0는 맞췄지만, 근거 없는 기체 압력식을 추가했고 액체/기체 압력을 동일식으로 둔 부분이 source와 맞지 않습니다.\"},\"B\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"모세관 전이/모세관압 때문에 FWL과 OWC가 다를 수 있음을 설명했고, FWL에서 Pc=0 및 압력선 교차 조건을 정확히 제시했습니다.\"},\"C\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"모세관압 때문에 깊이가 달라질 수 있고, FWL에서 Po=Pw 및 Pc=0라는 핵심을 정확히 답했습니다.\"},\"D\":{\"exact_correct\":false,\"partial_or_better\":false,\"claim_coverage\":0.0,\"unsupported_claim_count\":2,\"hallucination\":true,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"핵심인 capillary transition/Pc=0를 언급하지 않았고, OWC 압력이 지층의 '지구력'에 따라 결정된다는 등 근거 없는 구체 주장들이 포함되었습니다.\"},\"E\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"FWL과 OWC가 다를 수 있다는 점은 맞지만, 이유를 capillary transition/Pc로 명확히 풀지 않았고 FWL에서 Pc=0라는 압력 조건이 빠졌습니다.\"}}}",
+  "usage": {
+    "input_tokens": 9236,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 897,
+    "output_tokens_details": {
+      "reasoning_tokens": 268
+    },
+    "total_tokens": 10133
+  },
+  "provider_payload": {
+    "id": "resp_0e9952f0a185251d016ac9f8940d7c87d09932923026218a72",
+    "object": "response",
+    "created_at": 1791621268,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791621281,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are the single independent AI-assisted semantic reviewer for a fixed\npetroleum-engineering benchmark. This is not human review. Judge ONLY the five\nanonymized answers against the supplied expected claims, numeric gold, source spans,\nquestion, and evidence. Do not infer system identity. Do not repair answers.\n\nFor every answer return:\n- exact_correct (boolean): all material requested parts correct; no critical omission.\n- partial_or_better (boolean): at least one substantive correct requested part.\n- claim_coverage (0..1): fraction of expected claims accurately conveyed.\n- unsupported_claim_count (integer): unsupported *specific* engineering assertions.\n  A closed-book answer is NOT automatically unsupported solely because no source\n  was provided; only count a clearly invented, source-incompatible, or unjustified\n  specific assertion. Do not penalize uncertainty or a cautious statement.\n- hallucination (boolean): at least one fabricated factual, numerical, formula,\n  source, or engineering assertion; missing citations alone do not qualify.\n- engineering_contradiction_count (integer): explicit engineering relations contrary\n  to expected claims or cited evidence.\n- safe_refusal_correct (boolean or null): applicable only to unsupported_formula.\n- false_premise_handled (boolean or null): applicable only to false_premise;\n  requires explicit rejection and corrected relation, not vague hedging.\n- formula_accuracy (boolean or null): applicable to calculations or explicit models.\n- numeric_accuracy (boolean or null): applicable when numeric gold is supplied;\n  check the correct output-to-value association, not mere presence of an input number.\n- citation_semantic_support (number 0..1 or null): among actual citations in the\n  answer, fraction whose *specific cited evidence excerpt* supports the adjacent\n  engineering claim. Null if no citations or no evidence supplied. Citation ID\n  existence is independently checked, so here evaluate meaning, not formatting.\n- note: brief reason, no chain-of-thought.\n\nKeep all named keys in every score object, using JSON null for non-applicable\nfields. Be conservative about unsupported or contradictory statements. For missing answers,\nscore exact_correct=false, partial_or_better=false, claim_coverage=0, and leave\nnon-applicable fields null. Return only a JSON object with key 'scores' containing\none object per anonymous answer label. No Markdown or extra text.",
+    "max_output_tokens": 5000,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_0e9952f0a185251d016ac9f895254887d0914f9ea27d3fa396",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyfihRmPoKmN6HEhtqP011ebPL-_kErreoQPz8PtDvyEgYG3kScXEWpUpVIkGfdrzrKnmQK854sQVCqZCip5UeX2z0gJYTWBJe8_ISMzkQV_-TNBtaXXmQOlqvabbNCRtjRTKIt2cLrDsGLeyae72WtfZ2U6nLf6RrPk8aWFKHonNqS-YJULkZxS1gBP3NFps5MjKZLYh7fzDgaIlgM6Xsv42oSA4l4oHUhyPL2A4d4hnSJI8YoRTSgtzkJWLNtIQopnsaa6-0B2BkV-i8GeF9eCApsACluQobRoezLc69pROmbsuuf9boEjenXgETexkPBvw-VJzONvTp9xH0vzICEMHGTJY77HgoY-UWku__-LGl6or91-W25mIGIIDEZJUUD8aiK51oo8GUUSymx5CGvCk6bFyd-V8G3YW-GdbR_TQtvqZzBe4ZUACKmKE45fQb2FnSz3nz7CY3Bo3ATb1NLXTaCkQ4IwcFU8B4Jhb9B5SxzBrPX5mfC4e9Z18oL7stuFTLTr-PEYQon1sYT7amKFvvCMDY0chaFYrl5WuJA2ii-it1L9YxLx4-B7zGx13_1TQJ35Wh1p5AsmdJWwfCdyAkGkvWeOuG3Sz67xQdaQHmTsB2DyK4ljpbpIURSpHxHdeVEJSQ4Ooc_5Yjs9MHkkJfAxBz33liOpmyAcGGDn2UaIbMyQywHrdilSMn5Bv7234xeF16TciyxIX4-gelRL-oz34U4zMEUz_fJLrVc8SGeagv4vigCP_2JD01LWN9_64oN-Ij4_zEmatzYJpZW5cooCoPmZMPsusMDYxQAcyGv_ke2NLgu8_iBlLZ7uOemkvaIrAcjza_j9EOaEKXIBqh3HThMlOHISz-RkoWZLggbgF91zzy_58Gwy4z6tQqBhbkgAVSH3Bzd0vgp9Hf9bq5d687ersocT3mQLzPNBaBDWYy3ToTPdV-2-noMks2rtvYvR97vSWcgULSiH-qWFqlAkx5Ye5JC_cVHRt4X_GloZgfnWE1eW4pLBV8teC9olbEsx_jxi1G5RSznkPBhjjb_uMq4sSlLfKOPmTZF6B--nl4C5rc6zguH8-lk-porlegKmVOq4OiMh2ET2xtHKFt-cbO7YoAxCf3re9qfsKrYMUk0tAclsyDpf-HZo4AErBPKo6-ewzmJSQA4LnhU7RqoccEEEyTfAdvMkShzBbsrrbV55YS0QFAcJ1rBYvavtrEp0J-p8K6yvmlSsAqutGCb3MXZnvYy3GH13EumVy8ZyH-ekU_RyTh_F9eYCOogGIKkmfQBv8gCktwUpBsift_W8Ae1UvAJgRRIR8uaShJeIviSVrocpZOtmu3XPjxc0viWRDiN-qgAJ9GxjFPWrGnt30McTdlpm-vos5fuTonKnOtq9m5an3lwHV_D2vkrl70jllRPN9jbL6JmqSlsNCmzodEz9nFzjItEIgwJuRieny5NDuedt-AR-08m1Xv9MtVLiVa5soH_wmSvVbqTtYhm8FObF4qWCIxKrotVRZBQFrqLo07M_zSOqCOc6QDogSec21idM0GF5j3C0Vh5wQvXdbTqlsHG_qKJCt3DE4xK5u46ZSlZisPiwZkyt6FPOLSL1CgB-B8uQtwqwUg2K8qG0ztQ44bBRKOVk-jc3_r3fkf-klkbtCSEQmgUzrbSBymDl-A-gaEXPyGj2RTbU9XXGqydqrH5B9uL7LD1dLntBDLnlu1WQR2hAspmnZV2z8TpcHOQMGyHgnAZdJ6pFMTZJcx5IUrJ64jZ8anLZUGnxMqDYv8GT_1MeqYFbo7ZjagY88pQKsaEQkUoTgeIaZ61QOvSlQh2Gb9xkunSAAlVupFMBqC7DFU4CctowonZBMlnZ-RGDfQ_9RuWv7zCoky96EqFq1A-FWYcdM5WoLAtiMqtNEiKyRtw9uwTFwi6YIDe1c-9Ki0RfS5teEwlsQVwXedqns6b517Ss0jAPn9znyAH3xE0NRaE6WzKdJR_B0BeQFledr6u2KkcuTTspoRWLpiGj-VBGpUjXh2n3pQPvlTBu0ZwO1dDc87EI7XqPxB0iU34I_JXSBEmNt7gFwum05g0iSHwI5b29nqG2SPtaAPs93ashwMPt_j9J7-Y_Zul38i6eTIQcCZmayB3iSr2K4cp1zp-l8ut-3k7J0dNiJXeJF_9na2FxGN_mhdi2ktwiSBmhjvKoCXKkV-Gq_J_igkXF04xMQOyjGEHJscDfc2AnRuTSkIx6u4jhHDxNlzZD9ywtc4pGEYzd4OoTO0h_EghbTk_35t5HyviBTJ5npQiPZUQ192Mkvw9SIeE8RnATYT3zc-SsDBk8fRUcJtsge-35MI7nX5y7z6zdDDHAkSK6SMXXMfSNbT3xakZoRZaFk1GQ7x-u_zAuj0tb7hVmZVc4-5d7OhAPT0NH-8VU-THmelaIW6kksP3KNYyuAdrZ7GlhbRHeOSJ8_2yXNaQMb3MA4anj05GDBUY_IQx8IZ3XWpTkbFMy9A6ZH1TQV9mSmVi4YgevVlqu7Ea--bfi0ew37ZGswU3kG2jCMUhdZ-KN45RXCpsUXXNDPns-kycsASXOZV4UPnXqMJXOgUtFGUaDl3-zCy8W_M7iE-WPO4LZflhxRdhDdt5iSeMf-tfLKXc5vfsammmZ1BK3AqkeULciiWhzscXrCc6VxlnIE4XVwleia-ZwnQ-ThF6S5OrT1ufTU-halfpp-HKUVTH3vyTkNcuB3B3_uf3Kv3Zd2qTLdJnsaDAjnC48_VDw4macJOrFDJwsqwUUnldUZ-LQEbwo48hqXUtEA_6CuBr5nVk3x_aou_a6aQ3sQtd8fx0sTHLBKlZFHDuRX5Rv29D9fPdZ1b0-RQk3C7Gwaitbr9JbES9cuEi9r9Ajv3S2ZUt5jeHr4Cezu1fupRqGEXTjrzFygkz3z-OF7LMNUR9sYNy0RoXS_i7gCVAMk9kLQLJ-yql-9rkWqKEqdiXgTMxM1Q69FVh6XDlK7YmNccfSglX9SBaAmlKf0bzvrjEQZg7ZATJjsYdVm2wTgB1OsspRIbQsxAW2lQtnZcg_V4W2FLKtejO1DW8vmcISPOU54P1EWpcKjrksTzaS6WXrNszT0OfSF0IUG5psIw45KTsedpHPRKp8zma0HsBREDAl0_y7V9nldU0ghVBh7HSTDWObjAXU6ZM9FVqf8v_RIArLrEX-X_yzifxNfl4GIjrkmpLYB0kkooT3dSEBXOTDL5r54-FUCN79UJeTHVdWqRZ2YixgHGgW87edXBQRSVUoMKfYGncpi3ot1IX1tSUfkItU5hRLzfMytu20mLDngqvCvTPUI8MpP5i6-k7pkei5iY3qA8ZBwbMcmerjjsftLdvh3oLRoUo9PwyG9xKVYoCP4svNKzCqhvvev4ZDlVm9bKWAkILbOBoEte_BJoukXdAuBdP3ODY9YifRGZsyvhEMkGU1KYd6Dh1MFF_P1s95BffZZdbICSC61RsT8zsZlQSJ9fGs88LUMMG8E44p9sM3kTD0puWPHh0B_Ftv5UE5Ba4gIjtARMki1tiOTsmJaVyuR-A3epp1ZJ3zYbUg1fXgzek7CZ_6yV_sLC6fLtd0doV5PEPe7MG0a49X9Gg22vVPyrYCFuHTL12Zl7Cr1g3Cye9UBTG8wwwxuMZ5uNFfUcdIhi_ASUwSxveeYWv75E1BLZBMi5HX5hKDntp6ERWbRqtYhndkTcGPD0jjyGLkFra2Qs8hcYQ1iGWNqlT96f2Je-bzzG41zV4WzJIOny0Q8lws3pyndt1a-AsRFNT-eh6Gv4GT2S0WiBOKKSsCd6cTbcgSDMqzBJ_dKccFaxlmdegNPs-iDHMDBOoCJbZZ3vz-znezhooZ112XqDUIYIcD3yUtv4evwudZu45SO7e1oyLQR9RBbpxSwOXhN9s3GR1VqBuI-MoCIc-17vylbAL4vrMt5TGxad6216nMJ0ShOsu4KldA63s2vz1FYQr7tY5SAdyo-nrPmphO1WrIA1sQzZmkZRgoRF21_FLZFe4hrTRyd3ytzjKJvOkY99Vkn1Nek4daR0aFCL9aiSkWSOmatKAS-lebQejmx6CaZ2RsW0et9ZdOJAa9YGfytFIKA5OC0p9RAE3b3A40zP3If0153PV4N7lxBpQ1W3RXO2cYv-mhHhxgdDDDX2_COsLdktkIuvn2hlZH7tqie-07yDIOOVKHIFkM4bQZzCKYLbYaWOzKCUWEe2e3SzarFdZZFSqffVi-iLfQ00PbeSftQximThiFCLUMUkUMSnuiRXiyUIsICEBoBh-oYbUeoXgvwopV18aC_CRViLDtOGezcqXuRAteDiLw-SYJ33jkUGlUmyBYY_bcIyzUEpNzL_bdBgFeQnzbJ0uBfMxoaJ-66l4S3sAQdgVTNcrcVu2VymDOX9feK8oPMrAYoLTGUfNZ1qo6O6KJm5WdiX9MSHOMTYNMoEECI5e-kiyPn0jVVhFsiMJgDvTtWxCErokh3diE9ImGHQkqJ3mW0TtWrNPWmr47YhzMWemlCYxQUNHg9Wd9V2LJJV5buI3mf957-kJdLDQALvYsoS5UyNo78pPguuknQHKkh2ghv3Pk5QmkP2f4SuPInwqYxyfeRa3c_bBvL8mzUiIAFpk7jYPewYeoTbJ4sBIH7X6dvfKzaeHfqCNQ_3-sSWZRnLKNmDaySQXEaACwEwrA2LxdHbGThNlOM6b75KCcK9q72v7uKrIzE1_3UQJXRtPOqJGoKhdIPH0FMc4hRcou7_ZnxMWy5ioaYOwdbnfmmYoBLhMRGry5pz_2hGUZZjPV85OBfHbEcWBCs",
+        "summary": []
+      },
+      {
+        "id": "msg_0e9952f0a185251d016ac9f89a35fc87d09a3285e8a7209b3f",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":1,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":false,\"numeric_accuracy\":null,\"citation_semantic_support\":0.75,\"note\":\"정답 핵심인 OWC-FWL 차이와 FWL에서 Pc=0는 맞췄지만, 근거 없는 기체 압력식을 추가했고 액체/기체 압력을 동일식으로 둔 부분이 source와 맞지 않습니다.\"},\"B\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"모세관 전이/모세관압 때문에 FWL과 OWC가 다를 수 있음을 설명했고, FWL에서 Pc=0 및 압력선 교차 조건을 정확히 제시했습니다.\"},\"C\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"모세관압 때문에 깊이가 달라질 수 있고, FWL에서 Po=Pw 및 Pc=0라는 핵심을 정확히 답했습니다.\"},\"D\":{\"exact_correct\":false,\"partial_or_better\":false,\"claim_coverage\":0.0,\"unsupported_claim_count\":2,\"hallucination\":true,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"핵심인 capillary transition/Pc=0를 언급하지 않았고, OWC 압력이 지층의 '지구력'에 따라 결정된다는 등 근거 없는 구체 주장들이 포함되었습니다.\"},\"E\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"FWL과 OWC가 다를 수 있다는 점은 맞지만, 이유를 capillary transition/Pc로 명확히 풀지 않았고 FWL에서 Pc=0라는 압력 조건이 빠졌습니다.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 9236,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 897,
+      "output_tokens_details": {
+        "reasoning_tokens": 268
+      },
+      "total_tokens": 10133
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "qwen_same_evidence": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 1,
+      "hallucination": true,
+      "engineering_contradiction_count": 1,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": false,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 0.75,
+      "note": "정답 핵심인 OWC-FWL 차이와 FWL에서 Pc=0는 맞췄지만, 근거 없는 기체 압력식을 추가했고 액체/기체 압력을 동일식으로 둔 부분이 source와 맞지 않습니다."
+    },
+    "openai_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 1.0,
+      "note": "모세관 전이/모세관압 때문에 FWL과 OWC가 다를 수 있음을 설명했고, FWL에서 Pc=0 및 압력선 교차 조건을 정확히 제시했습니다."
+    },
+    "openai_closed_book": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "모세관압 때문에 깊이가 달라질 수 있고, FWL에서 Po=Pw 및 Pc=0라는 핵심을 정확히 답했습니다."
+    },
+    "qwen_closed_book": {
+      "exact_correct": false,
+      "partial_or_better": false,
+      "claim_coverage": 0.0,
+      "unsupported_claim_count": 2,
+      "hallucination": true,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "핵심인 capillary transition/Pc=0를 언급하지 않았고, OWC 압력이 지층의 '지구력'에 따라 결정된다는 등 근거 없는 구체 주장들이 포함되었습니다."
+    },
+    "agent": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.5,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 1.0,
+      "note": "FWL과 OWC가 다를 수 있다는 점은 맞지만, 이유를 capillary transition/Pc로 명확히 풀지 않았고 FWL에서 Pc=0라는 압력 조건이 빠졌습니다."
+    }
+  }
+}

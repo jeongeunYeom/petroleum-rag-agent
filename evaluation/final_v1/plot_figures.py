@@ -18,15 +18,16 @@ metrics = json.loads((HERE / "final_metrics.json").read_text(encoding="utf-8"))[
 
 
 def grouped_bars(tracks: list[str], title: str, file: str) -> None:
-    labels = ["Agent", "Qwen 8B", "OpenAI", "Gemini"]
+    labels = ["Agent", "Qwen 8B", "OpenAI"]
     keys = ["goal_success", "exact_accuracy", "claim_coverage", "hallucination"]
     names = ["Goal success", "Exact", "Claim coverage", "Hallucination"]
     x = np.arange(len(keys))
     fig, ax = plt.subplots(figsize=(10, 5.4), constrained_layout=True)
-    colors = ["#3755ad", "#777c86", "#3d998c", "#9d6db6"]
+    colors = ["#3755ad", "#777c86", "#3d998c"]
     for index, (label, track) in enumerate(zip(labels, tracks)):
         values = [metrics[track][key] for key in keys]
-        ax.bar(x + (index - 1.5) * 0.19, [100 * v if v is not None else np.nan for v in values],
+        ax.bar(x + (index - (len(tracks) - 1) / 2) * 0.19,
+               [100 * v if v is not None else np.nan for v in values],
                width=0.18, color=colors[index], label=label)
     ax.set_xticks(x, names)
     ax.set_ylim(0, 105)
@@ -38,14 +39,14 @@ def grouped_bars(tracks: list[str], title: str, file: str) -> None:
     plt.close(fig)
 
 
-grouped_bars(["agent", "qwen_closed_book", "openai_closed_book", "gemini_closed_book"],
+grouped_bars(["agent", "qwen_closed_book", "openai_closed_book"],
              "Track A: End-to-end (unequal information access)", "track_a_comparison.png")
-grouped_bars(["agent", "qwen_same_evidence", "openai_same_evidence", "gemini_same_evidence"],
+grouped_bars(["agent", "qwen_same_evidence", "openai_same_evidence"],
              "Track B: Same Agent-retrieved text evidence", "track_b_comparison.png")
 
 fig, ax = plt.subplots(figsize=(9, 4.7), constrained_layout=True)
-tracks = ["agent", "qwen_closed_book", "openai_closed_book", "gemini_closed_book",
-          "qwen_same_evidence", "openai_same_evidence", "gemini_same_evidence"]
+tracks = ["agent", "qwen_closed_book", "openai_closed_book",
+          "qwen_same_evidence", "openai_same_evidence"]
 latencies = [metrics[key]["median_latency_seconds"] for key in tracks]
 ax.barh(tracks[::-1], latencies[::-1], color="#6576a5")
 ax.set_xlabel("Median client wall-clock seconds per task")

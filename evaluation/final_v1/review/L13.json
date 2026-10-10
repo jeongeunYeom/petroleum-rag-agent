@@ -1,0 +1,201 @@
+{
+  "task_id": "L13",
+  "prompt_version": "final-v1-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_0d339d155c197aec016ac9f8d7db7887d094e342f15a55a38f",
+  "wall_seconds": 16.043,
+  "mapping": {
+    "A": "qwen_closed_book",
+    "B": "agent",
+    "C": "qwen_same_evidence",
+    "D": "openai_closed_book",
+    "E": "openai_same_evidence"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":1,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"압력 관계는 맞지만 kick을 지층 유체의 웰보어 유입이 아니라 '지하수로 유입'처럼 잘못 설명했고, '주로 액체석유'도 근거 없는 축소입니다.\"},\"B\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":1,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":0.8,\"note\":\"핵심 정의와 압력 관계는 맞습니다. 다만 '드릴링 유체의 밀도가 지층 압력보다 낮아'는 차원상 부정확한 특정 공학 진술이라 완전정답으로 보기 어렵습니다.\"},\"C\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"Kick을 지층 유체의 웰보어 유입으로 정의했고, 지층압이 머드 정수압을 초과할 때 발생한다고 정확히 설명했습니다.\"},\"D\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Kick의 의미와 핵심 압력 관계를 정확히 설명했습니다. 추가된 bottomhole pressure 설명도 공학적으로 양립 가능합니다.\"},\"E\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"Kick을 지층 유체의 웰보어 유입으로 설명했고, formation pressure > mud hydrostatic pressure 관계를 정확히 제시했습니다.\"}}}",
+  "usage": {
+    "input_tokens": 7117,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 1061,
+    "output_tokens_details": {
+      "reasoning_tokens": 451
+    },
+    "total_tokens": 8178
+  },
+  "provider_payload": {
+    "id": "resp_0d339d155c197aec016ac9f8d7db7887d094e342f15a55a38f",
+    "object": "response",
+    "created_at": 1791621335,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791621351,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are the single independent AI-assisted semantic reviewer for a fixed\npetroleum-engineering benchmark. This is not human review. Judge ONLY the five\nanonymized answers against the supplied expected claims, numeric gold, source spans,\nquestion, and evidence. Do not infer system identity. Do not repair answers.\n\nFor every answer return:\n- exact_correct (boolean): all material requested parts correct; no critical omission.\n- partial_or_better (boolean): at least one substantive correct requested part.\n- claim_coverage (0..1): fraction of expected claims accurately conveyed.\n- unsupported_claim_count (integer): unsupported *specific* engineering assertions.\n  A closed-book answer is NOT automatically unsupported solely because no source\n  was provided; only count a clearly invented, source-incompatible, or unjustified\n  specific assertion. Do not penalize uncertainty or a cautious statement.\n- hallucination (boolean): at least one fabricated factual, numerical, formula,\n  source, or engineering assertion; missing citations alone do not qualify.\n- engineering_contradiction_count (integer): explicit engineering relations contrary\n  to expected claims or cited evidence.\n- safe_refusal_correct (boolean or null): applicable only to unsupported_formula.\n- false_premise_handled (boolean or null): applicable only to false_premise;\n  requires explicit rejection and corrected relation, not vague hedging.\n- formula_accuracy (boolean or null): applicable to calculations or explicit models.\n- numeric_accuracy (boolean or null): applicable when numeric gold is supplied;\n  check the correct output-to-value association, not mere presence of an input number.\n- citation_semantic_support (number 0..1 or null): among actual citations in the\n  answer, fraction whose *specific cited evidence excerpt* supports the adjacent\n  engineering claim. Null if no citations or no evidence supplied. Citation ID\n  existence is independently checked, so here evaluate meaning, not formatting.\n- note: brief reason, no chain-of-thought.\n\nKeep all named keys in every score object, using JSON null for non-applicable\nfields. Be conservative about unsupported or contradictory statements. For missing answers,\nscore exact_correct=false, partial_or_better=false, claim_coverage=0, and leave\nnon-applicable fields null. Return only a JSON object with key 'scores' containing\none object per anonymous answer label. No Markdown or extra text.",
+    "max_output_tokens": 5000,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_0d339d155c197aec016ac9f8d8a62c87d08809bd598ccbfb87",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyfjnoPFBlb8nqW1ZyKvdkIestoG08cQKdNqQf1LUKi1aaZy6qFFRCEXSZlzwhDbUZHP_QyQFBL9d8LK7vFK5RREk0l9_QBKuyvJlMCY_xa02aPntB85bPWfCeNVXJx9XAW5uw4Y4JPyT9mE3_NjOIseT6bfo0za9Gn2cSiUO_-z_owwT_9F1QGhtuiohpS8WwA9uO5uEw6pLjsdYvil_UE1Ryt4PAIGgYv9q-JRGn3fPDIDlnqRFpxuLBB08DdVEu57yoxMvmHZ5cPjV4-naAtUn76C90JoDXUp5V1yzilUbp3ye3k1WMa8glBzv7JaRhy0a_MpYVK8StGTsfx8qbOFkWPYmUKDDYJO5gnKfzUlgWW-Fw1QI9o2mkcB3dObcNQRESGaXfLx1AsXgSX-UevfCd1M-LCq6WYuehjGx6tDH4ikQ5MumyzkPNAgU2Mei5FZUbgL8ytimUAzIFm0-BUtoH_-xFxbsM37Ss1iObVISo8xj_9UHjFNCRId6t563AwB2JYTmh8OXF5MqQRnt0HQluI4vQbK4x64viy9-CcTpEeWH1308oBDu_woLz10bpyinG0JXLG8n_6oSwwpZuOcOYCB1F_SY-pnoWg6dquxw_On-ArOs9J5drY8b8-QWzWBfooV1hxEu24NUtKjitLNDYn5ApL-kAW9QbhoCjSDhE9z7gXumJUi__n0OrAoGqZLTIrSDbOa87Pc2l9R1lr-UVuUNVLqTktQR84iZlOalNPc7b2l2KsvV7HfLHwEH0Uj_SKXFjEz7fXx8saCmcaomaiiI-MvuQCRJrsrwWWj_aUsxvl8FKoSE94byo8HIw4ukta4CazeJQUgnBxilYizn-d3XPC7V-jfIt91PS6uXWuOLXGyE7mvl8NfyqfdZybIBn_FnLxRCoQEhNotYd15ZbxT2usZqZfU-97Q_3gQAYhI9OquX19iF4eWx8imm_2qObH3a7A9Pto9nN-Mu-EfSvlkxxxMsOvRvzJRIWYeA6rtEt3t2i6CkB_Htb2nEhxgIfgRmhS7-lKnE_L1MA8IMznRirLbfHbTUp5qthtnb9iagN1HnXwFttTj0OyzOHW2PJkP6Z0bbK_Wjcd_8QVGG9Gl3y9FBNDA46l8h3iJPwAPh9pjtM3Sth3YBNC_1mL8JALM8O4SmoGbLYkxFHuxL6HZmMwKeBNq3fd0A2xa_ckIYvhY-k-nsgKWScGXWRubo9VBk3cei14GowFfeieKxVeU-pkMxkdp_YciKQwV1nSC7quNuxoHfbVPP5w1GDHfJoo-xgy6vQMTeYtgLOzDPjFXpxxIcXYfbpTCJyMSPmXAyzkmmDnHNR116WokmMcy3WDXOkFbM5TEjrWWY4adyjnXf0cqVy4SPnLkPUEut3aUc0VvrWklaK1HfAcPUvKViSrLKehM7OLC0qv0bmFTUAhdg-tda6geicNoxiHSMfRdsfxkUkXO6X1XomMdrF0x64xHVGOTCXrXmrjpgihdTn2EjzM_D_PtnTvxF9FRLPbHAF_MFP_jjJEUFj84hy6G1KdSLJ0e3q0DWh__y1KfucqYIzvP1ygPaufzgTRYK08ai9U_92arNLXI7abdgYCLDJgbPeKkdaRNoCAfBU02ojLpfut-ee9L8keaFLbT00K5HjK3d7MsMzur3PV1iNEekIabtbYS6ZIG0GCyu2Cssvy8MssZ8tVRidKtEfDxjNGn7woAazjVJHMGLQzfaeKsTqmFOyP6Nky1rnNgGPiRJJRodYIoHELQN4ziN-u5ffeM4Eh5ppfQuVscLFs7MspAe4tAE8fKN5WIT70t0cVlN_MGDxDe4Wqym7lVMCvWs4OaPnXNxoVaNnmhneQJJ8BmvBiM36HZDaZz-WzQRNUntnU-J3MjjGcie6trvQ-szaV2VSra1r8klZ1hJ8U7D-iquHRfiLVCW_eMzD1z-wHJNV_54868cJLuXZauK38mqvQTEDXT41itQ822Uzzy0Bp_FSZltqPsj09pbvqwduP-zne_lNBCy7glOfZ9rEwnb-TG8NHm5K98pGXZWWazQ6bMK6UTZR6ul9pjJpz9D7w9x9GkDM4Jwio3MxWZ1N5tQFlJULETMoh5nTITGrxvt9rAla9kuOdhuCtHrlLngDp6HXm2DG_V5VS4QYVgDLOPs80gugwK6XhIH7imRR3j4rUKbvLfhzLdiIWLWwkl4ytovxB1P-HKwfCyMrwZjdHvWBfNCM2JACxPrYRoAEd0v4EzhLiUoB1jzW2vEZeLvzB2KTpenJOpDJKe1Rjrsmy7IhOKf5qMVucA4FtA2JnT2NEMkp1k1DqEWq2usap-ySkmonZemkVdGcXi_Nua63VlHyeuKQt_bJVxfN_bEcIn7nE1HNNP3tufU52Q1FB_FOf0C0914vRu54jqPD1AXcW8O0Jd5MfLNVepEGkSGw0C4DyUNkHjdoWKbMR8VzahjIpwc5zIrNBj3jjynHYaOMkyCi8YFn1E28P5S8NZavZVZhL55ZTzX3bftLL9M9KEFrfmaOPVWD_cSlfmZ0JshbcNvj2E4fgWLD48CRxqQUMfWhnt-B64s-1JUnKLIcaGJTBju7dvspNIxkntv3-4BlkmzpjwFP4YP9mXK3gzmcDJSGBBvzidOgnB9PdCryj1boQ4VUAItELIuwwvA238wP00wwmQwoS_I4DqzPNfbbgbWWKSmSu3Y_3khiPJ_YpKjyxABZvxKVaXiyWHLvPS1S8nUg44ki_4e79JU2yrpVxEN3Gi-3hkOoFzfdRNLP_GTOFJ1qbJuZhMLGhaKfTItMrdPYvzjEEkosZiMiX93RcXR4tbTn7-71sOGDv2yTTld1ziQyZzpI8zQS54uHSyKwFi3qdLDCllkLbPF2hqfYeKgXfDYdgchIJi5p4vusTOni-lA7kUtygy8nojEeQMfvKZNJJWYv4DB9F40B_2rH-tRbyodIl2pKrs2IarmuFmulHyVnC9mbDpHgShgiA0nbvVPvm4t_jkf8oBQi2qUclE4jCKnbjF4_OsQjIDt87vwm4WJMkJIAy0NCWV3uqQffHVtsMfYPRA9U1HO1_Rqm3UdEA5CB_H8jSDwJrO7_JG4KPGss9QsiinYVtKVL2sFLNA8Yz0Juw2r8Xf3oidQXqysv-yuwVzC1j3R7jgIfYCxFTlPBt5JyvyVpdf6h4lHnPCz1YT5HWlim2_jZ_dAaHHXEzQChQFsJYIN1hj3d7H-bpfiHBA-bDEDk1Vp1sL51FmDYmgEpCneBa9VYNV4at2TfwwxnI-NvTdUPBQ12UgVo6kkDKOnl5FXfrfUI-1qaKJbMr6jEW6in1Q6-GKh1KPHCfqT_VImeNy0D6rvSbEqMfdHyVExxTT1x425T9enKoXlDpjiMgVHCnZR2pXG7skeoX65l_fLvRHDSjZsjrhmS-tZBrnM0PgOxL7FD6mT97EFlJQNaUWPJyMd4BMEyKqaPFG_AwY3NVFxnHI8D-MmFNcaQHNdmFmECzhW_2wfbgcAT_zIY-Vh8Nbt9DDPBr2z6BJHXorG5dQPTrj0BdanF735NglmqGjI322uL-6v367p5X1GqTvNv_moTjBYATj3GR5zulG9nw-gEvWEW2MQpg8dguObO3bqg4Hbjywcg_aeYYfESwhegHN4jj9LI6ViwBSaZHWUX-uXy7XUGiSgDYkLUquhvH81LENPHGEqV6eaZ0knCD847HiaQ3jCkhidNPW7J7rsFCs4CXV2RAhseBrhU_4QjVoa-ark1e2yUpHGKXmUTjdEp4wEMiii6Om_XDyOQYY21gWeSI_G6CcCmMukVwjf91CSQJN29SzsxrS8LS_3UOywfMBcNgX3uMATJhDPnL3rx9JvnXze6YYBepAJja1WTeFGDpS-rQPbsP01wdkFnOPeMlInjtdc92f92JVGb8M4JeYBkC0k9Ygb7LKTBIkdwxGfRx8q7u-Cd_iv4Dpo3Jv4gJ4PIrqwNzmE4fxGxalkYEyU4eZy3tWkdWoAvWSqi2CcUPq2laVIRWuEHEZ8H1dh7cRFMT3MLHrMmL8EvgeC8TYbKvjSBE_LWtZWUnnbT-X5Tk0LAUQmDC8OagKkaibNwvLxFnqAOKkNNTpzZc2Nn_U3fNMfgjNgisr8qfkK8MA-1RfcQZLyGSJNHe48AxPT1QcxatBpoWAa5Jdkw0KDlrSd67UxI8ik0skmlLAxkAvLtAQiiuOk4QaHfIq8RakAq-c71c5Z1-J8-7JgmLIUarL2GOuKynRZRmuejkoFk3b1ptXnzeXb3aBakYaO-LTXpSWzupjaMdJXEYzllDx_FxEuOGR53W6VTWprkN1Udv6wal3WMbssu2FwIJgr4YpP1MzySM7Pf469rNU3WUOdoLC3kbFesAF-BqzvGi2kLu-4EnxM6fpRuWI6UDHJtvJCS0lfwsOyAv_hzwy9I91PF4xNRjhOPdw0ONpDOBwF2DsIkxobHV6DSst6SQ1rmITQ0CmkOTvAYbadrlQXJ60FaoIjU3t9xSvy3QaF8dAGtdPcub_RuV4labmrb2h__npSMl5RCAZW49LimnnvGvakjs2srJXhRBSidM79UgVbWQUYV_CetPux1NP3y288D6MHkm87X-qH0Sb9oY5zvg4JJL2mY0airksWq-4dkvrYbVhmOOLs8LCs9sP6OTXDDcUcH4pHARE1ZV2RZ_jeiy6jPAwQKGp0JwjmUIcRgLtJOAaiMM-swLslet940-LBE5qta6f8zlOkKN3FP7GaGyFYoNZsokZc4vXjA0kmujF3bSV0pgSUihdkKfibodOEs2YAQAMjjtFSIQfnYFsrJ6TChsRiXCpvDIpyC7rSMywRYUljbIAD29k1PlkJOleyNh15M2gdujypUeLlce1Vqaij-mCmREdMGseVafgEgNNexpIPaPJf87zHkt5lbeFvq83_XwSUXK32L-RwUwqhmqgBpso_EwVUuMZg_cuwCXiK9j8s3Ce0L3NPcVLKke0133bXQl1teXGQfbO9sc0OPt-VITJwrQbDDskxuM0oBpc_813l15QZ5wo-hxAzfGkvdFYb1o99LGk-YXr-q_ICwPVVLuxVF6THkl5B1GvzZ5sGPZafa8yblrv_sfelZku5b2rjdyjn4ESOzyoT6XQlL7I4iitAQSDVhbU2beYc2yrx6WSjdAotspU__r_g3dbwM1H8KCa6hdV39gpxQTMx0SJYtlAuzP4eM4IxjWSYVXcTcVGWXPnkC7R4hWjIq6CB02nCqMTayGdXTFjFpHa9tnwsYkt3ihzMl57x4-1x3INiuGUL6zoYeswcy9ODyLuRMbHX6b4Ncq9elE_x7ipXbnE0OuhI0nQoOKONKtxlsLPMcMZ6fKBOMQeCsRXx9RQ5cNf1Mb6TCaNvzJHKBfMgUCLIFW7hA-3-3i_jfODSRss96A4r8XCQwi_5mBNXWMF15OONTip0qcqHjxBvdsWUNLdzL0J4QNzbtX_xyWBLdyqLjicnhjsqEkZaaoe93IfGLQhuk7FEABR100jwK2zkaA2LNRw6NNJcN5o_FoI7-TRNt4FHoQ8rxjbXvGC_AF_t-OmVAx6ZtHSDK2KHrouDTXm2yXKojcRGE2Y4nOu49gG8xhc4YA2wB9O3BX3ZQTlej6JKKo4qoN4I15per8WE4utuYVPEAQ-nec3sveWQsV3JExeoKF0G9DPwrE69xgXgbUvhhXtoY9UrpPYlfRJbqPEfzOc_1UAr1v1jJpLOnGmmmOCqnsAyI6EDnvrd0xxHy_yhboI0FUNPPLww0qJIQPS4nKDVvf0eJVhtl-sbGt17dklIK6ngaAVHlXA8GJEetRa84oGatSuEPFDIRWy6hPC9nNIit85a14lqa4uJ4-XPryoctHv_zUWIOJGjK2YY5YDxSVF_J_C1Sl91t81RshQFKHlYRMZ1DONprrTgbOAMatk2heFZJjDRKr1vrKRhKKdNhsAUgmBJtOHeFnOofXtCjW79p4ZusRpaNTKrOSs87zF3B-ArH7P_6z0kP-Uvot-5gRR-r8XdMUtZQWYN4dGuljbhXpor6li1Hmmihkr6S7WATQ73QxmWliwVm_x2K4LwoGy6lUevXW5rM79yeBJGqb2TMdgO9gtd9yuP-c-Xm6mvePJGVJGfz7lKWXwmE6s4O4Y_3P-bYlMpmUSk4Nz7FWIgKR7mDChLpbCDMdslPWmy7xqz0rDx5om8QzY24Q6CF05kCy7wu4l7NUx6Sarx1O2JweG_36uj8JRSXoDQ16hMVo3fnLKC535izscEA97WnTPyghAxLfdUnH4InmhbvoXYYthBsaLN8DQOE-I3IcXx0d9i5NsVu_bLsBqkHg9--H2-2ec4bXagesE_3B4hNH97VWYofCVKdoG3LeMg5p_ieVhhupjor31My9Usg_u148xTg0It1McqAxz1wxUNgZA3XLdwneOsBB1AJ4Avi3BqgFhKm8O0VGsYLIPVrFLS4lqRk4cMupDk1o9MrYX-bdUP6t65pbwNcXFUtPNoa_W4qw5fShQyrGyqwJh7O5E5a3YHgEDdPA04XeVRt5sUU9omH2ON8UTntv4jjax8vx5HswrjrpUB7JICjHIAEmHQiUxlNS2C7YYVTGyZyaO5eZTFWzvSez0ON6X55V9SVYFEjp9GjMN02hqdOE2a0YDvArPB4PyUfGlnHulFf7B_5aBH4TeZw4_SenxQhxy8zj2MEUdmSMTypADT3Z_May0JfRkUN2KUH-79U2DpT8LIxnNvNz0slysf1f68IDUOLF547x9mvGPViXZF9TeGDS6VsAXnRVM-lkEK_KJ-vDGnhkcnTG3hO5deaWjNbWq2NbhB9xeO7ZgFdn4FMMQ4lyLRxW6IJZfWRuc_r-yMUQMK9tigxcN3EM2Hn0OS0J8k57e6p_BsWO8jEIl-gzd2pJUVQg9rbh3izk04w81baTrkp3PIf2nRlzXkg0AmdOJYR5TOvun0cbfEV6LmpQtFBN4gzfTARtsIyFyTrWqXP0rEpyZ8TZhHUgE_Pv8Lkmo1TGylcfdugdmUx2BOfMM5I1GU7baklfuHdlI3QS13_9c_KeDTxTp6TuSvxDSkPY7SBD2hL0y8ca3KmNJbvc-E4Xq7vxXl3WMffmGKaR9Lmee0NCQZCa86jGNMexPURAk4mImk7Cw3pcIywWPsHsOvEXrzKhF7ZvxcUTPp8AYQnfj4LRfsHrWKOhHmsHrfs7PXgkUZ5nXOK6646MX_HMIPGUnA_RRnFBPkMMNi_3nqUrnq-dzVYHwOaxt92cOl8N9PY9JBw57WsSP-2Gblx_GTjJ4wTF6Poe2QtwR81vqiS7f75mipwDAZ-qkipX66l6tWyoW-SLNzrX_nbRMCR3etuymSsBIXTtWKPAKWFEjmVIXhRWiDT3YchrUHq9E0p8zDsNOWzbLtPd1GXDN_I4ulcFusLg_7TILWCeLUgAe1Ee-juHpdRgMUrMSOV_y-UAquPhRF1MZt4jVkapLNWUU=",
+        "summary": []
+      },
+      {
+        "id": "msg_0d339d155c197aec016ac9f8e163e087d0a91616ec8fe8f8a4",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":0.5,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":1,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"압력 관계는 맞지만 kick을 지층 유체의 웰보어 유입이 아니라 '지하수로 유입'처럼 잘못 설명했고, '주로 액체석유'도 근거 없는 축소입니다.\"},\"B\":{\"exact_correct\":false,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":1,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":0.8,\"note\":\"핵심 정의와 압력 관계는 맞습니다. 다만 '드릴링 유체의 밀도가 지층 압력보다 낮아'는 차원상 부정확한 특정 공학 진술이라 완전정답으로 보기 어렵습니다.\"},\"C\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"Kick을 지층 유체의 웰보어 유입으로 정의했고, 지층압이 머드 정수압을 초과할 때 발생한다고 정확히 설명했습니다.\"},\"D\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":true,\"numeric_accuracy\":null,\"citation_semantic_support\":null,\"note\":\"Kick의 의미와 핵심 압력 관계를 정확히 설명했습니다. 추가된 bottomhole pressure 설명도 공학적으로 양립 가능합니다.\"},\"E\":{\"exact_correct\":true,\"partial_or_better\":true,\"claim_coverage\":1.0,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"safe_refusal_correct\":null,\"false_premise_handled\":null,\"formula_accuracy\":null,\"numeric_accuracy\":null,\"citation_semantic_support\":1.0,\"note\":\"Kick을 지층 유체의 웰보어 유입으로 설명했고, formation pressure > mud hydrostatic pressure 관계를 정확히 제시했습니다.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 7117,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1061,
+      "output_tokens_details": {
+        "reasoning_tokens": 451
+      },
+      "total_tokens": 8178
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "qwen_closed_book": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 0.5,
+      "unsupported_claim_count": 1,
+      "hallucination": true,
+      "engineering_contradiction_count": 1,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "압력 관계는 맞지만 kick을 지층 유체의 웰보어 유입이 아니라 '지하수로 유입'처럼 잘못 설명했고, '주로 액체석유'도 근거 없는 축소입니다."
+    },
+    "agent": {
+      "exact_correct": false,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 1,
+      "hallucination": true,
+      "engineering_contradiction_count": 1,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 0.8,
+      "note": "핵심 정의와 압력 관계는 맞습니다. 다만 '드릴링 유체의 밀도가 지층 압력보다 낮아'는 차원상 부정확한 특정 공학 진술이라 완전정답으로 보기 어렵습니다."
+    },
+    "qwen_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 1.0,
+      "note": "Kick을 지층 유체의 웰보어 유입으로 정의했고, 지층압이 머드 정수압을 초과할 때 발생한다고 정확히 설명했습니다."
+    },
+    "openai_closed_book": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": true,
+      "numeric_accuracy": null,
+      "citation_semantic_support": null,
+      "note": "Kick의 의미와 핵심 압력 관계를 정확히 설명했습니다. 추가된 bottomhole pressure 설명도 공학적으로 양립 가능합니다."
+    },
+    "openai_same_evidence": {
+      "exact_correct": true,
+      "partial_or_better": true,
+      "claim_coverage": 1.0,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "safe_refusal_correct": null,
+      "false_premise_handled": null,
+      "formula_accuracy": null,
+      "numeric_accuracy": null,
+      "citation_semantic_support": 1.0,
+      "note": "Kick을 지층 유체의 웰보어 유입으로 설명했고, formation pressure > mud hydrostatic pressure 관계를 정확히 제시했습니다."
+    }
+  }
+}
