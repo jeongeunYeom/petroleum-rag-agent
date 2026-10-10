@@ -1,7 +1,7 @@
 """Complete all v2 semantic reviews with one independent local Gemma reviewer.
 
-The incomplete OpenAI reviewer records remain untouched in review/*.json. This
-separate 60-task set is the only semantic review used in final metrics.
+The incomplete OpenAI and initial local reviewer records remain untouched.
+The schema-constrained 60-task set is the only review used in final metrics.
 """
 
 from __future__ import annotations
@@ -16,7 +16,32 @@ from score_deterministic import TRACKS
 
 
 MODEL = "gemma4:latest"
-PROMPT_VERSION = "final-v2-reviewer-1-local-gemma"
+PROMPT_VERSION = "final-v2-reviewer-2-local-gemma-schema"
+OUTPUT_DIR = HERE / "review/local_gemma_schema"
+
+
+def output_schema(claim_count: int) -> dict:
+    fields = {
+        "claim_verdicts": {"type": "array", "items": {"type": "boolean"},
+                           "minItems": claim_count, "maxItems": claim_count},
+        "partial_or_better": {"type": "boolean"},
+        "unsupported_claim_count": {"type": "integer", "minimum": 0},
+        "hallucination": {"type": "boolean"},
+        "engineering_contradiction_count": {"type": "integer", "minimum": 0},
+        "numeric_accuracy": {"type": ["boolean", "null"]},
+        "unit_accuracy": {"type": ["boolean", "null"]},
+        "formula_accuracy": {"type": ["boolean", "null"]},
+        "false_premise_handled": {"type": ["boolean", "null"]},
+        "safe_refusal_correct": {"type": ["boolean", "null"]},
+        "citation_semantic_support": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "note": {"type": "string"},
+    }
+    score = {"type": "object", "properties": fields, "required": list(fields),
+             "additionalProperties": False}
+    scores = {"type": "object", "properties": {label: score for label in "ABCDE"},
+              "required": list("ABCDE"), "additionalProperties": False}
+    return {"type": "object", "properties": {"scores": scores},
+            "required": ["scores"], "additionalProperties": False}
 
 
 def parse_review(raw: str, mapping: dict[str, str], claim_count: int) -> dict:
@@ -48,11 +73,14 @@ def review_one(task: dict, catalog: dict) -> dict:
     started = time.perf_counter()
     attempts = []
     for attempt in range(1, 3):
-        instruction = INSTRUCTIONS if attempt == 1 else INSTRUCTIONS + "\nStrictly preserve every required key and all five labels A-E in JSON."
+        instruction = (INSTRUCTIONS + f"\nThis task has exactly {len(task['expected_claims'])} expected claims; "
+                       "each claim_verdicts array must contain exactly that many booleans.")
+        if attempt == 2:
+            instruction += " Strictly preserve every required key and all five labels A-E."
         response = request_json("http://127.0.0.1:11434/api/chat", {
             "model": MODEL, "messages": [{"role": "system", "content": instruction},
                                     {"role": "user", "content": json.dumps(item, ensure_ascii=False)}],
-            "stream": False, "think": False, "format": "json",
+            "stream": False, "think": False, "format": output_schema(len(task["expected_claims"])),
             "options": {"temperature": 0, "seed": 42, "num_ctx": 32768,
                         "num_predict": 3200}}, timeout=600)
         raw = response.get("message", {}).get("content", "")
@@ -89,7 +117,7 @@ def main() -> None:
         if task_id in invalid:
             print(f"{index:02d}/60 {task_id} INVALID SKIP", flush=True)
             continue
-        path = HERE / "review/local_gemma" / f"{task_id}.json"
+        path = OUTPUT_DIR / f"{task_id}.json"
         if path.exists():
             record = json.loads(path.read_text(encoding="utf-8"))
             if record.get("parse_error") or record.get("error"):
