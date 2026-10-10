@@ -45,12 +45,16 @@ def score_row(row: dict, review: dict, task: dict) -> dict:
     out["unsupported_claim"] = out["unsupported_claim_count"] > 0
     out["engineering_contradiction_count"] = 0 if empty_answer else int(review["engineering_contradiction_count"])
     out["engineering_contradiction"] = out["engineering_contradiction_count"] > 0
-    out["numeric_accuracy"] = (False if empty_answer else review["numeric_accuracy"]) if task.get("required_numeric_result") or task.get("expected_after_resume") else None
-    out["unit_accuracy"] = (False if empty_answer else review["unit_accuracy"]) if task.get("expected_units") else None
-    out["formula_accuracy"] = (False if empty_answer else review["formula_accuracy"]) if task.get("expected_formula") or task.get("user_formula") else None
-    out["false_premise_handling"] = (False if empty_answer else review["false_premise_handled"]) if task["category"] == "false_premise" else None
-    out["safe_refusal"] = (False if empty_answer else review["safe_refusal_correct"]) if task["category"] == "unsupported_formula" else None
-    out["citation_semantic_support"] = None if empty_answer else review["citation_semantic_support"]
+    numeric_applicable = bool(task.get("required_numeric_result") or task.get("expected_after_resume"))
+    unit_applicable = any(str(value).casefold() != "dimensionless" for value in (task.get("expected_units") or {}).values())
+    formula_applicable = bool(task.get("expected_formula") or task.get("user_formula"))
+    out["numeric_accuracy"] = bool(review["numeric_accuracy"]) if numeric_applicable and not empty_answer else (False if numeric_applicable else None)
+    out["unit_accuracy"] = bool(review["unit_accuracy"]) if unit_applicable and not empty_answer else (False if unit_applicable else None)
+    out["formula_accuracy"] = bool(review["formula_accuracy"]) if formula_applicable and not empty_answer else (False if formula_applicable else None)
+    out["false_premise_handling"] = bool(review["false_premise_handled"]) if task["category"] == "false_premise" else None
+    out["safe_refusal"] = bool(review["safe_refusal_correct"]) if task["category"] == "unsupported_formula" else None
+    out["citation_semantic_support"] = (float(review["citation_semantic_support"] or 0)
+                                        if row.get("citation_ids") else None)
     out["review_note"] = ("Empty final answer; deterministic guard overrides impossible reviewer assertions."
                           if empty_answer else review["note"])
     content_ok = bool(claim_verdicts and all(claim_verdicts) and

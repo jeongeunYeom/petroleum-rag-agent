@@ -8,14 +8,15 @@
 - The 60 tasks were written and compared against 160 v1/old-heldout questions before the freeze (maximum embedding similarity 0.6944; numeric-masked text similarity 0.4079; review threshold 0.82; zero near-duplicates retained). No v1 or heldout task was rerun, copied, translated, number-swapped, or paraphrased for this test. Page-level source distribution and audit details are in the manifest/preflight files.
 - Agent: local `qwen3:8b`, hybrid retrieval, web off, existing 12-document/18,976-chunk ChromaDB, autonomous Python/simulation enabled. OpenAI baseline: `gpt-5.4-mini-2026-03-17`. Qwen/OpenAI baselines have no retrieval, tools, Python or web. Same-evidence baselines receive only the exact KB/FIG text captured from the Agent run; no extra retrieval or tools.
 - Three-layer scoring: deterministic checks, structured expected-claim comparison, and **single-reviewer AI-assisted semantic adjudication** by local `gemma4:latest`. This is not human review. An empty final answer is deterministically scored as covering no claims and making no hallucinated assertion, even if the reviewer misattributes another answer's text. Goal Success is externally adjudicated, not the Agent's own `status` flag. Agent calculation Goal Success additionally requires validated CALC, correct formula span when applicable, full provenance, units and action sequence. Benchmarks are not independent clinical-grade ground truth. An earlier OpenAI reviewer completed 50 tasks then hit `credit_balance_exhausted`; those partial records and two F03 HTTP 429 errors are preserved under `review/` but excluded from every final metric. An initial local adjudication attempt completed 19 tasks before D02 returned extra claim verdicts; those records are preserved and excluded. Four clarification reviews were subsequently corrected to include the recorded user continuation, preserving their original review files. The final set uses one fixed local model and JSON schema for all 60 tasks.
+- Applicable numeric, explicit-unit, formula, false-premise and safe-refusal fields left null by the reviewer count as failures, not missing observations. Dimensionless outputs are excluded from the unit denominator. Citation semantic support is averaged only over answers actually citing KB/FIG/WEB IDs; a missing citation fails Citation ID Correctness when a source was required.
 
 ## Track A — End-to-End Product Comparison
 
 | System | Goal Success | Exact Accuracy | Claim Coverage | Hallucination | Numeric Accuracy | Median s | p95 s |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Petroleum-RAG-Agent v9 | 8.33% | 21.67% | 28.33% | 0.00% | 21.05% | 20.03 | 69.28 |
-| Qwen3:8b closed-book | 71.67% | 71.67% | 75.00% | 1.67% | 93.10% | 1.63 | 2.62 |
-| OpenAI closed-book | 88.33% | 88.33% | 91.67% | 0.00% | 100.00% | 2.79 | 4.92 |
+| Petroleum-RAG-Agent v9 | 8.33% | 20.00% | 28.33% | 0.00% | 13.33% | 20.03 | 69.28 |
+| Qwen3:8b closed-book | 68.33% | 68.33% | 75.00% | 1.67% | 90.00% | 1.63 | 2.62 |
+| OpenAI closed-book | 86.67% | 86.67% | 91.67% | 0.00% | 96.67% | 2.79 | 4.92 |
 
 ## Track B — Same-Evidence Comparison
 
@@ -23,9 +24,9 @@ The Agent row is the **identical** Track A output; only the two baselines are re
 
 | System | Goal Success | Exact Accuracy | Claim Coverage | Hallucination | Numeric Accuracy | Median s | p95 s |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Petroleum-RAG-Agent v9 | 8.33% | 21.67% | 28.33% | 0.00% | 21.05% | 20.03 | 69.28 |
-| Qwen3:8b same-evidence | 80.00% | 80.00% | 85.00% | 0.00% | 96.67% | 2.00 | 3.75 |
-| OpenAI same-evidence | 93.33% | 93.33% | 94.17% | 0.00% | 100.00% | 2.94 | 5.36 |
+| Petroleum-RAG-Agent v9 | 8.33% | 20.00% | 28.33% | 0.00% | 13.33% | 20.03 | 69.28 |
+| Qwen3:8b same-evidence | 76.67% | 76.67% | 85.00% | 0.00% | 96.67% | 2.00 | 3.75 |
+| OpenAI same-evidence | 90.00% | 90.00% | 94.17% | 0.00% | 96.67% | 2.94 | 5.36 |
 
 ![Goal Success comparison](figures/goal_success.png)
 
@@ -40,7 +41,7 @@ The Agent row is the **identical** Track A output; only the two baselines are re
 | Correct Action Selection | 50.00% | 60 |
 | Same-run Resume | 0.00% | 4 |
 | Citation ID Correctness | 55.00% | 40 |
-| Citation Semantic Support | 28.26% | 27 |
+| Citation Semantic Support | 25.59% | 22 |
 | Document Recall@K | 79.49% | 39 |
 | Page Recall@K | 46.15% | 39 |
 | Figure Retrieval Accuracy | 100.00% | 4 |
@@ -56,7 +57,7 @@ Mean repeated/no-progress action rate: 17.78%. Agent mean wall latency was 26.05
 | direct_calculation | 10 | 0.00% | 0.00% | 0.00% |
 | false_premise | 4 | 0.00% | 0.00% | 0.00% |
 | figure | 4 | 25.00% | 50.00% | 0.00% |
-| kb_calculation | 10 | 0.00% | 20.00% | 0.00% |
+| kb_calculation | 10 | 0.00% | 10.00% | 0.00% |
 | literature | 18 | 5.56% | 33.33% | 0.00% |
 | simulation | 6 | 50.00% | 50.00% | 0.00% |
 | unsupported_formula | 4 | 0.00% | 0.00% | 0.00% |
@@ -67,9 +68,9 @@ Percentile paired bootstrap by task ID, 4000 resamples, 95% CI. Numeric accuracy
 
 | System | Goal Success 95% CI | Exact Accuracy 95% CI | Hallucination 95% CI |
 | --- | --- | --- | --- |
-| Petroleum-RAG-Agent v9 | 1.67–15.00% | 11.67–31.67% | 0.00–0.00% |
-| Qwen3:8b closed-book | 60.00–81.67% | 60.00–81.67% | 0.00–5.00% |
-| OpenAI closed-book | 80.00–95.00% | 80.00–95.00% | 0.00–0.00% |
+| Petroleum-RAG-Agent v9 | 1.67–15.00% | 10.00–30.00% | 0.00–0.00% |
+| Qwen3:8b closed-book | 56.67–80.00% | 56.67–80.00% | 0.00–5.00% |
+| OpenAI closed-book | 76.67–95.00% | 76.67–95.00% | 0.00–0.00% |
 
 ## Agent tasks without Goal Success
 
@@ -110,7 +111,7 @@ Percentile paired bootstrap by task ID, 4000 resamples, 95% CI. Numeric accuracy
 | K06 | kb_calculation | False | 1.0 | False | Empty final answer; deterministic guard overrides impossible reviewer assertions. |
 | K07 | kb_calculation | False | 1.0 | False | Empty final answer; deterministic guard overrides impossible reviewer assertions. |
 | K08 | kb_calculation | False | 0.0 | False | States the correct formula definition (Pc = Po - Pw) but fails to perform the required calculation for the given values. |
-| K09 | kb_calculation | True | 1.0 | False | Correctly states the formula using citation support, but fails to perform the required numerical calculation. |
+| K09 | kb_calculation | False | 1.0 | False | Correctly states the formula using citation support, but fails to perform the required numerical calculation. |
 | K10 | kb_calculation | False | 0.0 | False | Did not perform the calculation or estimate the numerical result because it could not confirm the necessary relationship or input values from the sour |
 | S01 | simulation | False | N/A | False | Empty final answer; deterministic guard overrides impossible reviewer assertions. |
 | S03 | simulation | False | N/A | False | Empty final answer; deterministic guard overrides impossible reviewer assertions. |
@@ -137,7 +138,7 @@ Exact formula-span correctness was 0.00% among 14 applicable KB/clarification ta
 
 Agent hallucination 0.00% versus Qwen closed-book 1.67% (paired difference 95% CI -5.00 to 0.00 percentage points). This is not evidence of superior factuality: 17/60 Agent final answers were empty, and 27/60 runs stopped. A confidence interval spanning zero does not establish a difference.
 
-Goal success was Agent 8.33%, same-evidence Qwen 80.00%, and same-evidence OpenAI 93.33%; the differences describe this frozen task set, not causal attribution. Same-evidence systems did not execute Python, so their answer correctness and the Agent's operational chain are distinct measures.
+Goal success was Agent 8.33%, same-evidence Qwen 76.67%, and same-evidence OpenAI 90.00%; the differences describe this frozen task set, not causal attribution. Same-evidence systems did not execute Python, so their answer correctness and the Agent's operational chain are distinct measures.
 
 Agent median latency was 20.03 s versus closed-book Qwen 1.63 s; this reflects retrieval, planning, computation and verification cost. The 4 false-premise and 4 figure tasks have wide uncertainty. Source-gold labels were prepared from existing PDFs/Chroma before freeze; semantic review is one model, not a panel of humans. The incomplete OpenAI reviewer provides a **diagnostic only** overlap of 50 tasks/250 system rows: exact claim-verdict agreement 79.60%, hallucination agreement 81.60%, and full-citation-support classification agreement 70.42% (n=71). Citation semantic scores are therefore reviewer-sensitive; no final metric mixes adjudicators. v1 became a development diagnostic set and is **not** compared as same-test final performance. Gemini was not run.
 
@@ -145,4 +146,4 @@ Agent median latency was 20.03 s versus closed-book Qwen 1.63 s; this reflects r
 
 1. Exact formula-span correctness was 0.00% among 14 applicable KB/clarification tasks; complete calculation provenance was 10.00% among 30 applicable tasks.
 2. Agent hallucination 0.00% versus Qwen closed-book 1.67% (paired difference 95% CI -5.00 to 0.00 percentage points). This is not evidence of superior factuality: 17/60 Agent final answers were empty, and 27/60 runs stopped.
-3. Goal success was Agent 8.33%, same-evidence Qwen 80.00%, and same-evidence OpenAI 93.33%; the differences describe this frozen task set, not causal attribution. Agent median latency was 20.03 s, a visible trade-off against closed-book speed.
+3. Goal success was Agent 8.33%, same-evidence Qwen 76.67%, and same-evidence OpenAI 90.00%; the differences describe this frozen task set, not causal attribution. Agent median latency was 20.03 s, a visible trade-off against closed-book speed.
