@@ -90,7 +90,8 @@ def action_metrics(task: dict, payload: dict, response: dict) -> dict:
         seen.add(fingerprint)
     return {"action_sequence": names, "correct_action_selection": selected,
             "clarification_success": first.get("run_status") == "waiting_for_user_input" if clarification else None,
-            "same_run_resume_success": bool(payload.get("same_run_resume")) if clarification else None,
+            "same_run_resume_success": bool(payload.get("same_run_resume") and
+                                            response.get("status") == "achieved") if clarification else None,
             "repeated_no_progress_action_rate": repeated / len(actions) if actions else 0.0}
 
 
