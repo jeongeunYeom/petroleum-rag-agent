@@ -170,6 +170,10 @@ def main() -> None:
         if not review_path.exists():
             raise RuntimeError(f"Missing semantic review: {item['task_id']}")
         review = json.loads(review_path.read_text(encoding="utf-8"))
+        if review.get("parse_error") or review.get("error"):
+            retry_path = HERE / "review/retries" / f"{item['task_id']}.json"
+            if retry_path.exists():
+                review = json.loads(retry_path.read_text(encoding="utf-8"))
         if review.get("parse_error") or review.get("error") or item["track"] not in review.get("scores_by_track", {}):
             raise RuntimeError(f"Incomplete semantic review: {item['task_id']}")
         rows.append(score_row(item, review["scores_by_track"][item["track"]], tasks[item["task_id"]]))

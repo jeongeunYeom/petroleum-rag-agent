@@ -153,7 +153,24 @@ def main() -> None:
         if path.exists():
             existing = json.loads(path.read_text(encoding="utf-8"))
             if existing.get("parse_error") or existing.get("error"):
-                raise RuntimeError(f"Existing review error requires audit: {path}")
+                retry_path = HERE / "review/retries" / f"{task_id}.json"
+                if retry_path.exists():
+                    retry = json.loads(retry_path.read_text(encoding="utf-8"))
+                    if retry.get("parse_error") or retry.get("error"):
+                        raise RuntimeError(f"Reviewer retry already failed; preserve both records: {retry_path}")
+                    print(f"{index:02d}/60 {task_id} RETRY EXISTING", flush=True)
+                    continue
+                print(f"{index:02d}/60 {task_id} cooldown-completed single retry", flush=True)
+                try:
+                    retry = review_one(task, benchmark["source_catalog"])
+                except Exception as exc:
+                    retry = {"task_id": task_id, "prompt_version": PROMPT_VERSION,
+                             "error": f"{type(exc).__name__}: {str(exc)[:160]}"}
+                write_once(retry_path, retry)
+                if retry.get("parse_error") or retry.get("error"):
+                    raise RuntimeError(f"Reviewer retry failed; preserve both records: {retry_path}")
+                time.sleep(12)
+                continue
             print(f"{index:02d}/60 {task_id} EXISTING", flush=True)
             continue
         try:
@@ -166,7 +183,7 @@ def main() -> None:
         if result.get("error") or result.get("parse_error"):
             print("STOP: review error; no silent retry", flush=True)
             sys.exit(2)
-        time.sleep(2)
+        time.sleep(12)
 
 
 if __name__ == "__main__":
