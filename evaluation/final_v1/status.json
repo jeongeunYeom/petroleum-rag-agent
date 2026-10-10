@@ -1,6 +1,6 @@
 {
   "status": "BLOCKED",
-  "observed_utc": "2026-10-09T10:00:45Z",
+  "observed_utc": "2026-10-10T07:45:32Z",
   "evaluated_main_sha": "fcd89e6e93fc866f4a237ee13c7910dcedac44c3",
   "benchmark_freeze_commit": "a88fdc4a8e57e46c9f4775e8a3e07fcbb5360f2c",
   "benchmark_sha256": "03ea4db7b7aa91a886ee454e2c7ed45c22d31bff84b9e4bb447e030ab376c89f",
@@ -11,7 +11,7 @@
     "agent": 50,
     "qwen_closed_book": 50,
     "openai_closed_book": 50,
-    "gemini_closed_book": 20,
+    "gemini_closed_book": 41,
     "qwen_same_evidence": 0,
     "openai_same_evidence": 0,
     "gemini_same_evidence": 0
@@ -24,10 +24,12 @@
   },
   "blocking_failure": {
     "provider": "gemini",
-    "task_id": "L21",
+    "task_id": "F01",
     "http_status": 429,
     "cooldown_retry_failed": true,
-    "rate_limit_pacing_added_seconds": 10
+    "rate_limit_pacing_added_seconds": 10,
+    "cooldown_minutes_before_retry": 10,
+    "history": "L21 recovered; F01 returned HTTP 429, then failed again after one bounded cooldown retry"
   },
   "scoring_performed": false,
   "final_performance_claims": false
