@@ -83,6 +83,8 @@ def review_input(task: dict, catalog: dict) -> tuple[dict, dict[str, str]]:
             "tolerance": task.get("tolerance") or task.get("resume_tolerance"),
             "gold_source_spans": [catalog[key] for key in task["expected_source_ids"]],
             "answers": {label: answer_for(track, task["task_id"]) for label, track in mapping.items()}}
+    if task.get("continuation"):
+        item["user_continuation_after_clarification"] = task["continuation"]
     return item, mapping
 
 

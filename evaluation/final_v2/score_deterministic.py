@@ -111,7 +111,9 @@ def provenance(task: dict, response: dict, catalog: dict) -> tuple[bool | None, 
         return None, None, None
     records = [row for row in response.get("computations", []) if row.get("validation_passed")]
     if not records:
-        return False, False, False
+        return (False,
+                False if task["category"] in {"kb_calculation", "clarification"} else None,
+                False if "expected_formula" in task or "user_formula" in task else None)
     from app.services.formula_source_registry import equation_ast, FormulaSourceRegistry, source_contains_equation
     sources = {row.get("evidence_id"): row for row in evidence_items(response)}
     complete = False
@@ -167,7 +169,10 @@ def grade(task: dict, track: str, payload: dict | None, catalog: dict, invalid: 
     cites = CITE.findall(answer)
     valid_ids = {row.get("evidence_id") for row in evidence}
     result["citation_ids"] = cites
-    result["citation_id_correctness"] = bool(cites) and all(cid in valid_ids for cid in cites) if track == "agent" or track.endswith("same_evidence") else None
+    citation_applicable = bool(task["expected_source_ids"] or cites)
+    result["citation_id_correctness"] = (bool(cites) and all(cid in valid_ids for cid in cites)
+                                         if citation_applicable and (track == "agent" or track.endswith("same_evidence"))
+                                         else None)
     result["citation_semantic_support"] = None
     if track == "agent":
         result["run_id"] = response.get("run_id")

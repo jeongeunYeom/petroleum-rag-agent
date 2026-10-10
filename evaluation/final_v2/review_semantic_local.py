@@ -6,6 +6,7 @@ The schema-constrained 60-task set is the only review used in final metrics.
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 import time
@@ -103,6 +104,10 @@ def review_one(task: dict, catalog: dict) -> dict:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--clarification-correction", action="store_true",
+                        help="Review only four clarification tasks with the recorded user continuation")
+    args = parser.parse_args()
     benchmark = load_benchmark()
     deterministic = HERE / "metrics/deterministic_rows.json"
     if not deterministic.exists():
@@ -112,12 +117,15 @@ def main() -> None:
         raise RuntimeError("Raw results incomplete")
     invalid_file = HERE / "invalid_tasks.json"
     invalid = {row["task_id"] for row in json.loads(invalid_file.read_text(encoding="utf-8")).get("invalid", [])} if invalid_file.exists() else set()
+    output_dir = HERE / "review/clarification_context" if args.clarification_correction else OUTPUT_DIR
     for index, task in enumerate(benchmark["tasks"], 1):
         task_id = task["task_id"]
+        if args.clarification_correction and task["category"] != "clarification":
+            continue
         if task_id in invalid:
             print(f"{index:02d}/60 {task_id} INVALID SKIP", flush=True)
             continue
-        path = OUTPUT_DIR / f"{task_id}.json"
+        path = output_dir / f"{task_id}.json"
         if path.exists():
             record = json.loads(path.read_text(encoding="utf-8"))
             if record.get("parse_error") or record.get("error"):

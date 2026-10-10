@@ -166,7 +166,8 @@ def main() -> None:
             continue
         if not item["available"]:
             raise RuntimeError(f"Missing raw result: {item['task_id']} {item['track']}")
-        review_path = HERE / "review/local_gemma_schema" / f"{item['task_id']}.json"
+        review_folder = "review/clarification_context" if tasks[item["task_id"]]["category"] == "clarification" else "review/local_gemma_schema"
+        review_path = HERE / review_folder / f"{item['task_id']}.json"
         if not review_path.exists():
             raise RuntimeError(f"Missing semantic review: {item['task_id']}")
         review = json.loads(review_path.read_text(encoding="utf-8"))
@@ -181,8 +182,10 @@ def main() -> None:
                             for category in sorted({task["category"] for task in tasks.values()}))}
                    for track in TRACKS}
     statistical = bootstrap(rows, list(tasks))
-    reviewer_ids = {json.loads((HERE / "review/local_gemma_schema" / f"{task_id}.json").read_text(encoding="utf-8"))["reviewer_model_id"]
-                    for task_id in tasks}
+    reviewer_ids = {
+        json.loads((HERE / ("review/clarification_context" if task["category"] == "clarification"
+                           else "review/local_gemma_schema") / f"{task_id}.json").read_text(encoding="utf-8"))["reviewer_model_id"]
+        for task_id, task in tasks.items()}
     if reviewer_ids != {"gemma4:latest"}:
         raise RuntimeError(f"Mixed or missing semantic reviewer models: {reviewer_ids}")
     metrics = {"benchmark_id": benchmark["benchmark_id"], "evaluated_product_sha": benchmark["evaluated_product_sha"],
