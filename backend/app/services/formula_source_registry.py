@@ -39,6 +39,24 @@ def expression_variables(formula: str) -> set[str] | None:
         return None
 
 
+def equation_ast(formula: str) -> str | None:
+    """Canonical equation structure, including every variable and numeric constant."""
+    if expression_variables(formula) is None:
+        return None
+    lhs, rhs = formula.translate(TRANSLATION).split("=", 1)
+    return f"{lhs.strip().casefold()}={ast.dump(ast.parse(rhs.strip(), mode='eval'), include_attributes=False)}"
+
+
+def source_contains_equation(record: "FormulaSourceRecord", text: str,
+                             formula: str | None = None) -> bool:
+    """A locator or neighboring chunk never substitutes for this exact source span."""
+    if text[record.span_start:record.span_end] != record.raw_span:
+        return False
+    return bool(record.expression_candidate and record.equation_ast
+                and record.equation_ast == equation_ast(record.expression_candidate)
+                and record.equation_ast == equation_ast(formula or record.expression_candidate))
+
+
 class FormulaSourceRecord(BaseModel):
     formula_id: str
     source_id: str
@@ -49,6 +67,7 @@ class FormulaSourceRecord(BaseModel):
     span_start: int
     span_end: int
     expression_candidate: str | None = None
+    equation_ast: str | None = None
 
 
 class FormulaSourceRegistry(BaseModel):
@@ -65,6 +84,15 @@ class FormulaSourceRegistry(BaseModel):
                 raw = match.group("equation").rstrip(" .\t")
                 candidate = raw.translate(TRANSLATION)
                 variables = expression_variables(candidate)
+                if variables is None:
+                    # OCR/excerpts often continue with prose after a valid equation.
+                    # Keep the longest parseable prefix, never a paraphrased equation.
+                    for boundary in reversed([item.start() for item in re.finditer(r"\s+", raw)]):
+                        prefix = raw[:boundary].rstrip(" .\t")
+                        parsed = expression_variables(prefix.translate(TRANSLATION))
+                        if parsed:
+                            raw, candidate, variables = prefix, prefix.translate(TRANSLATION), parsed
+                            break
                 rhs = raw.split("=", 1)[1]
                 if variables is None and not (re.search(r"[+\-*/×÷−·]", rhs) and re.search(r"[A-Za-z_]", rhs)):
                     continue
@@ -74,5 +102,6 @@ class FormulaSourceRegistry(BaseModel):
                     source_type=str(source["source_type"]), raw_span=raw,
                     normalized_span=normalize_formula(raw), locator=source.get("locator"),
                     span_start=start, span_end=end, expression_candidate=candidate if variables is not None else None,
+                    equation_ast=equation_ast(candidate) if variables is not None else None,
                 ))
         return cls(records=records)

@@ -34,6 +34,7 @@ class SimulationReadiness:
     missing: list[str] = field(default_factory=list)
     formula_source_id: str | None = None
     input_ids: list[str] = field(default_factory=list)
+    formula_equation: str | None = None
 
 
 def _requested_parameter(text: str, formula_variables: set[str]) -> str | None:
@@ -141,7 +142,8 @@ def simulation_readiness(text: str, evidence: list[dict[str, Any]],
         bindings[variable] = fact.value
         input_ids.append(fact.parent_calc_id if isinstance(fact, DerivedFact) else fact.fact_id)
     if missing:
-        return SimulationReadiness(missing=missing, formula_source_id=formula.source_id)
+        return SimulationReadiness(missing=missing, formula_source_id=formula.source_id,
+                                   formula_equation=formula.expression_candidate)
 
     rhs = (formula.expression_candidate or "").split("=", 1)[1].strip()
     tree = ast.parse(rhs, mode="eval")
@@ -159,14 +161,17 @@ def simulation_readiness(text: str, evidence: list[dict[str, Any]],
     )
     validate_expression(spec)
     return SimulationReadiness(spec=spec, formula_source_id=formula.source_id,
-                               input_ids=input_ids)
+                               input_ids=input_ids, formula_equation=formula.expression_candidate)
 
 
 def clarification_question(missing: list[str], korean: bool) -> str:
     items = list(dict.fromkeys(missing))
+    needs_units = any("단위" in item or "unit" in item.casefold() for item in items)
     if korean:
-        return "계산을 계속하려면 " + ", ".join(items) + "이(가) 필요합니다. 값과 단위를 한 번에 알려주세요."
-    return "To continue, please provide: " + ", ".join(items) + ". Include units where applicable."
+        return ("계산을 계속하려면 " + ", ".join(items) + "이(가) 필요합니다. " +
+                ("값과 단위를 한 번에 알려주세요." if needs_units else "필요한 값을 알려주세요."))
+    return ("To continue, please provide: " + ", ".join(items) + ". " +
+            ("Include units where applicable." if needs_units else ""))
 
 
 def calculation_missing(formula: FormulaSourceRecord | None, evidence: list[dict[str, Any]],
@@ -178,3 +183,25 @@ def calculation_missing(formula: FormulaSourceRecord | None, evidence: list[dict
     variables = expression_variables(formula.expression_candidate or "") or set()
     return [f"{variable} 값과 단위" for variable in sorted(variables)
             if normalize_symbol(variable) not in available]
+
+
+def calculation_readiness(formula: FormulaSourceRecord | None, evidence: list[dict[str, Any]],
+                          users: UserFactRegistry, derived_facts: list[DerivedFact]) -> list[str]:
+    """Block Python until every sourced equation variable has one usable binding."""
+    if formula is None:
+        return ["출처가 확인된 계산 관계식"]
+    source = next((row for row in evidence if row.get("evidence_id") == formula.source_id), None)
+    from app.services.formula_source_registry import source_contains_equation
+    if source is None or not source_contains_equation(formula, str(source.get("text") or "")):
+        return ["실제 식이 포함된 근거 구간"]
+    missing = []
+    dimensionless = {"sg", "specificgravity", "phi", "porosity", "fraction", "ratio"}
+    for variable in sorted(expression_variables(formula.expression_candidate or "") or set()):
+        facts = [fact for fact in [*users.records, *derived_facts]
+                 if normalize_symbol(fact.name) == normalize_symbol(variable)]
+        if len(facts) != 1:
+            suffix = "값" if normalize_symbol(variable) in dimensionless else "값과 단위"
+            missing.append(f"{variable} {suffix}" if not facts else f"{variable} 값 확인")
+        elif not facts[0].unit and normalize_symbol(variable) not in dimensionless:
+            missing.append(f"{variable} 단위")
+    return missing

@@ -21,7 +21,7 @@ from app.models.goal_research_schemas import CalculationContract, ComputationRec
 from app.services.calculation_result import CalculationResultError, validate_calculation_result
 from app.services.calculation_assumption_guard import preflight_calculation_code
 from app.services.evidence_fact_registry import EvidenceFactRegistry
-from app.services.formula_source_registry import FormulaSourceRegistry, expression_variables, normalize_formula
+from app.services.formula_source_registry import FormulaSourceRegistry, expression_variables, normalize_formula, source_contains_equation
 from app.services.goal_tool_planner import PythonAnalysisPlan
 from app.tools.python_tools import PythonTools
 
@@ -222,7 +222,8 @@ class GoalPythonAnalysis:
             if record is None:
                 return VerificationFailure(stage="formula_provenance_failed", reason="formula_id_unknown", formula_id=plan.formula_source_id)
             if (record.raw_span != plan.formula_source_span or record.expression_candidate is None
-                    or not plan.formula or normalize_formula(record.expression_candidate) != normalize_formula(plan.formula)
+                    or not plan.formula or not source_contains_equation(
+                        record, str(by_id.get(record.source_id, {}).get("text") or ""), plan.formula)
                     or plan.supporting_evidence_ids != [record.source_id]):
                 return VerificationFailure(stage="formula_provenance_failed", reason="formula_text_mismatch", formula_id=record.formula_id, source_id=record.source_id)
             variables = expression_variables(plan.formula)
@@ -367,6 +368,14 @@ class GoalPythonAnalysis:
             source_evidence_ids=list(dict.fromkeys(fact.evidence_id for fact in plan.input_facts if fact.source_type != "user_fact")),
             source_input_ids=list(dict.fromkeys(fact.evidence_id for fact in plan.input_facts if fact.source_type == "user_fact")),
             formula_evidence_ids=[] if plan.formula and not plan.formula_source_id and _basic_arithmetic_formula(plan.formula, {fact.name for fact in plan.input_facts}) else plan.supporting_evidence_ids,
+            formula_source_ids=plan.supporting_evidence_ids if plan.formula_source_id else ["USER_REQUEST"],
+            input_fact_ids=list(dict.fromkeys(fact.evidence_id for fact in plan.input_facts)),
+            bound_variables={fact.name: fact.evidence_id for fact in plan.input_facts},
+            normalized_formula=(normalize_formula(plan.formula) if plan.formula else
+                                "builtin:" + ",".join(item.name for item in contract.required_outputs)
+                                if contract else None),
+            source_formula=plan.formula_source_span if plan.formula_source_id else plan.formula,
+            units={fact.name: fact.unit for fact in plan.input_facts},
             formula_source_id=plan.formula_source_id,
             canonical_fact_ids=list(dict.fromkeys(fact.canonical_fact_id for fact in plan.input_facts if fact.canonical_fact_id)),
             canonical_formula_ids=[plan.formula_source_id] if plan.formula_source_id else [],
@@ -453,6 +462,10 @@ class GoalPythonAnalysis:
                 else:
                     self._validate_result(data, plan)
                 record.validation_passed = True
+                record.execution_hash = hashlib.sha256(code.encode("utf-8")).hexdigest()
+                record.output = {key: item.get("value") for key, item in record.output_manifest.items()}
+                record.units.update({key: str(item.get("unit") or "")
+                                     for key, item in record.output_manifest.items()})
                 if trace:
                     trace.result_validation_passed = True
                     trace.execution_validated = True

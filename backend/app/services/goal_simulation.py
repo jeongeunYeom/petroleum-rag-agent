@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 import asyncio
+import hashlib
 import json
 import keyword
 import math
@@ -17,6 +18,7 @@ from app.core.config import Settings
 from app.models.agent_schemas import AgentAction, AgentPermissionLevel, AgentToolName
 from app.models.goal_research_schemas import ComputationRecord, GoalResearchRequest
 from app.services.goal_execution_state import SimulationSpec
+from app.services.formula_source_registry import normalize_formula
 from app.tools.python_tools import PythonTools
 
 
@@ -154,7 +156,14 @@ async def run_parameter_sweep(settings: Settings, request: GoalResearchRequest, 
     })
     return ComputationRecord(
         computation_id=calc_id, analysis_id=f"SIM-{calc_id}", purpose=request.goal or request.topic,
-        source_input_ids=[source_id], formula=spec.expression, input_facts=[{
+        source_input_ids=[source_id], formula_source_ids=[source_id], input_fact_ids=[source_id],
+        bound_variables={spec.parameter.name: source_id},
+        normalized_formula=normalize_formula(f"{spec.output_name}={spec.expression}"),
+        source_formula=f"{spec.output_name}={spec.expression}",
+        units={spec.parameter.name: spec.parameter.unit or "", spec.output_name: spec.output_unit or ""},
+        execution_hash=hashlib.sha256(code.encode("utf-8")).hexdigest(),
+        output={key: item.get("value") for key, item in manifest.items()},
+        formula=spec.expression, input_facts=[{
             "name": spec.parameter.name, "value": spec.parameter.start, "unit": spec.parameter.unit,
             "evidence_id": source_id, "source_type": "user_fact"}],
         code_record=str(execution.get("code_record") or ""),
@@ -163,6 +172,7 @@ async def run_parameter_sweep(settings: Settings, request: GoalResearchRequest, 
         summary=f"{count} validated cases; best {spec.parameter.name}={best['parameter']}, "
                 f"{spec.output_name}={best['value']} {spec.output_unit or ''}",
         validation_passed=True, attempts=1, output_manifest=manifest,
+        attempt_records=[{"attempt": 1, "code": code, "validation_passed": True}],
         required_output_ids=list(manifest), produced_output_ids=list(manifest),
         used_input_ids=[source_id], contract_validation_passed=True,
     )

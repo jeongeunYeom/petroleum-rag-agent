@@ -7,7 +7,7 @@ import re
 from typing import Any
 
 from app.services.calculation_requirements import normalize_symbol, symbol_names
-from app.services.formula_source_registry import FormulaSourceRecord, FormulaSourceRegistry, expression_variables, normalize_formula
+from app.services.formula_source_registry import FormulaSourceRecord, FormulaSourceRegistry, expression_variables, normalize_formula, source_contains_equation
 
 
 @dataclass(frozen=True)
@@ -46,6 +46,8 @@ def resolve_formula(evidence: list[dict[str, Any]], intent: FormulaIntent) -> Fo
     source_text = {str(item.get("evidence_id")): str(item.get("text") or "") for item in evidence}
     for record in FormulaSourceRegistry.from_evidence(evidence).records:
         expression = record.expression_candidate
+        if not source_contains_equation(record, source_text.get(record.source_id, ""), expression):
+            continue
         variables = expression_variables(expression) if expression else None
         if variables is None:
             continue

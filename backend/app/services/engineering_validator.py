@@ -7,6 +7,7 @@ from typing import Any, Iterable, Mapping
 from app.services.engineering import (
     ClaimValidationResult,
     EngineeringValidatorRegistry,
+    DrillingValidator,
     ReservoirValidator,
     ValidationResult,
     WellTestValidator,
@@ -18,8 +19,9 @@ class EngineeringValidator:
     def __init__(self, registry: EngineeringValidatorRegistry | None = None) -> None:
         self.well_test = WellTestValidator()
         self.reservoir = ReservoirValidator()
+        self.drilling = DrillingValidator()
         self.registry = registry or EngineeringValidatorRegistry(
-            [self.well_test, self.reservoir]
+            [self.well_test, self.reservoir, self.drilling]
         )
 
     def validators_for(self, query: str) -> list[Any]:

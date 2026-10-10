@@ -300,7 +300,8 @@ class GoalEvaluator:
         evidence: list[dict[str, Any]],
         computations: dict[str, ComputationRecord] | None = None,
     ) -> dict[str, Any]:
-        if not request.engineering_validation:
+        if not request.engineering_validation and not self.engineering_validator.detect_false_premises(
+                " ".join(value for value in (request.topic, request.goal) if value)):
             return {
                 "engineering_contradiction_count": 0,
                 "unsupported_engineering_claim_count": 0,
@@ -390,6 +391,14 @@ class GoalEvaluator:
             query,
             candidate,
         )
+        if detected and corrected:
+            cited_correction = "\n".join(line for line in candidate.splitlines()
+                                          if re.search(r"\[(?:KB|WEB|FIG)\d+\]", line))
+            _, corrected_with_citation, _ = self.engineering_validator.false_premise_correction(
+                query, "The premise is incorrect. " + cited_correction)
+            if not corrected_with_citation:
+                corrected = False
+                reasons.append("False-premise correction needs a cited supporting passage.")
         return {
             "engineering_contradiction_count": contradictions,
             "unsupported_engineering_claim_count": unsupported,

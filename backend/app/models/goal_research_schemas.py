@@ -319,6 +319,14 @@ class ComputationRecord(BaseModel):
     source_evidence_ids: list[str] = Field(default_factory=list)
     source_input_ids: list[str] = Field(default_factory=list)
     formula_evidence_ids: list[str] = Field(default_factory=list)
+    formula_source_ids: list[str] = Field(default_factory=list)
+    input_fact_ids: list[str] = Field(default_factory=list)
+    bound_variables: dict[str, str] = Field(default_factory=dict)
+    normalized_formula: str | None = None
+    source_formula: str | None = None
+    units: dict[str, str] = Field(default_factory=dict)
+    execution_hash: str | None = None
+    output: dict[str, Any] = Field(default_factory=dict)
     formula_source_id: str | None = None
     canonical_fact_ids: list[str] = Field(default_factory=list)
     canonical_formula_ids: list[str] = Field(default_factory=list)

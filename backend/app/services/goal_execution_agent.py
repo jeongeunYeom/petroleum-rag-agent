@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 import time
 import json
+import hashlib
 from dataclasses import replace
 from datetime import datetime, timezone
 from collections.abc import Callable
@@ -12,19 +13,22 @@ from typing import Any
 
 from app.core.config import get_settings
 from app.models.goal_research_schemas import (
-    CriterionStatus, ExpectedResultStatus, GoalCriterion, GoalResearchRequest,
+    CriterionEvaluation, CriterionStatus, ExpectedResultStatus, GoalCriterion, GoalResearchRequest,
     GoalResearchResponse, GoalRunStatus, GoalStatus, GoalStopReason,
 )
 from app.models.research_schemas import EvidenceCounts, ResearchRequest, ResearchResponse, ResearchTiming
-from app.services.formula_source_registry import FormulaSourceRegistry, normalize_formula
+from app.services.formula_source_registry import FormulaSourceRegistry, equation_ast, normalize_formula, source_contains_equation
 from app.services.calculation_requirements import select_formula_candidate
-from app.services.goal_clarification import (calculation_missing, clarification_question,
+from app.services.calculation_request_ir import parse_request_ir, validate_ir
+from app.services.goal_clarification import (calculation_missing, calculation_readiness, clarification_question,
                                              parse_user_simulation_spec, simulation_readiness)
 from app.services.evidence_fact_registry import EvidenceFactRegistry
-from app.services.calc_claim_grounding import validate_calc_claim
+from app.services.calc_claim_grounding import NUMERIC, _matches_reported_value, validate_calc_claim
 from app.services.citation_semantics import ground_research_claims
 from app.services.goal_action_planner import CALC_WORDS, SIMULATE_WORDS, GoalActionPlanner
 from app.services.goal_intent import asks_for_api_gravity_calculation, prefers_korean
+from app.services.engineering.drilling import DrillingValidator
+from app.services.engineering_validator import EngineeringValidator
 from app.services.goal_evaluator import GoalEvaluator
 from app.services.goal_execution_state import (
     ActionRecord, DerivedFact, GoalActionType, GoalExecutionState, SimulationParameter, SimulationSpec,
@@ -78,6 +82,19 @@ class _V8ToolPlanner(GoalToolPlanner):
                      evidence: list[dict[str, Any]], previous_coverage: float | None,
                      prior_evaluations: list[Any] | None = None) -> Any:
         result = await super().decide(request, criteria, evidence, previous_coverage, prior_evaluations)
+        if (not result.tool_needed and request.allow_python_execution and request.python_execution_approved):
+            user_ids = [str(item["evidence_id"]) for item in evidence
+                        if item.get("source_type") == "user_fact" and "name" in item]
+            intent = parse_request_ir(request, criteria) if user_ids else None
+            if (intent and not validate_ir(intent) and not intent.specialist_relation_required
+                    and intent.requested_operation_types and
+                    len(user_ids) >= (1 if intent.requested_operation_types == ["result"] else 2)):
+                # The existing generic contract/code path is deterministic; an
+                # LLM "no tool" answer cannot veto explicit user-only arithmetic.
+                return ToolDecision(tool_needed=True, tool_type="python_calculation",
+                                    reason="Explicit arithmetic over supplied user facts",
+                                    decision_status="selected", plan_status="generic_fast_path",
+                                    selected_user_fact_ids=user_ids, selected_fact_ids=user_ids)
         if (not result.tool_needed and asks_for_api_gravity_calculation(request)
                 and request.allow_python_execution and request.python_execution_approved):
             # A phrasing-sensitive LLM "none" must not veto an explicit calculation
@@ -171,19 +188,28 @@ class GoalExecutionAgent(GoalResearchAgent):
                              "Calculate API gravity from the supplied specific gravity with a validated result"])
         elif simulation_spec:
             descriptions.append("Report all simulated cases from the validated parameter sweep")
-            for word, phrase in ((r"\bbest\b|\bmaxim", "Identify the best case"),
-                                 (r"\bmean\b|\baverage\b", "Report the mean simulated result"),
-                                 (r"\brange\b|\bsensitiv", "Report the sensitivity range")):
+            for word, phrase in ((r"\bbest\b|\bmaxim|최적|최대|최댓", "Identify the best case"),
+                                 (r"\bmean\b|\baverage\b|평균", "Report the mean simulated result"),
+                                 (r"\brange\b|\bsensitiv|범위|민감도", "Report the sensitivity range")):
                 if re.search(word, goal, re.I):
                     descriptions.append(phrase)
         elif users.records and re.search(r"공식|수식|관계식|\b(?:formula|equation|correlation)\b", goal, re.I) and re.search(
                 r"계산|구해|\b(?:calculat\w*|comput\w*)\b", goal, re.I):
             descriptions.append("출처 있는 관계식과 제공된 입력으로 검증된 계산 결과를 제시" if prefers_korean(request)
                                 else "Provide a validated result from a sourced equation and supplied inputs")
-        elif users.records and re.search(r"\b(?:calculat|comput|determine|find)\w*\b|계산|구해|구하", goal, re.I):
+        elif users.records and re.search(r"\b(?:calculat|comput|determine|find|mean|average|sum|ratio|difference)\w*\b|계산|구해|구하|평균|합계|총합|비율|차이", goal, re.I):
             if re.search(r"\bmean\b|\baverage\b|평균", goal, re.I):
                 descriptions.append("제공된 입력의 평균을 계산하여 제시" if prefers_korean(request)
                                     else "Calculate the requested mean from the supplied inputs")
+            if re.search(r"\bsum\b|\btotal\b|합계|총합", goal, re.I):
+                descriptions.append("제공된 입력의 합계를 계산하여 제시" if prefers_korean(request)
+                                    else "Calculate the requested sum from the supplied inputs")
+            if re.search(r"\bratio\b|비율", goal, re.I):
+                descriptions.append("제공된 입력의 비율을 계산하여 제시" if prefers_korean(request)
+                                    else "Calculate the requested ratio from the supplied inputs")
+            if re.search(r"\bdifference\b|차이", goal, re.I):
+                descriptions.append("제공된 입력의 차이를 계산하여 제시" if prefers_korean(request)
+                                    else "Calculate the requested difference from the supplied inputs")
             if re.search(r"\b(?:rank|top|best|highest)\b|순위|최고|최적|가장\s*높", goal, re.I):
                 descriptions.append("제공된 입력의 순위와 가장 높은 항목을 제시" if prefers_korean(request)
                                     else "Identify the requested ranking or top case from the supplied inputs")
@@ -196,6 +222,47 @@ class GoalExecutionAgent(GoalResearchAgent):
                                 else "Explain the requested relationship with identifiable evidence")
         return [GoalCriterion(criterion_id=f"C{index}", description=description)
                 for index, description in enumerate(descriptions, 1)]
+
+    @staticmethod
+    def _premise_criteria(request: GoalResearchRequest) -> list[GoalCriterion]:
+        question = f"{request.topic}\n{request.goal or ''}"
+        if not EngineeringValidator().detect_false_premises(question):
+            return []
+        descriptions = (["질문의 잘못된 전제를 명시적으로 반박", "올바른 공학적 관계를 설명",
+                         "교정된 관계를 뒷받침하는 내부 근거를 인용"] if prefers_korean(request) else
+                        ["Explicitly reject the false premise", "State the corrected engineering relation",
+                         "Cite evidence supporting the correction"])
+        return [GoalCriterion(criterion_id=f"C{index}", description=value)
+                for index, value in enumerate(descriptions, 1)]
+
+    @staticmethod
+    def _validated_premise_criteria(evaluation: Any, criteria: list[GoalCriterion],
+                                    request: GoalResearchRequest, answer: str,
+                                    evidence: list[dict[str, Any]]) -> Any:
+        query = f"{request.topic}\n{request.goal or ''}"
+        validator = EngineeringValidator()
+        detected, corrected, _ = validator.false_premise_correction(query, answer)
+        cited = "\n".join(line for line in answer.splitlines()
+                          if re.search(r"\[(?:KB|WEB|FIG)\d+\]", line))
+        _, supported, _ = validator.false_premise_correction(query, "The premise is incorrect. " + cited)
+        if not (detected and corrected and supported and evaluation.engineering_validation_passed):
+            return evaluation
+        source_ids = set(re.findall(r"\[((?:KB|WEB|FIG)\d+)\]", cited))
+        sources = {str(item["evidence_id"]): str(item.get("text") or "") for item in evidence
+                   if item.get("source_type") in {"knowledge_base", "web", "figure"}}
+        if not source_ids <= sources.keys() or not source_ids:
+            return evaluation
+        for line in cited.splitlines():
+            ids = re.findall(r"\[((?:KB|WEB|FIG)\d+)\]", line)
+            if not validator.validate_claim(line, "\n".join(sources[value] for value in ids),
+                                            query=query).passed:
+                return evaluation
+        reason = ("잘못된 전제를 바로잡고 실제 근거를 인용했습니다." if prefers_korean(request)
+                  else "The false premise was corrected with cited evidence.")
+        updates = [CriterionEvaluation(criterion_id=item.criterion_id, status=CriterionStatus.MET,
+                                       reason=reason, supporting_evidence=sorted(source_ids))
+                   for item in criteria]
+        return replace(evaluation, criteria=updates, coverage=1.0, achieved=True, gaps=[])
 
     @staticmethod
     def _simulation_spec(request: GoalResearchRequest) -> SimulationSpec | None:
@@ -252,7 +319,9 @@ class GoalExecutionAgent(GoalResearchAgent):
         evidence = accumulator.records() + users.evidence()
         if simulation_spec:
             evidence.append({"evidence_id": simulation_source_id, "source_type": "user_fact",
-                             "locator": "request.goal", "text": simulation_spec.model_dump_json()})
+                             "locator": "request.goal",
+                             "text": f"{simulation_spec.output_name}={simulation_spec.expression}\n"
+                                     + simulation_spec.model_dump_json()})
         for computation in computations:
             if not computation.validation_passed:
                 continue
@@ -283,6 +352,71 @@ class GoalExecutionAgent(GoalResearchAgent):
                             unit=row.get("unit"), underlying_provenance_ids=parents)
                 for output_id, row in computation.output_manifest.items()
                 if isinstance(row.get("value"), (int, float))]
+
+    @staticmethod
+    def _provenance_complete(computation: Any, evidence: list[dict[str, Any]],
+                             request_text: str) -> bool:
+        """Validate the full recorded chain before admitting a CALC into the run."""
+        if not (computation.validation_passed and computation.contract_validation_passed
+                and (computation.formula or computation.formula_source_ids == ["USER_REQUEST"])
+                and computation.normalized_formula
+                and computation.execution_hash and re.fullmatch(r"[0-9a-f]{64}", computation.execution_hash)
+                and computation.formula_source_ids and computation.input_fact_ids
+                and computation.bound_variables and computation.output_manifest
+                and computation.output == {key: row.get("value") for key, row in computation.output_manifest.items()}):
+            return False
+        successful_code = next((row.get("code") for row in reversed(computation.attempt_records)
+                                if row.get("validation_passed") and isinstance(row.get("code"), str)), None)
+        if successful_code is None or hashlib.sha256(successful_code.encode("utf-8")).hexdigest() != computation.execution_hash:
+            return False
+        sources = {str(row.get("evidence_id")): row for row in evidence}
+        if any(value not in sources for value in computation.input_fact_ids):
+            return False
+        if any(value not in computation.input_fact_ids for value in computation.bound_variables.values()):
+            return False
+        if computation.formula_source_ids == ["USER_REQUEST"]:
+            return bool(re.search(r"평균|합계|비율|차이|순위|mean|average|sum|ratio|difference|rank",
+                                  request_text, re.I))
+        if any(source_id not in sources for source_id in computation.formula_source_ids):
+            return False
+        records = FormulaSourceRegistry.from_evidence(evidence).records
+        return all((bool(equation_ast(computation.source_formula or "")) and
+                    normalize_formula(computation.source_formula or "") in
+                    normalize_formula(str(sources[source_id].get("text") or "")))
+                   if sources[source_id].get("source_type") == "user_fact" else
+                   any(record.source_id == source_id and
+                       source_contains_equation(record, str(sources[source_id].get("text") or ""),
+                                                computation.source_formula or computation.formula)
+                       for record in records)
+                   for source_id in computation.formula_source_ids)
+
+    @staticmethod
+    def _filter_numeric_claims(answer: str, evidence: list[dict[str, Any]],
+                               computations: list[Any]) -> tuple[str, int]:
+        """No final number survives without its cited literal source or validated output."""
+        by_id = {str(row["evidence_id"]): row for row in evidence}
+        calcs = {row.computation_id: row for row in computations if row.validation_passed}
+        kept, removed = [], 0
+        for line in answer.splitlines():
+            citations = re.findall(r"\[((?:KB|WEB|FIG|USERF|CALC)\d+)\]", line)
+            plain = re.sub(r"\[(?:KB|WEB|FIG|USERF|CALC)\d+\]", "", line)
+            matches = list(NUMERIC.finditer(plain))
+            if not matches:
+                kept.append(line)
+                continue
+            literal_sources = "\n".join(str(by_id[value].get("text") or "") for value in citations
+                                        if value in by_id and by_id[value].get("source_type") != "calculation")
+            source_values = [match.group() for match in NUMERIC.finditer(literal_sources)]
+            calc_values = [float(row["value"]) for value in citations if value in calcs
+                           for row in calcs[value].output_manifest.values()
+                           if isinstance(row.get("value"), (int, float)) and not isinstance(row.get("value"), bool)]
+            if all(any(match.group().replace(",", "") == value.replace(",", "") for value in source_values)
+                   or any(_matches_reported_value(match, value) for value in calc_values)
+                   for match in matches):
+                kept.append(line)
+            else:
+                removed += 1
+        return "\n".join(kept).strip(), removed
 
     @staticmethod
     def _api_gravity_answer(request: GoalResearchRequest, computations: list[Any],
@@ -535,6 +669,7 @@ class GoalExecutionAgent(GoalResearchAgent):
             latest_candidate = str(resume_state.get("latest_candidate") or "")
             research_validation = dict(resume_state.get("research_validation") or {})
             clarification_attempts = int(resume_state.get("clarification_attempts") or 0)
+            premise_criteria = result.criteria_source == "inferred_premise"
             result.run_status = GoalRunStatus.RUNNING
             result.clarification_question = None
             result.required_inputs = []
@@ -542,8 +677,14 @@ class GoalExecutionAgent(GoalResearchAgent):
         else:
             criteria = [item.model_copy(deep=True) for item in request.success_criteria]
             source = "user" if criteria else "inferred"
+            premise_criteria = False
             if not criteria:
-                criteria = self._explicit_numeric_criteria(request, users, simulation_spec)
+                criteria = self._premise_criteria(request)
+                if criteria:
+                    source = "inferred_premise"
+                    premise_criteria = True
+                else:
+                    criteria = self._explicit_numeric_criteria(request, users, simulation_spec)
                 if not criteria:
                     criteria = await self.planner.infer_criteria(request)
             criteria_hash = self._criteria_hash(criteria)
@@ -585,7 +726,9 @@ class GoalExecutionAgent(GoalResearchAgent):
                 evidence_rows, f"{request.goal or ''} {request.topic}",
                 [item.name for item in users.records],
             ) if formula_available else None
+            formula_missing = calculation_readiness(selected_formula, evidence_rows, users, state.derived_facts) if selected_formula else []
             simulation_source = None
+            simulation_formula = None
             simulation_inputs: list[str] = []
             missing_simulation: list[str] = []
             if simulation_spec is None and SIMULATE_WORDS.search(f"{request.topic} {request.goal or ''}"):
@@ -593,6 +736,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                                                   users, state.derived_facts)
                 simulation_spec = readiness.spec
                 simulation_source = readiness.formula_source_id
+                simulation_formula = readiness.formula_equation
                 simulation_inputs = readiness.input_ids
                 missing_simulation = readiness.missing
             selection_started = time.perf_counter()
@@ -601,7 +745,8 @@ class GoalExecutionAgent(GoalResearchAgent):
                                                 formula_ready=selected_formula is not None,
                                                 formula_id=selected_formula.formula_id if selected_formula else None,
                                                 python_calls_used=result.python_calls_total,
-                                                simulation_spec=simulation_spec)
+                                                simulation_spec=simulation_spec,
+                                                formula_inputs_ready=not formula_missing)
             self._add_time(result, "planning_seconds", time.perf_counter() - selection_started)
             if action.action_type == GoalActionType.STOP:
                 calculation_stalled = (action.reason_code == "no_progress" and not state.computation_ids
@@ -610,7 +755,8 @@ class GoalExecutionAgent(GoalResearchAgent):
                     action.reason_code == "no_progress" and (bool(missing_simulation) or calculation_stalled))
                 if needs_clarification and request.use_internal and clarification_attempts < 3:
                     missing = (missing_simulation if missing_simulation else
-                               calculation_missing(selected_formula, evidence_rows, users, state.derived_facts))
+                               formula_missing or calculation_missing(selected_formula, evidence_rows,
+                                                                     users, state.derived_facts))
                     if missing:
                         return self._pause(result, state, accumulator, seen_actions, research_validation,
                                            latest_candidate, missing, korean, clarification_attempts + 1,
@@ -686,6 +832,12 @@ class GoalExecutionAgent(GoalResearchAgent):
                         state.unresolved_information = [failure]
                 elif action.action_type == GoalActionType.CALCULATE:
                     focused = selected_formula
+                    if not (request.allow_python_execution and request.python_execution_approved):
+                        raise PermissionError("calculation_permission_required")
+                    if (requires_sourced_formula or asks_for_api_gravity_calculation(request)) and not focused:
+                        raise ValueError("formula_source_unavailable")
+                    if focused and formula_missing:
+                        raise ValueError("missing_required_input")
                     snapshot = _EvidenceSnapshot(accumulator, request.model,
                                                  focused.source_id if focused else None,
                                                  focused.raw_span if focused else None,
@@ -738,11 +890,21 @@ class GoalExecutionAgent(GoalResearchAgent):
                                                            for value in computation.source_evidence_ids]
                         computation.formula_evidence_ids = [source_map.get(value, value)
                                                             for value in computation.formula_evidence_ids]
+                        computation.formula_source_ids = [source_map.get(value, value)
+                                                          for value in computation.formula_source_ids]
+                        computation.input_fact_ids = [source_map.get(value, value)
+                                                      for value in computation.input_fact_ids]
+                        computation.bound_variables = {name: source_map.get(value, value)
+                                                        for name, value in computation.bound_variables.items()}
                         for fact in computation.input_facts:
                             fact["evidence_id"] = source_map.get(str(fact.get("evidence_id")), fact.get("evidence_id"))
                         if (computation.formula and computation.formula_evidence_ids and not any(
                                 (value, normalize_formula(computation.formula)) in source_formulas
                                 for value in computation.formula_evidence_ids)):
+                            computation.validation_passed = False
+                        if computation.validation_passed and not self._provenance_complete(
+                                computation, self._evidence(accumulator, users, [], simulation_spec,
+                                                            simulation_source_id), f"{user_text}\n{request.goal or ''}"):
                             computation.validation_passed = False
                         computation.computation_id = f"CALC{len(result.computations) + 1}"
                         targets = set(computation.target_criteria)
@@ -768,6 +930,16 @@ class GoalExecutionAgent(GoalResearchAgent):
                 elif action.action_type == GoalActionType.SIMULATE:
                     if simulation_spec is None:
                         raise ValueError("simulation specification unavailable")
+                    if not (request.allow_python_execution and request.python_execution_approved):
+                        raise PermissionError("simulation_permission_required")
+                    if simulation_source and simulation_formula and simulation_source != simulation_source_id:
+                        source = next((item for item in accumulator.records()
+                                       if item.get("evidence_id") == simulation_source), None)
+                        if source is None or not any(
+                                record.source_id == simulation_source and
+                                source_contains_equation(record, str(source.get("text") or ""), simulation_formula)
+                                for record in FormulaSourceRegistry.from_evidence([source]).records):
+                            raise ValueError("simulation_formula_source_unavailable")
                     python_started = time.perf_counter()
                     computation = await run_parameter_sweep(get_settings(), request, run_id,
                                                             simulation_spec, f"CALC{len(result.computations) + 1}",
@@ -778,6 +950,17 @@ class GoalExecutionAgent(GoalResearchAgent):
                         computation.source_evidence_ids = [simulation_source]
                         computation.source_input_ids = list(dict.fromkeys(
                             [*computation.source_input_ids, *simulation_inputs]))
+                        computation.formula_source_ids = [simulation_source]
+                        computation.source_formula = simulation_formula
+                        computation.normalized_formula = normalize_formula(simulation_formula or "")
+                        computation.input_fact_ids = list(computation.source_input_ids)
+                        for item in users.records:
+                            if item.fact_id in simulation_inputs:
+                                computation.bound_variables[item.name] = item.fact_id
+                    if not self._provenance_complete(
+                            computation, self._evidence(accumulator, users, [], simulation_spec,
+                                                        simulation_source_id), f"{user_text}\n{request.goal or ''}"):
+                        raise ValueError("simulation provenance incomplete")
                     result.computations.append(computation)
                     calc_ids.append(computation.computation_id)
                     state.computation_ids.append(computation.computation_id)
@@ -826,14 +1009,29 @@ class GoalExecutionAgent(GoalResearchAgent):
                     self._notify(result, on_progress)
                     if not result.computations:
                         latest_candidate = self._focus_research_answer(latest_candidate, criteria)
+                    grounded_premise_answer = DrillingValidator().grounded_correction(
+                        f"{request.topic}\n{request.goal or ''}", evidence, korean)
+                    if grounded_premise_answer:
+                        latest_candidate = grounded_premise_answer
                     rejected_claims: list[str] = []
-                    if not result.computations and callable(getattr(self.ollama, "chat_structured", None)):
+                    if not grounded_premise_answer and callable(getattr(self.ollama, "chat_structured", None)):
                         latest_candidate, rejected_claims = await ground_research_claims(
                             self.ollama, request, latest_candidate, evidence)
+                    latest_candidate, rejected_numeric = self._filter_numeric_claims(
+                        latest_candidate, evidence, result.computations)
                     evaluation_started = time.perf_counter()
                     evaluation = await self.evaluator.evaluate(request, criteria, latest_candidate,
                                                                evidence, research_validation,
                                                                computations=result.computations)
+                    if premise_criteria:
+                        evaluation = self._validated_premise_criteria(
+                            evaluation, criteria, request, latest_candidate, evidence)
+                    if (not grounded_premise_answer and
+                            DrillingValidator().detect_false_premises(f"{request.topic}\n{request.goal or ''}")):
+                        latest_candidate = ("근거상 질문의 전제를 확인하거나 교정하지 못해 결론을 보류합니다."
+                                            if korean else "The premise could not be corrected from the available evidence.")
+                        evaluation = replace(evaluation, achieved=False,
+                                             gaps=[*evaluation.gaps, "False premise lacks a supported correction"])
                     evaluation_seconds = time.perf_counter() - evaluation_started
                     self._add_time(result, "evaluation_seconds", evaluation_seconds)
                     self._add_time(result, "llm_generation_seconds", evaluation_seconds)
@@ -870,6 +1068,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                                          "unsupported_engineering_claim_count": evaluation.unsupported_engineering_claim_count,
                                          "citation_semantic_passed": citation_semantic_passed,
                                          "unsupported_citation_claim_count": len(rejected_claims),
+                                         "unsupported_numeric_claim_count": rejected_numeric,
                                          "criteria_frozen": True}
                     details = {"engineering_validation_passed": evaluation.engineering_validation_passed,
                                "goal_achieved": state.goal_achieved}

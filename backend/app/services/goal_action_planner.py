@@ -9,8 +9,8 @@ from app.services.goal_execution_state import GoalAction, GoalActionType, GoalEx
 from app.services.goal_intent import asks_for_api_gravity_calculation
 
 
-CALC_WORDS = re.compile(r"\b(?:calculat\w*|comput\w*|derive|mean|average|rank\w*|compare\s+numeric|difference|ratio)\b|계산|산출|평균|순위|그래프", re.I)
-ANALYZE_WORDS = re.compile(r"\b(?:rank\w*|best|worst|maximum|minimum|optim\w*|sensitiv\w*|compare|plot|graph|chart)\b|순위|최적|민감도|최대|최소|그래프|도표", re.I)
+CALC_WORDS = re.compile(r"\b(?:calculat\w*|comput\w*|derive|mean|average|sum|rank\w*|compare\s+numeric|difference|ratio)\b|계산|산출|평균|합계|총합|비율|차이|순위|그래프", re.I)
+ANALYZE_WORDS = re.compile(r"\b(?:rank\w*|best|worst|maximum|minimum|optim\w*|sensitiv\w*|compare|plot|graph|chart)\b|순위|최적|최대|최소|최댓|최솟|민감도|그래프|도표", re.I)
 SIMULATE_WORDS = re.compile(r"\b(?:simulat\w*|sweep|parameter\s+range|vary\w*)\b|시뮬레이션|매개변수\s*변화|범위\s*탐색|범위로\s*계산|바꿔가며|바꾸면서|변화시키(?:며|면서|고|면|기|다|는|ㄴ)?|간격으로", re.I)
 
 
@@ -28,6 +28,7 @@ class GoalActionPlanner:
         formula_id: str | None = None,
         python_calls_used: int = 0,
         simulation_spec: SimulationSpec | None,
+        formula_inputs_ready: bool = True,
     ) -> GoalAction:
         text = " ".join(filter(None, (request.topic, request.goal)))
         wants_simulation = bool(SIMULATE_WORDS.search(text) or simulation_spec)
@@ -81,6 +82,9 @@ class GoalActionPlanner:
             return action(GoalActionType.SIMULATE, "simulation_inputs_ready")
         last_calculation = next((item for item in reversed(state.completed_actions)
                                  if item.action_type == GoalActionType.CALCULATE), None)
+        if (last_calculation and last_calculation.status != "completed" and last
+                and last.action_type == GoalActionType.RETRIEVE and not last.evidence_added):
+            return action(GoalActionType.STOP, "calculation_blocked")
         retry_after_gain = bool(last and last.action_type == GoalActionType.RETRIEVE and
                                 last.evidence_added and not state.computation_ids and
                                 (last_calculation is None or
@@ -100,6 +104,8 @@ class GoalActionPlanner:
             if python_calls_used >= request.max_python_calls:
                 return action(GoalActionType.STOP, "python_call_budget_exhausted")
             if specialist and formula_ready and not numeric_inputs_ready:
+                return action(GoalActionType.STOP, "calculation_blocked")
+            if specialist and formula_ready and not formula_inputs_ready:
                 return action(GoalActionType.STOP, "calculation_blocked")
             if numeric_inputs_ready and (not specialist or formula_ready):
                 return action(GoalActionType.CALCULATE, "calculation_inputs_ready")
