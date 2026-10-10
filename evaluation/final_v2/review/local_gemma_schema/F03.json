@@ -1,0 +1,122 @@
+{
+  "task_id": "F03",
+  "prompt_version": "final-v2-reviewer-2-local-gemma-schema",
+  "reviewer_model_id": "gemma4:latest",
+  "mapping": {
+    "A": "agent",
+    "B": "openai_same_evidence",
+    "C": "openai_closed_book",
+    "D": "qwen_closed_book",
+    "E": "qwen_same_evidence"
+  },
+  "scores_by_track": {
+    "agent": {
+      "claim_verdicts": [
+        false,
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 1,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": false,
+      "safe_refusal_correct": false,
+      "citation_semantic_support": 0.0,
+      "note": "The answer repeats the premise in the question and does not correct it. The source material contradicts the premise."
+    },
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": true,
+      "safe_refusal_correct": false,
+      "citation_semantic_support": 1.0,
+      "note": "Correctly rejects the premise and states that annular friction increases BHP and ECD above static mud weight, supported by both sources."
+    },
+    "openai_closed_book": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": true,
+      "safe_refusal_correct": false,
+      "citation_semantic_support": 0.0,
+      "note": "Correctly rejects the premise and states that annular friction increases BHP and ECD above static mud weight, although it lacks citations."
+    },
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": true,
+      "safe_refusal_correct": false,
+      "citation_semantic_support": null,
+      "note": "Correctly rejects the premise and states that annular friction increases BHP and ECD above static mud weight, but provides no citations."
+    },
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": true,
+      "safe_refusal_correct": false,
+      "citation_semantic_support": 1.0,
+      "note": "Correctly rejects the premise and states that annular friction increases BHP and ECD above static mud weight, citing the source material."
+    }
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"claim_verdicts\":[false,false],\"partial_or_better\":false,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":1,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":false,\"safe_refusal_correct\":false,\"citation_semantic_support\":0.0,\"note\":\"The answer repeats the premise in the question and does not correct it. The source material contradicts the premise.\"},\"B\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":true,\"safe_refusal_correct\":false,\"citation_semantic_support\":1.0,\"note\":\"Correctly rejects the premise and states that annular friction increases BHP and ECD above static mud weight, supported by both sources.\"},\"C\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":true,\"safe_refusal_correct\":false,\"citation_semantic_support\":0.0,\"note\":\"Correctly rejects the premise and states that annular friction increases BHP and ECD above static mud weight, although it lacks citations.\"},\"D\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":true,\"safe_refusal_correct\":false,\"citation_semantic_support\":null,\"note\":\"Correctly rejects the premise and states that annular friction increases BHP and ECD above static mud weight, but provides no citations.\"},\"E\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":true,\"safe_refusal_correct\":false,\"citation_semantic_support\":1.0,\"note\":\"Correctly rejects the premise and states that annular friction increases BHP and ECD above static mud weight, citing the source material.\"}}\n}",
+  "parse_attempts": 1,
+  "prior_attempts": [],
+  "wall_seconds": 5.924,
+  "input_tokens": 4292,
+  "output_tokens": 581,
+  "provider_payload": {
+    "model": "gemma4:latest",
+    "created_at": "2026-10-10T12:03:38.8769086Z",
+    "message": {
+      "role": "assistant",
+      "content": "{\"scores\":{\"A\":{\"claim_verdicts\":[false,false],\"partial_or_better\":false,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":1,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":false,\"safe_refusal_correct\":false,\"citation_semantic_support\":0.0,\"note\":\"The answer repeats the premise in the question and does not correct it. The source material contradicts the premise.\"},\"B\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":true,\"safe_refusal_correct\":false,\"citation_semantic_support\":1.0,\"note\":\"Correctly rejects the premise and states that annular friction increases BHP and ECD above static mud weight, supported by both sources.\"},\"C\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":true,\"safe_refusal_correct\":false,\"citation_semantic_support\":0.0,\"note\":\"Correctly rejects the premise and states that annular friction increases BHP and ECD above static mud weight, although it lacks citations.\"},\"D\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":true,\"safe_refusal_correct\":false,\"citation_semantic_support\":null,\"note\":\"Correctly rejects the premise and states that annular friction increases BHP and ECD above static mud weight, but provides no citations.\"},\"E\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":true,\"safe_refusal_correct\":false,\"citation_semantic_support\":1.0,\"note\":\"Correctly rejects the premise and states that annular friction increases BHP and ECD above static mud weight, citing the source material.\"}}\n}"
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 5897475500,
+    "load_duration": 5262100,
+    "prompt_eval_count": 4292,
+    "prompt_eval_cached_count": 0,
+    "prompt_eval_duration": 686593000,
+    "eval_count": 581,
+    "eval_duration": 5021500000
+  }
+}

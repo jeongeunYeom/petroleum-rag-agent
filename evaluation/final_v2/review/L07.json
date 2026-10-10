@@ -1,0 +1,216 @@
+{
+  "task_id": "L07",
+  "prompt_version": "final-v2-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_090050cd8c28f041016aca225a42a487d09becba8f41eeebc1",
+  "wall_seconds": 12.795,
+  "mapping": {
+    "A": "qwen_same_evidence",
+    "B": "openai_closed_book",
+    "C": "qwen_closed_book",
+    "D": "agent",
+    "E": "openai_same_evidence"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"claim_verdicts\":[true,false],\"partial_or_better\":true,\"unsupported_claim_count\":1,\"hallucination\":false,\"engineering_contradiction_count\":1,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0.0,\"note\":\"정답 핵심인 순환 중 마찰 성분 누락은 맞췄다. 그러나 ECD 언급이 없고, '정수두는 운동에너지에 기반'이라는 설명은 부정확하다. 인용 문헌 excerpt도 해당 주장 직접 뒷받침 안 함.\"},\"B\":{\"claim_verdicts\":[true,false],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"환상부 마찰압력 손실이 빠진다는 핵심을 정확히 답했다. 다만 ECD로 그 성분을 반영한다는 점은 언급하지 않았다.\"},\"C\":{\"claim_verdicts\":[false,false],\"partial_or_better\":false,\"unsupported_claim_count\":2,\"hallucination\":true,\"engineering_contradiction_count\":1,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"누락 성분을 지층압으로 잘못 지목했다. 정수두와 지층압의 관계 설명도 문제 취지와 맞지 않는다.\"},\"D\":{\"claim_verdicts\":[false,false],\"partial_or_better\":false,\"unsupported_claim_count\":3,\"hallucination\":true,\"engineering_contradiction_count\":2,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0.0,\"note\":\"질문에 대한 직접 답이 없고, 정수두가 중력 성분을 제외한다는 등 잘못된 진술이 포함됐다. 제시 인용 excerpt도 주장들을 지지하지 않는다.\"},\"E\":{\"claim_verdicts\":[true,false],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0.0,\"note\":\"순환 시 마찰압손이 추가된다는 핵심을 정확히 말했다. ECD 언급은 없고, 인용 excerpt는 해당 주장 직접 지원이 없다.\"}}}",
+  "usage": {
+    "input_tokens": 2798,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 907,
+    "output_tokens_details": {
+      "reasoning_tokens": 278
+    },
+    "total_tokens": 3705
+  },
+  "provider_payload": {
+    "id": "resp_090050cd8c28f041016aca225a42a487d09becba8f41eeebc1",
+    "object": "response",
+    "created_at": 1791631962,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791631974,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are one independent AI-assisted semantic reviewer, not a human reviewer.\nJudge five anonymized petroleum-engineering answers against one frozen task. Do not infer\nsystem identity or repair answers. Evaluate the final answer; for a clarification task,\nalso evaluate whether its first answer requested the missing information.\n\nReturn JSON only: {\"scores\":{\"A\":{...},\"B\":{...},...}}. Each score object MUST have:\n- claim_verdicts: boolean list in exactly the supplied expected_claims order. True only\n  when the final answer accurately conveys that claim. An explicit refusal does not\n  satisfy a substantive positive claim.\n- partial_or_better: boolean, at least one substantive requested part correct.\n- unsupported_claim_count: nonnegative integer of unsupported specific engineering\n  assertions; no-source closed-book is NOT automatically unsupported. Count clearly\n  invented, source-incompatible, or unjustified specific assertions.\n- hallucination: boolean for a fabricated factual, numeric, formula, source, or\n  engineering assertion. Missing citation alone is not hallucination.\n- engineering_contradiction_count: nonnegative integer of wrong engineering relations.\n- numeric_accuracy: boolean or null; use null only when no numeric gold. Associate\n  each expected output with its value; mere appearance of an input number is not enough.\n- unit_accuracy: boolean or null, units must attach to corresponding output; dimensionless\n  output is acceptable without a unit.\n- formula_accuracy: boolean or null when a formula is requested or supplied.\n- false_premise_handled: boolean or null. True requires explicit rejection of the\n  erroneous premise, correct statement, and supporting citation when supplied evidence\n  is available.\n- safe_refusal_correct: boolean or null; applicable to unsupported-formula tasks.\n- citation_semantic_support: 0..1 or null. Of actual cited IDs, fraction whose exact\n  supplied excerpt supports the adjacent claim. Do not judge only document/page similarity.\n- note: concise evidence-based reason, no private chain-of-thought.\n\nBe strict but fair. Source gold spans are answer keys, not evidence available to models.\nNo citations in an answer means citation_semantic_support=null. Do not infer missing\nfacts from background knowledge for citation support. If an answer is empty, all claim\nverdicts false and partial_or_better false. No Markdown.",
+    "max_output_tokens": 6500,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_090050cd8c28f041016aca225b1f0087d0b574995c531ce21d",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyiJmVZwvop3qPoBiRvTFCqC8JJvsMF2w7FJm76_FG9owomRQUlWNmzdWTf1cj3gjch45dve0UREqyF4Ta6nxcymyKDHf7Ue0ZIhqhKSTSRLU7sFAjEg6tS2toM5WY3UyE7B_6c6zQ2wh6xqecmCQJ2yfZskgy08QS16SMVQZbQ9l54nxxnsQ3LhPQwUwygVsekGCWFRVRjo42iYuO1b9DkolMllx1BBdxOWOGm5nN3TFnbtwvJmd6RPJbn6IpdhxvrHJoO-_-Mi8D7-uzAVbm0kybkeF8zTOyyoTLH_js5mJMPbq0_S75HAEJ25yrc-0-X_vYBvnK2bWUekY2WYvDM-8Wx_PgeiTGkiFFsZrft-JBoyT82KIWQQIaob07f8SSN5i3THteHbC4OEknT4CGHRb9hik-QeY2Mmbu9EgrLTx46H9784MO9L01viFqr2zDV7eJVjQyFNkFDIZvh4iLZiNcNwc5AFi4Wf5IZfCFXXS8ayyDLOs3bh2s-jAjx8tJhg6ALLkJ_NFfLXen16-wuWciayjSXt6-H8OqmdDX34ayTGkA7aikW-RCks0GsnmB4tYFO-Z6Xd7QMtzET7n17t-mdFcmgefGYNVJclopjENRMk7q5nfT0TkQg4ORCS-pFmFJLo6oigjHMeuDZ7rtndHBnGL6yXhuLT0DZiMtHqeviAJwEwhXiiKE6CYwmp0IaxKszQNlxqohbScpDMUXCFyNpFMr-gK2lYAVwTW8VnNM96BEmHwVtC13H2Y0QXIucLbxaVqavYRcSMlop9gzgYoadD6cgDe6EDbgwX_paxtUYfugrdEEZP2MZ0xpbW7uhSk8NyEWpyTcygNm6JXD3luwSZHYcxr9ep3llf4hNl5IC0DL3IFzn1o0gBU4mIEH4hzhIe98VGz12pmLNvh-5VyjlULUeXeaW25NB5NLqFUreG9ZiOhQmWJFvvgxfymPOFV6u_Z5FYv4PG20M5KFspkOcBWIkG6T5IHwZ7TEJAASBAHPeQy7-SXGAQvSfmt8PO3_dfNAbNm_kvo4AIgxU0aza9sAeNwEzfm_aYpu_jnMF2g8dY-w2USBsAUxBfE2arBeek2_yP9_z0W-E57nApplL9XuMhOcQ5U-j6BPbXCCB0dWXNva18HjBsZr2MPM3Yl4XVtasW2_Z8-agY1SawpKxGyP5VyyvL1sbrgW1shtTEQI3LjPPqkcOd1-SjV-So0Zoau0Bc6iI9IHu2rscwZhUzsvBnZvpXZttnZy-g1xENDGJkUyDLNg36wONSD38SrHOnqjRVvaTO6FzWVdvA2GB-IWbg5mPYGgwlNphxmbpVtkYSR7EHgXz7Sdq_1yxhI0kAg3nHa7V9j1wRYM2xUSszkORK-w4YqPHXg1oKXFdAAclFYsZVkx8G-htiXI3NCC6e2GxKfEXWcngFKHebgqC-oTHkUqTZlUSKzc5oZ900WjWm_socvhyUxBpAVpKW6CL5sGyL7ktqh5LBh52PwsI0mfbfQ4DTn2guAW5w1bCUGhy1xE-fDqoX4zKiWDjVepv2g0n6pNfgPzC40-3VJ5RW7CALSMLs0864gVLxiwFZcMiz5nkB4NeBtf060pahvEYKK-j64KKU-rZmHD2BQTS8odZrxVbt_AQhn7IlDWg2w6rlY9oLNc6oa_QPSHvvlyovXw0ujS4Wvld-TvTWXlSvmUvqzE7FeY5Hlqd86d1vt76b_REH4nrU-a31YN0hTyK6QwehRrU7CFVLlJWhqC9ffPg5rTVxisROiROxJyvE0jJKVqqSUFkW7DY0n12ntoDs6ZMCJPojlIe6ryRyxBKvOVV0wG9DSZjClms7H0cjDjfPnPDvu5ke2TBYBqGj9oIPrzn0bVaHDae5ifsDhEofNU6xAyUBG47_GkKfMqXPa_UGOUgsdg7du7T_yVqXUEHfd142UQhhET38QAi6nPgiJ13nKrWo1MOiF2KNsI-jsXdoCjWnrVeGIUH7TcAHIXi3G0mBPzKaoU0kNv4DkfcUABL0-3J9Uez_3UCcqwEw7Zdj3PckezVqLyNsVLRB5dTsFI2UoxZxE3hqxigsefD-QQaQI5F4tG5rLUeBIsAuqKpZTMxvNBWX9mlsK2GwfWXu60BdoLB-9S3QKwp2oSPuG8SSyJQxMLZsWrJhcv42oAsf1PZpOoVDQhIRKtMA0ACqXG4ihJCswhaRTkdkL6tyt4amqYeh2RX-LgeZVMH6t2eq5HNj3kgiDPK6FSGeDY_nsmo8ZfKYw4RLWlk51k2CdB0xOsklWx5q7-O1TQzKE9QbZXqdv58yCH5jo-a0DjH1MDBYb8YaesrrqGhAp7PCFn_g9f4eo5p6JeD-2SjcZfCMyOAh3BMuYI_a-U3nBD3Aq5Vou3RX_qmWnkeQX0TlSrs8aB7WRVCoaL0XAOktVpTqFugshAquzVyMCgQJlqNKbgO3-LO5aBUhTiM6BENqyhCDHblt7cAigXxtk5bTIAncFYJZXpE59E3URsUzVo3qV2cuz3cjOh-_Cx3Fd5eaK2SNtbSC0wlZOtqfPZbDukf7dlRgXlJkDt7ywlx-yFQUNcWyM1rNvYtdEFipX1doBfY1Gr3INpgSgj7TijSEkpHKAbq1029mwtaq2lBco8mpMzWihEDicUa_qFTUJO_A871i49WLVJ3qObBcMW1spLYyoM6-yTnwPWH35zVlzAFVg_u7HQ9AbNR0WDt-k4uvlx8BqY0WcT3sijWp_eH-mbidKc1RSO1K1s4pTWedxwtrEieZE0P0LXWjmGEzGmWaaZLHEpTUbv_3z37lSeVhGDALxzKC3uyso9hD_D7kwT8KSlo0BVDLVRT9nJM_zK50oICKOEEBXmFZ_GvvPLHvcggwfOy1DN-8M_3gKX8tAeZz3PWF9nGzV5B_BuP1Lx_1M4jrAuh7r2R4QHvXSQJq9tZkWN5hrQkbgl3jkXArgxDxenHJeT7y2abFQmhKqBgjrYhOmN7d3TX52lmsSWYdelxroJ4h175OeKzqTcwg8Fo-6ToIWjI8xaJ0_rcgi0GsjpVbPGaclSFUPg8C-q2FdfO1VTxDZ0RI7dRLRL8mw7jvbfNFvOiohoLfMULBU1UkD0EZCN2lkjZi8n07nKDF5A-bFLoqbzdaV4613Uav_grNdSp2F7mplMJxAeMcjIvNQ8motHayVax390kk7fm4HWtvpzopb-L3ovSUMD20pyW2-IOWpnnVKC-1Qn_bnMDD54XohN7WMP3SfyHTM510_ccra6r3SACfqeGGLWc7K4TGPG-JBbtKWUlZ3nia2QaJ02xJ32zQrhhJYcPF17f_OLKEfm9YB4q8m_zBCFunzE1MfN7GIGo_vELDQyThOwa5I6H_NJS0mXRMDeJI3ObgzuEvBSp-7KZXlWYeW2PD74Qf92Gb0UkDCXSBHzIrlBTH6aPqQ6lRmZa8k2GI31eD8Md3Zm895VmxMQwosOUL1W5qm0JvSqZrC_qpKYTvkBLezRMT2wu4RMkz0cc9Kx_byyzpI3f3HCG_Nbqg8DbIfo9gYjg2QIy44diGnmHiroNIeZvTZFOIEzKluqWwQAplwLhAUbk_wJM5pEaEyirQMUa2N9bLimnHmtTI1pe0zxwTL7WUbMAB_-RmdQx728gfUmp2X9h_zudD3paSX_1Foum-FcGWo3X4EMzHZYdr85Jynmzp0n0oFUkM64Ku4N2OMAID5G7o2W1n0vyxXDMU4iqTAv59g6oDbJMosfyAGnMgfyVZDE2dLztsxNHd0yzDlUlY0qLNHcG6J2vQ2qIBR-AHiH5XDnf2HA_d7djsdGS2O_cN3p0Hb7H0vvestXUeK9aQLC1PMugM0MqylNgDUt_odGNqHru_f7SfK_P8K8SUnLAZVAqKw5DVNus0DDCLz2E4Qa_56xWVKAwZ5ZmKJN9OfdYKO0B0C65D9xDJRfZDdPlUeeat3Z73qzjH7lVQPt6WH9majDRLcSix5bb6jWjIxFnl1jmqJisbf2a5o0I0nh9oxYu_yVu0xUPccseo-pa_uOGe07XmluLeJzem6BD_rjK2HzUVxQF3Py9nNLdWIuVXksNrkMQApVR7zEYUhxFu9jV34UHob8UrEVFj0yeJ7NhzSlERJ4J7hcMdcuvTr4rn34tpkcqm0M71knpKBAhHeoio0v3CSqg3i0Dg53wghDFhr8gyeFezP2rr8VW09gNPXK7baDsKCA31psdeR5TS7wvYe4kKhL7bHTSCh6gyyoPFpsYvBM0nzmvaQcofuGWMFXdDIgCOLYJppYNsX8WsyzNshY7OMAwoJMrQBbnNk18WYwPLyqvw3OHlTQQ6JYTRCOCbLRqhXKYm6r_Q_cAIhgs2ZkOifq5xlPbcluViF2ynwKhiSw0k5iHkanuE97VcIxf9MzaK_IgaU8SrDGNImfXxfuzDBMEYfc9QeGeH3Z4r8ioliph2wN3U2yJ24dHPecTEG1Z5ubu6yvaijU8kxutmwX9CSAf3L3On_1cxDRv7uIjSh7tzTJYYuQ4keN4og7BMRfUcxmnH7URhi_7HA0d-tP4-O3Wi0xmgRxfwISxUM9S_q0UMeSBGo3Vow43MWts9njMc16G04gI-a7kNMoObk2PjeUjE5GjZH4c41YyvP3CjIN6-Z_RF8OzXkMvdpRE8aFGw5Qr1KDpyqzA77CQaPRioj9akREcrp0C4gCKWKHUExugqxIH-yEnLZO_eVh1F8O_meSYPvYNQc7HIJ_JdkjxFCML4Lg4ef2VCqxie6jKiZ9WXVCVkZc-pLXhIqXFfRIMcWQIzp-ULrTRunCKzKSVW8k40RoO5xrCYls_T-_5fuvwpkAja87a9VTDr_iqtDdrsi2Cg-Gs2X7Zo8vOjRJw-bv3Zrx8ixibsH8dZpWL3O2YbicXL4xf27A2M9yonpI5H6mhZ65GV8Z0W2SugOg0-fI3iNF6CP7-LZ4n1jM4v38RPD8HFV4YA8X2gm59c58cO8GbEnywVi3eU16iT1DkIbMccpqQNpJp0BUWNhoKrPXtKzQEf-NuQLaJAPmXBcZsX3Z-TQoPawEgMD88fH2EoAw4K2ZyPl56iQUCANvqj0HMaQB22uMg==",
+        "summary": []
+      },
+      {
+        "id": "msg_090050cd8c28f041016aca225f9d7087d0bba6dd383fe1bb04",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"claim_verdicts\":[true,false],\"partial_or_better\":true,\"unsupported_claim_count\":1,\"hallucination\":false,\"engineering_contradiction_count\":1,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0.0,\"note\":\"정답 핵심인 순환 중 마찰 성분 누락은 맞췄다. 그러나 ECD 언급이 없고, '정수두는 운동에너지에 기반'이라는 설명은 부정확하다. 인용 문헌 excerpt도 해당 주장 직접 뒷받침 안 함.\"},\"B\":{\"claim_verdicts\":[true,false],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"환상부 마찰압력 손실이 빠진다는 핵심을 정확히 답했다. 다만 ECD로 그 성분을 반영한다는 점은 언급하지 않았다.\"},\"C\":{\"claim_verdicts\":[false,false],\"partial_or_better\":false,\"unsupported_claim_count\":2,\"hallucination\":true,\"engineering_contradiction_count\":1,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"누락 성분을 지층압으로 잘못 지목했다. 정수두와 지층압의 관계 설명도 문제 취지와 맞지 않는다.\"},\"D\":{\"claim_verdicts\":[false,false],\"partial_or_better\":false,\"unsupported_claim_count\":3,\"hallucination\":true,\"engineering_contradiction_count\":2,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0.0,\"note\":\"질문에 대한 직접 답이 없고, 정수두가 중력 성분을 제외한다는 등 잘못된 진술이 포함됐다. 제시 인용 excerpt도 주장들을 지지하지 않는다.\"},\"E\":{\"claim_verdicts\":[true,false],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0.0,\"note\":\"순환 시 마찰압손이 추가된다는 핵심을 정확히 말했다. ECD 언급은 없고, 인용 excerpt는 해당 주장 직접 지원이 없다.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 2798,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 907,
+      "output_tokens_details": {
+        "reasoning_tokens": 278
+      },
+      "total_tokens": 3705
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        true,
+        false
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 1,
+      "hallucination": false,
+      "engineering_contradiction_count": 1,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 0.0,
+      "note": "정답 핵심인 순환 중 마찰 성분 누락은 맞췄다. 그러나 ECD 언급이 없고, '정수두는 운동에너지에 기반'이라는 설명은 부정확하다. 인용 문헌 excerpt도 해당 주장 직접 뒷받침 안 함."
+    },
+    "openai_closed_book": {
+      "claim_verdicts": [
+        true,
+        false
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "환상부 마찰압력 손실이 빠진다는 핵심을 정확히 답했다. 다만 ECD로 그 성분을 반영한다는 점은 언급하지 않았다."
+    },
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        false,
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 2,
+      "hallucination": true,
+      "engineering_contradiction_count": 1,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "누락 성분을 지층압으로 잘못 지목했다. 정수두와 지층압의 관계 설명도 문제 취지와 맞지 않는다."
+    },
+    "agent": {
+      "claim_verdicts": [
+        false,
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 3,
+      "hallucination": true,
+      "engineering_contradiction_count": 2,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 0.0,
+      "note": "질문에 대한 직접 답이 없고, 정수두가 중력 성분을 제외한다는 등 잘못된 진술이 포함됐다. 제시 인용 excerpt도 주장들을 지지하지 않는다."
+    },
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true,
+        false
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 0.0,
+      "note": "순환 시 마찰압손이 추가된다는 핵심을 정확히 말했다. ECD 언급은 없고, 인용 excerpt는 해당 주장 직접 지원이 없다."
+    }
+  }
+}

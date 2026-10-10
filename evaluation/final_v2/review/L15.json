@@ -1,0 +1,216 @@
+{
+  "task_id": "L15",
+  "prompt_version": "final-v2-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_0d1e0920fcb0cc0b016aca22f64e7887d0b57d1ce009a541b4",
+  "wall_seconds": 23.937,
+  "mapping": {
+    "A": "qwen_same_evidence",
+    "B": "openai_closed_book",
+    "C": "openai_same_evidence",
+    "D": "qwen_closed_book",
+    "E": "agent"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"claim_verdicts\":[false,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0.0,\"note\":\"Mentions heterogeneity/stratification causing early water arrival, but omits local drawdown-induced coning. Citation does not directly support the specific adjacent claim about high-horizontal-permeability layers near perforations.\"},\"B\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Correctly explains near-well drawdown causing water coning/cresting and notes heterogeneity/high-perm paths can cause preferential breakthrough.\"},\"C\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":1.0,\"note\":\"Accurately describes local pressure drawdown forming a cone and heterogeneity/preferential flow paths causing early water arrival; cited excerpts support these points.\"},\"D\":{\"claim_verdicts\":[false,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Gives a generic preferential-flow/heterogeneity explanation, but does not identify the key local drawdown water-coning mechanism.\"},\"E\":{\"claim_verdicts\":[false,true],\"partial_or_better\":true,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":1,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0.75,\"note\":\"Recognizes heterogeneity/stratification as a cause of early breakthrough, but omits drawdown-induced coning and includes the wrong relation that lower horizontal permeability makes water move faster.\"}}}",
+  "usage": {
+    "input_tokens": 9580,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 1546,
+    "output_tokens_details": {
+      "reasoning_tokens": 977
+    },
+    "total_tokens": 11126
+  },
+  "provider_payload": {
+    "id": "resp_0d1e0920fcb0cc0b016aca22f64e7887d0b57d1ce009a541b4",
+    "object": "response",
+    "created_at": 1791632118,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791632141,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are one independent AI-assisted semantic reviewer, not a human reviewer.\nJudge five anonymized petroleum-engineering answers against one frozen task. Do not infer\nsystem identity or repair answers. Evaluate the final answer; for a clarification task,\nalso evaluate whether its first answer requested the missing information.\n\nReturn JSON only: {\"scores\":{\"A\":{...},\"B\":{...},...}}. Each score object MUST have:\n- claim_verdicts: boolean list in exactly the supplied expected_claims order. True only\n  when the final answer accurately conveys that claim. An explicit refusal does not\n  satisfy a substantive positive claim.\n- partial_or_better: boolean, at least one substantive requested part correct.\n- unsupported_claim_count: nonnegative integer of unsupported specific engineering\n  assertions; no-source closed-book is NOT automatically unsupported. Count clearly\n  invented, source-incompatible, or unjustified specific assertions.\n- hallucination: boolean for a fabricated factual, numeric, formula, source, or\n  engineering assertion. Missing citation alone is not hallucination.\n- engineering_contradiction_count: nonnegative integer of wrong engineering relations.\n- numeric_accuracy: boolean or null; use null only when no numeric gold. Associate\n  each expected output with its value; mere appearance of an input number is not enough.\n- unit_accuracy: boolean or null, units must attach to corresponding output; dimensionless\n  output is acceptable without a unit.\n- formula_accuracy: boolean or null when a formula is requested or supplied.\n- false_premise_handled: boolean or null. True requires explicit rejection of the\n  erroneous premise, correct statement, and supporting citation when supplied evidence\n  is available.\n- safe_refusal_correct: boolean or null; applicable to unsupported-formula tasks.\n- citation_semantic_support: 0..1 or null. Of actual cited IDs, fraction whose exact\n  supplied excerpt supports the adjacent claim. Do not judge only document/page similarity.\n- note: concise evidence-based reason, no private chain-of-thought.\n\nBe strict but fair. Source gold spans are answer keys, not evidence available to models.\nNo citations in an answer means citation_semantic_support=null. Do not infer missing\nfacts from background knowledge for citation support. If an answer is empty, all claim\nverdicts false and partial_or_better false. No Markdown.",
+    "max_output_tokens": 6500,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_0d1e0920fcb0cc0b016aca22f714d487d08c455935ae1a48b9",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyiMNC7--LzxtaCTAbcoQ9-H96V-Ac_EMmajCUBubr5bk4UZvR0AW0rAPzSMwXjNVYiITUSbOjAIWFEoeSLWh6HRHcKa4TQMGFUQ2rLxs4OH0BprXG8ocVj0jKrVjqsYfYHhFwttOD8pAdo18qPsnBVsG6pdBIjLBDS_CmoOtTvontvogYbYw8Gnxa9gojXGhNGZ6qV0DuqBCV8k9HU24k_PZTfP9lsOaB0x-zBOr_LXNNav58Q7ZFkwjaT_yBjypphBqxs-QK1PVfzi6mT4Tx7l4PiAQF3UaAlKsRwJ2VrWXIfCdHaCf8zzPgqapFbAvtHh5ZYC4-dOyjiakH7NqeddUIAkmjT3x3BCP_iID1JpPenQ_5PNEHAEQUnsMyHIdOGi5RpKnGnu26SUOVbFHmT1aPsp-ZEMPg02ehvQX_dgCDW0C0OZpfR3Z1C7PpsLrI7lB21KolGXF0QAOjlVqqrJIA-2hIjOrwviLCTOlIS7HUdK7grkB_YyVQh4-zqAL_FjBlfJs1VYAWkeqjmAcH_6TpFgxT_-esRYGCD_eAOuvW58w8e4hFlHcMc-VM74_haohOjS19oLbZCD1ud_1QEvGG4JwSF8AKegYfxPElqUSFJSbsiFRA4y9jAs1N0N9mYHjswS5XUSdvwmKKB_kNN83tO1v8d6smn05VUF9PsZFrR2PacGXFsCMcDyQRgKh0MFjh3Uv7GKsNhcl7sajdedSm_UWCtIikldhemwQdlAD91LSwKNBCBr1-c9ODYMYJtGMJAy3_yteJNVUVDdnoA2KytB6h-eRVdTjLG-GZj6ZFrvcPxWRZh99WjnbG8bAGwkZ3uflV6iGkSgYBZh66jo0E8nNEVG3VwJjDD1vqkbGcBQKGhHAvvbZmTx7G41sSVZ-DxF8nxddFIpEwvIjYip9NdTa_AS_yv-l41cgor3jsO9PzGo357hxnXO7UPNmq6p6tYnPcCPfxXxG8OUTV6b861F6pGGObZJsiDFsArZgUHPqUdJ3lhWvHi3TfM7-gcIvfzbxd751fKCCtxnJHy--x_ebABvQVG-t8_hRRGxG5bvvOdZvXX1iC3i2IJDn5KOlAxP4zmtDHIpGfA7dPOZOMEPcT6OsoXGkjjDnBKLxL8hvW6jx2x0fvIf3GLo2FJe5AQv63JjzRC84oBU1e4JMTwPZVbaiw-K4jTjcz8b0hiCdZF7x6v7_LmjxY2iRd7kv85IDXyGZA9qXOHhj5fTndyKObmi2yC-5ysJf2yMBdHmGzCHQcr9JZot9UUP8iv_RJ5K8P5fK4UAX-E5o3TAWhri_mPXWZmtZVpnkoDJzp98JbzTscidPdeA7nRyGcXyYptkSnqT2bPphgR4PL8q-qChVhawySR_dWBbemkAAZqwhuBIAZOzQmu_x-4G57N5yooWmnqGx6Enc47iAWEdBcsABRF3riCqhEohYDaCmWxoFQ_Ritn0bfn2iNA2mtG0DSuwLBymzjnqwmfGj_g5hKkvCnBFubCLxMvtIbGIrpfrxUVF_1srfx7ozE6oJLwLsvil2SpthLWI78iho1WH1GWRx5lBG_inTjsBAcrm7xlE11G-rV9oTQM5ffGkARkRGXtTgDnoh5sjwfXGslBnLzR8VYRX4bCmupkUQrPIagDCq-PpZ7WA14TtQHBNtH8Jhj2YNrFd1XQQbaAXvJ-XNYdY61wrMv8vk3xouSSo3SPCueAAU3HwxYeLXzkqVyfiEBGKcP2w9fF9y0FMm6C61XEDZrHmq1Vxsg27fZZC8gV3bQfA78CbnrJIdUaq2Rxowe2uifV_pbi8MC_HCTqWacrb7F0AhkcpVlAWjVEPqoAAiHYTQ6IsZoPR9nkaSfQBgd9gOHFwpIHt8kQGPjQuEJ8R6j-bVbplSyoPQZxNgE3L9SWvyg2_WA25hsKUoWXHU2NbALwSRPQdnNEpUjTbhUZ4b3UKvJ03RpX112l33CfFq74HpbnTb7ua2D7WwPM3xJAnPjnI7hCGNIqcqTaEOrvYYehkdWjyjV6hEcHxHTh73Vtqf1I09Oj-MPx4Z7xVNcD2UgeDt7Lt_O0MJjgAmxJ-Z4cBZVbgbyqRrSLfNKV3NLnQu6QHNJlG-I29x7YCMlbtuNKqqzMlR995h6KlluA_CwmpnQ2w0hgAz0XbCWYAyDIPoexZNMIDFVoRPTXgIiw8grNWkmqiuD5QkcV8Oi04xXyzETFe5M3IT8sTN7EyjbigZO99DLBWl5_e5yqL6wX8mbQCZYdeqXh4pHXVjKWPg16wt0-X3XIjJ9gG_SPIh7rwWXTLW-2QEKbDNtST8o8cL60-UZHNAqh35IF9I1ovGCWeO8yIvQvacyIdZ2mYFjRUdSAiYfAZ1h2sN4IeOkklUinhZ2BM-gaPZQBfbDaIMUK5XKzjzTsaQ0M3bHC1SJ6TO3uhCE_h_sh-OWasumA5w79oCfr6nGGn1_-XozI6FDCJisFrKEfE2w0u6qEP172M7-fdEC7eBOKyUuWNZbsaHItSjH8dZBwCe3a2Iu-IwJ08ufDysZqrtJtpWPfK9SOWW9s2IlNWRWSaPNwOgDnOWoZp7FUdTyKHI2CtY5-tFanl0I1EdJ2YKn_7tBWr65YSomjmU27qkzk4nevc4rwsatZJTok1hUb0DdOizi19vmWHLiQLhG_A7cM8NacE7QEBlrM9wa7RBjWb7gpPq8XA43nEbVfC4aP2k7QdNMHzCvSwBOSdIkIIHdX3lc3X6fUxGIMRU9wDR2iPv3lkhsDmFJ8OmF2RrbjOWB9_a3v8Xza7vAQMLrDgKcOgfIivXMsK5zZCWrkjHiznTg7mJttIfkMjwuBNIHNHb9rGNP53xUC_M5LfnzSI9uEyOxO5peIJvJ_GC84YkIrRCQMD8Q4oznvWG9kg9VGQ-gt9GuGQfsMtsOZyM_I53rH7WPO_qPISkWSw7r1JUN9Y9oANSPUE5FV7T69dKk8JvYXl1XAsmXmEKYGAZbcM-rj-Req2gS9DQkXGXhMfb3o5FlsSxGvWEisAlGAaerNwMM8oZuSP454cmadmXt8_kOPj9sqpfOKf9OlJveYQO0Cq84nnWa3pZYQlUuWAIsZkbTvH9vebBkv8SxuZgv5lrOy4boALGoVPd52kDmrJaW0VRNVUxNptzyPYCSbJc8Rhq1PRSbrFCJ5q1ILTfokqraZeMOKVUqQThbNRXFJ2GWu9OiyETJGCjynSZt4XtzSx_UrbXww3odVNqJj0PQUxp4BGEmumXf5OdX44MX7O6kG-7Ou9ZjIP12-TDCSktCaZEZBN60RrM7mBSP85zttfS77Ozg-wfFQc2E4du6qYCtndbtqgGzBjjLBtudzQNaJstnmW0rETW-crYMuSbx5Rm8W9qfhmgGnkOnVPgLiHMnRJhEwigws_XMX2Q62L5l_2E_chdc6KDGsfyTjHleobl14ZyQkS7Q3xI9wFTkLglCDV0eCS2yXveGSjK_nlpAJYZMPeq1dE3N8tH_kWzQNlDE41Q3Ey1qtlw5tHTXP36stQU2lPI-5eMsS5ES-rzkfzRFrHqWGNvt7Ji10EcDU2Br2dyFYKbMg8kasr6vOs64i5yxnFFQShQBySqWnIO2hlloEbVL7CcMJATQ4_n_K6GhjlBUUCKOxwURZ8HvXTadO0xqcPT-tPjXWUnB4z2yPCZeyo1xKFBhdmrBg5yb503RHI6mslBO5cYVQcpL-Xzem_RwmxyKQRSTdy768eeZDgq0oHqywbP21IefPnti1jPJciYoJjFceeRc60W3X4Fm9PdCsGqTSi-a8EihOy1VS7MGi8v6QDG7hceiIrIrJPNFrq2_acKI2GsWFrzkVx70jbqouHlZaGysIkcmudD35wx5U63vO1cI2OFyR7IdvFqvV_zKi215b33Il7sQVSObMbJttDMX7S7-FGLzLUCOcKHWMP96td8O4ZEKk7CMfH7UYkVcXThkE1DPqKPB_r6UodGQOZXqBRsr6mU8Yu3WjxHnzgsmsYU5_nRJaQ-FNXFz1pSd_iiRWNbM3w7SgSjE60fkk6nFWDiQSmptIF4TFpC_pJfyMdt-mipbcXkadT-hWPA-PmptGfKuY7KSxBE5Eac1K-mTZNEkOZQ7wRNNToDEwqPydo_KH49F47Bj1KAO_ARoObaffU-DFGZmkvQezI_kP7jZB0vZenOsbH88wnPFtoCqL5mdFu55jSD9jvRzxxDDZrdzB7pFQ86ZVCWtVpVQRwDNoZ2hs1RAdCnTOir_gvygqollRePOnEpxN3GkXdXApV91KNCiJYs7tbxZcNM5pkePHqLzcZNq0etQsov5mVu6nb2ARne1uIF0w7JdzgZBmWI_W1sw9k8tWYC4OpQidMkMt3azC_0F2MG91MmDSs7Ty9WAthvrM5URExo71tGSQ2goFzAa4i_aRVRHD43p3V_vce9Jm9Ea7C2cCTST_dKIbHl67cDATtxI730xPoE17p3wMVGQippRjHr4QpPo6CIsEdIPAq3kwI4K6e_nRYDxXueY1QmCa2w8sc6ji-cHHTpbyYe-nWYzuaUZ80KX8JCwvRleqh0Fs6ztqLDi-tgpazZ9zWz6WIuqlKwQDighNlSiGpJRhTXknqSd4Yqm47TXaDuCPw1nmgFv1IWpMBv3YKbj1azDOx06O21VBiB95i8LDSc87Z8Bd_qNZ-ZHdwSSQIqnGyJhb9sLwRQOZGWrGZ1rG5GoXSx8Mbedr6Pf1_adUHomoxFEuVGkPrzkzBt79WQJOqusoEjNQhE6nLX6NPUbyNwthng3nkS1m77zqylRKSlDsJaCY6RTRGyfs67xDZXFQkUbac-Lgab0frYF3SVFm_K6Jsi91hDUJC9ycCBveULpRRe62GE6aKxluCizHyBsOJoNl6QXWhwovU4alR-AwchrpCQftOjFmycEON1Eew83ipn1zKPDsaXKYzS9UEYDAfgSYY2fjg3-qHsbXNNYtNS2b0wCJZbP_DDuDXFbO6jW_Fs4nvb3TRaUsPwCeOVCHhpWBz_NqKNbPzLyiSgF7hAGMQJJkMTXjlHmRnn0Mfqd1fHWcoZ3E6bk8Ra0JkapMLgkAyza4CqCx2_5s5gDzvNGZMdP4J3Y9_BMBaygde4xnyN2cm_6-W8W35rTyGgd87uyDbbjMnaU7OILlTNix7qY0FuTIAYOVFXqAHZNvW6lzJIeZzFTTn3JiJMrb7fZ7wuOyIol0QOAzausHoiRzFlJ-QkFjo1hOppyvjn69pDGsQd6mxF4yGAIAostY-AkasJ86wam9ZH0er5511ZqLJkCfA4R0CEJU4_zo_hi6iBQtZkB7stutY7BguToVNR81om40r43-VKryViJnL2oJlK4MmkAU2AYj_6Rfknvl9YUIsOy4tHmXd48FCChGrgkfLJr9zKpUrPwdTtum6770B0MqCc_RZk80h_kRDzDMFpVD-2-yTBsy1tO9XZlWQ7BrW8sP3ba-3ggIh2U5oJnh9HtPHT1wg94h6IYrHlqbCzSZfcQ4R-EeusPtw_GKvUObCT81iLl-Jy6VY7vCdqvp6cjjYpNW3GS-hE0zwxC2ssDGD2nJt68Ih5iDVQCEMvFYiElmmYgSAGfzDebgvl0c7TrfBP1TN2OhK7q5FOkkkwBe7bk_Pm1Fdb3EY8UieI7r4lrNGwzVVwSXeAm3g-ww9-a2TV073PGFfiM0AX1ye1780AIbM-iwqfw-_Nd5v4MxVQFZxcY8SciRJaU7nJQ9Rl9mZqr6yt_tstjjsI5MbU3Ep6h3y9itTPhnwR7if2cEO3k-hd-jiS27c_H8TdSqwKIPtTEqsr_8X1BN8iGwmh9DpV9OFpgiGb-wAR9L5By7SkngjGDjYD0WfqPUMOlV-OD1A3QIGS_0tZphrLokrFu06wSJrqhh9ttS-2USgMW_rcNBDGbtxijhw_hzpxkQ_fZXjYXNMKsFJudN_3xPHni7COOLfH_99Jn-tmOlP6q6wO2RPRQgyjfhpBGtzfMCqgbUNeRhl8Jpf1T01-4KqkL4Akg2RTlmTPZDh2N88NifkLcFOntcrx008LOJacuX3SBtCUw36N6wbe9m5kfOhv4OeRpXyH7Hy2RIkuDYORw4-51sNxK6gzhoqwf95nc4hQ6oX6gbVL_mxWYQ5s9K9OUB4OT3ynhzOFycEdbROTfsyDlJSAVJ6MCxBocNfIq5e-xYTVhT02Opzt-Lf6dlGAPTYBIh3Gy5HEDjVDdFMQxLkzIVQVTo0H-cxUe3QfR91XyBz12e91pRl-Xhnl-HV5TEAliEMoDbUZV6PFvqkSXWlfH4idSoq9TaR46sAXj2SQDlth_EWDnpg9h8KUvc0LzP_sO7Fr3ZSiEQorwGVW5K76XndryI6XFe6H-QlWXK2On6R9SIsBnwRQ4-pN2NMHUcWrR34_X-0XJrkggmv-OXpF7yFJn2Wmlm7gU8v-eyNrwDa0ez8opiYTx731keT22w14ZbBQuxhsaprS9ea8tmy-ETLcEAhp_aMvp8dJX-KEV2l1GH7Qcbcv4Yta6lkQ53s-IDoKj2rabZy6bq8Dr0BJpFoN0m6nnnFc2_S44HXJynlhpZiz5wC1P9il--QvibV186cvoqI9zeiXyU4ODiW_V8ASsG0pMtSNMNVAmJp2oUJAU2BG6fPS32iJOiWZD0lDPNblal547rW4YSMrczNA1MAAkEJGB5jtXv8jcVeg6rnyt4zYBeI5tJoQ6vU9iQ9AoW_caZuFJ0dvPO5cqIP75eidGWPC2GilhmDilR0OqdcAuvwa0ei_ZZw_amnlHQXiiMYZ7RodyMhpNafSdz5z8AklZDm_iE0KRzR_Pkg-aif_Nc-FvIXHBkQF62LRJrWzxx5jjXxvfT2wCiAN2g5zoKN6niE19Ioa_ypFKs9yI2i85uQWEvJJNJwXDJs2ap8ACQRIyy8o7SWL21XeTQmwZJnUqTnHjHW3b-Ako7H9yHTVWb-65f0sLKQis8AWF2CUyXqoGKPP1NEjuc8lFY5vnNw7t_V_qDS2e8xFcO0NdRg41qMEUlm5JNEHfmDmFQaVZlipN-QOhLCwcdIithzk-VpxJV3ES6GhjU6v1GvyWQ3EGC5lM3fEcWuucdL3fJa1Nu4kf5gw2QNRH_mFPnMCd9QNqVNUTaDDiouOCeqYg_5pe6Fy-QrmUyPT4gcQb2QWyx7j_3ESXtZwp-v72zL347em25RzMACWLk15ZTiYdpANQ2T6MYLKDM56gSjN-h0Y5EgrnFaO-C60qDyKjAlCcnuVDJH0cMI7NTaRGIPJOEFQCvGTrMXqUaceapUIlJCq1IX0Ug5GWEyZmEG9C-MM_nB1tC9lVZvaZQ5NbhEsr6DbzJqGaibG2aGDj5h5MiyGNOinjU5nItCt0SNFJSNDUt8BnW4NMe6gnGZ8N6LFgTh2QgWTckRZ5THOBDX1DDNLqxbS6hAK8fLcAh3F9LJLFBhKH4JsAxirRumI3nMemENXKaM8es_JHJlSexbRZSCBpITrnTqpfB_CvrkqKkheE9Jav6m8xbIIkJDXHe5ustjJRYLE79uDyUgOHZMZcF3odSluXN4yp5UneLV2Y51m1VocPGTSJx3pKI4S-4HO1fbcDIVNZ7DaAcabFiek-WT5wxYjogMvdGKuBVtj76Q7n_D490GUlka8TfD-Cm341dB1Y6InFJs-p9jvWWHCM-tOa8JzFxAP0UyyGFp0VVtNjAxay0xa1etilWeVij0vywmO4x1hR6PCqg6Zz5mMBdwzLr5ZKxrxqdAEzRIKHTW2jmLQnKPEd_Jvmn6gU3z8U-eTtJ4oeisyqlMwblOtN8t-1nHWHYLZIW7pcsducrmITOdiSkrbCOc3f5D3BAOoTtKfBa8Juk3l9Ucqe7UqTCf0p3XQWUXdvqGJMI8z4wzQlZeoID2qgG0seYvvyq9TYOBDDYYrjhAI9-OlF-NcF-R9f-nVlYXcoIne80swSSXoNXmwTlWgUhcLYAAveoE1ET84YH1UJVrHGGGFsVBi0Mq3mweB-UUgXZRIJZKHJ7sElM6-ekqXz_A1Cg-_lBH49voXiss6k5RT_agG_laqZFSAG-QDXju4bPxnEH8wktNkL0q9RlviMn3vApdBuNBvZKYDWY3uARHdXCvMlLVVUeZYeCqXCj-3UTqwGxyxhM4KoSM4ZuKsvaBdVBL8L8pCkCA5FkUdLrTAJ8i6-nzMZX0ojUt4eRu0fNPBt2T5LoYViAGCuUK5gGPqh9yjENMxn_xGOAJLJyQDYmlkQwRPSOWz0AdLoEAmY1ERvO0nr9ztHJ_KIfMaim_3B67XuU2jDlY7n4xLPr5moCqQc4hKVp_fxK7ofItVZNN-GZF9Oq5HPcG6eHLQl6uPgmzubX1AOnnOg93icTjiAL3qp1MlbGMhmO2XMSoWC-CVWaUrjXfe8PUXZLXYGUHYyaeBhMu_tjiyhz8qDsqITGP9v35QyTPtkqoZR3-yn8e7UV2q5Y8nO-Mr01tmI8CDSScsCHMglpHggC2plz8gKVQ2T7YefbgjKO9mWVE2zSaTBsD7E5ZkSbLNllk7zTbH4WqJ0294-G3A2gNJ7BGJAJk-VOFD-FtXDIWWHXH-ELoy2lKTRW5J_DD07dwwczRg9Y89ieFDOHDq3iF4a_dUzhnvplOiAV2S55quOBeXqPtD2bGZElgU_hazGLW528GbEMoeJjfMKn4P8brIBLrENu1G8SZIykH5MRFqkPjzRRBqAaPUN6ZZOsIiUQqrksuvXQwj_ps31H3CBDCQTQ3GTzsmjLM2iemC98c_sgXAj9GQrEZ31rK997aqn0fB4xbKiftx5G2bQv2-LI_ST898BhdzwSUuNUVaYbELNCVwyPmIw_xFSyKSr8NXYYw-sF3nSe--1HkxkeWWAbeiBM4D0Fc-jTzg5Gj8ZoxNA5fCNl8MztyadWN0yzqzs-7lF-IGQjdylz0epmrlP0RD-Aonr9ZSuOP3V6K4Az4z3zDlRVmqLLZJ8PNWb-72KDB4AYnpY5uwiuuIFWA4B9Oc5r8Na4eaSf1TxUg8nUE-bc2hoSosk0ni49Olrd1jwuBUlgNd7pWJomRy0Z82krVI_nXN6Fz6n0Bl5qJTsXFf5UKLBX-KkfH7jjBk-j5E9GIF4_mIoqFW8ibFHwZZB-1De3X7d1pAmUmYJYpNg8-Rxj5TIismt4W4P6sEUnlK9CZ85oh20vWf_xVCN30l7H9xyLrWUHWdGV8Mh32-AF6q-Uw8ZbZOlFp0hKH-Wty7JNd1dUY2fwgnqTD-g_n0J4mpgsM4xuOakIJKPJllfvngBOkVv3RmqZE7qbC6HP3z31w9fM3aY6rTCEcDO-S7IuHmpsl8zcAL-NXQyyBC1rKlyel0_lkW-cdOURqv4-kBgkEegT617VEM6J2dJlUD6e_jBfK4MlkUDaSIDYv_LboWF7XriaVHTDayXYteb3Wr2u9ORgLBr97MOJD3lW-u2ymRq4nENILKFhoMaXzLoXG1ySorNt45db5T6jIDa3uUnsk0vvThEmL0fKJa6AF5s4bcuoqIP8dzJxJ4Qpd6a_y875wnNvvJ-Ocq3JNjb5UgSabpZhzcNmUBtxj5LZSmt0xZn3b0IT0sQaKeHab-SxlzmmPMMdxS1GlalsLTVUZ33C2FMOw6zv80XYlFj3R2Ix_k7EwZ0rvrTQ4FkPDZpALtfnRtqCJXQL24acrOLW4lDLagGjalB2PtCWRo350OntChin9h6zNy51Pd_Yk6smOPkeCkOWNq_xkpCHVyeS0-Fl1MKw-FAmSzNjDqXwWnnDA18jOyast9lS1fpgpc5HhIYDrsxHJz9-vfdGi6l9iyAd354p9lrrvm3nz6_IhvHU_zdiPp0_VMsCidYO9erTvpUOefzL7oV-UpfLGTh0WC9e359o1g1doquoiJP1PTzEmQKjQOmyuFJkJujsPEQoXyBdp23v2RLB1ZjI-ELJzoEiplxcaL5pDt7WW-YyQWpgJFrPAVX-vC0lhTiET5oJ-pIIXdFLoy5eYZFC4fm-_9tYn3YfSNO1nq7-zICudLYIHnYcvFWf90kE15_MG8rArbJ6GswCdY4NB8qAQ-sndqRPAwStM-X_QOha76c_Wuc0QPehoGLNSnf57sOEYYhmSMDB0jfK55r1hftAor28IP-WrLEnJe-de_6vup86uKVxQyuY3U7v3T3m2_a1hy8jIBuQycKal8xssSxw2R3m3K0EZIVXD7s3lBZKZpPMI27uuK0t0aRa9wanW6w7o-vWTpxNj45BilCy9vgJ55vUCKYFqJvny994sTxzLI4QVVv9mSPPJufgvscrYSKQv-n3pzzCrQ35ucmwTeE0N60dYDtO7XhZRCmkab41qX9VqTuv18yUE5g9oeEtAMHcFbVKNdC6G8WQfhiu_v8vvxgdfoYLuii7_VJo-Gk5bIUHxc-Ko22KsLYwr4hxJ8jug-zUhhskAIYJ4QMLa7I-tc5nWTRIpPIuozY3sF99Pk0SNAQzfsOOIthKMATgFyHVw4hPsqchT7CCV_BqD4NattSO5zuFWnYRDFZqZhOFRrxdGY9ZV9PkkLJYAV_FmGQ4DDz6FWoS2ockialOkQsj2at8JHLhzVZB1uX4Q2lA679AO8el3_mpPaPtCiCCdEI6z9ytGxl2welina4OgbZvghvNAagN0gugdEa0f-kXPnHhBVsYeMIvgHbTpBJxpDNKq449J73xGUPMNpjJU51ggpy_cumkNtueHexEMEwM6PqggLGOrty0PV4qD4ous4dBk6q__cDSPqssb7IYO65lF-6vQoiAOF6nHE9iurLlKDWQjW16HLsKUL5h4R9giL58NWr5Nu-BTTLdws2tYk9CU9kDaUaO4pNqXQo0Rkeh46C-YPinTnKYQ1GBS-OCQvEE-gxdr3K7fbYYSN6UkkzvZ2tu6vnRU1VN-rbYBR_fB2J9pLh2GPTOQ0um0nCqq3EZPVjawYVeir8V6-n9Ful6Ly5eztjD09dv3g2IDfUFGXCLLnRE7_VAov9L0xwEaoPZu-jU-iCaT0MW5gi9JAoBNnnTXaYEWIV1pU514QdEGkv9iTGqWLJC34d88hmqRdwPEvKE2CFI5jLY9kVBF0IGMuzdYnBkUSzYYgaVAqAaj115Ss7Hl6HKMDJ2uqn4DUpoV7_9kqwigydtoyRVHdgpLiR0E5d3meVLI6E08ucNgKiFT1MQabMW3gCCJqa9rLmPdM5R6HV26p_4QNLp4aEQjRp0iFNFFqj8e6TG7TlTJjDWYO7wQabtZGHVbiLh-1AD4tyn180rXuo650Ll3ILzUaGKkyQMs9p-sq3paPauLkx6J97bIhFodZq_3z6SUVHkVqDyIQWzLO55y2rFZyJt_jXGkUfpq4FA9O4_OsNwjOO_3ZLLdFjfZgHQJeAjcLnm8tzBHIVNjw7ncgwLIa-IAVTocNOM8htDJuv9CdLW1lxrXIzbUDNwKkUbs3dYYPn0nQ_TnVbERT31QQF6iOVuBEkUCU_-oGTtg1vYrJ5irywe_z_-u-6-44GY6I5BOIjQdAaTTxNqw1bbFR1chfcY2OmbrQTPV9BlCv1sLAzFM1OQ4PYE9R4bRYmSj7bKh_XuFYKLiX_GI47IHoiloXTZN312C6DgUNnn_RiKDEdykp2M8TX1VIS-CH3TmOBJWvlNTjYnzCMWi4Uoa518prBvGQHE7DjMbETB1D52rWUUrStzsvZL3OtjrZ05SW4_uL69URY6BLPp_5c1baCAIQ2sUJN9u3ITIwlM9oPjCr6TGXy8m21XkWB1NxF5EySP-Y1hmu2vYbctITFFfD00Jlr0p--g6Pyr6abHEh3KTbjIioNrmWFZsF2gYVXAyJXne2gvOsh68vTuMiHbE6eg_-6_t5g8qw3KMeIiWoiC9B4bbDossSz4klgi1apccJqjkSJvqbApTODev-73fMFuX97JCxDtfVEqRiFkQ72iIvWy6rgiLB82bCoDn-K8oG-8EUbFKAPk_4Uu46Rhdtlm_yYhSP8qHkSo3Tqvu3mPRSrbN0ZoLpyn6IragZ7WX-AtiIyrBtM0UzMSTS6cNdb-dEYwcPr3dB7ve886MtSTAYH7tzsYFLDNcjfsZW1lBHOKY2xHYSPgNCKMMUY_fRxRdDAfDAA1ltxDQZE1JRMpGTr-g1lac9Mp_-Wzp0QI8jcf53VHESvmB3PIlihclhJ3uG-SWoHBLgoxGdyCzlVwRw8r0PA9wxH_yz9einOpu4ob2Trumeo4V9uRbNq4FkEJw7ZN-Cttk3EOodwVRp9P86Db8WabpV-cXRG6nrXNN__dneITsi9xl9GQ6TLsNwLdVf7hyrlq85e4BDSzB-JAoUHodyfbmuvV4eHqvH6p7tOntemyE-g5n0rsym5hQuxOr9JwcAUde8nlKDDx9-biY5XronKzs9EmVF66QCWIvrr9pkguA3vgyu6IlIV68EUWF62jWN7AnAhDmWpJrPIhUr9HGZkJA5ZKXr5t4tx9LfgIkul4kTfIVl2888F2pNC6_ESXUl8d81fJS28th92VspoMfuzaWra5eWoo6aECgFdi1iLMayKKLOG0mh6jHsgtt7S7MGceNN0876KAhH-d5jybJOoyd1rwLT7e_5Qevo4qzvNz9rqnEisX7kdwC5NC8j4KbImqDC_HZ4JgsP__3yJl7UvoAEmq6QnrbQQM0z6-Lz0SxoYJtePqMo4ixQDe8Mf6iFIJ2l6zzFDpBRLypnpRdy9LvPxb6IkgOj2HhPTlP78eFgn7Y0wPoPJ5lbqlEOdhBPxiz7mMM0Cfpg_NgAdk5x8GVMYkom44-fkIjhrABKwquklakcWdAHbcrTnb7aka1wmMqScyEG-E36WRU-UxPBmKzv81wpf-CH2cPQOLmFAMOqc5DQBzpCYBRAixeOrZC3ZhaVXWxOyPYuPRUnvnBJZN_a1fDYSyRY6pjE48irEIyLV_mvUrIIN04LrvBMalCqSh85K3ArVHWyp4noAKGnVIbWRt9Uaw8NOOHn5Nd_UJsFsukyogvVQy8vFP_4q1rVCvQJnSHXlXIAse-ZNJR6CxzXBFYOdaTN32cklWgpLuwa8TRhcEjNhFRQzwV8mEVChj5FuB3-BF4sd2yYa_zxN-ffnBj_1q_aspSOOULY67rw6gKE718e9wiz_VhD0t9WfUOsLTJfBgb5jDeCqfH-4F8CVU82OJ0ciiR_hNgjboekWmI8v88Im1k_j14VMe0kOoiBDF9gKApgECOpMwbyuApzcU6enTNaJVytGYkqGt6E4NqYxsZxu_SF7-1KgU4_whPgupLV3V9YwEzwezHMOlG4AohHIOnJgdbc2gFKy4Zzx6yP4t6YBe1q1WHH49ehwMfpT0uW8e03dTLgK7STaIpFqQoHLgwBmPrznDYKd6QEPu9szQmOw-uGf17a_C9devnVDE2ysH60W7RM4ncgYY7oNewGEqcUO2Oq3TKlHlJqXug_lkAZ1noN0JuG6LjEedhmCF_H_6lqVb3N9ZM41sUtjxljsqdTMhhgH2whvfiSl7qUrSbS2X-quzISqjaDPjD0DmfkpvVx5BzUTuGODdc1DqgtbfamlLSE4zNIFh7DzuTOMJlC0imDqqg6A9FnWJejMMKatcLSTICRO1yu2r6gj48RA4pw1q8c-sGtAD3A65WPltcpDSHju6J8lN2WGIe_N9r-8U4y8N8hyJ-sLSssxKkUaRT3jM-wvjjYV4dT7YfWu3bDl-9_mTEyrxGJz9ONcDIaTT_R3k9JTjTgDNr15Nbx6dZ4MDezXBYod-DUlMrN9R7xfJTtVu_btUUFAClKmP9ty1tr2gWg9D52Rzir9lHIa-wb9qqKnEJ-pzWsT34ufv253P4d3uaHn9E-nFcr2PouIlWd7ktwMr4jHiUEoBcT7fgvTaZMRhBV5kv7nAyjmeCSkpGencMVQow-HMyPCui6mJSnCKQMH1RuFBqkVIfkUaIdL6ii6jw7opZQGe2nMIk-LQ3Eo2oxrFRPT0HnvwhKojLFAgKSi2SldzdonQv3fUTPf91wxSNmDkmbB5yh6pl4iZV_ljvSA2uzuV9C3yNt3opjfZKuFct9PLqsVXzIsuPJ8YY9mnqCbHZmpBqFca9gik_ggxbA7u3Y8bT8PeVED96Z9ezjUd3zTH0Xj8gy5tYFqMujJj0sfMid2xDhNU-xUe-75BCI2oMFbd4EH6irsDcfktS7jsYjlKjxHieif6jtZdSHViVDJplb_ApH-WrYinj1BY5VxJd6G8Gtq-piRqeN4kT7yHwjPs3q4nxO72cHdmg-ovyJ0WFvRMMqOCaGsYXPIg9mMCJccWsopfNTl3F83kmpuYyBtQi4eIBt2j9u9kepGodXGC7o_M954fQ5CPOcU2b9xdrpN3Fvxbhbmp_LGPzaDMnRXFQYMdvaKGS9asZkb0a1ywWJn6CH1b2WyIn89Zk_CUVMv2_w27EKe6zvYkvCGeNwc4bG2b_Z28zT-AzEWpQF95RNydiOLEssgZnQo19E6Y28Mi9CgS4_12GRPYYYUyJqqWifigmb7NMkbh94PKBc52u95b1EYDfJzB3oCUu7TyqnEG6xP_9ZA-ycDEqqZQZ2R_MDWqh1FQrFe8vq35fFcKrssA6zcpsy3QSc0puALj9l5mSCuE4Wi7Aiftj8rDTdUKvBCr17oBdlZMIEf0JuOsASsK0OmKyytmHfatrwM7AGClsGneaIvz85voD5EkjxoJrjwS_8T5oddNlHh6HcUIdFXlGh-4KXYTOYVJe2RdfYNY_MLgG8gXtEzmwPIQvQ7IX1x9_DGgncy57isD_LL0RxrhSictrblhvyFB7RbfDDICQDyd_fgAC6dkoIC_AizVKuAuDqPnmoiTEaFwv83urHY1SdmUnJFpxdpXa6_zXpTjEq9ajdObiRkvct-GcGCgyStEuYzZ4upzKoqLXJLC0QPpM20hRRMS6vJj9qtesocN22uNATnOl2uefTZv-lNPyao0OaRtO_WlboFNUe97YU5q7Ohoy4pE0G5o7YNaU3PWX_Iiz4akwaXiunchBIzzDbsOmxaJTKBRKS7y1M-XEbxrcxw58V1BIA_EjdjAs0-zb2nTatwiaMkfvp6NsvFkxBDY7GIO4CFbjxK2PT7nhww3mwgIMGhnxoJ6lzACgyDuK9AlQ1QMSJwTBIrw-qq7mnt2JfEeHxydWKgYPNXaj-CalN_2wmwkI2SxX_9X_KT-yhAcGAkDzE_9YMd-06zM-LGtyySZbYsZvz8VPSCVDaCYKTdYM7rYXGWoxw3rvFJs0FA2lssoW1JQwDPOowZVeQ693KAWG7VkRTR92EogMH6lZojdilhOIxUTSalRo6vlnI9OBvMf_VOoBJqRTft1w2KHMFvLhmuu5KG9xYfr6Il1J-hSiR8tNb4eF9Zh7NWKuEywfeO6uVcdEtjIFa_-SwmX1X9ZiAsgLc20IuJwTPVxcvgD-M3_vnyAk07MumtPbo2PO6t-Tgx3hxCxOolF6pLkDner4BvSOkHL9URw_jOxMDydDLSurqUWtezVR4EgHVrZ_FKjj49vQyCdjUMQhx63Xp46eybyw=",
+        "summary": []
+      },
+      {
+        "id": "msg_0d1e0920fcb0cc0b016aca230854a487d0a74944d7c9416475",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"claim_verdicts\":[false,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0.0,\"note\":\"Mentions heterogeneity/stratification causing early water arrival, but omits local drawdown-induced coning. Citation does not directly support the specific adjacent claim about high-horizontal-permeability layers near perforations.\"},\"B\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Correctly explains near-well drawdown causing water coning/cresting and notes heterogeneity/high-perm paths can cause preferential breakthrough.\"},\"C\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":1.0,\"note\":\"Accurately describes local pressure drawdown forming a cone and heterogeneity/preferential flow paths causing early water arrival; cited excerpts support these points.\"},\"D\":{\"claim_verdicts\":[false,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Gives a generic preferential-flow/heterogeneity explanation, but does not identify the key local drawdown water-coning mechanism.\"},\"E\":{\"claim_verdicts\":[false,true],\"partial_or_better\":true,\"unsupported_claim_count\":1,\"hallucination\":true,\"engineering_contradiction_count\":1,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0.75,\"note\":\"Recognizes heterogeneity/stratification as a cause of early breakthrough, but omits drawdown-induced coning and includes the wrong relation that lower horizontal permeability makes water move faster.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 9580,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1546,
+      "output_tokens_details": {
+        "reasoning_tokens": 977
+      },
+      "total_tokens": 11126
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        false,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 0.0,
+      "note": "Mentions heterogeneity/stratification causing early water arrival, but omits local drawdown-induced coning. Citation does not directly support the specific adjacent claim about high-horizontal-permeability layers near perforations."
+    },
+    "openai_closed_book": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly explains near-well drawdown causing water coning/cresting and notes heterogeneity/high-perm paths can cause preferential breakthrough."
+    },
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 1.0,
+      "note": "Accurately describes local pressure drawdown forming a cone and heterogeneity/preferential flow paths causing early water arrival; cited excerpts support these points."
+    },
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        false,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Gives a generic preferential-flow/heterogeneity explanation, but does not identify the key local drawdown water-coning mechanism."
+    },
+    "agent": {
+      "claim_verdicts": [
+        false,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 1,
+      "hallucination": true,
+      "engineering_contradiction_count": 1,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 0.75,
+      "note": "Recognizes heterogeneity/stratification as a cause of early breakthrough, but omits drawdown-induced coning and includes the wrong relation that lower horizontal permeability makes water move faster."
+    }
+  }
+}

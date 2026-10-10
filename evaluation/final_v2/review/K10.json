@@ -1,0 +1,211 @@
+{
+  "task_id": "K10",
+  "prompt_version": "final-v2-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_028c30acc42e0c7c016aca246920e087d0a0aa42fea169b47b",
+  "wall_seconds": 13.507,
+  "mapping": {
+    "A": "agent",
+    "B": "openai_closed_book",
+    "C": "qwen_same_evidence",
+    "D": "openai_same_evidence",
+    "E": "qwen_closed_book"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"claim_verdicts\":[false],\"partial_or_better\":false,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":false,\"unit_accuracy\":false,\"formula_accuracy\":false,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"최종 답변이 식과 계산을 제공하지 않고 거절했다. 질문에 필요한 입력값과 근거는 제공되어 있었다.\"},\"B\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"reD=re/rw로 정의하고 1000/0.5=2000으로 정확히 계산했다. 원문 직접 확인은 못 했다고 밝혔지만 최종 내용은 맞다.\"},\"C\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0,\"note\":\"정의와 계산은 맞다. 다만 인용한 KB1은 rD=r/rw만 직접 지원하고 reD=re/rw를 정확히 인접 문장대로 뒷받침하지는 않는다.\"},\"D\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0.5,\"note\":\"reD=re/rw와 계산 2000은 맞다. KB5는 rD=r/rw를 지원하지만 KB6은 reD 기호의 존재만 보여 주어 인접 주장 전체를 완전하게 직접 지원하지는 않는다.\"},\"E\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"reD=re/rw로 제시하고 1000/0.5=2000으로 정확히 계산했다.\"}}}",
+  "usage": {
+    "input_tokens": 10436,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 898,
+    "output_tokens_details": {
+      "reasoning_tokens": 306
+    },
+    "total_tokens": 11334
+  },
+  "provider_payload": {
+    "id": "resp_028c30acc42e0c7c016aca246920e087d0a0aa42fea169b47b",
+    "object": "response",
+    "created_at": 1791632489,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791632502,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are one independent AI-assisted semantic reviewer, not a human reviewer.\nJudge five anonymized petroleum-engineering answers against one frozen task. Do not infer\nsystem identity or repair answers. Evaluate the final answer; for a clarification task,\nalso evaluate whether its first answer requested the missing information.\n\nReturn JSON only: {\"scores\":{\"A\":{...},\"B\":{...},...}}. Each score object MUST have:\n- claim_verdicts: boolean list in exactly the supplied expected_claims order. True only\n  when the final answer accurately conveys that claim. An explicit refusal does not\n  satisfy a substantive positive claim.\n- partial_or_better: boolean, at least one substantive requested part correct.\n- unsupported_claim_count: nonnegative integer of unsupported specific engineering\n  assertions; no-source closed-book is NOT automatically unsupported. Count clearly\n  invented, source-incompatible, or unjustified specific assertions.\n- hallucination: boolean for a fabricated factual, numeric, formula, source, or\n  engineering assertion. Missing citation alone is not hallucination.\n- engineering_contradiction_count: nonnegative integer of wrong engineering relations.\n- numeric_accuracy: boolean or null; use null only when no numeric gold. Associate\n  each expected output with its value; mere appearance of an input number is not enough.\n- unit_accuracy: boolean or null, units must attach to corresponding output; dimensionless\n  output is acceptable without a unit.\n- formula_accuracy: boolean or null when a formula is requested or supplied.\n- false_premise_handled: boolean or null. True requires explicit rejection of the\n  erroneous premise, correct statement, and supporting citation when supplied evidence\n  is available.\n- safe_refusal_correct: boolean or null; applicable to unsupported-formula tasks.\n- citation_semantic_support: 0..1 or null. Of actual cited IDs, fraction whose exact\n  supplied excerpt supports the adjacent claim. Do not judge only document/page similarity.\n- note: concise evidence-based reason, no private chain-of-thought.\n\nBe strict but fair. Source gold spans are answer keys, not evidence available to models.\nNo citations in an answer means citation_semantic_support=null. Do not infer missing\nfacts from background knowledge for citation support. If an answer is empty, all claim\nverdicts false and partial_or_better false. No Markdown.",
+    "max_output_tokens": 6500,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_028c30acc42e0c7c016aca2469f87c87d0aea686f27bf067af",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyiR2gHJHElbUOdYi-aOLoOE5kKCqVuCfLhNRQCvZyaTHIDnXhgJpt_L7Y4JFHg9JWbEomeA4Yeqt6AsyYeEnLGQya6W9jbcuIw4Z5842zv3XAmK75LIoN2lvIa1btWvu73Sd3InuVINJnmPjk-rkP7TWu0M9TsrVlxLbiUl08ieBgsv7OFsk3mVNLVoyzcNrc-YRZeIUx0Qmc2-f27mOA_sg9R56Jkmujx4DG9p8bS6ik_Qr9vveM04PrHKePslZAxzYGSzrD3RlusaFogizW3fIl3iyRgcn9aGSi980jp-OnLcKR8d5XQkk25IotWiH84VLwAPxN_L0i-6CujKKUfwD8PwPGUr99ATiKWyX6sKtMsVwfM4bvnoXIQVGAdHDeYcoUJM_uwO6ZZ6qgGy-yKkdBm3ktMa2HkHJLlW9uf4RUJWbza0_tfUo_hgpZ8g8iDJG2shX8ckSzK0R5QsooF6BfzTX2VpvJnT1V_1MthdR11vXvFiEFnzthps-Ae3rapXIbk_0UJMZ9gA5q3kvEjNXQYtHYA8nPjNLW06qQeorzqNoUkq5dOM21dfXGbazGXxKkT0z9l6iaS7aWT_UvoUwc20AyE4viQhmy7ShOCsnUHwxVAbWhXAPiaa7wQxEqVSey4NzK7PrhXUxhAx-jEXFTn92ysrznJwJSFWCmnVy1L-MA6yxTp_2PSsSBQcD5XH8FKQJzObNrBeNbBgxN05WTbNUHL6mTQwfTaOdcGAcPVtczYe3dgc0vQE-LhyXTgl-hAaoOoOtkBJtTjIIwSYzih_AEgTusesCZWqg80QQhuzu6Y3ur7lg5m014ptZzkhvqM5HniJQealgLBR41CXXgiGFZzk5TBJRSRpk8rdaW8eSZ8PIvsBFbTH6tu-30t3SSr4x1N9OGCs2izhddXkTbf3TigFNsZXY9Aq0CP9gUd98CVTCuO2xk_4qXJUoABXSdSgCXSDOLAOSzU3BUiQzBOm3mIblImnHRVJj5Lm7Q5BVYNb7fP91QCsSFwoZLg3YkqucyTvg84ehKkLblzN902aSlMscDEAHRfHRbFzxzWr5cUqM30VJ61rdBaIaV1BzIONS9CisxY4g-JZ7swjFw7Pcm29owTCXKoc9pG8h2a_IGJxks09gtT7TWhGwNYZ7LtVkQC2DEtL1n_50wmVWnOPFaCB1lQ9Uga1CA_5IyjrSnuS9rSU6vg85-XOTiPHT1AL36DbPsRxXFOhtKn2QEvy3JiBHpxMCCauUzdm5sxO2A55HcRZ3S5GcrJlYRFHucK6sBGo2pW-ynZ8e4aQsM6MPV8vhga8QA96t3dgBvTw9YAGQKfQj5DfW-8EqAuemSRY7aPV6z--0hR1GWCRWF0FOG6RcmUsh4EsLaa0gRjLoJnaPjJwrSlSua60Soia66rXn2bSOO1lA_RJqH31c7CMk1AQaPyrIElNiV8SrxGZwWOPMh776kEy4ZHJI9veFylCRGBsEh9u9F8ganbRUwugVwoPyAQBqGraQp6h-ll5USkNm06mb0kdQahvTCdhMsG4nJ6_7zP-w1GCc5qO0ajJY02j2BKaB2GkSKIITr8Zip3XHmAzssi6BzpplcEILZwYsaNmd4kDHbfXEjNQyKSC7TZZb9jXPLPLqCTxqeudNrgyLGCCI3bgWpoI-JHUwzOpoQV0lkjtrUXIFgVhz83kLyQb85mgDucNLm0dIFhrYaB5CBmHC3ltfZPGymjFlx1BXcSmQIyVtCVJUnBbeJynoDsvmrnvfSI6Q_CHH5LAQySZhrwWxi-L_6T-in3Mqxig4AtYMPJPlgvb7kTScdC6fdsaObMb9ws0egkdzAJqwxE6zuIhVulA7Y6EGTClKdnHVWcUxBJAD7_YLNMfEFHLZ5AFxptXpdxEUn8i4h599UwPL1yuqpxp6F_FZ5lVoOM6L5w6Zv7btU2q8aTdPOoGb8skGtKTAN98LP4AmxmAhzzUgmQjXpmqCIFOV1e0f4mRlWvlB3pBMVoSHCQjeltnvfVmfL0QuPjqvNe-P__9Q37jnn2hHz0PptvgWXOzuMwZF8Kdau3yNcEVbKeXA86mnzFumzOtwYc2rqbfJyhTL_a41QDPEs1bcyP7Ip6Wsn4spRIAboOPHblSHdi9v2_K-jQtA_O9yQ8ppLDh7OZVcKOXChz7k0NbE0b6vjw0xeAfOLn6xxHE3jFJENHatNpgS03_2T0Wxy3sO8kXKs-Kf0xJPSztX5L9Srq7z3hFaHQ82Kw84b1fR9tDVQ0UTVBZ7NVPEh-5D4iUjQR4vgMIYBSDDxrHp_ANd8ziaTz8VoNoqG0d0m_2OqkPcS5JTO1uv6UcIXOFjAhx1pA6iBUNJyrrhN5t3XY0modsUWWd9PGNaeRv9j00Urj3wxwqr_Z_9Dfs-7wzHDqZr3TZTCHEo3Ctnpd5IpAbVGavGQcALG8hI-6AomB9s5qSHOeuM72NCoEm5XGtFsH8Myaccj8TnDImINkNTY8P6mQ9R3XNUi3lxc6CWqxyPkZbtxxBou0KU6ZYPReXGcXVtGDuUzM6H6AQwhZcmKqjD8mJiTZC1p0CuyB3FeEgUzkgLPOI6Nql2r9ux3zDEEvHtX9iddHYijj2U73oUJ7nhKjZR1ksK8e1zXNXv5cJjadND7yFG4RTANUoChLrd-ViyfXog_X5BUvsUfV0CRcoyxQKLrGFjS0i14cWjUEm_MaCd0POXjdftAf2fFmPGFFgLWdaizoE0242Tj_AHbkGvDdpQeFtAe_K2wNGoaNP6bTfeuNgayl2FtCVH_2r8mcx6RTmCpC3cHmt2PnNRum4AT4mssSW0rRadmy7rbXMqz-JPfQRaU7ixrp6VnGcSvs71dMUOzuEJ-KzD4ZzQ7CoUwRV3opZuh7LTBHBiEEV6SNCMBYaVTJcZyOQtPDCUrzoCoX3Yq15OFqe-9DefuSrKXAKdipWGKVKDIb6kLLfY3A1g2yYDnhC7f0QW2NdvDFmubGnAF-IGOmEL7YG76Pftl1_gIq2H7WJ3FdA1BLCE3dbZsUraC07NX0Wx27cF8sTq6KREVkHdn7DP8MJL6azyvAxaNMr5zdd1mNKl4cDoddag3Y3OH0ff8Tb-gcaYMMZL1IVTPifh6GQBfrK7VHZaghHQWiuq4AWTpKnyu7MfOk_u3qoQVVKLQo9AnxwX3yy9Lx4Y4Ij8hi5QObZgBPXBoDAzwU9GrpRxlFdE5njj5F_ONT9wzih2G78Mld4TBILKqUdCGN0F5fWs4j2ij7JWBw9P9Pnu0Raqb7d2T8ZaDUjqLkMy5ExDBGM2iQR5-BflDT5u9lEhctGJvSgEIb8uxweUCEEXwHdN1Fr8OTqiplN7Rlvak7Sk4luMccxz_ovOdw_v1azr85CKnINF7uXODuqTlnVd-4Efhx9BgWVV9jfQsf00Z2Kw3rdHHhBc60yBBT2Ipd-mhiI59TJPLmCgHYfayY7e3-P-yrzvFFwvAhz2LZgFacegAwUuHYQ-0ky37kmt4ja5QkOJdgiq8agLcAYkLzrLnB-tl1MfrEiakjYbdR0hvcXJvWfDG8Ktrw7A7o1w5OkXWpJF2fmLDFuN-Lgp04hYuxoUH5fdTuoDKK2xw6L-CopweFeJqNQU3JCu3biFfh7xIJIp6eGCuefY66RonXeMVV2cXPlVC-W7zAiU_hqTsLCrTxxPgTzP5y_126XpPqcKMl8ywD4wqXZKkApoBhnPay7_pdCus4YysFsq-MU07fjUmWG5ss6WrIJpsrWrUsEaT9bcznRQFdoYzaRnFgFi3s9rRB9zBB0PM4PkTNM-5kgD8HaI9e-GrGGHJj_d9lBS__KwJ2eyok5G9_tNolewJIxm8IqO0W6MuRCXtc6XUa3zXux9nhba2mG9O7Uy9Rq8KfOArpXPKbwNUuLw1o1iYXKTSIh_pxMLo7rbUJ2DbUxfhagMJVQa923HaRgf0Ob3gVvkmxybZLQgnt1IUMPxvX77Dt3-MRkAIVaal3blvOSuWheXZWGoXHnLO4cTkppGNJGOKWxY54rBuNiBkctU4__EkXrRuGxbXbbcDiqgtbssgoKn20orRKLB1qpBe6ztGPq3mdtyBwQXbuwjUTX4Qh1Jydo04T5hlm9vwoDHH7PmBO6HlMMxjdbjnaxQrOHI_ikx1DxLzvcpXnk-Adhzs_jguSun_QeEm99iRPh717rkI8CDXjnYgJG-C2RyFqpoGBsL6ygAESuPU-vr9r_j5rPywe1nQZHxugPj1m1-5U5kRtRkpg5L3pYsBtG9eZ_5UyfmmKgOAWSqKrfsGx8iG6v3AooXf76WGmuxKBkCDsMvobbIxrgrWdrVM44Ct4f6_V2C8ziUM4TU5WMT-KGKSGG_kWJFYYstbS0nOu82GJIzg3Mdl3r4OhSYNJv5bVx3dU3DS3zIYRmVhuEs8zTxR4nvR3ShswDv1NycJ4c-ltD4StBKWfWzKlTjd4JE3Pt_3IUMnAeUw-YLLOK4Ggjo3LztG8IXGBXbjVaEcv94NJ4cftmVmd8023OAtyAkEbJRkXYW_ry8Tna3Ryp8SqSOn3-t2EyFPrgQtGHAmXl1w1w9ojcjC1C1yhkJptk4t6kx1vntxhKsvtRpO52fn-SnT66732YPMjnTFq-CYMlGT5CiDKv7VoZtuWZY-4ErFhx0fwptRpnMU5UAv190qTWKv6loqU-fXdG26OzUJ1xz0GpXadPfa82Lx_mSBAuIFUQ_sJdCGgC361l_lNuYUKPOTvLInPE1rUtp5Z4dxYKIp2I0YvbniL7UPnsktio7S-qhwUOu3RCxyuIa_V7JXPw9xWq-oVfTOBUxtRIOve1t6gG99hir02A57Gfo3QBkfp1furru6CDxcnTgVN4kUGj1vA3drJJd4WSh0Kgd_bLx35PdCceJZVa9lBOtZ-UxCV3eFZFnBSmM6fkLh4lfreX6qqCNPyhD56gVZ4b9SoRRfrEdu9LQ43wX9zavVPKjz-PIsQSrJCJIa0Ml_me4BE8lETxsjoND9NAJAzf-wbiukB6Ct70ZfeEyscaNnNu6SS9E_ZhG5qPB9xF6VKaB47srUFG5Fvlqkr8D0IKQeCoOIhoT64m6y11YI_GMjCUCYL_UNPByjyGPNzmCLIhCpnodorcQmcZmX_xJP4bb9j8XQMDout09EcLpSHyNhSco_dXka7YxRtAJzMGyweSUQkUgOnpF6U6CZ0iEr-LsMwSpgtKV5m9RDD2ERMy3ZzWFt9tll1CCyy33UUM1NnrgIBCfaMIkukMb9v4mH4vfIzKwiQ==",
+        "summary": []
+      },
+      {
+        "id": "msg_028c30acc42e0c7c016aca246fa99087d09915a318d56b3b3b",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"claim_verdicts\":[false],\"partial_or_better\":false,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":false,\"unit_accuracy\":false,\"formula_accuracy\":false,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"최종 답변이 식과 계산을 제공하지 않고 거절했다. 질문에 필요한 입력값과 근거는 제공되어 있었다.\"},\"B\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"reD=re/rw로 정의하고 1000/0.5=2000으로 정확히 계산했다. 원문 직접 확인은 못 했다고 밝혔지만 최종 내용은 맞다.\"},\"C\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0,\"note\":\"정의와 계산은 맞다. 다만 인용한 KB1은 rD=r/rw만 직접 지원하고 reD=re/rw를 정확히 인접 문장대로 뒷받침하지는 않는다.\"},\"D\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0.5,\"note\":\"reD=re/rw와 계산 2000은 맞다. KB5는 rD=r/rw를 지원하지만 KB6은 reD 기호의 존재만 보여 주어 인접 주장 전체를 완전하게 직접 지원하지는 않는다.\"},\"E\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"reD=re/rw로 제시하고 1000/0.5=2000으로 정확히 계산했다.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 10436,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 898,
+      "output_tokens_details": {
+        "reasoning_tokens": 306
+      },
+      "total_tokens": 11334
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "agent": {
+      "claim_verdicts": [
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": false,
+      "unit_accuracy": false,
+      "formula_accuracy": false,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "최종 답변이 식과 계산을 제공하지 않고 거절했다. 질문에 필요한 입력값과 근거는 제공되어 있었다."
+    },
+    "openai_closed_book": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "reD=re/rw로 정의하고 1000/0.5=2000으로 정확히 계산했다. 원문 직접 확인은 못 했다고 밝혔지만 최종 내용은 맞다."
+    },
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 0,
+      "note": "정의와 계산은 맞다. 다만 인용한 KB1은 rD=r/rw만 직접 지원하고 reD=re/rw를 정확히 인접 문장대로 뒷받침하지는 않는다."
+    },
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 0.5,
+      "note": "reD=re/rw와 계산 2000은 맞다. KB5는 rD=r/rw를 지원하지만 KB6은 reD 기호의 존재만 보여 주어 인접 주장 전체를 완전하게 직접 지원하지는 않는다."
+    },
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "reD=re/rw로 제시하고 1000/0.5=2000으로 정확히 계산했다."
+    }
+  }
+}

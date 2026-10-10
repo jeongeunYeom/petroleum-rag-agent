@@ -1,0 +1,962 @@
+{
+  "task_id": "D10",
+  "model_id": "qwen3:8b",
+  "run_id": "GR-20261010-110158-0E58F8",
+  "initial_response": {
+    "run_id": "GR-20261010-110158-0E58F8",
+    "topic": "현장 인계표에서 1 m³=6.2898 bbl을 사용한다. 31.5 m³의 원유를 이 계수로 bbl로 환산해줘.",
+    "goal": "현장 인계표에서 1 m³=6.2898 bbl을 사용한다. 31.5 m³의 원유를 이 계수로 bbl로 환산해줘.",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "insufficient_evidence",
+    "final_answer": "근거 자료에서 필요한 관계식이나 입력값을 확인하지 못해 수치 결과를 계산하거나 추정하지 않았습니다.",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 0.833333,
+    "goal_coverage_percent": 83.33,
+    "criteria_source": "inferred",
+    "criteria_hash": "6cef2aca409041e0b4bf8d200f7da11c476d305f15798bcd12c52053e9c2df16",
+    "criteria": [
+      {
+        "criterion_id": "C1",
+        "status": "partial",
+        "reason": "계산 결과가 아직 검증되지 않았습니다.",
+        "supporting_evidence": [
+          "KB1",
+          "KB2",
+          "KB4",
+          "KB5",
+          "KB6"
+        ]
+      },
+      {
+        "criterion_id": "C2",
+        "status": "met",
+        "reason": "인용된 근거와 검증된 계산으로 조건을 충족했습니다.",
+        "supporting_evidence": [
+          "KB1",
+          "KB2",
+          "KB4",
+          "KB5",
+          "KB6"
+        ]
+      },
+      {
+        "criterion_id": "C3",
+        "status": "met",
+        "reason": "인용된 근거와 검증된 계산으로 조건을 충족했습니다.",
+        "supporting_evidence": [
+          "KB1",
+          "KB2",
+          "KB4",
+          "KB5",
+          "KB6"
+        ]
+      }
+    ],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "정확한 단위 변환 계수를 사용하여 31.5 m³를 bbl로 변환하는 계산이 수행되었는지 확인",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "변환 결과가 31.5 m³ × 6.2898 bbl/m³의 수치와 일치하는지 확인",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "변환된 값이 현장 인계표에서 사용되는 단위 변환 규칙에 부합하는지 확인",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 5,
+    "current_iteration": 5,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "initial_evidence_needed",
+        "started_at": "2026-10-10T11:02:01.176725Z",
+        "finished_at": "2026-10-10T11:02:05.266394Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "verify",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "verify_current_support",
+        "started_at": "2026-10-10T11:02:05.282323Z",
+        "finished_at": "2026-10-10T11:02:15.901239Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.666667,
+        "failure_reason": null,
+        "details": {
+          "engineering_validation_passed": true,
+          "goal_achieved": false
+        }
+      },
+      {
+        "iteration": 3,
+        "action_id": "ACT-3",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "completed",
+        "reason_code": "missing_requirement",
+        "started_at": "2026-10-10T11:02:15.916272Z",
+        "finished_at": "2026-10-10T11:02:19.522696Z",
+        "new_evidence_count": 1,
+        "evidence_added": [
+          "KB6"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.666667,
+        "coverage_after": 0.666667,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 1,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 4,
+        "action_id": "ACT-4",
+        "action_type": "verify",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "completed",
+        "reason_code": "verify_current_support",
+        "started_at": "2026-10-10T11:02:19.537994Z",
+        "finished_at": "2026-10-10T11:02:30.929912Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.666667,
+        "coverage_after": 0.833333,
+        "failure_reason": null,
+        "details": {
+          "engineering_validation_passed": true,
+          "goal_achieved": false
+        }
+      },
+      {
+        "iteration": 5,
+        "action_id": "ACT-5",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1"
+        ],
+        "status": "blocked",
+        "reason_code": "missing_requirement",
+        "started_at": "2026-10-10T11:02:30.943852Z",
+        "finished_at": "2026-10-10T11:02:30.948831Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.833333,
+        "coverage_after": 0.833333,
+        "failure_reason": "retrieve_no_progress",
+        "details": {
+          "new_evidence_count": 0,
+          "retrieval_mode": "hybrid",
+          "cache_hit": true
+        }
+      },
+      {
+        "iteration": 5,
+        "action_id": "ACT-STOP-5",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "verification_budget_exhausted",
+        "started_at": "2026-10-10T11:02:30.971337Z",
+        "finished_at": "2026-10-10T11:02:30.971337Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.833333,
+        "coverage_after": 0.833333,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "partial",
+          "C2": "partial",
+          "C3": "met"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "Direct source support needed for the answer"
+        ],
+        "coverage": 0.666667,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "partial",
+          "C2": "partial",
+          "C3": "met"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "Direct source support needed for the answer"
+        ],
+        "coverage": 0.666667,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 4,
+        "criteria": {
+          "C1": "partial",
+          "C2": "met",
+          "C3": "met"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "Direct source support needed for the answer"
+        ],
+        "coverage": 0.833333,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 5,
+        "criteria": {
+          "C1": "partial",
+          "C2": "met",
+          "C3": "met"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.833333,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 5,
+        "criteria": {
+          "C1": "partial",
+          "C2": "met",
+          "C3": "met"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.833333,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 896,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p896:c0",
+        "score": 0.01639344,
+        "excerpt": "SI Metric Conversion Factors\nacre ×\n4.046 873\nE + 03 = m2\nbbl ×\n1.589 873\nE − 01 = m3\ncp ×\n1.0*\nE − 03 = Pa·s\nft ×\n3.048*\nE − 01 = m\nft2 ×\n9.290 304*\nE − 02 = m2\nft3 ×\n2.831 685\nE − 02 = m3\n°F\n(°F − 32)/1.8\n= °C\nin.3 ×\n1.638 706\nE + 01 = cm3\nlbf ×\n4.448 222\nE + 00 = N\nlbm ×\n4.535 924\nE − 01 = kg\npsi ×\n6.894 757\nE + 00 = kPa\n*Conversion factor is exact.\nV-888\nPetroleum Engineering Handbook—Vol. V\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 7\nChapter 9"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 95,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p95:c3",
+        "score": 0.01612903,
+        "excerpt": "–28 September.\nSI Metric Conversion Factors\nbbl ×\n1.589873\nE − 01 = m3\nft ×\n3.048*\nE − 01 = m\n*Conversion factor is exact.\nChapter 3A—Petrophysics\nV-87\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 2\nChapter 3B"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 657,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p657:c0",
+        "score": 0.01587302,
+        "excerpt": "lbm mol ×\n4.535 924\nE − 01 = kmol\npsia ×\n6.894 757\nE − 00 = kPa\nres bbl ×\n1.689 873\nE − 01 = res m3\n*Conversion factor is exact.\nChapter 5—The Single-Well Chemical Tracer Test\nV-649\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 6\nChapter 4"
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 1268,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1268:c0",
+        "score": 0.015625,
+        "excerpt": "SI Metric Conversion Factors\nacre-ft ×\n1.233 489\nE + 03 = m3\nÅ ×\n1.0*\nE − 01 = nm\nbbl ×\n1.589 873\nE − 01 = m3\ncp ×\n1.0*\nE − 03 = Pa·s\nft ×\n3.048*\nE − 01 = m\nft2 ×\n9.290 304*\nE − 02 = m2\nft3 ×\n2.831 685\nE − 02 = m3\n°F\n(°F − 32)/1.8\n= °C\nin. ×\n2.54*\nE + 00 = cm\nin.3 ×\n1.638 706\nE + 01 = cm3\nlbm ×\n4.535 924\nE − 01 = kg\npsi ×\n6.894 757\nE + 00 = kPa\n*Conversion factor is exact.\nV-1260\nPetroleum Engineering Handbook—Vol. V\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 14\nChapter 12"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 988,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p988:c1",
+        "score": 0.01538462,
+        "excerpt": "= m3\ncp ×\n1.0*\nE − 03 = Pa·s\nft ×\n3.048*\nE − 01 = m\n°F\n(°F − 32)/1.8\n= °C\ngal ×\n3.785 412\nE − 03 = m3\nlbm ×\n4.535 924\nE − 01 = kg\npsi ×\n6.894 757\nE + 00 = kPa\nsq mile ×\n2.589 988\nE + 00 = km2\nstd ft3 ×\n2.831 685\nE − 02 = m3\n*Conversion factor is exact.\nV-980\nPetroleum Engineering Handbook—Vol. V\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 8\nChapter 10"
+      },
+      {
+        "evidence_id": "KB6",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 1578,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1578:c1",
+        "score": 0.015625,
+        "excerpt": "= m\nft3 ×\n2.831 685\nE − 02 = m3\nlbm ×\n4.535 924\nE − 01 = kg\nmile ×\n1.609 344*\nE + 00 = km\npsi ×\n6.894 757\nE + 00 = kPa\npsia ×\n6.894 757\nE + 00 = kPa\nsquare mile ×\n2.589 988\nE + 06 = m2\nton ×\n9.071 847\nE − 01 = Mg\n*Conversion factor is exact.\nV-1570\nPetroleum Engineering Handbook—Vol. V\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 17\nChapter 19"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 2.444328,
+      "retrieval_seconds": 7.682714,
+      "llm_generation_seconds": 19.059519,
+      "python_seconds": 0.0,
+      "verification_seconds": 22.010678,
+      "evaluation_seconds": 11.236934,
+      "synthesis_seconds": 7.822499,
+      "retrieve_action_seconds": 7.701066,
+      "verify_action_seconds": 22.010672,
+      "elapsed_seconds": 32.250324,
+      "total_seconds": 32.250448,
+      "message_parsing_seconds": 0.000124
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 32.250324,
+      "python_seconds": 0.0
+    },
+    "validation": {
+      "engineering_validation_passed": true,
+      "engineering_contradiction_count": 0,
+      "unsupported_engineering_claim_count": 0,
+      "citation_semantic_passed": false,
+      "unsupported_citation_claim_count": 1,
+      "unsupported_numeric_claim_count": 1,
+      "criteria_frozen": true
+    },
+    "cancel_requested": false,
+    "error": null
+  },
+  "resume_response": null,
+  "response": {
+    "run_id": "GR-20261010-110158-0E58F8",
+    "topic": "현장 인계표에서 1 m³=6.2898 bbl을 사용한다. 31.5 m³의 원유를 이 계수로 bbl로 환산해줘.",
+    "goal": "현장 인계표에서 1 m³=6.2898 bbl을 사용한다. 31.5 m³의 원유를 이 계수로 bbl로 환산해줘.",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "insufficient_evidence",
+    "final_answer": "근거 자료에서 필요한 관계식이나 입력값을 확인하지 못해 수치 결과를 계산하거나 추정하지 않았습니다.",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 0.833333,
+    "goal_coverage_percent": 83.33,
+    "criteria_source": "inferred",
+    "criteria_hash": "6cef2aca409041e0b4bf8d200f7da11c476d305f15798bcd12c52053e9c2df16",
+    "criteria": [
+      {
+        "criterion_id": "C1",
+        "status": "partial",
+        "reason": "계산 결과가 아직 검증되지 않았습니다.",
+        "supporting_evidence": [
+          "KB1",
+          "KB2",
+          "KB4",
+          "KB5",
+          "KB6"
+        ]
+      },
+      {
+        "criterion_id": "C2",
+        "status": "met",
+        "reason": "인용된 근거와 검증된 계산으로 조건을 충족했습니다.",
+        "supporting_evidence": [
+          "KB1",
+          "KB2",
+          "KB4",
+          "KB5",
+          "KB6"
+        ]
+      },
+      {
+        "criterion_id": "C3",
+        "status": "met",
+        "reason": "인용된 근거와 검증된 계산으로 조건을 충족했습니다.",
+        "supporting_evidence": [
+          "KB1",
+          "KB2",
+          "KB4",
+          "KB5",
+          "KB6"
+        ]
+      }
+    ],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "정확한 단위 변환 계수를 사용하여 31.5 m³를 bbl로 변환하는 계산이 수행되었는지 확인",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "변환 결과가 31.5 m³ × 6.2898 bbl/m³의 수치와 일치하는지 확인",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "변환된 값이 현장 인계표에서 사용되는 단위 변환 규칙에 부합하는지 확인",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 5,
+    "current_iteration": 5,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "initial_evidence_needed",
+        "started_at": "2026-10-10T11:02:01.176725Z",
+        "finished_at": "2026-10-10T11:02:05.266394Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "verify",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "verify_current_support",
+        "started_at": "2026-10-10T11:02:05.282323Z",
+        "finished_at": "2026-10-10T11:02:15.901239Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.666667,
+        "failure_reason": null,
+        "details": {
+          "engineering_validation_passed": true,
+          "goal_achieved": false
+        }
+      },
+      {
+        "iteration": 3,
+        "action_id": "ACT-3",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "completed",
+        "reason_code": "missing_requirement",
+        "started_at": "2026-10-10T11:02:15.916272Z",
+        "finished_at": "2026-10-10T11:02:19.522696Z",
+        "new_evidence_count": 1,
+        "evidence_added": [
+          "KB6"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.666667,
+        "coverage_after": 0.666667,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 1,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 4,
+        "action_id": "ACT-4",
+        "action_type": "verify",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "completed",
+        "reason_code": "verify_current_support",
+        "started_at": "2026-10-10T11:02:19.537994Z",
+        "finished_at": "2026-10-10T11:02:30.929912Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.666667,
+        "coverage_after": 0.833333,
+        "failure_reason": null,
+        "details": {
+          "engineering_validation_passed": true,
+          "goal_achieved": false
+        }
+      },
+      {
+        "iteration": 5,
+        "action_id": "ACT-5",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1"
+        ],
+        "status": "blocked",
+        "reason_code": "missing_requirement",
+        "started_at": "2026-10-10T11:02:30.943852Z",
+        "finished_at": "2026-10-10T11:02:30.948831Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.833333,
+        "coverage_after": 0.833333,
+        "failure_reason": "retrieve_no_progress",
+        "details": {
+          "new_evidence_count": 0,
+          "retrieval_mode": "hybrid",
+          "cache_hit": true
+        }
+      },
+      {
+        "iteration": 5,
+        "action_id": "ACT-STOP-5",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "verification_budget_exhausted",
+        "started_at": "2026-10-10T11:02:30.971337Z",
+        "finished_at": "2026-10-10T11:02:30.971337Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.833333,
+        "coverage_after": 0.833333,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "partial",
+          "C2": "partial",
+          "C3": "met"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "Direct source support needed for the answer"
+        ],
+        "coverage": 0.666667,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "partial",
+          "C2": "partial",
+          "C3": "met"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "Direct source support needed for the answer"
+        ],
+        "coverage": 0.666667,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 4,
+        "criteria": {
+          "C1": "partial",
+          "C2": "met",
+          "C3": "met"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "Direct source support needed for the answer"
+        ],
+        "coverage": 0.833333,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 5,
+        "criteria": {
+          "C1": "partial",
+          "C2": "met",
+          "C3": "met"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.833333,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 5,
+        "criteria": {
+          "C1": "partial",
+          "C2": "met",
+          "C3": "met"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.833333,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 896,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p896:c0",
+        "score": 0.01639344,
+        "excerpt": "SI Metric Conversion Factors\nacre ×\n4.046 873\nE + 03 = m2\nbbl ×\n1.589 873\nE − 01 = m3\ncp ×\n1.0*\nE − 03 = Pa·s\nft ×\n3.048*\nE − 01 = m\nft2 ×\n9.290 304*\nE − 02 = m2\nft3 ×\n2.831 685\nE − 02 = m3\n°F\n(°F − 32)/1.8\n= °C\nin.3 ×\n1.638 706\nE + 01 = cm3\nlbf ×\n4.448 222\nE + 00 = N\nlbm ×\n4.535 924\nE − 01 = kg\npsi ×\n6.894 757\nE + 00 = kPa\n*Conversion factor is exact.\nV-888\nPetroleum Engineering Handbook—Vol. V\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 7\nChapter 9"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 95,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p95:c3",
+        "score": 0.01612903,
+        "excerpt": "–28 September.\nSI Metric Conversion Factors\nbbl ×\n1.589873\nE − 01 = m3\nft ×\n3.048*\nE − 01 = m\n*Conversion factor is exact.\nChapter 3A—Petrophysics\nV-87\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 2\nChapter 3B"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 657,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p657:c0",
+        "score": 0.01587302,
+        "excerpt": "lbm mol ×\n4.535 924\nE − 01 = kmol\npsia ×\n6.894 757\nE − 00 = kPa\nres bbl ×\n1.689 873\nE − 01 = res m3\n*Conversion factor is exact.\nChapter 5—The Single-Well Chemical Tracer Test\nV-649\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 6\nChapter 4"
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 1268,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1268:c0",
+        "score": 0.015625,
+        "excerpt": "SI Metric Conversion Factors\nacre-ft ×\n1.233 489\nE + 03 = m3\nÅ ×\n1.0*\nE − 01 = nm\nbbl ×\n1.589 873\nE − 01 = m3\ncp ×\n1.0*\nE − 03 = Pa·s\nft ×\n3.048*\nE − 01 = m\nft2 ×\n9.290 304*\nE − 02 = m2\nft3 ×\n2.831 685\nE − 02 = m3\n°F\n(°F − 32)/1.8\n= °C\nin. ×\n2.54*\nE + 00 = cm\nin.3 ×\n1.638 706\nE + 01 = cm3\nlbm ×\n4.535 924\nE − 01 = kg\npsi ×\n6.894 757\nE + 00 = kPa\n*Conversion factor is exact.\nV-1260\nPetroleum Engineering Handbook—Vol. V\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 14\nChapter 12"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 988,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p988:c1",
+        "score": 0.01538462,
+        "excerpt": "= m3\ncp ×\n1.0*\nE − 03 = Pa·s\nft ×\n3.048*\nE − 01 = m\n°F\n(°F − 32)/1.8\n= °C\ngal ×\n3.785 412\nE − 03 = m3\nlbm ×\n4.535 924\nE − 01 = kg\npsi ×\n6.894 757\nE + 00 = kPa\nsq mile ×\n2.589 988\nE + 00 = km2\nstd ft3 ×\n2.831 685\nE − 02 = m3\n*Conversion factor is exact.\nV-980\nPetroleum Engineering Handbook—Vol. V\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 8\nChapter 10"
+      },
+      {
+        "evidence_id": "KB6",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 1578,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1578:c1",
+        "score": 0.015625,
+        "excerpt": "= m\nft3 ×\n2.831 685\nE − 02 = m3\nlbm ×\n4.535 924\nE − 01 = kg\nmile ×\n1.609 344*\nE + 00 = km\npsi ×\n6.894 757\nE + 00 = kPa\npsia ×\n6.894 757\nE + 00 = kPa\nsquare mile ×\n2.589 988\nE + 06 = m2\nton ×\n9.071 847\nE − 01 = Mg\n*Conversion factor is exact.\nV-1570\nPetroleum Engineering Handbook—Vol. V\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 17\nChapter 19"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 2.444328,
+      "retrieval_seconds": 7.682714,
+      "llm_generation_seconds": 19.059519,
+      "python_seconds": 0.0,
+      "verification_seconds": 22.010678,
+      "evaluation_seconds": 11.236934,
+      "synthesis_seconds": 7.822499,
+      "retrieve_action_seconds": 7.701066,
+      "verify_action_seconds": 22.010672,
+      "elapsed_seconds": 32.250324,
+      "total_seconds": 32.250448,
+      "message_parsing_seconds": 0.000124
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 32.250324,
+      "python_seconds": 0.0
+    },
+    "validation": {
+      "engineering_validation_passed": true,
+      "engineering_contradiction_count": 0,
+      "unsupported_engineering_claim_count": 0,
+      "citation_semantic_passed": false,
+      "unsupported_citation_claim_count": 1,
+      "unsupported_numeric_claim_count": 1,
+      "criteria_frozen": true
+    },
+    "cancel_requested": false,
+    "error": null
+  },
+  "same_run_resume": false,
+  "wall_seconds": 33.046
+}

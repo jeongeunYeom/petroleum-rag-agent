@@ -1,0 +1,216 @@
+{
+  "task_id": "F04",
+  "provider": "openai",
+  "track": "same_evidence",
+  "question": "수평정은 수직정용 radial r/z grid의 well connection factor를 수정 없이 적용해도 정확하다고 봐도 되는 거지?",
+  "continuation": null,
+  "system_prompt": "Answer the petroleum-engineering request in the user's language. Be concise and state uncertainty. No tools, Python, retrieval or web access. Do not invent formulas, measurements or citations. Explicitly correct a false premise. If essential input is absent, ask for it. Cite evidence IDs only when evidence is supplied. Use only supplied KB/FIG text and the user's values for sourced engineering claims. Cite supporting IDs in square brackets. No other evidence is available.",
+  "user_prompt": "수평정은 수직정용 radial r/z grid의 well connection factor를 수정 없이 적용해도 정확하다고 봐도 되는 거지?\n\n=== Captured Agent KB/FIG text evidence ===\n[{\"evidence_id\": \"KB1\", \"document\": \"Heriot-Watt University - Reservoir Engineering.pdf\", \"page\": 340, \"chunk_id\": \"f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p340:c0\", \"kind\": \"KB\", \"excerpt\": \"12\\n(ii) Boundary Conditions.   \\nAt the end faces x = 0 and x = L, the flow rate or pressure must be specified for \\nevery value of time, t.\\nSolutions of the linear diffusivity equation are needed when dealing with linear flow \\nfrom aquifers. For solutions dealing with well problems a radial model is required.\\n2.2.2 The Radial Model\\nFigure 4 illustrates the geometry of this model in which the flow occurs in horizontal \\nplanes perpendicular to the Z axis (i.e. in planes parallel to the XY plane) within a \\nlayer of constant height, h. The flow is radial and is either towards the Z axis or away \\nfrom it.\\n\\t                     \\nZ\\nY\\nX\\nh\\nre\\nrw\\nh\\nqρr\\nqρr+dr\\nr\\ndr\\nradial element\\nsection in the XZ plane\\nwellbore\\nZ\\nFigure 4  Radial horizontal flow geometry geometry\\nAt a distance r from x-axis, the flow velocity, U is now radius dependent:\\n\\t U = q/2πrh\\t\\n\\t\\n\\t\\n\\t\\n\\t\\n\\t\\n\\t\\n(2.9)\"}, {\"evidence_id\": \"KB2\", \"document\": \"Heriot-Watt_University_-_Reservoir_Simulation.pdf\", \"page\": 127, \"chunk_id\": \"3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p127:c1\", \"kind\": \"KB\", \"excerpt\": \"re trying to solve.  Consider the issues of grid dimension and type \\ntogether.  A 2D x/z cross-sectional model (with dip if necessary) may be used to study \\nthe effects of vertical heterogeneity - layering for example - on the sweep efficiency \\nor water breakthrough time.  For a near-well coning study, an r/z grid is usually more \\nappropriate since it more closely resembles the geometry of the near well radial flow. \\n2D x/z grids are also used to generate pseudo relative permeabilities for possible use in \\n2D areal models.  For full field simulations, 3D grids are generally used which in most \\nmodels are still probably Cartesian with varying grid spacing in all three dimensions. \\nIn recent years, other types of grid such as distorted or corner point grids are being \\napplied - especially if a geocellular model has been generated as part of the reservoir \\ndescription process.  Such guides are also applied in some studies to model major \\nfaults in reservoirs.  Flow through major faults can lead to communication between \\nnon neighbour blocks and this can be modelled in some simulators by defining non-\\nneighbour grid block connections as shown schematically in Figure 15.  \\n      \\nFault\"}, {\"evidence_id\": \"KB3\", \"document\": \"Heriot-Watt_University_-_Reservoir_Simulation.pdf\", \"page\": 144, \"chunk_id\": \"3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p144:c1\", \"kind\": \"KB\", \"excerpt\": \"e ≈\\n.0 2\\n \\n \\n ∆\\n                                                                            (24)\\nTherefore, we have a very simple way of calculating the PI or “well connection \\nfactor” as it is sometimes called of a well in a simulation grid block.\\nThe simple Peaceman formula applies to a well in a  radial environment (the five-spot \\nconfiguration is as close as we can get to radial using a common 2D Cartesian grid) \\nand for Δx = Δy.  In fact, some modification to the simple formula is required for \\nwells in “corner” locations or set close to a boundary and these are shown in Figure \\n32.  Also, if Δx ≠ Δy, but the well is isolated (radial flow), then:\\n              r\\nx\\ny\\ne ≈\\n+\\n.0 14\\n2\\n2\\n \\n∆\\n∆\\n                                        (25)\\n                                  \\n11\\n10\\n9\\n8\\n7\\n6\\n5\\n4\\n3\\n2\\n1\\n0\\n-1\\n-1  0  1   2  3   4  5   6  7   8  9 10 11\\nFigure 30\\nThe 2D areal grid used to \\ncompare pressures with \\nthe expected radial profiles \\n(from Peaceman, 1978)\"}, {\"evidence_id\": \"KB4\", \"document\": \"Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf\", \"page\": 1094, \"chunk_id\": \"779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1094:c1\", \"kind\": \"KB\", \"excerpt\": \"terial-balance calculations will be required to determine whether the waterflood is perform-\\ning as expected and whether significant operational changes are needed.\\nAlso keep in mind that the usefulness of all these calculations depends greatly on the quali-\\nty of the input data. The original field data must be reviewed for completeness and accuracy\\nbefore entering them to these types of calculations. Where gaps in the data or clearly erroneous\\nnumbers  are  found,  the  engineers  must  judge  how  to  edit  the  data  or  adjust  calculations  for\\nsuch data problems. Where total field data has been allocated to the individual wells, the alloca-\\ntion  procedures  should  be  checked,  including  whether  they  have  changed  over  time  and  thus\\ncaused changes in the slopes of some of plotted data—changes that are not real, but that are\\nartifacts of the data-allocation procedures.\\nFig. 11.45—Surveillance-overview logic for a layered waterflood.45\\nV-1086\\nPetroleum Engineering Handbook—Vol. V\\nPrint\\nSearch\\nHome\\nBookmarks\\nHelp\\nChapter 12\\nChapter 10\"}, {\"evidence_id\": \"KB5\", \"document\": \"Heriot-Watt_University_-_Reservoir_Simulation.pdf\", \"page\": 264, \"chunk_id\": \"3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p264:c2\", \"kind\": \"KB\", \"excerpt\": \"ing, and the results are not robust (negative or infi nite \\nvalues may be obtained).\\n•\\nThe regions around wells should be treated as a special case, because the fl ow\\nis radial.  The well index and the transmissibilities around the well block should \\neb upscaled.\\n•\\nPermeability is actually a tensor quantity (4 terms in 2D, 9 terms in 3D).  Full \\ntensors may be used to take account of cross-fl ow within a grid cell.  However, \\nin general, only the diagonal terms are used (kxx, kyy\\ny  and kzz, often referred to\\nas kx, ky and kz).\"}, {\"evidence_id\": \"KB6\", \"document\": \"Heriot-Watt_University_-_Reservoir_Simulation.pdf\", \"page\": 148, \"chunk_id\": \"3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p148:c0\", \"kind\": \"KB\", \"excerpt\": \"Institute of Petroleum Engineering,  Heriot-Watt University  \\n35\\n44\\nGridding And Well Modelling\\nLayer\\n1\\n2\\n3\\n4\\nWell\\ncompletion\\nh\\nQT = Qo + Qw\\nQo1\\nQw1\\nQo2\\nQw2\\nQo3\\nQw3\\nQo4\\nQw4\\nk1, h1, P1, Sw1\\nk2, h2, P2, Sw2\\nk3, h3, P3, Sw3\\nk4, h4, P4, Sw4\\n(a)\\n(b)\\n4.4   Modelling Horizontal Wells\\nFigure 35 shows the trajectory of a “horizontal” well in a reservoir simulation \\nmodel.  This is not well represented by the purely radial r/z model grid discussed \\nin Section 2.1 above in the context of a vertical well.  Hence, it is less likely that \\nthe well connection factors calculated as shown in previous sections will apply for \\na horizontal well.  This is broadly true although the basic principle is very similar. \\nThat is, each well sector intersects a grid block (i,j,k) even although the well may \\nbe going through this block in say the x(i) direction and the flows between the well \\nsector and the grid are given by an expression of the form:\\n    Q\\nPI\\no i j k =\\n, ,\\n \\noo i j k\\ni j k\\ni j k\\nP\\nP\\n \\nwf \\n, ,\\n, ,\\n, ,\\n.\\n−\\n(\\n)\\n \\n(32)\\nwhere the actual form of the productivity index expression, PIoi,j,k , may be rather more \\ncomplex since (a) the well may intersect the block in a more complex way and (b) \\nthe aspe\"}, {\"evidence_id\": \"KB7\", \"document\": \"Heriot-Watt_University_-_Production_Technology_I.pdf\", \"page\": 92, \"chunk_id\": \"18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p92:c0\", \"kind\": \"KB\", \"excerpt\": \"1\\n48\\n2.6.1 Use of Vertical Well Pressure Loss Correlations\\nAny of the correlations  discussed above  can be used by modifying the frictional and\\nhydrostatic gradient term as suggested above.  The use of the correlation in this way\\nassumes, however, that:\\n(1)\\nthe holdup correlation developed for vertical wells will be valid for inclined\\nwells\\n(2)\\nthe physical distribution of the phases and flow regimes will remain the same.\\nBeggs and Brill  found that these assumptions were not necessarily valid.\\nIt can therefore be concluded that the use of such adjustments to vertical multiphase\\ncorrelations will be of limited accuracy.\\n2.6.2 Inclined Flow Correlations\\nRelatively little research has been conducted in this area, with the majority of\\ntechniques evolving from horizontal correlations modified to account for uphill\\nsections of pipeline.\\nAmongst the published methods are the following:\\n• Beggs and Brill\\n• Griffith et al\\nThe Griffith et al correlation only considered two flow regimes, namely slug flow and\\nannular flow.  It did not consider the effects of pipe roughness, liquid viscosity and\\nentrainment.\\nThe method of Beggs and Brill is a widely accepted method for predicting inclined\\nwel\"}, {\"evidence_id\": \"KB8\", \"document\": \"Heriot-Watt_University_-_Reservoir_Simulation.pdf\", \"page\": 433, \"chunk_id\": \"3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p433:c0\", \"kind\": \"KB\", \"excerpt\": \"6\\nSet up a near-well  r/z geometry fine grid - possibly 50 layers and\\nset reservoir near-well rock properties e.g. Layering, Tz modifiers,\\nRel. perms. etc.\\n                    \\nPerform simulations to look at issues such as effect of rate, vertical\\ncommunication, gas/oil/water Rel. perms. etc…\\nGenerally needs a fine Dr, Dz grid, often finer near the well where\\nmost rapid changes of Sg and pressure with time occur.\\n(v)\\n1. The geometry would be different: r/z for coning and cartesian or\\ncorner point for full field.\\n2. The fineness of the grid would be different.  Very fine for near-\\nwell; much coarser for full field.\\n#\\n(Dimensionality too 2D vs. 3D)\"}, {\"evidence_id\": \"KB9\", \"document\": \"Heriot-Watt_University_-_Well_Test_Analysis.pdf\", \"page\": 44, \"chunk_id\": \"01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p44:c2\", \"kind\": \"KB\", \"excerpt\": \"h these effects occur to the greater or lesser \\nextent in a real well and the basic radial flow models must be modified to include \\nan allowance for such phenomena.  This is achieved by including a correction \\nterm known as the skin factor which represents the difference between the bottom \\nhole pressure predicted by the homogeneous radial flow model and proper value \\nallowing for permeability or well-bore radius variation.\\nTable 1\"}, {\"evidence_id\": \"KB10\", \"document\": \"Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf\", \"page\": 1011, \"chunk_id\": \"779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1011:c1\", \"kind\": \"KB\", \"excerpt\": \"n  1%  accuracy  for\\ntD / rD\\n2 > 8.5, and essentially identical to tD / rD\\n2 > 100.13\\nNoting that the dimensionless potential at the well differs from the dimensionless potential\\nat the wellbore radius (rD = 1) by the skin factor, the basic radial well flow equation used for\\nmost well-testing purposes is\\nψDw = 1.1513 log (2.2458tD) + S′. ........................................... (10.52)\\nA  graph  of  ψwf  vs.  the  logarithm  of  time  is  a  straight  line.  This  slope  is  the  basis  for  much\\npressure-drawdown and -buildup testing.\\nWhen predicting well performance, it is important to recognize when data are being collect-\\ned during transient flow and to take into account the continuing decline in well deliverability\\nuntil a steady-state or pseudosteady-state condition is established.\\nPseudosteady State.  In a closed drainage volume, once all the outer boundaries have been\\nfully felt, a constant-rate well will experience pseudosteady-state flow. Because all pressures in\\nthe  reservoir  decline  at  the  same  rate  during  pseudosteady-state  flow,  the  difference  between\\nreservoir pressures and the well pressure remains constant, even though both individually are\\nchanging\"}, {\"evidence_id\": \"KB11\", \"document\": \"Heriot-Watt_University_-_Production_Technology_I.pdf\", \"page\": 69, \"chunk_id\": \"18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p69:c0\", \"kind\": \"KB\", \"excerpt\": \"Department of Petroleum Engineering,  Heriot-Watt University\\n25\\n33\\nPerformance of Flowing Wells\\n                       \\nSkin\\nZone\\n-S\\nS=0\\n+S\\n∆PSkin\\nS<0\\n∆PSkin\\nS>0\\nPw\\nrw\\nrs\\nr\\nre\\nA dimensionless skin factor can be defined for each of the radial flow perturbations\\ndescribed above.  Some of the skin factors can be estimated given a knowledge of the\\ncompletion conditions and configurations.\\nPreviously, equations were developed which related the pressure drawdown across\\nthe reservoir to the flowrate and other parameters.  The actual drawdown across the\\nreservoir when a skin exists, ∆Pactual, can be related to the ideal drawdown predicted\\nfrom radial flow theory ∆Pideal and the skin pressure drop ∆PSKIN by:\\nP\\nP\\nwf\\nwf\\nactual\\nideal\\n=\\n+\\n \\n∆\\n∆\\n∆∆PSKIN\\n(44)\\nie, for the steady state radial flow case.\\n∆\\nP\\nP\\nP\\nP\\nP\\ne\\nwf\\ne\\nwf\\nSKIN\\nactual\\nideal\\n−\\n[\\n] =\\n−\\n[\\n] +\\n(45)\\n∆\\nwhere\\nP\\nP\\nP\\nSKIN\\nwf\\nwf\\nideal\\nactual\\n=\\n−\\n[\\n]\\n \\nSince ∆PSKIN was defined as\\n∆P\\nq\\nB\\nkh S\\nSKIN\\ns\\n=\\n⋅\\nµ\\nπ\\n2\\n(46)\\nin Darcy units\\nor\\nFigure 11\\nEffect of skin on Pwf\"}, {\"evidence_id\": \"KB12\", \"document\": \"Heriot-Watt_University_-_Well_Test_Analysis.pdf\", \"page\": 51, \"chunk_id\": \"01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p51:c1\", \"kind\": \"KB\", \"excerpt\": \"ll-bore improvement; \\nvalues of S down to -5 have been observed.  It is important to appreciate that radial \\nflow is highly sensitive to conditions near the well where superficial velocities are \\nat their highest.\\n \\nHomogeneous\\nmedium\\nprediction\\nPossible actual\\nprofile\\npw\\npwf\\n∆ps\\n...  Negative\\n   S = ∆ps\\n qµ\\n2πkh\\n∆ps   is a negative quantity\\n•\\nDue to near wellbore permeability improvement\\ni.e.  stimulation\\n1.7.5.  Analytical Skin Formulae\\nThe dimensionless skin factor, S , accounts for any deviation from homogeneous, \\nradial flow in the near well-bore region.  The skin effect due to formation damage \\ncannot usually be predicted a priori and the actual measurement of this quantity is \\none of the major objectives of the transient pressure testing of wells.  However in \\ncertain circumstances it is possible to make an estimate of the incremental pressure \\ndrop in the damaged zone and calculate the skin factor.  The best example of this is \\na sand consolidation treatment where the permeability and extent of the altered zone \\ncan be predicted.  The physical situation is shown in Figure 43.  where an altered zone \\nof radius, rs , and permeability, ks  , surrounds the well-bore; the format\"}]",
+  "evidence": [
+    {
+      "evidence_id": "KB1",
+      "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+      "page": 340,
+      "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p340:c0",
+      "kind": "KB",
+      "excerpt": "12\n(ii) Boundary Conditions.   \nAt the end faces x = 0 and x = L, the flow rate or pressure must be specified for \nevery value of time, t.\nSolutions of the linear diffusivity equation are needed when dealing with linear flow \nfrom aquifers. For solutions dealing with well problems a radial model is required.\n2.2.2 The Radial Model\nFigure 4 illustrates the geometry of this model in which the flow occurs in horizontal \nplanes perpendicular to the Z axis (i.e. in planes parallel to the XY plane) within a \nlayer of constant height, h. The flow is radial and is either towards the Z axis or away \nfrom it.\n\t                     \nZ\nY\nX\nh\nre\nrw\nh\nqρr\nqρr+dr\nr\ndr\nradial element\nsection in the XZ plane\nwellbore\nZ\nFigure 4  Radial horizontal flow geometry geometry\nAt a distance r from x-axis, the flow velocity, U is now radius dependent:\n\t U = q/2πrh\t\n\t\n\t\n\t\n\t\n\t\n\t\n(2.9)"
+    },
+    {
+      "evidence_id": "KB2",
+      "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+      "page": 127,
+      "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p127:c1",
+      "kind": "KB",
+      "excerpt": "re trying to solve.  Consider the issues of grid dimension and type \ntogether.  A 2D x/z cross-sectional model (with dip if necessary) may be used to study \nthe effects of vertical heterogeneity - layering for example - on the sweep efficiency \nor water breakthrough time.  For a near-well coning study, an r/z grid is usually more \nappropriate since it more closely resembles the geometry of the near well radial flow. \n2D x/z grids are also used to generate pseudo relative permeabilities for possible use in \n2D areal models.  For full field simulations, 3D grids are generally used which in most \nmodels are still probably Cartesian with varying grid spacing in all three dimensions. \nIn recent years, other types of grid such as distorted or corner point grids are being \napplied - especially if a geocellular model has been generated as part of the reservoir \ndescription process.  Such guides are also applied in some studies to model major \nfaults in reservoirs.  Flow through major faults can lead to communication between \nnon neighbour blocks and this can be modelled in some simulators by defining non-\nneighbour grid block connections as shown schematically in Figure 15.  \n      \nFault"
+    },
+    {
+      "evidence_id": "KB3",
+      "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+      "page": 144,
+      "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p144:c1",
+      "kind": "KB",
+      "excerpt": "e ≈\n.0 2\n \n \n ∆\n                                                                            (24)\nTherefore, we have a very simple way of calculating the PI or “well connection \nfactor” as it is sometimes called of a well in a simulation grid block.\nThe simple Peaceman formula applies to a well in a  radial environment (the five-spot \nconfiguration is as close as we can get to radial using a common 2D Cartesian grid) \nand for Δx = Δy.  In fact, some modification to the simple formula is required for \nwells in “corner” locations or set close to a boundary and these are shown in Figure \n32.  Also, if Δx ≠ Δy, but the well is isolated (radial flow), then:\n              r\nx\ny\ne ≈\n+\n.0 14\n2\n2\n \n∆\n∆\n                                        (25)\n                                  \n11\n10\n9\n8\n7\n6\n5\n4\n3\n2\n1\n0\n-1\n-1  0  1   2  3   4  5   6  7   8  9 10 11\nFigure 30\nThe 2D areal grid used to \ncompare pressures with \nthe expected radial profiles \n(from Peaceman, 1978)"
+    },
+    {
+      "evidence_id": "KB4",
+      "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+      "page": 1094,
+      "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1094:c1",
+      "kind": "KB",
+      "excerpt": "terial-balance calculations will be required to determine whether the waterflood is perform-\ning as expected and whether significant operational changes are needed.\nAlso keep in mind that the usefulness of all these calculations depends greatly on the quali-\nty of the input data. The original field data must be reviewed for completeness and accuracy\nbefore entering them to these types of calculations. Where gaps in the data or clearly erroneous\nnumbers  are  found,  the  engineers  must  judge  how  to  edit  the  data  or  adjust  calculations  for\nsuch data problems. Where total field data has been allocated to the individual wells, the alloca-\ntion  procedures  should  be  checked,  including  whether  they  have  changed  over  time  and  thus\ncaused changes in the slopes of some of plotted data—changes that are not real, but that are\nartifacts of the data-allocation procedures.\nFig. 11.45—Surveillance-overview logic for a layered waterflood.45\nV-1086\nPetroleum Engineering Handbook—Vol. V\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 12\nChapter 10"
+    },
+    {
+      "evidence_id": "KB5",
+      "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+      "page": 264,
+      "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p264:c2",
+      "kind": "KB",
+      "excerpt": "ing, and the results are not robust (negative or infi nite \nvalues may be obtained).\n•\nThe regions around wells should be treated as a special case, because the fl ow\nis radial.  The well index and the transmissibilities around the well block should \neb upscaled.\n•\nPermeability is actually a tensor quantity (4 terms in 2D, 9 terms in 3D).  Full \ntensors may be used to take account of cross-fl ow within a grid cell.  However, \nin general, only the diagonal terms are used (kxx, kyy\ny  and kzz, often referred to\nas kx, ky and kz)."
+    },
+    {
+      "evidence_id": "KB6",
+      "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+      "page": 148,
+      "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p148:c0",
+      "kind": "KB",
+      "excerpt": "Institute of Petroleum Engineering,  Heriot-Watt University  \n35\n44\nGridding And Well Modelling\nLayer\n1\n2\n3\n4\nWell\ncompletion\nh\nQT = Qo + Qw\nQo1\nQw1\nQo2\nQw2\nQo3\nQw3\nQo4\nQw4\nk1, h1, P1, Sw1\nk2, h2, P2, Sw2\nk3, h3, P3, Sw3\nk4, h4, P4, Sw4\n(a)\n(b)\n4.4   Modelling Horizontal Wells\nFigure 35 shows the trajectory of a “horizontal” well in a reservoir simulation \nmodel.  This is not well represented by the purely radial r/z model grid discussed \nin Section 2.1 above in the context of a vertical well.  Hence, it is less likely that \nthe well connection factors calculated as shown in previous sections will apply for \na horizontal well.  This is broadly true although the basic principle is very similar. \nThat is, each well sector intersects a grid block (i,j,k) even although the well may \nbe going through this block in say the x(i) direction and the flows between the well \nsector and the grid are given by an expression of the form:\n    Q\nPI\no i j k =\n, ,\n \noo i j k\ni j k\ni j k\nP\nP\n \nwf \n, ,\n, ,\n, ,\n.\n−\n(\n)\n \n(32)\nwhere the actual form of the productivity index expression, PIoi,j,k , may be rather more \ncomplex since (a) the well may intersect the block in a more complex way and (b) \nthe aspe"
+    },
+    {
+      "evidence_id": "KB7",
+      "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+      "page": 92,
+      "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p92:c0",
+      "kind": "KB",
+      "excerpt": "1\n48\n2.6.1 Use of Vertical Well Pressure Loss Correlations\nAny of the correlations  discussed above  can be used by modifying the frictional and\nhydrostatic gradient term as suggested above.  The use of the correlation in this way\nassumes, however, that:\n(1)\nthe holdup correlation developed for vertical wells will be valid for inclined\nwells\n(2)\nthe physical distribution of the phases and flow regimes will remain the same.\nBeggs and Brill  found that these assumptions were not necessarily valid.\nIt can therefore be concluded that the use of such adjustments to vertical multiphase\ncorrelations will be of limited accuracy.\n2.6.2 Inclined Flow Correlations\nRelatively little research has been conducted in this area, with the majority of\ntechniques evolving from horizontal correlations modified to account for uphill\nsections of pipeline.\nAmongst the published methods are the following:\n• Beggs and Brill\n• Griffith et al\nThe Griffith et al correlation only considered two flow regimes, namely slug flow and\nannular flow.  It did not consider the effects of pipe roughness, liquid viscosity and\nentrainment.\nThe method of Beggs and Brill is a widely accepted method for predicting inclined\nwel"
+    },
+    {
+      "evidence_id": "KB8",
+      "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+      "page": 433,
+      "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p433:c0",
+      "kind": "KB",
+      "excerpt": "6\nSet up a near-well  r/z geometry fine grid - possibly 50 layers and\nset reservoir near-well rock properties e.g. Layering, Tz modifiers,\nRel. perms. etc.\n                    \nPerform simulations to look at issues such as effect of rate, vertical\ncommunication, gas/oil/water Rel. perms. etc…\nGenerally needs a fine Dr, Dz grid, often finer near the well where\nmost rapid changes of Sg and pressure with time occur.\n(v)\n1. The geometry would be different: r/z for coning and cartesian or\ncorner point for full field.\n2. The fineness of the grid would be different.  Very fine for near-\nwell; much coarser for full field.\n#\n(Dimensionality too 2D vs. 3D)"
+    },
+    {
+      "evidence_id": "KB9",
+      "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+      "page": 44,
+      "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p44:c2",
+      "kind": "KB",
+      "excerpt": "h these effects occur to the greater or lesser \nextent in a real well and the basic radial flow models must be modified to include \nan allowance for such phenomena.  This is achieved by including a correction \nterm known as the skin factor which represents the difference between the bottom \nhole pressure predicted by the homogeneous radial flow model and proper value \nallowing for permeability or well-bore radius variation.\nTable 1"
+    },
+    {
+      "evidence_id": "KB10",
+      "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+      "page": 1011,
+      "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1011:c1",
+      "kind": "KB",
+      "excerpt": "n  1%  accuracy  for\ntD / rD\n2 > 8.5, and essentially identical to tD / rD\n2 > 100.13\nNoting that the dimensionless potential at the well differs from the dimensionless potential\nat the wellbore radius (rD = 1) by the skin factor, the basic radial well flow equation used for\nmost well-testing purposes is\nψDw = 1.1513 log (2.2458tD) + S′. ........................................... (10.52)\nA  graph  of  ψwf  vs.  the  logarithm  of  time  is  a  straight  line.  This  slope  is  the  basis  for  much\npressure-drawdown and -buildup testing.\nWhen predicting well performance, it is important to recognize when data are being collect-\ned during transient flow and to take into account the continuing decline in well deliverability\nuntil a steady-state or pseudosteady-state condition is established.\nPseudosteady State.  In a closed drainage volume, once all the outer boundaries have been\nfully felt, a constant-rate well will experience pseudosteady-state flow. Because all pressures in\nthe  reservoir  decline  at  the  same  rate  during  pseudosteady-state  flow,  the  difference  between\nreservoir pressures and the well pressure remains constant, even though both individually are\nchanging"
+    },
+    {
+      "evidence_id": "KB11",
+      "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+      "page": 69,
+      "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p69:c0",
+      "kind": "KB",
+      "excerpt": "Department of Petroleum Engineering,  Heriot-Watt University\n25\n33\nPerformance of Flowing Wells\n                       \nSkin\nZone\n-S\nS=0\n+S\n∆PSkin\nS<0\n∆PSkin\nS>0\nPw\nrw\nrs\nr\nre\nA dimensionless skin factor can be defined for each of the radial flow perturbations\ndescribed above.  Some of the skin factors can be estimated given a knowledge of the\ncompletion conditions and configurations.\nPreviously, equations were developed which related the pressure drawdown across\nthe reservoir to the flowrate and other parameters.  The actual drawdown across the\nreservoir when a skin exists, ∆Pactual, can be related to the ideal drawdown predicted\nfrom radial flow theory ∆Pideal and the skin pressure drop ∆PSKIN by:\nP\nP\nwf\nwf\nactual\nideal\n=\n+\n \n∆\n∆\n∆∆PSKIN\n(44)\nie, for the steady state radial flow case.\n∆\nP\nP\nP\nP\nP\ne\nwf\ne\nwf\nSKIN\nactual\nideal\n−\n[\n] =\n−\n[\n] +\n(45)\n∆\nwhere\nP\nP\nP\nSKIN\nwf\nwf\nideal\nactual\n=\n−\n[\n]\n \nSince ∆PSKIN was defined as\n∆P\nq\nB\nkh S\nSKIN\ns\n=\n⋅\nµ\nπ\n2\n(46)\nin Darcy units\nor\nFigure 11\nEffect of skin on Pwf"
+    },
+    {
+      "evidence_id": "KB12",
+      "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+      "page": 51,
+      "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p51:c1",
+      "kind": "KB",
+      "excerpt": "ll-bore improvement; \nvalues of S down to -5 have been observed.  It is important to appreciate that radial \nflow is highly sensitive to conditions near the well where superficial velocities are \nat their highest.\n \nHomogeneous\nmedium\nprediction\nPossible actual\nprofile\npw\npwf\n∆ps\n...  Negative\n   S = ∆ps\n qµ\n2πkh\n∆ps   is a negative quantity\n•\nDue to near wellbore permeability improvement\ni.e.  stimulation\n1.7.5.  Analytical Skin Formulae\nThe dimensionless skin factor, S , accounts for any deviation from homogeneous, \nradial flow in the near well-bore region.  The skin effect due to formation damage \ncannot usually be predicted a priori and the actual measurement of this quantity is \none of the major objectives of the transient pressure testing of wells.  However in \ncertain circumstances it is possible to make an estimate of the incremental pressure \ndrop in the damaged zone and calculate the skin factor.  The best example of this is \na sand consolidation treatment where the permeability and extent of the altered zone \ncan be predicted.  The physical situation is shown in Figure 43.  where an altered zone \nof radius, rs , and permeability, ks  , surrounds the well-bore; the format"
+    }
+  ],
+  "initial_answer": "아니요. **그렇게 보면 안 됩니다.**  \n수평정은 **수직정용 radial r/z grid의 well connection factor를 수정 없이 그대로 적용하기에 정확하다고 말할 수 없습니다**. KB에서는 수평정이 **순수 radial r/z 모델로 잘 표현되지 않으며**, 그래서 이전 섹션의 well connection factor가 **그대로 적용될 가능성이 낮다**고 명시합니다 [KB6]. r/z grid는 원래 **수직정 주변의 근정(radial) 유동**이나 coning 같은 문제에 더 적합합니다 [KB2][KB5].\n\n즉, 수평정에는 보통\n- **수평정에 맞는 well model / connection factor**\n- 또는 **더 적절한 grid 및 PI 보정**\n\n이 필요합니다.\n\n원하시면 제가 **“언제는 근사적으로 써도 되는지”**까지 조건별로 짧게 정리해드릴게요.",
+  "answer": "아니요. **그렇게 보면 안 됩니다.**  \n수평정은 **수직정용 radial r/z grid의 well connection factor를 수정 없이 그대로 적용하기에 정확하다고 말할 수 없습니다**. KB에서는 수평정이 **순수 radial r/z 모델로 잘 표현되지 않으며**, 그래서 이전 섹션의 well connection factor가 **그대로 적용될 가능성이 낮다**고 명시합니다 [KB6]. r/z grid는 원래 **수직정 주변의 근정(radial) 유동**이나 coning 같은 문제에 더 적합합니다 [KB2][KB5].\n\n즉, 수평정에는 보통\n- **수평정에 맞는 well model / connection factor**\n- 또는 **더 적절한 grid 및 PI 보정**\n\n이 필요합니다.\n\n원하시면 제가 **“언제는 근사적으로 써도 되는지”**까지 조건별로 짧게 정리해드릴게요.",
+  "model_id": "gpt-5.4-mini-2026-03-17",
+  "input_tokens": 4364,
+  "output_tokens": 297,
+  "response_id": "resp_06a2efc74535159a016aca218615f487d09b98c722d7b50576",
+  "provider_payload": {
+    "id": "resp_06a2efc74535159a016aca218615f487d09b98c722d7b50576",
+    "object": "response",
+    "created_at": 1791631750,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791631752,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "Answer the petroleum-engineering request in the user's language. Be concise and state uncertainty. No tools, Python, retrieval or web access. Do not invent formulas, measurements or citations. Explicitly correct a false premise. If essential input is absent, ask for it. Cite evidence IDs only when evidence is supplied. Use only supplied KB/FIG text and the user's values for sourced engineering claims. Cite supporting IDs in square brackets. No other evidence is available.",
+    "max_output_tokens": 1800,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-mini-2026-03-17",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_06a2efc74535159a016aca2186978087d0a4b9a13d153c07df",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyiGIogxE66OEUI_o7EMUHKUgZ30H8SG3sNuUCOQJBVLxHo7_sSlThvPGUAlsZZmU2bKO_i4qVAoOGaGrqkyji7uo6kJvrDhjQQETQ65buBxm2xPqR-i2hj1w-80F2JwiWSbt5afvhmdAWI7JClefsLrzv1O0h8fsV_udV0S6Mk1LOfZST85cttQCLZHdjHzuv_FhCexcbl5hTmNMeIqYpbTORX_2w2XPNeIlUQwMfl7s3BD0xPRJW8vmrtxs_O_Vy5L4TSaOy6Xa6owApFum8Msg9lUasVwXNpwbKxiLvlFykX1GybxeWyYalH2Q6WSlpAztyy6MBtM_hnrqnACkrjyK-asPYk22w-mL_XvC2TQ8aaZTrm4plCXKdnDkbmLXDHjVHgyonjaAgdemdKZ8p-mBepkZ5z1jrBaSTC_AsUrzmrCxo-nDbGFZvn9vtBL3Y5TWnjh7Ulsh5uNVKfPGpyq4ov_XY3AKxvMBUXjIKMSG70S_df9wX93EhjfrBubly9lebp_FTNtPF92dystTlhdQJeoo3LhX-SYd3t1v8mUweWUbUdgW2I1A6Lp_QQ55T0hfFQl24DFOzkI3Gb2yYhSrQB193Y4tKk3qBr1IX6Awn4Kwz5xYmcvVDN7GB0UOk4seEJHhXFQXQ05Ynf8NaO42cgLNynkWuyqK2h_ZRuVCCzHriaOdS4D9ng4NbaBAL5INTCFGisXJEW_ymgY-inGGGaXP4cRucNl7_-k4gTSZivpap8BGXVAh1cVmFoXXJPqmp4RoQKLL-2-aaapntuASGluCYLs8ybwID_BrK78gUqlIafMuQ17w4Qm___ApA2cIF_VSg9O680FcUTBYrVk24sZ0p2mfDyIBHYaMu6KxTC3IwLvfe9fm8ABz8OHYKRLOx0TzbDJrvvro-xumB11JOlGUcDQ3Ba9oAOLYgfVm8kfxhdJbC4BgqirTpukhwhSy1dc0huC3I7LSdbAe5dQ2faoLdIuq41t8i_ngtvrg5SEAi-j1ayRoUwfVeyq9mMJrj3nnVehHBmhtDJMGlLoOuFQ4hYDEf2cO_WNw75O2lzWebEJ_4gEqAsPNmFdmxfxfELVeuYa756wq73DQZIQkOC-4FKqnX8l1Ke-ZtCycQM3P0SFkVKHpdYCCyTgmWtFWBJyfFnxGa29-8e6mx56WDa_zMdhMbZ56eZofd5nUDovVYMt6T_yWQBU1lIV3m86yVT8QBsRn5cFUNxfmVs_ZbX4mw0BtissbKwmwwdcfaNGxQAuKe8GACyVtThT06_dHdVwMGMl29eaWQyGQQhum5IbEkHj9MqkzcgXm-RjhvmU4GdA0ziqXS-M8Rzlsi1tZ61T1f8xyahicI-l4kvMq4OJaj64xoHwqVKC7zq4f90jXrcCuazNGeRanXVIDIfA4NnN37HQCE4m-aEJuLSk1HG0zjwx6HUzY6B7h28wz7lEWt1sK21wso6pKwIGukAM2l05fbWaPKMaogS5g64IEYyH-izSfyPK4x4iy_l0TPAYHba0qjQD1e1dRARP8wfkn5gG-APsH7F0EEJ0F9vRP4rczs0K4YkPNLNaYkidhTxR4FWu4_-mQBvsA-1R813hvGqsLVr8WWDeC78UK42V0ffx4cP0ew0VAlLWy3G-3zrV4IuRvcmI2eCE_VMzLN-5G1GYpN_8uymUyAylH3C_bEsr6cO_fXi3mdq7DtZqeuLiEwwQlOd5pptzF6Rc8bDJH2dUpRGj85gOk5powX-3ZOvsNcN8y-OS4xeuSty1WbBPhw9nQvutCfizSY2puG8DPULCE7JZtcYjYVxN_T7S5p3Ke0L17mUHR3SiFKwa0UuwkI17VAFfswSR5h0xafxeOmIV5FHG-GbLYc_rlt6gizjcJ4GQgrr9q0xe6YdAW6oU8w0H1_Sxt7S6LeTPUfMBEOngZvi37yZsqcEJMfj2r8sZwbwnGth2akkNQ6aK1DqeltcIP-R8rNk9SJUrSFeRAu3sCeYEiPK6fpo9PTqGgQi0Wqdue7Iit3QkW0xBiseLEQBFnKlHcmArSz2reR9dHfF19M8fq9YyRc89nAINrO9_sfAcbW6MfaBVqP4kVcuN-w3_UcrKJZ_jefv1AFDPs3A4UreHnEALhcd1Px2E1qXe2aw0tbkjyDqzhV6XOYRi4nr79pmgBYYJ-hb9K0HrVumM3VDscOMIgzmP2e64O0nNGN04uihDik5rcCyiFHSac0kKhpWjRy0eX38LXv7ZOjzpfKUq4VI-YPsdKK6MFi662uCzvU_QeufhGThXXCBq-cavEpiKKjTb34wa4FhUOmVAUocSh298Ib89trFjNXaw8eWNNTlgW0sNTDc2KR6wQRXPQhLDmPoeG6SQ2SWa2xYf_2gFnuozlVzppD6mHMWMuzJT_5H5J2uG-npD8aIjzjgp66P_WM4DHIl4PRHCfjlHWgdh0u00ZxDJ2rXQ_rbQQhOeYU5WRXmgfic17KIF6h2cBUEBk0oi4UfNI4iTnHCdPqMcph5Vh7gAhraiVixkj8AtkYzeNzmbzll_q4hk4nWXycxH7XuFC5p7leDF6",
+        "summary": []
+      },
+      {
+        "id": "msg_06a2efc74535159a016aca21872d6c87d0b90e4a3d249e5aa6",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "아니요. **그렇게 보면 안 됩니다.**  \n수평정은 **수직정용 radial r/z grid의 well connection factor를 수정 없이 그대로 적용하기에 정확하다고 말할 수 없습니다**. KB에서는 수평정이 **순수 radial r/z 모델로 잘 표현되지 않으며**, 그래서 이전 섹션의 well connection factor가 **그대로 적용될 가능성이 낮다**고 명시합니다 [KB6]. r/z grid는 원래 **수직정 주변의 근정(radial) 유동**이나 coning 같은 문제에 더 적합합니다 [KB2][KB5].\n\n즉, 수평정에는 보통\n- **수평정에 맞는 well model / connection factor**\n- 또는 **더 적절한 grid 및 PI 보정**\n\n이 필요합니다.\n\n원하시면 제가 **“언제는 근사적으로 써도 되는지”**까지 조건별로 짧게 정리해드릴게요."
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 4364,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 297,
+      "output_tokens_details": {
+        "reasoning_tokens": 85
+      },
+      "total_tokens": 4661
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "wall_seconds": 2.923
+}

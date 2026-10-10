@@ -1,0 +1,1008 @@
+{
+  "task_id": "C01",
+  "model_id": "qwen3:8b",
+  "run_id": "GR-20261010-110814-FCCF3C",
+  "initial_response": {
+    "run_id": "GR-20261010-110814-FCCF3C",
+    "topic": "내부 2-stage separator test의 GOR 식으로 값을 계산해줘. 첫 분리기 기체 V1=400 scf, stock-tank oil L2=10 stb인데 둘째 기체 V2는 아직 측정하지 못했어.",
+    "goal": "내부 2-stage separator test의 GOR 식으로 값을 계산해줘. 첫 분리기 기체 V1=400 scf, stock-tank oil L2=10 stb인데 둘째 기체 V2는 아직 측정하지 못했어.",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "insufficient_evidence",
+    "final_answer": "근거 자료에서 필요한 관계식이나 입력값을 확인하지 못해 수치 결과를 계산하거나 추정하지 않았습니다.",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "8728fc2564ab86e1ff426d6620ca95aa7e5c7e38b39e6e87ea83ca81a60f6abd",
+    "criteria": [],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "The user's goal is to calculate the GOR using the internal 2-stage separator test formula, given V1 = 400 scf and L2 = 10 stb, with V2 not yet measured.",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "The calculation must be based on the provided values and the standard GOR formula for a 2-stage separator test.",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 6,
+    "current_iteration": 6,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "calculate",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "blocked",
+        "reason_code": "calculation_inputs_ready",
+        "started_at": "2026-10-10T11:08:16.359301Z",
+        "finished_at": "2026-10-10T11:08:27.773142Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "calculation_source_incomplete",
+        "details": {
+          "subprocess_reached": false,
+          "blocked_stage": "calculation_source_incomplete",
+          "source_complete": false,
+          "python_calls": 0,
+          "user_fact_ids": [
+            "USERF1"
+          ],
+          "evidence_fact_ids": [],
+          "formula_id": null,
+          "missing_variables": [
+            "calculation_plan"
+          ],
+          "unit_mismatch_variables": []
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "completed",
+        "reason_code": "calculation_failed_replan",
+        "started_at": "2026-10-10T11:08:27.784488Z",
+        "finished_at": "2026-10-10T11:08:31.600672Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 3,
+        "action_id": "ACT-3",
+        "action_type": "calculate",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "failed",
+        "reason_code": "calculation_inputs_ready",
+        "started_at": "2026-10-10T11:08:31.629544Z",
+        "finished_at": "2026-10-10T11:08:31.632531Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "ValueError",
+        "details": {
+          "error_type": "ValueError"
+        }
+      },
+      {
+        "iteration": 4,
+        "action_id": "ACT-4",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "completed",
+        "reason_code": "calculation_failed_replan",
+        "started_at": "2026-10-10T11:08:31.666382Z",
+        "finished_at": "2026-10-10T11:08:35.410549Z",
+        "new_evidence_count": 1,
+        "evidence_added": [
+          "KB6"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 1,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 5,
+        "action_id": "ACT-5",
+        "action_type": "calculate",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "failed",
+        "reason_code": "calculation_inputs_ready",
+        "started_at": "2026-10-10T11:08:35.444485Z",
+        "finished_at": "2026-10-10T11:08:35.447472Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "ValueError",
+        "details": {
+          "error_type": "ValueError"
+        }
+      },
+      {
+        "iteration": 6,
+        "action_id": "ACT-6",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "blocked",
+        "reason_code": "calculation_failed_replan",
+        "started_at": "2026-10-10T11:08:35.495260Z",
+        "finished_at": "2026-10-10T11:08:35.525129Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "retrieve_no_progress",
+        "details": {
+          "new_evidence_count": 0,
+          "retrieval_mode": "hybrid",
+          "cache_hit": true
+        }
+      },
+      {
+        "iteration": 6,
+        "action_id": "ACT-STOP-6",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "insufficient_evidence",
+        "started_at": "2026-10-10T11:08:35.535659Z",
+        "finished_at": "2026-10-10T11:08:35.535659Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "calculation_source_incomplete"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [
+          "calculation_source_incomplete"
+        ],
+        "source_complete": false
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "calculation_source_incomplete"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [
+          "calculation_source_incomplete"
+        ],
+        "source_complete": false
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "ValueError"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [
+          "ValueError"
+        ],
+        "source_complete": false
+      },
+      {
+        "iteration": 4,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "ValueError"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [
+          "ValueError"
+        ],
+        "source_complete": false
+      },
+      {
+        "iteration": 5,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "ValueError"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [
+          "ValueError"
+        ],
+        "source_complete": false
+      },
+      {
+        "iteration": 6,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [
+          "ValueError"
+        ],
+        "source_complete": false
+      },
+      {
+        "iteration": 6,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [
+          "ValueError"
+        ],
+        "source_complete": false
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 559,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p559:c1",
+        "score": 0.01639344,
+        "excerpt": "Pb\nTres\n60 F & 14.7 psia\nGOR = (V1+V2) / L2\nBo = Vres / L2\nFigure 20  Schematic of a Two Stage Separator Test\n \nThe procedure for the separation test is as follows. The starting point is oil in the PVT \ncell at its reservoir bubble point, ie. the same starting condition as the differential test. \nFluid is displaced from the PVT cell ensuring that the PVT cell contents remain at \nbubble point pressure.  The gas and liquids are collected from the separation stage(s) \nand their respective properties measured. The final stage is at stock tank conditions. \nThe resulting fluid is termed stock tank oil.\nA single separator test is carried out by flashing reservoir liquid at bubble point pressure \nand reservoir temperature through the separator operating at the average annual \ntemperature and at pressures which may be expected in the field.  The difference in \nresults when using a single or a double separator is that in the former case the total \ngas/oil ratio is higher, the shrinkage is greater and the density of the tank oil is higher \nthan in the latter case.\nThe main objectives of the separator test are in combination with the flash vaporisation \nand differential tests to provide format"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 498,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p498:c1",
+        "score": 0.01612903,
+        "excerpt": "tank\nat Pst and Tst\nThree-stage separation\nFigure 6   Schematic drawing of separation process.\n5.1 Gas/Oil Ratio\nGas is removed from each stage so that the solution GOR can be calculated for each \nstage or combination of stages.\n \nTotal gas / oil ratio =\nsum of gas volumes (SCF)\nvolume of stock tank oil (bbl) = RT"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 498,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p498:c0",
+        "score": 0.01587302,
+        "excerpt": "14\nEach condition of pressure and temperature at which vapour and liquid are separated \nis called a stage-separation.  Hence a process using one separator and a stock tank is a \ntwo stage process a three stage process has two separators and one stock tank. (Figure 6).\nSeparator calculations are performed to determine the composition of products, the \noil formation-volume factor and the volume of gas released per barrel of oil and to \ndetermine the optimum separator conditions for the particular conditions of fluid.\nUsing equilibrium calculations already derived we can calculate the separation \nachieved at each stage, the composition of the phases separated, the gas/oil ratio, and \nthe oil formation volume factor.\n           \nFeed\nVapor\nVent\nLiquid\nTo pipeline / tanker\nSeparator\nat Psep and Tsep\nStocktank\nat Pst and Tst\nTwo-stage separation\nFeed\n1st stage vapor\nVent\nLiquid\n2nd stage vapor\nLiquid\nTo pipeline / tanker\n1st stage separator\nat (Psep)1 and (Tsep)1\n2nd stage separator\nat (Psep)2 and (Tsep)2\nStocktank\nat Pst and Tst\nThree-stage separation\nFigure 6   Schematic drawing of separation process.\n5.1 Gas/Oil Ratio\nGas is removed from each stage so that the solution GOR can be calc"
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 559,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p559:c0",
+        "score": 0.015625,
+        "excerpt": "Institute of Petroleum Engineering,  Heriot-Watt University  \n21\nPVT Analysis\n6.3 Separator Tests\nThe object of these tests are to examine the influence of separator pressure and \ntemperature on formation volume factor, gas/oil ratio, gas density and tank-oil density. \nThese tests are not driven by those who will be responsible for the optimised separation \nprocess if the field ultimately is developed.  They are carried out to give an indication \nof the oil shrinkage and GOR which occurs when the fluids are produced to surface \nconditions.  It should be emphasised at this stage that there is not a unique value for \nthe formation volume factor and solution gas-oil ratio. It depends on the stages and \nconditions of separation through which the fluids pass.   \nWith the equipment available, a single test or a multiple separation test can be carried \nout.\nThe systems is set up as shown in the schematic below, Figure 20.\n                           \nV1\nL1\nV2\nL2\nPs1\nTs1\nPs2\nTs2\nValve 2\nValve 1\nPVT Cell\nVres\nPump\nPb\nTres\n60 F & 14.7 psia\nGOR = (V1+V2) / L2\nBo = Vres / L2\nFigure 20  Schematic of a Two Stage Separator Test\n \nThe procedure for the separation test is as follows. The starting po"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 499,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p499:c0",
+        "score": 0.01538462,
+        "excerpt": "Institute of Petroleum Engineering,  Heriot-Watt University  \n15\n12\n12\nVapour Liquid Equlibria\n(a) Calculation for Stock Tank Oil, STO.\nIf n1 moles enter first stage, moles of liquid entering 2nd = n2 = n1L1.\nwhere L1 = separation in stage one based on basis of one mole feed.\nNumber of moles entering third stage n3 = n2L2 = L2L1n1\nIf third stage is the stock tank then:\n nST = L3n3 = L3L2L1n1\nnST is the moles of liquid in stock tank for n1 moles into first separator:\n \n∴\n=\n=∏\nn\nn\nL\nST\ni\ni\nm\n1\n1\n \n \n \n \n \n \n \n(26)\n m  = number of stages\n Li  = mole fraction of liquid off ith stage\n n1  = moles of feed to first stage\n  ∴ If n1 = 1\n then:\n  \nn\nL\nST\ni\ni\nm\n=\n=∏\n1\n  \n \n \n \n \n \n \n(27)\n  \nn\nL\nST\ni\ni\nm\n=\n=∏\n1\n = mole fraction of STO in the feed.\n(b) Calculation of Total Gas\n  ngi = number of moles off stage i\n  ng1 = V1n1\n  ng2 = V2n2 = V2L1n1\n  ng3 = V3n3 = V3L2L1n\nor in general for total gas:\n \nn\nn\nn\nV\nL\ngT\ngi\ni\nm\ni\ni\nm\nj\nj\ni\n=\n=\n=\n=\n=\n−\n∑\n∑∏\n1\n1\n1\n1\n1\n ∴ If nj = 1\n \nn\nV\nL\ngT\ni\ni\nm\nj\nj\ni\n=\n=\n=\n−\n∑∏\n1\n1\n1\n \n \n \n \n \n \n \n(28)\n ngT = mole fraction of total gas in the feed"
+      },
+      {
+        "evidence_id": "KB6",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 571,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p571:c1",
+        "score": 0.01587302,
+        "excerpt": "the separator tests the results of which provide the basis for the \nBo and GOR values. \n \n12.1 Separator Tests of Reservoir Fluids\nIn the separator test, page 7 of 15 of the report, oil at reservoir temperature and the \nbubble point pressure in a PVT cell has been carefully displaced from the cell through \na series of pressure and temperature steps.  The tests show what quantity of surface \ngases and stock tank oil results when one barrel of bubble point oil is flashed through \na certain surface trap sequence.  The tabulation also gives the ˚API gravity of the \nstock tank oil and, in some instances, the gravity of gas coming from the primary \ntrap. There are four separate tests reported. The first where the first separation is at \n50 psig and 75°F and the tank separation at 0 psig and 75°F, the other tests where \nthe first stage conditions are at 100 psig, 200 psig and 300 psig.  The temperatures \nand conditions for the final stage are the same for each test.\nColumn 1 and 2 give the pressure-temperature conditions of the surface trap tests \nthat were investigated.  These should be specified by the reservoir engineer at the \ntime the test is planned .  A difficulty here is that the"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 2.201096,
+      "retrieval_seconds": 7.51605,
+      "llm_generation_seconds": 5.203394,
+      "python_seconds": 6.206119,
+      "verification_seconds": 0.0,
+      "evaluation_seconds": 0.0,
+      "synthesis_seconds": 0.0,
+      "calculate_action_seconds": 11.418539,
+      "retrieve_action_seconds": 7.589792,
+      "elapsed_seconds": 21.387913,
+      "total_seconds": 21.388113,
+      "message_parsing_seconds": 0.0002
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 21.387913,
+      "python_seconds": 6.206119
+    },
+    "validation": {},
+    "cancel_requested": false,
+    "error": null
+  },
+  "resume_response": null,
+  "response": {
+    "run_id": "GR-20261010-110814-FCCF3C",
+    "topic": "내부 2-stage separator test의 GOR 식으로 값을 계산해줘. 첫 분리기 기체 V1=400 scf, stock-tank oil L2=10 stb인데 둘째 기체 V2는 아직 측정하지 못했어.",
+    "goal": "내부 2-stage separator test의 GOR 식으로 값을 계산해줘. 첫 분리기 기체 V1=400 scf, stock-tank oil L2=10 stb인데 둘째 기체 V2는 아직 측정하지 못했어.",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "insufficient_evidence",
+    "final_answer": "근거 자료에서 필요한 관계식이나 입력값을 확인하지 못해 수치 결과를 계산하거나 추정하지 않았습니다.",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "8728fc2564ab86e1ff426d6620ca95aa7e5c7e38b39e6e87ea83ca81a60f6abd",
+    "criteria": [],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "The user's goal is to calculate the GOR using the internal 2-stage separator test formula, given V1 = 400 scf and L2 = 10 stb, with V2 not yet measured.",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "The calculation must be based on the provided values and the standard GOR formula for a 2-stage separator test.",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 6,
+    "current_iteration": 6,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "calculate",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "blocked",
+        "reason_code": "calculation_inputs_ready",
+        "started_at": "2026-10-10T11:08:16.359301Z",
+        "finished_at": "2026-10-10T11:08:27.773142Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "calculation_source_incomplete",
+        "details": {
+          "subprocess_reached": false,
+          "blocked_stage": "calculation_source_incomplete",
+          "source_complete": false,
+          "python_calls": 0,
+          "user_fact_ids": [
+            "USERF1"
+          ],
+          "evidence_fact_ids": [],
+          "formula_id": null,
+          "missing_variables": [
+            "calculation_plan"
+          ],
+          "unit_mismatch_variables": []
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "completed",
+        "reason_code": "calculation_failed_replan",
+        "started_at": "2026-10-10T11:08:27.784488Z",
+        "finished_at": "2026-10-10T11:08:31.600672Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 3,
+        "action_id": "ACT-3",
+        "action_type": "calculate",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "failed",
+        "reason_code": "calculation_inputs_ready",
+        "started_at": "2026-10-10T11:08:31.629544Z",
+        "finished_at": "2026-10-10T11:08:31.632531Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "ValueError",
+        "details": {
+          "error_type": "ValueError"
+        }
+      },
+      {
+        "iteration": 4,
+        "action_id": "ACT-4",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "completed",
+        "reason_code": "calculation_failed_replan",
+        "started_at": "2026-10-10T11:08:31.666382Z",
+        "finished_at": "2026-10-10T11:08:35.410549Z",
+        "new_evidence_count": 1,
+        "evidence_added": [
+          "KB6"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 1,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 5,
+        "action_id": "ACT-5",
+        "action_type": "calculate",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "failed",
+        "reason_code": "calculation_inputs_ready",
+        "started_at": "2026-10-10T11:08:35.444485Z",
+        "finished_at": "2026-10-10T11:08:35.447472Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "ValueError",
+        "details": {
+          "error_type": "ValueError"
+        }
+      },
+      {
+        "iteration": 6,
+        "action_id": "ACT-6",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "blocked",
+        "reason_code": "calculation_failed_replan",
+        "started_at": "2026-10-10T11:08:35.495260Z",
+        "finished_at": "2026-10-10T11:08:35.525129Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "retrieve_no_progress",
+        "details": {
+          "new_evidence_count": 0,
+          "retrieval_mode": "hybrid",
+          "cache_hit": true
+        }
+      },
+      {
+        "iteration": 6,
+        "action_id": "ACT-STOP-6",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "insufficient_evidence",
+        "started_at": "2026-10-10T11:08:35.535659Z",
+        "finished_at": "2026-10-10T11:08:35.535659Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "calculation_source_incomplete"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [
+          "calculation_source_incomplete"
+        ],
+        "source_complete": false
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "calculation_source_incomplete"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [
+          "calculation_source_incomplete"
+        ],
+        "source_complete": false
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "ValueError"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [
+          "ValueError"
+        ],
+        "source_complete": false
+      },
+      {
+        "iteration": 4,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "ValueError"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [
+          "ValueError"
+        ],
+        "source_complete": false
+      },
+      {
+        "iteration": 5,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "ValueError"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [
+          "ValueError"
+        ],
+        "source_complete": false
+      },
+      {
+        "iteration": 6,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [
+          "ValueError"
+        ],
+        "source_complete": false
+      },
+      {
+        "iteration": 6,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [
+          "ValueError"
+        ],
+        "source_complete": false
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 559,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p559:c1",
+        "score": 0.01639344,
+        "excerpt": "Pb\nTres\n60 F & 14.7 psia\nGOR = (V1+V2) / L2\nBo = Vres / L2\nFigure 20  Schematic of a Two Stage Separator Test\n \nThe procedure for the separation test is as follows. The starting point is oil in the PVT \ncell at its reservoir bubble point, ie. the same starting condition as the differential test. \nFluid is displaced from the PVT cell ensuring that the PVT cell contents remain at \nbubble point pressure.  The gas and liquids are collected from the separation stage(s) \nand their respective properties measured. The final stage is at stock tank conditions. \nThe resulting fluid is termed stock tank oil.\nA single separator test is carried out by flashing reservoir liquid at bubble point pressure \nand reservoir temperature through the separator operating at the average annual \ntemperature and at pressures which may be expected in the field.  The difference in \nresults when using a single or a double separator is that in the former case the total \ngas/oil ratio is higher, the shrinkage is greater and the density of the tank oil is higher \nthan in the latter case.\nThe main objectives of the separator test are in combination with the flash vaporisation \nand differential tests to provide format"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 498,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p498:c1",
+        "score": 0.01612903,
+        "excerpt": "tank\nat Pst and Tst\nThree-stage separation\nFigure 6   Schematic drawing of separation process.\n5.1 Gas/Oil Ratio\nGas is removed from each stage so that the solution GOR can be calculated for each \nstage or combination of stages.\n \nTotal gas / oil ratio =\nsum of gas volumes (SCF)\nvolume of stock tank oil (bbl) = RT"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 498,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p498:c0",
+        "score": 0.01587302,
+        "excerpt": "14\nEach condition of pressure and temperature at which vapour and liquid are separated \nis called a stage-separation.  Hence a process using one separator and a stock tank is a \ntwo stage process a three stage process has two separators and one stock tank. (Figure 6).\nSeparator calculations are performed to determine the composition of products, the \noil formation-volume factor and the volume of gas released per barrel of oil and to \ndetermine the optimum separator conditions for the particular conditions of fluid.\nUsing equilibrium calculations already derived we can calculate the separation \nachieved at each stage, the composition of the phases separated, the gas/oil ratio, and \nthe oil formation volume factor.\n           \nFeed\nVapor\nVent\nLiquid\nTo pipeline / tanker\nSeparator\nat Psep and Tsep\nStocktank\nat Pst and Tst\nTwo-stage separation\nFeed\n1st stage vapor\nVent\nLiquid\n2nd stage vapor\nLiquid\nTo pipeline / tanker\n1st stage separator\nat (Psep)1 and (Tsep)1\n2nd stage separator\nat (Psep)2 and (Tsep)2\nStocktank\nat Pst and Tst\nThree-stage separation\nFigure 6   Schematic drawing of separation process.\n5.1 Gas/Oil Ratio\nGas is removed from each stage so that the solution GOR can be calc"
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 559,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p559:c0",
+        "score": 0.015625,
+        "excerpt": "Institute of Petroleum Engineering,  Heriot-Watt University  \n21\nPVT Analysis\n6.3 Separator Tests\nThe object of these tests are to examine the influence of separator pressure and \ntemperature on formation volume factor, gas/oil ratio, gas density and tank-oil density. \nThese tests are not driven by those who will be responsible for the optimised separation \nprocess if the field ultimately is developed.  They are carried out to give an indication \nof the oil shrinkage and GOR which occurs when the fluids are produced to surface \nconditions.  It should be emphasised at this stage that there is not a unique value for \nthe formation volume factor and solution gas-oil ratio. It depends on the stages and \nconditions of separation through which the fluids pass.   \nWith the equipment available, a single test or a multiple separation test can be carried \nout.\nThe systems is set up as shown in the schematic below, Figure 20.\n                           \nV1\nL1\nV2\nL2\nPs1\nTs1\nPs2\nTs2\nValve 2\nValve 1\nPVT Cell\nVres\nPump\nPb\nTres\n60 F & 14.7 psia\nGOR = (V1+V2) / L2\nBo = Vres / L2\nFigure 20  Schematic of a Two Stage Separator Test\n \nThe procedure for the separation test is as follows. The starting po"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 499,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p499:c0",
+        "score": 0.01538462,
+        "excerpt": "Institute of Petroleum Engineering,  Heriot-Watt University  \n15\n12\n12\nVapour Liquid Equlibria\n(a) Calculation for Stock Tank Oil, STO.\nIf n1 moles enter first stage, moles of liquid entering 2nd = n2 = n1L1.\nwhere L1 = separation in stage one based on basis of one mole feed.\nNumber of moles entering third stage n3 = n2L2 = L2L1n1\nIf third stage is the stock tank then:\n nST = L3n3 = L3L2L1n1\nnST is the moles of liquid in stock tank for n1 moles into first separator:\n \n∴\n=\n=∏\nn\nn\nL\nST\ni\ni\nm\n1\n1\n \n \n \n \n \n \n \n(26)\n m  = number of stages\n Li  = mole fraction of liquid off ith stage\n n1  = moles of feed to first stage\n  ∴ If n1 = 1\n then:\n  \nn\nL\nST\ni\ni\nm\n=\n=∏\n1\n  \n \n \n \n \n \n \n(27)\n  \nn\nL\nST\ni\ni\nm\n=\n=∏\n1\n = mole fraction of STO in the feed.\n(b) Calculation of Total Gas\n  ngi = number of moles off stage i\n  ng1 = V1n1\n  ng2 = V2n2 = V2L1n1\n  ng3 = V3n3 = V3L2L1n\nor in general for total gas:\n \nn\nn\nn\nV\nL\ngT\ngi\ni\nm\ni\ni\nm\nj\nj\ni\n=\n=\n=\n=\n=\n−\n∑\n∑∏\n1\n1\n1\n1\n1\n ∴ If nj = 1\n \nn\nV\nL\ngT\ni\ni\nm\nj\nj\ni\n=\n=\n=\n−\n∑∏\n1\n1\n1\n \n \n \n \n \n \n \n(28)\n ngT = mole fraction of total gas in the feed"
+      },
+      {
+        "evidence_id": "KB6",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 571,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p571:c1",
+        "score": 0.01587302,
+        "excerpt": "the separator tests the results of which provide the basis for the \nBo and GOR values. \n \n12.1 Separator Tests of Reservoir Fluids\nIn the separator test, page 7 of 15 of the report, oil at reservoir temperature and the \nbubble point pressure in a PVT cell has been carefully displaced from the cell through \na series of pressure and temperature steps.  The tests show what quantity of surface \ngases and stock tank oil results when one barrel of bubble point oil is flashed through \na certain surface trap sequence.  The tabulation also gives the ˚API gravity of the \nstock tank oil and, in some instances, the gravity of gas coming from the primary \ntrap. There are four separate tests reported. The first where the first separation is at \n50 psig and 75°F and the tank separation at 0 psig and 75°F, the other tests where \nthe first stage conditions are at 100 psig, 200 psig and 300 psig.  The temperatures \nand conditions for the final stage are the same for each test.\nColumn 1 and 2 give the pressure-temperature conditions of the surface trap tests \nthat were investigated.  These should be specified by the reservoir engineer at the \ntime the test is planned .  A difficulty here is that the"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 2.201096,
+      "retrieval_seconds": 7.51605,
+      "llm_generation_seconds": 5.203394,
+      "python_seconds": 6.206119,
+      "verification_seconds": 0.0,
+      "evaluation_seconds": 0.0,
+      "synthesis_seconds": 0.0,
+      "calculate_action_seconds": 11.418539,
+      "retrieve_action_seconds": 7.589792,
+      "elapsed_seconds": 21.387913,
+      "total_seconds": 21.388113,
+      "message_parsing_seconds": 0.0002
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 21.387913,
+      "python_seconds": 6.206119
+    },
+    "validation": {},
+    "cancel_requested": false,
+    "error": null
+  },
+  "same_run_resume": false,
+  "wall_seconds": 22.276
+}

@@ -1,0 +1,948 @@
+{
+  "task_id": "D05",
+  "model_id": "qwen3:8b",
+  "run_id": "GR-20261010-105916-E75319",
+  "initial_response": {
+    "run_id": "GR-20261010-105916-E75319",
+    "topic": "탱크에 원유 600 bbl이 있고 6시간 동안 매시간 75 bbl씩 이송했다. 유입이 없다면 남은 양은 몇 bbl인가?",
+    "goal": "탱크에 원유 600 bbl이 있고 6시간 동안 매시간 75 bbl씩 이송했다. 유입이 없다면 남은 양은 몇 bbl인가?",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "insufficient_evidence",
+    "final_answer": "근거 자료에서 필요한 관계식이나 입력값을 확인하지 못해 수치 결과를 계산하거나 추정하지 않았습니다.",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "f3f7e3d31942e5e806714299c55bb5314aba0beb14745f20d76f5a0fe719228e",
+    "criteria": [
+      {
+        "criterion_id": "C1",
+        "status": "unmet",
+        "reason": "정확한 수치 계산을 통해 탱크에 남은 원유의 양을 도출할 수 있는지 여부를 판단할 수 있는 충분한 증거가 제공되지 않았습니다. 계산 과정이나 결과가 명확히 제시되지 않았습니다.",
+        "supporting_evidence": []
+      },
+      {
+        "criterion_id": "C2",
+        "status": "unmet",
+        "reason": "시간 단위별 이송량을 누적하여 총 이송량을 계산할 수 있는지 여부를 판단할 수 있는 충분한 증거가 제공되지 않았습니다. 누적 계산 과정이나 결과가 명확히 제시되지 않았습니다.",
+        "supporting_evidence": []
+      },
+      {
+        "criterion_id": "C3",
+        "status": "unmet",
+        "reason": "초기 양에서 총 이송량을 제한 후 남은 양을 정확히 표현할 수 있는지 여부를 판단할 수 있는 충분한 증거가 제공되지 않았습니다. 표현 과정이나 결과가 명확히 제시되지 않았습니다.",
+        "supporting_evidence": []
+      }
+    ],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "정확한 수치 계산을 통해 탱크에 남은 원유의 양을 도출할 수 있는지 여부",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "시간 단위별 이송량을 누적하여 총 이송량을 계산할 수 있는지 여부",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "초기 양에서 총 이송량을 제한 후 남은 양을 정확히 표현할 수 있는지 여부",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 5,
+    "current_iteration": 5,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "initial_evidence_needed",
+        "started_at": "2026-10-10T10:59:19.169718Z",
+        "finished_at": "2026-10-10T10:59:22.862445Z",
+        "new_evidence_count": 4,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 4,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "verify",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "verify_current_support",
+        "started_at": "2026-10-10T10:59:22.887335Z",
+        "finished_at": "2026-10-10T10:59:34.799524Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "engineering_validation_passed": true,
+          "goal_achieved": false
+        }
+      },
+      {
+        "iteration": 3,
+        "action_id": "ACT-3",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "missing_requirement",
+        "started_at": "2026-10-10T10:59:34.824016Z",
+        "finished_at": "2026-10-10T10:59:38.484883Z",
+        "new_evidence_count": 2,
+        "evidence_added": [
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 2,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 4,
+        "action_id": "ACT-4",
+        "action_type": "verify",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "verify_current_support",
+        "started_at": "2026-10-10T10:59:38.513370Z",
+        "finished_at": "2026-10-10T10:59:50.836370Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "engineering_validation_passed": true,
+          "goal_achieved": false
+        }
+      },
+      {
+        "iteration": 5,
+        "action_id": "ACT-5",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "blocked",
+        "reason_code": "missing_requirement",
+        "started_at": "2026-10-10T10:59:50.864473Z",
+        "finished_at": "2026-10-10T10:59:54.682650Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "retrieve_no_progress",
+        "details": {
+          "new_evidence_count": 0,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 5,
+        "action_id": "ACT-STOP-5",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "verification_budget_exhausted",
+        "started_at": "2026-10-10T10:59:54.710526Z",
+        "finished_at": "2026-10-10T10:59:54.710526Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "정확한 수치 계산",
+          "시간 단위별 이송량 누적 계산",
+          "남은 양의 정확한 표현",
+          "Direct source support needed for the answer"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "정확한 수치 계산",
+          "시간 단위별 이송량 누적 계산",
+          "남은 양의 정확한 표현",
+          "Direct source support needed for the answer"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 4,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "정확한 수치 계산을 통해 탱크에 남은 원유의 양을 도출할 수 있는지 여부를 판단할 수 있는 증거가 부족합니다.",
+          "시간 단위별 이송량을 누적하여 총 이송량을 계산할 수 있는지 여부를 판단할 수 있는 증거가 부족합니다.",
+          "초기 양에서 총 이송량을 제한 후 남은 양을 정확히 표현할 수 있는지 여부를 판단할 수 있는 증거가 부족합니다.",
+          "Direct source support needed for the answer"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 5,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 5,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 892,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p892:c0",
+        "score": 0.01639344,
+        "excerpt": "B10\n(a)\nDescribe briefly the drive mechanisms associated with producing an\nundersaturated oil reservoir, without a supporting aquifer, down to a\npressure well below the bubble point.\n[6]\n(b)\nExplain briefly why surface samples from a wet gas or condensate\nreservoir can be unrepresentative if collected too early after a shut\ndown or major well disturbance. What suggestions would you give to\nget more representative samples.\n[4]\n(c)\nTable 1 gives the results for a constant mass study on an oil sample. In\nthe test the volume of live oil was measured as a function of pressure.\nThe temperature was maintained at the reservoir temperature of 220 ˚F.\nIn another test a sample of the same oil in a PVT cell,at its bubble point\nand at 220 ˚F was passed through a two stage separator at 500 psig\nand 160 ˚F and 0 psig and 60 ˚F.  38 cc of oil were removed from the\nPVT cell and 28.34 cc of oil were collected from the final separator.  A\ntotal amount of 3492 cc of gas at 60˚F and 0 psig were collected from\nboth stages of the separation process.\nIn a further test a differential liberation procedure was carried out on a\nsample of the oil at 220 ˚F and the volumes of oil remaining and\nstandard volumes"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 65,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p65:c0",
+        "score": 0.01612903,
+        "excerpt": "8\nDefinitions of the various quantities we need for our simplified MB equation for the \ndepletion of an undersaturated oil reservoir above the bubble point (Pb) are given \nin Figure 1.  (NB a more extensive list of quantities required for a full material \nbalance equation in any type of oil or gas reservoir is given in the Glossary for \ncompleteness).  \nIn going from initial reservoir conditions shown in Figure 1 at pressure, po, to pressure, \np, volume changes in the oil, water and void space (rock) occur, ΔVo, ΔVw, ΔVvoid \n(ΔVvoid = - ΔVrock).  The pressure drop is denoted, Δ P = p - po.  The volume balance \nsimply says that:\n \n∆\n∆\n∆\n∆\n∆\n∆\nV\nV\nV\nV\nV\nV\no\nw\nrock\no\nw\nvoid\n+\n+\n=\n+\n−\n= 0  \n(1)\nEach of these volume changes can be calculated quite straightforwardly as \nfollows:\n \nOil volume change, ΔVo\n    Initial oil volume in reservoir  \n=    N.Boi \n \n(bbl = RB)\n    Oil volume t time t, pressure p  \n=  (N - Np). Bo  \n(bbl)\n    Change in oil volume, \nΔVo \n=   N.Boi  - (N - Np). Bo  (bbl)  (1)\nWater volume change, ΔVw\n    Initial reservoir water  volume \n=    W  \n \n \n(bbl)\n    Cumulative water production at time  =  Wp  \n \n \n(STB)\n    Reservoir volume of cumulative water production at t"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 503,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p503:c1",
+        "score": 0.01587302,
+        "excerpt": "0.0814\n0.0201 \n0.0181\n0.0327 \n0.0221\n0.0573 \n0.0115\n0.7872 \n0.0070\n1.0000 \n1.0001\nStep 3: Calculate the density and molecular weight of the stock tank oil.\n    \nComponent Component, Molecular            Weight  \nLiquid \nLiquid\nof stock \nmole \nweight  \n \ndensity at \nvolume at\ntank oil \nfraction  \n \n \n60°F and \n60°F and\n \n     xj \n   Mj \n          xjMj \n14.7 psia \n14.7 psia\n \n \n \n \nρoj \nxjMj / ρoj\nC1 \n0.0016 \n16.0 \n         0.026 \nC2 \n0.0060 \n30.1 \n         0.181 \nC3 \n0.0467 \n44.1 \n         2.059 \n31.66 \n0.0650\ni-C4 \n0.0130 \n58.1 \n         0.755 \n35.12 \n0.0215\nn-C4 \n0.0354 \n58.1 \n         2.057 \n36.45 \n0.0564\ni-C5 \n0.0201 \n72.2 \n         1.451 \n38.96 \n0.0372\nn-C5 \n0.0327 \n72.2 \n         2.361 \n39.35 \n0.0600\nC6 \n0.0573 \n86.2 \n         4.939 \n41.30 \n0.1196 \nC7+ \n0.7872 \n263 \n         207.034 \n55.25 \n3.7472 \nTotal \n1.0000 \n \n         220.863 \n \n4.1069\n \n \n \n \n \ncu.ft. C3+\n \n \n \n∑C3+ = 220.656 \n \nlb.mole STO\n \n \n \n∑C2+ = 220.837\n \n \n \nMSTO = 220.863 lb\n \n \n \n                  lb mole"
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 1393,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1393:c1",
+        "score": 0.015625,
+        "excerpt": "ifficult  because  of  the  complex  reactions  and  the  thin  burning\nfront  that  requires  small  gridblocks  for  representation.  Simulators  range  from  tank  models  to\ncomplex 3D simulators. In addition to simulation, empirical models, hybrid models, and corre-\nlation methods have been developed. A discussion of some of these methods follows.\nThe  easiest  method  is  essentially  a  tank  balance,14  adapted  by  Prats.2  The  oil  and  water\nproduced are given by\nNp = fVb(Soi −Sf ) + 0.4Soi(Vp −Vb)........................................... (16.29)\nand\nWp = Vbf (Swi + Swf ), ...................................................... (16.30)\nwhere  Soi  =  initial  oil  saturation,  fraction;  Sf  =  oil  saturation  burned,  fraction;  Vb  =  volume\nburned,  m3;  Np  =  oil  produced,  m3;  Wp  =  water  produced,  m3;  f  =  porosity,  fraction;  Vp  =\nvolume of the pattern, m3; and Swf = water saturation resulting from the combustion process,\nfraction.\nIf the volumes are in acre-ft and the production terms are in bbl, a multiplication factor of\n7,758 must be used. The estimate of 40% of the oil produced coming from outside the burned\nvolume is an empirical value based on"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 351,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p351:c1",
+        "score": 0.01639344,
+        "excerpt": "500 \n \n  \n  \n \n \n \n \n \n=  26.6 bbl            \n \n (underdisplace by 1 bbl )  \n \n \n \n= 25.6 bbl\n\t\n                                          \nTotal Volume to mix and displace = 779 + 25.6 = 804.6  bbls\n\t Total time @ 5 bbl/min\t\n\t\n\t\n\t\n= 804.6/5\n\t \t\n\t \t\n\t\n\t\n\t\n\t\n\t\n= 160.9 = 2.7 hrs"
+      },
+      {
+        "evidence_id": "KB6",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 252,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p252:c0",
+        "score": 0.01612903,
+        "excerpt": "48\nc.  The Time taken to circulate out the influx:\n(i) The Total time taken to circulate out the influx will be:\n\t\nTotal Capacity of Drillstring and Annulus (bbls)\nPump Rate (bbls/min.)\n- Total Capacity of Inside of Drillstring\n= (9100 - 360) x 0.0178\n(I.D. of Drillpipe)\n+ 360 x 0.0077\n(I.D. of Collars)\n=  158 bbls\n - Total Capacity of Annulus  \n =  360 x 0.0323 \n \n \n \n(Drillcollar/Hole Annulus)\n  \n  + (9100 - 7000 - 360) x 0.0459  \n(Drillpipe/Hole Annulus)\n  \n  + 7000 x 0.0465 \n \n \n(Drillpipe/Casing Annulus)\n\t \t\n\t \t\n  \n =  417 bbls\n - Total Volume =  575 bbls\n\t\n - Pump Rate = No. strokes per min. of pump x No. of bbls per stroke\n  \n  \n=  14 strokes/min. x 0.1428 bbls/stroke\n  \n  \n=  1.992 bbls/min.\nTotal Time to circlate out influx\n\t \t\n\t \t\n  \n  \n=   575\n\t \t\n\t \t\n    1.992\n  \n  \n=  289 mins     \n(4.8 hrs )\nThe time taken to complete each stage in the killing operation can also be \ncalculated:"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 2.208557,
+      "retrieval_seconds": 11.123394,
+      "llm_generation_seconds": 21.088584,
+      "python_seconds": 0.0,
+      "verification_seconds": 24.235349,
+      "evaluation_seconds": 12.953536,
+      "synthesis_seconds": 8.134923,
+      "retrieve_action_seconds": 11.171322,
+      "verify_action_seconds": 24.235341,
+      "elapsed_seconds": 37.761792,
+      "total_seconds": 37.76192,
+      "message_parsing_seconds": 0.000128
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 37.761792,
+      "python_seconds": 0.0
+    },
+    "validation": {
+      "engineering_validation_passed": true,
+      "engineering_contradiction_count": 0,
+      "unsupported_engineering_claim_count": 0,
+      "citation_semantic_passed": false,
+      "unsupported_citation_claim_count": 1,
+      "unsupported_numeric_claim_count": 0,
+      "criteria_frozen": true
+    },
+    "cancel_requested": false,
+    "error": null
+  },
+  "resume_response": null,
+  "response": {
+    "run_id": "GR-20261010-105916-E75319",
+    "topic": "탱크에 원유 600 bbl이 있고 6시간 동안 매시간 75 bbl씩 이송했다. 유입이 없다면 남은 양은 몇 bbl인가?",
+    "goal": "탱크에 원유 600 bbl이 있고 6시간 동안 매시간 75 bbl씩 이송했다. 유입이 없다면 남은 양은 몇 bbl인가?",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "insufficient_evidence",
+    "final_answer": "근거 자료에서 필요한 관계식이나 입력값을 확인하지 못해 수치 결과를 계산하거나 추정하지 않았습니다.",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "f3f7e3d31942e5e806714299c55bb5314aba0beb14745f20d76f5a0fe719228e",
+    "criteria": [
+      {
+        "criterion_id": "C1",
+        "status": "unmet",
+        "reason": "정확한 수치 계산을 통해 탱크에 남은 원유의 양을 도출할 수 있는지 여부를 판단할 수 있는 충분한 증거가 제공되지 않았습니다. 계산 과정이나 결과가 명확히 제시되지 않았습니다.",
+        "supporting_evidence": []
+      },
+      {
+        "criterion_id": "C2",
+        "status": "unmet",
+        "reason": "시간 단위별 이송량을 누적하여 총 이송량을 계산할 수 있는지 여부를 판단할 수 있는 충분한 증거가 제공되지 않았습니다. 누적 계산 과정이나 결과가 명확히 제시되지 않았습니다.",
+        "supporting_evidence": []
+      },
+      {
+        "criterion_id": "C3",
+        "status": "unmet",
+        "reason": "초기 양에서 총 이송량을 제한 후 남은 양을 정확히 표현할 수 있는지 여부를 판단할 수 있는 충분한 증거가 제공되지 않았습니다. 표현 과정이나 결과가 명확히 제시되지 않았습니다.",
+        "supporting_evidence": []
+      }
+    ],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "정확한 수치 계산을 통해 탱크에 남은 원유의 양을 도출할 수 있는지 여부",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "시간 단위별 이송량을 누적하여 총 이송량을 계산할 수 있는지 여부",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "초기 양에서 총 이송량을 제한 후 남은 양을 정확히 표현할 수 있는지 여부",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 5,
+    "current_iteration": 5,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "initial_evidence_needed",
+        "started_at": "2026-10-10T10:59:19.169718Z",
+        "finished_at": "2026-10-10T10:59:22.862445Z",
+        "new_evidence_count": 4,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 4,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "verify",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "verify_current_support",
+        "started_at": "2026-10-10T10:59:22.887335Z",
+        "finished_at": "2026-10-10T10:59:34.799524Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "engineering_validation_passed": true,
+          "goal_achieved": false
+        }
+      },
+      {
+        "iteration": 3,
+        "action_id": "ACT-3",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "missing_requirement",
+        "started_at": "2026-10-10T10:59:34.824016Z",
+        "finished_at": "2026-10-10T10:59:38.484883Z",
+        "new_evidence_count": 2,
+        "evidence_added": [
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 2,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 4,
+        "action_id": "ACT-4",
+        "action_type": "verify",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "verify_current_support",
+        "started_at": "2026-10-10T10:59:38.513370Z",
+        "finished_at": "2026-10-10T10:59:50.836370Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "engineering_validation_passed": true,
+          "goal_achieved": false
+        }
+      },
+      {
+        "iteration": 5,
+        "action_id": "ACT-5",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "blocked",
+        "reason_code": "missing_requirement",
+        "started_at": "2026-10-10T10:59:50.864473Z",
+        "finished_at": "2026-10-10T10:59:54.682650Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "retrieve_no_progress",
+        "details": {
+          "new_evidence_count": 0,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 5,
+        "action_id": "ACT-STOP-5",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "verification_budget_exhausted",
+        "started_at": "2026-10-10T10:59:54.710526Z",
+        "finished_at": "2026-10-10T10:59:54.710526Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "정확한 수치 계산",
+          "시간 단위별 이송량 누적 계산",
+          "남은 양의 정확한 표현",
+          "Direct source support needed for the answer"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "정확한 수치 계산",
+          "시간 단위별 이송량 누적 계산",
+          "남은 양의 정확한 표현",
+          "Direct source support needed for the answer"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 4,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "정확한 수치 계산을 통해 탱크에 남은 원유의 양을 도출할 수 있는지 여부를 판단할 수 있는 증거가 부족합니다.",
+          "시간 단위별 이송량을 누적하여 총 이송량을 계산할 수 있는지 여부를 판단할 수 있는 증거가 부족합니다.",
+          "초기 양에서 총 이송량을 제한 후 남은 양을 정확히 표현할 수 있는지 여부를 판단할 수 있는 증거가 부족합니다.",
+          "Direct source support needed for the answer"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 5,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 5,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 892,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p892:c0",
+        "score": 0.01639344,
+        "excerpt": "B10\n(a)\nDescribe briefly the drive mechanisms associated with producing an\nundersaturated oil reservoir, without a supporting aquifer, down to a\npressure well below the bubble point.\n[6]\n(b)\nExplain briefly why surface samples from a wet gas or condensate\nreservoir can be unrepresentative if collected too early after a shut\ndown or major well disturbance. What suggestions would you give to\nget more representative samples.\n[4]\n(c)\nTable 1 gives the results for a constant mass study on an oil sample. In\nthe test the volume of live oil was measured as a function of pressure.\nThe temperature was maintained at the reservoir temperature of 220 ˚F.\nIn another test a sample of the same oil in a PVT cell,at its bubble point\nand at 220 ˚F was passed through a two stage separator at 500 psig\nand 160 ˚F and 0 psig and 60 ˚F.  38 cc of oil were removed from the\nPVT cell and 28.34 cc of oil were collected from the final separator.  A\ntotal amount of 3492 cc of gas at 60˚F and 0 psig were collected from\nboth stages of the separation process.\nIn a further test a differential liberation procedure was carried out on a\nsample of the oil at 220 ˚F and the volumes of oil remaining and\nstandard volumes"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 65,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p65:c0",
+        "score": 0.01612903,
+        "excerpt": "8\nDefinitions of the various quantities we need for our simplified MB equation for the \ndepletion of an undersaturated oil reservoir above the bubble point (Pb) are given \nin Figure 1.  (NB a more extensive list of quantities required for a full material \nbalance equation in any type of oil or gas reservoir is given in the Glossary for \ncompleteness).  \nIn going from initial reservoir conditions shown in Figure 1 at pressure, po, to pressure, \np, volume changes in the oil, water and void space (rock) occur, ΔVo, ΔVw, ΔVvoid \n(ΔVvoid = - ΔVrock).  The pressure drop is denoted, Δ P = p - po.  The volume balance \nsimply says that:\n \n∆\n∆\n∆\n∆\n∆\n∆\nV\nV\nV\nV\nV\nV\no\nw\nrock\no\nw\nvoid\n+\n+\n=\n+\n−\n= 0  \n(1)\nEach of these volume changes can be calculated quite straightforwardly as \nfollows:\n \nOil volume change, ΔVo\n    Initial oil volume in reservoir  \n=    N.Boi \n \n(bbl = RB)\n    Oil volume t time t, pressure p  \n=  (N - Np). Bo  \n(bbl)\n    Change in oil volume, \nΔVo \n=   N.Boi  - (N - Np). Bo  (bbl)  (1)\nWater volume change, ΔVw\n    Initial reservoir water  volume \n=    W  \n \n \n(bbl)\n    Cumulative water production at time  =  Wp  \n \n \n(STB)\n    Reservoir volume of cumulative water production at t"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 503,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p503:c1",
+        "score": 0.01587302,
+        "excerpt": "0.0814\n0.0201 \n0.0181\n0.0327 \n0.0221\n0.0573 \n0.0115\n0.7872 \n0.0070\n1.0000 \n1.0001\nStep 3: Calculate the density and molecular weight of the stock tank oil.\n    \nComponent Component, Molecular            Weight  \nLiquid \nLiquid\nof stock \nmole \nweight  \n \ndensity at \nvolume at\ntank oil \nfraction  \n \n \n60°F and \n60°F and\n \n     xj \n   Mj \n          xjMj \n14.7 psia \n14.7 psia\n \n \n \n \nρoj \nxjMj / ρoj\nC1 \n0.0016 \n16.0 \n         0.026 \nC2 \n0.0060 \n30.1 \n         0.181 \nC3 \n0.0467 \n44.1 \n         2.059 \n31.66 \n0.0650\ni-C4 \n0.0130 \n58.1 \n         0.755 \n35.12 \n0.0215\nn-C4 \n0.0354 \n58.1 \n         2.057 \n36.45 \n0.0564\ni-C5 \n0.0201 \n72.2 \n         1.451 \n38.96 \n0.0372\nn-C5 \n0.0327 \n72.2 \n         2.361 \n39.35 \n0.0600\nC6 \n0.0573 \n86.2 \n         4.939 \n41.30 \n0.1196 \nC7+ \n0.7872 \n263 \n         207.034 \n55.25 \n3.7472 \nTotal \n1.0000 \n \n         220.863 \n \n4.1069\n \n \n \n \n \ncu.ft. C3+\n \n \n \n∑C3+ = 220.656 \n \nlb.mole STO\n \n \n \n∑C2+ = 220.837\n \n \n \nMSTO = 220.863 lb\n \n \n \n                  lb mole"
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 1393,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1393:c1",
+        "score": 0.015625,
+        "excerpt": "ifficult  because  of  the  complex  reactions  and  the  thin  burning\nfront  that  requires  small  gridblocks  for  representation.  Simulators  range  from  tank  models  to\ncomplex 3D simulators. In addition to simulation, empirical models, hybrid models, and corre-\nlation methods have been developed. A discussion of some of these methods follows.\nThe  easiest  method  is  essentially  a  tank  balance,14  adapted  by  Prats.2  The  oil  and  water\nproduced are given by\nNp = fVb(Soi −Sf ) + 0.4Soi(Vp −Vb)........................................... (16.29)\nand\nWp = Vbf (Swi + Swf ), ...................................................... (16.30)\nwhere  Soi  =  initial  oil  saturation,  fraction;  Sf  =  oil  saturation  burned,  fraction;  Vb  =  volume\nburned,  m3;  Np  =  oil  produced,  m3;  Wp  =  water  produced,  m3;  f  =  porosity,  fraction;  Vp  =\nvolume of the pattern, m3; and Swf = water saturation resulting from the combustion process,\nfraction.\nIf the volumes are in acre-ft and the production terms are in bbl, a multiplication factor of\n7,758 must be used. The estimate of 40% of the oil produced coming from outside the burned\nvolume is an empirical value based on"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 351,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p351:c1",
+        "score": 0.01639344,
+        "excerpt": "500 \n \n  \n  \n \n \n \n \n \n=  26.6 bbl            \n \n (underdisplace by 1 bbl )  \n \n \n \n= 25.6 bbl\n\t\n                                          \nTotal Volume to mix and displace = 779 + 25.6 = 804.6  bbls\n\t Total time @ 5 bbl/min\t\n\t\n\t\n\t\n= 804.6/5\n\t \t\n\t \t\n\t\n\t\n\t\n\t\n\t\n= 160.9 = 2.7 hrs"
+      },
+      {
+        "evidence_id": "KB6",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 252,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p252:c0",
+        "score": 0.01612903,
+        "excerpt": "48\nc.  The Time taken to circulate out the influx:\n(i) The Total time taken to circulate out the influx will be:\n\t\nTotal Capacity of Drillstring and Annulus (bbls)\nPump Rate (bbls/min.)\n- Total Capacity of Inside of Drillstring\n= (9100 - 360) x 0.0178\n(I.D. of Drillpipe)\n+ 360 x 0.0077\n(I.D. of Collars)\n=  158 bbls\n - Total Capacity of Annulus  \n =  360 x 0.0323 \n \n \n \n(Drillcollar/Hole Annulus)\n  \n  + (9100 - 7000 - 360) x 0.0459  \n(Drillpipe/Hole Annulus)\n  \n  + 7000 x 0.0465 \n \n \n(Drillpipe/Casing Annulus)\n\t \t\n\t \t\n  \n =  417 bbls\n - Total Volume =  575 bbls\n\t\n - Pump Rate = No. strokes per min. of pump x No. of bbls per stroke\n  \n  \n=  14 strokes/min. x 0.1428 bbls/stroke\n  \n  \n=  1.992 bbls/min.\nTotal Time to circlate out influx\n\t \t\n\t \t\n  \n  \n=   575\n\t \t\n\t \t\n    1.992\n  \n  \n=  289 mins     \n(4.8 hrs )\nThe time taken to complete each stage in the killing operation can also be \ncalculated:"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 2.208557,
+      "retrieval_seconds": 11.123394,
+      "llm_generation_seconds": 21.088584,
+      "python_seconds": 0.0,
+      "verification_seconds": 24.235349,
+      "evaluation_seconds": 12.953536,
+      "synthesis_seconds": 8.134923,
+      "retrieve_action_seconds": 11.171322,
+      "verify_action_seconds": 24.235341,
+      "elapsed_seconds": 37.761792,
+      "total_seconds": 37.76192,
+      "message_parsing_seconds": 0.000128
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 37.761792,
+      "python_seconds": 0.0
+    },
+    "validation": {
+      "engineering_validation_passed": true,
+      "engineering_contradiction_count": 0,
+      "unsupported_engineering_claim_count": 0,
+      "citation_semantic_passed": false,
+      "unsupported_citation_claim_count": 1,
+      "unsupported_numeric_claim_count": 0,
+      "criteria_frozen": true
+    },
+    "cancel_requested": false,
+    "error": null
+  },
+  "same_run_resume": false,
+  "wall_seconds": 37.86
+}

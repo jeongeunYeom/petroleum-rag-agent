@@ -1,0 +1,216 @@
+{
+  "task_id": "S05",
+  "prompt_version": "final-v2-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_0c2a7dcf0717b4af016aca24bbe01487d0b999f321e610c31e",
+  "wall_seconds": 13.585,
+  "mapping": {
+    "A": "qwen_same_evidence",
+    "B": "openai_same_evidence",
+    "C": "openai_closed_book",
+    "D": "qwen_closed_book",
+    "E": "agent"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Computed all five wc cases with the given formula and correctly identified the maximum net of 90 at wc=0.\"},\"B\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Accurately evaluated the five sweep points, restated the formula correctly, and found the maximum at wc=0.0.\"},\"C\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Correctly applied the stated formula to five cases and reported the correct maximum net and corresponding wc.\"},\"D\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Shows all five computed values from the provided formula and correctly identifies max net 90.0 at wc=0.0.\"},\"E\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":true,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":false,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Numeric sweep and optimum are correct, but the answer does not state the user formula and includes fabricated citation-like tags such as [CALC1] and [USERF1].\"}}}",
+  "usage": {
+    "input_tokens": 2644,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 914,
+    "output_tokens_details": {
+      "reasoning_tokens": 386
+    },
+    "total_tokens": 3558
+  },
+  "provider_payload": {
+    "id": "resp_0c2a7dcf0717b4af016aca24bbe01487d0b999f321e610c31e",
+    "object": "response",
+    "created_at": 1791632571,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791632584,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are one independent AI-assisted semantic reviewer, not a human reviewer.\nJudge five anonymized petroleum-engineering answers against one frozen task. Do not infer\nsystem identity or repair answers. Evaluate the final answer; for a clarification task,\nalso evaluate whether its first answer requested the missing information.\n\nReturn JSON only: {\"scores\":{\"A\":{...},\"B\":{...},...}}. Each score object MUST have:\n- claim_verdicts: boolean list in exactly the supplied expected_claims order. True only\n  when the final answer accurately conveys that claim. An explicit refusal does not\n  satisfy a substantive positive claim.\n- partial_or_better: boolean, at least one substantive requested part correct.\n- unsupported_claim_count: nonnegative integer of unsupported specific engineering\n  assertions; no-source closed-book is NOT automatically unsupported. Count clearly\n  invented, source-incompatible, or unjustified specific assertions.\n- hallucination: boolean for a fabricated factual, numeric, formula, source, or\n  engineering assertion. Missing citation alone is not hallucination.\n- engineering_contradiction_count: nonnegative integer of wrong engineering relations.\n- numeric_accuracy: boolean or null; use null only when no numeric gold. Associate\n  each expected output with its value; mere appearance of an input number is not enough.\n- unit_accuracy: boolean or null, units must attach to corresponding output; dimensionless\n  output is acceptable without a unit.\n- formula_accuracy: boolean or null when a formula is requested or supplied.\n- false_premise_handled: boolean or null. True requires explicit rejection of the\n  erroneous premise, correct statement, and supporting citation when supplied evidence\n  is available.\n- safe_refusal_correct: boolean or null; applicable to unsupported-formula tasks.\n- citation_semantic_support: 0..1 or null. Of actual cited IDs, fraction whose exact\n  supplied excerpt supports the adjacent claim. Do not judge only document/page similarity.\n- note: concise evidence-based reason, no private chain-of-thought.\n\nBe strict but fair. Source gold spans are answer keys, not evidence available to models.\nNo citations in an answer means citation_semantic_support=null. Do not infer missing\nfacts from background knowledge for citation support. If an answer is empty, all claim\nverdicts false and partial_or_better false. No Markdown.",
+    "max_output_tokens": 6500,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_0c2a7dcf0717b4af016aca24bc989c87d0ad070888f639eae5",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyiTI5wurM3vJNQ8aax61WA3LEpYOuBKdcWzRo_JCyzqdSAVwzMsZxQ1Tf1gn7eA_DoNwTAdBctt1qqeowERh4GPUDe-BKhYo-NnMd4rs59lnieTUo9a7HX2fyybfhRlHNBQkDfAMQ6IGuPVnAl-XQy1szmevFcrFsfsVBYqiwAMh0WsqKdD4ky3nxRcQZyzNk5EWmPZwYhcNRyKkzjYiLc0gNgZUmv7b9rz5g-4B4Qwm0b4rB4blDMMdtdn3J-_zGW_uAw8VmNQW9mMKcKp3KtlVEnsBo50Ktaa1vTidrQ98IBBjyIEgVG33QTnFRYmKKaTEbddcElrT3BEGzVfC5h2jyv8qbt8lptyY3ybTkdIs8uaB-95ItwJLC4gg2D7O-d1XwzXTu3ATYgmqx0n-MyGKhNTu2W7SLP5Y9UK1XAANMppcMN6U8cF6d4AnWPsqJHJHz4r5cfrVuuhYH2fttN8uLeqAJY2vTgerZIbnvs6mmg7gCTrEdt4_tz34v8iunS35-cqBopQwC2wgNX9hQ8hKvuX4J_6ht---XCAvVXOdNyCOrDzDwaf84lrvsulJa6G6xYPt30e1Yg13Nh-xBXpXeQqUIji3CAFCSxLTfI9i4x5QjWJrXdh0PsmsjpILzRfNtennqPzgDuQmO79aUgQq1SnrMZsAQIXQ_cSf6Vl5TAQbbQnPcQDZFPHHPpCc-jPvT8FwkISVBP6mRWCBsQCW-FPeGqAypErKG2dl7LJX-5uUCo5QDlFfoXi5JEsBnHT3t5FUV_kXXR5QVssUxAEdlyQ-Tl1nD_RcSFpnZsYl3cA1ORfUweYy79gPljF9IdvvoQAdeXReQa2che6pTCjxQf5Fhy9EggR68I2_osGIzL4r1xyFKk9DTkIYBcY2inlbKDKacgObkEng7oPyC1fdlH86j_FjZq_razvsxGsZ-GLHfWThy99PBLikpv6AMPQfKpHsjz2cVsP5_g7dYAjw9M9nViUwEpj3VTxFd5lPOneO_kJPfMz3OkNZKavfBHzWJ50l_DpMVlwh-yjH1N_Ubvop4wKIm-jSUrirNkG3GEK0wJ2_1r8WsPEimA6mBQ0DOM31K0CWTyetQy8Tj_r-7r7mHou4vXV_v8D0diOMbHRqI3eWhjkIOEKlbF9JPqwK_t3gHwFwCITxuPdxOUc1a5bU6EwQlJPeygjYTU5OTS6l8WU7DIWBiv7ofhvOn1FH-BLuIASbULwqccNEuFXjMs3ARaI3351Odsk8ERZF2rlaNvXH8vR3e2Tol-QP2dqI2RfaidhaxR4W7CCDqghsemr8l8U42CMFkMfmvaVaGP8zONmbF42GcS6HmUkb8glvf4bBG2TLZQvp71dWM1I3xPm3VxFB3e9cMjbfcKCweMM92O-D0Ksoxi87WDTmwYgESFMkrU9sEv-_W3uWisCv1cbfY8VHWJTTjP5Gsa0oDWIUJZWR1sgt2M73wAMCy2Tjt0eJcU3gutCBXfuuJfKFKKGZRXsx19YXbP7w_jDH_nK2WwkqRFk30buMB48NN4fHZ2wRVv3ac1YqHzOgRnJA6ubGYKnBU5gGnXYdGTOOUCErZ170wWcCXU3ZWu3XGamb2DOcMV81hez5l94jDq9P3dqndFD1kfGNEfPp2QJFeb0cFiBwYjh03sItDKs6EIo4NWyWhZmdCDtYeVgztzKCyEmvDGiZzyrYOfbhggSEsbOmEYxhLguGBP0AFRKIipqWAIdzJLvJEVmGrXFNUN7OdzfPlH4ELqJziSGWwB6x6MF8Fj4IjQB6dUOELSUYf1W29eopSxedfbanZ0JMpseqY6GxoffUbKuqxMJi0IUmxgNZB8uACFSAvWa0m3-6LVSK_w-nvvWQ1HJLhzf1WQrD5HLpjLFO-C8T0CjjWWVQKzqmtZ_uZGMlwAIB687xKmkDpfJy9W7GQmQ7uiLslrqPPI__mhWcFwU91Jd-w6LmxBoINSv7r3HYGeVSjvU5r2s1hEF507C-T0bzlHX4HU6P7uYKJf7rp7qUvIg1idrNPS28RJ0hQcjHTLg0lspRYTqyLRsYvPOjEV0zT15Bt_8RQwuDrraHdRQQ6K7ZLG08-pFeLNrE25ds6hEu0ui23pL0TnYTJ8rQhHyyQqxZcdUn_pIvc9OVaFzRqwXiBBioOlhvuhNKVhwmiQQ289iVb_94XW3FLQWvZaKGUgGSw6rMEJOHvl5WYC3zSeEJYZGMgELHAZUXXlace85WMYh3UIYnQV-3z1nWaomRMunGj8TiXORB1NeKk9LavXuHUZO67nagTmUPVLapqe1p-sQxtO0oPVCEtYAmMB-LOCs-YnB-mCwHapStjIldohfj45BUfB8HDVmCmj9puxrDg8P6McXNBCwN4rySVufBKaAWwX4Tpm3W1NY2qTy43cEEJf5q27ulAOO0qE2yjGYFONXYCyrWkIj169LmpVzK-eqgxaMUYP9g5qLJC6wkwrLdkkhzKIzry_esLLIOthes0aG6S2e5tHyrLZwd1ZrohEtgYgJBSDsd-1pndGHBNH3TVSrK8wyo-6GSZKTkj2KNgzbnDSsOPl9OeMRNSC6LqEnitOXh2K0NeS1VM0m9C5_NKe2nQvBs5jowP0t2TOo2LnLMnT9BTMK8XP16RlUvgwbP677jsbHLKmWbETZ1bpAEb5CSZfkYomMF0D9fcC-dObWRJ2kpxcjLxErVpICZ4PboiuKZdNMVn-1XGt6EsaYKKAmMOk-b2FegbOGU6q6mb1XARxZAW6m8RjFQEMMNOMmoCvrOtY0eN4ATZtiZ8v5VZRSn20D5VM61YaXhVH7l6xLgG1S9w9jWeEoUzGGOSpfDg55YQePjslbt7-p7vdyNQijD2f56y7tQgYRGePjNH8bUQgksZ6IjDPf8YG90IpYp3fzJOh7SGpJBDTI_XpdNYnpY6410i5jQg7LAGOJ1oXGfgBADVFMHHzKDIUPdH9u25ggD5nqcTA7DambVhupmuqCTj7fXhV9o4BzBn3lgBboZlS75uPHnHfW6X4FSZO5J6v7C7MRWP2rz3HyPryj5mWeOAJIeHvyYO9y-LD2Gh3EFkzXSGIUfPz0c2GfqZY93o6X9K1UxzIvk0ClO0JawaoNOhUV6pRP8E1cddaMWOR9oit9tRL6vHeySC1eGADuAuwxgyh-6gKF2T07ACYekQjxUyJjnBqLwx976qx6QmZkf9hZ-LW9IUCggNSxsyFi4xhIl3ctaEmV4_OhzoZxtzmeEoueu7uZo5FBssrNW5tam9eOYcrAlbNqQtwRQIGdcGRqFwHCW4GpospaRoUVHKYQXoLkhAz6IBnzohswe714PJ1FUaHStlkSmXRnP89lvHOK0zH3O0FTPumZmXh8pdkHENQOTnbywMl0JO-2F2PbHSDtfFHtybhqTh4zZly18-d6EoelehfJ-qai72W1vef7X91c5Djh6Qc79la0VbWsCZ8bxhT9uN83tFIc0Ko2mm1bkN3WGe1uyFIbBJGVXSFk5NsEeXyVzI2RtGtEGsUYNOiUFwaM8YYhg0iAIOBZWc0xlDGZwIWj6UDUZd3xNa5J7Od0px4Urmq6fJgrn0TqNmLpBpUfvDkXyFecakDfB9wDJnuVxaTohURbddIoVtvyzoCiklMDNghBITuYBKsoffMdSmjBQeqVk7cayETYpVs39nB5MGAW7_Bc3I0O452pygOWNsWJUa_7c-RAk51nwOiZY32lseNaHNFdCXKONdLUwWUIvJ2B6HGKqVxyTEwcFJHryvHSuyX2sJku6Ma6-aenoVlvAxeWVD0LwbKN-YXy0eBlYLojNGmXkdZ61HX6V6GGQBg2el35efLe-uilNmLLdKInKkyykt3Nm8e7NojKANWrz6nh-PZWaybw1jKEtDTKjGojoKsxhxptNO_I5WRbyaB6Zaao_vwPWYF2StGueb2AljS81kaxESYe5UkeRelQL5wkOLUCSl_EVOCSRtwHm-W4GSpMt2nU2O3ixAYXzsL1Zp9w2E0OHnt1OowAUaXKXenRxEEk22JmpiAR4TCNWPSXbCYBmLR9LQ-gwroVB8oJSGcvCoAE1Gt68P4Ezyo9cPOvWaYnZlS8xRlZEoD8pr2l2HfsjPdWxvDnL2wAKb_xwtOegtjvgh46lTQswPVYeUR4WFmqV8Mc-COX1wtKHXVLi-ux5b-FVVzGKARhtWgJr3ZC_vUbUImEYAzPEuZfiidt9udR_N6h0EOihYRsubb-Rp3jAJS-NlDcEfg9SN9pHMf1766k1xbAlJN1WkeMDXZQXUt1at8KRKpbzQpReOlXi-IQZqKmwi4nGpMXe1TeP4YUqzpjMOxtUfDvPZ_WPN1QzzaveCmHuvAuwj4m2miLiqxF1_0CAAfJaaQkReAYDkM1sgPzlTpV4-pEs48kAy9a6SJ3bC_9Z1cj2fSXraSc5WljXYsXmGH7YRznrK3-R33zqSo5vPcMQzgizivkxb-AzxdvZjQ6qQcfvzPOiqKuvepQfwZGuHpvZ68viB5s6ouiffLb1l9kyur32a1x1G9g9tmoK9blXvv0xuBCJS-I1ctOIxZppJ3t9U_ehRcb42kFyVhEjJ_Qi_Fe4G583cUj52Cb-EIJCY1Yp13Ly-59PONQX5bWhSk6oxfzcxRTt0VFZ0ZZ0lJknqvAnBFNzrIQej2ALr-BUiO2oxF2Yr_b22Uj1KhKCYkiO3xYcKeWw-HQO02qJJfqATTUrN8PnvDiksZJd8n3lYaoHKP4m0R0l4TTNwYE8DuG8Jp55nhR_Z2PKFkKJjeUDVyKAxiLpd1eFtpMRblbXOn_G1T6Odrb0hz9qvs7I3H6pvwTevUEXSZdiaPlQiB6ka8kSHdVsmv4uxa-Qfbx47IUW1D663dNSEz69YtCDEmBdnuMDXVHvp2OYjZrVNXYou3tZIQD5GFzF4jM8goLQm6NasTij9Rt8K3CiJG5ORW2qYu28WDwknoJvl8P8LO_1TnMAl2XPmofQCW-KLZxbd8rl1XdHLNDIYIVSVu82AlJJm6tbGU15aEtLeWgmcg-VPqGM_HjrniRyjsrDB6sa5eJKgNqeVnsoKxcsOIKG_c3s0r3GRCPbiQs0hho-umb3CnDyhURFDDsKcYkseJnbWST0QyHHDpkdyi_zbUMgeWnjbo1eIQy-PZtyx81cF2aGjqMTe4uKpoMMpHC5ZCfiyZAjeVESKAEqFBWIX0PnjklXgoqjoi8YKuHqnPn87WaxEW0P2hJ5Sz7lsOsBtryEkHfuhwT1jYj2oCZjvLhxsiZjPdcV3pKVSzC3ARYHVy6jhhUhlh9hqvEl87cP5CrPPaFuWq4Iv_R4ENNN1sEgCB6mYPDQ8SmpDfZoL3H19myHmFOhIMexKZW5s1wUXc--7MvR1t6s5qa1ec8Afn6SYGNsKtffWY22tKcTQSMFEysSFGGflMoMhhrEFku1FtwNNQm-6277LwI338u2fFkC2Z_-3kNAxJ_6ysjDdXaUMwk7DXOja-ULEnHP3SGRAKbJhE71iCzbnZTCmhNy4BNQV2gI42LL9yAQ_8ZIe3gKwtJXK6Nlv-Qhh0QN-2ehVKQlyj66jlzidIQLtOFXnclbTFtwYAG9tn9Hehb_uDbayJIgPAe6K4T7B4vLAnj9QrQUwcl7034k9ElO12snzIHZHYo7S2qUzgZJHu3BK8A0AIR4QhpRhzMhXyBmbPBkS08hFj1QRUE6klByShwn4RRqZ_EOSd1OD70pZpthWciuzv9vJjGGBAzLoVjlZh8dJSx6sorAPdA8jvgUr7_bjBfT-V4B7ZfCVSqsdhi_uU3MYLtBtyb8OUwI5_GP8Cq5g6LvGN5X3RL3QZgiX-ybIFINQ6ns8qjqDYpezg8t8SRXRxufML0CN1Ttwgq2Bexd7lbOIWSsjM04SQmf7-IFZxt_4WE4qAs_63Wt4i1h7EP7GbZKbZfPq1VT9REcKG6cpoPWVX7mFpKVVa9xBgsmBrZbN8nlTIWjxagh2W1ty3s2Nkf3cvgJyTAlOkQB5pM5YMyFTyZbGYQGqqq9w0FQHTJMZ4_q8-bu-LyXW1YV6fiFdT6ahMnkfepjWwiHyfCi2rJ3gks8CRVO8yjRJbCvzx5Vwvw3pK9w-VpIo_t8uXlP80iUyZocl-AnBWR-fXK5xLCqujDF5RMQXD0jMdWhNYPSAd-tA-FF-WY-lYnJjZYVGRY4Rm_mokqq9LgRksLp4uJtt-GIQsK-EOujsKq9rmbPF0XJ8COTG6zER7qwso1XVf2uhz1GRb_TUSBFGBdWBWwh4abLv3TSIn2BakFWwIcC9knz6x1BmW9I_ieU8rHXM3oCMNnGzfYIBGviD-AFuMbZVT0vFbi9bhnubBdhk522Lwrm9y51BGeC7s-UoCquiDKM3gctXjpS9P1yXUKVhcwGaWKBJKtgNj4TMIPl31FtYV0icXZGhEwlcSahYlMiofiTgXZDWZ2a-7wVhG4u7L1c46tHiF0xF-CoKRzB3RR7N5s6E5vfTUPDmznPBuWiJW-I_qxZriU=",
+        "summary": []
+      },
+      {
+        "id": "msg_0c2a7dcf0717b4af016aca24c35d7c87d0b13719942f5ccd39",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Computed all five wc cases with the given formula and correctly identified the maximum net of 90 at wc=0.\"},\"B\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Accurately evaluated the five sweep points, restated the formula correctly, and found the maximum at wc=0.0.\"},\"C\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Correctly applied the stated formula to five cases and reported the correct maximum net and corresponding wc.\"},\"D\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Shows all five computed values from the provided formula and correctly identifies max net 90.0 at wc=0.0.\"},\"E\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":true,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":false,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Numeric sweep and optimum are correct, but the answer does not state the user formula and includes fabricated citation-like tags such as [CALC1] and [USERF1].\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 2644,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 914,
+      "output_tokens_details": {
+        "reasoning_tokens": 386
+      },
+      "total_tokens": 3558
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": null,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Computed all five wc cases with the given formula and correctly identified the maximum net of 90 at wc=0."
+    },
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": null,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Accurately evaluated the five sweep points, restated the formula correctly, and found the maximum at wc=0.0."
+    },
+    "openai_closed_book": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": null,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly applied the stated formula to five cases and reported the correct maximum net and corresponding wc."
+    },
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": null,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Shows all five computed values from the provided formula and correctly identifies max net 90.0 at wc=0.0."
+    },
+    "agent": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": true,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": null,
+      "formula_accuracy": false,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Numeric sweep and optimum are correct, but the answer does not state the user formula and includes fabricated citation-like tags such as [CALC1] and [USERF1]."
+    }
+  }
+}

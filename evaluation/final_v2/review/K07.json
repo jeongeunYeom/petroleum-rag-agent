@@ -1,0 +1,211 @@
+{
+  "task_id": "K07",
+  "prompt_version": "final-v2-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_0356d0b80b199dba016aca243b3b1887d0aa85ef49782d552f",
+  "wall_seconds": 12.176,
+  "mapping": {
+    "A": "openai_same_evidence",
+    "B": "agent",
+    "C": "qwen_same_evidence",
+    "D": "openai_closed_book",
+    "E": "qwen_closed_book"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":1.0,\"note\":\"States QT=Qo+Qw and correctly computes 110+35=145 m3/d; cited KB1/KB2 excerpts directly support the formula.\"},\"B\":{\"claim_verdicts\":[false],\"partial_or_better\":false,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":false,\"unit_accuracy\":false,\"formula_accuracy\":false,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Final answer is empty, so it does not provide the formula claim or the requested calculation. Initial answer asked for missing information, but final-answer scoring remains negative.\"},\"C\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Correctly gives QT=Qo+Qw and computes QT=145 m3/d.\"},\"D\":{\"claim_verdicts\":[false],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Computes 145 m3/d correctly, but presents QT=Qo+Qw only conditionally and says the exact figure formula cannot be confirmed, so it does not firmly convey the cited-model claim.\"},\"E\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"States QT=Qo+Qw and correctly calculates QT=145 m3/d.\"}}}",
+  "usage": {
+    "input_tokens": 9977,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 833,
+    "output_tokens_details": {
+      "reasoning_tokens": 296
+    },
+    "total_tokens": 10810
+  },
+  "provider_payload": {
+    "id": "resp_0356d0b80b199dba016aca243b3b1887d0aa85ef49782d552f",
+    "object": "response",
+    "created_at": 1791632443,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791632454,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are one independent AI-assisted semantic reviewer, not a human reviewer.\nJudge five anonymized petroleum-engineering answers against one frozen task. Do not infer\nsystem identity or repair answers. Evaluate the final answer; for a clarification task,\nalso evaluate whether its first answer requested the missing information.\n\nReturn JSON only: {\"scores\":{\"A\":{...},\"B\":{...},...}}. Each score object MUST have:\n- claim_verdicts: boolean list in exactly the supplied expected_claims order. True only\n  when the final answer accurately conveys that claim. An explicit refusal does not\n  satisfy a substantive positive claim.\n- partial_or_better: boolean, at least one substantive requested part correct.\n- unsupported_claim_count: nonnegative integer of unsupported specific engineering\n  assertions; no-source closed-book is NOT automatically unsupported. Count clearly\n  invented, source-incompatible, or unjustified specific assertions.\n- hallucination: boolean for a fabricated factual, numeric, formula, source, or\n  engineering assertion. Missing citation alone is not hallucination.\n- engineering_contradiction_count: nonnegative integer of wrong engineering relations.\n- numeric_accuracy: boolean or null; use null only when no numeric gold. Associate\n  each expected output with its value; mere appearance of an input number is not enough.\n- unit_accuracy: boolean or null, units must attach to corresponding output; dimensionless\n  output is acceptable without a unit.\n- formula_accuracy: boolean or null when a formula is requested or supplied.\n- false_premise_handled: boolean or null. True requires explicit rejection of the\n  erroneous premise, correct statement, and supporting citation when supplied evidence\n  is available.\n- safe_refusal_correct: boolean or null; applicable to unsupported-formula tasks.\n- citation_semantic_support: 0..1 or null. Of actual cited IDs, fraction whose exact\n  supplied excerpt supports the adjacent claim. Do not judge only document/page similarity.\n- note: concise evidence-based reason, no private chain-of-thought.\n\nBe strict but fair. Source gold spans are answer keys, not evidence available to models.\nNo citations in an answer means citation_semantic_support=null. Do not infer missing\nfacts from background knowledge for citation support. If an answer is empty, all claim\nverdicts false and partial_or_better false. No Markdown.",
+    "max_output_tokens": 6500,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_0356d0b80b199dba016aca243c109887d08f8b5cd7ab6c3661",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyiRGE4T6zQqgs3muZ-59AgK_-8AsNBhhLGBMNR2nsvPmL8qZB8TNFvQus7DzE6TxpZq3AoowC4XjytMSd79hTQXKK2HjFt0eQ3W4SWhrwj68p0RgHsTc5iFBrBg4s6LNCprDO7mB6LEjfNBD6Ktm8MyGTbGhNVbuifIaJmQu42Lr_5QKeHESFLAL0aulp1uiF5YBa3GRJNZeruazprHCT8D1tDTfuiHoQ4eqPmUV-ZsvFBlr8uAMOHDue0o_ehZOWVD8PTLllQOuhGDxs_5EJsWIWBQZ7FH_YO3Cs6BfiwRY3eiRT8urKfBUzB5qZhOcWccVuA0eflJ_o57m3-vxeoNt-Vrwo7Ms3KGTSVbbxmEdELK6_wSF-OhOaSNeVCRYG4XjKe1bApzgMFvHotV0E3c8K0pxU0Xow3Zk2WHzXNJODHHyKDxS60s0M5mJXAL4V9Uzwx2TIa7i4uK7nmM4rs9PrpEuVjsJ_ndBc_hgukaFr4sNqBUqyxrhxjnKABy_3kUyo3c9rvAv9CnwSMq8OMHvj-vSpSX2iI7yGKe5tcVbTSmT7vpy0Ou7-0dPbGJs9xazN9e473yWXgnHORKAcPSIkttUP9wiod6kqZBljoSHu6ptHTQ4IwgYj-khQgvzMTS00zSMK3wqouIUjnz_f2CLLXglX0KcjdJ2h9NdjXj1Mn2fmUVFcpHEI-V3r2DOiWj0Z8S1tcjAIs6pyovAQ6MCUQCYYcBi7llBhCuMZYm_zHLnV0KUIESiE0I51SHcZrXioO8Tu0LfCad_sC-glAuBalZm2lJhCFYKX3NZIBzECiNHMdj6DhvPXrY5yN90VbX8hsQ1kHpBeHjfTzWdO9NiqpYX-GcZTIDyHZlOCV2vhKRHdx9L8LIaLdVFyEnuN8PVTy1bKv2-A8DoqRvRSkhG-v9vlE1VrDLxcKcZ0KbokUTk_cgI_oHp2THyZJZ-a5WR9qfz1eaQHsy8QvVGf2ZO-9sP90g48ew8baXCIEHrT5-QPJC1Q0lZ-rEATXxAsx58Nw376-V6HVhBQvLi1EMrLUdHDqFLpGrDynO4yTJwPHlXz8R4dTetVevIOdk9aQ0n5AyXXvqxi3t077wq4a76iS8-LBSq_k2ExLoCLQu2Ennagy7b8qUaacGee_-avdDYo-PnmHLnbiTvDbC8SE3Xds7N4QGly5HjAxMm4mnnFgze9PEHRPnJtVf-YZV70dHJTngRCGL-c2iMTUfApo4NLSkMXUfrMY2NVgoZiDMvDs_cUFZ2U2V-LFSJuDav4A1SOKSd3-Qe3XciJZleGs3k6l8zqnn1bJ57Z9YyImGCJ3KoDlhcwGKaYbFJy1zFZdP3dSlM9rUHzYarK5tBduXkAd-fhvlvk5PcsDvcdGZoX8XxLMMtlIGo2ZGU1Aeysa3BsyLLmgoriPH6aErTP4nYdcLJixEhsdXQ5JdDSb_mY0J0RusbCPtaeQfcRljDf4JtJ7RGH4SAm98vP5VbhuVbo0ZwnDO9xlZllixv0PsZ44CAeueiPCQWjsau2CLTGfbtsYwu1jBTGuKhCBbdXQqhlXy0IqVm08YFMWE1WWQGLOqJtYzeIklABs_eq9xQmKb-CZQQPvDEH5ncu9QJ1nZfOh2bGdjz63PKc-KTrIzWpYjBd1AGqFOLn63HCfD1tyW7ktvvZNo2QF63H_PiOjXygbuaUvZlfs6K2tDlDbykuafznlnhrH3WfDo1hX_Dx5dQqpKwHTjSMGai6ZlKzlPCt7MOCgyBza53-WRFukisxeQgT-ILpblSYiCwK1B-O_kE-wQksM20YOVr86iUMO692lcJlKyVZOhIZvbomTAdQvoajhfstaHVhPMRB16tCBczQshMyk0EUz3MjLSX8JHccp2esciTpKdp-RqHSR3igq1Ci62YoE2rb3NxL8YMtdG26YlvjVSBbWDDVjUPyCwBDvo_DmcVpLytcv7699kolPKZHlU8CudtOMFV8RQQZM2oCqccs1OxiBgzAwM4vsgr8nJm_d-sS7pqAKJAapl6NIugsDOjFQicFZmYZL6ndyTy2l9RvVQMRTVa0YaeZz2_XR1uvGzmeJ7FuotzSlzwWYcOUTfscgQvmfTBME8pUXDZ9vpcgK5ycnau2MYhgyCkZnXgHHMQQLvy3dc6h10Cdx8oDuC9iwV-k6dSpafNQ-fSv12qhDWZD5V8sgpdI4EJLEbot4Fx0pCf4w52sEaGXhpd8M_Qm72cziURffEG8gWtZRaCa8n6IS7q5CXmDpfzHSd0fzblfP_2gCd4yrtqdmwQz01Zlz5idvz6XTPSUxgUQrnz92YheBbqnVK-jcAVLgnlxcbmmYm8dRcw7n4gkdnX2I_5uvoNfL64IJAg6Vr6Qw38cC5hx__lwZI2GcMnHKka08oeqVfxnJ9ZbKuAhlxXC6tlpytTn-c9PMlJuKJbS_muW6D1-Ucwd4AKiMUnJHSDdZN2BSTZFHmlnS9kECK30iLRXy1QkGxViolL8TA68S-SLe2nIJrerV9zhPO26V7k7hTVTP5B7umDx_uSedNbMy707F_k-4DAYd3pDXxDjbF8rY2TEGcwg9huwAni5JwICQFG39XFQXD_03JyDrSFFWCP5iBq_CZrB3dpIp_foj1pfL1MeqZOfWkuiH4gg7apkOFkC1jejfMtLWWWBQA8oo66W7f-77VtjMmDnqbvXCziB3Xd45J3HQ02POhUZhcsZOLkXlqfNq2B6rFfnLXCE1jmkSQbDQxElInXmqW6BBQr1ANpBJ2zPJTfIjcJk1VuW6Vr0yISBNJVXftWpAjClB46dW_y1jb-M2FQ3YsYhmCBvTC7uLhlfOmC_fXFMICyUGbxf_Wd4zZbVHLhHkoThmG33Z-d3Cy3qz-VIJwy_Ei-NnCdP5EcpQNKtyNVrqJYIqlVjI5ySLjjyvKiWolRRElUSlKzOch-CuW0cyIxSSI2Qd1HX035jEp6jCjq1cE9KPsLYKdH_TazEBVv8z4y1TgtbgNQdFEWQLkYwNl6Q0JkxuA3UChtFD3_pz1VWjXMObTTbih5S8C0GVnWeFS49cevxzgvyVRHzRVh7OjibJ3WpRLGbxgCUkHrAi6HHIoasDuBi_jN6aHuXnR8txQ_hZVvQtzJD9kutCOR5erYBu2A14mQjY_Zuq91TZda-dj6fC-i_lvzC8HUZqvTYnHBm1t57cT22UNId_ShdyJy7NDZl8q0rHBJ15ZXdM8537dUpYjN4l8zzE_UJ5dJqGax6cgStNbn2oRN_YCoOBpRhE3dV67cIbP2sGEeBG_uM60qQYssDiWQ6biu5lVMsF8oyp8ibGdsOhq4nYIFIdYzNbROUwfa8bN7PYv5Tg0A2bYje7tHEe6QkHVUey4a0x9ncb_ymFQHLknxpMad90dKWVAD1UC8k06lBjKdJHZ-TvC_wAQUvj0slsgXayuF4UzjEUBD6ldp8tHTDvrUvkIjOXqZQsbZICCbvsjnigMgrNlYNqKh9vg-2XV9FpCjBI-O1XdHH2nk-9_xCi4L4WD8s4MY3H9_Us4HpCn-nlBaTqR8s3nO6thsIicob_UBYaBHoMn_QGLMy7u4K5RRj7fwx3LZWYEG4w7FZMjokF737epr6QGbaYDF6EUrvTcIOXlpoRx2PB_NXKSwjPIi8awJLMb20hykMNwJ2yZtS0-0xxStpnI_N1A6AU-hOz0nTNKwSWyt6U6bZZISn6taDe8EM3MRkJso5M458Dah36xLX8zZuLimx_EZJkL9iFqfI-C4uWhaReHarY_YuPGKMNgUMS6So71PkKECHI2-KNxo500ldYCpWkyXjg3Om8csGzUXzcGw55sdfuCYlzIEllTl9kCqbttbvIAgzenoSjrn3dHDL_cEs6kcCD68Y9GQOVOfzwi4OU9xNFY38a26JmHY_dJUVz4UXqqinRxWKJb9mhWKv1QHn3HOEqHVegSMkV35dUveZC92ruMCvUDqneom0eXc9BKdYojPH16hlPgRJTYaM-_kC1DUGE-_eGs1l9Q-R2Wf8gPdXtTTULgE2Zlkut0b2CleD3SxwPo4P-JGPAWzhGMPUlPZVu8Xwf0u-UBIdabwvBJvF_fqB1OO748jjDksTY20MjTtb-ZAsc1F9Zg6-ol4FsBzYJ3bBRFH5a61EUxv-5ZSkyn--sxmDcKkL8JgsMtc3vEQJh--pjxjdzwU_bUBjlIJPXAh9nZ5VJgZQ0Mi8Kcw9s6o9izsahARr-3eFAcS4D1shdCwTz6ftkqaTHjts0xyjKAj2KrdGMHrNh7JfapPJEDCPK_e7wS0PQSmW60MpiGpWd4-pEydiEvalmP0T-Co-RF66w2AtafGy0r8UENcyuwUayeHv8EQnYNUcpnRaYJUEpm2pNBlGYv9ZFdUsIhCs3aSel9yTF8Ior7WfCSdy7ELYd7yJerN038SG-A7BW9RmZ5jm6Uz9zFekV3rpqRiDJfd-6ZpdLssgC6Wf6lOKONUoq6glZw4Ksg4P9BuRSY049s8SQdDOPM2xO-Nyq1UVP4Det1BbeM7ICySUh9hTEmPiyI6Ue6jBh6sKpzPOeRaHLqG9sMOQI7XQI9LtArR8e4J5A4WAtJKmyS3MX8upvcXyfgshGwt0-1bXWubsyy3AY_g6ho7Ikd2RLejX4CEHympiieeRGOBhqPIz7AKgO1z2MF4rPy3S2NDJdtVVZcXC6tdT0psH2elTbghBpdHwwVrp7xl83onk6sYbRpJOBuSp9CrSHFdeYc27RUwgQBIkwSpZCHXKatKT5tvVwhM6nv7xvmgQw-Yu-EvaGYb3TsoiDzXlS_tssEaaMb--dgZS6SqI-i4fSVVIKlpPAt2AQis0AIQhofqBmEYx2iMskzurzN0qnlhJzCAVEd1w-Tgi5cKWQD44b2FyNVp0NDOKp4UZsMhYNEGmoyd6eqK9ExEj--YP95jFwrn18h0KSuJOXHxhy7MiRgLKekpPYa7uzFMOG0H5k_WkrLsN3g_T3-pkEW9yOGRqTDxLO98moGxanN1wxLujWr8jcuEAx_1VGhUGpiURL_JKPB7IIHX_ZDKwJ5_iL8U6gvSJQ6sEjFZtJ4TEDdk8DBTNv9SCej36lbhF-Yxz9wh0SRNz-fbdZ9rI7w4etJAghLeaPrTKQVkyvbuTE_cDO5D5ki-R_Rvlwrts6OfV6gJTE13l6K-B7Z7eR_UniCbj0s5YevuE6PxHdY4-7Fk3fswfY-mxG6oFdXFqcEh6_4=",
+        "summary": []
+      },
+      {
+        "id": "msg_0356d0b80b199dba016aca2441fec487d0954973b15a70600a",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":1.0,\"note\":\"States QT=Qo+Qw and correctly computes 110+35=145 m3/d; cited KB1/KB2 excerpts directly support the formula.\"},\"B\":{\"claim_verdicts\":[false],\"partial_or_better\":false,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":false,\"unit_accuracy\":false,\"formula_accuracy\":false,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Final answer is empty, so it does not provide the formula claim or the requested calculation. Initial answer asked for missing information, but final-answer scoring remains negative.\"},\"C\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Correctly gives QT=Qo+Qw and computes QT=145 m3/d.\"},\"D\":{\"claim_verdicts\":[false],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Computes 145 m3/d correctly, but presents QT=Qo+Qw only conditionally and says the exact figure formula cannot be confirmed, so it does not firmly convey the cited-model claim.\"},\"E\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"States QT=Qo+Qw and correctly calculates QT=145 m3/d.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 9977,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 833,
+      "output_tokens_details": {
+        "reasoning_tokens": 296
+      },
+      "total_tokens": 10810
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 1.0,
+      "note": "States QT=Qo+Qw and correctly computes 110+35=145 m3/d; cited KB1/KB2 excerpts directly support the formula."
+    },
+    "agent": {
+      "claim_verdicts": [
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": false,
+      "unit_accuracy": false,
+      "formula_accuracy": false,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Final answer is empty, so it does not provide the formula claim or the requested calculation. Initial answer asked for missing information, but final-answer scoring remains negative."
+    },
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly gives QT=Qo+Qw and computes QT=145 m3/d."
+    },
+    "openai_closed_book": {
+      "claim_verdicts": [
+        false
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Computes 145 m3/d correctly, but presents QT=Qo+Qw only conditionally and says the exact figure formula cannot be confirmed, so it does not firmly convey the cited-model claim."
+    },
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "States QT=Qo+Qw and correctly calculates QT=145 m3/d."
+    }
+  }
+}

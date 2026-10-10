@@ -1,0 +1,420 @@
+{
+  "task_id": "K04",
+  "model_id": "qwen3:8b",
+  "run_id": "GR-20261010-110451-7ABD7A",
+  "initial_response": {
+    "run_id": "GR-20261010-110451-7ABD7A",
+    "topic": "비트에서의 압력 손실 Pb를 펌프 총압 Pt와 시스템 손실 Ps로 표현한 교재 식을 찾아줘. Pt=2900 psi, Ps=1100 psi를 넣어 계산해줘.",
+    "goal": "비트에서의 압력 손실 Pb를 펌프 총압 Pt와 시스템 손실 Ps로 표현한 교재 식을 찾아줘. Pt=2900 psi, Ps=1100 psi를 넣어 계산해줘.",
+    "expected_result": null,
+    "run_status": "waiting_for_user_input",
+    "status": "pending",
+    "stop_reason": null,
+    "final_answer": "",
+    "clarification_question": "계산을 계속하려면 Pb 값과 단위이(가) 필요합니다. 값과 단위를 한 번에 알려주세요.",
+    "required_inputs": [
+      "Pb 값과 단위"
+    ],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "fead17bbaa583c3d462d05ec2977c3b69622008dc0d9dba4f7383693cd1cfe0d",
+    "criteria": [],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "교재에서 비트 압력 손실 Pb를 펌프 총압 Pt와 시스템 손실 Ps로 표현한 수식이 명시적으로 제공되는지 확인.",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "수식에 Pt와 Ps의 값을 대입하여 Pb를 계산할 수 있는 구조가 있는지 확인.",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "계산 결과가 Pb의 단위인 psi로 표현되는지 확인.",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 1,
+    "current_iteration": 1,
+    "max_iterations": 6,
+    "current_stage": "waiting_for_user_input",
+    "current_action": null,
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "calculation_source_missing",
+        "started_at": "2026-10-10T11:04:53.789819Z",
+        "finished_at": "2026-10-10T11:04:57.489519Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2",
+          "EFACT1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2",
+          "EFACT1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "Pb 값과 단위"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 432,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p432:c1",
+        "score": 0.01639344,
+        "excerpt": "ts (<100  \n \n \npsi).\n(ii)     Pd - the pressure loss in the drillstring (i.e. inside the drillpipe and drill   \n \n \ncollars).\n(iii)   Pb - the pressure loss through the bit nozzles.  This is where most of the \t \t\n \n \npressure drop should occur for efficient drilling\n(iv) \n  Pa- the pressure drop in the annulus.\nThe total pressure drop (Pt) can be written:    \n\t \t\n\t Pt = Psc + Pd + Pb + Pa or \n\t \t\n\t Pt = Pb+ Ps\nwhere Ps = pressure loss in the system (Ps = Psc + Pd + Pa).  The system pressure loss \n(parasitic loss) must be controlled so that most of the total pressure delivered by the \npump is used across the bit.  All of these losses can be quantified using Sections 4 \nand 5 of this set of notes."
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+        "page": 267,
+        "chunk_id": "3ef043ce163a7809b2d9e47c3676b2f3afdac2d7570be1005afaaaa36942e61c:p267:c0",
+        "score": 0.01612903,
+        "excerpt": "p1 = suction-vessel operating pressure, m/Lt2, psig\np2 = discharge-vessel operating pressure, m/Lt2, psig\nPB = brake horsepower, horsepower\nPc = discharge flow-control-valve losses, psi\nPH = hydraulic horsepower, horsepower\nq = pump capacity, L2/t, gal/min\nQ = flow rate, L2/t, gal/min\ns = cylinder displacement, gal/min\nS = slip, percent\nt = time, t, days\nv = average velocity of the liquid in the pipe, L/t, ft/sec\nZ = height above a datum, L, ft\nγ = specific gravity of the liquid, dimensionless\nρ = density, m/L3, lbm/ft3\nρf = density of the liquid being pumped, m/L3, lbm/ft3\nρw = density of water at standard conditions of temperature and pressure (62.34\nlbm/ft3), m/L3, lbm/ft3\nSubscripts\n1, 2 = locations along a pipe\nReferences\n1. Hydraulic Institute Engineering Data Book, second edition, Hydraulic Inst., Parsippany, New\nJersey (1991).\nSI Metric Conversion Factors\nft ×\n3.048*\nE − 01\n= m\nft3 ×\n2.831 685\nE − 02\n= m3\n°F\n(°F − 32)/1.8\n= °C\ngal ×\n3.785 412\nE − 03\n= m3\nhp ×\n7.460 43\nE − 01\n= kW\nin. ×\n2.54*\nE + 00\n= cm\nlbm ×\n4.535 924\nE − 01\n= kg\npsi ×\n6.894 757\nE + 00\n= kPa\n*Conversion factor is exact.\nChapter 6—Pumps\nIII-259\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 7\nChapter 5"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 440,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p440:c0",
+        "score": 0.01587302,
+        "excerpt": "38\nthe bit pressure losses can be calculated from the following :\n\t\nPbit = ρ x Q2\n564 Αn\n2\nwhere,\nρ = 0.52 psi/ft\nAn= 0.45 in2\n\t\n\t Flowrate\t\n\t\nPbit\n\t GPM\t\t\npsi\n 590   \n1585\n\t 516\t\t \t\n1212\n 443   \n894\n 393     \n703\nFrom the above tabulation the pressure losses in the circulation system can be \ndetermined :\n\t \tFlowrate\t\n\t\nPsurf\t\n\t\nPbit\t\n\t\nPcirc.\n\t \t   gpm\n\t \t\n  590 \n \n3005 \n \n1585 \n \n1420\n\t \t 516\t\n\t\n2242\t\n\t\n1212\t\n\t\n1030\n  443 \n \n1852 \n   \n894 \n   \n958\n  393 \n \n1363 \n   \n703 \n   \n660\n3. The flowrate is plotted against the circulating pressure loss on log-log paper (See \nFigure Solution 3) and the gradient of the line measured. The gradient of this line \nis approx. 1.85.\n4. From Table 1 it can be seen that the circulating system factor W is 0.35.\n5. Thus the optimum circulating pressure loss at this depth and with this system is \n\t \t\n\t Pcirc.opt =  W x Pmax\n\t \t\n\t\n\t\n\t Pcirc.opt =  1464 psi\n6. If this line is plotted on the log-log plot the optimum flowrate can be deduced. \nThe optimum flowrate is found to be  600 gpm.\n7. The optimum nozzle area is selected on the basis of the following equation :\n\t\n\t\nNozzle area = Qopt\n23.75√\nρ\nPmax - Pcirc.opt.\t\n  =  0.358 in2"
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+        "page": 239,
+        "chunk_id": "d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p239:c0",
+        "score": 0.015625,
+        "excerpt": "ppc\n′ =\nppcTpc\n′\nTpc −B(1 −B)ε =\n(663.29 psia)(356.31°R)\n377.59°R −(0.07)(0.93)(21.278°R) = 628.21 psia.\nNext, calculate the pseudoreduced properties:\npr =\np\np′pc\n= 2,010 psia\n628.21 psia = 3.1995\nand Tr = (75 + 459.67)°R\n356.31°R\n= 1.5006.\nFinally, looking up the z-factor chart (Fig 5.2) gives z = 0.772.\n(b) Using the method of Piper et al.,13\nJ = 0.11582 −0.45820yH2S(\nTc\npc)H2S −0.90348yCO2(\nTc\npc)CO2\n−0.66026yN2(\nTc\npc)N2\n+0.70729γg −0.099397γg\n2\n= 0.11582 −(0.45820)(0.07)(\n672.3°R\n1,306 psia) −(0.90348)(0.1)(\n547.5°R\n1,071 psia)\n+ (0.70729)(0.7) −(0.099397)(0.72)\n= 0.4995°R (in.2)/ lbf.\nK = 3.8216 −0.06534yH2S(\nTc\npc)H2S\n−0.42113yCO2(\nTc\npc)CO2\n−0.91249yN2(\nTc\npc)N2\n+17.438γg −3.2191γg\n2\n= 3.8216 −(0.06534)(0.07)(\n672.3°R\n1,306 psia) −0.42113yCO2(\n547.5°R\n1,071 psia)\n+ (17.438)(0.7) −(3.2191)(0.72)\n= 13.661°R (in.)/ lbf0.5.\nTpc = K2\nJ\n=\n13.6612°R2in.2/ lbf\n0.4995°R in.2/ lbf\n= 373.6°R\nppc =\nTpc\nJ\n= 373.6\n0.4995 = 747.9 psia.\nThe pseudoreduced properties are then:\npr =\np\nppc\n= 2,010 psia\n747.9 psia = 2.687\nand Tr =\nT\nTpc\n= (75 + 459.67)°R\n373.6°R\n= 1.431.\nFinally, looking up the z-factor chart (Fig 5.3) gives z = 0.745.\nI-232\nPetroleum Engineering Handbook—Vol. I\nHome\nSearch\nPri"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 406,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p406:c1",
+        "score": 0.01538462,
+        "excerpt": "discharge pressures, pump speeds, etc. is given in \nmanufacturers’ pump tables. This expression for hydraulic horsepower is a general \nexpression and can also be used to express the power which is expended in sacrificial \nlosses and the power that is used to pump the fluid through the nozzles of the bit.  \n\t \t\n\t\nHHPs =\nPs x Q\n1714\nHHPb =\nPb x Q\n1714\nwhere,\nHHPs  : Sacrificial Hydraulic Horsepower (hp)\nHHPb  : Bit Hydraulic Horsepower (hp)\nPs  \n: Sacrificial Pressure Losses (psi)\nPb  \n: Bit Pressure Losses (psi)\nQ  \n: Flowrate (gpm)"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 2.449966,
+      "retrieval_seconds": 3.686402,
+      "llm_generation_seconds": 5.2e-05,
+      "python_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "evaluation_seconds": 0.0,
+      "synthesis_seconds": 0.0,
+      "retrieve_action_seconds": 3.699637,
+      "elapsed_seconds": 6.189102,
+      "total_seconds": 6.189246,
+      "message_parsing_seconds": 0.000144
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode"
+    },
+    "validation": {},
+    "cancel_requested": false,
+    "error": null
+  },
+  "resume_response": null,
+  "response": {
+    "run_id": "GR-20261010-110451-7ABD7A",
+    "topic": "비트에서의 압력 손실 Pb를 펌프 총압 Pt와 시스템 손실 Ps로 표현한 교재 식을 찾아줘. Pt=2900 psi, Ps=1100 psi를 넣어 계산해줘.",
+    "goal": "비트에서의 압력 손실 Pb를 펌프 총압 Pt와 시스템 손실 Ps로 표현한 교재 식을 찾아줘. Pt=2900 psi, Ps=1100 psi를 넣어 계산해줘.",
+    "expected_result": null,
+    "run_status": "waiting_for_user_input",
+    "status": "pending",
+    "stop_reason": null,
+    "final_answer": "",
+    "clarification_question": "계산을 계속하려면 Pb 값과 단위이(가) 필요합니다. 값과 단위를 한 번에 알려주세요.",
+    "required_inputs": [
+      "Pb 값과 단위"
+    ],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "fead17bbaa583c3d462d05ec2977c3b69622008dc0d9dba4f7383693cd1cfe0d",
+    "criteria": [],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "교재에서 비트 압력 손실 Pb를 펌프 총압 Pt와 시스템 손실 Ps로 표현한 수식이 명시적으로 제공되는지 확인.",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "수식에 Pt와 Ps의 값을 대입하여 Pb를 계산할 수 있는 구조가 있는지 확인.",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "계산 결과가 Pb의 단위인 psi로 표현되는지 확인.",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 1,
+    "current_iteration": 1,
+    "max_iterations": 6,
+    "current_stage": "waiting_for_user_input",
+    "current_action": null,
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "calculation_source_missing",
+        "started_at": "2026-10-10T11:04:53.789819Z",
+        "finished_at": "2026-10-10T11:04:57.489519Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2",
+          "EFACT1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2",
+          "EFACT1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "Pb 값과 단위"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 432,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p432:c1",
+        "score": 0.01639344,
+        "excerpt": "ts (<100  \n \n \npsi).\n(ii)     Pd - the pressure loss in the drillstring (i.e. inside the drillpipe and drill   \n \n \ncollars).\n(iii)   Pb - the pressure loss through the bit nozzles.  This is where most of the \t \t\n \n \npressure drop should occur for efficient drilling\n(iv) \n  Pa- the pressure drop in the annulus.\nThe total pressure drop (Pt) can be written:    \n\t \t\n\t Pt = Psc + Pd + Pb + Pa or \n\t \t\n\t Pt = Pb+ Ps\nwhere Ps = pressure loss in the system (Ps = Psc + Pd + Pa).  The system pressure loss \n(parasitic loss) must be controlled so that most of the total pressure delivered by the \npump is used across the bit.  All of these losses can be quantified using Sections 4 \nand 5 of this set of notes."
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+        "page": 267,
+        "chunk_id": "3ef043ce163a7809b2d9e47c3676b2f3afdac2d7570be1005afaaaa36942e61c:p267:c0",
+        "score": 0.01612903,
+        "excerpt": "p1 = suction-vessel operating pressure, m/Lt2, psig\np2 = discharge-vessel operating pressure, m/Lt2, psig\nPB = brake horsepower, horsepower\nPc = discharge flow-control-valve losses, psi\nPH = hydraulic horsepower, horsepower\nq = pump capacity, L2/t, gal/min\nQ = flow rate, L2/t, gal/min\ns = cylinder displacement, gal/min\nS = slip, percent\nt = time, t, days\nv = average velocity of the liquid in the pipe, L/t, ft/sec\nZ = height above a datum, L, ft\nγ = specific gravity of the liquid, dimensionless\nρ = density, m/L3, lbm/ft3\nρf = density of the liquid being pumped, m/L3, lbm/ft3\nρw = density of water at standard conditions of temperature and pressure (62.34\nlbm/ft3), m/L3, lbm/ft3\nSubscripts\n1, 2 = locations along a pipe\nReferences\n1. Hydraulic Institute Engineering Data Book, second edition, Hydraulic Inst., Parsippany, New\nJersey (1991).\nSI Metric Conversion Factors\nft ×\n3.048*\nE − 01\n= m\nft3 ×\n2.831 685\nE − 02\n= m3\n°F\n(°F − 32)/1.8\n= °C\ngal ×\n3.785 412\nE − 03\n= m3\nhp ×\n7.460 43\nE − 01\n= kW\nin. ×\n2.54*\nE + 00\n= cm\nlbm ×\n4.535 924\nE − 01\n= kg\npsi ×\n6.894 757\nE + 00\n= kPa\n*Conversion factor is exact.\nChapter 6—Pumps\nIII-259\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 7\nChapter 5"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 440,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p440:c0",
+        "score": 0.01587302,
+        "excerpt": "38\nthe bit pressure losses can be calculated from the following :\n\t\nPbit = ρ x Q2\n564 Αn\n2\nwhere,\nρ = 0.52 psi/ft\nAn= 0.45 in2\n\t\n\t Flowrate\t\n\t\nPbit\n\t GPM\t\t\npsi\n 590   \n1585\n\t 516\t\t \t\n1212\n 443   \n894\n 393     \n703\nFrom the above tabulation the pressure losses in the circulation system can be \ndetermined :\n\t \tFlowrate\t\n\t\nPsurf\t\n\t\nPbit\t\n\t\nPcirc.\n\t \t   gpm\n\t \t\n  590 \n \n3005 \n \n1585 \n \n1420\n\t \t 516\t\n\t\n2242\t\n\t\n1212\t\n\t\n1030\n  443 \n \n1852 \n   \n894 \n   \n958\n  393 \n \n1363 \n   \n703 \n   \n660\n3. The flowrate is plotted against the circulating pressure loss on log-log paper (See \nFigure Solution 3) and the gradient of the line measured. The gradient of this line \nis approx. 1.85.\n4. From Table 1 it can be seen that the circulating system factor W is 0.35.\n5. Thus the optimum circulating pressure loss at this depth and with this system is \n\t \t\n\t Pcirc.opt =  W x Pmax\n\t \t\n\t\n\t\n\t Pcirc.opt =  1464 psi\n6. If this line is plotted on the log-log plot the optimum flowrate can be deduced. \nThe optimum flowrate is found to be  600 gpm.\n7. The optimum nozzle area is selected on the basis of the following equation :\n\t\n\t\nNozzle area = Qopt\n23.75√\nρ\nPmax - Pcirc.opt.\t\n  =  0.358 in2"
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+        "page": 239,
+        "chunk_id": "d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p239:c0",
+        "score": 0.015625,
+        "excerpt": "ppc\n′ =\nppcTpc\n′\nTpc −B(1 −B)ε =\n(663.29 psia)(356.31°R)\n377.59°R −(0.07)(0.93)(21.278°R) = 628.21 psia.\nNext, calculate the pseudoreduced properties:\npr =\np\np′pc\n= 2,010 psia\n628.21 psia = 3.1995\nand Tr = (75 + 459.67)°R\n356.31°R\n= 1.5006.\nFinally, looking up the z-factor chart (Fig 5.2) gives z = 0.772.\n(b) Using the method of Piper et al.,13\nJ = 0.11582 −0.45820yH2S(\nTc\npc)H2S −0.90348yCO2(\nTc\npc)CO2\n−0.66026yN2(\nTc\npc)N2\n+0.70729γg −0.099397γg\n2\n= 0.11582 −(0.45820)(0.07)(\n672.3°R\n1,306 psia) −(0.90348)(0.1)(\n547.5°R\n1,071 psia)\n+ (0.70729)(0.7) −(0.099397)(0.72)\n= 0.4995°R (in.2)/ lbf.\nK = 3.8216 −0.06534yH2S(\nTc\npc)H2S\n−0.42113yCO2(\nTc\npc)CO2\n−0.91249yN2(\nTc\npc)N2\n+17.438γg −3.2191γg\n2\n= 3.8216 −(0.06534)(0.07)(\n672.3°R\n1,306 psia) −0.42113yCO2(\n547.5°R\n1,071 psia)\n+ (17.438)(0.7) −(3.2191)(0.72)\n= 13.661°R (in.)/ lbf0.5.\nTpc = K2\nJ\n=\n13.6612°R2in.2/ lbf\n0.4995°R in.2/ lbf\n= 373.6°R\nppc =\nTpc\nJ\n= 373.6\n0.4995 = 747.9 psia.\nThe pseudoreduced properties are then:\npr =\np\nppc\n= 2,010 psia\n747.9 psia = 2.687\nand Tr =\nT\nTpc\n= (75 + 459.67)°R\n373.6°R\n= 1.431.\nFinally, looking up the z-factor chart (Fig 5.3) gives z = 0.745.\nI-232\nPetroleum Engineering Handbook—Vol. I\nHome\nSearch\nPri"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 406,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p406:c1",
+        "score": 0.01538462,
+        "excerpt": "discharge pressures, pump speeds, etc. is given in \nmanufacturers’ pump tables. This expression for hydraulic horsepower is a general \nexpression and can also be used to express the power which is expended in sacrificial \nlosses and the power that is used to pump the fluid through the nozzles of the bit.  \n\t \t\n\t\nHHPs =\nPs x Q\n1714\nHHPb =\nPb x Q\n1714\nwhere,\nHHPs  : Sacrificial Hydraulic Horsepower (hp)\nHHPb  : Bit Hydraulic Horsepower (hp)\nPs  \n: Sacrificial Pressure Losses (psi)\nPb  \n: Bit Pressure Losses (psi)\nQ  \n: Flowrate (gpm)"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 2.449966,
+      "retrieval_seconds": 3.686402,
+      "llm_generation_seconds": 5.2e-05,
+      "python_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "evaluation_seconds": 0.0,
+      "synthesis_seconds": 0.0,
+      "retrieve_action_seconds": 3.699637,
+      "elapsed_seconds": 6.189102,
+      "total_seconds": 6.189246,
+      "message_parsing_seconds": 0.000144
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode"
+    },
+    "validation": {},
+    "cancel_requested": false,
+    "error": null
+  },
+  "same_run_resume": false,
+  "wall_seconds": 7.07
+}

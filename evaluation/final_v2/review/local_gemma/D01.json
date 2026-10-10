@@ -1,0 +1,140 @@
+{
+  "task_id": "D01",
+  "prompt_version": "final-v2-reviewer-1-local-gemma",
+  "reviewer_model_id": "gemma4:latest",
+  "mapping": {
+    "A": "qwen_closed_book",
+    "B": "agent",
+    "C": "qwen_same_evidence",
+    "D": "openai_closed_book",
+    "E": "openai_same_evidence"
+  },
+  "scores_by_track": {
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly identifies the formula and calculates the result (0.5)."
+    },
+    "agent": {
+      "claim_verdicts": [
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Refuses to answer without external source confirmation, which is unnecessary for this direct calculation."
+    },
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly identifies the formula and calculates the result (0.5)."
+    },
+    "openai_closed_book": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": false,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly calculates the result (0.5) but incorrectly states the unit for the final answer (50% implies percentage, but the calculation is dimensionless)."
+    },
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 0.25,
+      "note": "Correctly calculates the result (0.5) and provides the correct conceptual understanding, although the citation support is weak for the core calculation."
+    }
+  },
+  "raw_review": "{\"scores\":{\"A\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": null, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"Correctly identifies the formula and calculates the result (0.5).\"}, \"B\": {\"claim_verdicts\": [false], \"partial_or_better\": false, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": null, \"unit_accuracy\": null, \"formula_accuracy\": null, \"false_premise_handled\": null, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"Refuses to answer without external source confirmation, which is unnecessary for this direct calculation.\"}, \"C\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": null, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"Correctly identifies the formula and calculates the result (0.5).\"}, \"D\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": false, \"formula_accuracy\": true, \"false_premise_handled\": null, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"Correctly calculates the result (0.5) but incorrectly states the unit for the final answer (50% implies percentage, but the calculation is dimensionless).\"}, \"E\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": null, \"safe_refusal_correct\": null, \"citation_semantic_support\": 0.25, \"note\": \"Correctly calculates the result (0.5) and provides the correct conceptual understanding, although the citation support is weak for the core calculation.\"}}\n}",
+  "parse_attempts": 2,
+  "prior_attempts": [
+    {
+      "attempt": 1,
+      "parse_error": "ValueError",
+      "raw_review": "{\"scores\":{\"A\": {\"claim_verdicts\": [true, false, false], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"The calculation is correct, and the formula stated is correct, but the claim that the formula is 'Net-to-gross is net pay divided by gross thickness' is stated in the claim, and the answer correctly implements this formula.\"}, \"B\": {\"claim_verdicts\": [false, false, false], \"partial_or_better\": false, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": null, \"unit_accuracy\": null, \"formula_accuracy\": null, \"false_premise_handled\": false, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"The answer refuses to calculate, which is incorrect given the direct calculation nature of the task.\"}, \"C\": {\"claim_verdicts\": [true, false, false], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"The calculation is correct, and the formula stated is correct, but the claim that the formula is 'Net-to-gross is net pay divided by gross thickness' is stated in the claim, and the answer correctly implements this formula.\"}, \"D\": {\"claim_verdicts\": [true, false, false], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": false, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"The calculation is correct, but the unit accuracy is questionable as the final answer is presented as a percentage ('50%') without explicitly stating the dimensionless nature, although the calculation itself is correct.\"}, \"E\": {\"claim_verdicts\": [true, false, false], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": null, \"citation_semantic_support\": 0.25, \"note\": \"The calculation is correct, and the formula stated is correct, but the claim that the formula is 'Net-to-gross is net pay divided by gross thickness' is stated in the claim, and the answer correctly implements this formula.\"}}\n}",
+      "provider_payload": {
+        "model": "gemma4:latest",
+        "created_at": "2026-10-10T11:55:27.4542002Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"scores\":{\"A\": {\"claim_verdicts\": [true, false, false], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"The calculation is correct, and the formula stated is correct, but the claim that the formula is 'Net-to-gross is net pay divided by gross thickness' is stated in the claim, and the answer correctly implements this formula.\"}, \"B\": {\"claim_verdicts\": [false, false, false], \"partial_or_better\": false, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": null, \"unit_accuracy\": null, \"formula_accuracy\": null, \"false_premise_handled\": false, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"The answer refuses to calculate, which is incorrect given the direct calculation nature of the task.\"}, \"C\": {\"claim_verdicts\": [true, false, false], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"The calculation is correct, and the formula stated is correct, but the claim that the formula is 'Net-to-gross is net pay divided by gross thickness' is stated in the claim, and the answer correctly implements this formula.\"}, \"D\": {\"claim_verdicts\": [true, false, false], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": false, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"The calculation is correct, but the unit accuracy is questionable as the final answer is presented as a percentage ('50%') without explicitly stating the dimensionless nature, although the calculation itself is correct.\"}, \"E\": {\"claim_verdicts\": [true, false, false], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": null, \"citation_semantic_support\": 0.25, \"note\": \"The calculation is correct, and the formula stated is correct, but the claim that the formula is 'Net-to-gross is net pay divided by gross thickness' is stated in the claim, and the answer correctly implements this formula.\"}}\n}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 7948906500,
+        "load_duration": 4751800,
+        "prompt_eval_count": 7477,
+        "prompt_eval_cached_count": 0,
+        "prompt_eval_duration": 1166591000,
+        "eval_count": 748,
+        "eval_duration": 6612164000
+      }
+    }
+  ],
+  "wall_seconds": 15.049,
+  "input_tokens": 7494,
+  "output_tokens": 638,
+  "provider_payload": {
+    "model": "gemma4:latest",
+    "created_at": "2026-10-10T11:55:34.5356085Z",
+    "message": {
+      "role": "assistant",
+      "content": "{\"scores\":{\"A\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": null, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"Correctly identifies the formula and calculates the result (0.5).\"}, \"B\": {\"claim_verdicts\": [false], \"partial_or_better\": false, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": null, \"unit_accuracy\": null, \"formula_accuracy\": null, \"false_premise_handled\": null, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"Refuses to answer without external source confirmation, which is unnecessary for this direct calculation.\"}, \"C\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": null, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"Correctly identifies the formula and calculates the result (0.5).\"}, \"D\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": false, \"formula_accuracy\": true, \"false_premise_handled\": null, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"Correctly calculates the result (0.5) but incorrectly states the unit for the final answer (50% implies percentage, but the calculation is dimensionless).\"}, \"E\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": null, \"safe_refusal_correct\": null, \"citation_semantic_support\": 0.25, \"note\": \"Correctly calculates the result (0.5) and provides the correct conceptual understanding, although the citation support is weak for the core calculation.\"}}\n}"
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 7063049900,
+    "load_duration": 4404200,
+    "prompt_eval_count": 7494,
+    "prompt_eval_cached_count": 0,
+    "prompt_eval_duration": 1164680000,
+    "eval_count": 638,
+    "eval_duration": 5742541000
+  }
+}

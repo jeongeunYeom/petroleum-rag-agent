@@ -1,0 +1,176 @@
+{
+  "task_id": "K01",
+  "provider": "openai",
+  "track": "same_evidence",
+  "question": "내부 PVT 교재의 pseudo-reduced pressure 식을 찾아, 실제 압력 3000 psia와 pseudocritical pressure 750 psia로 Ppr을 계산하고 식이 나온 페이지를 인용해줘.",
+  "continuation": null,
+  "system_prompt": "Answer the petroleum-engineering request in the user's language. Be concise and state uncertainty. No tools, Python, retrieval or web access. Do not invent formulas, measurements or citations. Explicitly correct a false premise. If essential input is absent, ask for it. Cite evidence IDs only when evidence is supplied. Use only supplied KB/FIG text and the user's values for sourced engineering claims. Cite supporting IDs in square brackets. No other evidence is available.",
+  "user_prompt": "내부 PVT 교재의 pseudo-reduced pressure 식을 찾아, 실제 압력 3000 psia와 pseudocritical pressure 750 psia로 Ppr을 계산하고 식이 나온 페이지를 인용해줘.\n\n=== Captured Agent KB/FIG text evidence ===\n[{\"evidence_id\": \"KB1\", \"document\": \"Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf\", \"page\": 239, \"chunk_id\": \"d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p239:c0\", \"kind\": \"KB\", \"excerpt\": \"ppc\\n′ =\\nppcTpc\\n′\\nTpc −B(1 −B)ε =\\n(663.29 psia)(356.31°R)\\n377.59°R −(0.07)(0.93)(21.278°R) = 628.21 psia.\\nNext, calculate the pseudoreduced properties:\\npr =\\np\\np′pc\\n= 2,010 psia\\n628.21 psia = 3.1995\\nand Tr = (75 + 459.67)°R\\n356.31°R\\n= 1.5006.\\nFinally, looking up the z-factor chart (Fig 5.2) gives z = 0.772.\\n(b) Using the method of Piper et al.,13\\nJ = 0.11582 −0.45820yH2S(\\nTc\\npc)H2S −0.90348yCO2(\\nTc\\npc)CO2\\n−0.66026yN2(\\nTc\\npc)N2\\n+0.70729γg −0.099397γg\\n2\\n= 0.11582 −(0.45820)(0.07)(\\n672.3°R\\n1,306 psia) −(0.90348)(0.1)(\\n547.5°R\\n1,071 psia)\\n+ (0.70729)(0.7) −(0.099397)(0.72)\\n= 0.4995°R (in.2)/ lbf.\\nK = 3.8216 −0.06534yH2S(\\nTc\\npc)H2S\\n−0.42113yCO2(\\nTc\\npc)CO2\\n−0.91249yN2(\\nTc\\npc)N2\\n+17.438γg −3.2191γg\\n2\\n= 3.8216 −(0.06534)(0.07)(\\n672.3°R\\n1,306 psia) −0.42113yCO2(\\n547.5°R\\n1,071 psia)\\n+ (17.438)(0.7) −(3.2191)(0.72)\\n= 13.661°R (in.)/ lbf0.5.\\nTpc = K2\\nJ\\n=\\n13.6612°R2in.2/ lbf\\n0.4995°R in.2/ lbf\\n= 373.6°R\\nppc =\\nTpc\\nJ\\n= 373.6\\n0.4995 = 747.9 psia.\\nThe pseudoreduced properties are then:\\npr =\\np\\nppc\\n= 2,010 psia\\n747.9 psia = 2.687\\nand Tr =\\nT\\nTpc\\n= (75 + 459.67)°R\\n373.6°R\\n= 1.431.\\nFinally, looking up the z-factor chart (Fig 5.3) gives z = 0.745.\\nI-232\\nPetroleum Engineering Handbook—Vol. I\\nHome\\nSearch\\nPri\"}, {\"evidence_id\": \"KB2\", \"document\": \"Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf\", \"page\": 241, \"chunk_id\": \"d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p241:c1\", \"kind\": \"KB\", \"excerpt\": \"..................................... (5.31)\\nMultiplying Eq. 5.30 through by the pseudocritical pressure gives\\ncr = cg ppc = 1\\npr\\n−1\\nz (\\n∂z\\n∂pr )Tr\\n................................................. (5.32)\\nCharts  of  the  pseudoreduced  gas  compressibility  have  been  published  by  Trube14  and  by\\nMattar et al.,15 and two of these are shown in Figs 5.8 and 5.9. Mattar et al.15 also developed\\nan analytical expression for calculating the pseudoreduced compressibility; that expression is\\ncr = 1\\npr\\n−0.27\\nz2Tr\\n(∂z /∂ρr)Tr\\n1 +(\\nρr\\nz )(\\n∂z\\n∂ρr )Tr\\n............................................. (5.33)\\nTaking the derivative of Eq. 5.10, the following is obtained:\\nI-234\\nPetroleum Engineering Handbook—Vol. I\\nHome\\nSearch\\nPrint\\nHelp\\nChapter 4\\nChapter 6 Bookmarks\"}, {\"evidence_id\": \"KB3\", \"document\": \"Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf\", \"page\": 248, \"chunk_id\": \"d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p248:c0\", \"kind\": \"KB\", \"excerpt\": \"(d) The compressibility is determined by first reading Fig. 5.8 or Fig. 5.9 for the previously\\ncalculated values of pr = 3.200 and Tr = 1.500 to give crTr = 0.5. Because Tr = 1.500 then cr =\\n0.5/1.5 = 0.3333. Because cr = cg ppc,\\ncg = cr / ppc = 0.3333 / 628.21\\ncg = 5.306 × 10−4psi−1.\\n5.14 Real-Gas Pseudopotential\\nIn  the  analysis  of  gas  reservoirs,  well-test  analysis,  gas  flow  in  pipes,  and  other  calculations\\ncan be made more accurate by the use of the real-gas pseudopotential. This is because the z\\nfactor and viscosity that appear in such equations along with pressure terms are dependent on\\npressure. Consequently, the integral of pressure divided by the z factor and viscosity is defined\\nas a separate parameter called the real-gas pseudopotential and is designated here as ψ(p).\\nψ(p) = 2∫po\\np p\\nμz dp, ........................................................ (5.38)\\nwhere po is some arbritary low base pressure (typically atmospheric pressure). This integral is\\nusually evaluated numerically using values of z and μ for the particular gas at a particular tem-\\nperature.  Then,  the  pseudopotential  is  tabulated  as  a  function  of  pressure  and  temperature.\\nIllustration\"}, {\"evidence_id\": \"KB4\", \"document\": \"Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf\", \"page\": 862, \"chunk_id\": \"779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p862:c2\", \"kind\": \"KB\", \"excerpt\": \"lly, first calculate the pseudopressure at pb and compute\\nΔpp = pp(ps) −pp(pb) = 9.9715 × 106 −2,098.7 = 9.969 × 106 .\\nV-854\\nPetroleum Engineering Handbook—Vol. V\\nPrint\\nSearch\\nHome\\nBookmarks\\nHelp\\nChapter 7\\nChapter 9\"}, {\"evidence_id\": \"KB5\", \"document\": \"Heriot-Watt University - Reservoir Engineering.pdf\", \"page\": 134, \"chunk_id\": \"f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p134:c0\", \"kind\": \"KB\", \"excerpt\": \"12\\n \\nT\\nT\\nT\\nand\\nP\\nP\\npr\\npc\\npc\\n=\\n=\\n Ppr\\n \\n \\n \\n \\n \\n \\n(17)\\nThe use of this chart , figure 2 ,has become common practise to generate z values for \\nnatural gases. Poettmann and Carpenter 2 have also converted the chart to a table. \\nVarious equations have also been generated based on the tables.\\nEXERCISE 8.  \\nFor the gas of exercise 4 determine the compressibility factor at a temperature of \\n150°F and a pressure of 3500psia.\\n2.3 Pseudocritical Properties of Natural Gases\\nThe pseudocritical properties of gases can be computed from the basic composition \\nbut can also be estimated from the gas gravity using the correlation presented in \\nFigure 3.\\n       \\n0.5\\n0.6\\n0.7\\n0.8\\n0.9\\n1.0\\n1.1\\n1.2\\nPseudocritical Properties of Natural Gases\\nPseudocritical Temperature,  R\\nPseudocritical Pressure, psia\\nGas Gravity (air = 1)\\n700\\n650\\n600\\n550\\n500\\n450\\n400\\n350\\n300\\nCondensate We\\nll Fluids \\nMiscellaneous Gases \\nMiscellaneous Gases \\nCondensat\\ne Well Fluids \\nFigure 3  Pseudocritical properties of natural gases 3\"}, {\"evidence_id\": \"KB6\", \"document\": \"Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf\", \"page\": 854, \"chunk_id\": \"779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p854:c2\", \"kind\": \"KB\", \"excerpt\": \"= 407.6 psia, pp(p = 407.6) = 1.617 × 107 psia2/cp. p after 10 years = 350 psia,\\npp(p = 350) = 1.2239 × 107 psia2/cp. pb = 14.65 psia, pp(pb) = 2,674.8 psia2/cp.\\nThe  pseudopressure  in  this  example  (and  all  others  in  this  section)  were  calculated  using\\nthe methods suggested by Al-Hussainy et al.15 These methods, which involve numerical evalua-\\ntion  of  the  integral  in  Eq.  8.97  and  which  require  computational  routines  to  estimate  gas\\nviscosity, μ, and deviation factor, z, are widely available in basic reservoir fluid flow analysis\\nsoftware.\\nSolution.\\nRawlins-Schellhardt  Analysis.  Plot  Δpp  vs.  q  on  log-log  graph  paper  (Fig.  8.115).  Table\\n8.14  gives  the  plotting  functions.  Construct  the  best-fit  line  through  the  data  points.  All  data\\npoints lie on the best-fit line and will be used for all subsequent calculations.\\nNext, determine the deliverability exponent using least-squares regression analysis. Alterna-\\ntively,  because  Points  1  and  4  both  lie  on  the  perceived  “best”  straight  line  through  the  test\\ndata, the reciprocal slope is estimated to be\\nV-846\\nPetroleum Engineering Handbook—Vol. V\\nPrint\\nSearch\\nHome\\nBookmarks\\nHel\"}, {\"evidence_id\": \"KB7\", \"document\": \"Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf\", \"page\": 890, \"chunk_id\": \"779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p890:c1\", \"kind\": \"KB\", \"excerpt\": \"zed pseudopressure, (μz/p)pp, psia\\npawf = adjusted flowing bottomhole pressure, psia\\npaws = adjusted shut-in bottomhole pressure, psia\\npf = formation pressure, psi\\npi = original reservoir pressure, psi\\npm = matrix pressure, psi\\npp = pseudopressure, psia2/cp\\nps = stabilized shut-in BHP measured just before start of a deliverability test, psia\\npsc = standard-condition pressure, psia\\npt = surface pressure in tubing, psi\\npw = BHP in wellbore, psi\\npwf = flowing BHP, psi\\npws = shut-in BHP, psi\\npxy = parameter in horizontal well analysis equations\\npxyz = parameter in horizontal well analysis equations\\npy = parameter in horizontal well analysis equations\\np1hr = pressure at 1-hour shut-in (flow) time on MTR line or its extrapolation, psi\\np′ = pressure derivative\\np* = MTR pressure trend extrapolated to infinite shut-in time, psi\\npD = 0.00708 kh(pi – p)/qBμ, dimensionless pressure as defined for constant-rate\\nproduction\\npMBHD = Matthews-Brons-Hazebroek pressure, dimensionless\\n(pD)MP = dimensionless pressure at match point\\nq = flow rate at surface, STB/D\\nqAOF = absolute-open-flow potential, MMscf/D\\nV-882\\nPetroleum Engineering Handbook—Vol. V\\nPrint\\nSearch\\nHome\\nBookmarks\\nHelp\\nChapter 7\\nChapter 9\"}]",
+  "evidence": [
+    {
+      "evidence_id": "KB1",
+      "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+      "page": 239,
+      "chunk_id": "d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p239:c0",
+      "kind": "KB",
+      "excerpt": "ppc\n′ =\nppcTpc\n′\nTpc −B(1 −B)ε =\n(663.29 psia)(356.31°R)\n377.59°R −(0.07)(0.93)(21.278°R) = 628.21 psia.\nNext, calculate the pseudoreduced properties:\npr =\np\np′pc\n= 2,010 psia\n628.21 psia = 3.1995\nand Tr = (75 + 459.67)°R\n356.31°R\n= 1.5006.\nFinally, looking up the z-factor chart (Fig 5.2) gives z = 0.772.\n(b) Using the method of Piper et al.,13\nJ = 0.11582 −0.45820yH2S(\nTc\npc)H2S −0.90348yCO2(\nTc\npc)CO2\n−0.66026yN2(\nTc\npc)N2\n+0.70729γg −0.099397γg\n2\n= 0.11582 −(0.45820)(0.07)(\n672.3°R\n1,306 psia) −(0.90348)(0.1)(\n547.5°R\n1,071 psia)\n+ (0.70729)(0.7) −(0.099397)(0.72)\n= 0.4995°R (in.2)/ lbf.\nK = 3.8216 −0.06534yH2S(\nTc\npc)H2S\n−0.42113yCO2(\nTc\npc)CO2\n−0.91249yN2(\nTc\npc)N2\n+17.438γg −3.2191γg\n2\n= 3.8216 −(0.06534)(0.07)(\n672.3°R\n1,306 psia) −0.42113yCO2(\n547.5°R\n1,071 psia)\n+ (17.438)(0.7) −(3.2191)(0.72)\n= 13.661°R (in.)/ lbf0.5.\nTpc = K2\nJ\n=\n13.6612°R2in.2/ lbf\n0.4995°R in.2/ lbf\n= 373.6°R\nppc =\nTpc\nJ\n= 373.6\n0.4995 = 747.9 psia.\nThe pseudoreduced properties are then:\npr =\np\nppc\n= 2,010 psia\n747.9 psia = 2.687\nand Tr =\nT\nTpc\n= (75 + 459.67)°R\n373.6°R\n= 1.431.\nFinally, looking up the z-factor chart (Fig 5.3) gives z = 0.745.\nI-232\nPetroleum Engineering Handbook—Vol. I\nHome\nSearch\nPri"
+    },
+    {
+      "evidence_id": "KB2",
+      "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+      "page": 241,
+      "chunk_id": "d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p241:c1",
+      "kind": "KB",
+      "excerpt": "..................................... (5.31)\nMultiplying Eq. 5.30 through by the pseudocritical pressure gives\ncr = cg ppc = 1\npr\n−1\nz (\n∂z\n∂pr )Tr\n................................................. (5.32)\nCharts  of  the  pseudoreduced  gas  compressibility  have  been  published  by  Trube14  and  by\nMattar et al.,15 and two of these are shown in Figs 5.8 and 5.9. Mattar et al.15 also developed\nan analytical expression for calculating the pseudoreduced compressibility; that expression is\ncr = 1\npr\n−0.27\nz2Tr\n(∂z /∂ρr)Tr\n1 +(\nρr\nz )(\n∂z\n∂ρr )Tr\n............................................. (5.33)\nTaking the derivative of Eq. 5.10, the following is obtained:\nI-234\nPetroleum Engineering Handbook—Vol. I\nHome\nSearch\nPrint\nHelp\nChapter 4\nChapter 6 Bookmarks"
+    },
+    {
+      "evidence_id": "KB3",
+      "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+      "page": 248,
+      "chunk_id": "d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p248:c0",
+      "kind": "KB",
+      "excerpt": "(d) The compressibility is determined by first reading Fig. 5.8 or Fig. 5.9 for the previously\ncalculated values of pr = 3.200 and Tr = 1.500 to give crTr = 0.5. Because Tr = 1.500 then cr =\n0.5/1.5 = 0.3333. Because cr = cg ppc,\ncg = cr / ppc = 0.3333 / 628.21\ncg = 5.306 × 10−4psi−1.\n5.14 Real-Gas Pseudopotential\nIn  the  analysis  of  gas  reservoirs,  well-test  analysis,  gas  flow  in  pipes,  and  other  calculations\ncan be made more accurate by the use of the real-gas pseudopotential. This is because the z\nfactor and viscosity that appear in such equations along with pressure terms are dependent on\npressure. Consequently, the integral of pressure divided by the z factor and viscosity is defined\nas a separate parameter called the real-gas pseudopotential and is designated here as ψ(p).\nψ(p) = 2∫po\np p\nμz dp, ........................................................ (5.38)\nwhere po is some arbritary low base pressure (typically atmospheric pressure). This integral is\nusually evaluated numerically using values of z and μ for the particular gas at a particular tem-\nperature.  Then,  the  pseudopotential  is  tabulated  as  a  function  of  pressure  and  temperature.\nIllustration"
+    },
+    {
+      "evidence_id": "KB4",
+      "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+      "page": 862,
+      "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p862:c2",
+      "kind": "KB",
+      "excerpt": "lly, first calculate the pseudopressure at pb and compute\nΔpp = pp(ps) −pp(pb) = 9.9715 × 106 −2,098.7 = 9.969 × 106 .\nV-854\nPetroleum Engineering Handbook—Vol. V\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 7\nChapter 9"
+    },
+    {
+      "evidence_id": "KB5",
+      "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+      "page": 134,
+      "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p134:c0",
+      "kind": "KB",
+      "excerpt": "12\n \nT\nT\nT\nand\nP\nP\npr\npc\npc\n=\n=\n Ppr\n \n \n \n \n \n \n(17)\nThe use of this chart , figure 2 ,has become common practise to generate z values for \nnatural gases. Poettmann and Carpenter 2 have also converted the chart to a table. \nVarious equations have also been generated based on the tables.\nEXERCISE 8.  \nFor the gas of exercise 4 determine the compressibility factor at a temperature of \n150°F and a pressure of 3500psia.\n2.3 Pseudocritical Properties of Natural Gases\nThe pseudocritical properties of gases can be computed from the basic composition \nbut can also be estimated from the gas gravity using the correlation presented in \nFigure 3.\n       \n0.5\n0.6\n0.7\n0.8\n0.9\n1.0\n1.1\n1.2\nPseudocritical Properties of Natural Gases\nPseudocritical Temperature,  R\nPseudocritical Pressure, psia\nGas Gravity (air = 1)\n700\n650\n600\n550\n500\n450\n400\n350\n300\nCondensate We\nll Fluids \nMiscellaneous Gases \nMiscellaneous Gases \nCondensat\ne Well Fluids \nFigure 3  Pseudocritical properties of natural gases 3"
+    },
+    {
+      "evidence_id": "KB6",
+      "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+      "page": 854,
+      "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p854:c2",
+      "kind": "KB",
+      "excerpt": "= 407.6 psia, pp(p = 407.6) = 1.617 × 107 psia2/cp. p after 10 years = 350 psia,\npp(p = 350) = 1.2239 × 107 psia2/cp. pb = 14.65 psia, pp(pb) = 2,674.8 psia2/cp.\nThe  pseudopressure  in  this  example  (and  all  others  in  this  section)  were  calculated  using\nthe methods suggested by Al-Hussainy et al.15 These methods, which involve numerical evalua-\ntion  of  the  integral  in  Eq.  8.97  and  which  require  computational  routines  to  estimate  gas\nviscosity, μ, and deviation factor, z, are widely available in basic reservoir fluid flow analysis\nsoftware.\nSolution.\nRawlins-Schellhardt  Analysis.  Plot  Δpp  vs.  q  on  log-log  graph  paper  (Fig.  8.115).  Table\n8.14  gives  the  plotting  functions.  Construct  the  best-fit  line  through  the  data  points.  All  data\npoints lie on the best-fit line and will be used for all subsequent calculations.\nNext, determine the deliverability exponent using least-squares regression analysis. Alterna-\ntively,  because  Points  1  and  4  both  lie  on  the  perceived  “best”  straight  line  through  the  test\ndata, the reciprocal slope is estimated to be\nV-846\nPetroleum Engineering Handbook—Vol. V\nPrint\nSearch\nHome\nBookmarks\nHel"
+    },
+    {
+      "evidence_id": "KB7",
+      "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+      "page": 890,
+      "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p890:c1",
+      "kind": "KB",
+      "excerpt": "zed pseudopressure, (μz/p)pp, psia\npawf = adjusted flowing bottomhole pressure, psia\npaws = adjusted shut-in bottomhole pressure, psia\npf = formation pressure, psi\npi = original reservoir pressure, psi\npm = matrix pressure, psi\npp = pseudopressure, psia2/cp\nps = stabilized shut-in BHP measured just before start of a deliverability test, psia\npsc = standard-condition pressure, psia\npt = surface pressure in tubing, psi\npw = BHP in wellbore, psi\npwf = flowing BHP, psi\npws = shut-in BHP, psi\npxy = parameter in horizontal well analysis equations\npxyz = parameter in horizontal well analysis equations\npy = parameter in horizontal well analysis equations\np1hr = pressure at 1-hour shut-in (flow) time on MTR line or its extrapolation, psi\np′ = pressure derivative\np* = MTR pressure trend extrapolated to infinite shut-in time, psi\npD = 0.00708 kh(pi – p)/qBμ, dimensionless pressure as defined for constant-rate\nproduction\npMBHD = Matthews-Brons-Hazebroek pressure, dimensionless\n(pD)MP = dimensionless pressure at match point\nq = flow rate at surface, STB/D\nqAOF = absolute-open-flow potential, MMscf/D\nV-882\nPetroleum Engineering Handbook—Vol. V\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 7\nChapter 9"
+    }
+  ],
+  "initial_answer": "교재의 pseudo-reduced pressure 식은 다음입니다:\n\n\\[\nP_{pr} = \\frac{p}{p_{pc}}\n\\]\n\n이 식은 *Petroleum Engineering Handbook, Vol. I* p. 239(표기상 I-232)에서 “Next, calculate the pseudoreduced properties: \\(p_r = p/p_{pc}\\)”로 제시됩니다. [KB1]\n\n주어진 값으로 계산하면:\n\n\\[\nP_{pr} = \\frac{3000\\ \\text{psia}}{750\\ \\text{psia}} = 4.0\n\\]\n\n따라서 **\\(P_{pr} = 4.0\\)** 입니다.",
+  "answer": "교재의 pseudo-reduced pressure 식은 다음입니다:\n\n\\[\nP_{pr} = \\frac{p}{p_{pc}}\n\\]\n\n이 식은 *Petroleum Engineering Handbook, Vol. I* p. 239(표기상 I-232)에서 “Next, calculate the pseudoreduced properties: \\(p_r = p/p_{pc}\\)”로 제시됩니다. [KB1]\n\n주어진 값으로 계산하면:\n\n\\[\nP_{pr} = \\frac{3000\\ \\text{psia}}{750\\ \\text{psia}} = 4.0\n\\]\n\n따라서 **\\(P_{pr} = 4.0\\)** 입니다.",
+  "model_id": "gpt-5.4-mini-2026-03-17",
+  "input_tokens": 3235,
+  "output_tokens": 329,
+  "response_id": "resp_04f7945803f97d03016aca21187d9087d0b369af165f682358",
+  "provider_payload": {
+    "id": "resp_04f7945803f97d03016aca21187d9087d0b369af165f682358",
+    "object": "response",
+    "created_at": 1791631640,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791631642,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "Answer the petroleum-engineering request in the user's language. Be concise and state uncertainty. No tools, Python, retrieval or web access. Do not invent formulas, measurements or citations. Explicitly correct a false premise. If essential input is absent, ask for it. Cite evidence IDs only when evidence is supplied. Use only supplied KB/FIG text and the user's values for sourced engineering claims. Cite supporting IDs in square brackets. No other evidence is available.",
+    "max_output_tokens": 1800,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-mini-2026-03-17",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_04f7945803f97d03016aca2118cd6487d08147744ce7d17c56",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyiEalv4ZD41s-5vQSY6rSTyCqFV81mbxLOzMmWzDDA9TcrTpLF0WRINy8pJKxMIvsI6dVJXCx5KgjWN6yjczV5nFMbxkJ6VBOi5E1ne_H9cK7BSD-TW5oHk-OxImH3Sn--FC47dg-3yeMWhB8bul4VnS_LAno0GmUP_iJLAbFmdKQ4ib0-wudwfT7rNRRrfk9qq3cEqEMOi4-4YvLH690sGl6VDngxNHPr8UMhgws4H1bEh42n9RnBaYuSIbmTFPsdUDf79xSFu_pZxRaGErylmOU9Bkl0B7HVpYuyhYE6dNR0TitwPZOs18fbfnIDI7gjQqK7K3vR47uHrKOBNbVnDGMmAZtw4aXMaWp6Qhcz_Drz65nLDrTgFruXN-Ifo2LuAX6mwsx02ADtTLEZ8zhdr6ftbU5LHrnZK9weS1_LmfeSSa3Dyh179av9Tad-IBmLML9g8iaYjCbrw00gGfuavbuGGJuoxo26XFi9UsNpze5M4sT0saTcovSCP4HsVKq3L2H45z9KRb3nw1ZSP8UNvuQspJHiy4VFkLesnD25tDzv4LESGDuAC1f93kzooI18UxCggLZZB9R_ExhCx5h_9K5KTrlMutd3naa8ZhsYOQ8utoa1NoyOCsOoUMxaFANgWIznvxcuhdH766n1nGAwqUjcpuksNE2bzU4sdyT2rntOGNCDJ-_mxfB3TKZm6cOxypvzj7Qbxq0V4eHa-u7_XHc9d0nyAW86po_D6AUKfg2z08i6lvS22-OOTqTylZ-qZAQa3VaPjaZr7hykYh1ewFTgt0ft-pDmUr4YEfxvMmUv_hKqD7aGNozfpHjAS7uZKxu0dDK0dkqo9McjQewLRDQPhhyu9Nmhrq8qq4uui7J0_RKfJfvF8iJrIwAKcltPsvj68Izo1uBMDtKKkiYiU3jaJ1jnVAKmAt327SXZCiicihkf0sSrd3uTgVxz1iAsHoy3SCpq8A8LbMCTAsa2dFQbISaBXDUEP19BR5BbgPRh-7C1HOn4FIlB39RDIUHfN3n4WEhhqrkkbsf3yCt94qpIVXzjF9KmDfRxUtD2Hl9rbnumpI96gSMvu3oNG4zWsBuAIe-Qibvjisubn3u4IyyAQ03sK6m5CAf5fcyXvrZ5SJ2yRt9YksWVRN4lFtbg4-2mnScUTgaMV90Gq9KXeWisMBDGoMMHo9W9AlUmzSuU_PrWpA5_zv6s-uNH1Z5Xvqt84qosDy_N8OiIpDxBYtiTAJF1YfcPCwwI9ldF4rCpRiouLcr_yD2cMwZPxezuOxnV0yCHktB2SC99QQx6mz9g4nsrkUDFyuiE7JiLLPifkh0Leq-btaOiDOBFLwoTFZjC4kFqW0hUyUf6tEDY6aI86fYPgqVFopaKnhXV5dYOx8mo8SPZc6SNxBjCYys3ZeqoqiGtSxfkE2jdXx7QfAhZA80dHbCRaSKLTOV8QukPy6aCOCv_d5NZdz9EWzDvUBWdeEa9eReTSr4H1TzU5JCATDEMp67gMFI8ewhOY8UloLMBkrQTcr1gwSR39K-w2YbMgJ6UjYzl50yIkJI-eldDq_OKg3Z_Vz4C9ydxJMP7w03xyt2yLuHmUUkk0IES0Q7UANIpTJrKx75C6E44cY7LQMoi9lxj6dJ2L-D2IedID0PzQxASoBV-A22MmZptff7PAHzRWlgMgBc44QaEI9Z7TgRRG4bTgXW0Dh2bNPSPIBKlZjN6-RUdGk_1RmXcIi95mCmV4co625GlqKRhLZRNfr0Km1Q5MxLBLJYWbC5s1V6UCqZx-Vtcxe7B0hbIgUaDM2jctaVBmvhWri7wUVpCmQDSHAajs0Q7u29_zRwnNmjrgZCPycJ2hZDiTD6J37lZksHK5zsUhtaD623QHkyc9ruToh03sROMSs-rfQ-P8HKQO-b0kULis-zJ-R2O6ETZqNsI2dLRYqYCjz6UUMEcV0mszvC06RWxoI7yjc6dCMAnrS50JelCgpOUhRq5y9gcHcgoJ6Ixit6SGyl8mB06vujwwS9fdCJ7vHdLSRoqYWOHrG_VW__FlDp5fDWYnzsWDY0rqnLFjKGxAG9mWRa63YRcvSlRGhaP5Oqp_dGDgCHhajrpWhwIReNyArwB54Jp_HkcrhuUg8i1aKqBzRxNgoA0gcsJzCzweBmgi5wTL2JyfXnXn3iv4-i0-psBr3V1o8ygov1xVHpIcAmQLm7nxVJfnmhvdPB02eDN48Pbr9Pj0440sIlfqw14F38bm9IP7dgnE4EYdJE7Xw1boinr-Ri05NT71zpoUUj5d7Jg4G5Dzf-9cFqasGAFXuUlIOcVwqP8U-0toCQ-AkTeAnzr8zyfB3t3QLA6TwhnRW84oP-F4pERZjd5xTwqqnUFOhtL8lN7Mk_579xoqGAruYOqBsjLz_YEg6GRrSUhLNGyQyBxeaTQwRqidGK_W5hfYAB1IRqfeUxrv0caCMnoL5bYfGb7jCzUA3T9iT7FGKByNA9_Z5ARt1hA5-8FPSh2wSqBJxHKl9btN4V3lTOABIbeZ8HpC2j7J7kWW1oUgZLHeTb_aNtcJthGLY27vRlR0gUU4iN3BH5Y1msiOiHNe9Di2OuuSHUTBz5YP5lBK-_DRvbGM7QdMuZdVNGzmFDBXvv-mWNhlg_-YZZwKCCMwfJm0JcXyv5QprfUB5NaocnxRxwGffHnhim0jhs5xYrjGYjQppZ5aESOCrrtUOaojDGGKva0TMsypsDKk77hMg6_ha1sC3BHoMvJed0SbIUuVHzAODWIE0cbunEQXiLNSfNijButmD-Es5naoiTK-Qk_9ZjH87RJwzdMm7rrhtS9MsPw4QbGlWOvlVIGBbJwoFXEvDlwMekgs_hcITzrtT67_CQThArQPG56W7nRMsGwzsM0n7TWyo_PoMlOljRuP5zCQfGmgS_rBsN6PKv5p2MOzNHcyUPLWJrCWflESg4pTFN2yvKmH1ZUsTmQcqSBpRD-nM7QgQoqUpGTvc_5tcon6H4sSrMUnGHE9z4sIkDQCkVhJJYXhes6YmUKsV7I0_3I8qPuBJBa4zo_9vV7wTPrBFr77bjBMMj04RnHMAhuwQnySwcdocCUR0yMQGCkU__JI3KJKOVPXMjk1RxnT8DQJYYm9k01inUlXk7Q-vjCDPoHxVidCukn-FWWxf4zpRcK8iSdh4VWs49mi9zSSx74tXaNgMK1YjNoe-smv2-8eMy8uxsf11OiuFIQHbsuEfn2Cydc_mNdljIOBIaB7j21pDj33NPjtH-s5dLDg0tw5A8-GHnw0nKzRwO3joHf1NP3ngW_wBfK60uwScFoZSZEH78xmnduXxyUV77pIjr9VjH2NY5qwZz3cdWK--0Fj4SKc7ACFw6DYVhDp22V840t7kYvvtHakvH-SPyNBGc9MMvMiPC7L61FVOliSJJKBSjbWzjS78Qz_OSiKGq6b3TdyzHljr8vFNh_9b8FUy-7hg",
+        "summary": []
+      },
+      {
+        "id": "msg_04f7945803f97d03016aca2119bf8887d09161a7798eb35311",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "교재의 pseudo-reduced pressure 식은 다음입니다:\n\n\\[\nP_{pr} = \\frac{p}{p_{pc}}\n\\]\n\n이 식은 *Petroleum Engineering Handbook, Vol. I* p. 239(표기상 I-232)에서 “Next, calculate the pseudoreduced properties: \\(p_r = p/p_{pc}\\)”로 제시됩니다. [KB1]\n\n주어진 값으로 계산하면:\n\n\\[\nP_{pr} = \\frac{3000\\ \\text{psia}}{750\\ \\text{psia}} = 4.0\n\\]\n\n따라서 **\\(P_{pr} = 4.0\\)** 입니다."
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 3235,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 329,
+      "output_tokens_details": {
+        "reasoning_tokens": 177
+      },
+      "total_tokens": 3564
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "wall_seconds": 2.507
+}

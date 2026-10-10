@@ -1,0 +1,211 @@
+{
+  "task_id": "D04",
+  "prompt_version": "final-v2-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_0ea1d6b2e3fe065d016aca2378a9b087d0948a74af579b4fb7",
+  "wall_seconds": 11.73,
+  "mapping": {
+    "A": "qwen_closed_book",
+    "B": "agent",
+    "C": "openai_same_evidence",
+    "D": "openai_closed_book",
+    "E": "qwen_same_evidence"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"claim_verdicts\":[false],\"partial_or_better\":true,\"unsupported_claim_count\":2,\"hallucination\":true,\"engineering_contradiction_count\":2,\"numeric_accuracy\":false,\"unit_accuracy\":false,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Gives the correct multiplication as an example (0.15×800=120 m3) but incorrectly concludes the volume cannot be calculated without density or other information.\"},\"B\":{\"claim_verdicts\":[false],\"partial_or_better\":false,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":false,\"unit_accuracy\":false,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Refuses to calculate despite all needed inputs and relation being explicitly provided.\"},\"C\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Correctly applies V=A×L with 0.15 m2 and 800 m to obtain 120 m3.\"},\"D\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Correctly computes V=A×L=120 m3; extra caveat does not change the correct result.\"},\"E\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Correctly uses the supplied relation and inputs to get 120 m3.\"}}}",
+  "usage": {
+    "input_tokens": 1871,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 821,
+    "output_tokens_details": {
+      "reasoning_tokens": 317
+    },
+    "total_tokens": 2692
+  },
+  "provider_payload": {
+    "id": "resp_0ea1d6b2e3fe065d016aca2378a9b087d0948a74af579b4fb7",
+    "object": "response",
+    "created_at": 1791632248,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791632259,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are one independent AI-assisted semantic reviewer, not a human reviewer.\nJudge five anonymized petroleum-engineering answers against one frozen task. Do not infer\nsystem identity or repair answers. Evaluate the final answer; for a clarification task,\nalso evaluate whether its first answer requested the missing information.\n\nReturn JSON only: {\"scores\":{\"A\":{...},\"B\":{...},...}}. Each score object MUST have:\n- claim_verdicts: boolean list in exactly the supplied expected_claims order. True only\n  when the final answer accurately conveys that claim. An explicit refusal does not\n  satisfy a substantive positive claim.\n- partial_or_better: boolean, at least one substantive requested part correct.\n- unsupported_claim_count: nonnegative integer of unsupported specific engineering\n  assertions; no-source closed-book is NOT automatically unsupported. Count clearly\n  invented, source-incompatible, or unjustified specific assertions.\n- hallucination: boolean for a fabricated factual, numeric, formula, source, or\n  engineering assertion. Missing citation alone is not hallucination.\n- engineering_contradiction_count: nonnegative integer of wrong engineering relations.\n- numeric_accuracy: boolean or null; use null only when no numeric gold. Associate\n  each expected output with its value; mere appearance of an input number is not enough.\n- unit_accuracy: boolean or null, units must attach to corresponding output; dimensionless\n  output is acceptable without a unit.\n- formula_accuracy: boolean or null when a formula is requested or supplied.\n- false_premise_handled: boolean or null. True requires explicit rejection of the\n  erroneous premise, correct statement, and supporting citation when supplied evidence\n  is available.\n- safe_refusal_correct: boolean or null; applicable to unsupported-formula tasks.\n- citation_semantic_support: 0..1 or null. Of actual cited IDs, fraction whose exact\n  supplied excerpt supports the adjacent claim. Do not judge only document/page similarity.\n- note: concise evidence-based reason, no private chain-of-thought.\n\nBe strict but fair. Source gold spans are answer keys, not evidence available to models.\nNo citations in an answer means citation_semantic_support=null. Do not infer missing\nfacts from background knowledge for citation support. If an answer is empty, all claim\nverdicts false and partial_or_better false. No Markdown.",
+    "max_output_tokens": 6500,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_0ea1d6b2e3fe065d016aca23796bc087d092e90bf103ee14a9",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyiODJpvOCliUXjIQkaJH9ejZNXEfYO85NLl3Mp0UJ6uOy5zOi8pw3IfW6n9o-uwDKnbgNUyNomvfzjfe05Zx0S2gm3nPnvM3mSAfExFnRGnwq6fSF8RoTLoaJfpV-vwJ6-5TAN9xn8kHyur5bhytJrEM-5wKmJLJcnUjHTkFM9g4WJs1CFqZJd1pTsLWmzz_kNnKWvhnGSb7M8SYjW9KFYSxdlN89v4gGiaz2WXCTch8bXJouKRLOdTyhg99RlgvYlw-HhtS9e-L8_1pFR-vh0e1fDv1yEAsiGDMvbERMTgJJhmOMjQKBs4gdCXcCqc_fhWMC3f2mYrelhd5QPa_m85DuJD6bUyux5dI4LuKXirhjs7Vho16hW-1Zttj5KJoUuZYkc24a7VNG8xCBAH6LdmC0HfAVo2gVeKHO4L59NGLafLtkKQZnnNTi1lTGQ7BWQKOBb5BFhYg3ocLS68FH4kLLmTXWMDfixbab_rM6CctDIWRgu-IAfBlPdb1OXpgvmRzDe7X2DGE7yqpHFDn_up63gZDYnr96zLq1h-058TV9KDlpvHrAn5Ja28KX5ZLFiiZRzmoE5q0tgzbp5S45DAq_rX72y44e3IF8UUTO5kCQX2tqSzQPlbDB4GyFpkDXbaxxkd5UGkyWsvWGqXdA2vXwR3NtFWvDCfROCNJaL3qccBPBrXCMRRWUIfwVRKZgptpdpmda0OE8UepG3O4OeHQlN-nqr8_1QVWSSMERf5W-GleWePedLzHEn52qhLU10qmcCQc0hEnRX9NpFiHHR8LERrZ4qsiG_Ua8g7bcw248XyhZlVJnow7xjaazkQFFChqbQvM2wZorVDCywDjMJrxtNEAMgak-1q2DxOzjfHpOhAvcd7DFw54G6gC7FbJfxX_hsiL78eCxKY-2urDcbMOAG4kYRUVp5WxvTqS37lTXLmbTZNyS_V59sDCgRj2-TfGLHkU8wuNnvJDshL-QhxZ4mBvCy7mKOKieLeabrDqcnzYhy82PyNhT2u4ifLes4njSDtbctrOWd8brff9Yp9m-E5DkmadnwDAjE0FQnkYuJNeNANTZeKbOtMe9yv1Z8Y-oMj2xUePnfXLdO_OZUN7rzm8hambFjkjuqTw4FWeI2wHnvECxpWyhVSiWqYFkpXdJlegiWr_j2YtdolG4VsEzuVEEUvXUG0Oojk8Ow1FLihf1omPYi9PQ3QXIoow1pdKrzsXpF1pVL3D37Gwo-HgdlzHI3ABebd17STqu_725ICwNR0VRa1owPC0JCz_T_7jMBs4pMuqbe2yIYrY6EgeEv36YQOX5oaIQPkXSBX2ndLSrhgJG9t01Y-G6Yq5k9BM1lvUVwIaoFXvIHm-m-JI0PFQ_T3ortFwJkG7FAKmgyx8c_Ee8rk3X2RfefMy-SD4jMoJpk7qRTYUjQR-5FGHp7TmemCsvZKBiZNT_kdouZWD6I9YUoE4CZCawQ_qlIPwbAFLTFzBgO4u5q6sBvSAaLpbUL4yXS8xuSMfbTf8qCsVNweD6333NoOVxQ1jIqhnj-UPTzWYeDv2UUBUGLlYJEdcZ6ZB_upoYIwLaynrszDnASkjFpdlYIdqtDwA0kXBFwUx-qs3Fhz7XTJEtq0YPymbA33KtvcAtWPF-ckWXMMo68U7xcihjy3I1AtxKOwAJwrfLZYwbk2_aypglXiLF1RCYDfkg4WKHMbxP7-AXHQkOU7p7EUhdxyr8VBSGmEEe_Ly2Nq8i07WJJnORyC38W-hlex__mTOdxwA22Qr8PqzS33UpMvWRknhARHFPneEiMwE_Af96FcIyaO3pDz_q9_4S3OQr--C-6NDVp5OD0al7yjACs9RHiVCzrB8hBqV-i_DCYWJLl9k-qfcmblWdLyKHrL-whA8NP_kljcte4b7BlStEuSb5-HWoNdmOAadeUC-HV4Gu13KpcY6QaKQqQsIF9L7Hoi_pHmCdrg0lU93YcsJU1Af8BxS1_T1fIwEG4vsrZRRSU94mnrF6phxK9deyJ3eW_gev0d-HyOgDP8MupCuqw--jqBpDmD_eJs_V104PPMrCDeIllNpiWmHYJ7CkxGVMNZ-93XDVEx0ESiWDDx7Ls7vLq9N0doy03IPOK7g-6oqRECN7b9xLPQm06tHS0C6YPBsDDGrB-2b5GxPJUlCs2yvGVxt3pC_nhWY834UonEZ2xgO7voZEOL1N0ozGKYykWV2QV7xtA_bDInu26tbXqdqOTp4xfe3icPLo5jbPZGUMcIqhzC-giKhPqKDZ_RodnMBrI5yHZWrn_bpzuej4D-zZ8zmYa5mI94xFu2kMMrkCaHoC_WoPTZfEcUbSmVfLN5VjkFZYe1gvRAdyRnMOTZS3pffdqKiYMjoXYtjylXgkqpGFRYAHbLl7md_WzFobQUjABNeYhPn8rrhiL8hGd75re-KGxyDB4pYjrZU9Mn6axkUcxokdEPK3fsqkmAh0SE-q_FEJpF_0ONOkWuv8pZ7Y3lCAMbuDMC_xsRPfd1fCDG06waZOfmlzAFZlL-1CJeE1xvdLm0SCodU_h6NyNStae2jaJYpo70AvsF6Hqkj0FxDN4PHt6l_UIE0u5FvoxFp2P_dSVLYG_z5AyFQfmjdqS7OxLP4SpnIPFJbP5cv9r33X-vAH-tqWEB8Df5o84_NOEXRp9q3gAePxPjb2WWszXs3rTaYPJtbA5OaVsygM16d9Ywq2xN77s2Dqq_XU3FUwVOoraQvNzNVOBVDdcbwB6RdrxO5AB_lFhSiI6vUoeRHBNS82oKgI0-YX0q3jdD5F9ck39Tfsg4AxnBzW1xD2NXkK2VmjEtDr5aGFflqkEc3y33YFbMw2fBASPxgtKklkwe74m8CkfaRF6Ga6YTIt6yk2bxaGQbwzKngqbWphEoNQd5tv7IiOKulwmmH3dDrjTmiwujK9FRhNZBfLYg3oh33ObIdhwNIjYZ2uagzcoTf5Cnucs4LJfkOyYWtcr7BblOMkdI6GjVxF26Y3QYFdbrPKVd3oh_0SreUgjL8z7jORK-JLgF8JJrVUOZE2xl1LIDttAHHOYNPDGShYDsyC_fTWWVPxtVCsq0_C9N21eKChIWgzzq_Iid3TbTgrzsg7Z4bjQJ6RaMrtrGiZSJZ5_kAif6QFgr3GbYOPgwn4D9o9PsJzFvv7m0qLf8tn-rFHAtIUEbj30EuOqfz0SHNASf8p9MPRrQLmIlt6CK5L1UMZnzpKvzh4eRUmw-iUYjJkUVSEugEY5ArwbcQvRa9vhYU8xBrbS6ss9iDQ_NAZxGiZ4e7q13zb0CYIJ4UBGOI37tkxe27lnvb0x5RmxitrOdYowrNu_79CZJrqDSn1lfHVjJFfzRcdDKyZprBn4NkLJoSIEJ1MrXykoAzh3BIPNs3Klh6jqALy8fvJaxQsmy7T1X5RsFgmWPKlFbFPdfystFHI-rvOGh8Zhg4rvpybhSYPDJby5e_RJ8DciU90qxGzemaBJtoPX3cVlA0D_26BbQ_8cCACWuJuxCQlzfPPu6LsqKh2b9o8eKS4l0lWsvJ4tg8knQEM7bz9WJlm1gCgQ0GG3JOqyO9HLIYtzHGr4PwdTrhrCkYOM4H5Z00Oc5a5Abk6ZpWCdHocX_7DYvu0Cfn87Yx8didnkv2XB7bYCrNlrZzbKipmHIq20yTkLQBnIwJMnhqiARA4fqGLaYcaRwXCTGTi046XvYQnJU6Motj98Ub885TrKdI8qosPoWVoofiVTGh3w_6HYVRM6YoZBlsaI4izt9w1XYDWC1vAaKMV7dJusDvFOpDn5MKRdrkLprG0lIMjk6C45IPowyN5C3bOunEEHcFYmChpy6YNOYxk_1JI-S-we8_Oy8Nq4i2f5E6bcLr40Q-Ae-GcEHGdIo3Sn1xYl7CHRQB7oQD_N8qXjWMQCRCAXEGTzksnwcIaaxJmbqv9Ztt3hiT0Se2GQw2_S2q1myAgGX3i6OuG1MantXY-5NMVqjF_ArYOB_yXUabrk6z2D3VX80sy4q_-AM0MZuqfO1rx9uTDYV8QShyQ1jHR5zCtA_AHcqAk5KPEikudggGmtraZ1t6YnDneu_oFjzHAQ9ki8IqSiwBq8owgM5HJtxS6Ds1L3xPkD1VAhf4HRjTSs1DidjgpdvbFvmBi1MCf5T5REjDuoj4xMSgNLl_Ybx7uPUFszii0CkCmtKjGfMd6dzBABh6i10U4i85Zwimusy5c41I05TE9DUXmlrFBbe2DdnLhQJ8niJmOFS2NCoseG-D0-Dsfz0Qk5gpVnsEjtL4NIjsRvHXlUBuo5Ho5g9kvOWIJi3M_AdMmNtRb9FnVDkT4djWy3FjMrtqIdzyWXqGlzbkzP5DfFmJ-4SNI6VBxQuDkPE6EmWOXE7chzlwnt7e9uZ8xVOfLzBm7nExn7Y73exuu-z7PCxcF12pR5V0O3NgTQ9GIBYZK5Y77skdLNKMA6baquD-P-luL9nPC6OjTQJSoHPIiKwtehxkcWyn1FkahbN-XzZQ9TF2WaqgfjyQ12a8rcD_MARiumNACi3JfmMkImIqQUug4iOuEwbHCHtljz_4D5kDGet8OVr8j0tWov-RCu3wENv-agTMbelqrF8e6XOTTWLO8TCwx0a3L4IDxe3y7ueHeacWHIEIapfgprKs9b6s0c4_K1FoL--83-Dg6AZjGvxgGyTFVrQEHSxt5k05Mg-HJBxNig4Xuyp5DTxy5b7v7qAD185eNrhwRmEe3BF6BXaQZtIscwrFX41BNzMa0EcL4obxITiwVbASEB89poSb3SVeOSODZnAfRYXgg8RfVgTe6UqXRX6VwN4_a6Mqb5q_ljwETeGOwmfOgSW7UsaX0eAIayfytK7DgfFsd8fVh6avFZBw2YFVa05jEYbgJ_YccU2zCuzhJKpWfFxl4Qn888eYdvOJB0vD6DYuj2SReNZiXjqPmlk-NzMHt5L35b6MGGcwe8V9N8t8bl_gR7ABzWmqwpikKk4YuqLvN0_WdxhhN4tkKPis4k__ZDxF4xAtg033-ozOTJ7b_-Af0JjcCrySZdcxB1VvlCGEjWY_64tKyzXl11NPSo4aGU7NG_-cPcAEia-f0TiH9yflvkwnED4KxqIaWrI6EJ6y10j_b9Bn-KdYMt6ZK3nMywqxQhaHQqEPj3bdp1_RhNvSlELChdNr-CebGmIFEj_GhhCJO2d_tv39vRepLQa1IwL6KdWyZz29WDtuci7YngiSToedNQYJYJKNQWN8MV4M4FzTUynJpP-rcIm3-1YAxMnO9QufqYzp7pnbjW2Hb9bRskv63rdo-gs88F7MxJ0BYN8Vxdbbvjf4DrSrJKm00MiFjRyZzZwVNoIByDlV7qkEEdgdf_zH2nSlnni0AZ5Tcq-tCM6fRlLjSDu4e9Ln9Sh0RVzm4c1i0Ydndj0sWaaGlSCaHpr2c8cjMfz6UugprQVSRhgq3QrYY6WuvWYS_u0-Ahr6CN2LUAwLE1F2dK60jvy66mPTydc5o1L_m1Ji-LljrCdwAxtpUbQ7YUWSNTMpPlaS6UitLXOE5TnADQzZDXsfesjDa29Iu4yrHT1VkErSEDIugKvob2kotzHj4yVPGvo6yqc4yvLroalLT-OR4OWuC-SR2K1ktq8DADQxt83e9vliYbSW4XMG",
+        "summary": []
+      },
+      {
+        "id": "msg_0ea1d6b2e3fe065d016aca237efc2c87d081eeb2497b873283",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"claim_verdicts\":[false],\"partial_or_better\":true,\"unsupported_claim_count\":2,\"hallucination\":true,\"engineering_contradiction_count\":2,\"numeric_accuracy\":false,\"unit_accuracy\":false,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Gives the correct multiplication as an example (0.15×800=120 m3) but incorrectly concludes the volume cannot be calculated without density or other information.\"},\"B\":{\"claim_verdicts\":[false],\"partial_or_better\":false,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":false,\"unit_accuracy\":false,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Refuses to calculate despite all needed inputs and relation being explicitly provided.\"},\"C\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Correctly applies V=A×L with 0.15 m2 and 800 m to obtain 120 m3.\"},\"D\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Correctly computes V=A×L=120 m3; extra caveat does not change the correct result.\"},\"E\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Correctly uses the supplied relation and inputs to get 120 m3.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 1871,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 821,
+      "output_tokens_details": {
+        "reasoning_tokens": 317
+      },
+      "total_tokens": 2692
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        false
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 2,
+      "hallucination": true,
+      "engineering_contradiction_count": 2,
+      "numeric_accuracy": false,
+      "unit_accuracy": false,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Gives the correct multiplication as an example (0.15×800=120 m3) but incorrectly concludes the volume cannot be calculated without density or other information."
+    },
+    "agent": {
+      "claim_verdicts": [
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": false,
+      "unit_accuracy": false,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Refuses to calculate despite all needed inputs and relation being explicitly provided."
+    },
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly applies V=A×L with 0.15 m2 and 800 m to obtain 120 m3."
+    },
+    "openai_closed_book": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly computes V=A×L=120 m3; extra caveat does not change the correct result."
+    },
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly uses the supplied relation and inputs to get 120 m3."
+    }
+  }
+}

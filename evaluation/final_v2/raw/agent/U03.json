@@ -1,0 +1,628 @@
+{
+  "task_id": "U03",
+  "model_id": "qwen3:8b",
+  "run_id": "GR-20261010-111207-6B0A5D",
+  "initial_response": {
+    "run_id": "GR-20261010-111207-6B0A5D",
+    "topic": "모델의 grid-block 개수 500개만 알고 있다. 유속·격자 크기·상대투과도 없이 water-breakthrough 시간을 정확한 일수로 산출해줘.",
+    "goal": "모델의 grid-block 개수 500개만 알고 있다. 유속·격자 크기·상대투과도 없이 water-breakthrough 시간을 정확한 일수로 산출해줘.",
+    "expected_result": null,
+    "run_status": "waiting_for_user_input",
+    "status": "pending",
+    "stop_reason": null,
+    "final_answer": "",
+    "clarification_question": "계산을 계속하려면 출처가 확인된 계산 관계식이(가) 필요합니다. 필요한 값을 알려주세요.",
+    "required_inputs": [
+      "출처가 확인된 계산 관계식"
+    ],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "949c95573ca935794e6381c0987f59c15383a9dc2bf941daae254c58196b89c7",
+    "criteria": [],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "모델의 grid-block 개수만을 기반으로 water-breakthrough 시간을 정확한 일수로 산출할 수 있는 알고리즘 또는 방법론이 존재하는지 여부",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "산출된 water-breakthrough 시간이 실제 시뮬레이션 결과와 일치하는지 여부",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "산출된 water-breakthrough 시간이 유속, 격자 크기, 상대투과도 등의 파라미터에 의존하지 않는지 여부",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 3,
+    "current_iteration": 3,
+    "max_iterations": 6,
+    "current_stage": "waiting_for_user_input",
+    "current_action": null,
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "calculation_source_missing",
+        "started_at": "2026-10-10T11:12:09.827761Z",
+        "finished_at": "2026-10-10T11:12:13.819176Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "blocked",
+        "reason_code": "calculation_source_missing",
+        "started_at": "2026-10-10T11:12:13.854307Z",
+        "finished_at": "2026-10-10T11:12:13.867250Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "retrieve_no_progress",
+        "details": {
+          "new_evidence_count": 0,
+          "retrieval_mode": "hybrid",
+          "cache_hit": true
+        }
+      },
+      {
+        "iteration": 3,
+        "action_id": "ACT-3",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "calculation_source_missing",
+        "started_at": "2026-10-10T11:12:13.899110Z",
+        "finished_at": "2026-10-10T11:12:17.691399Z",
+        "new_evidence_count": 1,
+        "evidence_added": [
+          "KB6"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 1,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "출처가 확인된 계산 관계식"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 121,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p121:c1",
+        "score": 0.01639344,
+        "excerpt": "ks \n(Δx decreases), then we will locate the front more accurately.  Indeed, taking more \nand more blocks we will gradually get closer to the analytical (correct) solution. \nHence, one method of reducing numerical dispersion is to increase the number of \ngrid blocks.  An alternative is to use a numerical method which has inherently less \ndispersion in it but we will not pursue this here.  Another approach is to use pseudo \nfunctions to control numerical dispersion - as we briefly introduced in Chapter 1 \n- and this is discussed further below.\nFigure 3\nEffect of grid on water \nbreakthrough time - numer­\nical dispersion."
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 120,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p120:c0",
+        "score": 0.01612903,
+        "excerpt": "Institute of Petroleum Engineering,  Heriot-Watt University  \n7\n44\nGridding And Well Modelling\ndiscuss how to reduce this source of error in our simulations or to make it a minor \neffect.  The balance, as we will see, is between accuracy (usually by taking more \ngrid blocks) and computational cost.  Ideally, we would like to capture all the main \nreservoir processes (e.g. frontal displacement, crossflow, gravity segregation etc.) and \naccurately forecast recovery to some acceptable percentage error, for the minimum \nnumber of grid blocks.  \nA simple schematic of the way that the numerical dispersion error arises is shown \nstep by step in Figure 3.  This figure illustrates a simple linear waterflood and we \nimagine that each of the sub-figures shown from (a) to (e) represents a time step, Δt, \nof the water injection process.  Block i = 1 contains the injector well which is injecting \nwater at a constant volumetric rate of Qw, and block i = 5 contains the producer.  The \nsystem is initially at water saturation, Swc, and this water is immobile i.e. the relative \npermeability of water is zero, krw(Swc) = 0.  Each block has constant pore volume, Vp \n= Δx.A.φ where φ is the porosity.  In"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 120,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p120:c2",
+        "score": 0.01587302,
+        "excerpt": "ion \nsuch that Sw2 > Swc making the relative permeability in this block, krw(Sw2)  > 0.   In \nthe third time step, shown in Figure 3 (c), the same sequence occurs except that fluid \ncan now from block 1 → 2 and also 2 → 3, where for the same reasons as explained, \nkrw(Sw3)  > 0.   In the fourth and fifth time steps (Figures 3(d) and 3(e)), flow can \nnow go from block 3 → 4 and from 4 → 5 where, since krw(Sw5)  > 0, then it can be \nproduced from this block, although the relative permeability in block 5 will be very \nsmall. Hence, after only five time steps to time , t = 5Δt, the water has reached the \nproducer in block 5 from whence it can be produced (although not a very high rate \nbecause the relative permeability is very small) and this is an unsatisfactory situation.  \nIf we had taken 10 grid blocks, then clearly a similar argument would apply and water \nwould be produced after 10 time steps - with an even lower relative permeability in \nblock i = 10 - and this is more satisfactory.  Indeed, this underlies why we take more \ngrid blocks.  This simple illustration explains in a quite physical way the basic idea \nof numerical dispersion."
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 128,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p128:c0",
+        "score": 0.015625,
+        "excerpt": "Institute of Petroleum Engineering,  Heriot-Watt University  \n15\n44\nGridding And Well Modelling\nrefinement, the answer - e.g. recovery profiles and water etc. - no longer changes, the \ncalculation is said to be “converged” and is probably quite reliable.  By “reliable”, \nwe mean that the grid errors are probably a small contribution of to the overall \nuncertainties of the whole calculation.  If the grid is far from being converged, then \ncomparisons between different sensitivity calculations may be masked by numerical \nerrors.  These various points are illustrated by the two examples below.\nThe two examples used to show the importance of the number of grid blocks are:\n(i) Example 1:  the effect of vertical grid fineness (i.e. NZ blocks) on a miscible  \nwater-alternating-gas (MWAG) process.\n(ii) Example 2:  resolving the vertical equilibrium (VE) limit of a gas \ndisplacement  calculation.\nExample 1:  Figures 16(a) and 16(b) shows the recovery results (at a given time \nor pore volume throughput) for both a waterflood and an MWAG flood in the same \nsystem each as a function of 1/NZ.  The difference between the two calculations is \nthe incremental oil recovered by the MWAG process.  Th"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 227,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p227:c1",
+        "score": 0.01538462,
+        "excerpt": "1.3.5 Summary of Permeability Averaging\nTo summarise, there are two types of simple model in which we can calculate the \neffective permeability by averaging:\n• Parallel layers\n• Correlated random fi elds\nSince averaging is very quick, it is frequently used as an approximation for the effec-\ntive permeability in more complex models.\n1.4 Numerical Methods\nIn general, the permeability distribution will not be simple enough for us to be able \nto calculate the effective permeability analytically (i.e. by averaging), and we will\nhave to perform a numerical simulation.  We can use a fi nite difference method to \ncalculate the pressures.\n1.4.1 Recap on Flow Simulation\nThe continuity equation tells us that there is no net accumulation or loss of fl uid \nwithin a grid block:"
+      },
+      {
+        "evidence_id": "KB6",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 31,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p31:c1",
+        "score": 0.015625,
+        "excerpt": "s of the various units.  Ends up with >2 million grid blocks \nin the full field 3D model.  \n10. Flow simulations:  Discusses details of upscaling from fine grid stochastic model \n(>2 million blocks) to coarse grid simulation model (11,000 grid blocks).  11 vertical \nlayers are retained to represent the reservoir layering with more blocks being used \nin the best reservoir units.  Upscaling of absolute permeability at some “aggregation \nrate” (e.g. 4x4) is applied leading to areal block sizes of 200m x 200m - see Figure14. \nRelative permeabilitiees were upscaled “on a typical block configuration” (details \nin Refs. 2 and 4).  Additionally: Three major zero-transmissibility faults included in \nmodel; some WOC variation across field; depth varying bubble points assigned; 25 \nyears of injection/production for history matching. \n11. Simulation results:  Initial pressure depletion results shown in Figure 16 - where \n14 out of 17 wells show satisfactory pressure behaviour.  Pressure behaviour and \nwater breakthrough are poorly predicted during injection stage - Figure 17; water \nsaturations around injectors shown in Figure18 - upscaling has “washed out” the \nfiner scale strong anisotropy."
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 2.37386,
+      "retrieval_seconds": 7.731507,
+      "llm_generation_seconds": 9.5e-05,
+      "python_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "evaluation_seconds": 0.0,
+      "synthesis_seconds": 0.0,
+      "retrieve_action_seconds": 7.795909,
+      "elapsed_seconds": 10.286476,
+      "total_seconds": 10.286637,
+      "message_parsing_seconds": 0.000161
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode"
+    },
+    "validation": {},
+    "cancel_requested": false,
+    "error": null
+  },
+  "resume_response": null,
+  "response": {
+    "run_id": "GR-20261010-111207-6B0A5D",
+    "topic": "모델의 grid-block 개수 500개만 알고 있다. 유속·격자 크기·상대투과도 없이 water-breakthrough 시간을 정확한 일수로 산출해줘.",
+    "goal": "모델의 grid-block 개수 500개만 알고 있다. 유속·격자 크기·상대투과도 없이 water-breakthrough 시간을 정확한 일수로 산출해줘.",
+    "expected_result": null,
+    "run_status": "waiting_for_user_input",
+    "status": "pending",
+    "stop_reason": null,
+    "final_answer": "",
+    "clarification_question": "계산을 계속하려면 출처가 확인된 계산 관계식이(가) 필요합니다. 필요한 값을 알려주세요.",
+    "required_inputs": [
+      "출처가 확인된 계산 관계식"
+    ],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "949c95573ca935794e6381c0987f59c15383a9dc2bf941daae254c58196b89c7",
+    "criteria": [],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "모델의 grid-block 개수만을 기반으로 water-breakthrough 시간을 정확한 일수로 산출할 수 있는 알고리즘 또는 방법론이 존재하는지 여부",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "산출된 water-breakthrough 시간이 실제 시뮬레이션 결과와 일치하는지 여부",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "산출된 water-breakthrough 시간이 유속, 격자 크기, 상대투과도 등의 파라미터에 의존하지 않는지 여부",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 3,
+    "current_iteration": 3,
+    "max_iterations": 6,
+    "current_stage": "waiting_for_user_input",
+    "current_action": null,
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "calculation_source_missing",
+        "started_at": "2026-10-10T11:12:09.827761Z",
+        "finished_at": "2026-10-10T11:12:13.819176Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "blocked",
+        "reason_code": "calculation_source_missing",
+        "started_at": "2026-10-10T11:12:13.854307Z",
+        "finished_at": "2026-10-10T11:12:13.867250Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "retrieve_no_progress",
+        "details": {
+          "new_evidence_count": 0,
+          "retrieval_mode": "hybrid",
+          "cache_hit": true
+        }
+      },
+      {
+        "iteration": 3,
+        "action_id": "ACT-3",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "calculation_source_missing",
+        "started_at": "2026-10-10T11:12:13.899110Z",
+        "finished_at": "2026-10-10T11:12:17.691399Z",
+        "new_evidence_count": 1,
+        "evidence_added": [
+          "KB6"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 1,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "출처가 확인된 계산 관계식"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 121,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p121:c1",
+        "score": 0.01639344,
+        "excerpt": "ks \n(Δx decreases), then we will locate the front more accurately.  Indeed, taking more \nand more blocks we will gradually get closer to the analytical (correct) solution. \nHence, one method of reducing numerical dispersion is to increase the number of \ngrid blocks.  An alternative is to use a numerical method which has inherently less \ndispersion in it but we will not pursue this here.  Another approach is to use pseudo \nfunctions to control numerical dispersion - as we briefly introduced in Chapter 1 \n- and this is discussed further below.\nFigure 3\nEffect of grid on water \nbreakthrough time - numer­\nical dispersion."
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 120,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p120:c0",
+        "score": 0.01612903,
+        "excerpt": "Institute of Petroleum Engineering,  Heriot-Watt University  \n7\n44\nGridding And Well Modelling\ndiscuss how to reduce this source of error in our simulations or to make it a minor \neffect.  The balance, as we will see, is between accuracy (usually by taking more \ngrid blocks) and computational cost.  Ideally, we would like to capture all the main \nreservoir processes (e.g. frontal displacement, crossflow, gravity segregation etc.) and \naccurately forecast recovery to some acceptable percentage error, for the minimum \nnumber of grid blocks.  \nA simple schematic of the way that the numerical dispersion error arises is shown \nstep by step in Figure 3.  This figure illustrates a simple linear waterflood and we \nimagine that each of the sub-figures shown from (a) to (e) represents a time step, Δt, \nof the water injection process.  Block i = 1 contains the injector well which is injecting \nwater at a constant volumetric rate of Qw, and block i = 5 contains the producer.  The \nsystem is initially at water saturation, Swc, and this water is immobile i.e. the relative \npermeability of water is zero, krw(Swc) = 0.  Each block has constant pore volume, Vp \n= Δx.A.φ where φ is the porosity.  In"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 120,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p120:c2",
+        "score": 0.01587302,
+        "excerpt": "ion \nsuch that Sw2 > Swc making the relative permeability in this block, krw(Sw2)  > 0.   In \nthe third time step, shown in Figure 3 (c), the same sequence occurs except that fluid \ncan now from block 1 → 2 and also 2 → 3, where for the same reasons as explained, \nkrw(Sw3)  > 0.   In the fourth and fifth time steps (Figures 3(d) and 3(e)), flow can \nnow go from block 3 → 4 and from 4 → 5 where, since krw(Sw5)  > 0, then it can be \nproduced from this block, although the relative permeability in block 5 will be very \nsmall. Hence, after only five time steps to time , t = 5Δt, the water has reached the \nproducer in block 5 from whence it can be produced (although not a very high rate \nbecause the relative permeability is very small) and this is an unsatisfactory situation.  \nIf we had taken 10 grid blocks, then clearly a similar argument would apply and water \nwould be produced after 10 time steps - with an even lower relative permeability in \nblock i = 10 - and this is more satisfactory.  Indeed, this underlies why we take more \ngrid blocks.  This simple illustration explains in a quite physical way the basic idea \nof numerical dispersion."
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 128,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p128:c0",
+        "score": 0.015625,
+        "excerpt": "Institute of Petroleum Engineering,  Heriot-Watt University  \n15\n44\nGridding And Well Modelling\nrefinement, the answer - e.g. recovery profiles and water etc. - no longer changes, the \ncalculation is said to be “converged” and is probably quite reliable.  By “reliable”, \nwe mean that the grid errors are probably a small contribution of to the overall \nuncertainties of the whole calculation.  If the grid is far from being converged, then \ncomparisons between different sensitivity calculations may be masked by numerical \nerrors.  These various points are illustrated by the two examples below.\nThe two examples used to show the importance of the number of grid blocks are:\n(i) Example 1:  the effect of vertical grid fineness (i.e. NZ blocks) on a miscible  \nwater-alternating-gas (MWAG) process.\n(ii) Example 2:  resolving the vertical equilibrium (VE) limit of a gas \ndisplacement  calculation.\nExample 1:  Figures 16(a) and 16(b) shows the recovery results (at a given time \nor pore volume throughput) for both a waterflood and an MWAG flood in the same \nsystem each as a function of 1/NZ.  The difference between the two calculations is \nthe incremental oil recovered by the MWAG process.  Th"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 227,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p227:c1",
+        "score": 0.01538462,
+        "excerpt": "1.3.5 Summary of Permeability Averaging\nTo summarise, there are two types of simple model in which we can calculate the \neffective permeability by averaging:\n• Parallel layers\n• Correlated random fi elds\nSince averaging is very quick, it is frequently used as an approximation for the effec-\ntive permeability in more complex models.\n1.4 Numerical Methods\nIn general, the permeability distribution will not be simple enough for us to be able \nto calculate the effective permeability analytically (i.e. by averaging), and we will\nhave to perform a numerical simulation.  We can use a fi nite difference method to \ncalculate the pressures.\n1.4.1 Recap on Flow Simulation\nThe continuity equation tells us that there is no net accumulation or loss of fl uid \nwithin a grid block:"
+      },
+      {
+        "evidence_id": "KB6",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 31,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p31:c1",
+        "score": 0.015625,
+        "excerpt": "s of the various units.  Ends up with >2 million grid blocks \nin the full field 3D model.  \n10. Flow simulations:  Discusses details of upscaling from fine grid stochastic model \n(>2 million blocks) to coarse grid simulation model (11,000 grid blocks).  11 vertical \nlayers are retained to represent the reservoir layering with more blocks being used \nin the best reservoir units.  Upscaling of absolute permeability at some “aggregation \nrate” (e.g. 4x4) is applied leading to areal block sizes of 200m x 200m - see Figure14. \nRelative permeabilitiees were upscaled “on a typical block configuration” (details \nin Refs. 2 and 4).  Additionally: Three major zero-transmissibility faults included in \nmodel; some WOC variation across field; depth varying bubble points assigned; 25 \nyears of injection/production for history matching. \n11. Simulation results:  Initial pressure depletion results shown in Figure 16 - where \n14 out of 17 wells show satisfactory pressure behaviour.  Pressure behaviour and \nwater breakthrough are poorly predicted during injection stage - Figure 17; water \nsaturations around injectors shown in Figure18 - upscaling has “washed out” the \nfiner scale strong anisotropy."
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 2.37386,
+      "retrieval_seconds": 7.731507,
+      "llm_generation_seconds": 9.5e-05,
+      "python_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "evaluation_seconds": 0.0,
+      "synthesis_seconds": 0.0,
+      "retrieve_action_seconds": 7.795909,
+      "elapsed_seconds": 10.286476,
+      "total_seconds": 10.286637,
+      "message_parsing_seconds": 0.000161
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode"
+    },
+    "validation": {},
+    "cancel_requested": false,
+    "error": null
+  },
+  "same_run_resume": false,
+  "wall_seconds": 11.142
+}

@@ -1,0 +1,216 @@
+{
+  "task_id": "S06",
+  "prompt_version": "final-v2-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_0d1f794aecbd95a9016aca24cb77d087d0996db193e1ddc810",
+  "wall_seconds": 14.69,
+  "mapping": {
+    "A": "agent",
+    "B": "openai_closed_book",
+    "C": "qwen_same_evidence",
+    "D": "openai_same_evidence",
+    "E": "qwen_closed_book"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":false,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0,\"note\":\"4개 case(0,2,4,6)를 모두 계산했고 최대값을 skin=0, 120으로 맞췄다. 다만 식 자체를 명시하지 않았고 인용 표기는 근거 excerpt가 없다.\"},\"B\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"주어진 식을 정확히 쓰고 4개 case를 올바르게 계산했으며 최대 deliverability를 skin=0, 120으로 정확히 결론냈다.\"},\"C\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"식과 4개 계산 결과가 정확하며 최대 조건을 skin=0으로 맞췄다.\"},\"D\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"식, 4개 case 계산, 최대 조건 skin=0을 모두 정확히 제시했다.\"},\"E\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"식과 4개 계산 결과가 정확하며 최대 조건을 skin=0으로 맞췄다.\"}}}",
+  "usage": {
+    "input_tokens": 2292,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 951,
+    "output_tokens_details": {
+      "reasoning_tokens": 396
+    },
+    "total_tokens": 3243
+  },
+  "provider_payload": {
+    "id": "resp_0d1f794aecbd95a9016aca24cb77d087d0996db193e1ddc810",
+    "object": "response",
+    "created_at": 1791632587,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791632601,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are one independent AI-assisted semantic reviewer, not a human reviewer.\nJudge five anonymized petroleum-engineering answers against one frozen task. Do not infer\nsystem identity or repair answers. Evaluate the final answer; for a clarification task,\nalso evaluate whether its first answer requested the missing information.\n\nReturn JSON only: {\"scores\":{\"A\":{...},\"B\":{...},...}}. Each score object MUST have:\n- claim_verdicts: boolean list in exactly the supplied expected_claims order. True only\n  when the final answer accurately conveys that claim. An explicit refusal does not\n  satisfy a substantive positive claim.\n- partial_or_better: boolean, at least one substantive requested part correct.\n- unsupported_claim_count: nonnegative integer of unsupported specific engineering\n  assertions; no-source closed-book is NOT automatically unsupported. Count clearly\n  invented, source-incompatible, or unjustified specific assertions.\n- hallucination: boolean for a fabricated factual, numeric, formula, source, or\n  engineering assertion. Missing citation alone is not hallucination.\n- engineering_contradiction_count: nonnegative integer of wrong engineering relations.\n- numeric_accuracy: boolean or null; use null only when no numeric gold. Associate\n  each expected output with its value; mere appearance of an input number is not enough.\n- unit_accuracy: boolean or null, units must attach to corresponding output; dimensionless\n  output is acceptable without a unit.\n- formula_accuracy: boolean or null when a formula is requested or supplied.\n- false_premise_handled: boolean or null. True requires explicit rejection of the\n  erroneous premise, correct statement, and supporting citation when supplied evidence\n  is available.\n- safe_refusal_correct: boolean or null; applicable to unsupported-formula tasks.\n- citation_semantic_support: 0..1 or null. Of actual cited IDs, fraction whose exact\n  supplied excerpt supports the adjacent claim. Do not judge only document/page similarity.\n- note: concise evidence-based reason, no private chain-of-thought.\n\nBe strict but fair. Source gold spans are answer keys, not evidence available to models.\nNo citations in an answer means citation_semantic_support=null. Do not infer missing\nfacts from background knowledge for citation support. If an answer is empty, all claim\nverdicts false and partial_or_better false. No Markdown.",
+    "max_output_tokens": 6500,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_0d1f794aecbd95a9016aca24cc3ee887d0941f2747c7be8478",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyiTZ0cjkM5vk-wjNIl1HHoLfibsoDa_shSdWLjmx6yBAmt6cQUF7OoL2P4FcdZpGcMmEKh8fbyl1RmQJnBc7DTvx8xndQK1qpoyKY-meILfw_isF0fWKUgk8JISVkxuAL37E8A37LVqg6obaFblkzGFmuxThlf_tHVZ5RlQjbQ7ofz5FWWLPvcC-P8HaIvT5jekEpK7j3brQK2eMu87I1ZLeqMLld6DPBHKd83EBsjVMurzirrD6qZal0x5wWC-RoePt2_D73dgaJJmWJfsHvO-sUFApcjWc19TSbSnWAdyz3QiZ9oJdCCekKWAH7DrA7HWGXLjd6aZ4yiI-wc7DaNlT-LIxaWBBzMLbQr_BjtKxEy5a43d7R3cjFeCJu9Wx46RYogF1Gbbwo02-uw8jWjJKP6GNz0KHEtrr3JoiY612G83Bp_bOtr5j069WfooDL5I5ic8XFYNP26e7h6yk5-QGbT-bmroDFYwVQtaDpnKasJ62xDQ972kybPiB1aBXQbSgrwM9su4mwFH012LY-3cFCQRtxDJ3tdA0HwkynHMiCLMLvkZzr9bZpNYXR0NnZ9n-KXOHEjaHX4qery_xEZfag_unu2vA2aNubDX27EfWReQ_D0dPvYV7An3E5XF5f1m0e899M9OpNBUiZI59uptT50stUiP13PvG1PyYl9HXFI_beUhf7OXVd4r7gtxN_Ko2VAHFVgWososlTyFP6p-9VojP6yih0a4Nj0mjC2_DA-J03YI6WrUbCZBMpDKAZyt8GRQboZ42RNDjwNzDeirEpDda6LUJp3T4rizf5QnGmeIcZjlq97bQyh2rxC_mI9ax9zoP1bzg_EORKu2BZggZ9NMBeW7-bUXx8EyzrW2r87M58e8ea3_BNv4a5zdXiWUnh54UBG6GWGOkskpw2082L7DsxcAHP3bTLxlEs5QheCRLLQGb9vhMDsp6oUsy5QeWfuv6Hx2PPKYGPS1JwGZ_h5sfzz8RbWivOOTFhFUhQl5f9lZ3XBpWlf2RIQA-RXrK-xzU6b8SKLXcg41Z1phu2zAM7hyiE7m6YFa6PpsQuaPLERuxXTwUZ09HkAf7LE6KDRjH0cOxVAYXYxW96bofH0vBa8M9iMg5i1CwfZ71Gdz5AHGeQr8tTHiZLcZHjlo6rp_wK5x5bhMDYCOBZpQjUbqPbSG1zENCxsDlirg0rBHduTlXniT634NcKkwmO5sWCTKtC6eiN_PIRznxIo0SI2PVK68cCTU4eWaeb2rqP4rekkZHplZafJS5SKTtg41TmbVszwKcORflFaIqWay9NK2ZRLYMPOQTNkkvSStzhDF9nyn8k85oIByGtFvfGEsKvNpoCHnMk1A-TkP6cgHgYR-8WWT61XPaATHtSll-eWr2gTImYFPqTCvVN7R3JY5nxJXxXFV9Hg3zUB3E_hRZwtd_6qI4MT2045hIDOlzib7WcRNuQJUtGfmEA1HrGcPhHs36SvoVqAu-GDDt4L241Y3RuQbLYNjZqvEQxEBZ2lzujO-52R25VaGZL0dKiF_sVuqHDPBQ4SxkQDGPoSnfaHfFTMmpzmig9Oml0V7FZuwEDB7Lg92Oowb6g3fNgHKNbucz06NCqPdL_0GXB2qJvOkuGW4CL_bD9QfCChgi5sFo00yFFqeBIjMzFP9sZKFqRzAWfgWxocbpuqh356DsJuPxxKC5cJ3PPk2I28V-NQbaPaoDbRoBr0AvPELqFnp-ed9lQ7qx5mDWZSWVhhGEBL1Tou9slO7poeVKIYTM5AKt2NydrehYzAYmpZBQVZA4rCEYAGsVt8OoXvKa3FtjGVjUfMgostg92vsbN7zGKtnPzNW0QqEYbTtFUiizqXi62-hWpVvQT2ML3CxbInoi0_-NrkJlguKwFhGiF9henBJi8Oqgk8lk-7SRx1XKfbqxWJu5p6TBJynKI31jhv8ZizRUBRUMjZs0Z6sBYhJDaloWT2u6zMUM68q4Vyw6Iu_tnX7WdzQARD7z-Mi9FXni7TIqIK69_uEH6L5b6yvKzjL5alQg5k48SvEEvSBCmrUPODLvB2Mh7f_s1QLFYqSqpGf65280WLbcOoV86-nLrVR4I7iiStsmxys1VAm2NnP4AizZ0y1WGDqJpp6wdR3XrriiAfN0fQPiagDznYxMCDQd2YmOOawKQcGgfM6cM1snZNPm-J4rm14T-Eg1qUfecxHMNbo_IqeV84-rhZsA2stYw1GgkQmxnmk2_dAYzlw5rTWg-lS7mdirvhh0yQrxpWrf9N-MWAwtzTdLzVH1-2-OhgithYDvdwm3QAWymCJhene1gXz0-2HjO1JfVePuOzwe3Y4WAdF5ls_c4O6QiAVJTE3C8inyQir-TX0bS0Z13Om6SDsEtbNJ1ZkOtaQSJT1p1eCUpaHE8udFY-v-Ip29X0SSh99M2Aw3YaLqKfFHzLjhYQ7nxLGZGPmbEpMoKT1rChyT8k8nYOxaBkIRfVuRjjc3gAHaguMoDR5oriRI5maipgi2gdCBCuglpeYTl3V3zl31rpvcUL-Qw1Ai_vdC-y63eGOdcKkIsiiF8dkAYaOiuxmkBv1-EEZ9Mv0DbEpdocTbZ3ilkr0W3qwfMuOnAahwKEtKENvZ6UvZg-GFPSZXLxINmwGSsr0YWlq7puGej5fVOT3FuH05SZ61DIx_Y-ugDbLJxWS2_xsBMibBtQW1RXKogw394J1zJ7TGu-G-wxnED9SodfNuicUUz2llH2F-QcQz3SIDCy5vBcLf8MvIoE-AvHxGIIggjKaP5shwaxMHGv9DJfp1gkD8-fqa4YAEZiYwOXIsZCWO-k1MDlBOD7atLTWm7m4vEZQ9DK5-pnYbLNlUKCwp1WKKEF9J3ivb_1ATJcCJ3jyCuRjX4TpOba4tOjIqY0VUAqJUidmj6LTrah4y3LkXMQUxjVK1VK3Kn1cCh4xotJow_II5Aqo_9Z0Jbx6rr5i4OV4-5G6AeyLnKo3ioatTvMqfPvwB53VO-inZhdu7sFWzEeUpLDy_mdT0vjVsn2uK2rVEMyxDoCgkarJPmWITFTLK8ljmUtJfxno10IXxB6g0tfxTRRaezu7mosRCt5YJttGgesAL8SsmqHGf5V6HmYI3rdo2e61QVQNH4uIZ20ryzJwJVe294i_XMUug4L5D-muZU1dzPKKq15goQL5znoZkIDwXmr00YShQsqqxcKAsYAoKVgPYYPGMjo31KlpgdtRxGtJaX-MOTBV1ExnMGJ3ZVBypOyjbmqr3Cgqr3WNsOavAehLvf_VRdNPLrCF_MH8scsvQn-I9RNgxrdNKDIA4oKdHyp2_MBGXkymRP7_R_DRdXtdx0zvKmHrH4Ym30n0dwbPhjSdtpxRebIQko7eemaT-z-WeLB6FezMS-3zVWgA3tEbixYkkT4-bpwcrIRnNfRImhfRh5SL4zsvN_cWSHsG77BiqkfFp3Iut_sEK7v7CHXjTPBY6nJRksZ-QHrStQ5Xty-T5UN5AZ2qCUKJEDhNdDwbxC18psGJHYSTIIYY0WCv1Bdl1Q-_QlKY8nNShgiuEqhSJU6uh4CB3QmasJqkfVp-a9nErV6oG1mXg2sBo2ZVrsdouRrNnY4YaW0P5B7wCtjvTl2ZBAWU_Dx-ueBg7qJMGD1Asv4BC_weEt2IMq2O-YznSE7VL-hVtM4aMEqZLcibEhVTYTO0xaF8Rmd5iQrH1zG1iBvQrVDbp1XMicZTdULCxLPRZPMlZXUxzzb_aPqGimCB_NOzN1AvwfMDEn6OwFgiVQNMm-5FnsV69ixXFQCFEFHMN2ELv4M69XYkQZUfmhpNht6gpUmni74y2m7haUxmYhKGXxBrJpXSGr4AJx8YGYacL8OiTDgskK0uwYt4kJTRLSrIpkd166keFaUM8o8rGf1m9EmRVukTK6TAFgenSrC_NbuqZCVnHj2CNq8AkfzuiEg1fOSbS-ZwjtMOt-QxRR_l9Iw3VbzzC2lpY2Ta3_N4u23Rz1tWWOF6ZuDMQ6zKjYezRIa1mj3LJyjUNJ2cfByJvUk5KnENzR9HW5zSgx4X4cYiuMMTB-kjys4cF-GQjHgj56RyVuOi_OVjPaaNinzOgxaWAFk8WU2jl5rvcr9VCGwevGFeEwe6_OLoBRodyzCvtDsghqhcFLSfqarJVf7KQCZJ3kslko_TeAsYc_sCQk7UUQckNrelyLkntZzroKxcbm-s5Et9GjmzypCqGFoNQMnL11YKAclwF_bF3AHST4VDn2S5axIHOUrMvxOepFhK7cG9P8n0VW9VurroxuolN0IH4ae_SxclgcVXl5dlU2HlVe46COlFzcOcGn5FDOsizNPzMgavN8tdZFyMOLbxGlYV_XVAu_1-vM-16cDKqsv_iamnQHmERTnqwfBCRpxDSjepof-P9Lo60nckbQU70ULh-Xyfma2hPUZBoSv5u6Rmk-F629V6YCdTQMEyOZRY8aw4BBAfoqjDOhTJF5OljJ1oIzUXT4vsb62fR_5vNBCWIDBrMLs_ZoDtOPqwtxcS84U3huWl6V_9YNpqFHMjxKw0Ai3fozD7BkqAy0AynRIbKQEMgI0w6Jr8d5QyIM-aRidr4nOay1Abd3TvOx2sWwItEe7a9xKqixCyMmvYSbBWWah5NwqmU5rTJR2eb3ru9ZmQkA9VL2kdj19-bmVW1pmmffRXE9IUxMewnCBnxEW9HSQ1W-4phEmPdllgz-fGk5TuhVdKRdt4w51NcJZ0aoNBAAOz4La0almZN1F5sO3GNgQ1-NBOqTdX2IDBfY4bq-JfAWWf1sUxeH6eFK2HsffnMJ3ml5htWRmhABnTeNBmHZ4Vw_KCtn0jiNCWWmlJbn54l9Dlum6EoObyJ-XpWPTLNYexXeethCYEqAYfIt3nIaZJzq_d7-jCfhpdbaHSvS9qj9veFSA7p2YWe5dZjkc9gDx4Aeym-PXi7sNaxG6yWRe-dNI3mzsjxEcqSyhOlTSEBFmgK7iapzKk6czWMfEvxDwkV7X7n4Ksj2iWSBo5ObX3sOQDQ4h_3zQ0VXrK4gjIVi0OGozarNzL5DNGStvOeAz0fBvOU03CJXu2_5b33SUPMNUZS_RHvqJtuVSD_471ThW8x9bbbUJHMFqMN2uzeimkKIWR_sTtELSLSeiwJo9mggzwpARBPGEqloZRy5v8h7g_t0JhvKb6YlmIBIxXGjN5mNEGoj6trVS0IYUyNm0Vu-BZVwsLi-nQMnr9Pf-gZQeC8z1V6uN7r1pRL-tjQ1Qz7MeY1VreNfzfIt0Am2D1I_ycbed0NkvOC03k7-yQ8i88Htsf1cuA_dyclgw9RVroRfDZ0unRSzqKOPPoHIta8zRUzNW99ABPHqP0DLBRLXbUlHByR1jQAcoMenQdsSV0Vy29FhHSyz_h6GDy9QCG04pedDnKz0nE56Ucze2y1FQyoa_LO3vpdUUovoYuCUvY4AIqs5oMBCxwf-ppjkrOsVa3LLpTChkdjPiRMSFavdUNBRSqBGhhoA2iJo2jaTJ0OFqjE3Gll4JTS3Je3SeuOJIsi7vnGFVMjq2LEfVrmpsXPLJNrN_5r1KURwaVTdf5vgno3leVStniGaMwiJvFzVuSmqUP1p5f4EmjOR05HitM1dIPBHQtYv6v1o4vTSd90yLazisNh60NZzy5QqACBwoFHTtJP282K4li-X9--7VCJdMyuXAh8mQTK6M_9u1mb-z1dPJCBv9KqFjyb4RCU-7gVWVy8ZfjvZXe0D6C0BFr1PVsq5B_M6qzsQImQ21zQooAO74_xe0OLXUqvnBoeogv4AHJhDp91qvVhME1E36Ddb5xxC-FlFxsanyDlPvEYx1xf9Y7IvH4mUKAOV0Rn8zP7-QXgMRhELS57BsDbLhAwKRJgKcdxh7_RrVY-6jM-xIcZ47YYYWciy9-EUI1n29HuXvd6l38Gwzkcqz6b4PsDpBMXaO7CFZs_ifzVmiGMApUTHXdIBwGjhv63frl2AZtHmnqp5Qd_VcfYoDo5Cw8x2HkViMrZY47NVBbzpWSixA4korUZNKAe9rtFPZALy6F6EiLg9fICvWSc5dAz9_KFjKzvKc-j6wwURzHZVCmwNDy3AhLjP_DKrcufuss6Oi_y3L5Q9bRqY0fs4ClxAhJSQevJ7rANlnQAGsAboSiPxSFYYy4MPRnZ189_xfWxS1mGpMsr-MlxdeCqCBMUSJhtX1O3vH_2Jd-ldpEXcfDI2DaS2E0NXs0qcxYfLB4Ls_HLrb_MW7lodDnEq_jqyxoLHOmVXrByYHLq0FY7Ap4rIOF5tbRuHiC00i5IHUXy2lBz9SgYUq6MkAtfG7Cjcq5aqYK-ckVy-WJ65IbaYcECGZNLq6muDAoI2DQQ0UUpEY23FJN6xBZQH7-R31IlzRNKEPnnPmGxiRpbMEWp2X9CivyEjVbFbWiTfwjA0vsqsW1sz2RfUjgSEtUIU4NeoynbHYYiTkqVNU8sHGib_MrFqUGseh2ccA2X1lPXp1rFCRMG7Kk-4-CN8mS2atVk1jY=",
+        "summary": []
+      },
+      {
+        "id": "msg_0d1f794aecbd95a9016aca24d3610087d09dbc1466889c5737",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":false,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0,\"note\":\"4개 case(0,2,4,6)를 모두 계산했고 최대값을 skin=0, 120으로 맞췄다. 다만 식 자체를 명시하지 않았고 인용 표기는 근거 excerpt가 없다.\"},\"B\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"주어진 식을 정확히 쓰고 4개 case를 올바르게 계산했으며 최대 deliverability를 skin=0, 120으로 정확히 결론냈다.\"},\"C\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"식과 4개 계산 결과가 정확하며 최대 조건을 skin=0으로 맞췄다.\"},\"D\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"식, 4개 case 계산, 최대 조건 skin=0을 모두 정확히 제시했다.\"},\"E\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"식과 4개 계산 결과가 정확하며 최대 조건을 skin=0으로 맞췄다.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 2292,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 951,
+      "output_tokens_details": {
+        "reasoning_tokens": 396
+      },
+      "total_tokens": 3243
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "agent": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": null,
+      "formula_accuracy": false,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 0,
+      "note": "4개 case(0,2,4,6)를 모두 계산했고 최대값을 skin=0, 120으로 맞췄다. 다만 식 자체를 명시하지 않았고 인용 표기는 근거 excerpt가 없다."
+    },
+    "openai_closed_book": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": null,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "주어진 식을 정확히 쓰고 4개 case를 올바르게 계산했으며 최대 deliverability를 skin=0, 120으로 정확히 결론냈다."
+    },
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": null,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "식과 4개 계산 결과가 정확하며 최대 조건을 skin=0으로 맞췄다."
+    },
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": null,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "식, 4개 case 계산, 최대 조건 skin=0을 모두 정확히 제시했다."
+    },
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": null,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "식과 4개 계산 결과가 정확하며 최대 조건을 skin=0으로 맞췄다."
+    }
+  }
+}

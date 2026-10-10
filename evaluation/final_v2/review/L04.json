@@ -1,0 +1,216 @@
+{
+  "task_id": "L04",
+  "prompt_version": "final-v2-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_0664fb4ec459de6b016aca221247c887d0b29d5523d6866779",
+  "wall_seconds": 27.678,
+  "mapping": {
+    "A": "qwen_closed_book",
+    "B": "qwen_same_evidence",
+    "C": "agent",
+    "D": "openai_same_evidence",
+    "E": "openai_closed_book"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":2,\"hallucination\":true,\"engineering_contradiction_count\":2,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"핵심 기준인 경계 영향 유무는 맞췄다. 다만 초기 transient에서 압력이 지수적으로 감소하고 late-transient에서 선형적으로 감소한다는 서술은 근거 없고 공학적으로 부정확하다.\"},\"B\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":3,\"hallucination\":true,\"engineering_contradiction_count\":1,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0.5,\"note\":\"두 핵심 주장 모두 포함. 그러나 초기 transient를 곧바로 infinite-acting radial flow로 놓고 기울기 일정 등 세부를 붙인 부분은 제시 인용문과 잘 맞지 않는다. KB3는 경계 영향이 중간시간 이후 나타남을 지지한다.\"},\"C\":{\"claim_verdicts\":[false,true],\"partial_or_better\":true,\"unsupported_claim_count\":1,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0.86,\"note\":\"late-transient가 경계 영향 이후라는 점은 맞다. 하지만 초기 transient가 배수 경계의 영향을 받지 않는다는 핵심을 명시하지 않았고, KB1 인용으로 wellbore storage 관련 주장을 뒷받침하지 못했다.\"},\"D\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0.88,\"note\":\"배수 경계 신호의 도달 여부로 초기와 late-transient를 구분한다고 정확히 설명했다. 경계가 보이기 시작하면 응답이 infinite-acting에서 벗어난다는 점도 인용 취지와 부합한다.\"},\"E\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"초기 transient는 경계 미도달, late-transient는 경계 영향 시작 이후라고 명확히 설명했다. 경계 유형별 응답 경향과 wellbore storage 주의점도 공학적으로 타당하다.\"}}}",
+  "usage": {
+    "input_tokens": 9977,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 1718,
+    "output_tokens_details": {
+      "reasoning_tokens": 1031
+    },
+    "total_tokens": 11695
+  },
+  "provider_payload": {
+    "id": "resp_0664fb4ec459de6b016aca221247c887d0b29d5523d6866779",
+    "object": "response",
+    "created_at": 1791631890,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791631917,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are one independent AI-assisted semantic reviewer, not a human reviewer.\nJudge five anonymized petroleum-engineering answers against one frozen task. Do not infer\nsystem identity or repair answers. Evaluate the final answer; for a clarification task,\nalso evaluate whether its first answer requested the missing information.\n\nReturn JSON only: {\"scores\":{\"A\":{...},\"B\":{...},...}}. Each score object MUST have:\n- claim_verdicts: boolean list in exactly the supplied expected_claims order. True only\n  when the final answer accurately conveys that claim. An explicit refusal does not\n  satisfy a substantive positive claim.\n- partial_or_better: boolean, at least one substantive requested part correct.\n- unsupported_claim_count: nonnegative integer of unsupported specific engineering\n  assertions; no-source closed-book is NOT automatically unsupported. Count clearly\n  invented, source-incompatible, or unjustified specific assertions.\n- hallucination: boolean for a fabricated factual, numeric, formula, source, or\n  engineering assertion. Missing citation alone is not hallucination.\n- engineering_contradiction_count: nonnegative integer of wrong engineering relations.\n- numeric_accuracy: boolean or null; use null only when no numeric gold. Associate\n  each expected output with its value; mere appearance of an input number is not enough.\n- unit_accuracy: boolean or null, units must attach to corresponding output; dimensionless\n  output is acceptable without a unit.\n- formula_accuracy: boolean or null when a formula is requested or supplied.\n- false_premise_handled: boolean or null. True requires explicit rejection of the\n  erroneous premise, correct statement, and supporting citation when supplied evidence\n  is available.\n- safe_refusal_correct: boolean or null; applicable to unsupported-formula tasks.\n- citation_semantic_support: 0..1 or null. Of actual cited IDs, fraction whose exact\n  supplied excerpt supports the adjacent claim. Do not judge only document/page similarity.\n- note: concise evidence-based reason, no private chain-of-thought.\n\nBe strict but fair. Source gold spans are answer keys, not evidence available to models.\nNo citations in an answer means citation_semantic_support=null. Do not infer missing\nfacts from background knowledge for citation support. If an answer is empty, all claim\nverdicts false and partial_or_better false. No Markdown.",
+    "max_output_tokens": 6500,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_0664fb4ec459de6b016aca221326f887d083b75d65a879bf7d",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyiIthRer_dw8G_RCWLtA5ZhYk-7pgceBBBFzdOEgvBdt3iEgtyOEcYpRaIpCr69SW5oaxxtQ4wNh0W541lodnSDJ6ihb4PGKEdnnThcag1PraIFySYQESLey6v0N_8EO_eIi9AyT27NTLSd__r9jKq4okLlkgAheUATenj1DD-jjNguytE-p6q-cvd9h3dpS5W63soHfKMbDtU175IZ2V8IJ_zVvhtApC3a8hI526Xq56SGHj2muTrP46z_8jrdcYvXKnDqmuioix1Q-4nXsIPBk43FBlt02gCzfJ7fTntQHsryj_Os1oH5qm8CbPp3C2OkXH0v3Uvx0x_9I9SVu54FbMeU3i4TqU-YaD2lQ_7Kks1TVZxU2Eo5EzPWVfouCXYVjFDZFaXiAoYclZjRYtablFjrFoA7J3p7k51xL5pPjDxv7eKaTXcwpe_EYj5sODLSnU4l2G1E0HUWnpOl-kFuxfEF46nMcJ0Sii4-NUrwYpb6sxQdpS64Ij4Q5znzBvwdzYB-JhfznLbg45HQe-a_eW9hA6tQfT9vYp26I4b8QXpMYK2hNJ2TpLvNb3aKpJSDmeXVRCMoZ7D8tndMwEmTKWMNlO7pJrE2GFMTluStceAnaii9AqSBcckHyas3WHiELyslUo_ZiJKZO8L6PaZ-1Xsx7v8wHsa6_u49o3q4Q7WrK3mxMw4prKemNUd6MEj2Y3g66ov5RTLBCTxMEfHkBTx7PMimrv0HLe_F86EtZGu2pT_zRyD18rlGrhO3PHcV89ubtFha7MzApR4xcW-4GIFw_o4NRHBRqOeyEGPYExzldFefk6P_nLXyhPwuYQpqIhWgJSwOkbKbULomqjdeRcMQlbK22W4YpnrQ1mCi4b7j4yS7lEzc4ZZlH3utn0jxtot3Bu-jyRgA-cQ41NK1NVuyGlqSPuitk2SdfDmAs4g7F57LYHDJMjgeVTyQre-n8ObCHSqyGu3nt0MJ6yjg5EKcywJre5GtSIieCjlqD4uuEmzGdB_T18YvkvCxFTqLbhqmp7-F2BmPZuMdbp5h1cffVuYs7iL6jD0zB9hgUH278By4Vy13AyXvfjIHdNvuXgq2p2pFeADcE7XlP4KTnTd0F_nSzDijC8p2OHFrp12dY7_zE6aY8GtU88QjXH2pZpXuob4V9yvg7uQD9iDq8E0m9LrVV_4dmr-ztfzK83yLFAqHARVMQHYXxZxrTLCa1lBPdxtJ3PQlLVqnzKS-4J0CZlrYVaZB28x5MAaQdBR4FDrVKZNgkOY5oxbcsDb0FGlSvMLyJvntMUAv4TZKpV0qCAWZYNK1qP9nHmk8tDvwX7h7LgQHph4HaAspPKpoed_5f-HaaIE771-xywSBt4KYT7LMJbQVDaMgAWfAPcc9pxAucn-qyDmTVWrO5NAfFrqWotT5y-F19E1EjZ8LFS37kuVRgZuU-Wwr9_IA9lgrN7W-fThFXftnOfwbhglUotvrOPkszDj_dzcNz_ew0FwtUv-keDHPhznmKRbktrUKXda89wwSXnTzcQY6Kix1rSFIGQXO_lps0j18cqiLtb2I10RyKL54YMYhnJlM9AbizZtcSkQYBdNd4sxduXQIRF-s4y6suQPXpQf5Z6IK7BVM9ZZWl9r5Yff1fWqiEqOIYGFay0AYHSdW1Rzf9g3gXjSMWcWyrSw6hIgUrmZ3kqYo7WOv9QK1ng7n-O8gM94j9_t6Z6mZpisbFfr_ekliHldpv7ey5tMi7GWq1JphVjT-ov00ezeXpJtbsEoepqNJG9qh5h3i5wb44VwOE3Xj2CymqSYQ8fd0JhSXPmWuvDzlIypaAysOZ1ZbxwmVh7MC_P7Ajb6TqdwV-DV39NRkmAgWSvOh87C96wMsDhHb6E4W44SeBE4CJkbHaCsgdoh57o4iGP-gaLWCsH7J5N87edkeUV-Hm8S5Kt8BNwVDXuTSJGPBFMG_UvnngyfktwR6nO2frnSb7_A1O1Mt8lrpZqEG3pKEcHRlund3cnigRdzhxqrX7wQe0w6tPN4lBGH0tvRLTaQyNWGh2SEBhXL68FQbtcAy2B0dXL1NXvxRNuiIAwWydi6b6e1Kc4l7xjIPoF34atW3Sv51s0AQ6juWIKkB9XHDrTtl4Z9LLzXLwgHNSYMq2mXQeew_oG0BkKDb5u_QCOyZHgiVNZV2WpeG_e2KPXck07JbaHzrZ6POm1KGhsqKOg001H-G4AjlWYFbLrN8GcolSvQ1QTXHm1_YU2YMwhp_pAfB4S4jGfqH6yfmSew3pxo1XTQBn7nU-Iz6NW4-LLDIj7vZdXqFobfKDXwuu0zgZDCl27KmlCQ9pZ_OV0Jj99YR8ZTaY1WN9xLh9gFc9Hl7ehMrd-J-3MUwYxa16YvvJK1cdnMEUwMXshOnvZV6Pc2wr1F36d1bVmVIPCuWnN7etzJjbCtl5BMDEpT20k5pW_y9z2cbcmOZ-1Gu0pFsIXiCfIUJzP_hajWPxRQujqYyPZHN9rsI5TNJll1aeW1_VjCR12h8JtqVeLJjPeU3_vDmwwDp03a-5tqCzS4Oqr6pDFKipp7b2pBz5gwfnPcS4KoTYtDVZ6_4Qw2QqSevbxlMnFLoN6NTRyhnony-VN9yrKRU6VHsLoSn3WalU495qnxqhhABqKnzwlEUK8Rf9fCvRQrnd0CAAuSZ_o9D1UPIlheywvMbzI2gNAjG31AMxcOF1LE9J1w3yC8GR3o6n-UnOytrQ6o1NCsIximuaVDSPOyejsGSk_gWZFLAZGFYF_q5AGsOzqHiWlPwQZ0Z1goAex5MLlhCkd62cPTAZva7jH9NEJIJD0aFNbBzE5YNZTGtspnqsJ68DJTRY0uIWJVx4DiS6C5vWe-hPHYZHH9U2qlyTv6OvEd4coeAcqpm7kpzXcyjXjpCMlweNT6l3DCQcdy8Cix3zjSNqKjEJv6wXp_06KHbrsPFHS0D_zHbSMtk4a9LMh2-UQoAnCD1h7naRWxNgZtBCTmxvQLjbbM6_XJFDUoZvl_bSQrJ7GWngS_ebOf8uA0OZmts-vbKzGEZRkqw_XWMDOX3qbR_qz3ZFnzX7WKwlimDtuabjO-eok2nvtK4Rw_7oANh29qY6syn5GCcWmMme8YQY9i99jbgV63ADR3RyuCFlF4CGNdMpv9wcLqdjRuvf8duSkvwRHFijbvez1pk012qfQc2Zf9R295O3bxdXXVvIE7ToTXigOYrt4UB3-uSRkf6TaIuTgfm_dv2NymyV7oE2WeXljjKCa0fQbBhHSz-ibZtYvjE28HmNGBWXqa7a5XIb7VzRU4KsHySrmvYr3_qiD91y0tkHV8lGamAy60oW1EfYxMEWsYxl0Oyrtvcv2Jxp4ovgfE8nPbOdmglwcccShtP1WGNMJAw8X3p2R70K3lRgT8oju31lXMTfOIFFX2XQ-8uy6qIDFsumedOwVyjel0aJ9nvpymUgdcFkcQJfaJ_8nsC3-b-3qXSJRjfeINmT_NMcadVjkiVRrU2zITDI7x5byb10h7IypMupUDtUrCqRJMe_tJFoZppjUSghd67dFBU6602HJ6YmJSbcaTU-jmxgvqykXpTrVQw7MFbUHCFijKyBjI38l3BibSmSjPwIjcTN1GvvDK1lGE9V39uSrNVOLlry5kA-i5wPWtU4lvKccRMWALnaVMEK3j5UG04htgVqILcHURs13gaqaNUJZLxFJ3PmHpnIN7cTp7Bz-OkEVOmPTIa_dCaJJk_FiKKoADVMaSET8ij662hjrXVNu96r-vCTm33uYvXXfGNz9BRpahoV8rROOxnb7HzI9GuFCs0ia3gjAYFZhFpybDa3dMuQ_EnnBd7ly_SmwbmHoa_M-kAvieWmFfm-JdxVA8EFcOQY1r6kiQy_7Mw1bKUNEcdYyk6wyOGRIwRn040tZO1Xd3HwcqygRhl6fDvEMRrsOpDBzLlacSDOVJj5oH4eH7bVZp61L1QIQDscnVmu7FzlNwgR2o7OMkjXI84GUG-eC27lDEx5G9Odnc97TMXxkQcG5mIYPU_SgV_hmtabixdI8LmBGUNjRkVEB0JRoKf2sBJ2rpXTVZQQYg_-M5NX9RSc8IV7gQmEY_HeqAROagV-L0FlabBsSn1gXxCE5QsfeFHkWE0xFpq6i_2qjYokBHSZs8FTuzzdroV8ftRrdfNpaJHkqv2xhUC1rIoHDWwy-rJ0nh-IIH5rhclhxLcaI6CLWp09uz-RpN2XhkvfXsj737p_e6S-f3t6TKAQzqdhReNoLO_gyiJSSJJQKUoy5IN70PY3cSiC9Fi4T3r--jaVV7rMuOHjP1Qr145Anugikg7EoA3f4kK6Ey6tV9GX1SU3BmHW41_4kLtXONmD-1Q2nDFcruQAe25dGVl9bEZ0XxIALZvxkvHRGv4-xpQ70CYYDTpobDnLJQ6-1Y7p6zEqB86HG1YhHWY4Ajj_WAq7d4y-wG0SIKXevtfzujbFq6wW1lV_MQqG92Wl5qsrwggy6Z7W4fW08eo3kJP_xy0sJ6L0edSuMYaMCAllCkrzJ0-rvF_87NQatbU3EUXFJaAjl_sWmwpQIIk3ZmK8riG9vxNcZFBQ276JE2H9lb3Yhs3bpGiCh8VfeYhjcr_H1UzVZEUdTmHtT6v1XGlHqabF_3Y2aIR4CPX9taLHJsCLVivJ2zFXd1nL9PUKu-d7JZx_WrVae1e86ViY6ybB-Koq3OI9brkw2vLZ5gyL--aSqqnE2Ak5bROPJDAWU-PbRVgNp0erNFaBRNG1ApoCesOrKcQpHskaRBkwqWH68B7qGbS00I7iGb4ISfUoNdzr94ZISGyVAd1TWzUL4EJdrhc_DGIy2DBM2K4WL_tdZ-QIDG5aV1FjyXv8-xE355kFMWjDaLVxseDSXktWeixDMHoKDUP0B5yJDzPnFJjWQ6w-J7ycv_XSN8FEM1OjSTB_5WxEIRXrKza-uhFNkKeXL5ytxQVsXFqjHNa-ahsIX9LaPq5nnlkPd5TXCrwLxsBNfpL-5WGt8ddVThhZyUf37ofgSSy4SBQ68HhwzUtay8Efm0Chul6ruFCjhrVpYSTAn0GjHXKUoTNUymBCiE5d0G2HFN53s-UHWaFko6ov3kTGN00bJn6om9fgM2ctCsbcQXnB4-gxdSv7gffPY31fw5rHXn1CQoYRfqNTDSUTPgi1mNqgQ-_jumCRVUNom2bnBk0mP_mx5z9gTIml9JgZIDSfdgl9F2XKe2DyeK2e0SufKfvzMt-sAlr744OdJdK2GqyGnYFr76_IWaT2T3r1i-fKWtEDBMsI-_bVnCzeXupvWXGt1aLN_xvmoXglxnzN9FUxlJ9AHenlZEFZlafa_jwSU0NhEIWFCcrMilvRK4HRGB_j9mt7goRd8Spe0b7g7bTKvJpfjQ0KiiCebqqCJwEQC8zADKvjIJM_Crj-661X8f2TZfvVJBNUSRqpdVXdfRvCPUlHMrNjr87tu03o2LufRn8MpVw0u0g-1zxQ685xGrESJdg92P96Hp_mcMy5Kenj0xoi-YS7g3w97Fas1gttGvFxZ1Cm-hkq9u1msUfGz2QQrRLTA9Ws3hkiCwcoBWXZclHmL7Cel1A6Aaea0G4jCkCBdKPVTg9xz2ZtoGCvpSszX2ayWXADMchQvfCZuU_BoJs7S-wrC5YJGOsWQb7VJlRWwWwuBos3wsSvXBrR8-XvWpHohVRR5PGGp3x3Prs9egtGuxnSbwmIESmFIQiYUWr78YKqnpK7pyXBRbpIwBCgMNuUViOrcRWWsMYvvITgRYcejpH3iWtwwXedGT1ZYS7vYasLZwtQGMbYUJz447gVG5ts9U0690duWyiUksC8kBEDUnKIlzXDWzDIR2YSpM4XiRNgMPNuaHumjoKfZOVlyoBbcz5Wy_O-ruU9K6PAPXiL1bdhiHtsHyE5msAV9BnkSqlU3z70uEXLtomyvB7MS0ofch2SWSvhVIlDtS5LX4Gktc4kP4iqXlSX0VjTsS_-P-v6bsr7s1OirlrCEiKGk58HKQPix4yJq9GI3e1zmbdkY2TPKwQZ8e3UAIYr-ma2RcY7rAD2GcKqElpY8f8gnRiyZb-3YCKkDC6xr9r18BEaauTPAfBxhtlFo0uksR2MSUttA3JbV7l9IRd_7cXoz0F96uTT4l8BsI65cXgi9ZUFMRV8EngXwFjL0N4Sq7QMuheCtX7JlCmZA_Af-xOK0K5wQvJ5XaGsNYmKca6A4FinMPR0LGkhQdwuKVHv9xpqbOovk2YWzPHXCnGU6kKz8rj_XK66dAbsYGweXOyJ9ReBpiDVtaKql7WT-IabmRiAJE06i3drmjJAqs9NiDK8dWBnOTgrTCi90JigU0xgVSZe1Q9RLdYXRtZsBDQRm0WlUAegqAHcte3im3APYk_4tDoCaY20E4CTGrl6RNSYkchxwjiV9bCX73SuTGH7VdmO0CULW7-ZiszWJSXotyn2ndXk-B5owDhY6yLSfn-xszi7jjts8keLnJoyMteXlgHqNjXjuRYZNBTKOKwB7dQck_crmAeMdrzeDNK0nzYowCu2vBs7ZLWr7CVy4DhOX9Kd1xr0J_fb_NBXCEStBh7h_FK65Z1BklvgaSWvuASgEGFYyxHGkDs9MbouFO47MmHy4OLDCHFJkXG53wGIMdipm2IO7qs3QMxTer072MEeN1wly-5IDMlVYCCcqxF3j2aqKgbbvLUGVHY1r_FSKMGvenoeWYGlbRJdkeZVUN9QOjnqdLajc11yBlZNIRafpz7enueoHGfVpQCEFnyO5gxRZkbjOxWmWrh8ybhYnqRt4rI2HJZDmqHilUZLUDzBLneVQf6fn94pdX9CQLFKgOnmWY7gkuKuqPy39QN-ZjpwgOdA7joQ40wfyo_UCjOcKwXPeUvTd9mrXUMzuI4KYs58TPUI5UvZTL2WwfuzgOL6r9AxulA9MWB-n7XSkdHbB8u47zj-pKCqCSKDRkhJhThE6vgkWDMb8AqJOOtkfB4EWwA7nVrBpjbIwu0A38r742r6Sgb67vuMSk4nl9vJoHSUFqlSAYFg4XHLjO4D8UaNPPwu4ozwrRye_1hpUeHPjFIkc01KhLORLypo34OoxcQIXhaLvf6a5J4RWbtl_dnXDEhjwhkFjxbrHRr2Njm3wNkpVPaJVWEjGsN9eQtdVfBVo5GoLaLNSKorw4tTXYba_rJsXU6FkFwGtv02dsFsD8Q3ld3lDKKs2sHwhQguahzOW02ApdcjQj1Y8TZMl-RLZ6N5SrAQlsniLE5zV_HdEZzM1lTZXQFw-miLL0HHIEzKbg-MuEh5of2uxta14fNHHEAo1zE-2Rre51nnfCapZer--F6IDgVh58aH_iR6r61rpgGnEED1VTv_l-xyuAd4FENwJuAKiLfWA5GD03iNeUoU4QDkq_qGlMW4vTn8BlyukrQcyKRxiG3uFEyg3_wQoxEgTGEPe0vTgkvpAUncL2DrJBD6vQRXfXTmI2x6xN8t3l6uHGtxOrpTAOXPtO2aQmmHc_WpLfpX4y8Mw3OA_fQshZzqK0TJvpIg2xrwBzt-vzIvufw9SrJ2W1LanDNKW6hbCa_MSQdECeRSr9VjGXeRUEbKiEtekBz0KmY7R4QuHupl02nwAUCWR9zWKkirA5hVnf50oy_SdxAH6xjVQfLDMYHp5NzyP9omd5RnnhsMQMUWhT2--LA4MGrjL9OvaVsaY7m6D34tHkecuM84lTN4HD92C8HqfxXl724q5lisXcPCkYHGGZhR2DfO0ga8vOtcyCPPLBX7uuw8TamZPJRrFSoV5ia23jSsX0fDD-3tKb8qmJFoFcaF8sBhU1HbDcVW-cGI0LYaYeEcVu2Ulw8gGm3iQs1XHLmGAc5nMh0MI97GqkJjDZMn_vZMPZWXdRe8LQT1XqDVVRt4uoKAXyLnDKljm7RhiYJlFVkWq-BsuT7mY8V9_xPrKlVuvRvJdyGOnHRPtTa8oAI2l8qoU8Z47xcIKu_rxaXbr2RC2umb06x2X6mqHahYBrcvY9ECGdNqciDYr3BmFcuOTY7A9x2v-mGDTGdTXapvSGjiTi3CppuN2C5K_hZNDwpXi0KkoMsvSqK-mKmEWWdtGCzwyQ5GoKCWUtAgtK7z6bvXfdb0sNkrqQX0rHMiiJjv9GEjLosa-Qib9uEkTLKMtS_10Wlmxlp669i1CnIRza_RWprE2nimr-nAIF6hci9X1RF157rPZBX5VqrOIDtLUQPWsDibk34zlSjmQA2plJ_UTRUh5Y8gjgzuPeCAt0eLLtWZKyC4UqwWpM4yesAxUX8y2u3aG9Xg_C5mr4eG3NRy7qm-RmVDzOswYFdFzgdUmhkTgzLDvXKMF0zJvcgJvrBMLNmSsAGtm4pzXTlozlh8lS01-8Byaz4XyBCpEJHNuERbuN3t7gC-nRB0Tzw4u3ki3omA7zPD_4jHjBFpOa-BqChM0ORCiWNBY0ppbqF7Diy4RLJmqVhdCTqUf_fzdTJr9FmyilkJB5QnaLXrelBzGbN5GIzkKcQZrfDUYK_NT55_A6dMAuZbyZCy-3h6CTfbmlEmxhrg-vADPVgmfa2WWgl8nzL3guoA9gNMSa_SHqCqnlEcETCZ0GOZ1d6wYMEq4FqA_gmh-LOg6tkKo-BbDPN8TMYnYys4HYBMGWkJwrw7Lg5pj_d16HuA2X53YYzvkTU3EWK-MQY3gHNcuUmyrsc3mNfWQJ4au-4Zu5CCj8YDnFPCH2wvEk7VihXtgM27u0AafYY8KgZslqSh0VlcvXyZvIxwjHo0ONbT6NlHLMJYHbOxgj19QDFFxHnxkzk8AfV6YHCIU1PIBrdYduOQkixLVpFqYtUmvExgI2-HSrD0i3CzKnSBqnTd7czsq22kIqX5_lckFz8JqeCsICzylP31Hsj_6JlmUNiZRiRADskyQQUsLDvjy_NBRLjXe9iWZzUy2v3SziM-nWY7RBJwTmvz1pqVHhXU2wCcR3mIGeuPiWhowBeYxvHDk41DLvtzApq8KWP39rU908YUn7KjkgJmBoAYtQ6wX1csz1W-GBl9SEFpYD-Qf6GvMOA3i-fGRCufCBSWMXFsbpPJIMCSCkm2sewXrrWC08RPBcla9xKC0dBXeRcT061mWUuYO969HRaJqPxP1O7ggGVCqUBYS8nUjH6dvkHHi08g2CZ1Dwti1kBwUdcN3rDtgH2TgQpt_flXmYpmjqVEnmn-1oYR5fda0uPWq-UwSRMJqlfDsENpmJX0kMYRjWmjGJWP45YB8VUSu0ijP-rvzBUW8HXm14FXVLWVe9Et-DpMQrObgIy5j_mJaCz1af_95bEMqX4i3f6Oc07ZYemzFvzN2xPgH8jjTpvJ97wHPpw-amAwbtIi5Kq9wgbZcOvZ2Fyg9Fl2NpopqAwjo8kOI2Jl9dT-bV_5ZnBinyyCFXzvFx9zuGejcOick6ox0PONOp8aiDnvNLUkbejnPwHnytfUaVqZpvtzpNIQLDwkTe_91b2AYdJy4iievXvZhUmQvGXiW_kfo8U-_bxzG8F8CD47VNk9cBT3syN4WeCZSDsDSqNqez9_sFeGw2efz9CDde4hWtPWWzIR2Rk5MvV4MejmLgRnMWJiTrjYqAiB5LPXc_-gY5oRI_2Xxlcsm3R-Mg4VXlcAtN3vPk02qzheoYDN3NaQsf8rVLQNXCszgyR4T0Tjq-X_tvuJ2zpGEyjYSY-3ZSTU3H7Nl2N-SWiHJIQzPyyI9zAJAnxDxWx6g7PaqmClSnlKVOSJJQw7iKyPHhCRiCer1Qu03PR8BgNxuxou6PqWLNwblSYaFprEAHa7nkZJLLM7GjGw0zH0gr4l25bisCodrio5DVWwkc5X4XK8pFCHhKU3U-jj0rKJQsIm55leFlWIFN6KbpMM3qhz6tTZT3HtJvxfTW3ceiINrQfMDLhkKgPWg2a0hT1JPqOoZkYkX32h3LCq6zD_w9qDHw5k5jI-nGVD2zNFszVPrhLjA6MVs4WREJUcSrqK9T8LYlEPQZJ5K7QZVL1TM1hrro_defTYxOxHbqVlQAuEfOzdqnferiRA36Yg0Ttux731QKFlxHGUiBuDFs0WtX6uHad1Zq-5UbcAniLIH4u35_Ne343bS9HJM4babBRXc1DHq3ju5wQaxFvkDD4yh6-G1vlFZsBiKFz1VU-U_HBZWYbWoHn1iJ_N8yfhj6all1GwOk1YbzWmO-OHZM-HOu2hxRqBp8gyCdTYDVhGWmM2zOjI5zwLwiMRPvW4Xt8bjx1ygrcnLV2FuF67sNAJ-gu4pe2Pmo2-gi63aYbmd_0wi4iF_asm-_iDX0VLA3kG1Q_SGO2IQAcIZRfEXoww3s1YPp7hSCCyx7o93f463qlW2bLN8HN69aaxLQzabv5BJMhs3GjwP_oNh92ySokzTHzjc4ShCOwGK2SlB7Ku1t8DQmTNCPeiMo0z75Va22VGtNAcO7oRYJT9R0hCUcVBeB6um0_VLdyn0lM6jSNage0axNo9MGLTCGanlb6dQvvgYaIuIffZyXbp2BjDr_8Hg5348dypYzQzFfC_Wv7NPY7E12pyrIuTH3wlw_zYMYiyNeTqTUrxr4v_x8ytSSb-82UsnpaLGCm0ctuVcAGOgPLXP8_ErOX58GuZPZbaLQrUFFTcLjtey6lPmYdknGCkNMreXyDwlrDzdCvAKzyPJUt00tW50GxJuH6OM0ufvovfMygaUcV4d-EcaXdWXXWE4wBdL109Tri5_3-1hIjBjnGVKPApBnSEXGdtzNobkkIBRN-2Op1YwUUpj4dExgqyxXp4_gZaC_rSPAxXqSLL_98ZoT7P3WMU63nlXEuduJG12Cg9daUHJF7G9yXbzQ_jIidPBXUo05tzZ_sxgdeV2kLl90452K_0Q-lpEso2Zns7VKjBP2p861JtWZC6b_vPTB8sh8gzKJ9DpNw14q69rMJa5UkHv2SQu2GQxR0a_XFkgF2pCNxY0eWGbz-RIr968civ9yOqg7gTgY-EO7gUsQp3Q9TxROBNlPTew0baRZZGnRwMuZMFcr8NFt9BErwjxqaJ1CG0RRN2S_QPmpfdZYIrlQHST7wuNdiYcOLv-bnr2xXGGZtbSQJIL7e3UAkkda112aBBIJmxbqS5jMNqFVsgHeAY0zq0F-FKmxe4B3zq7lRbSvGCtRna4ghlLnHSo5lD2qK_jZTQf6iBtgVcgxuF3AavhswDBhfvksrtaURBMv52R29FohtJ337l8b0XRp7KxWnNs7R6tIVLSW2lPxxITrqeQSkoLB-2yLG0uD8NxOfAl8-VzQxzMlsqY3MlcPaoTCSHqwBeBEG5dJKZoEn-ijQispmGZWrOAaN7ysPGcWGZNGWY8t3cXnx8_pSYK0zH9cGLGLYKaQepHX2sPMizBZxUucToE6c8D53ySzZepk3AidL9ziMIWk8muFRN04LvCP9YRKu9WpC-tOdBV2_08ZOxlP8u9-r4kx8zKteXbYWNE88QMZh5oxiDMAjwExLVQNNJizVd2q5NZy3MmcOZON-t7wLHygw2FQG5ieEbPZ-5G5pJrTY0hrpOU8PbzdXODCIRzOK4jhoMMYbSulfrRXKCHwwy4fRqGaJ5VKpEfxSd3JKhH58ugcPOt7648bVZrkoV5zoSlwGwQOA_QCuCdFFLotyXMtjXkwJJ6XL3Ici4dfX4EKw94kMAN0GhfpIajUSm_DK4_nzYmJ0tSIE7fSqnzfMym-U4iV9Bmk-3HxkvQ7P699kWaGOycUkU1Nn2DxG3HCKhIXdkB7RfYqfbJpgNrwSUqoMMb1WfC8qJfhaWJ5qMO7bYeoxkKuLgmZO6p7RdRh-CrouffkLEOtUvG92hQOJs-0X9GiqKnNOVikuNmEBsTjbWopECINRjIwhk8mov-yzZvGDV0Sc1JlQ75AHCL-WXd-t_XIyeSh639cPj2GSfsUE_Z1FefYNiR-SiSzkxGMef_kCmjdWKIDcNx-mUCmH5hnq8Euj5vYlZIFOh42E0p58zWGPzuQ8-X27ZTZScCPlnrG8BWzB4W0VeHYCQDCYVauesMjEAseClUuGPZ9lhNHsFWHGNbZPTGloQVGzJhBV6_XC41lk5It4oUsxn6awenAflBQZn_T4ZP6Nl7VsEKxrvzgwPZLj8YnJz-EQZgEh7pGrRr5dUdA5GTgMpubLCjabyvXddzOiXbH-fQQpdnNE0ufspZEkb1SChDDOTK6IHTzvLH3N_44gl3TCb1UeHUraavbkX0c55zOKlQmr858vrhCYZAY9q8JGHiJcXglctRwU4mTfPey20jFNWCe_3aQu5CERVLN26M8afzu2fTHTO4putyugPXnSz1g07tJIAdpT4a5H0U5TfwCIdEsCcYL7CinBw4wXMuX26pQU62MvR58x44730q7dUgAqd6-V2pC_Xp4KKn4NSflTUuvF21UU4vo_Q3A4YOhdthny6EQnNgXpCcWdtjHpDFWTThf65bcsYXzcnJKCFGIlLoRfN2PVaeaZgT8lkzUMXQ_USpTDcmJJ6i7EsBtr7FVGsJ_p2jBxv9WLKBSUHkAOT0jfdpz8BjcS7MtlgN-2YQGb1VvsRd0-rrsnjqDFf-3TEH9EM8dKWsu-P8fLAwS3d9uvpTWD1zeRtibhPbZ06a_C5xsRffDtfc93lrem7OYEfRizX6MLqibffF-7-17uiCKl3LJnqxrW2pSAjKFhCYMmPbYPNLv9IF5kFocnhrIgdEYIhdDF5HdwEPRIkQcitU4C_bh-7oWe8PWVamuvQqGZYuKM-a_oN8XzrbRd5WxtJlfDFeQbUHhN5-MAfg8UGki0Gtw-1VYSmyXSCXrojgjbZ9PCjY5cKqbsY6afhYQgxBfj_aypTi4Sq-yLFCxEd52Q3733-Y_du9fq6jxft75GDHhwFqKzpt_3Xn3a6n6bqF1R10A8KoBMZUg3UiMtxkSeHY_NJmkL374QS2bKRmk81Sp2ArXYXY1IneY-feQtqhzDIxB1ZndNSjuP20td_Ezxy0TOAeMFwfJ-FB7stFRGa018Y-GLXZz7XYjRLtv-5ER1xlQdVf0rvGvtlyxNxqYZ-OtVkdMh05IbM5sTtCF1AkiaYiV0z0_4fPsfId2Nd4hHkCKDa2DIcdxA_iYsVEwy6hs1dCNs8uKYrsFN2kE3nzqPFPiAXNzfJn5GIg_ZxYPPjrA8AYyu4xrD7MdX9lsOVKQwebtamjbFJAWkEnOsjw8MrYitcGoJHQWoQFmELohFSh9oKJa51fdbJOO_3ieFDgTXBlc1nqiAfP0mgYwMYN4shoQU4WGm1l2LvKaF1M57pfhDqmMowotyuJZdd3juEA1ed0RnQsQW2oc9gWqrr2ISzHt0_9sVHIy1ZiZWkTHbOjUazDW6cvBmwjE7tZEPRoIxqHwDJwrueiTfUSKlmakLVm3bPmRjlsPv760MRTGHDzaicjlWvNXB-dH9AJrwwKmGt-ZgCzr1dwmIovUTkGeXz4F-7uCjXxhJWTxL_GEwYCKOrCJujRCARMke3QKc_VMtuOzNHHcbIpyY4AQDLiF6Z7UQ0Xjx2d_I4Lq_LX_cTrUv0954Hr_v_T0beAXIPECFXmUfGkre8F44ixDEYxygRlWYwgQo-4sbMTOxJFmldJmgMDjyP8vznrIPc8J-VtT9qLze5YwcEoDQaxTHs_d-JlLEoS5Bh5pJC08-8viEFGcSd61yv1XpSPXXqfunSDUJ944JlP2tCLd13sN7KqFu7APnjfzBX04nj33NYVEnCi5Jen24akEVM9HLkqmlAocvWzxYjr67iWrp6Yur9gPGlvJQ-5IOzoUU3xiilpEV5G2LCT30Io7qm6rZWTIqscsGkihR9X7d6Bt8DRtaEdrrWy6gpnEEHzjCDJha99uKJ66gU0qaT34VBM9BC04salUsjjsnAFj9ihe63EspBTk1o22hxkgs52COZQPVUFTwUV-XMTMziESRZT65bK8fCA6QiSxlPJLSzMB_elVF0k5hNhGOXK-HLXtq7ZL-5bsYwC_VG1KIncVxX2cItWJHxsGakarodP5gLopk3ceB9iTRASulNLl_C-shlkY8NI9OayKUmpJwBd1BdbwGz5sPFjRfzY67-kFJiVFFSZiOt3oA8Wg_PNVNi6bRwG8Pf2JedfeVyFfB-tOl8Z81kgMi-0d1_72RLuyAWWsDfk4VfEsNrHkiQ2VqA0helKAsJE_Hdr-ATF3DRZGwWa1AEmHAhbGWV6eH0IywIE0S_oXITUNNJQ1MU05cMkacZNUtezijMRSq7M8PZ6XHdQMiLhf4tGE2UorJNG6HHtAKrnjGY37DzggFuJ5Tkovwr7eMej01BfzPeHFIgUWt91X2GdjnTD4s3POst0yXmpYIUYS3whqMvRiVF2xMfSm8cxyltyMR_j4yxBhaqQ5wbFo5wnDIl-hbwt8U-gq3tAaBFWiLmBJdMh2kiTObO_EKYcymCFZN099NseXaAjPpSJogQtb-4HuWB6a08fnya5dzp2JBuMi_5mAMjG1MXdK-Gv_urOvaKJhjieJRKya2CujlCbKfOtxn-69w7SsVfJkI9IgX5ayqDUjPjL5zCNgkwNgaxP8rb-8zek6b-vw2hhfVnGe9mX0jf4RL_avFHUxIC11zk8YXe-xpMOZzOmKMavx7aRm0at6-dDVSAodqn2uuyWaHrs8obIIajEtYbfk0wZogyCrjnnER-kBT7526IjanNACiBaV27l3NenwPLgVclEsCGcHXB34lpmCwazHuXOdcXvS26yQORVO_Lbdorc0Tr8ZQVYfSwC78zxkIduhpWpA7aNMQ-zGnWXJ3WHOQwGHj6X4jbOv5sunO79gmQ1PX1D52Usm53LTMAZdQyBfYawK54ex851TIhpdlAGcNV_RIL1--Y7K9EcOb5AuW8FWy88sH6vHRnPUoJXh2dLhmdWjxz2guNA7qXwa7ZqUegZ_iiqqlAARhJsRd-NIQBOdzd6lLPG7DleGsaOwOZR4lLM-nGayq2knbMGYSAWEqBaQluq66T3NF-mOJQvbV0_EH_DQ==",
+        "summary": []
+      },
+      {
+        "id": "msg_0664fb4ec459de6b016aca2225df9087d08a7766aadd4b4fa6",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":2,\"hallucination\":true,\"engineering_contradiction_count\":2,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"핵심 기준인 경계 영향 유무는 맞췄다. 다만 초기 transient에서 압력이 지수적으로 감소하고 late-transient에서 선형적으로 감소한다는 서술은 근거 없고 공학적으로 부정확하다.\"},\"B\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":3,\"hallucination\":true,\"engineering_contradiction_count\":1,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0.5,\"note\":\"두 핵심 주장 모두 포함. 그러나 초기 transient를 곧바로 infinite-acting radial flow로 놓고 기울기 일정 등 세부를 붙인 부분은 제시 인용문과 잘 맞지 않는다. KB3는 경계 영향이 중간시간 이후 나타남을 지지한다.\"},\"C\":{\"claim_verdicts\":[false,true],\"partial_or_better\":true,\"unsupported_claim_count\":1,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0.86,\"note\":\"late-transient가 경계 영향 이후라는 점은 맞다. 하지만 초기 transient가 배수 경계의 영향을 받지 않는다는 핵심을 명시하지 않았고, KB1 인용으로 wellbore storage 관련 주장을 뒷받침하지 못했다.\"},\"D\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0.88,\"note\":\"배수 경계 신호의 도달 여부로 초기와 late-transient를 구분한다고 정확히 설명했다. 경계가 보이기 시작하면 응답이 infinite-acting에서 벗어난다는 점도 인용 취지와 부합한다.\"},\"E\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":null,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"초기 transient는 경계 미도달, late-transient는 경계 영향 시작 이후라고 명확히 설명했다. 경계 유형별 응답 경향과 wellbore storage 주의점도 공학적으로 타당하다.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 9977,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1718,
+      "output_tokens_details": {
+        "reasoning_tokens": 1031
+      },
+      "total_tokens": 11695
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 2,
+      "hallucination": true,
+      "engineering_contradiction_count": 2,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "핵심 기준인 경계 영향 유무는 맞췄다. 다만 초기 transient에서 압력이 지수적으로 감소하고 late-transient에서 선형적으로 감소한다는 서술은 근거 없고 공학적으로 부정확하다."
+    },
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 3,
+      "hallucination": true,
+      "engineering_contradiction_count": 1,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 0.5,
+      "note": "두 핵심 주장 모두 포함. 그러나 초기 transient를 곧바로 infinite-acting radial flow로 놓고 기울기 일정 등 세부를 붙인 부분은 제시 인용문과 잘 맞지 않는다. KB3는 경계 영향이 중간시간 이후 나타남을 지지한다."
+    },
+    "agent": {
+      "claim_verdicts": [
+        false,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 1,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 0.86,
+      "note": "late-transient가 경계 영향 이후라는 점은 맞다. 하지만 초기 transient가 배수 경계의 영향을 받지 않는다는 핵심을 명시하지 않았고, KB1 인용으로 wellbore storage 관련 주장을 뒷받침하지 못했다."
+    },
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 0.88,
+      "note": "배수 경계 신호의 도달 여부로 초기와 late-transient를 구분한다고 정확히 설명했다. 경계가 보이기 시작하면 응답이 infinite-acting에서 벗어난다는 점도 인용 취지와 부합한다."
+    },
+    "openai_closed_book": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "초기 transient는 경계 미도달, late-transient는 경계 영향 시작 이후라고 명확히 설명했다. 경계 유형별 응답 경향과 wellbore storage 주의점도 공학적으로 타당하다."
+    }
+  }
+}

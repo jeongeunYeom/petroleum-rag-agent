@@ -1,0 +1,524 @@
+{
+  "task_id": "S03",
+  "model_id": "qwen3:8b",
+  "run_id": "GR-20261010-110748-A201D7",
+  "initial_response": {
+    "run_id": "GR-20261010-110748-A201D7",
+    "topic": "사용자 제공 민감도 식 mu=4-0.02*T (cP)를 사용해 온도 T=40~80 °C를 10 °C 간격으로 평가하고 점도가 최소인 온도와 값을 찾아줘.",
+    "goal": "사용자 제공 민감도 식 mu=4-0.02*T (cP)를 사용해 온도 T=40~80 °C를 10 °C 간격으로 평가하고 점도가 최소인 온도와 값을 찾아줘.",
+    "expected_result": null,
+    "run_status": "waiting_for_user_input",
+    "status": "pending",
+    "stop_reason": null,
+    "final_answer": "",
+    "clarification_question": "계산을 계속하려면 관계식에서 변화시킬 변수 이름이(가) 필요합니다. 필요한 값을 알려주세요.",
+    "required_inputs": [
+      "관계식에서 변화시킬 변수 이름"
+    ],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "838f3bc874bacbd64a6bd98e0913014cc43989aee59d546b55e81ee77c38bf1e",
+    "criteria": [],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "온도 T=40~80 °C를 10 °C 간격으로 설정하여 민감도 식 mu=4-0.02*T (cP)에 따라 점도를 계산하는 과정이 명확하게 수행되었는지 확인",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "각 온도에 대응하는 점도 값을 정확하게 계산하고, 해당 값을 기록하여 비교할 수 있는 데이터가 존재하는지 확인",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "점도가 최소인 온도와 해당 점도 값을 정확하게 식별하고, 그 값을 기준으로 최소 점도가 발생하는 온도를 도출했는지 확인",
+        "required": true
+      },
+      {
+        "criterion_id": "C4",
+        "description": "모든 계산 및 분석 과정이 사용자 제공 식 mu=4-0.02*T (cP)에 기반하여 이루어졌는지 확인",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 2,
+    "current_iteration": 2,
+    "max_iterations": 6,
+    "current_stage": "waiting_for_user_input",
+    "current_action": null,
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3",
+          "C4"
+        ],
+        "status": "completed",
+        "reason_code": "simulation_model_or_inputs_missing",
+        "started_at": "2026-10-10T11:07:51.573323Z",
+        "finished_at": "2026-10-10T11:07:55.676247Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3",
+          "C4"
+        ],
+        "status": "blocked",
+        "reason_code": "simulation_model_or_inputs_missing",
+        "started_at": "2026-10-10T11:07:55.702132Z",
+        "finished_at": "2026-10-10T11:07:55.715076Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "retrieve_no_progress",
+        "details": {
+          "new_evidence_count": 0,
+          "retrieval_mode": "hybrid",
+          "cache_hit": true
+        }
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet",
+          "C4": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet",
+          "C4": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet",
+          "C4": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "관계식에서 변화시킬 변수 이름"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 696,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p696:c1",
+        "score": 0.01639344,
+        "excerpt": "er calibration.\nPressure Thermal Sensitivity.  The pressure thermal sensitivity represents the error (psi) that\nresults if the temperature measurement is in error 1°C.\nMaximum Hysteresis During the Calibration Cycle.  This test is determined from calibration\ndata.\nCalibration  Check.   A  calibration  check  verifies  the  consistency  of  the  sensor  readings\nwhen the applied pressures and temperatures are different from those used during the calibra-\ntion  cycle.  The  calibration  check  is  performed  in  the  laboratory  at  the  time  the  sensor  is\nevaluated and is essentially a rerun of a master calibration.\nOther Procedures and Tests.  Standard procedures are typically used in evaluating pressure\ntransducers to compare different technologies and certify the calibration parameters. The most\ncommonly used standard procedures are as follows:\n• Complete master calibration.\n• Calibration check.\n• Stability tests: middle term and long term.\n• Repeatability test.\n• Resolution test.\n• Noise or short-term stability test.\n• Dynamic  tests:  temperature  shock,  temperature  transient,  temperature  response  time,  and\npressure shock.\n7.6 Metrology of Temperature Gauges\nWhen the t"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 562,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p562:c0",
+        "score": 0.01612903,
+        "excerpt": "24\n           \n75 \n  85 \n    95 \n      105          115 \n125 \n 135 \n    145\n60\n50\n40\n30\n20\n10\n0\nTemperature, °F\nDifferential Pressure,  psig\nApproximate Cloud Point\nFigure 21  Graph of differential pressure v temperature during constant cooling.\n(Core laboratories)"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 183,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p183:c0",
+        "score": 0.01587302,
+        "excerpt": "Institute of Petroleum Engineering,  Heriot-Watt University  \n23\n       \n10\n9\n8\n7\n6\n5\n4\n3\n2\n1\n0\n25\n30\n35\n40\n50\n45\n55\n60\n65\nDensity at 60ºF and pressure P, lb/cu ft\nDensity at 60ºF minus density at temperature, lb/cu ft\n80 \n100 \n120 \n1\n6\n0 \n1\n8\n0\n \n2\n0\n0\n \n22\n0 \nTe\nmpe\nrature\n ºF \n24\n0 \n14\n0\n \n60\nFigure 15  Density correction for thermal expansion of liquids 10.\nExercise 4. \nCalculate the density of the reservoir liquid of exercise 3 at a reservoir temperature \nof 5,500 psia and 180 oF\nFull compositional data may not always be available and the characterisation of the \nproduced fluids will vary from full compositional analysis to a description of the \nfluids in terms of gas and oil gravity.  The procedure just described is for the situa-\ntion where the composition of the reservoir fluid is known. The procedures which \nfollow cover the situation where a less comprehensive analysis is available.  These \nmethods make use of empirical correlations.\nProperties of Reservoir Liquids"
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+        "page": 255,
+        "chunk_id": "d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p255:c0",
+        "score": 0.015625,
+        "excerpt": "Tpc = K2\nJ\n= 17.371662\n0.63832\n= 472.76°R\nppc =\nTpc\nJ\n= 472.76\n0.63832 = 740.64 psia,\npr =\np\nppc\n= 6098 / 740.64 = 8.233,\nand Tr =\nT\nTpc\n= 766.67 / 472.76 = 1.622.\nFinally, looking up the z-factor chart (Fig. 5.3) gives z = 1.02. This represents a 2% error with\nthe experimental value.\nExample 5.6 Calculate the viscosity at 150°F (609.67°R) and 2,012 psia for the gas of the\ncomposition shown in Table 5.8.\nSolution  (by  the  Carr  et  al.16  Method).  First,  calculate  the  pseudocritical  properties  using\nKay’s3 rules. The charts of Carr et al.16 are based on pseudocritical properties determined with\nKay’s  rules;  it  would  not  be  correct, then,  to  use  the  methods  of  Sutton4  or  Piper  et al.13 to\ncalculate the pseudocritical properties for use with the viscosity calculation. The details are in\nTable 5.9.\nI-248\nPetroleum Engineering Handbook—Vol. I\nHome\nSearch\nPrint\nHelp\nChapter 4\nChapter 6 Bookmarks"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+        "page": 231,
+        "chunk_id": "d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p231:c2",
+        "score": 0.01538462,
+        "excerpt": "r  equilibrium  studies,  and  compressibility  factors  can  be  obtained  routinely  from\nthese data.\nIf the gas-deviation factor is not measured, it may be estimated from correlations. The cor-\nrelations depend on the pseudoreduced temperature and pressure, which in turn depend on the\npseudocritical temperature and pseudocritical pressure. The pseudocritical temperature and pseu-\ndocritical pressure normally can be defined most simply as the molal average critical tempera-\nture and pressure of the mixture components. Thus,\nppc = Σyi pci and Tpc = ΣyiTci, ................................................ (5.6)\nwhere  ppc=  pseudocritical  pressure  of  the  gas  mixture,  Tpc=  pseudocritical  temperature  of  the\ngas mixture, pci= critical pressure of component i in the gas mixture, Tci=critical temperature of\ncomponent i in the gas mixture, and yi=mole fraction of component i in the gas mixture. These\nrelations are known as Kay’s rule after W.B. Kay,3 who first suggested their use.\nThe pseudocritical temperature and pressure are not the actual critical temperature and pres-\nsure of the mixture but represent the values that must be used for the purpose of comparing\ncorresponding"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 3.085794,
+      "retrieval_seconds": 4.085602,
+      "llm_generation_seconds": 8.4e-05,
+      "python_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "evaluation_seconds": 0.0,
+      "synthesis_seconds": 0.0,
+      "retrieve_action_seconds": 4.115384,
+      "elapsed_seconds": 7.282754,
+      "total_seconds": 7.28289,
+      "message_parsing_seconds": 0.000136
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode"
+    },
+    "validation": {},
+    "cancel_requested": false,
+    "error": null
+  },
+  "resume_response": null,
+  "response": {
+    "run_id": "GR-20261010-110748-A201D7",
+    "topic": "사용자 제공 민감도 식 mu=4-0.02*T (cP)를 사용해 온도 T=40~80 °C를 10 °C 간격으로 평가하고 점도가 최소인 온도와 값을 찾아줘.",
+    "goal": "사용자 제공 민감도 식 mu=4-0.02*T (cP)를 사용해 온도 T=40~80 °C를 10 °C 간격으로 평가하고 점도가 최소인 온도와 값을 찾아줘.",
+    "expected_result": null,
+    "run_status": "waiting_for_user_input",
+    "status": "pending",
+    "stop_reason": null,
+    "final_answer": "",
+    "clarification_question": "계산을 계속하려면 관계식에서 변화시킬 변수 이름이(가) 필요합니다. 필요한 값을 알려주세요.",
+    "required_inputs": [
+      "관계식에서 변화시킬 변수 이름"
+    ],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "838f3bc874bacbd64a6bd98e0913014cc43989aee59d546b55e81ee77c38bf1e",
+    "criteria": [],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "온도 T=40~80 °C를 10 °C 간격으로 설정하여 민감도 식 mu=4-0.02*T (cP)에 따라 점도를 계산하는 과정이 명확하게 수행되었는지 확인",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "각 온도에 대응하는 점도 값을 정확하게 계산하고, 해당 값을 기록하여 비교할 수 있는 데이터가 존재하는지 확인",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "점도가 최소인 온도와 해당 점도 값을 정확하게 식별하고, 그 값을 기준으로 최소 점도가 발생하는 온도를 도출했는지 확인",
+        "required": true
+      },
+      {
+        "criterion_id": "C4",
+        "description": "모든 계산 및 분석 과정이 사용자 제공 식 mu=4-0.02*T (cP)에 기반하여 이루어졌는지 확인",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 2,
+    "current_iteration": 2,
+    "max_iterations": 6,
+    "current_stage": "waiting_for_user_input",
+    "current_action": null,
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3",
+          "C4"
+        ],
+        "status": "completed",
+        "reason_code": "simulation_model_or_inputs_missing",
+        "started_at": "2026-10-10T11:07:51.573323Z",
+        "finished_at": "2026-10-10T11:07:55.676247Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3",
+          "C4"
+        ],
+        "status": "blocked",
+        "reason_code": "simulation_model_or_inputs_missing",
+        "started_at": "2026-10-10T11:07:55.702132Z",
+        "finished_at": "2026-10-10T11:07:55.715076Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "retrieve_no_progress",
+        "details": {
+          "new_evidence_count": 0,
+          "retrieval_mode": "hybrid",
+          "cache_hit": true
+        }
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet",
+          "C4": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet",
+          "C4": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet",
+          "C4": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "관계식에서 변화시킬 변수 이름"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 696,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p696:c1",
+        "score": 0.01639344,
+        "excerpt": "er calibration.\nPressure Thermal Sensitivity.  The pressure thermal sensitivity represents the error (psi) that\nresults if the temperature measurement is in error 1°C.\nMaximum Hysteresis During the Calibration Cycle.  This test is determined from calibration\ndata.\nCalibration  Check.   A  calibration  check  verifies  the  consistency  of  the  sensor  readings\nwhen the applied pressures and temperatures are different from those used during the calibra-\ntion  cycle.  The  calibration  check  is  performed  in  the  laboratory  at  the  time  the  sensor  is\nevaluated and is essentially a rerun of a master calibration.\nOther Procedures and Tests.  Standard procedures are typically used in evaluating pressure\ntransducers to compare different technologies and certify the calibration parameters. The most\ncommonly used standard procedures are as follows:\n• Complete master calibration.\n• Calibration check.\n• Stability tests: middle term and long term.\n• Repeatability test.\n• Resolution test.\n• Noise or short-term stability test.\n• Dynamic  tests:  temperature  shock,  temperature  transient,  temperature  response  time,  and\npressure shock.\n7.6 Metrology of Temperature Gauges\nWhen the t"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 562,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p562:c0",
+        "score": 0.01612903,
+        "excerpt": "24\n           \n75 \n  85 \n    95 \n      105          115 \n125 \n 135 \n    145\n60\n50\n40\n30\n20\n10\n0\nTemperature, °F\nDifferential Pressure,  psig\nApproximate Cloud Point\nFigure 21  Graph of differential pressure v temperature during constant cooling.\n(Core laboratories)"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 183,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p183:c0",
+        "score": 0.01587302,
+        "excerpt": "Institute of Petroleum Engineering,  Heriot-Watt University  \n23\n       \n10\n9\n8\n7\n6\n5\n4\n3\n2\n1\n0\n25\n30\n35\n40\n50\n45\n55\n60\n65\nDensity at 60ºF and pressure P, lb/cu ft\nDensity at 60ºF minus density at temperature, lb/cu ft\n80 \n100 \n120 \n1\n6\n0 \n1\n8\n0\n \n2\n0\n0\n \n22\n0 \nTe\nmpe\nrature\n ºF \n24\n0 \n14\n0\n \n60\nFigure 15  Density correction for thermal expansion of liquids 10.\nExercise 4. \nCalculate the density of the reservoir liquid of exercise 3 at a reservoir temperature \nof 5,500 psia and 180 oF\nFull compositional data may not always be available and the characterisation of the \nproduced fluids will vary from full compositional analysis to a description of the \nfluids in terms of gas and oil gravity.  The procedure just described is for the situa-\ntion where the composition of the reservoir fluid is known. The procedures which \nfollow cover the situation where a less comprehensive analysis is available.  These \nmethods make use of empirical correlations.\nProperties of Reservoir Liquids"
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+        "page": 255,
+        "chunk_id": "d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p255:c0",
+        "score": 0.015625,
+        "excerpt": "Tpc = K2\nJ\n= 17.371662\n0.63832\n= 472.76°R\nppc =\nTpc\nJ\n= 472.76\n0.63832 = 740.64 psia,\npr =\np\nppc\n= 6098 / 740.64 = 8.233,\nand Tr =\nT\nTpc\n= 766.67 / 472.76 = 1.622.\nFinally, looking up the z-factor chart (Fig. 5.3) gives z = 1.02. This represents a 2% error with\nthe experimental value.\nExample 5.6 Calculate the viscosity at 150°F (609.67°R) and 2,012 psia for the gas of the\ncomposition shown in Table 5.8.\nSolution  (by  the  Carr  et  al.16  Method).  First,  calculate  the  pseudocritical  properties  using\nKay’s3 rules. The charts of Carr et al.16 are based on pseudocritical properties determined with\nKay’s  rules;  it  would  not  be  correct, then,  to  use  the  methods  of  Sutton4  or  Piper  et al.13 to\ncalculate the pseudocritical properties for use with the viscosity calculation. The details are in\nTable 5.9.\nI-248\nPetroleum Engineering Handbook—Vol. I\nHome\nSearch\nPrint\nHelp\nChapter 4\nChapter 6 Bookmarks"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+        "page": 231,
+        "chunk_id": "d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p231:c2",
+        "score": 0.01538462,
+        "excerpt": "r  equilibrium  studies,  and  compressibility  factors  can  be  obtained  routinely  from\nthese data.\nIf the gas-deviation factor is not measured, it may be estimated from correlations. The cor-\nrelations depend on the pseudoreduced temperature and pressure, which in turn depend on the\npseudocritical temperature and pseudocritical pressure. The pseudocritical temperature and pseu-\ndocritical pressure normally can be defined most simply as the molal average critical tempera-\nture and pressure of the mixture components. Thus,\nppc = Σyi pci and Tpc = ΣyiTci, ................................................ (5.6)\nwhere  ppc=  pseudocritical  pressure  of  the  gas  mixture,  Tpc=  pseudocritical  temperature  of  the\ngas mixture, pci= critical pressure of component i in the gas mixture, Tci=critical temperature of\ncomponent i in the gas mixture, and yi=mole fraction of component i in the gas mixture. These\nrelations are known as Kay’s rule after W.B. Kay,3 who first suggested their use.\nThe pseudocritical temperature and pressure are not the actual critical temperature and pres-\nsure of the mixture but represent the values that must be used for the purpose of comparing\ncorresponding"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 3.085794,
+      "retrieval_seconds": 4.085602,
+      "llm_generation_seconds": 8.4e-05,
+      "python_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "evaluation_seconds": 0.0,
+      "synthesis_seconds": 0.0,
+      "retrieve_action_seconds": 4.115384,
+      "elapsed_seconds": 7.282754,
+      "total_seconds": 7.28289,
+      "message_parsing_seconds": 0.000136
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode"
+    },
+    "validation": {},
+    "cancel_requested": false,
+    "error": null
+  },
+  "same_run_resume": false,
+  "wall_seconds": 8.231
+}

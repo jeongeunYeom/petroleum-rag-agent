@@ -1,0 +1,119 @@
+{
+  "task_id": "G04",
+  "provider": "openai",
+  "track": "closed_book",
+  "question": "Well Test Analysis의 Case 2 연속 tight-zone 그림에서 장벽 연속성과 각 층 내부 소통을 어떻게 구분해 그렸는지, fault effect 판단을 포함해 알려줘.",
+  "continuation": null,
+  "system_prompt": "Answer the petroleum-engineering request in the user's language. Be concise and state uncertainty. No tools, Python, retrieval or web access. Do not invent formulas, measurements or citations. Explicitly correct a false premise. If essential input is absent, ask for it. Cite evidence IDs only when evidence is supplied.",
+  "user_prompt": "Well Test Analysis의 Case 2 연속 tight-zone 그림에서 장벽 연속성과 각 층 내부 소통을 어떻게 구분해 그렸는지, fault effect 판단을 포함해 알려줘.",
+  "evidence": [],
+  "initial_answer": "질문하신 **“Case 2 연속 tight-zone 그림”**은 제가 지금 **정확한 원본 도면/교재를 보지 못했기 때문에**, 그 그림이 **어떤 책/슬라이드의 Case 2인지 단정해서 설명할 수는 없습니다.**  \n다만, 웰 테스트 해석에서 **장벽 연속성**과 **층내 소통**, 그리고 **fault effect**는 보통 아래처럼 구분해서 그립니다.\n\n## 1) 장벽 연속성(continuous barrier)을 어떻게 그리나\n- **tight-zone(저투과층)** 이 **한 구간에서 끊기지 않고 이어져 있으면**, 보통 그림에서는  \n  - 두 구획 사이를 가로지르는 **연속된 저투과 띠**  \n  - 또는 **압력 전파를 막는 연속 장벽**  \n  으로 표현합니다.\n- 핵심은 **“같은 층 안의 유체가 장벽 때문에 서로 직접 연결되지 못한다”**는 점입니다.\n- 즉, 장벽이 연속이면 **압력 영향이 한쪽에서 다른 쪽으로 바로 넘어가지 않는 형태**로 그려집니다.\n\n## 2) 각 층 내부 소통(intra-layer communication)은 어떻게 구분하나\n층 내부 소통은 장벽과 반대로,\n- 같은 층 안에서는 압력 응답이 **서로 연결된 듯한 패턴**으로 나타나고,\n- 시간이 지나면 **하나의 공통 경향**으로 수렴하는 경우가 많습니다.\n\n그림으로는 보통:\n- **같은 층 내 구간 사이에 연결 화살표**\n- 또는 **압력 파형/해석 곡선이 서로 영향을 주는 모습**\n으로 표현합니다.\n\n즉,  \n- **층 내부 소통이 좋다** → 같은 층에서는 압력 전달이 이어짐  \n- **장벽이 연속이다** → 층과 층 사이, 또는 구획과 구획 사이 압력 전달이 차단됨\n\n## 3) fault effect는 어떻게 판단하나\nfault effect는 단순히 “fault가 있다/없다”보다, **fault가 실제로 압력 흐름을 막는지**를 봅니다.\n\n### fault effect가 강한 경우\n- 압력 응답이 **한쪽에서만 두드러지고 반대편으로 약하게 전파**\n- 예상보다 **응답이 늦게 나타남**\n- 경계처럼 행동해 **유효 저류 공간이 줄어든 것처럼** 보임\n- 해석상 **차단성 fault(sealing fault)** 가능성\n\n### fault effect가 약한 경우\n- fault가 있어도 압력 반응이 **양쪽에서 상당히 연속적**\n- 즉, **완전 차단이 아니라 부분 소통** 가능\n- 해석상 **leaky fault** 또는 **non-sealing fault** 가능성\n\n## 4) 그림에서 보통 어떻게 구분하나\n실무적으로는 이렇게 생각하면 됩니다.\n\n- **연속 tight-zone**\n  - “여기가 계속 막혀 있다”\n  - 장벽이 **끊기지 않는 띠**로 표현\n- **층 내부 소통**\n  - “같은 층에서는 압력이 전달된다”\n  - 층 내부는 **연결된 영역**으로 표현\n- **fault effect**\n  - “fault가 실제 흐름을 차단하느냐”\n  - 압력 응답의 **비대칭성, 지연, 차단 정도**로 판단\n\n## 5) 중요한 점\n질문하신 표현 중 **“장벽 연속성 = 무조건 fault effect”** 는 아닙니다.  \n이 둘은 다릅니다.\n\n- **장벽 연속성**: 구조적으로 계속 이어진 막힘\n- **fault effect**: 그 fault가 **압력/유체 흐름에 실제로 영향을 주는지**\n\n즉,  \n**fault가 있어도 소통이 있으면 fault effect가 약할 수 있고**,  \n반대로 **tight-zone가 연속이면 fault처럼 보이는 차단 효과**가 나타날 수 있습니다.\n\n원하시면 제가 다음 단계로  \n**“Case 2 그림을 기준으로 화살표/구역별 해석을 도식처럼 정리”** 해드릴게요.  \n그 경우에는 **그 그림 캡처** 또는 **교재/슬라이드 제목**을 보내주시면 더 정확하게 설명할 수 있습니다.",
+  "answer": "질문하신 **“Case 2 연속 tight-zone 그림”**은 제가 지금 **정확한 원본 도면/교재를 보지 못했기 때문에**, 그 그림이 **어떤 책/슬라이드의 Case 2인지 단정해서 설명할 수는 없습니다.**  \n다만, 웰 테스트 해석에서 **장벽 연속성**과 **층내 소통**, 그리고 **fault effect**는 보통 아래처럼 구분해서 그립니다.\n\n## 1) 장벽 연속성(continuous barrier)을 어떻게 그리나\n- **tight-zone(저투과층)** 이 **한 구간에서 끊기지 않고 이어져 있으면**, 보통 그림에서는  \n  - 두 구획 사이를 가로지르는 **연속된 저투과 띠**  \n  - 또는 **압력 전파를 막는 연속 장벽**  \n  으로 표현합니다.\n- 핵심은 **“같은 층 안의 유체가 장벽 때문에 서로 직접 연결되지 못한다”**는 점입니다.\n- 즉, 장벽이 연속이면 **압력 영향이 한쪽에서 다른 쪽으로 바로 넘어가지 않는 형태**로 그려집니다.\n\n## 2) 각 층 내부 소통(intra-layer communication)은 어떻게 구분하나\n층 내부 소통은 장벽과 반대로,\n- 같은 층 안에서는 압력 응답이 **서로 연결된 듯한 패턴**으로 나타나고,\n- 시간이 지나면 **하나의 공통 경향**으로 수렴하는 경우가 많습니다.\n\n그림으로는 보통:\n- **같은 층 내 구간 사이에 연결 화살표**\n- 또는 **압력 파형/해석 곡선이 서로 영향을 주는 모습**\n으로 표현합니다.\n\n즉,  \n- **층 내부 소통이 좋다** → 같은 층에서는 압력 전달이 이어짐  \n- **장벽이 연속이다** → 층과 층 사이, 또는 구획과 구획 사이 압력 전달이 차단됨\n\n## 3) fault effect는 어떻게 판단하나\nfault effect는 단순히 “fault가 있다/없다”보다, **fault가 실제로 압력 흐름을 막는지**를 봅니다.\n\n### fault effect가 강한 경우\n- 압력 응답이 **한쪽에서만 두드러지고 반대편으로 약하게 전파**\n- 예상보다 **응답이 늦게 나타남**\n- 경계처럼 행동해 **유효 저류 공간이 줄어든 것처럼** 보임\n- 해석상 **차단성 fault(sealing fault)** 가능성\n\n### fault effect가 약한 경우\n- fault가 있어도 압력 반응이 **양쪽에서 상당히 연속적**\n- 즉, **완전 차단이 아니라 부분 소통** 가능\n- 해석상 **leaky fault** 또는 **non-sealing fault** 가능성\n\n## 4) 그림에서 보통 어떻게 구분하나\n실무적으로는 이렇게 생각하면 됩니다.\n\n- **연속 tight-zone**\n  - “여기가 계속 막혀 있다”\n  - 장벽이 **끊기지 않는 띠**로 표현\n- **층 내부 소통**\n  - “같은 층에서는 압력이 전달된다”\n  - 층 내부는 **연결된 영역**으로 표현\n- **fault effect**\n  - “fault가 실제 흐름을 차단하느냐”\n  - 압력 응답의 **비대칭성, 지연, 차단 정도**로 판단\n\n## 5) 중요한 점\n질문하신 표현 중 **“장벽 연속성 = 무조건 fault effect”** 는 아닙니다.  \n이 둘은 다릅니다.\n\n- **장벽 연속성**: 구조적으로 계속 이어진 막힘\n- **fault effect**: 그 fault가 **압력/유체 흐름에 실제로 영향을 주는지**\n\n즉,  \n**fault가 있어도 소통이 있으면 fault effect가 약할 수 있고**,  \n반대로 **tight-zone가 연속이면 fault처럼 보이는 차단 효과**가 나타날 수 있습니다.\n\n원하시면 제가 다음 단계로  \n**“Case 2 그림을 기준으로 화살표/구역별 해석을 도식처럼 정리”** 해드릴게요.  \n그 경우에는 **그 그림 캡처** 또는 **교재/슬라이드 제목**을 보내주시면 더 정확하게 설명할 수 있습니다.",
+  "model_id": "gpt-5.4-mini-2026-03-17",
+  "input_tokens": 115,
+  "output_tokens": 1161,
+  "response_id": "resp_058fa2746c83213d016aca1fc22e3887d0af35780f21e03de8",
+  "provider_payload": {
+    "id": "resp_058fa2746c83213d016aca1fc22e3887d0af35780f21e03de8",
+    "object": "response",
+    "created_at": 1791631298,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791631305,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "Answer the petroleum-engineering request in the user's language. Be concise and state uncertainty. No tools, Python, retrieval or web access. Do not invent formulas, measurements or citations. Explicitly correct a false premise. If essential input is absent, ask for it. Cite evidence IDs only when evidence is supplied.",
+    "max_output_tokens": 1800,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-mini-2026-03-17",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_058fa2746c83213d016aca1fc2925487d0a659e0d36fc56f10",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyh_JYpLsjn9_tEDJdSlqsSm3lZ0C3FB-cYJFtKo1BnE5DMkg18vkXuakvbD1sZxxlAg8JN3MDI_KP-qJirQnp4JBgwXVv8q-cwKUbyPcSacJKA08FvnAGrQuKjmSgeBol3yAtPq0VwrW8OM23qSGbQYT_Df33TEjF7lLUvjGBmOubtGB2T5_0JZgiGdsZnCQgKd5Ic3iaeuDHZlzQv2U6iuvJMfrW5Lg_nuZBDR-oanhzKIATvSwpImbyOWrdnFyXAfYUY_bu2Xr3q0TKadM0sHfft_RMuOoifKnZduq9TFf4GT1hTS2X5QkdP7xcGxokyv3hPsA5GIW7mUzuDHqLeXkBarBXm3TTQfWsqk3fV2OttdupFmS6wfk4jrUOO-PdOg0n2oxGLkomLDvTccmMUkoDUcrkTvGyrNbg4oS6VFR-2AHsx1m5cWalop0Qp1pN0Y8nQw1BRRb4el5I1eMib-9mvsg8pAOs8KxHFxGRXWuuKo-wYiYc_qBtJMQC4sVUymvQo0E_IbS6rTHe7u0wUdfnq4d0OUoQ2uriSUXiP-WxReBCtKPXEhmGElHHGzEypXKnPjgqIvoF5_nBhRGYrwW13ZqznG7fEKD53_QjftDQAh9L0PIMa70l1L6jWq7wRsA1byF8q-JUoDxDkntqiUOs1nf8m88zbZmNI7KMHZK4HN35TYfLEfI52rp3lufqccc86HwS3DCp4tDENA8QC_AviAmuMG35c9fY1fqhwJKJ1L4GR8jaCLrFEkyGMx2AjOLuaopdfMmLn0s1PfLhkXQL4_BkmaP6KKSpLb0lbPhsdhRIJxO-GErE9-NOTx2dEETMvS3E-uu9vKZTX0j6PqDA2JOYt5nCK8KuNCKr-wRirenydDbVnfaEqpUz5wwJXgQ0zQn8CG-6PNN7XWTPTDQg3rxxVwbdoIN9M_cvIhMsBcs7IwEBTKp4IiLZxaruzw_PIbAZVHBoIdiz5IbGe13346dl4GtFTJHDoaWavtTeLy3M1GLM3xxVfYuj2rMVN7-sF170ax7-zyfxzAEOcpLkBmK_A4y7h54bnabB1JEF58GBHUAwBLtZtdw2ZXidIOCbHz8p4eNQ26HJ6V0T6SmefweJLX_tFpPfm4Ujo6ievGUNc1g9l-WiC9IEExPoY5hGPT1YLRhEiPVXqZE-tGj3L4BGCZOKlcSXpScxH3rW300ng72_jkfxtnbgbf6wKIkgkDG1ZuHJgDF8ObIbNAOIXu4SkvobLjFcDq3Ks12gf3Tcm3FGAAsLULWC_5-ipkfAaXN4zKazFQoeS349LvZpXbEyXfexc-kkNzeDKkKEWt_ATNNE1mv8d1Y1GgYr7moZR9-xzBVMlW14A95gvLhshST99B36o4PVJ12YJl0Pl9TDUE9FyPVIS3XTxEicm9ncW0MSCMSS80eS-brjOfxwCwS4kBpsAGhsbkLCyTKZxsVoPqH4y4CjHnqbQl5JZFJE1eIa7nqJ_oYnEQST1kuWWT5XgpFJ-5TS9lsPDqJoVX3zRT0eq5Sk-i5OtKWelCaeuebxasBmozJMUtC4f0YjruTykeCLEe-wRu112rzZ8OIH12PQSBDdKo3nZdJ6X_CINTkZzhSrQx1tkHTGS-_3Cq7TTKYwCHFUYzSRq-QvXPbTn7qrj03DDOwuYfK61ZV_DoNg2Wg3zVkUqVg7XH39CWsz0vHzLQiLeYULo-AytOWpJTea6LL6uC4jiyf0rCg0RC0F-rs-OzH4GLAHUuFaTyjftrrsSTuzB80MHbbGV963f-0kGTxe3VP8ObswLrjTjNP-RUw-GbA7QC3W8SZMx19URe2IyndrF7lfvkWZkT5GfxYcXSju55YnzAZIAzzRKQuec6Xhmg198AK31LaoTSVkcHUpzn-dMoY4yTKskTMCfAbMVpj3ecaLx9Hhxi14FA2d1Vha4yaVfRjDllU0RfcPziHf8jq1vduSqmHErZGiBnQ8_Hqre6XrSVN1JLYPBcmApIxMmnaHB9b4CLxMqvYFcvye3SnqOMMHLsnTmeU9Ci9XeNvu26ACjVF7ihSVhX9GsQYhMlU-vxKWNli0hkfKi_gdHOK8Ygo6kpMsdR1DGfRAT0dyAeHAGySQ-Ry7FAaB4Y9szAPdddjrYH_cBKP-46P0ij9Tw3KKEQ4ObTpbLr4DfKlmuOV63fUz0QafXKRKBalawOGzmBEJDbR48apYtWCjbS8H6gpGtyzb0scshyADwJwR6fkbayYFFh_imKkGfxxyF-3YeXeG5fWfhp_p_v6aOOVGEwlpbBdhsm7c9kJc1xBvRCdYzw73JwSqapJRwm5jGnlVkMrEUY0B54EMXV1B9lC5PhhWhUMYpnestK5mC0g00pBUQms9RNNz6nKEfpBnKTSdaVwEZAXtz_vOtr3rCLXeZZCZNur8KzHwQpOPd7n4Y6uFXuC65cmjcHoseqcBJHBmglzRgTn3AKfEo9-4V6KVyCQMed5XNpPBqdvtFHCkT8M3J0tkfdj4c3vBBjMrKVPcNdU49LQ3-LJXFu2OVMp4HsIEtkJV4JkC3NbjAHxxYNH61BGQ9rp8YQGERuKhuFf6iuqaPF-u5Sd2t7gJpyfZwPnVkk2nqFEZ4GJbU1SKyRP1NuHq3-pocEPwYjPqhysRbJtzLL0sN84aiOECGakWpJhH_LS6Up6kjdLpJ3aNqbdAfDvWkxiPijT2w45riCoaq74tRgpQN_0b_A5P-O7kf-tQZChZQd6rOaHNEabM6BCAgY-1diFyupPwVUof7UFLMd_RtN7ZbcqwReBHMm18x5mzYf3qSk-w8M591JqKsHLFXSgOQS1WC2aTlidi_tWYPamSSogS-3r015YdQ9zwcoRk1wtWc5UEB1gzkvfLe3CTQ7SXOUj7LTN1h08v8t4i6rAqSh10OdRsSe_qKR5iGm_WsKUPa9T-tLkPljJPejriuGUZ8bhu6Kdr1vF22c__maNPBYSO7hdN03Vy-_WOylovrzI4UcqFiqhWKQu_sfxHf7tw3Tgs93zfxR4J4V48Vvzu2UiHu0Pb2TSB6IJqVenGw0Rn3accQkYy8Fx2rI_DGYJmgssuMv5ZQaXhPpZFX7H6XEtst-tVNh_6p9xO-TtBZfCoEm2Pyw7lY2TAH0JBl4kw9qnGlr0dWvEPgpP1eYn5cQ5U5r1qHoAtRVLBGoQo2Zsl4Vy5uLTtL4sFpw9I_X7OyI--cdiGCp3kX8PaKbobXnqUcFA5r9aO4htKBV6thGx-LV5Dc6Wfifq9RyOJatNjHH4sgY6B8iWzA5AM6g1qQEmaH7H1_OmfxHaKX8VVoYaRzUKaP0aPOaq5JhOqb9QdP19_5u5DNzEcH31IgZe5RMyL2jxScdT5JVSffA8mSwBoqRa0TWt7UcFOJz9DOksdblTFB0FYeloJ-kGzLBlkwC6tDBfHkiJjxCeFMEAo68p6GSHn-sc1Y50KEgdMiQva9zjiUQDq5Kqy7FSwzRRWF3LYab5cYNStWPBWg3zRa3afRD9XyR8Mv515Ep3tNrwuKT6QK5z-9ip0NSK1CoVkPwW85PP5XhBPeUUifpjdvF3YYxhFMNX1XcQfAE81VDhf1_gNwtcSAZ5a9omkQsRM6EXNSsqY2Wq5VBFt8sNhxwj1uvLgRmnlprbB0M-0PJQnoOAVz7nnZX6xd-OYM6Xoy4ODs0IfI-fWiDe1pT-42zoCCm55UfoCN411rd2z8btmttDl4enEndzwLFJJ7xR-GS-zyDIszwVlb19EyRKaaTYT_oZig0yh9ijpv9d_poWrqB5E7sJkGUFpEW2VOePOmRHyiVtTQ9SW_Day3q5wVYSQx3ilgI-lWMi5jjoYw-30IwIleXEX-PXXITWKqnhrLhXUbNJYs_7mkDdTFh_OW49jGDt7HIyl7GjdN_mP6e-mVPTbl5HcXj3vbYZILExBIDt_7RBHQCFpMmakqfApImYzj-BpvWMACrWpkaJLPfSPladH4XY4y0R57QDDBzjEyrTTblkzjR_bl-e7hgFCcA-R_w=",
+        "summary": []
+      },
+      {
+        "id": "msg_058fa2746c83213d016aca1fc3d27c87d0840483213590e64b",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "질문하신 **“Case 2 연속 tight-zone 그림”**은 제가 지금 **정확한 원본 도면/교재를 보지 못했기 때문에**, 그 그림이 **어떤 책/슬라이드의 Case 2인지 단정해서 설명할 수는 없습니다.**  \n다만, 웰 테스트 해석에서 **장벽 연속성**과 **층내 소통**, 그리고 **fault effect**는 보통 아래처럼 구분해서 그립니다.\n\n## 1) 장벽 연속성(continuous barrier)을 어떻게 그리나\n- **tight-zone(저투과층)** 이 **한 구간에서 끊기지 않고 이어져 있으면**, 보통 그림에서는  \n  - 두 구획 사이를 가로지르는 **연속된 저투과 띠**  \n  - 또는 **압력 전파를 막는 연속 장벽**  \n  으로 표현합니다.\n- 핵심은 **“같은 층 안의 유체가 장벽 때문에 서로 직접 연결되지 못한다”**는 점입니다.\n- 즉, 장벽이 연속이면 **압력 영향이 한쪽에서 다른 쪽으로 바로 넘어가지 않는 형태**로 그려집니다.\n\n## 2) 각 층 내부 소통(intra-layer communication)은 어떻게 구분하나\n층 내부 소통은 장벽과 반대로,\n- 같은 층 안에서는 압력 응답이 **서로 연결된 듯한 패턴**으로 나타나고,\n- 시간이 지나면 **하나의 공통 경향**으로 수렴하는 경우가 많습니다.\n\n그림으로는 보통:\n- **같은 층 내 구간 사이에 연결 화살표**\n- 또는 **압력 파형/해석 곡선이 서로 영향을 주는 모습**\n으로 표현합니다.\n\n즉,  \n- **층 내부 소통이 좋다** → 같은 층에서는 압력 전달이 이어짐  \n- **장벽이 연속이다** → 층과 층 사이, 또는 구획과 구획 사이 압력 전달이 차단됨\n\n## 3) fault effect는 어떻게 판단하나\nfault effect는 단순히 “fault가 있다/없다”보다, **fault가 실제로 압력 흐름을 막는지**를 봅니다.\n\n### fault effect가 강한 경우\n- 압력 응답이 **한쪽에서만 두드러지고 반대편으로 약하게 전파**\n- 예상보다 **응답이 늦게 나타남**\n- 경계처럼 행동해 **유효 저류 공간이 줄어든 것처럼** 보임\n- 해석상 **차단성 fault(sealing fault)** 가능성\n\n### fault effect가 약한 경우\n- fault가 있어도 압력 반응이 **양쪽에서 상당히 연속적**\n- 즉, **완전 차단이 아니라 부분 소통** 가능\n- 해석상 **leaky fault** 또는 **non-sealing fault** 가능성\n\n## 4) 그림에서 보통 어떻게 구분하나\n실무적으로는 이렇게 생각하면 됩니다.\n\n- **연속 tight-zone**\n  - “여기가 계속 막혀 있다”\n  - 장벽이 **끊기지 않는 띠**로 표현\n- **층 내부 소통**\n  - “같은 층에서는 압력이 전달된다”\n  - 층 내부는 **연결된 영역**으로 표현\n- **fault effect**\n  - “fault가 실제 흐름을 차단하느냐”\n  - 압력 응답의 **비대칭성, 지연, 차단 정도**로 판단\n\n## 5) 중요한 점\n질문하신 표현 중 **“장벽 연속성 = 무조건 fault effect”** 는 아닙니다.  \n이 둘은 다릅니다.\n\n- **장벽 연속성**: 구조적으로 계속 이어진 막힘\n- **fault effect**: 그 fault가 **압력/유체 흐름에 실제로 영향을 주는지**\n\n즉,  \n**fault가 있어도 소통이 있으면 fault effect가 약할 수 있고**,  \n반대로 **tight-zone가 연속이면 fault처럼 보이는 차단 효과**가 나타날 수 있습니다.\n\n원하시면 제가 다음 단계로  \n**“Case 2 그림을 기준으로 화살표/구역별 해석을 도식처럼 정리”** 해드릴게요.  \n그 경우에는 **그 그림 캡처** 또는 **교재/슬라이드 제목**을 보내주시면 더 정확하게 설명할 수 있습니다."
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 115,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1161,
+      "output_tokens_details": {
+        "reasoning_tokens": 180
+      },
+      "total_tokens": 1276
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "wall_seconds": 8.248
+}

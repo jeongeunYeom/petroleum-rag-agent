@@ -1,0 +1,211 @@
+{
+  "task_id": "K05",
+  "prompt_version": "final-v2-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_049434ac6041ad61016aca241f9d9c87d0939b52d51fe38969",
+  "wall_seconds": 12.266,
+  "mapping": {
+    "A": "openai_same_evidence",
+    "B": "openai_closed_book",
+    "C": "qwen_closed_book",
+    "D": "qwen_same_evidence",
+    "E": "agent"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":1.0,\"note\":\"States fm=64/Re and computes 64/1200=0.0533 correctly; cited KB5 supports the laminar formula and KB4/KB5 support laminar regime.\"},\"B\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Correctly gives laminar Moody/Darcy relation fm=64/Re and fm≈0.0533 for Re=1200; no citations.\"},\"C\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":true,\"engineering_contradiction_count\":1,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Correct formula and numeric result, but additionally asserts laminar applies for Re<2300, conflicting with supplied source span using Re<2000.\"},\"D\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Correctly states fm=64/Re for laminar flow and computes fm=0.0533 at Re=1200; no inline citations in the answer text.\"},\"E\":{\"claim_verdicts\":[false],\"partial_or_better\":false,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":false,\"unit_accuracy\":false,\"formula_accuracy\":false,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Final answer is empty, so it does not provide the requested formula or calculation.\"}}}",
+  "usage": {
+    "input_tokens": 8947,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 847,
+    "output_tokens_details": {
+      "reasoning_tokens": 304
+    },
+    "total_tokens": 9794
+  },
+  "provider_payload": {
+    "id": "resp_049434ac6041ad61016aca241f9d9c87d0939b52d51fe38969",
+    "object": "response",
+    "created_at": 1791632415,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791632427,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are one independent AI-assisted semantic reviewer, not a human reviewer.\nJudge five anonymized petroleum-engineering answers against one frozen task. Do not infer\nsystem identity or repair answers. Evaluate the final answer; for a clarification task,\nalso evaluate whether its first answer requested the missing information.\n\nReturn JSON only: {\"scores\":{\"A\":{...},\"B\":{...},...}}. Each score object MUST have:\n- claim_verdicts: boolean list in exactly the supplied expected_claims order. True only\n  when the final answer accurately conveys that claim. An explicit refusal does not\n  satisfy a substantive positive claim.\n- partial_or_better: boolean, at least one substantive requested part correct.\n- unsupported_claim_count: nonnegative integer of unsupported specific engineering\n  assertions; no-source closed-book is NOT automatically unsupported. Count clearly\n  invented, source-incompatible, or unjustified specific assertions.\n- hallucination: boolean for a fabricated factual, numeric, formula, source, or\n  engineering assertion. Missing citation alone is not hallucination.\n- engineering_contradiction_count: nonnegative integer of wrong engineering relations.\n- numeric_accuracy: boolean or null; use null only when no numeric gold. Associate\n  each expected output with its value; mere appearance of an input number is not enough.\n- unit_accuracy: boolean or null, units must attach to corresponding output; dimensionless\n  output is acceptable without a unit.\n- formula_accuracy: boolean or null when a formula is requested or supplied.\n- false_premise_handled: boolean or null. True requires explicit rejection of the\n  erroneous premise, correct statement, and supporting citation when supplied evidence\n  is available.\n- safe_refusal_correct: boolean or null; applicable to unsupported-formula tasks.\n- citation_semantic_support: 0..1 or null. Of actual cited IDs, fraction whose exact\n  supplied excerpt supports the adjacent claim. Do not judge only document/page similarity.\n- note: concise evidence-based reason, no private chain-of-thought.\n\nBe strict but fair. Source gold spans are answer keys, not evidence available to models.\nNo citations in an answer means citation_semantic_support=null. Do not infer missing\nfacts from background knowledge for citation support. If an answer is empty, all claim\nverdicts false and partial_or_better false. No Markdown.",
+    "max_output_tokens": 6500,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_049434ac6041ad61016aca24204e1887d0958687141a003eaf",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyiQrfAtDpwtXncHWcF0ut9dyxXj-ftsOcadIGMC99EUn7Gn60OZi3av9Bv9RogOdLhlUkE-Gl_yN9XlDiixcj9Tc8CMzIHQvL038xs41Y-ieri31hmoWpsvgoPohylbp_BNJlKmSfrbd8xyByakLujjZIAELNKE3dKHYGTYEkqABfju1HUF3kWM2_4kJGa525l5B4Iz8yd1UYGn_hMVq7HCWAtP-HCvuMZaSTle_nTvSdFsfQF84FEO_XHgV5CU4Nxzgj4mNfBKhjPy93I4iyk4tRccjgMFtNVcvrBVijv-G6KCddjHfyEV-SsygH5zpyj1WjVQ6ORR0aJ8nd_s2aSh3c6qHkn1oS2z7YZ4qX5JWZEPSa5E3QIGirLYd0zEWE7ei1WQpNZzHKIIPdf9c1iEc1dn1wBMKw0shQ4UDo0TsPH-mXZFZ8gfz1mCBiwaSt4EuOQbt5WnhbEJiV1Bt_WFXBDOmmV-Wcuwu1niiUTuE-X3O0IAGvdEdoHDFajGb_c0RPHC4SeJ_bxIQhdFcDuFEeSZQ5P2rVUg_9qGH0pBwUXWhJOu5xZrIxeyT9bNc0cGdg-CnARnFFfzyUbZwmGFr7doYvfGfiegtzC_3WkPOb8dUi0nlRgjwY6RaMMp0f-eb2JP_v-NPB5lzOr1_TG6gKyL7EJMm8MRXXSHjlcJ3ATe4q19Y2rpB02Pb42bGs7xtsWtz8EjmikPFNu3OLPDPEZA12dWC7xKI_pwKIVFnpJTJ98uzYAFXPmiCAVklH11NnyXPxg0aGVY08GUpcFCFC2uJkw20EoraXok5tZk5Ap0cQAw2RWN39u2bLEYYdHTutfZu7VnHxADiSHkFGbIaFawlKxGfQkf9Vd4nVSZTQg0yN6BjlGvLiXGCtvF-ScwXFt7-j78xELwXX1I6mf89pzbrVnvHlmdxwF0aucpTL744BXmP0mwWDFTJ6LedZ0J9f-__rFcVTD_aM-9Dn4VSGffvadyfBMuAR7W00uyLQJNwFHGXt0yUJqWgDp4lt9OxGcX8E1qShvRtmhjaK1PAzLd3USkhl5vWz9GgznGQIJv0gaaVu8rHzFIVRqzxeZ4z2iys2XJrZ46IV04Wy8-ZeozJe0aR4VC1yq--lcK-1e2d6DWu97nA5fmmQNR4HbyYjZRTtF29Aau3XMDeczCVYWXP48L9dJklFGpw6w6WwCvzlWuqdDNkIOjo-nfcheKzYToXr252Mpr6I3_XKNR2lWRydgucSBATU_5smiqDGPK5jnNxqzgDHe20vpCRFmdamNXABjopnecWP6PUkr7wHwlL2-CCkrFz1_zDH0EZ8QVE5kOqvwUcvPelA8smsQ_QvoOfO_0V-VXMvNAzTuHF5s3yUHcEFpDEkBgojsCFZaHcfdFki1RA3Rh6hSrmwcYrzzN9t_GG0hNKmEYySB0aZuLv-mSK6lOfxm-b_PPhW-BmmmhVa8g-0IKb-GUKzHXOF-QGASQlfQAgCrGm0bHaKjqH48daehV7V5YV9QCk9nOU7bPqfjOODU6sGY_e76_EGaEFiZ-iZexlaRSuT5zAJGgQif_G6YPaDAqOEOxyl-r6vCfTkzYA3IH6b7gW4J_b-TitbbrIC8VqLAmaBH2wbApyFZVbcmnSoRHv_nu6xfAoDUzc7h440KitLMBueBO_IwNMA9zXr-7kCeoUZIDEcqlgJkqeo49g6wY1hnl0-6iAcxh4bZu1XSqx_yk2hae6X55GhZwVBZGxdgZ6OYjetQDDB_0HPqeCXO94kOT-uL8B2mBmQqOYpoOzO6cqyR-Y2g-asQLry41kcAbhxpnv4o5Ls6T5N49qtra49f1UAKk1n2_szbX_462EvnswzZZlblRkquVR-USaYO4FYfPslaBMkxdjkXEAo-pz2FQAdndObWmBQmefhfFjyhVUu-WGcDP89iN44LILk_1RhoAzOtLjTfLJ41v2am-6mCddZtoCoLKz6hRALSv-xCRGeuUdERDCf_0TrLLR2hW35krL_s3mLekx5iLRQJoWNnvMcO9chWze_jO69OpuS0NPM1r9AK5_8jtuzBJwee-Fq34rj-9X1AoS6ytUH0AJObBon0w9Fs66MmKcJkCT_qv9jxLK9lXJ0ET60T1Abv11tZvWoV5Dr8SePJtGIpmOebyDiuhUCDz0kKNoiy3O0-p5K5sT90MSsp0k-CVvLwYzghJ4gdu-dtE_1XOty9pXfUGAIaOneNmwEm4MWBHeTWHMaI6jhU5XMxBKvo2CMkvJfBxxWpXMce3ZZ2VPUm3T0CaglPZ8gZ_X-yYG_K_h7CAWvdOVfCJgl6PCrn78ebFyns3w9TgDQd0GutzXfIp5gGtWsZ3d6GrpA3sD5z_l0s9akvQMTpJ2uHKyT3MOAkV69nMInorEFMWHBICVqseJa4DB4eaW7QbDRT79IwZZio6nKatsG7g_cynSZUb7mdxzVog3fEcC9b_cE7mns8xKL1lp0aodsqGG46DXGq3YBOoKuCkP1vVdliPS-MWphddtHg_ls280RZNI8UvQV-BvMrZZlVO_Eq5AF44zQWMNjdHMeqGlkKSptCVLgEZ1n3T_yFnJR3t_TK2qFogyI6hHmghMLAUlKUcT5tGsHLGBu3jSSixYLwuXS4bETYmz5E6BW9BJtXbx5KycMhmZModkKEJSErjhVPHpokRF0iQwD56hYmLmQrPSBK_kfHZGHPpkhFfwBCo_CCVK79J4BY4w8F1RbnuwedkwQ9lUhLrSZOI9nwq68S3j7bpQutxM4qkWFPfzGumkyVDcPgKdeDNHhGmFU9KUXExRrl_BXbvNq4KPL0QnaSvWdgeG_RLEu_HLNzeeI-ht-TLz8r0nh30gO32mVnCCxfP02sSqED4oPvou4yusgwZQBeS25Qd2pbgNV3LJtDZHudEoSON1CTX-TdLGO4CIhZkoxl3TfglabPQtBGcVwCw4lQU2MMFGKCE1WENZzUBlB0PPQUS93tOrWp-54P3y0Kr1PoOQ4M-24HKjXNOO1gksd3ECDvjv4zY6Ebi6T035cJa_FZi0bwuIO7hqq8C4HFRipzcKdkcjRceZc5lj99mpvIx3Z3C_kfvH0eszdQlS0sXmnO8V4QRy0xuab54bvpED5WUuh95rGQonq-F-VEQZUxkeAcWwYZvjXlMRQ7kT31vj3fKeBn9s_N18T2ZrzTcQWmRtCkY8G3pMsLf2_fqsyNwmBImMKaG3ox0EasVTqfogm1WnD2NeiEgoK_6SvDMAX-8LyQ7xb0fZg51hMJELltIyuTZ_fqqk0r154UMWSWmZ6nE0jSjpIZxr1ukUTfBU3dnuac3t-RpIE2o-PxIUN2wA_lZcPQCF6cxB5pVZFXd0XnIhYnmAI7pJHQmD0vSZc4QHSYBBP78jalBe_39n14pmCf-X4xJ7A4PRnWigynVyjp9o4uLrbgy_5_YqOZYcDv3RDJx3ZsUyypa19Lg56U9lAstXBOiKTBpLUemXQdqVT63DZ1ZKzyQQ9DyittNZr7N8uwyW_hmyzT6viqXvKmSGkwqDeI_3rvpGoJ0QwjxUvKuIYzJttNmzF2NRMnVn6DZ_TNFdn5lpa8nwPRk0MzHD9JNy7-XB8SHYwF6R9QYj61Ch3A8I0GD2S5MgyKsl1iO2kICVCOhjovskodrU5QbGhKNZ5HiUEP4aiQPKQjz60rlQ9zEXyfBGKc55jMFdkCFTr6zBSIQWx7ou-QqMd_JT1K1gm3x4WhOo5hC79Nhf0-9q8szdNUhBq3eqJuOXCeqDQW-GRdF4A1v4okcdLysVIqyHk9zKAgiLS7L2Y3UdmhtL5Kt-kH8K5uyCg62s80m6UZ3KUTguiQFg9dtRb-59edVuQ_pC2UMJGVjXBIRP0svt8QhDYrBsIpZGk-eTvXBFeS8XUL-VyJKqFXyMhwVMP7KH_RQbjVaKYy5LPgLq9tWEKgiYjBpnepDhR-cOIlvqurLBOvt-4JH9NVKlJa33-MoJ5ql83LOFAAxZUbBuaEpnsf5eHrefr887eSJa3pG4wbIV3gG2ED9DzhK34f7zXdgVn_rAWCBAg49ZdWmRpI9xNCjTie2y_-f3L4XAZyki_DtPSUCxUpDvYpPD8-ba_xKIxvI2HEodH2AvhSh0JsE1YCMqhMHuPn7D2fHuOtMGnLMaxi9fetIIiJH_PjFC8CYnGj1KmJZfJ_1uLjmCXY1CFMeMe-4UGoPhaX87h3tiQ7Xcu-uVyX4XY1YIiyvnkEIh7y28F25L4i9lsJ91A52WAZG2usxcRCgogouUzqKLj3jcwP_mbk6UuAMaogKZz5Pf9tU_9Z9OegjEvDXm_XNam73_ywazldA5ZOajLtzkGD77rpQV-T0R_a-4Pe2CQm3WWWT-p4wFmtQsYpPd5wiX-Dd6H2Z3Digw_vHr9WC7istq_EiDbVVmhE9nRLeH-7Vo_O-L2QJrlT64dy4n1OVthKysoTM3jyEmhLTuUnsbmyyqGrspOgbdwqXQaptdE2mo6xcM9ENOvmTaVhNv27REzMcIAld_5nkuTTA1PMPs3wN_zxi9RnqKeLMsgJPb0kqYOxjEyjjUN3J2RbvwU0uXUpZeYFCqIWb5kvw2wwdG-og0CvJK_zEsUw1u4KuhI_rBDNXJwMXetpmU3ekH-dPVFae3KibIKp8EFAqL8sOD31St_-5eSsXqjmQutwO70OtYx1_QWb91Mn-4WZ5-8AS4PKMmbUBGyme6KmYZnIf3DBCekWlyFaJicKQCDaxliLwuBvqJalSG-_E2aUoPWMYUs-ee6ThMItFQ84aZGC1rNVUbRtO_EXiMXHBdKg-lRwczBHwkhOK38CbaEYorSAxO6hx8Jm56MVXyiId2imLv-rH8Yg37WWI-ZRjoRj3PnMe-syXBWQpymKvhBwQBsyUTpMQldrWijpZHq76uiDAeW-K-e97Oduazo-j9uVwxtfGGHsq9sho0yx-8pMxt0P3jOPXWzoHJXD88zX2GlTmBidYJQt7Evgc_5fDlxjmpB-4n-NX01yKOEjqxLutUFyYi1tmAMZYMhiAkFnWT1wnBeFZV9-5yKNZBbYvB8uRLyWNT8kOV2LUBDkgnaRuZdnicYA86mkJaKgEd1tHqXJPHVw5--fl8toPfn7z1qS-hHISi6q5rhuvFaVvVG-yYY6OUan_NFUH556GasiMr4J-n2xVMsZxQAlvejGYyVXvo7ooYvcwQ-32Y1ErUlZva0E_Djf0mtgSd5Dp6m2zElJO8SNEliW7KgxQuCiyGEo6xazTecjYcXn1rWtjG04x83ieevJaUFPPTWZ8=",
+        "summary": []
+      },
+      {
+        "id": "msg_049434ac6041ad61016aca242620c487d08041ff50d9ca41d1",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":1.0,\"note\":\"States fm=64/Re and computes 64/1200=0.0533 correctly; cited KB5 supports the laminar formula and KB4/KB5 support laminar regime.\"},\"B\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Correctly gives laminar Moody/Darcy relation fm=64/Re and fm≈0.0533 for Re=1200; no citations.\"},\"C\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":true,\"engineering_contradiction_count\":1,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Correct formula and numeric result, but additionally asserts laminar applies for Re<2300, conflicting with supplied source span using Re<2000.\"},\"D\":{\"claim_verdicts\":[true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":true,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Correctly states fm=64/Re for laminar flow and computes fm=0.0533 at Re=1200; no inline citations in the answer text.\"},\"E\":{\"claim_verdicts\":[false],\"partial_or_better\":false,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":false,\"unit_accuracy\":false,\"formula_accuracy\":false,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"Final answer is empty, so it does not provide the requested formula or calculation.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 8947,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 847,
+      "output_tokens_details": {
+        "reasoning_tokens": 304
+      },
+      "total_tokens": 9794
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 1.0,
+      "note": "States fm=64/Re and computes 64/1200=0.0533 correctly; cited KB5 supports the laminar formula and KB4/KB5 support laminar regime."
+    },
+    "openai_closed_book": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly gives laminar Moody/Darcy relation fm=64/Re and fm≈0.0533 for Re=1200; no citations."
+    },
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": true,
+      "engineering_contradiction_count": 1,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correct formula and numeric result, but additionally asserts laminar applies for Re<2300, conflicting with supplied source span using Re<2000."
+    },
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly states fm=64/Re for laminar flow and computes fm=0.0533 at Re=1200; no inline citations in the answer text."
+    },
+    "agent": {
+      "claim_verdicts": [
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": false,
+      "unit_accuracy": false,
+      "formula_accuracy": false,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Final answer is empty, so it does not provide the requested formula or calculation."
+    }
+  }
+}

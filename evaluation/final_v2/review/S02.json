@@ -1,0 +1,216 @@
+{
+  "task_id": "S02",
+  "prompt_version": "final-v2-reviewer-1",
+  "reviewer_model_id": "gpt-5.4-2026-03-05",
+  "reviewer_response_id": "resp_0837075a21d50d42016aca248ed7b887d095b919ad93aa65c6",
+  "wall_seconds": 12.847,
+  "mapping": {
+    "A": "qwen_same_evidence",
+    "B": "qwen_closed_book",
+    "C": "openai_same_evidence",
+    "D": "agent",
+    "E": "openai_closed_book"
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"5개 k 값(10~50)을 모두 계산했고 최대 q=105가 k=50에서 발생한다고 정확히 제시했다.\"},\"B\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"5개 경우의 표를 정확히 제시했고 최대값 위치도 k=50으로 맞다. Darcy 관련 언급도 요청과 충돌하지 않는다.\"},\"C\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"장난감 모델 q=2k+5만 사용해 5개 경우를 계산했고 최대 q=105, 최대가 되는 k=50을 정확히 밝혔다.\"},\"D\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":true,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0,\"note\":\"5개 경우 계산과 최대 k=50, q=105는 정확하다. 다만 [CALC1], [USERF1] 인용은 제공된 근거와 연결되지 않는 fabricated citation이다.\"},\"E\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"표로 5개 경우를 정확히 계산했고 최대 q=105와 해당 k=50을 명확히 제시했다.\"}}}",
+  "usage": {
+    "input_tokens": 2230,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 879,
+    "output_tokens_details": {
+      "reasoning_tokens": 308
+    },
+    "total_tokens": 3109
+  },
+  "provider_payload": {
+    "id": "resp_0837075a21d50d42016aca248ed7b887d095b919ad93aa65c6",
+    "object": "response",
+    "created_at": 1791632526,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791632538,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "You are one independent AI-assisted semantic reviewer, not a human reviewer.\nJudge five anonymized petroleum-engineering answers against one frozen task. Do not infer\nsystem identity or repair answers. Evaluate the final answer; for a clarification task,\nalso evaluate whether its first answer requested the missing information.\n\nReturn JSON only: {\"scores\":{\"A\":{...},\"B\":{...},...}}. Each score object MUST have:\n- claim_verdicts: boolean list in exactly the supplied expected_claims order. True only\n  when the final answer accurately conveys that claim. An explicit refusal does not\n  satisfy a substantive positive claim.\n- partial_or_better: boolean, at least one substantive requested part correct.\n- unsupported_claim_count: nonnegative integer of unsupported specific engineering\n  assertions; no-source closed-book is NOT automatically unsupported. Count clearly\n  invented, source-incompatible, or unjustified specific assertions.\n- hallucination: boolean for a fabricated factual, numeric, formula, source, or\n  engineering assertion. Missing citation alone is not hallucination.\n- engineering_contradiction_count: nonnegative integer of wrong engineering relations.\n- numeric_accuracy: boolean or null; use null only when no numeric gold. Associate\n  each expected output with its value; mere appearance of an input number is not enough.\n- unit_accuracy: boolean or null, units must attach to corresponding output; dimensionless\n  output is acceptable without a unit.\n- formula_accuracy: boolean or null when a formula is requested or supplied.\n- false_premise_handled: boolean or null. True requires explicit rejection of the\n  erroneous premise, correct statement, and supporting citation when supplied evidence\n  is available.\n- safe_refusal_correct: boolean or null; applicable to unsupported-formula tasks.\n- citation_semantic_support: 0..1 or null. Of actual cited IDs, fraction whose exact\n  supplied excerpt supports the adjacent claim. Do not judge only document/page similarity.\n- note: concise evidence-based reason, no private chain-of-thought.\n\nBe strict but fair. Source gold spans are answer keys, not evidence available to models.\nNo citations in an answer means citation_semantic_support=null. Do not infer missing\nfacts from background knowledge for citation support. If an answer is empty, all claim\nverdicts false and partial_or_better false. No Markdown.",
+    "max_output_tokens": 6500,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-2026-03-05",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_0837075a21d50d42016aca248fa9cc87d0943874ce0da21e14",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyiSadiYhyW5kE-vA65vjSjmBkEH0CzT6X7Solb-dyS8WX3nPVZCM8Tqheej7hKUYmu3yIws44_vjehYr84iXRwmqK07PDZGTjAVXldNVsw_mJq1aqHC8vU_q3FyMpFtGLAltbzV8J70juCkUcRU9q__h_35_IYncehCf1_JmfMx1tbfrLa5OkGQZaWrIAeTaRrp0CuEp0Pi_LsPFxuEza8aUMsEVqca5mkknQ_br46R83stHSvPvOLpX9kb-SmHR4dU_BdQsVuLkFL62cxrldn-R8TIe_10mQNcmYStdNmw4MCg2i-NorOQaQFIPhnA-Fmx3q3gH68BQiYjt227gelVTXVDYzMRoj1RjqD0jbkKHLplILpOvLuwEkYyqaAwq-31JrFF1Z0NVkLmd5qBkAOTT5oyj_PPZH9eQU7Gg2-bSjAYi7xtDXK_SJnyp-WcVhhhE8lMePGHytYWW2ueQMnts5-G91BuJXXMB_yvYHMBL4Eu2oSqYbX3aJOGf-Z-iheyoSHWaw_iNsIz8tzqPuuZTdbGRPWKjFtXCOotTvFlpwKW86WR_hvB3mlbe3P1lvmb0p0r4QTtJeb1D0VSexbnvAYby2QkLHY648m0uT-3_i6r4ZzCdhIwR2ZRha6QUmLdcxQkZXiPAjVdo6kfBi3RFE7a5XXMwdUHpmdtM6HPjwhHw0R8aSt-vSlis6vdVTc88DzxjeSxGV1uWUrlNwbWC5My7DKdMQx9ErGgphM6YbSkdNvZg7G1DZ64kWglrhUBrGtFhdKQpdFgWwKvYIIN_y1z2rVtOtaRTLOLKTUOP3wJ_KJGcrUCK7o-0Qo7_ftOUwCXc_B-_cKhhU656pqFNg1vpU1ZgZ8JzuHg-v7EXadzY_GFsIURuJw-TRR0LELs6wjc-bDARL5ZN3aEm8BniXYLIqiKp5qDNxJP7rg51_PlDjG2RBMePcG4h1Sek3jNNV3trKtmibuHxWMKaKYX8CTcNsXlKC-GNmQF65nThzQ_5uMf7bmSnN4p_aUtjbC6ny3gY2qFhvkzvTxhU9AqVpBjFvlacgTkDu6ULWv2L1to3i2t3uwZJ2VoLPESnLa7LMy6D8FLjVaB8OuTPoIqoIQOSf4rsLIA-DydRQO8YIHaa64bAAfSzW4Mx_JnAEVlYqLKIy_33HBApgwGLTkM7H5iX6XkZSSIKyIHGakPHfuBjyDCR3lwpiA_Buo0DbZrv2hd_uexp08q1ihDhSTta5KIEbD06ixafx-ylqzHC87fA-S03itBm5pxJn2Jzb5C5YvYUxoGaV-PAjTUoYiy8-fH9QtoNhHKlwdo1h_QtFBfdz6Lkg6bRW_UV5Au5GoXndwGH7myX2lakHYigNeqlhBQxACwBuhMyqdcAP-4zUMgDDdh8ew01OtCHbJnKjFEK9pjM3JVBBoixGZ6vFglqVGYjtel63UxMLSu0Oh_uu_GA00wNSPRPzt28DrXT2oPZR5xjRuZpS7Wkyg1ZW-ikLZKG9mibHBvjNPVSZ6Zk6wjSUa9hnuPyyF7tfK6wwxZEcHFOCWFzNrByoLfy1CeTVfjlUWCIuxMqfGzD-zlJ02q_iSzMwhG-U5d5Dg0v3HGk5ETnL9UOm-mO88IRmHS_AaV5Ghay0mHE5T52yMyp4OqvBgkvI-JJsq3WAH4uBYQ9OXrw5bU6Q6u5tQbjcUMMu5w7KJZv1IYEfMv5nYF_OEN6JyyrjEFKICOdyxku8sPcveLVlqiARO5LODibBPMO7DsZxlOjprkGD_sU59d44WhCiGa4u80-AVE3BtSkluoW_EGZ7_WfOfqiu4olcwS3gPFFB9dqwXFM2sdWhjjsHIjLRO7oYBUMdukFuje6u5Se51HhgokuFYlrHsBicNqlG5wDOG_xPZQfHE1Z2NSp9yJwF9Oobknu2PjKBX4Zj7S9rX47LmeQ8Zyjh7NIFSI5HfUpZDJC4cxXQJnEJ5TMfhIaMaNrskUWlQlofVHiVWmKnsfUGDF82SyAzGOXkiXsnYw2XJAEHRSJoI65yYcQG6YMYpKBDOuNVeQy1nETtWLtjlfXQAsHIjYkxognnW5pNc-hEW9WPUyICCOs-H0dAU9YaSatqwPMV8be7u42m_ruoIyaEPgb7pwbE77I72JrVf5T60caB47uaw72vg57G5vDRdQG_JNj2XzAuBPb6rfqJJv4kw1IAMmfTUKyHdFclMf0oBbFEXcxqwWHwT0UFNzfwozxomAS6Hx6rb8MNUOioAvLPGtRVaFq599stptiAcfErCjUhhjnm7EiTjh_o19cK_eKlNW3pfTjHLI7VfmekhjFka3AAUK6gaRiVEDMvA6LrG8aCw1jWYLpR6mHqdqz6i3dWyz8fKp7di7jtJ8yQmkDqHV01F09j9LH1oU4ivUjh0vtikwB1ulzXp6LFjDW5m_87xwgzasA46S29vt-A6QXqWxJQPo2sHQkPKLQDRYVvCxM6goNN7mfULlUJv6pM0YqPyTSM7coznFN3NGxvsvrV9xIeHaGYKZ8BBypVW4tE3wN7LVwyiohHWM4CxHuKoh-Zc9pJvR-UewLEyIu0xrP8Jsqs65SdFm03uqYdxhU1NN40ht9U9NpSSemUUNKaupeRqFJ63ePQ75ePrgcBUa3ORV1ur5oa2jnz5rpq1jaLojvIPbPZhNRt-b4p7mTNowxFXA_LCU8E5MKnRiW6m1UhQw-rzIU-yvux2q5Eh_qrINWrrb-ll5bplQg6lItG3B8rE84H91QW-FsWg_dkJP38iY6_Q2FFExp9vpvruRVfXdazOVieO_Hqj-Xhn4eAGwc6xcRO0sXS_zaagdyPhJrZuJezCWj57H6pS9FL8sk4xzNXdbo9x3mHTCP2RZhVaAk8wMpWwcxx21aLu15X-zS-WViiv4YVnR5iEjzZADzBMXzYAsJP_ABDXxbUsCIPbkOCM9QciGA5j97dLyW0bAeOOeYmY4rIUXz8UETql9sF16hcD-TaPrgAQILp0awG58j6e7TSzn3qJNb-6uoohzNXA5eZRfhtQTbsBmyDnFYf77Z2HQaCvu1wBKgczW4-Hm_ZPdIOeEk2aAYseqt5aW5iCmMTvATFpDqXT-j1SqxY4jqNtaMpFH5eNCsnF582elsrARCVRrVVjKy4NzLHlRY36ctbMXhPExHzeZECb47UTdUgaZMQ2bLxDAO2Z8gQTjXIhZzvI0OLVm30kL4HpowdeLQ967ACQeYEeX5ji1tmrx62I-8HLPHm8rB7s2WD3tULAh1qo9pzP_FpOUzXdePLrekjyb2LoM9vuE4NiAPUSALL4cIDpTaSRbVkBzSy8B_Z4EzA0yIWEaazIbPeYyGUcUoMB3QiQH7jZ2penOlBWtV2gwhRjpbpqXa1ciVUquFiDjHJoP-7lcAT5NShh7q7NbCfrpsCI9MZ0K8RW2lOh98jxh3k3cDzUcvHMi8S5_zhRSDaPqZCiC1vzaxKHDwH5SffZ-hEI5NCBpNHjOxkv_-kO2cPqRoeVimdrHsk9Asqa8vUHsJlPcfyA057Vckbjn0jxyoORNBua01W3UICJ61E7VwzO_2UnhA-z2hRYaGPhjQJUE1xNaJRRi-7avqeJLVNIlqWj_2aLB3w2tD2Fm3JvHDdMluOsD_OaSPu1jLU5gwzfNSnqbK14mHKv-ZmIgl4X0mkDzXi0-6BxtI-tROhOYSlE4D6SWdMrhKXHIBxNKAHnHqUH41R2Jo_l2bdrKHu5szFzMtk6GPLB1qV9V-9gAPHZnPf2O_vWsvokWzWFqTl8qjAewyD9989Z2T7UTiBnzFALHo44se8yQk2jP5ipSXjFXJrPvEN3W6Jy_OX5uEqG8T7yA23Kjmh7eyQHZTAkDmGOGK89ZF3L855R_TJJ4HRrNLju_g_uAgW0oDr66yRaeIXK_xUbF_eg20y5lq-F6a_ZEO_dbgQjFbkKPkumANcyeNw7GmMI_FylwJ1Xw5pB7vmo305tfE6ndH3WWw3tOmWaq50M5zZoVlO54p4x8XKsTS42ulrO0xsJKjV4IOP2Vu5cwDk6UFWEiriqdTFMMvI5IGQj4KxUm3B5pL5zzUs-4lBbCwWo0kOzAlh3ajZHFga4QnnP2yUYUCim8VTYsk74Ak2Ze9sVA1CTpiBJqf0fImQ_Avufp1D7TQvNXrIMKkZ5oVuFwYS6o4NXGVkfPLfg1MPche1390zwX1BQYtT1126sm0c3cpRXz2S4WYpnjyrDo7HKi6_HhYMwUXXhda8atjU5SGafnzq6CJ73-4wI7ZwdcK7niytciyNnnBrpP1KlrvGrqSrdGgU412U01ltsF0UXZgJY25ZFrOKrwRwYgy-cumvooPYRfr47JEWYvAs8Q7u9DOi_JXJPoAKjnlQZpoC0dC_Bt07ACSBoKSowz2-Rf3Cdc-CXdqWcxMwBkmpnW-4WGtw5Nx_4-v5JqyG2wis9qnPXjMiE0scDVJ9NTigkZxSUVOQgDG8Rm4PGDSD36fncGb_UOLgFjaMRAXCQ08wMlrz6fCytNFSIcpyOmtwerrdrEvMa-GshER1ptjjxenou_wztsigv0ZlDGTA0SWMQ240vOKFcyARGkXtQ6ZbGZtfviidMRWLbLCkAbJvVYDjkQFKyqIfgu-1AVEcy8kb7463aWoImdGCTgqr1ICKYcr5lq44cNo_WKPWD00HghjMH6NvNY3to9gcIRd-W_tZoaK5TpsG0CdBG-ylSOLr4wpujqfzqtCQ15UhIt7TzCCB7UFJnx3b9mZKTzn6ujzlqT3sjCBRCrnlsOksTekw0z-hSs99t8oaLvKwitg68IvBRnNi5S7Bi6G9pqV--EJ5qxuHUHzyTn7SCcdI7KD73_0r9H3_H2kKl98ZIy7PdmOWFFF4RcB3ARQgnpeLFvHQ-vixxhmceIwNfVEuTolEsDQho9nKYvGqrYsAuU8xuskvHZB5G5bNZcLTwddm2P8IeO6g53wP2DyJ91NqN_5Eq3Bwg1phuHVtoJ6BDLyCcL4xsjlJeBaPCJuw0PB9rM3YmJ-ZyeVq3MlUYSXM6GhFNQUJNU1mc_77W3X6zYBAFaDkgo0pv-GDajaAe4NE7tBVcF1YUhim1bm6jLwkZDcQsjH8Q4wYXlzXwlWAH-hlBnJER1R3xr5hUkvTMwMSq2VNoE3k-MyjBiC4XyrR15eYkEeZQdYemSIg5fp1CxBJOn_G70IbjMyaW61piWC19_9Aq8TSisi3SbwXdC0GGY-8sslYoMWObKuIuveTzdvj_cGnsujH7v0TuvFi6HrJZijswl9YCeYwsJLHmDGMKWm4OXL-1VHdPSxvPUi-kmq3n3P8spGtUTlQ5Ax9rU9zvmaHs_Sxw==",
+        "summary": []
+      },
+      {
+        "id": "msg_0837075a21d50d42016aca24952e0487d0bbfb0c469621fc17",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "{\"scores\":{\"A\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"5개 k 값(10~50)을 모두 계산했고 최대 q=105가 k=50에서 발생한다고 정확히 제시했다.\"},\"B\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"5개 경우의 표를 정확히 제시했고 최대값 위치도 k=50으로 맞다. Darcy 관련 언급도 요청과 충돌하지 않는다.\"},\"C\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"장난감 모델 q=2k+5만 사용해 5개 경우를 계산했고 최대 q=105, 최대가 되는 k=50을 정확히 밝혔다.\"},\"D\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":true,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":null,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":0,\"note\":\"5개 경우 계산과 최대 k=50, q=105는 정확하다. 다만 [CALC1], [USERF1] 인용은 제공된 근거와 연결되지 않는 fabricated citation이다.\"},\"E\":{\"claim_verdicts\":[true,true],\"partial_or_better\":true,\"unsupported_claim_count\":0,\"hallucination\":false,\"engineering_contradiction_count\":0,\"numeric_accuracy\":true,\"unit_accuracy\":null,\"formula_accuracy\":true,\"false_premise_handled\":null,\"safe_refusal_correct\":null,\"citation_semantic_support\":null,\"note\":\"표로 5개 경우를 정확히 계산했고 최대 q=105와 해당 k=50을 명확히 제시했다.\"}}}"
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 2230,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 879,
+      "output_tokens_details": {
+        "reasoning_tokens": 308
+      },
+      "total_tokens": 3109
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "scores_by_track": {
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": null,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "5개 k 값(10~50)을 모두 계산했고 최대 q=105가 k=50에서 발생한다고 정확히 제시했다."
+    },
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": null,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "5개 경우의 표를 정확히 제시했고 최대값 위치도 k=50으로 맞다. Darcy 관련 언급도 요청과 충돌하지 않는다."
+    },
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": null,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "장난감 모델 q=2k+5만 사용해 5개 경우를 계산했고 최대 q=105, 최대가 되는 k=50을 정확히 밝혔다."
+    },
+    "agent": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": true,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 0,
+      "note": "5개 경우 계산과 최대 k=50, q=105는 정확하다. 다만 [CALC1], [USERF1] 인용은 제공된 근거와 연결되지 않는 fabricated citation이다."
+    },
+    "openai_closed_book": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": null,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "표로 5개 경우를 정확히 계산했고 최대 q=105와 해당 k=50을 명확히 제시했다."
+    }
+  }
+}

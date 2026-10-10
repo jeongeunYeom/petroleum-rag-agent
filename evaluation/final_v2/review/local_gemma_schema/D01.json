@@ -1,0 +1,117 @@
+{
+  "task_id": "D01",
+  "prompt_version": "final-v2-reviewer-2-local-gemma-schema",
+  "reviewer_model_id": "gemma4:latest",
+  "mapping": {
+    "A": "qwen_closed_book",
+    "B": "agent",
+    "C": "qwen_same_evidence",
+    "D": "openai_closed_book",
+    "E": "openai_same_evidence"
+  },
+  "scores_by_track": {
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly identifies the formula and calculates the result (0.5)."
+    },
+    "agent": {
+      "claim_verdicts": [
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Refuses to answer, stating that a source-verified relationship is needed, which is incorrect for this direct calculation task."
+    },
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly identifies the formula and calculates the result (0.5)."
+    },
+    "openai_closed_book": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": false,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly calculates the result (0.5) but incorrectly states the unit accuracy (should be dimensionless, not just a number)."
+    },
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 0.25,
+      "note": "Correctly calculates the result (0.5) and provides the correct conceptual understanding, although the citation support is weak/irrelevant to the calculation itself."
+    }
+  },
+  "raw_review": "{\"scores\":{\"A\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": null, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"Correctly identifies the formula and calculates the result (0.5).\"}, \"B\": {\"claim_verdicts\": [false], \"partial_or_better\": false, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": null, \"unit_accuracy\": null, \"formula_accuracy\": null, \"false_premise_handled\": null, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"Refuses to answer, stating that a source-verified relationship is needed, which is incorrect for this direct calculation task.\"}, \"C\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": null, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"Correctly identifies the formula and calculates the result (0.5).\"}, \"D\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": false, \"formula_accuracy\": true, \"false_premise_handled\": null, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"Correctly calculates the result (0.5) but incorrectly states the unit accuracy (should be dimensionless, not just a number).\"}, \"E\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": null, \"safe_refusal_correct\": null, \"citation_semantic_support\": 0.25, \"note\": \"Correctly calculates the result (0.5) and provides the correct conceptual understanding, although the citation support is weak/irrelevant to the calculation itself.\"}}\n}",
+  "parse_attempts": 1,
+  "prior_attempts": [],
+  "wall_seconds": 6.998,
+  "input_tokens": 7501,
+  "output_tokens": 642,
+  "provider_payload": {
+    "model": "gemma4:latest",
+    "created_at": "2026-10-10T11:59:33.1614921Z",
+    "message": {
+      "role": "assistant",
+      "content": "{\"scores\":{\"A\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": null, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"Correctly identifies the formula and calculates the result (0.5).\"}, \"B\": {\"claim_verdicts\": [false], \"partial_or_better\": false, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": null, \"unit_accuracy\": null, \"formula_accuracy\": null, \"false_premise_handled\": null, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"Refuses to answer, stating that a source-verified relationship is needed, which is incorrect for this direct calculation task.\"}, \"C\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": null, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"Correctly identifies the formula and calculates the result (0.5).\"}, \"D\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": false, \"formula_accuracy\": true, \"false_premise_handled\": null, \"safe_refusal_correct\": null, \"citation_semantic_support\": null, \"note\": \"Correctly calculates the result (0.5) but incorrectly states the unit accuracy (should be dimensionless, not just a number).\"}, \"E\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": null, \"safe_refusal_correct\": null, \"citation_semantic_support\": 0.25, \"note\": \"Correctly calculates the result (0.5) and provides the correct conceptual understanding, although the citation support is weak/irrelevant to the calculation itself.\"}}\n}"
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 6995411900,
+    "load_duration": 5312100,
+    "prompt_eval_count": 7501,
+    "prompt_eval_cached_count": 0,
+    "prompt_eval_duration": 1154733000,
+    "eval_count": 642,
+    "eval_duration": 5579473000
+  }
+}
