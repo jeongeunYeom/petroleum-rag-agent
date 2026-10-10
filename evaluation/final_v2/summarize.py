@@ -35,22 +35,24 @@ def percent(value: float | None) -> float | None:
 
 def score_row(row: dict, review: dict, task: dict) -> dict:
     out = dict(row)
-    claim_verdicts = review["claim_verdicts"]
+    empty_answer = not str(row.get("answer") or "").strip()
+    claim_verdicts = [False] * len(task["expected_claims"]) if empty_answer else review["claim_verdicts"]
     out["claim_verdicts"] = claim_verdicts
     out["claim_coverage"] = sum(claim_verdicts) / len(claim_verdicts) if claim_verdicts else 0.0
-    out["partial_or_better"] = bool(review["partial_or_better"])
-    out["hallucination"] = bool(review["hallucination"])
-    out["unsupported_claim_count"] = int(review["unsupported_claim_count"])
+    out["partial_or_better"] = bool(review["partial_or_better"]) and not empty_answer
+    out["hallucination"] = bool(review["hallucination"]) and not empty_answer
+    out["unsupported_claim_count"] = 0 if empty_answer else int(review["unsupported_claim_count"])
     out["unsupported_claim"] = out["unsupported_claim_count"] > 0
-    out["engineering_contradiction_count"] = int(review["engineering_contradiction_count"])
+    out["engineering_contradiction_count"] = 0 if empty_answer else int(review["engineering_contradiction_count"])
     out["engineering_contradiction"] = out["engineering_contradiction_count"] > 0
-    out["numeric_accuracy"] = review["numeric_accuracy"] if task.get("required_numeric_result") or task.get("expected_after_resume") else None
-    out["unit_accuracy"] = review["unit_accuracy"] if task.get("expected_units") else None
-    out["formula_accuracy"] = review["formula_accuracy"] if task.get("expected_formula") or task.get("user_formula") else None
-    out["false_premise_handling"] = review["false_premise_handled"] if task["category"] == "false_premise" else None
-    out["safe_refusal"] = review["safe_refusal_correct"] if task["category"] == "unsupported_formula" else None
-    out["citation_semantic_support"] = review["citation_semantic_support"]
-    out["review_note"] = review["note"]
+    out["numeric_accuracy"] = (False if empty_answer else review["numeric_accuracy"]) if task.get("required_numeric_result") or task.get("expected_after_resume") else None
+    out["unit_accuracy"] = (False if empty_answer else review["unit_accuracy"]) if task.get("expected_units") else None
+    out["formula_accuracy"] = (False if empty_answer else review["formula_accuracy"]) if task.get("expected_formula") or task.get("user_formula") else None
+    out["false_premise_handling"] = (False if empty_answer else review["false_premise_handled"]) if task["category"] == "false_premise" else None
+    out["safe_refusal"] = (False if empty_answer else review["safe_refusal_correct"]) if task["category"] == "unsupported_formula" else None
+    out["citation_semantic_support"] = None if empty_answer else review["citation_semantic_support"]
+    out["review_note"] = ("Empty final answer; deterministic guard overrides impossible reviewer assertions."
+                          if empty_answer else review["note"])
     content_ok = bool(claim_verdicts and all(claim_verdicts) and
                       not out["hallucination"] and not out["engineering_contradiction"] and
                       (out["numeric_accuracy"] is not False) and (out["unit_accuracy"] is not False) and
