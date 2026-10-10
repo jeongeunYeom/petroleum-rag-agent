@@ -1,0 +1,58 @@
+{
+  "benchmark_id": "petroleum-final-v2",
+  "evaluated_product_sha": "b99d5ddf84a60086df08c08a2af546d8ae212852",
+  "benchmark_sha256": "5d78ecb6f9e6ff55109b4ecc66256ca589a503e67b124c88cf5a8c8a0fa7e08b",
+  "freeze_commit": "a1fb8ac37a37ac8aca3b7ae989de1dc60a9c9a13",
+  "task_count": 60,
+  "category_distribution": {
+    "literature": 18,
+    "direct_calculation": 10,
+    "kb_calculation": 10,
+    "simulation": 6,
+    "clarification": 4,
+    "false_premise": 4,
+    "unsupported_formula": 4,
+    "figure": 4
+  },
+  "source_page_distribution": {
+    "catalog_source_records": 28,
+    "task_referenced_pages": 27,
+    "task_referenced_documents": 7,
+    "by_document": {
+      "Heriot_Watt_University_-_Formation_Evaluation.pdf": {"pages": [103, 120, 133, 171, 196], "task_references": 5},
+      "Heriot-Watt University - Reservoir Engineering.pdf": {"pages": [153, 241, 242, 349, 559, 710], "task_references": 11},
+      "Heriot-Watt_University_-_Drilling_Engineering.pdf": {"pages": [192, 242, 431, 521], "task_references": 6},
+      "Heriot-Watt_University_-_Production_Technology_I.pdf": {"pages": [21, 23], "task_references": 2},
+      "Heriot-Watt_University_-_Production_Technology_II.pdf": {"pages": [21, 23, 165, 542], "task_references": 6},
+      "Heriot-Watt_University_-_Reservoir_Simulation.pdf": {"pages": [148, 207, 335], "task_references": 6},
+      "Heriot-Watt_University_-_Well_Test_Analysis.pdf": {"pages": [65, 201, 499], "task_references": 3}
+    }
+  },
+  "pre_freeze_checks": {
+    "old_questions_compared": 160,
+    "old_sets": ["final_benchmark_v1", "agentic_heldout_v1", "petroleum_agent_heldout_v1", "well_test_agent_benchmark"],
+    "dedup_embedding_model": "qwen3-embedding:0.6b",
+    "semantic_or_numeric_masked_review_threshold": 0.82,
+    "maximum_semantic_similarity": 0.6944,
+    "maximum_numeric_masked_similarity": 0.4079,
+    "near_duplicates_retained": 0,
+    "v1_source_page_overlap": 0,
+    "exact_formula_span_checks_passed": 13,
+    "figure_images_visually_checked": 4,
+    "details": "evaluation/final_v2/benchmark_preflight.json"
+  },
+  "evaluation_policy": {
+    "product_code": "Fixed at evaluated_product_sha; no product-code edits during evaluation",
+    "freeze": "Question, expected claims, values, source references and tolerance are immutable after freeze_commit",
+    "invalid": "A demonstrably wrong or ambiguous frozen task is recorded as INVALID with reason; its question and gold are never edited",
+    "track_a": "Identical valid tasks: Agent with local qwen3:8b, hybrid Chroma 12 documents/18976 chunks, web off, autonomous Python; Qwen and OpenAI closed-book without retrieval or tools",
+    "track_b": "Qwen and OpenAI receive exactly the Agent's captured KB/FIG text evidence for each task, with no new retrieval, browsing, or tools; Agent rows are reused from Track A",
+    "figure_evidence": "Text baselines receive the Agent's retrieved figure note text, not image pixels; source gold was visually checked from existing images",
+    "agent_calculation_goal_success": "Correct numeric result and unit, correct exact formula-source span when KB formula is required, complete provenance chain, validation_passed CALC, and appropriate action sequence are all required",
+    "false_premise_goal_success": "Explicit rejection, corrected engineering relation and semantically supporting evidence citation are all required",
+    "scoring": "Deterministic gates plus structured expected-claim comparison plus single-reviewer AI-assisted semantic adjudication; reviewer separated from the candidate OpenAI mini model when available",
+    "statistics": "Task-paired nonparametric bootstrap percentile 95% CI, 4000 resamples, seed 20261010",
+    "missing_provider_results": "Provider errors are not task invalidity; incomplete system tracks remain explicitly incomplete and cannot be ranked as complete",
+    "output_driven_changes": "No product tuning, benchmark answer edits or frozen-task replacement based on observed model outputs"
+  }
+}
