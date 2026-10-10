@@ -151,7 +151,8 @@ def call_qwen(system: str, turns: list[dict]) -> dict:
     payload = request_json("http://127.0.0.1:11434/api/chat", {
         "model": MODELS["qwen"], "messages": [{"role": "system", "content": system}, *turns],
         "stream": False, "think": False,
-        "options": {"temperature": 0, "seed": 42, "num_predict": 1200}}, timeout=300)
+        "options": {"temperature": 0, "seed": 42, "num_ctx": 16384,
+                    "num_predict": 1200}}, timeout=300)
     return {"answer": payload.get("message", {}).get("content", "").strip(),
             "model_id": payload.get("model"), "input_tokens": payload.get("prompt_eval_count"),
             "output_tokens": payload.get("eval_count"), "provider_payload": payload}
