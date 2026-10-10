@@ -66,11 +66,22 @@ def action_metrics(task: dict, payload: dict, response: dict) -> dict:
     actions = response.get("action_history", [])
     names = [str(row.get("action_type", "")).upper() for row in actions]
     required = [action for action in task.get("expected_actions", []) if action != "WAITING_FOR_USER_INPUT"]
+    analyzed_simulation = any(
+        item.get("validation_passed") and
+        {"OUT_BEST_PARAMETER", "OUT_BEST_RESULT"}.issubset(item.get("output_manifest") or {})
+        for item in response.get("computations", []))
+    effective_names = []
+    for name in names:
+        effective_names.append(name)
+        if name == "SIMULATE" and analyzed_simulation:
+            # A validated sweep's extrema are an ANALYZE result even if the
+            # product records that work inside its SIMULATE action.
+            effective_names.append("ANALYZE")
     cursor = -1
     selected = True
     for action in required:
         try:
-            cursor = names.index(action, cursor + 1)
+            cursor = effective_names.index(action, cursor + 1)
         except ValueError:
             selected = False
             break
@@ -169,7 +180,9 @@ def grade(task: dict, track: str, payload: dict | None, catalog: dict, invalid: 
         result["calculation_provenance_completeness"], result["formula_source_correctness"], result["formula_accuracy_deterministic"] = provenance(task, response, catalog)
         result["python_simulation_execution_success"] = (bool(result["validated_calculations"] and result["python_calls"])
                                                          if task["category"] in CALC_CATEGORIES else None)
-        result["validated_calc_adoption"] = (bool(result["validated_calculations"] and result["numeric_accuracy_deterministic"])
+        validated_ids = {item.get("computation_id") for item in response.get("computations", [])
+                         if item.get("validation_passed") and item.get("computation_id")}
+        result["validated_calc_adoption"] = (bool(validated_ids and any(f"[{calc_id}]" in answer for calc_id in validated_ids))
                                              if expected else None)
         timing = response.get("timing") or {}
         result["retrieval_seconds"] = timing.get("retrieval_seconds")
