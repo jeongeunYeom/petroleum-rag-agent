@@ -166,14 +166,10 @@ def main() -> None:
             continue
         if not item["available"]:
             raise RuntimeError(f"Missing raw result: {item['task_id']} {item['track']}")
-        review_path = HERE / "review" / f"{item['task_id']}.json"
+        review_path = HERE / "review/local_gemma" / f"{item['task_id']}.json"
         if not review_path.exists():
             raise RuntimeError(f"Missing semantic review: {item['task_id']}")
         review = json.loads(review_path.read_text(encoding="utf-8"))
-        if review.get("parse_error") or review.get("error"):
-            retry_path = HERE / "review/retries" / f"{item['task_id']}.json"
-            if retry_path.exists():
-                review = json.loads(retry_path.read_text(encoding="utf-8"))
         if review.get("parse_error") or review.get("error") or item["track"] not in review.get("scores_by_track", {}):
             raise RuntimeError(f"Incomplete semantic review: {item['task_id']}")
         rows.append(score_row(item, review["scores_by_track"][item["track"]], tasks[item["task_id"]]))
@@ -185,10 +181,14 @@ def main() -> None:
                             for category in sorted({task["category"] for task in tasks.values()}))}
                    for track in TRACKS}
     statistical = bootstrap(rows, list(tasks))
+    reviewer_ids = {json.loads((HERE / "review/local_gemma" / f"{task_id}.json").read_text(encoding="utf-8"))["reviewer_model_id"]
+                    for task_id in tasks}
+    if reviewer_ids != {"gemma4:latest"}:
+        raise RuntimeError(f"Mixed or missing semantic reviewer models: {reviewer_ids}")
     metrics = {"benchmark_id": benchmark["benchmark_id"], "evaluated_product_sha": benchmark["evaluated_product_sha"],
                "frozen_tasks": len(benchmark["tasks"]), "valid_tasks": len(tasks), "invalid_tasks": sorted(invalid),
                "model_ids": {"agent": MODELS["qwen"], "qwen": MODELS["qwen"],
-                             "openai": MODELS["openai"], "semantic_reviewer": MODELS["reviewer"]},
+                             "openai": MODELS["openai"], "semantic_reviewer": "gemma4:latest"},
                "tracks": by_track, "categories": by_category,
                "scoring": "deterministic + structured expected claims + single-reviewer AI-assisted semantic adjudication"}
     (HERE / "final_metrics.json").write_text(json.dumps(metrics, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
