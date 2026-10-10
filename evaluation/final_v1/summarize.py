@@ -165,6 +165,10 @@ def fmt(value: float | None, *, percent: bool = True) -> str:
     return f"{100 * value:.1f}%" if percent else f"{value:.2f}"
 
 
+def fmt_pp(value: float | None) -> str:
+    return "N/A" if value is None else f"{100 * value:.1f} pp"
+
+
 def markdown_table(metrics: dict, tracks: list[str]) -> str:
     lines = ["| System | N | Goal success | Exact | Claim coverage | Hallucination | Numeric | Citation ID | Median s |",
              "|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
@@ -229,9 +233,9 @@ def write_report(benchmark: dict, rows: list[dict], metrics: dict, stats: dict,
     for baseline, by_metric in stats["differences"].items():
         for metric, estimate in by_metric.items():
             interval = estimate["ci95"]
-            ci_text = (f"[{fmt(interval[0])}, {fmt(interval[1])}]" if interval else "N/A")
+            ci_text = (f"[{fmt_pp(interval[0])}, {fmt_pp(interval[1])}]" if interval else "N/A")
             ci_lines.append(f"| {baseline} | {metric} | {estimate['paired_n']} | "
-                            f"{fmt(estimate['difference'])} | {ci_text} |")
+                            f"{fmt_pp(estimate['difference'])} | {ci_text} |")
     ci_table = "\n".join(ci_lines)
     secondary_lines = ["| System | Unsupported claims | Contradictions | Safe refusal | False premise | Unit | Formula | Citation semantic | Mean s | p95 s |",
                        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]

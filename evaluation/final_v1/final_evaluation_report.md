@@ -96,26 +96,26 @@ Task-paired, nonparametric bootstrap percentile 95% intervals use 4000 resamples
 
 | Comparison (Agent minus baseline) | Metric | Paired N | Difference | Bootstrap 95% CI |
 |---|---|---:|---:|---:|
-| qwen_closed_book | goal_success | 49 | -14.3% | [-26.5%, -2.0%] |
-| qwen_closed_book | exact_accuracy | 49 | -6.1% | [-18.4%, 6.1%] |
-| qwen_closed_book | claim_coverage | 49 | -16.3% | [-31.1%, -1.6%] |
-| qwen_closed_book | hallucination | 49 | -22.4% | [-36.7%, -8.2%] |
-| qwen_closed_book | numeric_accuracy | 18 | -11.1% | [-44.4%, 22.2%] |
-| openai_closed_book | goal_success | 49 | -49.0% | [-63.3%, -32.7%] |
-| openai_closed_book | exact_accuracy | 49 | -40.8% | [-57.1%, -24.5%] |
-| openai_closed_book | claim_coverage | 49 | -47.9% | [-60.9%, -34.5%] |
-| openai_closed_book | hallucination | 49 | 10.2% | [-6.1%, 26.5%] |
-| openai_closed_book | numeric_accuracy | 18 | -33.3% | [-61.1%, 0.0%] |
-| qwen_same_evidence | goal_success | 49 | -28.6% | [-42.9%, -14.3%] |
-| qwen_same_evidence | exact_accuracy | 49 | -20.4% | [-34.7%, -8.2%] |
-| qwen_same_evidence | claim_coverage | 49 | -35.6% | [-47.5%, -23.5%] |
-| qwen_same_evidence | hallucination | 49 | -12.2% | [-28.6%, 2.0%] |
-| qwen_same_evidence | numeric_accuracy | 18 | -22.2% | [-44.4%, 5.6%] |
-| openai_same_evidence | goal_success | 49 | -65.3% | [-77.6%, -51.0%] |
-| openai_same_evidence | exact_accuracy | 49 | -59.2% | [-73.5%, -44.9%] |
-| openai_same_evidence | claim_coverage | 49 | -58.1% | [-68.8%, -47.4%] |
-| openai_same_evidence | hallucination | 49 | 28.6% | [14.3%, 42.9%] |
-| openai_same_evidence | numeric_accuracy | 18 | -44.4% | [-66.7%, -22.2%] |
+| qwen_closed_book | goal_success | 49 | -14.3 pp | [-26.5 pp, -2.0 pp] |
+| qwen_closed_book | exact_accuracy | 49 | -6.1 pp | [-18.4 pp, 6.1 pp] |
+| qwen_closed_book | claim_coverage | 49 | -16.3 pp | [-31.1 pp, -1.6 pp] |
+| qwen_closed_book | hallucination | 49 | -22.4 pp | [-36.7 pp, -8.2 pp] |
+| qwen_closed_book | numeric_accuracy | 18 | -11.1 pp | [-44.4 pp, 22.2 pp] |
+| openai_closed_book | goal_success | 49 | -49.0 pp | [-63.3 pp, -32.7 pp] |
+| openai_closed_book | exact_accuracy | 49 | -40.8 pp | [-57.1 pp, -24.5 pp] |
+| openai_closed_book | claim_coverage | 49 | -47.9 pp | [-60.9 pp, -34.5 pp] |
+| openai_closed_book | hallucination | 49 | 10.2 pp | [-6.1 pp, 26.5 pp] |
+| openai_closed_book | numeric_accuracy | 18 | -33.3 pp | [-61.1 pp, 0.0 pp] |
+| qwen_same_evidence | goal_success | 49 | -28.6 pp | [-42.9 pp, -14.3 pp] |
+| qwen_same_evidence | exact_accuracy | 49 | -20.4 pp | [-34.7 pp, -8.2 pp] |
+| qwen_same_evidence | claim_coverage | 49 | -35.6 pp | [-47.5 pp, -23.5 pp] |
+| qwen_same_evidence | hallucination | 49 | -12.2 pp | [-28.6 pp, 2.0 pp] |
+| qwen_same_evidence | numeric_accuracy | 18 | -22.2 pp | [-44.4 pp, 5.6 pp] |
+| openai_same_evidence | goal_success | 49 | -65.3 pp | [-77.6 pp, -51.0 pp] |
+| openai_same_evidence | exact_accuracy | 49 | -59.2 pp | [-73.5 pp, -44.9 pp] |
+| openai_same_evidence | claim_coverage | 49 | -58.1 pp | [-68.8 pp, -47.4 pp] |
+| openai_same_evidence | hallucination | 49 | 28.6 pp | [14.3 pp, 42.9 pp] |
+| openai_same_evidence | numeric_accuracy | 18 | -44.4 pp | [-66.7 pp, -22.2 pp] |
 
 ## Invalid tasks and limitations
 
