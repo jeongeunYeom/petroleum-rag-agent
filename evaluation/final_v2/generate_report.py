@@ -97,7 +97,9 @@ def main() -> None:
     contrasts = statistical["paired_differences_percentage_points"]
     c = contrasts["agent_minus_qwen_closed_book"]["hallucination"]
     hallucination_sentence = (f"Agent hallucination {f(agent['hallucination'], '%')} versus Qwen closed-book {f(qwen['hallucination'], '%')} "
-                             f"(paired difference 95% CI {f(c['lower'])} to {f(c['upper'])} percentage points).")
+                             f"(paired difference 95% CI {f(c['lower'])} to {f(c['upper'])} percentage points). "
+                             f"This is not evidence of superior factuality: {metrics['agent_empty_final_answers']}/60 Agent final answers were empty, "
+                             f"and {metrics['agent_run_status_counts'].get('stopped', 0)}/60 runs stopped.")
     source_sentence = (f"Exact formula-span correctness was {f(agent['formula_source_correctness'], '%')} "
                        f"among {agent['formula_source_correctness_denominator']} applicable KB/clarification tasks; "
                        f"complete calculation provenance was {f(agent['calculation_provenance_completeness'], '%')} "

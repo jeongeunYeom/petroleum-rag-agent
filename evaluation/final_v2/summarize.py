@@ -195,6 +195,8 @@ def main() -> None:
                "model_ids": {"agent": MODELS["qwen"], "qwen": MODELS["qwen"],
                              "openai": MODELS["openai"], "semantic_reviewer": "gemma4:latest"},
                "tracks": by_track, "categories": by_category,
+               "agent_run_status_counts": dict(Counter(row.get("run_status") for row in rows if row["track"] == "agent")),
+               "agent_empty_final_answers": sum(not str(row.get("answer") or "").strip() for row in rows if row["track"] == "agent"),
                "scoring": "deterministic + structured expected claims + single-reviewer AI-assisted semantic adjudication"}
     (HERE / "final_metrics.json").write_text(json.dumps(metrics, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (HERE / "statistical_analysis.json").write_text(json.dumps(statistical, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
