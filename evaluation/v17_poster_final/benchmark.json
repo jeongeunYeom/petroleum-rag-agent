@@ -1,0 +1,160 @@
+{
+  "benchmark_id": "v17_poster_final_independent_24",
+  "version": 1,
+  "tasks": [
+    {
+      "id": "V17-01", "category": "knowledge", "domain": "drilling", "question": "방향 측정기 근처에 Monel 드릴칼라를 배치하는 목적과 그 재질상 특징을 내부 시추 자료에 근거해 설명해줘.", "answerable": true,
+      "required_claims": ["Monel drill collars are made of a non-magnetic steel alloy.", "They isolate directional survey instruments from magnetic distortion caused by the steel drillstring."],
+      "source_document": "Heriot-Watt_University_-_Drilling_Engineering.pdf", "source_page": 96,
+      "supporting_spans": [{"chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p96:c0", "text": "These collars are made of a special non-magnetic steel alloy."}, {"chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p96:c0", "text": "Their purpose is to isolate directional survey instruments from magnetic distortion due to the steel drillstring."}],
+      "gold_answer_summary": "Nonmagnetic Monel collars shield directional survey instruments from drillstring magnetic interference.", "reasoning_rubric": "Require nonmagnetic construction and instrument-isolation function with KB support.", "numeric_gold": null, "accepted_units": [], "numeric_tolerance": null, "false_premise_correction": null, "required_missing_inputs": []
+    },
+    {
+      "id": "V17-02", "category": "knowledge", "domain": "surface_facilities", "question": "분리된 NGL을 탱크에 저장하기 전에 안정화하는 이유와, 내부 교재가 설명하는 단계적 가열·flash 과정의 효과는 무엇인가요?", "answerable": true,
+      "required_claims": ["Separated NGL contains dissolved volatile gases and has high vapor pressure, making it unsuitable for storage/transport.", "Progressive heating at constant pressure flashes off gas and reduces NGL vapor pressure."],
+      "source_document": "Heriot-Watt_University_-_Production_Technology_II.pdf", "source_page": 458,
+      "supporting_spans": [{"chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p458:c0", "text": "The separated NGL has a high vapour pressure due to dissolved, volatile gasses"}, {"chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p458:c0", "text": "The vapour pressure is reduced by heating the NGL to progressively higher temperature and allowing the gas to “flash-off” at constant pressure"}],
+      "gold_answer_summary": "Dissolved light gases make NGL too volatile for storage; successive heating and flashing lowers vapor pressure.", "reasoning_rubric": "Cause and process consequence required, source supported.", "numeric_gold": null, "accepted_units": [], "numeric_tolerance": null, "false_premise_correction": null, "required_missing_inputs": []
+    },
+    {
+      "id": "V17-03", "category": "knowledge", "domain": "petrophysics", "question": "In a neutron-density log display, what opposite apparent-porosity responses can free gas create, and what is that display effect called? Use internal evidence.", "answerable": true,
+      "required_claims": ["Gas increases the apparent porosity seen by the density log.", "Gas decreases the apparent porosity seen by the neutron log, producing gas crossover."],
+      "source_document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf", "source_page": 281,
+      "supporting_spans": [{"chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p281:c0", "text": "gas increases the apparent porosity seen by a density log, it decreases the apparent porosity seen by the neutron log"}, {"chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p281:c0", "text": "This is the source of “gas crossover” on neutron density-log displays"}],
+      "gold_answer_summary": "Gas makes density-derived apparent porosity rise and neutron apparent porosity fall; the separation is gas crossover.", "reasoning_rubric": "Both directions must be right, with crossover term and source support.", "numeric_gold": null, "accepted_units": [], "numeric_tolerance": null, "false_premise_correction": null, "required_missing_inputs": []
+    },
+    {
+      "id": "V17-04", "category": "knowledge", "domain": "well_testing", "question": "In gas-well deliverability testing, what does the absolute open-flow (AOF) potential represent, and why is it not a normal operating production rate? Use the internal handbook.", "answerable": true,
+      "required_claims": ["AOF is the theoretical maximum flow rate against atmospheric sandface backpressure.", "A well cannot normally produce at that theoretical rate in practice."],
+      "source_document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf", "source_page": 848,
+      "supporting_spans": [{"chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p848:c0", "text": "The AOF is the maximum rate at which a well could flow against a theoretical atmospheric backpressure at the sandface."}, {"chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p848:c0", "text": "Although in practice the well cannot produce at this rate"}],
+      "gold_answer_summary": "AOF is a theoretical rate at atmospheric sandface backpressure, not a routinely achievable production rate.", "reasoning_rubric": "Both theoretical definition and operational caveat needed.", "numeric_gold": null, "accepted_units": [], "numeric_tolerance": null, "false_premise_correction": null, "required_missing_inputs": []
+    },
+    {
+      "id": "V17-05", "category": "knowledge", "domain": "reservoir_simulation", "question": "생산정 주변과 유전 가장자리의 변화 속도가 다를 때 local grid refinement를 쓰는 이유는 무엇인가요? 내부 시뮬레이션 교재의 설명을 근거로 답해줘.", "answerable": true,
+      "required_claims": ["Pressure/saturation changes can be rapid near actively changing wells and slower in remote field areas.", "Rapidly moving fronts need finer cells; a uniform grid can be unsuitable, motivating local refinement."],
+      "source_document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf", "source_page": 123,
+      "supporting_spans": [{"chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p123:c1", "text": "close to a well which is changing production rate every day or so, there will be large pressure and saturation changes"}, {"chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p123:c1", "text": "To represent regions with rapidly changing waterfronts will require a finer grid"}],
+      "gold_answer_summary": "Use finer local cells where pressure, saturation and fronts change rapidly, without applying equally fine cells to slowly changing distant regions.", "reasoning_rubric": "Describe spatially different changes and local fine-grid purpose.", "numeric_gold": null, "accepted_units": [], "numeric_tolerance": null, "false_premise_correction": null, "required_missing_inputs": []
+    },
+    {
+      "id": "V17-06", "category": "knowledge", "domain": "flow_assurance", "question": "저온에서 가스 주입 라인이 hydrate로 막혔다면 교재가 설명하는 제거 방법과 예방 조치는 무엇인가요? 내부 근거를 포함해줘.", "answerable": true,
+      "required_claims": ["Depressurizing can remove the plug because hydrates become unstable at low pressure.", "Drying the gas to a water dew point below the lowest expected ambient temperature can prevent it."],
+      "source_document": "Heriot-Watt_University_-_Production_Technology_II.pdf", "source_page": 186,
+      "supporting_spans": [{"chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p186:c0", "text": "Such blockages are most easily removed by depressuris- ing the line since hydrates are unstable at low pressures"}, {"chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p186:c0", "text": "proper drying of the gas so that water dew point is below the lowest expected ambient temperature"}],
+      "gold_answer_summary": "Depressurize to destabilize hydrates; prevent by sufficient dehydration to keep dew point below minimum ambient temperature.", "reasoning_rubric": "Removal and prevention distinct; do not claim pressurization removes hydrate.", "numeric_gold": null, "accepted_units": [], "numeric_tolerance": null, "false_premise_correction": null, "required_missing_inputs": []
+    },
+    {
+      "id": "V17-07", "category": "reasoning", "domain": "production_corrosion", "question": "For CO₂-containing lift gas, explain why liquid water location matters for corrosion and why a high gas velocity can undermine continuous inhibitor protection. Use the internal production text.", "answerable": true,
+      "required_claims": ["CO₂-bearing natural gas is corrosive in the presence of liquid rather than gaseous water.", "Corrosion risk should be inspected at low points where liquid water collects.", "High gas velocity can strip corrosion inhibitor from metal surfaces and remove protection."],
+      "source_document": "Heriot-Watt_University_-_Production_Technology_II.pdf", "source_page": 186,
+      "supporting_spans": [{"chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p186:c1", "text": "Natural gas containing carbon dioxide is only corrosive in the presence of liquid water rather than gaseous water."}, {"chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p186:c1", "text": "where liquid water can collect (the bottom of pipelines, low points in undulating pipelines etc.)"}, {"chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p186:c1", "text": "will strip the inhibitor from the metal surfaces and remove this protection"}],
+      "gold_answer_summary": "Liquid water enables CO₂ corrosion at collection points; high gas velocities can remove protective inhibitor films.", "reasoning_rubric": "Three separate source-grounded claims; avoid unconditional CO₂ corrosion without water.", "numeric_gold": null, "accepted_units": [], "numeric_tolerance": null, "false_premise_correction": null, "required_missing_inputs": []
+    },
+    {
+      "id": "V17-08", "category": "reasoning", "domain": "completion_stimulation", "question": "불순물이 섞인 자연 균열 탄산염암에 산처리를 할 때 HCl에 녹지 않는 입자가 왜 문제이며, 교재는 생산 재개 시 어떤 배출 보조 방법을 언급하나요? 균열 전도도와 연결해 설명해줘.", "answerable": true,
+      "required_claims": ["HCl-insoluble material can remain and block an acid-created channel, reducing natural-fracture conductivity.", "A silt-suspending surfactant can mobilize particles so they flush out when the well returns to production."],
+      "source_document": "Heriot-Watt_University_-_Production_Technology_II.pdf", "source_page": 301,
+      "supporting_spans": [{"chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p301:c0", "text": "fractures often have a conductivity many times that of the formation"}, {"chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p301:c0", "text": "insoluble materials will remain in the fracture and block the created permeability"}, {"chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p301:c1", "text": "mobilised by the use of a silt suspending agent (a surfactant) so that they are flushed out of the fracture"}],
+      "gold_answer_summary": "Acid may improve conductive natural fractures, but insolubles can block channels; surfactant can suspend and flush them during production.", "reasoning_rubric": "Two separate cause/intervention claims with exact source support.", "numeric_gold": null, "accepted_units": [], "numeric_tolerance": null, "false_premise_correction": null, "required_missing_inputs": []
+    },
+    {
+      "id": "V17-09", "category": "reasoning", "domain": "core_analysis", "question": "When preparing a reservoir core for laboratory analysis, compare a preserved core with a solvent-cleaned core. What possible alteration must be considered when freezing or solvent-cleaning? Use the internal text.", "answerable": true,
+      "required_claims": ["A preserved core is protected for storage, sometimes by freezing to retain fluids, but freezing may alter rock properties.", "A cleaned core has fluids removed by solvents, and some solvents can damage rock fabric, especially fragile clays."],
+      "source_document": "Heriot-Watt University - Reservoir Engineering.pdf", "source_page": 270,
+      "supporting_spans": [{"chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p270:c1", "text": "freezing the core to lock in fluids which would otherwise evaporate ( in this case the freezing may alter some of the rock properties)"}, {"chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p270:c1", "text": "Cleaned Core. Core from which the fluids have been removed by solvents."}, {"chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p270:c1", "text": "Some solvents could damage the fabric of the rock"}],
+      "gold_answer_summary": "Preservation retains fluids but freezing can alter rock; solvent cleaning removes fluids but can damage fragile rock fabric.", "reasoning_rubric": "Two distinct core-handling trade-offs, not generic preservation advice.", "numeric_gold": null, "accepted_units": [], "numeric_tolerance": null, "false_premise_correction": null, "required_missing_inputs": []
+    },
+    {
+      "id": "V17-10", "category": "reasoning", "domain": "well_completion", "question": "완결 스트링이 장기간 안전하게 생산하도록 설계될 때, 유체 유출 경로의 봉쇄·케이싱-튜빙 환상공간의 격리·지상 격리가 안 될 때의 차단 기능을 어떻게 함께 확보해야 하나요? 내부 자료로 설명해줘.", "answerable": true,
+      "required_claims": ["Completion string, casing and wellhead form a pressure system keeping reservoir fluids from escaping except through production tubing and Xmas tree.", "The design may need to isolate the casing-tubing annulus, particularly for instability or reducing casing contact with reservoir fluids.", "It should permit downhole shut-in when isolation at the surface is not possible."],
+      "source_document": "Heriot-Watt_University_-_Production_Technology_I.pdf", "source_page": 151,
+      "supporting_spans": [{"chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p151:c1", "text": "prevents formation fluids and pressure escaping from the reservoir except via the production tubing and the Xmas Tree"}, {"chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p151:c1", "text": "The ability to isolate the annulus between the casing and the production tubing"}, {"chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p151:c2", "text": "downhole shut-in either by remote control or directly activated by changing well flowing conditions"}],
+      "gold_answer_summary": "Contain reservoir fluids through intended tubing/tree path, provide annulus isolation, and allow downhole shut-in when surface isolation fails.", "reasoning_rubric": "Three independently supported completion-safety functions.", "numeric_gold": null, "accepted_units": [], "numeric_tolerance": null, "false_premise_correction": null, "required_missing_inputs": []
+    },
+    {
+      "id": "V17-11", "category": "direct_calculation", "domain": "drilling", "question": "드릴링 머드 탱크에 173 bbl이 있었는데 순환 후 129 bbl이 남았습니다. 중간 보충이 없었다면 손실량은 몇 bbl인가요?", "answerable": true,
+      "required_claims": ["Mud loss is initial volume minus final volume, 44 bbl."], "source_document": null, "source_page": null, "supporting_spans": [],
+      "gold_answer_summary": "173 − 129 = 44 bbl lost.", "reasoning_rubric": "Use user values, subtraction, no KB required.", "numeric_gold": {"value": 44, "unit": "bbl"}, "accepted_units": ["bbl", "barrels"], "numeric_tolerance": {"absolute": 0.01, "relative": 0.001}, "false_premise_correction": null, "required_missing_inputs": []
+    },
+    {
+      "id": "V17-12", "category": "direct_calculation", "domain": "production", "question": "어제 산유량은 508 stb였고 오늘은 635 stb였습니다. 어제 대비 오늘 산유량의 증가율을 %로 계산해줘.", "answerable": true,
+      "required_claims": ["Percentage increase is (635−508)/508×100 = 25%."], "source_document": null, "source_page": null, "supporting_spans": [],
+      "gold_answer_summary": "25% increase from previous-day baseline.", "reasoning_rubric": "Use old value as denominator; no KB required.", "numeric_gold": {"value": 25, "unit": "%"}, "accepted_units": ["%", "percent"], "numeric_tolerance": {"absolute": 0.05, "relative": 0.002}, "false_premise_correction": null, "required_missing_inputs": []
+    },
+    {
+      "id": "V17-13", "category": "direct_calculation", "domain": "injection", "question": "Three water-injection pumps delivered 88, 112, and 100 m³/h during the same hour. What was the arithmetic mean pump rate in m³/h?", "answerable": true,
+      "required_claims": ["Arithmetic mean is (88+112+100)/3 = 100 m³/h."], "source_document": null, "source_page": null, "supporting_spans": [],
+      "gold_answer_summary": "100 m³/h.", "reasoning_rubric": "Arithmetic mean of three simultaneous rates with rate unit.", "numeric_gold": {"value": 100, "unit": "m³/h"}, "accepted_units": ["m³/h", "m3/h", "cubic meters per hour", "m^3/h"], "numeric_tolerance": {"absolute": 0.05, "relative": 0.001}, "false_premise_correction": null, "required_missing_inputs": []
+    },
+    {
+      "id": "V17-14", "category": "direct_calculation", "domain": "surface_facilities", "question": "A transfer line delivered 960 bbl of oil; 135 bbl were diverted to slops. What net oil volume reached the receiving tank?", "answerable": true,
+      "required_claims": ["Net delivered volume is 960−135 = 825 bbl."], "source_document": null, "source_page": null, "supporting_spans": [],
+      "gold_answer_summary": "825 bbl reached the receiving tank.", "reasoning_rubric": "Subtract diverted from gross delivered volume.", "numeric_gold": {"value": 825, "unit": "bbl"}, "accepted_units": ["bbl", "barrels"], "numeric_tolerance": {"absolute": 0.05, "relative": 0.001}, "false_premise_correction": null, "required_missing_inputs": []
+    },
+    {
+      "id": "V17-15", "category": "user_formula", "domain": "pipeline", "question": "For this line use the supplied relation v = Q / A. The volumetric rate Q is 0.018 m³/s and the internal flow area A is 0.060 m². Calculate v with its compound unit.", "answerable": true,
+      "required_claims": ["v = 0.018/0.060 = 0.30 m/s."], "source_document": null, "source_page": null, "supporting_spans": [],
+      "gold_answer_summary": "0.30 m/s from the supplied flow-area relation.", "reasoning_rubric": "Evaluate user-provided relation and cancel volume/area dimensions to m/s; no KB needed.", "numeric_gold": {"value": 0.30, "unit": "m/s"}, "accepted_units": ["m/s", "m·s⁻¹", "meters per second"], "numeric_tolerance": {"absolute": 0.005, "relative": 0.005}, "false_premise_correction": null, "required_missing_inputs": []
+    },
+    {
+      "id": "V17-16", "category": "user_formula", "domain": "production", "question": "이 유정의 water cut은 사용자가 정한 식 fw = qw / (qw + qo)로 계산합니다. 물 유량 qw=132 stb/d, 오일 유량 qo=468 stb/d라면 fw를 무차원 값으로 구해줘.", "answerable": true,
+      "required_claims": ["fw = 132/(132+468) = 0.22, dimensionless."], "source_document": null, "source_page": null, "supporting_spans": [],
+      "gold_answer_summary": "0.22 dimensionless water cut from the supplied formula.", "reasoning_rubric": "Follow supplied fraction and retain dimensionless interpretation; no KB required.", "numeric_gold": {"value": 0.22, "unit": "dimensionless"}, "accepted_units": ["dimensionless", "무차원", "unitless", "1"], "numeric_tolerance": {"absolute": 0.005, "relative": 0.005}, "false_premise_correction": null, "required_missing_inputs": []
+    },
+    {
+      "id": "V17-17", "category": "user_formula", "domain": "pipeline", "question": "Use the supplied line-loss relation P_loss = (0.055 psi/ft) × L + 3 psi. If L is 260 ft, what pressure loss does this model give?", "answerable": true,
+      "required_claims": ["The supplied model gives 0.055×260+3 = 17.3 psi."], "source_document": null, "source_page": null, "supporting_spans": [],
+      "gold_answer_summary": "17.3 psi based solely on the user-specified model.", "reasoning_rubric": "Use explicit formula and unit cancellation; do not claim this is a universal pressure-loss law.", "numeric_gold": {"value": 17.3, "unit": "psi"}, "accepted_units": ["psi"], "numeric_tolerance": {"absolute": 0.05, "relative": 0.002}, "false_premise_correction": null, "required_missing_inputs": []
+    },
+    {
+      "id": "V17-18", "category": "kb_formula", "domain": "gas_pvt", "question": "내부 교재의 정의/관계를 적용해 가스의 pseudo-reduced pressure를 계산해줘. 실제 압력 P=3120 psia, pseudocritical pressure Ppc=780 psia입니다.", "answerable": true,
+      "required_claims": ["Internal source defines Ppr=P/Ppc.", "Ppr=3120/780=4.0 and is dimensionless."],
+      "source_document": "Heriot-Watt University - Reservoir Engineering.pdf", "source_page": 153,
+      "supporting_spans": [{"chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p153:c0", "text": "Ppr = P/Ppc, Tpr = T/Tpc"}],
+      "gold_answer_summary": "Apply source relation Ppr=P/Ppc to get 4.0, dimensionless.", "reasoning_rubric": "Correct exact formula source span and input binding required for Agent success.", "numeric_gold": {"value": 4.0, "unit": "dimensionless"}, "accepted_units": ["dimensionless", "무차원", "unitless", "1"], "numeric_tolerance": {"absolute": 0.01, "relative": 0.002}, "false_premise_correction": null, "required_missing_inputs": []
+    },
+    {
+      "id": "V17-19", "category": "kb_formula", "domain": "formation_evaluation", "question": "NaCl가 주성분인 머드에서 Rm이 1.6 ohm-m로 측정되었습니다. 내부 자료의 통계적 근사 관계를 이용해 Rmf를 계산하고 적용 조건을 밝혀줘.", "answerable": true,
+      "required_claims": ["For predominantly NaCl mud, source statistical approximation is Rmf=0.75 Rm.", "Rmf=1.2 ohm-m for Rm=1.6 ohm-m."],
+      "source_document": "Heriot_Watt_University_-_Formation_Evaluation.pdf", "source_page": 204,
+      "supporting_spans": [{"chunk_id": "d3d33e53ea2478fe3729bba7019d8604095c5b6c2c2d3dc0bd7e9608a9931ebb:p204:c0", "text": "A statistical approximation, for predominantly NaCl muds, is Rmc = 1.5 Rm, and Rmf = 0.75 Rm."}],
+      "gold_answer_summary": "Rmf≈0.75×1.6=1.2 ohm-m, conditional on predominantly NaCl mud.", "reasoning_rubric": "Conditional relation, exact source, correct numeric/unit; no other estimation method substituted.", "numeric_gold": {"value": 1.2, "unit": "ohm-m"}, "accepted_units": ["ohm-m", "Ω·m", "ohm m", "Ω m"], "numeric_tolerance": {"absolute": 0.01, "relative": 0.002}, "false_premise_correction": null, "required_missing_inputs": []
+    },
+    {
+      "id": "V17-20", "category": "kb_formula", "domain": "production", "question": "An undersaturated liquid well has productivity index PI=1.8 stb/(d·psi), reservoir pressure PR=3400 psi, and flowing bottomhole pressure Pwf=3150 psi. Retrieve the internal straight-line inflow relation and calculate q with a source citation.", "answerable": true,
+      "required_claims": ["Internal source defines q=PI(PR−Pwf) for liquid inflow.", "q=1.8×(3400−3150)=450 stb/d."],
+      "source_document": "Heriot-Watt_University_-_Production_Technology_II.pdf", "source_page": 9,
+      "supporting_spans": [{"chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p9:c0", "text": "q = PI (PR - Pwf)"}],
+      "gold_answer_summary": "450 stb/d using the internal linear liquid-inflow equation.", "reasoning_rubric": "Exact formula source, all three supplied operands, validated calculation, and rate unit.", "numeric_gold": {"value": 450, "unit": "stb/d"}, "accepted_units": ["stb/d", "stb per day", "stock-tank barrels per day"], "numeric_tolerance": {"absolute": 0.5, "relative": 0.002}, "false_premise_correction": null, "required_missing_inputs": []
+    },
+    {
+      "id": "V17-21", "category": "false_premise", "domain": "stimulation", "question": "매트릭스 산처리는 파쇄압을 넘어 균열을 만든 뒤 프로판트로 열어두는 방식이므로, 산 주입 압력을 항상 파쇄압 이상으로 맞춰야 합니다. 내부 교재를 근거로 적용 원리를 설명해줘.", "answerable": true,
+      "required_claims": ["Explicitly reject the assertion that matrix acidizing requires pressure above fracture breakdown.", "Matrix acidizing occurs below breakdown pressure and dissolves matrix rock or damage to improve conductivity.", "Propped hydraulic fracturing, not matrix acidizing, uses pressure above breakdown and proppant."],
+      "source_document": "Heriot-Watt_University_-_Production_Technology_I.pdf", "source_page": 10,
+      "supporting_spans": [{"chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p10:c0", "text": "Propped Hydraulic Fracturing - whereby fluids are injected at a high rate and at a pressure which exceeds the formation break down gradient"}, {"chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p10:c1", "text": "Matrix Acidisation - this process is conducted at pressures below the formation break down gradient"}],
+      "gold_answer_summary": "Reject premise: matrix acidizing is below fracture breakdown and dissolves rock/damage; propped fracturing is the above-breakdown proppant method.", "reasoning_rubric": "Explicit rejection, corrected mechanisms, evidence citation all mandatory.", "numeric_gold": null, "accepted_units": [], "numeric_tolerance": null, "false_premise_correction": "Matrix acidizing is below formation breakdown; hydraulic fracturing exceeds it and proppant holds the fracture open.", "required_missing_inputs": []
+    },
+    {
+      "id": "V17-22", "category": "false_premise", "domain": "formation_evaluation", "question": "In SP logging the shale baseline is the large deflection opposite a clean permeable sand, while shale intervals define the variable excursions. Explain this log interpretation with an internal citation.", "answerable": true,
+      "required_claims": ["Explicitly reject the reversed shale-baseline premise.", "SP readings opposite shales are relatively constant and define the shale baseline.", "Permeable beds show excursions from that baseline; polarity can depend on mud and formation-water salinity."],
+      "source_document": "Heriot_Watt_University_-_Formation_Evaluation.pdf", "source_page": 59,
+      "supporting_spans": [{"chunk_id": "d3d33e53ea2478fe3729bba7019d8604095c5b6c2c2d3dc0bd7e9608a9931ebb:p59:c1", "text": "Readings opposite shales are relatively constant and are referred to as “the shale baseline”."}, {"chunk_id": "d3d33e53ea2478fe3729bba7019d8604095c5b6c2c2d3dc0bd7e9608a9931ebb:p59:c1", "text": "Opposite permeable formations the SP curve typically shows excursions"}],
+      "gold_answer_summary": "Premise reversed: shale defines the relatively steady baseline; permeable sands show salinity-dependent deflection.", "reasoning_rubric": "Explicit rejection plus correction and source evidence; silent reframing fails.", "numeric_gold": null, "accepted_units": [], "numeric_tolerance": null, "false_premise_correction": "Shales define the steady SP baseline; permeable formations cause excursions from it.", "required_missing_inputs": []
+    },
+    {
+      "id": "V17-23", "category": "unanswerable", "domain": "reservoir_pressure", "question": "저류층 깊이가 2800 m라는 정보만으로 그 지점의 정확한 정수압을 계산해줘. 이 정보만으로 정확한 값을 낼 수 없다면 무엇이 더 필요한지 밝혀줘.", "answerable": false,
+      "required_claims": ["Exact hydrostatic pressure cannot be determined from depth alone.", "Fluid density or water salinity/pressure gradient is needed; hydrostatic pressure depends on fluid density and depth."],
+      "source_document": "Heriot-Watt University - Reservoir Engineering.pdf", "source_page": 63,
+      "supporting_spans": [{"chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p63:c1", "text": "Its value depends on the density of the water ρw, which is affected by salinity."}, {"chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p63:c2", "text": "Pf = ρwDg"}],
+      "gold_answer_summary": "Depth alone is insufficient: need fluid density/pressure gradient or water salinity; do not assume fresh-water density.", "reasoning_rubric": "No invented exact pressure; state missing density or salinity/gradient, not generic refusal.", "numeric_gold": null, "accepted_units": [], "numeric_tolerance": null, "false_premise_correction": null, "required_missing_inputs": ["in-situ fluid density or pressure gradient", "fluid salinity/composition if estimating density"]
+    },
+    {
+      "id": "V17-24", "category": "unanswerable", "domain": "flow_assurance", "question": "A natural-gas line operates at 900 psia. From that pressure alone, give the exact hydrate-formation temperature for this particular gas and explain what data are missing if it cannot be fixed.", "answerable": false,
+      "required_claims": ["Exact hydrate-formation temperature for this gas cannot be inferred from pressure alone.", "Gas composition and water/salinity conditions or relevant phase-equilibrium data are needed."],
+      "source_document": "Heriot-Watt_University_-_Production_Technology_II.pdf", "source_page": 460,
+      "supporting_spans": [{"chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p460:c1", "text": "Position of this line is a function of gas composition"}, {"chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p460:c1", "text": "Water contents of natural gasses with corrections for salinity and relative density."}],
+      "gold_answer_summary": "No exact site-specific hydrate temperature from pressure alone; need gas composition and water/salinity/phase-equilibrium information.", "reasoning_rubric": "Name missing engineering inputs, no numerical onset temperature fabricated.", "numeric_gold": null, "accepted_units": [], "numeric_tolerance": null, "false_premise_correction": null, "required_missing_inputs": ["gas composition", "water content and/or salinity", "validated hydrate-equilibrium relationship"]
+    }
+  ]
+}

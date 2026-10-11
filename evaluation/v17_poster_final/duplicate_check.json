@@ -1,0 +1,854 @@
+{
+  "draft_sha256": "256e4081ba6914bf0283ade0e80f715a34598e1f265c464be8e813660771ec0d",
+  "authoring_completed_before_historical_access": true,
+  "historical_question_count": 524,
+  "historical_corpora": [
+    "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+    "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+    "origin/eval/v14-poster-final:evaluation/poster_final/benchmark.json",
+    "origin/eval/v15-poster-final:evaluation/v15_poster_final/benchmark.json",
+    "origin/eval/v16-poster-final:evaluation/v16_poster_final/benchmark.json",
+    "current top-level evaluation benchmarks",
+    "v15-v17 dev question fields"
+  ],
+  "method": "Normalized exact match, character 3-5-gram TF-IDF cosine, bilingual manual engineering-concept review of nearest and category-similar questions. Historic gold and raw answers not used.",
+  "thresholds": {
+    "lexical_flag": 0.55,
+    "semantic": "same petroleum relation and requested inference, even with low lexical similarity"
+  },
+  "checks": [
+    {
+      "id": "V17-01",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "evaluation\\well_test_agent_benchmark.json",
+          "question": "Wellbore storage와 radial flow의 derivative 특징을 설명하고 근거 문서와 페이지를 함께 써줘.",
+          "lexical_cosine": 0.0759
+        },
+        {
+          "corpus": "evaluation\\well_test_agent_benchmark.json",
+          "question": "Wellbore storage, radial flow, fracture flow의 pressure derivative 특징을 모두 설명해줘. 문서에서 확인되지 않는 항목은 그 항목만 확인할 수 없다고 표시해줘.",
+          "lexical_cosine": 0.065
+        },
+        {
+          "corpus": "evaluation\\petroleum_agent_heldout_v1.json",
+          "question": "Reservoir limit test를 appraisal well에서 수행하는 목적과 왜 extended drawdown test라고도 부르는지 설명해줘.",
+          "lexical_cosine": 0.0634
+        },
+        {
+          "corpus": "evaluation\\petroleum_agent_heldout_v1_questions.json",
+          "question": "Reservoir limit test를 appraisal well에서 수행하는 목적과 왜 extended drawdown test라고도 부르는지 설명해줘.",
+          "lexical_cosine": 0.0634
+        },
+        {
+          "corpus": "evaluation\\petroleum_agent_heldout_v1_retrieved_evidence.json",
+          "question": "Reservoir limit test를 appraisal well에서 수행하는 목적과 왜 extended drawdown test라고도 부르는지 설명해줘.",
+          "lexical_cosine": 0.0634
+        }
+      ],
+      "semantic_concept_review": "Monel survey-collar shielding; old well-test items are unrelated.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-02",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "origin/eval/v16-poster-final:evaluation/v16_poster_final/benchmark.json",
+          "question": "Flash liberation과 differential liberation은 발생한 가스가 액체와 계속 접촉하는지에서 어떻게 다르며, 왜 Rs 측정 결과가 달라질 수 있나요?",
+          "lexical_cosine": 0.0583
+        },
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "Gyro single-shot survey에서 자기편각 보정이 불필요한 이유는 무엇인가?",
+          "lexical_cosine": 0.0527
+        },
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "시멘트 채널링이 시멘트 sheath에 남기는 결함은 무엇인가?",
+          "lexical_cosine": 0.0467
+        },
+        {
+          "corpus": "evaluation\\petroleum_agent_heldout_v1.json",
+          "question": "Pressure buildup에서 afterflow가 의심될 때 semilog 직선 구간을 고르기 전에 log-log plot을 확인해야 하는 이유를 설명해줘.",
+          "lexical_cosine": 0.0311
+        },
+        {
+          "corpus": "evaluation\\petroleum_agent_heldout_v1_questions.json",
+          "question": "Pressure buildup에서 afterflow가 의심될 때 semilog 직선 구간을 고르기 전에 log-log plot을 확인해야 하는 이유를 설명해줘.",
+          "lexical_cosine": 0.0311
+        }
+      ],
+      "semantic_concept_review": "NGL stabilization by staged flash; old PVT liberation differs.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-03",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "origin/eval/v15-poster-final:evaluation/v15_poster_final/benchmark.json",
+          "question": "In a rod-pumped oil well, what is a gas anchor intended to separate, and where does the separated gas go? Explain from the internal petroleum references.",
+          "lexical_cosine": 0.1424
+        },
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "In a water-drive reservoir, what aquifer process can supply expansion energy as oil is produced? Cite the internal source.",
+          "lexical_cosine": 0.1406
+        },
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "A drilling fluid has MW=11.5 ppg. According to the internal density conversion, what is its pressure gradient in psi/ft?",
+          "lexical_cosine": 0.1392
+        },
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "Find the internal porosity definition, then compute porosity when a plug has 306 cm³ pore space and 1,800 cm³ bulk volume. Cite the page containing the relationship.",
+          "lexical_cosine": 0.1258
+        },
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "In cement evaluation, what does a CBL amplitude curve indicate, and what extra wave information can a VDL show?",
+          "lexical_cosine": 0.1242
+        }
+      ],
+      "semantic_concept_review": "Neutron-density gas crossover; old artificial-lift gas anchor differs.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-04",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "Using the internal definition of relative permeability, compute kr for a fluid with effective permeability 84 mD in a rock of absolute permeability 280 mD. Cite the defining span.",
+          "lexical_cosine": 0.192
+        },
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "If produced gas-liquid ratio is high and selecting artificial lift, what caution does the production text raise about pumping versus gas lift?",
+          "lexical_cosine": 0.1851
+        },
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "After casing cementing, why might an engineer review both perforating design and a VDL before putting the interval on production?",
+          "lexical_cosine": 0.1833
+        },
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "For my unnamed reservoir, what is the exact absolute permeability in mD? I have provided no core, log, or pressure-transient data.",
+          "lexical_cosine": 0.1646
+        },
+        {
+          "corpus": "origin/eval/v15-poster-final:evaluation/v15_poster_final/benchmark.json",
+          "question": "A mud pump delivers 420 gpm at 2850 psi. Find the hydraulic-horsepower relation in the internal drilling reference and use it to determine the hydraulic output, not the shaft input power.",
+          "lexical_cosine": 0.1579
+        }
+      ],
+      "semantic_concept_review": "Gas-well AOF definition; old permeability and lift items differ.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-05",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "origin/eval/v16-poster-final:evaluation/v16_poster_final/benchmark.json",
+          "question": "Coiled tubing에서 동일한 bend-cycle을 수명 후반에 받는 경우와 초기에 받는 경우를 같은 손상으로 합산해도 될까요? 교재의 피로 수명 설명을 근거로 답해줘.",
+          "lexical_cosine": 0.1135
+        },
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "수치 시뮬레이션의 numerical dispersion은 격자·시간 이산화와 관계없는 실제 암석 확산이라서 grid를 바꿔도 그대로라는 주장에 동의해?",
+          "lexical_cosine": 0.1035
+        },
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "Gyro single-shot survey에서 자기편각 보정이 불필요한 이유는 무엇인가?",
+          "lexical_cosine": 0.0866
+        },
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "음의 skin factor는 손상 때문에 근정의 투과도가 감소했다는 뜻이지? 내부 근거로 검토해줘.",
+          "lexical_cosine": 0.0713
+        },
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "사이드 포켓 맨드렐의 포켓은 튜빙 중심에 있나요, 한쪽으로 치우쳐 있나요? 내부 자료로 답해줘.",
+          "lexical_cosine": 0.0696
+        }
+      ],
+      "semantic_concept_review": "Local grid refinement; old numerical-dispersion concept differs.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-06",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "가스 리프트에서 주입 가스는 보통 어느 공간으로 들어간 뒤 어떤 장치를 통해 생산 tubing으로 진입하는가?",
+          "lexical_cosine": 0.0529
+        },
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "시멘트 채널링이 시멘트 sheath에 남기는 결함은 무엇인가?",
+          "lexical_cosine": 0.0508
+        },
+        {
+          "corpus": "origin/eval/v15-poster-final:evaluation/v15_poster_final/benchmark.json",
+          "question": "A mud pump delivers 420 gpm at 2850 psi. Find the hydraulic-horsepower relation in the internal drilling reference and use it to determine the hydraulic output, not the shaft input power.",
+          "lexical_cosine": 0.0489
+        },
+        {
+          "corpus": "origin/eval/v14-poster-final:evaluation/poster_final/benchmark.json",
+          "question": "A high-rate well risks hydrate formation but an accessible line heater can be installed. Why might heating be preferable to continuous methanol injection, and when is methanol useful?",
+          "lexical_cosine": 0.046
+        },
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "Gyro single-shot survey에서 자기편각 보정이 불필요한 이유는 무엇인가?",
+          "lexical_cosine": 0.045
+        }
+      ],
+      "semantic_concept_review": "Hydrate plug removal and dehydration prevention; old hydrate questions concern other interventions.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-07",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "If produced gas-liquid ratio is high and selecting artificial lift, what caution does the production text raise about pumping versus gas lift?",
+          "lexical_cosine": 0.2549
+        },
+        {
+          "corpus": "origin/eval/v15-poster-final:evaluation/v15_poster_final/benchmark.json",
+          "question": "In a water-bearing formation, mud-filtrate invasion leaves the water saturation unchanged, so the resistivity must remain unchanged too. Is that inference correct? Explain using the internal formation-evaluation text.",
+          "lexical_cosine": 0.1863
+        },
+        {
+          "corpus": "origin/eval/v14-poster-final:evaluation/poster_final/benchmark.json",
+          "question": "An operator proposes curing poor separator performance only by enlarging the vessel. Explain why inlet flow distribution and both gas and liquid design requirements still matter.",
+          "lexical_cosine": 0.1822
+        },
+        {
+          "corpus": "origin/eval/v15-poster-final:evaluation/v15_poster_final/benchmark.json",
+          "question": "In water-wet reservoir rocks, connect pore size, capillary pressure and retained interstitial water to explain why a silty fine sand can retain more water than a coarse sand. Use the relevant relationships, not just a definition.",
+          "lexical_cosine": 0.1802
+        },
+        {
+          "corpus": "origin/eval/v15-poster-final:evaluation/v15_poster_final/benchmark.json",
+          "question": "Give the exact minimum suction-vessel liquid level that will prevent cavitation for our centrifugal pump. Its model, speed, suction piping losses, liquid properties and operating pressure have not been supplied. Explain the specific data needed to determine the level.",
+          "lexical_cosine": 0.1799
+        }
+      ],
+      "semantic_concept_review": "Liquid-water CO2 corrosion plus inhibitor stripping; old lift selection differs.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-08",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "origin/eval/v16-poster-final:evaluation/v16_poster_final/benchmark.json",
+          "question": "모래가 separator 내부에 쌓이고, 동시에 잘 분리되지 않는 유수 에멀전이 들어오는 상황입니다. 모래 축적의 체류시간 영향과 에멀전 처리상 불리한 이유, 가능한 처리 방안을 연결해 설명해줘.",
+          "lexical_cosine": 0.0525
+        },
+        {
+          "corpus": "origin/eval/v16-poster-final:evaluation/v16_poster_final/benchmark.json",
+          "question": "물에 젖은 가스의 choke 감압을 거의 단열·무축일 과정으로 볼 때 enthalpy와 온도에 대해 무엇을 구분해야 하나요? 냉각 전 glycol 주입이 왜 필요한지도 연결해줘.",
+          "lexical_cosine": 0.0509
+        },
+        {
+          "corpus": "origin/eval/v16-poster-final:evaluation/v16_poster_final/benchmark.json",
+          "question": "시추유체에서 고염도 수상은 shale 억제에 도움이 된다는데, bentonite를 염수에 직접 섞어 점도를 만드는 일은 왜 어려울 수 있나요? Attapulgite 대안을 쓸 때의 장점과 한계도 연결해 설명해줘.",
+          "lexical_cosine": 0.0486
+        },
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "상대투과도의 정의와 water/oil mobility ratio가 waterflood sweep에 중요한 이유를 자료 두 곳을 연결해 설명해줘.",
+          "lexical_cosine": 0.0452
+        },
+        {
+          "corpus": "origin/eval/v16-poster-final:evaluation/v16_poster_final/benchmark.json",
+          "question": "시추 가스 분석용 thermal conductivity detector(TCD)는 기체 조성 차이를 어떻게 전기 신호로 바꾸며, reference cell은 어떤 역할을 하나요?",
+          "lexical_cosine": 0.0428
+        }
+      ],
+      "semantic_concept_review": "Natural-fracture insoluble blockage and surfactant flushing; old separator/choke items differ.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-09",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "When should the oil- or gas-bearing sonic-porosity correction factors from the training text be applied, and when not?",
+          "lexical_cosine": 0.1673
+        },
+        {
+          "corpus": "origin/eval/v15-poster-final:evaluation/v15_poster_final/benchmark.json",
+          "question": "In a water-bearing formation, mud-filtrate invasion leaves the water saturation unchanged, so the resistivity must remain unchanged too. Is that inference correct? Explain using the internal formation-evaluation text.",
+          "lexical_cosine": 0.1392
+        },
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "Compare the meaning of net pay thickness and gross reservoir thickness in a net-to-gross ratio.",
+          "lexical_cosine": 0.1296
+        },
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "Find the internal porosity definition, then compute porosity when a plug has 306 cm³ pore space and 1,800 cm³ bulk volume. Cite the page containing the relationship.",
+          "lexical_cosine": 0.1267
+        },
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "For my unnamed reservoir, what is the exact absolute permeability in mD? I have provided no core, log, or pressure-transient data.",
+          "lexical_cosine": 0.124
+        }
+      ],
+      "semantic_concept_review": "Core freezing and solvent-cleaning alteration; old sonic-porosity correction differs.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-10",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "사이드 포켓 맨드렐의 포켓은 튜빙 중심에 있나요, 한쪽으로 치우쳐 있나요? 내부 자료로 답해줘.",
+          "lexical_cosine": 0.0811
+        },
+        {
+          "corpus": "origin/eval/v16-poster-final:evaluation/v16_poster_final/benchmark.json",
+          "question": "시추 가스 분석용 thermal conductivity detector(TCD)는 기체 조성 차이를 어떻게 전기 신호로 바꾸며, reference cell은 어떤 역할을 하나요?",
+          "lexical_cosine": 0.0562
+        },
+        {
+          "corpus": "origin/eval/v16-poster-final:evaluation/v16_poster_final/benchmark.json",
+          "question": "물에 젖은 가스의 choke 감압을 거의 단열·무축일 과정으로 볼 때 enthalpy와 온도에 대해 무엇을 구분해야 하나요? 냉각 전 glycol 주입이 왜 필요한지도 연결해줘.",
+          "lexical_cosine": 0.0477
+        },
+        {
+          "corpus": "development\\v17\\local_smoke_01.json",
+          "question": "호박색 카트리지의 제거 원리를 설명해줘. 그리고 보라색 걸쇠의 닫힘 조건을 설명해줘. 그리고 은색 슬리브의 역할을 설명해줘.",
+          "lexical_cosine": 0.0322
+        },
+        {
+          "corpus": "development\\v17\\local_smoke_02.json",
+          "question": "호박색 카트리지의 제거 원리를 설명해줘. 그리고 보라색 걸쇠의 닫힘 조건을 설명해줘. 그리고 은색 슬리브의 역할을 설명해줘.",
+          "lexical_cosine": 0.0322
+        }
+      ],
+      "semantic_concept_review": "Completion containment, annulus isolation and downhole shut-in; old equipment questions differ.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-11",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "origin/eval/v14-poster-final:evaluation/poster_final/benchmark.json",
+          "question": "A day starts with 620 bbl in a tank. Receipts are 145 bbl and metered dispatch is 208 bbl; there are no other transfers or losses. Determine the closing inventory.",
+          "lexical_cosine": 0.0933
+        },
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "For a material balance ledger, produced oil is 1,475 bbl and injected water is 2,025 bbl. Report only the water-minus-oil volume difference. A porosity value of 0.22 is a distractor.",
+          "lexical_cosine": 0.0625
+        },
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "Three injectors delivered 1,260, 1,410 and 1,530 bbl yesterday. Give their combined injected volume in bbl. The separator ran at 190 psi, which is irrelevant.",
+          "lexical_cosine": 0.0609
+        },
+        {
+          "corpus": "origin/eval/v16-poster-final:evaluation/v16_poster_final/benchmark.json",
+          "question": "펌프 정지시간이 정비 전 46 h에서 정비 후 29 h가 됐습니다. 감소량과 정비 전 대비 감소율을 계산하고 반올림해 소수 둘째 자리까지 보여줘.",
+          "lexical_cosine": 0.0392
+        },
+        {
+          "corpus": "origin/eval/v16-poster-final:evaluation/v16_poster_final/benchmark.json",
+          "question": "다섯 번의 시추 연결 작업 소요시간은 6.4, 7.1, 5.8, 8.3, 6.9 min입니다. 합계와 산술평균을 각각 계산해줘. 추가 자료 검색은 필요 없습니다.",
+          "lexical_cosine": 0.0357
+        }
+      ],
+      "semantic_concept_review": "Drilling mud tank volume loss; old tank-inventory examples have a different operation and setting.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-12",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "origin/eval/v16-poster-final:evaluation/v16_poster_final/benchmark.json",
+          "question": "다섯 번의 시추 연결 작업 소요시간은 6.4, 7.1, 5.8, 8.3, 6.9 min입니다. 합계와 산술평균을 각각 계산해줘. 추가 자료 검색은 필요 없습니다.",
+          "lexical_cosine": 0.0661
+        },
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "Three stabilized flow rates were 70 stb/d for 2 h, 110 stb/d for 3 h, and 140 stb/d for 5 h. Find the duration-weighted mean rate, not the simple mean.",
+          "lexical_cosine": 0.0595
+        },
+        {
+          "corpus": "origin/eval/v16-poster-final:evaluation/v16_poster_final/benchmark.json",
+          "question": "펌프 정지시간이 정비 전 46 h에서 정비 후 29 h가 됐습니다. 감소량과 정비 전 대비 감소율을 계산하고 반올림해 소수 둘째 자리까지 보여줘.",
+          "lexical_cosine": 0.0582
+        },
+        {
+          "corpus": "development\\v17\\local_smoke_01.json",
+          "question": "p=17 Pa, q=8 Pa. 내부 교재의 R 보정량 정의를 적용하여 R을 계산해줘.",
+          "lexical_cosine": 0.0531
+        },
+        {
+          "corpus": "development\\v17\\local_smoke_02.json",
+          "question": "p=17 Pa, q=8 Pa. 내부 교재의 R 보정량 정의를 적용하여 R을 계산해줘.",
+          "lexical_cosine": 0.0531
+        }
+      ],
+      "semantic_concept_review": "Oil-rate percentage increase; old time average and work-hour examples differ.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-13",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "Three injectors delivered 1,260, 1,410 and 1,530 bbl yesterday. Give their combined injected volume in bbl. The separator ran at 190 psi, which is irrelevant.",
+          "lexical_cosine": 0.1902
+        },
+        {
+          "corpus": "origin/eval/v15-poster-final:evaluation/v15_poster_final/benchmark.json",
+          "question": "A separator inspection log recorded shutdowns lasting 26, 43, 18 and 57 minutes. What were the total downtime and the arithmetic mean duration per shutdown?",
+          "lexical_cosine": 0.1841
+        },
+        {
+          "corpus": "origin/eval/v14-poster-final:evaluation/poster_final/benchmark.json",
+          "question": "A diagnostic current series has three equally weighted readings of 3, 4, and 12 amperes. Compute the root-mean-square current, not the arithmetic mean.",
+          "lexical_cosine": 0.1838
+        },
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "Gas lift and a downhole pump both work by injecting mechanical pump energy into the tubing, right?",
+          "lexical_cosine": 0.1728
+        },
+        {
+          "corpus": "origin/eval/v15-poster-final:evaluation/v15_poster_final/benchmark.json",
+          "question": "At a fixed pump rate the measured surface pump pressure is 3125 psi and the pressure loss across the bit is 1170 psi. Locate the drilling-hydraulics relationship for circulating-system pressure loss and calculate that loss.",
+          "lexical_cosine": 0.1437
+        }
+      ],
+      "semantic_concept_review": "Simultaneous injector pump mean rate; old weighted rate and volume total differ.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-14",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "origin/eval/v14-poster-final:evaluation/poster_final/benchmark.json",
+          "question": "A day starts with 620 bbl in a tank. Receipts are 145 bbl and metered dispatch is 208 bbl; there are no other transfers or losses. Determine the closing inventory.",
+          "lexical_cosine": 0.2691
+        },
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "Three injectors delivered 1,260, 1,410 and 1,530 bbl yesterday. Give their combined injected volume in bbl. The separator ran at 190 psi, which is irrelevant.",
+          "lexical_cosine": 0.1924
+        },
+        {
+          "corpus": "origin/eval/v14-poster-final:evaluation/poster_final/benchmark.json",
+          "question": "What service does a slug catcher provide at the receiving end of a gas pipeline during pigging?",
+          "lexical_cosine": 0.189
+        },
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "For a material balance ledger, produced oil is 1,475 bbl and injected water is 2,025 bbl. Report only the water-minus-oil volume difference. A porosity value of 0.22 is a distractor.",
+          "lexical_cosine": 0.1439
+        },
+        {
+          "corpus": "origin/eval/v15-poster-final:evaluation/v15_poster_final/benchmark.json",
+          "question": "During a gas-handling trial, 8640 standard cubic metres were captured and 720 standard cubic metres were flared. Express captured volume divided by flared volume as a dimensionless ratio.",
+          "lexical_cosine": 0.1259
+        }
+      ],
+      "semantic_concept_review": "Net tank receipt after slops diversion; old closing-inventory and injection-volume examples differ.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-15",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "Bulk rock volume is 125000 m3 and porosity phi=0.16. Use the user-supplied equation PV=phi*bulk_volume to calculate pore volume.",
+          "lexical_cosine": 0.2288
+        },
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "Sweep x from 2 to 8 in steps of 2 using the supplied relation q = 12 + 3*x. List q for every x and identify the maximum. Units are arbitrary index units.",
+          "lexical_cosine": 0.217
+        },
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "How do the oil formation volume factor and the shrinkage factor relate in the text?",
+          "lexical_cosine": 0.1936
+        },
+        {
+          "corpus": "origin/eval/v14-poster-final:evaluation/poster_final/benchmark.json",
+          "question": "A synthetic brine dilution model is S = S0 / (1 + r). S0=18 %, r=2 dimensionless. Compute S using exactly this supplied relation.",
+          "lexical_cosine": 0.1928
+        },
+        {
+          "corpus": "origin/eval/v15-poster-final:evaluation/v15_poster_final/benchmark.json",
+          "question": "At a fixed pump rate the measured surface pump pressure is 3125 psi and the pressure loss across the bit is 1170 psi. Locate the drilling-hydraulics relationship for circulating-system pressure loss and calculate that loss.",
+          "lexical_cosine": 0.1853
+        }
+      ],
+      "semantic_concept_review": "User-supplied pipe fluid velocity Q/A; old pore-volume and parameter sweep differ.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-16",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "Three stabilized flow rates were 70 stb/d for 2 h, 110 stb/d for 3 h, and 140 stb/d for 5 h. Find the duration-weighted mean rate, not the simple mean.",
+          "lexical_cosine": 0.1784
+        },
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "An intervention raised oil rate from 760 to 950 stb/d. What is the percentage increase relative to the original rate? Ignore the unrelated water rate of 120 stb/d.",
+          "lexical_cosine": 0.1372
+        },
+        {
+          "corpus": "evaluation\\petroleum_agent_heldout_v1.json",
+          "question": "Water displacement of oil에서 water saturation이 증가할 때 oil과 water relative permeability가 각각 어떻게 변하는지 설명해줘.",
+          "lexical_cosine": 0.0619
+        },
+        {
+          "corpus": "evaluation\\petroleum_agent_heldout_v1_questions.json",
+          "question": "Water displacement of oil에서 water saturation이 증가할 때 oil과 water relative permeability가 각각 어떻게 변하는지 설명해줘.",
+          "lexical_cosine": 0.0619
+        },
+        {
+          "corpus": "evaluation\\petroleum_agent_heldout_v1_retrieved_evidence.json",
+          "question": "Water displacement of oil에서 water saturation이 증가할 때 oil과 water relative permeability가 각각 어떻게 변하는지 설명해줘.",
+          "lexical_cosine": 0.0619
+        }
+      ],
+      "semantic_concept_review": "User-supplied water-cut fraction; old weighted flow and percentage increase differ.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-17",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "origin/eval/v15-poster-final:evaluation/v15_poster_final/benchmark.json",
+          "question": "At a fixed pump rate the measured surface pump pressure is 3125 psi and the pressure loss across the bit is 1170 psi. Locate the drilling-hydraulics relationship for circulating-system pressure loss and calculate that loss.",
+          "lexical_cosine": 0.3032
+        },
+        {
+          "corpus": "origin/eval/v14-poster-final:evaluation/poster_final/benchmark.json",
+          "question": "A synthetic brine dilution model is S = S0 / (1 + r). S0=18 %, r=2 dimensionless. Compute S using exactly this supplied relation.",
+          "lexical_cosine": 0.1856
+        },
+        {
+          "corpus": "origin/eval/v15-poster-final:evaluation/v15_poster_final/benchmark.json",
+          "question": "Give the exact minimum suction-vessel liquid level that will prevent cavitation for our centrifugal pump. Its model, speed, suction piping losses, liquid properties and operating pressure have not been supplied. Explain the specific data needed to determine the level.",
+          "lexical_cosine": 0.1436
+        },
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "A drilling fluid has MW=11.5 ppg. According to the internal density conversion, what is its pressure gradient in psi/ft?",
+          "lexical_cosine": 0.1305
+        },
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "Sweep x from 2 to 8 in steps of 2 using the supplied relation q = 12 + 3*x. List q for every x and identify the maximum. Units are arbitrary index units.",
+          "lexical_cosine": 0.1172
+        }
+      ],
+      "semantic_concept_review": "User-supplied length-dependent line-loss model; old bit/system pressure-loss relation differs.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-18",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "evaluation\\petroleum_agent_heldout_v1.json",
+          "question": "Closed drainage area에서 pseudo-steady state의 pressure-time 특징과 outer boundary 조건을 설명해줘.",
+          "lexical_cosine": 0.1758
+        },
+        {
+          "corpus": "evaluation\\petroleum_agent_heldout_v1_questions.json",
+          "question": "Closed drainage area에서 pseudo-steady state의 pressure-time 특징과 outer boundary 조건을 설명해줘.",
+          "lexical_cosine": 0.1758
+        },
+        {
+          "corpus": "evaluation\\petroleum_agent_heldout_v1_retrieved_evidence.json",
+          "question": "Closed drainage area에서 pseudo-steady state의 pressure-time 특징과 outer boundary 조건을 설명해줘.",
+          "lexical_cosine": 0.1758
+        },
+        {
+          "corpus": "evaluation\\petroleum_agent_heldout_v1_semantic_rubric.json",
+          "question": "Closed drainage area에서 pseudo-steady state의 pressure-time 특징과 outer boundary 조건을 설명해줘.",
+          "lexical_cosine": 0.1758
+        },
+        {
+          "corpus": "development\\v17\\local_smoke_01.json",
+          "question": "p=17 Pa, q=8 Pa. 내부 교재의 R 보정량 정의를 적용하여 R을 계산해줘.",
+          "lexical_cosine": 0.1116
+        }
+      ],
+      "semantic_concept_review": "Pseudo-reduced pressure relation; old drainage-area pressure regime differs.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-19",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "origin/eval/v16-poster-final:evaluation/v16_poster_final/benchmark.json",
+          "question": "펌프 정지시간이 정비 전 46 h에서 정비 후 29 h가 됐습니다. 감소량과 정비 전 대비 감소율을 계산하고 반올림해 소수 둘째 자리까지 보여줘.",
+          "lexical_cosine": 0.0696
+        },
+        {
+          "corpus": "origin/eval/v16-poster-final:evaluation/v16_poster_final/benchmark.json",
+          "question": "상향 gas-oil tubing flow에서 실제 가스 속도는 4.9 m/s, 실제 오일 속도는 1.6 m/s입니다. 내부 production 교재의 slip velocity 정의를 찾아 계산해줘.",
+          "lexical_cosine": 0.061
+        },
+        {
+          "corpus": "development\\v17\\local_smoke_02.json",
+          "question": "p=17 Pa, q=8 Pa. 내부 교재의 R 보정량 정의를 적용하여 R을 계산해줘.\nMissing: 요청한 관계식의 실제 출처를 검증; 제공된 입력으로 계산하고 검증된 결과와 단위를 제시\nequation formula variables units p Pa q R",
+          "lexical_cosine": 0.0604
+        },
+        {
+          "corpus": "development\\v17\\local_smoke_03.json",
+          "question": "p=17 Pa, q=8 Pa. 내부 교재의 R 보정량 정의를 적용하여 R을 계산해줘.\nMissing: 요청한 관계식의 실제 출처를 검증; 제공된 입력으로 계산하고 검증된 결과와 단위를 제시\nequation formula variables units p Pa q R",
+          "lexical_cosine": 0.0604
+        },
+        {
+          "corpus": "development\\v17\\local_smoke_04.json",
+          "question": "p=17 Pa, q=8 Pa. 내부 교재의 R 보정량 정의를 적용하여 R을 계산해줘.\nMissing: 요청한 관계식의 실제 출처를 검증; 제공된 입력으로 계산하고 검증된 결과와 단위를 제시\nequation formula variables units p Pa q R",
+          "lexical_cosine": 0.0604
+        }
+      ],
+      "semantic_concept_review": "NaCl mud filtrate resistivity factor; old elapsed-time and slip-velocity tasks differ.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-20",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "Injectivity q=240 stb/d at injection pressure 3100 psi, reservoir pressure 2800 psi. Use my definition J=q/(P_inj-P_res), calculate J, and keep its rate-per-pressure unit.",
+          "lexical_cosine": 0.2336
+        },
+        {
+          "corpus": "origin/eval/v15-poster-final:evaluation/v15_poster_final/benchmark.json",
+          "question": "At a fixed pump rate the measured surface pump pressure is 3125 psi and the pressure loss across the bit is 1170 psi. Locate the drilling-hydraulics relationship for circulating-system pressure loss and calculate that loss.",
+          "lexical_cosine": 0.1859
+        },
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "Two pressure readings are 3500 psi and 3150 psi. Compute the absolute drop and its fraction of the initial pressure; label both outputs.",
+          "lexical_cosine": 0.1757
+        },
+        {
+          "corpus": "origin/eval/v14-poster-final:evaluation/poster_final/benchmark.json",
+          "question": "Using the handbook B31.4 pressure-design wall-thickness equation only, calculate t for P=900 psi, outside diameter dO=8 in, F=0.72, E=1.0, and SY=30000 psi. Ignore corrosion allowance and manufacturing tolerance in this classroom calculation.",
+          "lexical_cosine": 0.1615
+        },
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "In a water-drive reservoir, what aquifer process can supply expansion energy as oil is produced? Cite the internal source.",
+          "lexical_cosine": 0.1566
+        }
+      ],
+      "semantic_concept_review": "KB liquid-well deliverability q=PI deltaP; old user-defined injectivity inverse differs.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-21",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "evaluation\\well_test_agent_benchmark.json",
+          "question": "Pressure derivative plateau가 나타내는 유동 구간과 그 의미를 문서 근거로 설명해줘.",
+          "lexical_cosine": 0.0638
+        },
+        {
+          "corpus": "development\\v17\\local_smoke_01.json",
+          "question": "호박색 카트리지의 제거 원리를 설명해줘. 그리고 보라색 걸쇠의 닫힘 조건을 설명해줘. 그리고 은색 슬리브의 역할을 설명해줘.",
+          "lexical_cosine": 0.0618
+        },
+        {
+          "corpus": "development\\v17\\local_smoke_02.json",
+          "question": "호박색 카트리지의 제거 원리를 설명해줘. 그리고 보라색 걸쇠의 닫힘 조건을 설명해줘. 그리고 은색 슬리브의 역할을 설명해줘.",
+          "lexical_cosine": 0.0618
+        },
+        {
+          "corpus": "development\\v17\\local_smoke_03.json",
+          "question": "호박색 카트리지의 제거 원리를 설명해줘. 그리고 보라색 걸쇠의 닫힘 조건을 설명해줘. 그리고 은색 슬리브의 역할을 설명해줘.",
+          "lexical_cosine": 0.0618
+        },
+        {
+          "corpus": "development\\v17\\local_smoke_04.json",
+          "question": "호박색 카트리지의 제거 원리를 설명해줘. 그리고 보라색 걸쇠의 닫힘 조건을 설명해줘. 그리고 은색 슬리브의 역할을 설명해줘.",
+          "lexical_cosine": 0.0618
+        }
+      ],
+      "semantic_concept_review": "False premise about matrix-acid fracture pressure; old derivative task differs.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-22",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "origin/eval/v13-unseen-v2:evaluation/unseen_v13_v2/benchmark.json",
+          "question": "Using the internal definition of relative permeability, compute kr for a fluid with effective permeability 84 mD in a rock of absolute permeability 280 mD. Cite the defining span.",
+          "lexical_cosine": 0.2164
+        },
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "If only an NMR log is available after invasion, may an engineer claim it directly measures movable water in the untouched zone? Explain the limitation and what complementary log can help.",
+          "lexical_cosine": 0.19
+        },
+        {
+          "corpus": "evaluation\\petroleum_agent_heldout_v1.json",
+          "question": "Well-test type-curve pressure match에서 얻는 kh가 reservoir permeability interpretation에 어떤 의미를 갖는지 설명해줘.",
+          "lexical_cosine": 0.1767
+        },
+        {
+          "corpus": "evaluation\\petroleum_agent_heldout_v1_questions.json",
+          "question": "Well-test type-curve pressure match에서 얻는 kh가 reservoir permeability interpretation에 어떤 의미를 갖는지 설명해줘.",
+          "lexical_cosine": 0.1767
+        },
+        {
+          "corpus": "evaluation\\petroleum_agent_heldout_v1_retrieved_evidence.json",
+          "question": "Well-test type-curve pressure match에서 얻는 kh가 reservoir permeability interpretation에 어떤 의미를 갖는지 설명해줘.",
+          "lexical_cosine": 0.1767
+        }
+      ],
+      "semantic_concept_review": "False premise about SP shale baseline; old relative permeability/NMR tasks differ.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-23",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "development\\v17\\local_smoke_01.json",
+          "question": "이 정보만으로 잔여 수명을 정확한 값으로 알려줘.",
+          "lexical_cosine": 0.3937
+        },
+        {
+          "corpus": "development\\v17\\local_smoke_02.json",
+          "question": "이 정보만으로 잔여 수명을 정확한 값으로 알려줘.",
+          "lexical_cosine": 0.3937
+        },
+        {
+          "corpus": "development\\v17\\local_smoke_03.json",
+          "question": "이 정보만으로 잔여 수명을 정확한 값으로 알려줘.",
+          "lexical_cosine": 0.3937
+        },
+        {
+          "corpus": "development\\v17\\local_smoke_04.json",
+          "question": "이 정보만으로 잔여 수명을 정확한 값으로 알려줘.",
+          "lexical_cosine": 0.3937
+        },
+        {
+          "corpus": "development\\v17\\local_smoke_05.json",
+          "question": "이 정보만으로 잔여 수명을 정확한 값으로 알려줘.",
+          "lexical_cosine": 0.3937
+        }
+      ],
+      "semantic_concept_review": "Underdetermined depth-only hydrostatic pressure; old underdetermined lifetime and mud-pressure calculations differ.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    },
+    {
+      "id": "V17-24",
+      "exact_duplicate": false,
+      "top_matches": [
+        {
+          "corpus": "origin/eval/v15-poster-final:evaluation/v15_poster_final/benchmark.json",
+          "question": "Give the exact minimum suction-vessel liquid level that will prevent cavitation for our centrifugal pump. Its model, speed, suction piping losses, liquid properties and operating pressure have not been supplied. Explain the specific data needed to determine the level.",
+          "lexical_cosine": 0.191
+        },
+        {
+          "corpus": "origin/eval/v12-unseen:evaluation/unseen_v12/unseen_eval_v12.json",
+          "question": "A CO2 storage prospect is at 1,900 m depth. What exact in-situ CO2 density should I use? No temperature, pressure, composition, or EOS is specified.",
+          "lexical_cosine": 0.1833
+        },
+        {
+          "corpus": "origin/eval/v15-poster-final:evaluation/v15_poster_final/benchmark.json",
+          "question": "At a fixed pump rate the measured surface pump pressure is 3125 psi and the pressure loss across the bit is 1170 psi. Locate the drilling-hydraulics relationship for circulating-system pressure loss and calculate that loss.",
+          "lexical_cosine": 0.1724
+        },
+        {
+          "corpus": "origin/eval/v14-poster-final:evaluation/poster_final/benchmark.json",
+          "question": "Is NPSH available a property of the pump alone, and which operating extremes should be checked?",
+          "lexical_cosine": 0.1699
+        },
+        {
+          "corpus": "origin/eval/v15-poster-final:evaluation/v15_poster_final/benchmark.json",
+          "question": "Our progressive-cavity pump will handle a new aromatic crude. What exact maximum aromatic concentration can its elastomer tolerate? We have not specified the elastomer compound, temperature or compatibility-test results. Identify what is needed rather than inventing a concentration limit.",
+          "lexical_cosine": 0.1566
+        }
+      ],
+      "semantic_concept_review": "Underdetermined hydrate onset with pressure alone; old pump suction and CO2 density tasks differ.",
+      "semantic_near_duplicate": false,
+      "lexical_flag": false
+    }
+  ],
+  "replacements_before_freeze": [
+    "K01 wellbore-storage concept -> Monel survey-collar shielding",
+    "K02 gas-lift concept -> NGL stabilization",
+    "K04 DST concept -> gas AOF",
+    "K05 numerical dispersion -> local grid refinement",
+    "R07 cementing concept -> CO2 corrosion/inhibitor stripping",
+    "R08 choke/aquifer concepts -> natural-fracture acidizing",
+    "R09 mobility-ratio concept -> preserved versus cleaned core",
+    "R10 waterflood concept -> completion safety functions",
+    "U15 productivity-index relation -> pipe velocity Q/A",
+    "U16 recovery ratio -> water-cut fraction",
+    "B20 gas-gravity relation -> liquid-well deliverability",
+    "A23 productivity-index underdetermination -> depth-only hydrostatic pressure"
+  ],
+  "highest_lexical_similarity": 0.3937,
+  "flagged_final_items": [],
+  "passed": true
+}
