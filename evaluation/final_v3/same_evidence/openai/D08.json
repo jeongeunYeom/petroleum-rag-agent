@@ -1,0 +1,160 @@
+{
+  "task_id": "D08",
+  "provider": "openai",
+  "track": "same_evidence",
+  "question": "두 코어의 투과도 9 mD와 36 mD의 기하평균을 구해줘. 두 값의 곱의 제곱근만 사용하면 돼.",
+  "continuation": null,
+  "system_prompt": "Answer the petroleum-engineering request in the user's language. Be concise and state uncertainty. No tools, Python, retrieval or web access. Do not invent formulas, measurements or citations. Explicitly correct a false premise. If essential input is absent, ask for it. Cite evidence IDs only when evidence is supplied. Use only supplied KB/FIG text and the user's values for sourced engineering claims. Cite supporting IDs in square brackets. No other evidence is available.",
+  "user_prompt": "두 코어의 투과도 9 mD와 36 mD의 기하평균을 구해줘. 두 값의 곱의 제곱근만 사용하면 돼.\n\n=== Captured Agent KB/FIG text evidence ===\n[{\"evidence_id\": \"KB1\", \"document\": \"Heriot-Watt_University_-_Reservoir_Simulation.pdf\", \"page\": 227, \"chunk_id\": \"3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p227:c0\", \"kind\": \"KB\", \"excerpt\": \"8\\nSuppose that the permeability values in the simple example are jumbled up, so that \\nthere are 75 small cells of 10 mD, and 125 small cells of 100 mD.  See Figure 8.  The \\neffective permeability of this model is:\\nk\\nk\\nmD\\neff\\ng\\n=\\n=\\n=\\n=\\n=\\n×\\n+\\n×\\n\\n\\n\\n\\n+\\n\\n\\n\\n\\n10\\n10\\n10\\n42 17\\n75\\n10\\n125\\n100\\n200\\n75 250\\n200\\n1 625\\nlog(\\n)\\nlog(\\n)\\n.\\n.\\n.\\n1.3.4 Additional Averaging Methods\\nSince averaging is very quick (compared with numerical simulation), many engi-\\nneers use this technique in more complex models. Sometimes engineers increase the \\naccuracy by using power averaging.  The power average is defi ned as:\\nk\\nk\\nn\\np\\ni\\ni\\nn\\n=\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n=∑\\nα\\nα\\n1\\n1/\\n,\\n(8)\\nwhere α is the power.  The value of the power depends on the type of model, and \\nmust be calibrated against numerical simulation (Section 1.4).\\nAlso, sometimes, engineers use a combination of the arithmetic and harmonic aver-\\nages, e.g. they take the arithmetic average of the permeabilities in each column and \\nthen calculate the harmonic average of the columns.\\n1.3.5 Summary of Permeability Averaging\\nTo summarise, there are two types of simple model in which we can calculate the \\neffective permeability by averaging:\\n• Parallel layers\\n• Co\"}, {\"evidence_id\": \"KB2\", \"document\": \"Heriot-Watt_University_-_Drilling_Engineering.pdf\", \"page\": 410, \"chunk_id\": \"9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p410:c0\", \"kind\": \"KB\", \"excerpt\": \"8\\n2.2 Determination of the Laminar/Turbulent Boundary in a Newtonian Fluid:\\nReynolds showed that when circulating Newtonian fluids through pipes the onset \\nof turbulence was dependant on the following variables: \\n•\\t Pipe diameter, d,\\n• Density of fluid, r\\n• Viscosity of fluid, µ\\n• Average flow velocity, v.\\nHe also found that the onset of turbulence occurred when the following combination \\nof these variables exceeded a value of 2100\\nThis is a very significant finding since it means that the onset of turbulence can be \\npredicted for pipes of any size, and fluids of any density or viscosity, flowing at any \\nrate through the pipe.  This grouping of variables is generally termed a dimensionless \\ngroup and is known as the Reynolds number.   In field units, this equation is:\\n\\t \\t\\n\\t\\nN\\nd\\nRe = 928ρ\\nµ\\nv\\nEquation 2 Reynolds Number Equation\\n                               \\t\\n\\t\\n\\t\\n\\t\\n      \\t\\n\\t\\nwhere,\\nr  \\t=  fluid density, lbm/gal\\nv   =  mean fluid velocity, ft/s\\nd  \\t=  pipe diameter, in.\\nµ   =  fluid viscosity, cp.\\nReynolds found that as he increased the fluid velocity in the tube, the flow pattern \\nchanged from laminar to turbulent at a Reynolds number value of about 2100. \\nHowever, later investigat\"}, {\"evidence_id\": \"KB3\", \"document\": \"Heriot-Watt_University_-_Well_Test_Analysis.pdf\", \"page\": 139, \"chunk_id\": \"01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p139:c0\", \"kind\": \"KB\", \"excerpt\": \"36\\nwhere the βm are the roots of:\\n \\nJ1 (βm) Y0 (βm rDe)   -  Y1 (βm) J0 (βm rDe)    = 0     \\n(80)\\nAgain for sufficiently long times the summation is negligible and equation \\n(79) reduces to:\\n \\npD (1, tD)  =  ln rDe \\n(81)\\nor, in terms of actual variables\\n \\n=\\n−\\np\\np\\nr\\nw\\ni\\nw\\nµ\\nπ\\nqsB\\n2 kh    re\\nln\\n \\n(82)\\nIn this circumstance the inflow at the external boundary and the production \\nrate are equal, i.e. qe = qs and a true steady-state exists within the cylindrical \\nvolume.  Note that in equation (82) pi represents the pressure at the outer boundary \\nand is synonymous with pe .\\n2.2.11 SPE Field Units\\nIn the preceding treatment the equations have been presented in fundamental \\nform applicable in any system of consistent units e.g. strict metric S.I. where \\nthe basic units are:\\nProduction rate, qs  : m3/s \\nFormation thickness, h : m \\nPermeability, k : m2\\nViscosity, µ:      \\n: Ns/m2 \\nPressure,  \\np : Pa \\nRadius,  \\nr : m \\nTime                    t  : s \\nCompressibility,  \\nct : Pa-1\\nHowever most engineers prefer to work in a more practical system of units, for \\nexample SPE field units which are defined as:\\nqs \\n:  STbbl/day \\nh :  ft \\nk :  md\\nµ \\n:  cp \\np :  psia \\nr  :  ft\\nt \\n:  hr \\nct :  psia-1\\nIn\"}, {\"evidence_id\": \"KB4\", \"document\": \"Heriot_Watt_University_-_Formation_Evaluation.pdf\", \"page\": 117, \"chunk_id\": \"d3d33e53ea2478fe3729bba7019d8604095c5b6c2c2d3dc0bd7e9608a9931ebb:p117:c0\", \"kind\": \"KB\", \"excerpt\": \"2\\nLEARNING OBJECTIVES\\nHaving worked through this chapter the Student will be able to:\\nGeneral:\\n1.  \\nDetermine porosity from an acoustic, density and neutron log.\\nAcoustic Log\\n2.  \\nDescribe the Wyllie time-average equation for determination of porosity\\n  \\nand identify the variables in the equation.\\n3.  \\nDescribe the conditions in which this equation is valid, the terms in the\\n  \\nequation, and the sources of error in the use of the equation.\\n4.  \\nDescribe the empirical equation for determination of porosity and identify\\n  \\nthe variables in the equation.\\n5.  \\nDescribe the conditions in which this equation is valid, the terms in the\\n  \\nequation and the sources of error in the use of the equation.  \\n6.  \\nDescribe which of the above is the most appropriate equation to use in a\\n  \\ngiven situation.\\n7.  \\nDescribe the effects of hydrocarbon, shales, carbonates and uncompacted\\n  \\nsands on the acoustic log.\\nDensity Log\\n8.  \\nDescribe the equation for determination of porosity and identify the\\n  \\nvariables in the equation.\\n9.  \\nDescribe the conditions in which this equation is valid, the terms in the\\n  \\nequation and the sources of error in the use of the equation.\\n10.  List the density of some c\"}, {\"evidence_id\": \"KB5\", \"document\": \"Heriot-Watt_University_-_Well_Test_Analysis.pdf\", \"page\": 212, \"chunk_id\": \"01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p212:c0\", \"kind\": \"KB\", \"excerpt\": \"26\\n                        \\n∆p\\nTangents to Curve\\n(Obtained by Numerical\\nDifferentiation)\\nLn t\\nLn t\\np =\\nd( p)\\n∆\\nd(ln t)\\n. . . Local slope of\\nsemilog graph\\nMTR\\nLTR\\nETR\\nPLATEAU\\nln p\\n3.3.1. Derivative Analysis\\nFor infinite-acting radial flow, the constant rate drawdown solution to the diffusivity \\nequation is:\\n \\npD =  0.5 t  +  0.80908\\nD\\nln\\n \\n(55)\\n                                                                                                \\nDifferentiating with respect to tD gives:                                                                        \\n                                                                                                                                          \\n \\np\\ndt\\nD\\nD\\n•\\n =  dp\\n= 0.5\\nt\\nD\\nD\\n \\n(56)\\n                                                                                                                                       \\n                                                                                         \\nsince \\nd\\nt\\ndt\\nt\\nD\\nD\\nD\\n(\\n)\\nln\\n= 1\\nIn terms of real variables \\n \\np\\ndt\\nt\\n•\\n. .\\n=  dp = - q\\n2 kh\\nµ\\nπ\\n0 5 \\n(57)\\nor in field units\\n \\n =  dp\\ndt\\np\\nxq\\nkh\\nt\\n•\\n.\\n.\\n= −887 2\\n4\\n1\\nµ\\nπ\\n \\n(58)\\nFigure 14\\nDerivative log - log \\ndiagnostic\"}]",
+  "evidence": [
+    {
+      "evidence_id": "KB1",
+      "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+      "page": 227,
+      "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p227:c0",
+      "kind": "KB",
+      "excerpt": "8\nSuppose that the permeability values in the simple example are jumbled up, so that \nthere are 75 small cells of 10 mD, and 125 small cells of 100 mD.  See Figure 8.  The \neffective permeability of this model is:\nk\nk\nmD\neff\ng\n=\n=\n=\n=\n=\n×\n+\n×\n\n\n\n\n+\n\n\n\n\n10\n10\n10\n42 17\n75\n10\n125\n100\n200\n75 250\n200\n1 625\nlog(\n)\nlog(\n)\n.\n.\n.\n1.3.4 Additional Averaging Methods\nSince averaging is very quick (compared with numerical simulation), many engi-\nneers use this technique in more complex models. Sometimes engineers increase the \naccuracy by using power averaging.  The power average is defi ned as:\nk\nk\nn\np\ni\ni\nn\n=\n\n\n\n\n\n\n\n\n\n\n\n\n=∑\nα\nα\n1\n1/\n,\n(8)\nwhere α is the power.  The value of the power depends on the type of model, and \nmust be calibrated against numerical simulation (Section 1.4).\nAlso, sometimes, engineers use a combination of the arithmetic and harmonic aver-\nages, e.g. they take the arithmetic average of the permeabilities in each column and \nthen calculate the harmonic average of the columns.\n1.3.5 Summary of Permeability Averaging\nTo summarise, there are two types of simple model in which we can calculate the \neffective permeability by averaging:\n• Parallel layers\n• Co"
+    },
+    {
+      "evidence_id": "KB2",
+      "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+      "page": 410,
+      "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p410:c0",
+      "kind": "KB",
+      "excerpt": "8\n2.2 Determination of the Laminar/Turbulent Boundary in a Newtonian Fluid:\nReynolds showed that when circulating Newtonian fluids through pipes the onset \nof turbulence was dependant on the following variables: \n•\t Pipe diameter, d,\n• Density of fluid, r\n• Viscosity of fluid, µ\n• Average flow velocity, v.\nHe also found that the onset of turbulence occurred when the following combination \nof these variables exceeded a value of 2100\nThis is a very significant finding since it means that the onset of turbulence can be \npredicted for pipes of any size, and fluids of any density or viscosity, flowing at any \nrate through the pipe.  This grouping of variables is generally termed a dimensionless \ngroup and is known as the Reynolds number.   In field units, this equation is:\n\t \t\n\t\nN\nd\nRe = 928ρ\nµ\nv\nEquation 2 Reynolds Number Equation\n                               \t\n\t\n\t\n\t\n      \t\n\t\nwhere,\nr  \t=  fluid density, lbm/gal\nv   =  mean fluid velocity, ft/s\nd  \t=  pipe diameter, in.\nµ   =  fluid viscosity, cp.\nReynolds found that as he increased the fluid velocity in the tube, the flow pattern \nchanged from laminar to turbulent at a Reynolds number value of about 2100. \nHowever, later investigat"
+    },
+    {
+      "evidence_id": "KB3",
+      "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+      "page": 139,
+      "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p139:c0",
+      "kind": "KB",
+      "excerpt": "36\nwhere the βm are the roots of:\n \nJ1 (βm) Y0 (βm rDe)   -  Y1 (βm) J0 (βm rDe)    = 0     \n(80)\nAgain for sufficiently long times the summation is negligible and equation \n(79) reduces to:\n \npD (1, tD)  =  ln rDe \n(81)\nor, in terms of actual variables\n \n=\n−\np\np\nr\nw\ni\nw\nµ\nπ\nqsB\n2 kh    re\nln\n \n(82)\nIn this circumstance the inflow at the external boundary and the production \nrate are equal, i.e. qe = qs and a true steady-state exists within the cylindrical \nvolume.  Note that in equation (82) pi represents the pressure at the outer boundary \nand is synonymous with pe .\n2.2.11 SPE Field Units\nIn the preceding treatment the equations have been presented in fundamental \nform applicable in any system of consistent units e.g. strict metric S.I. where \nthe basic units are:\nProduction rate, qs  : m3/s \nFormation thickness, h : m \nPermeability, k : m2\nViscosity, µ:      \n: Ns/m2 \nPressure,  \np : Pa \nRadius,  \nr : m \nTime                    t  : s \nCompressibility,  \nct : Pa-1\nHowever most engineers prefer to work in a more practical system of units, for \nexample SPE field units which are defined as:\nqs \n:  STbbl/day \nh :  ft \nk :  md\nµ \n:  cp \np :  psia \nr  :  ft\nt \n:  hr \nct :  psia-1\nIn"
+    },
+    {
+      "evidence_id": "KB4",
+      "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+      "page": 117,
+      "chunk_id": "d3d33e53ea2478fe3729bba7019d8604095c5b6c2c2d3dc0bd7e9608a9931ebb:p117:c0",
+      "kind": "KB",
+      "excerpt": "2\nLEARNING OBJECTIVES\nHaving worked through this chapter the Student will be able to:\nGeneral:\n1.  \nDetermine porosity from an acoustic, density and neutron log.\nAcoustic Log\n2.  \nDescribe the Wyllie time-average equation for determination of porosity\n  \nand identify the variables in the equation.\n3.  \nDescribe the conditions in which this equation is valid, the terms in the\n  \nequation, and the sources of error in the use of the equation.\n4.  \nDescribe the empirical equation for determination of porosity and identify\n  \nthe variables in the equation.\n5.  \nDescribe the conditions in which this equation is valid, the terms in the\n  \nequation and the sources of error in the use of the equation.  \n6.  \nDescribe which of the above is the most appropriate equation to use in a\n  \ngiven situation.\n7.  \nDescribe the effects of hydrocarbon, shales, carbonates and uncompacted\n  \nsands on the acoustic log.\nDensity Log\n8.  \nDescribe the equation for determination of porosity and identify the\n  \nvariables in the equation.\n9.  \nDescribe the conditions in which this equation is valid, the terms in the\n  \nequation and the sources of error in the use of the equation.\n10.  List the density of some c"
+    },
+    {
+      "evidence_id": "KB5",
+      "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+      "page": 212,
+      "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p212:c0",
+      "kind": "KB",
+      "excerpt": "26\n                        \n∆p\nTangents to Curve\n(Obtained by Numerical\nDifferentiation)\nLn t\nLn t\np =\nd( p)\n∆\nd(ln t)\n. . . Local slope of\nsemilog graph\nMTR\nLTR\nETR\nPLATEAU\nln p\n3.3.1. Derivative Analysis\nFor infinite-acting radial flow, the constant rate drawdown solution to the diffusivity \nequation is:\n \npD =  0.5 t  +  0.80908\nD\nln\n \n(55)\n                                                                                                \nDifferentiating with respect to tD gives:                                                                        \n                                                                                                                                          \n \np\ndt\nD\nD\n•\n =  dp\n= 0.5\nt\nD\nD\n \n(56)\n                                                                                                                                       \n                                                                                         \nsince \nd\nt\ndt\nt\nD\nD\nD\n(\n)\nln\n= 1\nIn terms of real variables \n \np\ndt\nt\n•\n. .\n=  dp = - q\n2 kh\nµ\nπ\n0 5 \n(57)\nor in field units\n \n =  dp\ndt\np\nxq\nkh\nt\n•\n.\n.\n= −887 2\n4\n1\nµ\nπ\n \n(58)\nFigure 14\nDerivative log - log \ndiagnostic"
+    }
+  ],
+  "initial_answer": "기하평균은 \\(\\sqrt{9 \\times 36} = \\sqrt{324} = 18\\) mD입니다.",
+  "answer": "기하평균은 \\(\\sqrt{9 \\times 36} = \\sqrt{324} = 18\\) mD입니다.",
+  "model_id": "gpt-5.4-mini-2026-03-17",
+  "input_tokens": 2437,
+  "output_tokens": 71,
+  "response_id": "resp_0715b253137f9c52016acb35ac116087d0b59a846e84ca9298",
+  "provider_payload": {
+    "id": "resp_0715b253137f9c52016acb35ac116087d0b59a846e84ca9298",
+    "object": "response",
+    "created_at": 1791702444,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791702445,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "Answer the petroleum-engineering request in the user's language. Be concise and state uncertainty. No tools, Python, retrieval or web access. Do not invent formulas, measurements or citations. Explicitly correct a false premise. If essential input is absent, ask for it. Cite evidence IDs only when evidence is supplied. Use only supplied KB/FIG text and the user's values for sourced engineering claims. Cite supporting IDs in square brackets. No other evidence is available.",
+    "max_output_tokens": 1800,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-mini-2026-03-17",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_0715b253137f9c52016acb35ac731087d08e42c7e3b5f1a110",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyzWt4lNkDqOKBm4bgSh1WyoEY8CiO4bVL9_dcvuB2tqso6b2YCUGy9UUIjTY8CAxMIUN4VDgsJrp0nh50BE2-9w0EhOU8U0_1oKP38xYf-vy7M7MWTZsWJ5JWX2JW_SgTY_SR2NA3hyre188w0CtW49fGiUIw5ImvHnBUH9S4x8EhGNwpQKPLZIL64KQlqFJOLkW6Q-6vHovjfeyBXEBApuiRQ0fE7qUr8i2LkHDl3bfg5JqtHD4mx7Sn8jVBQac2gofWzsUNP5rTBg5sbCfUJ1Y3nYdSD4ieKne3-nny6s9oxlA94Mv9IeRw4aBs_bJvukOppRmwUt-296afMpfz9GLqouwHQaxCPfL-FYEbB7ahv_bYLyCS15xthhRb3Qnoy4QIEVano7wnnabOmWCD34KmnLI2wjciKFvm2ytu-jU66iFI5VjXieR3teqQg_BUT-qGgbwb8L1GLLlMlcqZTRsIKHaCcN1fC1hUnSEpnWmmKUZahNLMKSaCZ8-xt7eIxo6tEqfjoiRhC50fKoH1ljCVRkbEWi_R3U5QIyhqcpGhk4RRdRaoEm2nmPH-BleHGXxqBecKrFNiwrE2dSw5gWLRlb6IZkNN_16sRUWo6h0lFxwr7Tlzaebs7UmODSPdUD_HU2NWb88py2yfqTPfReLPSvdXl-kCHJMGWorCma3PLUVsvQhReCaoZcp-GYXxl1NTaI30AoIa70ZjIx1Qe5vtW07pbjkdWE0GHmiaN8jPrA-R7Af6QK2pOIoZhGM7mVadPTeiHm3qy1WL2NOQd10T1whEQ_foVPCeNiuIJFS4reAvc8hD6PqZbH7K8r9aXRBDG0CwpsB_Y7faEYl51LdN4fvFP1p41gLzufL0jkD6sWj8uh1pl32HC-CYbXPtvPY5XAFdgJAl-DdRtsFwoTsJnSKsUP0ElMy-bACGtrcuItCgeBLQ-ane6Bx_77NJlSAbt8hFYIgCHGPd_jWzy-O729gBOuMPLJJ2m6WfLWFQsorvL5rw16D66bSqHe0w2Wcsmb2wQ5c5cYGF7hSsunj0uvNp9I99Rcm2wdTNQOjHU8ursuBbfOujS6TwxSFh_WLzKkD1KzPC7IYfgJHe3BtQDnyZ_fqsm_2s2Cuuwgd8l09blBwti9rmcJ2A2U3ToVOxSd9xrgY1qC8J8-gSAKDwGHggyr2xPuB2-xvhaEEAiDDM1T9V2xze1KQqMfPycaKHO8feTrl6yQYmQYCNqF1t852MF6sSMkS-V0LIGyDasoocilpsSN1zWJkGZkNy6X7vpfVjmGuLMs1-Q5VmfmmxiFXmisGLuM7d7N-3pU4j7Of9HHWNhUAI_-E3s9kwmKi6mh3nR-eeT_v98kI6IgBpTrQGZOaRBoOwIzXzr4GUe2Q3JaV4bg5Ax6xyCK0loZM9119H4CBkGa-Ojybts_xj4tK3vtE258Z_gAnXudijfQ4CCAOEFBTlyDvzEUzVkMixQpn4a_MmA6Y5RzcCQXvM_c3dR48msCI5Qz1Sj7tpmAUPVkezAP0QSyaMRV3uSrFyXnc0lezEM46a8stFKqYYt4hSZHhc_zijqck9p3KNj4w9-z6A33REAKCOdBelWwcfS83WWA7O-M-O-Py8sFCDj2q-knev4WfdAOaRH48oGQBmgketiaWPFYKcQMcHXRpb1dVyI71JmsV5KJqiOxGOC8SraqLHi8Vvmglv_Hjr1TqMZqMmnHxIvVnodRhTA5JyjIv315Cs1akZ4OlC59WRF0GjdIvoI_Hf_R8NhDT356levrIlUpE9LSb_tYJvaqlYopsSL_G-Ckizk2aIrddUSKT0vlWgXxsAqzzgEdxPqJGu7oFVZV9Lm2HidzUPEnIuneO5hr6TjFNdW7ivnhtcw==",
+        "summary": []
+      },
+      {
+        "id": "msg_0715b253137f9c52016acb35ac9fa887d085471765e8b4ba0a",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "기하평균은 \\(\\sqrt{9 \\times 36} = \\sqrt{324} = 18\\) mD입니다."
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 2437,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 71,
+      "output_tokens_details": {
+        "reasoning_tokens": 35
+      },
+      "total_tokens": 2508
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "wall_seconds": 1.44
+}

@@ -1,0 +1,122 @@
+{
+  "task_id": "L16",
+  "prompt_version": "final-v3-reviewer-3-local-gemma-fraction",
+  "reviewer_model_id": "gemma4:latest",
+  "mapping": {
+    "A": "openai_same_evidence",
+    "B": "qwen_same_evidence",
+    "C": "qwen_closed_book",
+    "D": "agent",
+    "E": "openai_closed_book"
+  },
+  "scores_by_track": {
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": false,
+      "safe_refusal_correct": false,
+      "citation_semantic_support": 1.0,
+      "note": "Accurately lists the two components (tubing friction loss and surface flowline back pressure) as supported by KB1."
+    },
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": false,
+      "safe_refusal_correct": false,
+      "citation_semantic_support": 1.0,
+      "note": "Accurately lists the two components (friction loss of production tubing and surface flow line back pressure) as supported by KB1."
+    },
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        false,
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 1,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": false,
+      "safe_refusal_correct": false,
+      "citation_semantic_support": 0.0,
+      "note": "Incorrectly identifies the components as 'friction head' and 'velocity head'. KB1 explicitly lists 'Friction loss of production tubing' and 'Surface flow line back pressure' as the two components besides hydrostatic head."
+    },
+    "agent": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": false,
+      "safe_refusal_correct": false,
+      "citation_semantic_support": 1.0,
+      "note": "Accurately lists the two components (friction loss of production tubing and surface flow line back pressure) as supported by KB1."
+    },
+    "openai_closed_book": {
+      "claim_verdicts": [
+        false,
+        false
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": false,
+      "safe_refusal_correct": true,
+      "citation_semantic_support": 0.0,
+      "note": "While the answer correctly identifies the general concepts (friction loss and surface/wellhead backpressure), it does not cite the specific components listed in the gold source (KB1) and is less direct than A, B, or D."
+    }
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"claim_verdicts\": [true,true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": null, \"unit_accuracy\": null, \"formula_accuracy\": null, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": 1.0, \"note\": \"Accurately lists the two components (tubing friction loss and surface flowline back pressure) as supported by KB1.\"}, \"B\":{\"claim_verdicts\": [true,true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": null, \"unit_accuracy\": null, \"formula_accuracy\": null, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": 1.0, \"note\": \"Accurately lists the two components (friction loss of production tubing and surface flow line back pressure) as supported by KB1.\"}, \"C\":{\"claim_verdicts\": [false,false], \"partial_or_better\": false, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 1, \"numeric_accuracy\": null, \"unit_accuracy\": null, \"formula_accuracy\": null, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": 0.0, \"note\": \"Incorrectly identifies the components as 'friction head' and 'velocity head'. KB1 explicitly lists 'Friction loss of production tubing' and 'Surface flow line back pressure' as the two components besides hydrostatic head.\"}, \"D\":{\"claim_verdicts\": [true,true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": null, \"unit_accuracy\": null, \"formula_accuracy\": null, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": 1.0, \"note\": \"Accurately lists the two components (friction loss of production tubing and surface flow line back pressure) as supported by KB1.\"}, \"E\":{\"claim_verdicts\": [false,false], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": null, \"unit_accuracy\": null, \"formula_accuracy\": null, \"false_premise_handled\": false, \"safe_refusal_correct\": true, \"citation_semantic_support\": 0.0, \"note\": \"While the answer correctly identifies the general concepts (friction loss and surface/wellhead backpressure), it does not cite the specific components listed in the gold source (KB1) and is less direct than A, B, or D.\"}}\n\n}",
+  "parse_attempts": 1,
+  "prior_attempts": [],
+  "wall_seconds": 7.458,
+  "input_tokens": 8172,
+  "output_tokens": 714,
+  "provider_payload": {
+    "model": "gemma4:latest",
+    "created_at": "2026-10-11T07:17:44.7024948Z",
+    "message": {
+      "role": "assistant",
+      "content": "{\"scores\":{\"A\":{\"claim_verdicts\": [true,true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": null, \"unit_accuracy\": null, \"formula_accuracy\": null, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": 1.0, \"note\": \"Accurately lists the two components (tubing friction loss and surface flowline back pressure) as supported by KB1.\"}, \"B\":{\"claim_verdicts\": [true,true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": null, \"unit_accuracy\": null, \"formula_accuracy\": null, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": 1.0, \"note\": \"Accurately lists the two components (friction loss of production tubing and surface flow line back pressure) as supported by KB1.\"}, \"C\":{\"claim_verdicts\": [false,false], \"partial_or_better\": false, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 1, \"numeric_accuracy\": null, \"unit_accuracy\": null, \"formula_accuracy\": null, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": 0.0, \"note\": \"Incorrectly identifies the components as 'friction head' and 'velocity head'. KB1 explicitly lists 'Friction loss of production tubing' and 'Surface flow line back pressure' as the two components besides hydrostatic head.\"}, \"D\":{\"claim_verdicts\": [true,true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": null, \"unit_accuracy\": null, \"formula_accuracy\": null, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": 1.0, \"note\": \"Accurately lists the two components (friction loss of production tubing and surface flow line back pressure) as supported by KB1.\"}, \"E\":{\"claim_verdicts\": [false,false], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": null, \"unit_accuracy\": null, \"formula_accuracy\": null, \"false_premise_handled\": false, \"safe_refusal_correct\": true, \"citation_semantic_support\": 0.0, \"note\": \"While the answer correctly identifies the general concepts (friction loss and surface/wellhead backpressure), it does not cite the specific components listed in the gold source (KB1) and is less direct than A, B, or D.\"}}\n\n}"
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 7455398800,
+    "load_duration": 5325800,
+    "prompt_eval_count": 8172,
+    "prompt_eval_cached_count": 0,
+    "prompt_eval_duration": 1252684000,
+    "eval_count": 714,
+    "eval_duration": 6041576000
+  }
+}

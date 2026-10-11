@@ -1,0 +1,119 @@
+{
+  "task_id": "C01",
+  "provider": "openai",
+  "track": "same_evidence",
+  "question": "내부 ESP 교재의 PIn 식으로 pump intake pressure를 계산해줘. Pr=2500 psi, Q=900 stb/d는 알지만 productivity index PI는 아직 측정값을 받지 못했어.",
+  "continuation": "PI는 1.8 stb/d/psi로 측정됐습니다.",
+  "system_prompt": "Answer the petroleum-engineering request in the user's language. Be concise and state uncertainty. No tools, Python, retrieval or web access. Do not invent formulas, measurements or citations. Explicitly correct a false premise. If essential input is absent, ask for it. Cite evidence IDs only when evidence is supplied. Use only supplied KB/FIG text and the user's values for sourced engineering claims. Cite supporting IDs in square brackets. No other evidence is available.",
+  "user_prompt": "내부 ESP 교재의 PIn 식으로 pump intake pressure를 계산해줘. Pr=2500 psi, Q=900 stb/d는 알지만 productivity index PI는 아직 측정값을 받지 못했어.\n\n=== Captured Agent KB/FIG text evidence ===\n[]",
+  "evidence": [],
+  "initial_answer": "PI 값이 없어서 **PIn을 숫자로 계산할 수는 없습니다.**  \n또한, **PIn을 Pr와 Q만으로 바로 계산할 수 있다는 전제는 틀렸습니다.** 보통은 **PI가 필요**합니다.\n\n교재 식이 일반적인 형태라면:\n\n**PIn = Pr − Q / PI**\n\n따라서 지금은:\n\n**PIn = 2500 − 900 / PI**  \\[psi\\]\n\n즉, **PI(예: stb/d/psi)** 값이 있어야 최종 PIn을 구할 수 있습니다.\n\nPI 값을 주시면 바로 계산해드릴게요.",
+  "answer": "주어진 값으로 계산하면:\n\n**PIn = Pr − Q / PI**  \n**PIn = 2500 − 900 / 1.8**\n\n**900 / 1.8 = 500 psi** 이므로,\n\n**PIn = 2500 − 500 = 2000 psi**\n\n따라서 **pump intake pressure(PIn) = 2000 psi** 입니다.",
+  "model_id": "gpt-5.4-mini-2026-03-17",
+  "input_tokens": 325,
+  "output_tokens": 96,
+  "response_id": "resp_0e99c9e5a0e602a0016acb361f033487d081a68f320935602b",
+  "provider_payload": {
+    "id": "resp_0e99c9e5a0e602a0016acb361f033487d081a68f320935602b",
+    "object": "response",
+    "created_at": 1791702559,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791702559,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "Answer the petroleum-engineering request in the user's language. Be concise and state uncertainty. No tools, Python, retrieval or web access. Do not invent formulas, measurements or citations. Explicitly correct a false premise. If essential input is absent, ask for it. Cite evidence IDs only when evidence is supplied. Use only supplied KB/FIG text and the user's values for sourced engineering claims. Cite supporting IDs in square brackets. No other evidence is available.",
+    "max_output_tokens": 1800,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-mini-2026-03-17",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_0e99c9e5a0e602a0016acb361f71cc87d0b952ba874c699747",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyzYfPbWKwowHYsBUm6HNZDcTnwz2UvCfpS8QnLfedQOuDlFVGTPI6NTK6NWZOhlFK7hPHtWEHeEOmG8tcBfZ9fKmB1nx0ZVhvQUkYnmCn8mdBO9-OGPLnflMNXPqp9PJ3Mz21rs_7iw00aka5zGguk-V1KjIHBZwqjZy61IwFBi0ZJrpdfsqXPo9iqyJL7PTkvofSsYXa09948GiP2H-mkRS0LaP0Cf3HUnHCYnk04RmV5oV7wU_pwBSRol2woJ-tsSyyAzy1GLPW23p2xV_9vbUdC8IyiRsRBOS5UFvuzPo8URCmRqFEFZU3LkqOc9GCTHvF-iISbuZpUPY0bfJlJGYWbjL0kW_vtUe4iSrq8UuoBF1SAq2cXwH0HwNW26IKGV0dDTyapg_-UaTTbV_YrcKLql4aMKnOoQkpL7fZIsBScpehVJ4q4d0KBqPZ-1LxA5_CwIFp71qBtI8NsNSTgCNzthm30QlSG3HoP3avtt5ixw6mbDQCB27SMU6BG1SkCvB_54OV57gxvmC2XN8aJUIxN9MX_JwwMrzdYMoAQqcZJUQfDOWA3Dgd-ffa6g-nfbOMBQDnqKmsUWNVB-uhyU2P2K825qOFAVnDOjWeKSNfoQ2gHfotkfOPOqfw0LO63SvFTq5FM-7FN5I40CnhneGnUuXFfW3co-pbcGF2i2Kx5ToGgGNJJcwUTrRmZc56eMMq32rDPz3M58BhPQMh_jcP--FfDnEbjiWWguI5yDl7GW56QNTjOQvzEg3k1hmK-y_AUiVtzXz7cwdAi2rDsf2rRvYIFtJCVEj87qw-KA4JVxNL62lEwXK8V33caNKRfHzJ14IqZaJ8GZl5UusM4ix_UvZG6HyhxHF1YFCK26T6cM5zyz7KH8hW3ra2vE1Yf7zX6p5blaiVzOJyTLE3tZ99zfC380rqD-ZjmvdkZuNwLJTHbdXJRJmV7IPRSStJmCTkIHswfA0hKivaJl1dmaryXppy8RJ7zRo01EEQjEXAsOg8yjQ8N_W_UiglilFeGz0AVxFYEiqtAHA3r03r1ma84iFQUUYz6Ay3EYyFTxvlCAHrvcSiI0bj3VrnN13U0OE6tj8IEjeplCfcXzFfXguAsB7711hfri6D8QHxD8V8hIEAXMuNxz-_y-SRrwwkbl__5jarQfqVty11yeNC_zD-iVtFSZkN4xUdgg0KAeH2k7_gs1U373iMRHijAhOCCf9VyOrcIXgujpA7h54oMW7DjPQxNHjp9FuPOc6yYWQI6waC9y_rB8cVbXjEWDcC7PQ2e-a13w1q-cxWRVWzT83ua8HIQ7HKBAXzVdmXKt6OBa_6tYM9sifBFRkih7kQRnS4SxK4Tc51zLW5YMAi-dSC2de9v4rjWEBk8P0oj7k6N-_viBLpsCGMnqsUbMhDsGeituREuEauQAOWSS3uvLayF9QcZGya5B3ZWxz1bMLJ868HHdBftMb_ntEnS4v3CbcpzJ_D3KfBb6TlUInsNEe_lFs8dbegpUFByfCNXSDeUjSAJWaW1WCp8gm5JBiQCBg",
+        "summary": []
+      },
+      {
+        "id": "msg_0e99c9e5a0e602a0016acb361f77dc87d0b09c8ff0ab3abbf9",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "주어진 값으로 계산하면:\n\n**PIn = Pr − Q / PI**  \n**PIn = 2500 − 900 / 1.8**\n\n**900 / 1.8 = 500 psi** 이므로,\n\n**PIn = 2500 − 500 = 2000 psi**\n\n따라서 **pump intake pressure(PIn) = 2000 psi** 입니다."
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 325,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 96,
+      "output_tokens_details": {
+        "reasoning_tokens": 7
+      },
+      "total_tokens": 421
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "wall_seconds": 3.433
+}

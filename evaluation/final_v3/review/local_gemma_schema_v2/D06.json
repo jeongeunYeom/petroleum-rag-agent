@@ -1,0 +1,117 @@
+{
+  "task_id": "D06",
+  "prompt_version": "final-v3-reviewer-3-local-gemma-fraction",
+  "reviewer_model_id": "gemma4:latest",
+  "mapping": {
+    "A": "openai_closed_book",
+    "B": "agent",
+    "C": "qwen_closed_book",
+    "D": "openai_same_evidence",
+    "E": "qwen_same_evidence"
+  },
+  "scores_by_track": {
+    "openai_closed_book": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": false,
+      "safe_refusal_correct": false,
+      "citation_semantic_support": null,
+      "note": "The calculation (40 + (80 - 40) * 0.5 = 60) is mathematically correct for linear interpolation at the midpoint, matching the expected result."
+    },
+    "agent": {
+      "claim_verdicts": [
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": false,
+      "unit_accuracy": false,
+      "formula_accuracy": false,
+      "false_premise_handled": false,
+      "safe_refusal_correct": true,
+      "citation_semantic_support": null,
+      "note": "The answer provided no calculation or result, only a statement that no evidence was found."
+    },
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": false,
+      "safe_refusal_correct": false,
+      "citation_semantic_support": null,
+      "note": "The calculation (40 + 500 * 0.04 = 60) is mathematically correct for linear interpolation, matching the expected result."
+    },
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": false,
+      "safe_refusal_correct": false,
+      "citation_semantic_support": null,
+      "note": "The calculation ((40 + 80) / 2 = 60) is mathematically correct for linear interpolation at the midpoint, matching the expected result."
+    },
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 1,
+      "numeric_accuracy": false,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": false,
+      "safe_refusal_correct": false,
+      "citation_semantic_support": null,
+      "note": "The calculation for the temperature at 1500 m is incorrect (52 °C instead of 60 °C). The formula used is correct, but the arithmetic is flawed."
+    }
+  },
+  "raw_review": "{\"scores\":{\"A\":{\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": null, \"note\": \"The calculation (40 + (80 - 40) * 0.5 = 60) is mathematically correct for linear interpolation at the midpoint, matching the expected result.\"}, \"B\":{\"claim_verdicts\": [false], \"partial_or_better\": false, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": false, \"unit_accuracy\": false, \"formula_accuracy\": false, \"false_premise_handled\": false, \"safe_refusal_correct\": true, \"citation_semantic_support\": null, \"note\": \"The answer provided no calculation or result, only a statement that no evidence was found.\"}, \"C\":{\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": null, \"note\": \"The calculation (40 + 500 * 0.04 = 60) is mathematically correct for linear interpolation, matching the expected result.\"}, \"D\":{\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": null, \"note\": \"The calculation ((40 + 80) / 2 = 60) is mathematically correct for linear interpolation at the midpoint, matching the expected result.\"}, \"E\":{\"claim_verdicts\": [false], \"partial_or_better\": false, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 1, \"numeric_accuracy\": false, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": null, \"note\": \"The calculation for the temperature at 1500 m is incorrect (52 °C instead of 60 °C). The formula used is correct, but the arithmetic is flawed.\"}}\n}",
+  "parse_attempts": 1,
+  "prior_attempts": [],
+  "wall_seconds": 6.498,
+  "input_tokens": 4297,
+  "output_tokens": 682,
+  "provider_payload": {
+    "model": "gemma4:latest",
+    "created_at": "2026-10-11T07:18:27.2703477Z",
+    "message": {
+      "role": "assistant",
+      "content": "{\"scores\":{\"A\":{\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": null, \"note\": \"The calculation (40 + (80 - 40) * 0.5 = 60) is mathematically correct for linear interpolation at the midpoint, matching the expected result.\"}, \"B\":{\"claim_verdicts\": [false], \"partial_or_better\": false, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": false, \"unit_accuracy\": false, \"formula_accuracy\": false, \"false_premise_handled\": false, \"safe_refusal_correct\": true, \"citation_semantic_support\": null, \"note\": \"The answer provided no calculation or result, only a statement that no evidence was found.\"}, \"C\":{\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": null, \"note\": \"The calculation (40 + 500 * 0.04 = 60) is mathematically correct for linear interpolation, matching the expected result.\"}, \"D\":{\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": null, \"note\": \"The calculation ((40 + 80) / 2 = 60) is mathematically correct for linear interpolation at the midpoint, matching the expected result.\"}, \"E\":{\"claim_verdicts\": [false], \"partial_or_better\": false, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 1, \"numeric_accuracy\": false, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": null, \"note\": \"The calculation for the temperature at 1500 m is incorrect (52 °C instead of 60 °C). The formula used is correct, but the arithmetic is flawed.\"}}\n}"
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 6495354700,
+    "load_duration": 4415600,
+    "prompt_eval_count": 4297,
+    "prompt_eval_cached_count": 0,
+    "prompt_eval_duration": 680983000,
+    "eval_count": 682,
+    "eval_duration": 5615954000
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "task_id": "K05",
+  "prompt_version": "final-v3-reviewer-3-local-gemma-fraction",
+  "reviewer_model_id": "gemma4:latest",
+  "mapping": {
+    "A": "openai_same_evidence",
+    "B": "openai_closed_book",
+    "C": "qwen_closed_book",
+    "D": "qwen_same_evidence",
+    "E": "agent"
+  },
+  "scores_by_track": {
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": false,
+      "safe_refusal_correct": false,
+      "citation_semantic_support": 1.0,
+      "note": "Correctly identifies the formula Pc = Pe - Pi and calculates the result as 800 psi, matching the gold source formula (KB1)."
+    },
+    "openai_closed_book": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": false,
+      "safe_refusal_correct": false,
+      "citation_semantic_support": 0.0,
+      "note": "Correctly identifies the formula and calculates the result (800 psi). However, it does not cite the source material, and the claim verdict relies on the general knowledge derived from the source material, not explicit citation."
+    },
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": false,
+      "safe_refusal_correct": false,
+      "citation_semantic_support": 0.0,
+      "note": "Correctly identifies the formula and calculates the result (800 psi). However, it does not cite the source material, and the claim verdict relies on the general knowledge derived from the source material, not explicit citation."
+    },
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": false,
+      "safe_refusal_correct": false,
+      "citation_semantic_support": 1.0,
+      "note": "Correctly identifies the formula, calculates the result (800 psi), and cites the correct source (KB1)."
+    },
+    "agent": {
+      "claim_verdicts": [
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": false,
+      "unit_accuracy": false,
+      "formula_accuracy": false,
+      "false_premise_handled": false,
+      "safe_refusal_correct": true,
+      "citation_semantic_support": 0.0,
+      "note": "Failed to answer the calculation question, although it correctly identified the relevant formula in its evidence review."
+    }
+  },
+  "raw_review": "{\"scores\": {\"A\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": 1.0, \"note\": \"Correctly identifies the formula Pc = Pe - Pi and calculates the result as 800 psi, matching the gold source formula (KB1).\"}, \"B\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": 0.0, \"note\": \"Correctly identifies the formula and calculates the result (800 psi). However, it does not cite the source material, and the claim verdict relies on the general knowledge derived from the source material, not explicit citation.\"}, \"C\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": 0.0, \"note\": \"Correctly identifies the formula and calculates the result (800 psi). However, it does not cite the source material, and the claim verdict relies on the general knowledge derived from the source material, not explicit citation.\"}, \"D\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": 1.0, \"note\": \"Correctly identifies the formula, calculates the result (800 psi), and cites the correct source (KB1).\"}, \"E\": {\"claim_verdicts\": [false], \"partial_or_better\": false, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": false, \"unit_accuracy\": false, \"formula_accuracy\": false, \"false_premise_handled\": false, \"safe_refusal_correct\": true, \"citation_semantic_support\": 0.0, \"note\": \"Failed to answer the calculation question, although it correctly identified the relevant formula in its evidence review.\"}}\n}",
+  "parse_attempts": 1,
+  "prior_attempts": [],
+  "wall_seconds": 7.831,
+  "input_tokens": 9251,
+  "output_tokens": 705,
+  "provider_payload": {
+    "model": "gemma4:latest",
+    "created_at": "2026-10-11T07:19:38.0610826Z",
+    "message": {
+      "role": "assistant",
+      "content": "{\"scores\": {\"A\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": 1.0, \"note\": \"Correctly identifies the formula Pc = Pe - Pi and calculates the result as 800 psi, matching the gold source formula (KB1).\"}, \"B\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": 0.0, \"note\": \"Correctly identifies the formula and calculates the result (800 psi). However, it does not cite the source material, and the claim verdict relies on the general knowledge derived from the source material, not explicit citation.\"}, \"C\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": 0.0, \"note\": \"Correctly identifies the formula and calculates the result (800 psi). However, it does not cite the source material, and the claim verdict relies on the general knowledge derived from the source material, not explicit citation.\"}, \"D\": {\"claim_verdicts\": [true], \"partial_or_better\": true, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": true, \"unit_accuracy\": true, \"formula_accuracy\": true, \"false_premise_handled\": false, \"safe_refusal_correct\": false, \"citation_semantic_support\": 1.0, \"note\": \"Correctly identifies the formula, calculates the result (800 psi), and cites the correct source (KB1).\"}, \"E\": {\"claim_verdicts\": [false], \"partial_or_better\": false, \"unsupported_claim_count\": 0, \"hallucination\": false, \"engineering_contradiction_count\": 0, \"numeric_accuracy\": false, \"unit_accuracy\": false, \"formula_accuracy\": false, \"false_premise_handled\": false, \"safe_refusal_correct\": true, \"citation_semantic_support\": 0.0, \"note\": \"Failed to answer the calculation question, although it correctly identified the relevant formula in its evidence review.\"}}\n}"
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 7809682300,
+    "load_duration": 5509700,
+    "prompt_eval_count": 9251,
+    "prompt_eval_cached_count": 0,
+    "prompt_eval_duration": 1427044000,
+    "eval_count": 705,
+    "eval_duration": 6173934000
+  }
+}

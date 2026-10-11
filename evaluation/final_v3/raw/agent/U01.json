@@ -1,0 +1,622 @@
+{
+  "task_id": "U01",
+  "model_id": "qwen3:8b",
+  "run_id": "GR-20261011-065244-EDFCAB",
+  "initial_response": {
+    "run_id": "GR-20261011-065244-EDFCAB",
+    "topic": "Casing 외경이 9⅝ in라는 정보만으로 이 pipe의 정확한 burst rating을 psi로 확정해줘. Grade나 wall thickness 자료는 없다.",
+    "goal": "Casing 외경이 9⅝ in라는 정보만으로 이 pipe의 정확한 burst rating을 psi로 확정해줘. Grade나 wall thickness 자료는 없다.",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "insufficient_evidence",
+    "final_answer": "검색된 자료에서 답변을 뒷받침할 직접 근거를 확인하지 못했습니다.",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 0.75,
+    "goal_coverage_percent": 75.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "2d2be6fad90808f056bccfb4cb669786eea9bea914f677679b16052678e0bfa6",
+    "criteria": [
+      {
+        "criterion_id": "C1",
+        "status": "met",
+        "reason": "인용된 근거와 검증된 계산으로 조건을 충족했습니다.",
+        "supporting_evidence": [
+          "KB3",
+          "KB2",
+          "KB1",
+          "KB4",
+          "KB5"
+        ]
+      },
+      {
+        "criterion_id": "C2",
+        "status": "partial",
+        "reason": "계산 결과가 아직 검증되지 않았습니다.",
+        "supporting_evidence": [
+          "KB3",
+          "KB2",
+          "KB1",
+          "KB4",
+          "KB5"
+        ]
+      }
+    ],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "Burst rating cannot be determined solely based on casing outer diameter (9⅝ in) without additional information such as grade and wall thickness.",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "The absence of grade and wall thickness data precludes the calculation of a precise burst rating in psi.",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 2,
+    "current_iteration": 2,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "completed",
+        "reason_code": "source_evidence_needed",
+        "started_at": "2026-10-11T06:52:46.287816Z",
+        "finished_at": "2026-10-11T06:52:50.266307Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "query": "Casing 외경이 9⅝ in라는 정보만으로 이 pipe의 정확한 burst rating을 psi로 확정해줘. Grade나 wall thickness 자료는 없다.\nMissing: Burst rating cannot be determined solely based on casing outer diameter (9⅝ in) without additional information such as grade and wall thickness.; The absence of grade and wall thickness data precludes the calculation of a precise burst rating in psi.",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "verify",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "completed",
+        "reason_code": "verify_current_support",
+        "started_at": "2026-10-11T06:52:50.302151Z",
+        "finished_at": "2026-10-11T06:53:02.259520Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.75,
+        "failure_reason": null,
+        "details": {
+          "engineering_validation_passed": true,
+          "goal_achieved": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-STOP-2",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "insufficient_evidence",
+        "started_at": "2026-10-11T06:53:02.286403Z",
+        "finished_at": "2026-10-11T06:53:02.286403Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.75,
+        "coverage_after": 0.75,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "EFACT1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "met",
+          "C2": "partial"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "EFACT1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "Grade information is missing, which is essential for determining the yield strength of the casing material.",
+          "Wall thickness information is missing, which is essential for calculating the burst rating using the Barlow equation."
+        ],
+        "coverage": 0.75,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "met",
+          "C2": "partial"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "EFACT1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "Grade information is missing, which is essential for determining the yield strength of the casing material.",
+          "Wall thickness information is missing, which is essential for calculating the burst rating using the Barlow equation."
+        ],
+        "coverage": 0.75,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+        "page": 499,
+        "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p499:c0",
+        "score": 0.0305789,
+        "excerpt": "1 in. of wall thickness to achieve a suitable design without resorting to the use of ultrahigh-\nstrength  pipe.  As  an  example,  9⅞-in.  casing  can  usually  be  designed  properly  if  8⅝-in.  drift\ndiameters are allowed.\nHole-geometry-selection  approach  may  dictate  the  casing  drift  diameter  as  the  controlling\ncriterion. The options are as follows:\n• Try to design the pipe under the specific drift and OD conditions.\n• Use high-strength materials.\n• Use special drift pipe available from some manufacturers.\n• As a last resort, pipe manufacturers can prepare a special pipe design based on minimum\ndrift requirements by enlarging the wall thickness and OD.\nThe  fourth  option  is  occasionally  required  in  hydrogen  sulfide  environments  where  low-\nstrength metals must be used.\nCoupling Selection. Pipe  couplings  are  generally  designed  to  satisfy  requirements  such  as\nburst, collapse, tension, and sealing effectiveness. However, coupling diameters may be a de-\nsign guideline in some wells. Table 11.5 shows the OD of various types of couplings and pipe\nsizes. American Petroleum Inst. (API) couplings are normally 1 in. larger than the pipe in sizes\ngreater than 7⅝"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+        "page": 296,
+        "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p296:c0",
+        "score": 0.01639344,
+        "excerpt": "7.5.1 Mechanical Properties. Each mechanical property of casing and tubing is discussed next.\nBurst Strength. If casing is subjected to internal pressure higher than external, it is said that\ncasing is exposed to burst pressure. Burst pressure conditions occur during well control opera-\ntions, integrity tests, and squeeze cementing. The burst strength of the pipe body is determined\nby the internal yield pressure formula found in API Bull. 5C3, Formulas and Calculations for\nCasing, Tubing, Drillpipe, and Line Pipe Properties.1\nPB = 0.875\n2Ypt\nD\n, .......................................................... (7.1)\nwhere\nPB = minimum burst pressure, psi,\nYp = minimum yield strength, psi,\nFig. 7.1—Typical casing program.\nChapter 7—Casing Design\nII-289\nSHORTMAN UTT\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 8\nChapter 6"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+        "page": 297,
+        "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p297:c0",
+        "score": 0.01612903,
+        "excerpt": "t = nominal wall thickness, in.,\nand\nD = nominal outside pipe diameter, in.\nThis equation, commonly known as the Barlow equation, calculates the internal pressure at\nwhich  the  tangential  (or  hoop)  stress  at  the  inner  wall  of  the  pipe  reaches  the  yield  strength\n(YS)  of  the  material.  The  expression  can  be  derived  from  the  Lamé  equation  for  tangential\nstress by making the thin-wall assumption that D/t >> 1. Most casing used in the oilfield has a\nD/t ratio between 15 and 25. The factor of 0.875 appearing in the equation represents the allow-\nable manufacturing tolerance of –12.5% on wall thickness specified in API Bull. 5C2, Perfor-\nmance Properties of Casing, Tubing, and Drillpipe.2\nBecause  a  burst  failure  will  not  occur  until  after  the  stress  exceeds  the  ultimate  tensile\nstrength (UTS), using a yield strength criterion as a measure of burst strength is an inherently\nconservative  assumption.  This  is  particularly  true  for  lower-grade  materials  such  H-40,  K-55,\nand N-80 whose UTS/YS ratio is significantly greater than that of higher-grade materials such\nas P-110 and Q-125. The effect of axial loading on the burst strength is discuss"
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 297,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p297:c0",
+        "score": 0.01587302,
+        "excerpt": "77\nCasing\n43\nInstitute of Petroleum Engineering,  Heriot-Watt University  \n\t\nExternal pressure at surface\t\n\t\n= 0 psi\n       \nSummary of Collapse Loads\nDEPTH   \n \nExternal    Internal   \nNet    \nDesign Load \n \n \n  Load       \n Load    \nLoad   (Net Load x 1.0)\nSurface   \n \n0    \n0   \n0   \n0\nCasing Shoe (6000ft)  \n2964    \n0   \n2964   \n2964\nProduction Casing  (9 5/8” @ 10000 ft)\nBurst Design - Production :\nInternal Load:  Assuming that a leak occurs in the tubing at surface and that the \nclosed in tubing head pressure (CITHP) is acting on the inside of the top of the \ncasing.  This pressure will then act on the colom of packer fluid.  The 9 5/8” casing \nis only exposed to these pressure down to the Top of Liner (TOL).  The 7”  liner \nprotects the remainder of the casing.\n       \nPi\nPe\nPgas\n(Pressure\nin gas colom)\nCITHP = 6503psi\nMud\n4693 psi\n8190 psi\nPform\nPressure\n10751 psi\n10000 ft\nDepth\nTOC\nMax. Pore Pressure at the top of the production zone \t\n\t\n\t\n\t \t\n\t\n\t\n\t\n=  14 x 0.052 x 11250\n\t\n\t\n\t \t\n\t\n\t\n\t\n=   8190 psi\nCITHP  (at surface) -  Pressure at Top of Perfs - pressure due to colom of gas (0.15 \npsi/ft)\n\t\n\t\n\t \t\n\t\n\t\n\t\n=  8190 - 0.15 x 11250\n\t\n\t\n\t \t\n\t\n\t\n\t\n=  6503 psi\nPressure at Top of Li"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 263,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p263:c0",
+        "score": 0.015625,
+        "excerpt": "77\nCasing\n9\nInstitute of Petroleum Engineering,  Heriot-Watt University  \nAlthough casing must meet the classification requirements of the API, set out above, \nit is not possible to manufacture it to a precise length.  Therefore, when the casing is \ndelivered to the rig, the precise length of each joint has to be measured and recorded \non a tally sheet.   The length is measured from the top of the connector to a reference \npoint on the pin end of the connection at the far end of the casing joint.  Lengths \nare recorded on the tally sheet to the nearest 100th of a foot.   Range 2 is the most \ncommon length, although shorter lengths are useful as pup joints when attempting \nto assemble a precise length of string.\n4.3 Casing Weight\nFor each casing size there are a range of casing weights available.  The weight of \nthe casing is in fact the weight per foot of the casing and is a representation of the \nwall thickness of the pipe.  There are for instance four different weights of 9 5/8\"  casing:  \n                        \nWeight\nOD\nID\nWall\nThickness\nDrift\nDiameter\nlb/ft\nin.\nin.\nin.\nin.\n53.5\n9.625\n8.535\n0.545\n8.379\n47\n9.625\n8.681\n0.472\n8.525\n43.5\n9.625\n8.755\n0.435\n8.599\n40\n9.625\n8.835\n0.3"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 1.909671,
+      "retrieval_seconds": 3.961241,
+      "llm_generation_seconds": 10.332228,
+      "python_seconds": 0.0,
+      "verification_seconds": 11.957,
+      "evaluation_seconds": 7.374582,
+      "synthesis_seconds": 2.957569,
+      "retrieve_action_seconds": 3.978692,
+      "verify_action_seconds": 11.956996,
+      "elapsed_seconds": 17.921268,
+      "total_seconds": 17.921468,
+      "message_parsing_seconds": 0.0002
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "intent_route": "knowledge_qa",
+      "source_requirement": "none",
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 17.921268,
+      "python_seconds": 0.0
+    },
+    "validation": {
+      "engineering_validation_passed": true,
+      "engineering_contradiction_count": 0,
+      "unsupported_engineering_claim_count": 0,
+      "citation_semantic_passed": true,
+      "unsupported_citation_claim_count": 0,
+      "unsupported_numeric_claim_count": 0,
+      "criteria_frozen": true
+    },
+    "cancel_requested": false,
+    "error": null
+  },
+  "resume_response": null,
+  "response": {
+    "run_id": "GR-20261011-065244-EDFCAB",
+    "topic": "Casing 외경이 9⅝ in라는 정보만으로 이 pipe의 정확한 burst rating을 psi로 확정해줘. Grade나 wall thickness 자료는 없다.",
+    "goal": "Casing 외경이 9⅝ in라는 정보만으로 이 pipe의 정확한 burst rating을 psi로 확정해줘. Grade나 wall thickness 자료는 없다.",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "insufficient_evidence",
+    "final_answer": "검색된 자료에서 답변을 뒷받침할 직접 근거를 확인하지 못했습니다.",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 0.75,
+    "goal_coverage_percent": 75.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "2d2be6fad90808f056bccfb4cb669786eea9bea914f677679b16052678e0bfa6",
+    "criteria": [
+      {
+        "criterion_id": "C1",
+        "status": "met",
+        "reason": "인용된 근거와 검증된 계산으로 조건을 충족했습니다.",
+        "supporting_evidence": [
+          "KB3",
+          "KB2",
+          "KB1",
+          "KB4",
+          "KB5"
+        ]
+      },
+      {
+        "criterion_id": "C2",
+        "status": "partial",
+        "reason": "계산 결과가 아직 검증되지 않았습니다.",
+        "supporting_evidence": [
+          "KB3",
+          "KB2",
+          "KB1",
+          "KB4",
+          "KB5"
+        ]
+      }
+    ],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "Burst rating cannot be determined solely based on casing outer diameter (9⅝ in) without additional information such as grade and wall thickness.",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "The absence of grade and wall thickness data precludes the calculation of a precise burst rating in psi.",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 2,
+    "current_iteration": 2,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "completed",
+        "reason_code": "source_evidence_needed",
+        "started_at": "2026-10-11T06:52:46.287816Z",
+        "finished_at": "2026-10-11T06:52:50.266307Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "query": "Casing 외경이 9⅝ in라는 정보만으로 이 pipe의 정확한 burst rating을 psi로 확정해줘. Grade나 wall thickness 자료는 없다.\nMissing: Burst rating cannot be determined solely based on casing outer diameter (9⅝ in) without additional information such as grade and wall thickness.; The absence of grade and wall thickness data precludes the calculation of a precise burst rating in psi.",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "verify",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "completed",
+        "reason_code": "verify_current_support",
+        "started_at": "2026-10-11T06:52:50.302151Z",
+        "finished_at": "2026-10-11T06:53:02.259520Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.75,
+        "failure_reason": null,
+        "details": {
+          "engineering_validation_passed": true,
+          "goal_achieved": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-STOP-2",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "insufficient_evidence",
+        "started_at": "2026-10-11T06:53:02.286403Z",
+        "finished_at": "2026-10-11T06:53:02.286403Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.75,
+        "coverage_after": 0.75,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "EFACT1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "met",
+          "C2": "partial"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "EFACT1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "Grade information is missing, which is essential for determining the yield strength of the casing material.",
+          "Wall thickness information is missing, which is essential for calculating the burst rating using the Barlow equation."
+        ],
+        "coverage": 0.75,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "met",
+          "C2": "partial"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "EFACT1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "Grade information is missing, which is essential for determining the yield strength of the casing material.",
+          "Wall thickness information is missing, which is essential for calculating the burst rating using the Barlow equation."
+        ],
+        "coverage": 0.75,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+        "page": 499,
+        "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p499:c0",
+        "score": 0.0305789,
+        "excerpt": "1 in. of wall thickness to achieve a suitable design without resorting to the use of ultrahigh-\nstrength  pipe.  As  an  example,  9⅞-in.  casing  can  usually  be  designed  properly  if  8⅝-in.  drift\ndiameters are allowed.\nHole-geometry-selection  approach  may  dictate  the  casing  drift  diameter  as  the  controlling\ncriterion. The options are as follows:\n• Try to design the pipe under the specific drift and OD conditions.\n• Use high-strength materials.\n• Use special drift pipe available from some manufacturers.\n• As a last resort, pipe manufacturers can prepare a special pipe design based on minimum\ndrift requirements by enlarging the wall thickness and OD.\nThe  fourth  option  is  occasionally  required  in  hydrogen  sulfide  environments  where  low-\nstrength metals must be used.\nCoupling Selection. Pipe  couplings  are  generally  designed  to  satisfy  requirements  such  as\nburst, collapse, tension, and sealing effectiveness. However, coupling diameters may be a de-\nsign guideline in some wells. Table 11.5 shows the OD of various types of couplings and pipe\nsizes. American Petroleum Inst. (API) couplings are normally 1 in. larger than the pipe in sizes\ngreater than 7⅝"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+        "page": 296,
+        "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p296:c0",
+        "score": 0.01639344,
+        "excerpt": "7.5.1 Mechanical Properties. Each mechanical property of casing and tubing is discussed next.\nBurst Strength. If casing is subjected to internal pressure higher than external, it is said that\ncasing is exposed to burst pressure. Burst pressure conditions occur during well control opera-\ntions, integrity tests, and squeeze cementing. The burst strength of the pipe body is determined\nby the internal yield pressure formula found in API Bull. 5C3, Formulas and Calculations for\nCasing, Tubing, Drillpipe, and Line Pipe Properties.1\nPB = 0.875\n2Ypt\nD\n, .......................................................... (7.1)\nwhere\nPB = minimum burst pressure, psi,\nYp = minimum yield strength, psi,\nFig. 7.1—Typical casing program.\nChapter 7—Casing Design\nII-289\nSHORTMAN UTT\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 8\nChapter 6"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+        "page": 297,
+        "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p297:c0",
+        "score": 0.01612903,
+        "excerpt": "t = nominal wall thickness, in.,\nand\nD = nominal outside pipe diameter, in.\nThis equation, commonly known as the Barlow equation, calculates the internal pressure at\nwhich  the  tangential  (or  hoop)  stress  at  the  inner  wall  of  the  pipe  reaches  the  yield  strength\n(YS)  of  the  material.  The  expression  can  be  derived  from  the  Lamé  equation  for  tangential\nstress by making the thin-wall assumption that D/t >> 1. Most casing used in the oilfield has a\nD/t ratio between 15 and 25. The factor of 0.875 appearing in the equation represents the allow-\nable manufacturing tolerance of –12.5% on wall thickness specified in API Bull. 5C2, Perfor-\nmance Properties of Casing, Tubing, and Drillpipe.2\nBecause  a  burst  failure  will  not  occur  until  after  the  stress  exceeds  the  ultimate  tensile\nstrength (UTS), using a yield strength criterion as a measure of burst strength is an inherently\nconservative  assumption.  This  is  particularly  true  for  lower-grade  materials  such  H-40,  K-55,\nand N-80 whose UTS/YS ratio is significantly greater than that of higher-grade materials such\nas P-110 and Q-125. The effect of axial loading on the burst strength is discuss"
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 297,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p297:c0",
+        "score": 0.01587302,
+        "excerpt": "77\nCasing\n43\nInstitute of Petroleum Engineering,  Heriot-Watt University  \n\t\nExternal pressure at surface\t\n\t\n= 0 psi\n       \nSummary of Collapse Loads\nDEPTH   \n \nExternal    Internal   \nNet    \nDesign Load \n \n \n  Load       \n Load    \nLoad   (Net Load x 1.0)\nSurface   \n \n0    \n0   \n0   \n0\nCasing Shoe (6000ft)  \n2964    \n0   \n2964   \n2964\nProduction Casing  (9 5/8” @ 10000 ft)\nBurst Design - Production :\nInternal Load:  Assuming that a leak occurs in the tubing at surface and that the \nclosed in tubing head pressure (CITHP) is acting on the inside of the top of the \ncasing.  This pressure will then act on the colom of packer fluid.  The 9 5/8” casing \nis only exposed to these pressure down to the Top of Liner (TOL).  The 7”  liner \nprotects the remainder of the casing.\n       \nPi\nPe\nPgas\n(Pressure\nin gas colom)\nCITHP = 6503psi\nMud\n4693 psi\n8190 psi\nPform\nPressure\n10751 psi\n10000 ft\nDepth\nTOC\nMax. Pore Pressure at the top of the production zone \t\n\t\n\t\n\t \t\n\t\n\t\n\t\n=  14 x 0.052 x 11250\n\t\n\t\n\t \t\n\t\n\t\n\t\n=   8190 psi\nCITHP  (at surface) -  Pressure at Top of Perfs - pressure due to colom of gas (0.15 \npsi/ft)\n\t\n\t\n\t \t\n\t\n\t\n\t\n=  8190 - 0.15 x 11250\n\t\n\t\n\t \t\n\t\n\t\n\t\n=  6503 psi\nPressure at Top of Li"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 263,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p263:c0",
+        "score": 0.015625,
+        "excerpt": "77\nCasing\n9\nInstitute of Petroleum Engineering,  Heriot-Watt University  \nAlthough casing must meet the classification requirements of the API, set out above, \nit is not possible to manufacture it to a precise length.  Therefore, when the casing is \ndelivered to the rig, the precise length of each joint has to be measured and recorded \non a tally sheet.   The length is measured from the top of the connector to a reference \npoint on the pin end of the connection at the far end of the casing joint.  Lengths \nare recorded on the tally sheet to the nearest 100th of a foot.   Range 2 is the most \ncommon length, although shorter lengths are useful as pup joints when attempting \nto assemble a precise length of string.\n4.3 Casing Weight\nFor each casing size there are a range of casing weights available.  The weight of \nthe casing is in fact the weight per foot of the casing and is a representation of the \nwall thickness of the pipe.  There are for instance four different weights of 9 5/8\"  casing:  \n                        \nWeight\nOD\nID\nWall\nThickness\nDrift\nDiameter\nlb/ft\nin.\nin.\nin.\nin.\n53.5\n9.625\n8.535\n0.545\n8.379\n47\n9.625\n8.681\n0.472\n8.525\n43.5\n9.625\n8.755\n0.435\n8.599\n40\n9.625\n8.835\n0.3"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 1.909671,
+      "retrieval_seconds": 3.961241,
+      "llm_generation_seconds": 10.332228,
+      "python_seconds": 0.0,
+      "verification_seconds": 11.957,
+      "evaluation_seconds": 7.374582,
+      "synthesis_seconds": 2.957569,
+      "retrieve_action_seconds": 3.978692,
+      "verify_action_seconds": 11.956996,
+      "elapsed_seconds": 17.921268,
+      "total_seconds": 17.921468,
+      "message_parsing_seconds": 0.0002
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "intent_route": "knowledge_qa",
+      "source_requirement": "none",
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 17.921268,
+      "python_seconds": 0.0
+    },
+    "validation": {
+      "engineering_validation_passed": true,
+      "engineering_contradiction_count": 0,
+      "unsupported_engineering_claim_count": 0,
+      "citation_semantic_passed": true,
+      "unsupported_citation_claim_count": 0,
+      "unsupported_numeric_claim_count": 0,
+      "criteria_frozen": true
+    },
+    "cancel_requested": false,
+    "error": null
+  },
+  "same_run_resume": false,
+  "wall_seconds": 18.098
+}

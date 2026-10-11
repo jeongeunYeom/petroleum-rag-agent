@@ -1,0 +1,520 @@
+{
+  "task_id": "K06",
+  "model_id": "qwen3:8b",
+  "run_id": "GR-20261011-064604-C6C8FD",
+  "initial_response": {
+    "run_id": "GR-20261011-064604-C6C8FD",
+    "topic": "Simulation 교재에서 Darcy velocity u의 Q와 전체 단면적 A 관계식을 확인해줘. Q=0.045 m³/s, A=0.015 m²라면 u를 계산해줘.",
+    "goal": "Simulation 교재에서 Darcy velocity u의 Q와 전체 단면적 A 관계식을 확인해줘. Q=0.045 m³/s, A=0.015 m²라면 u를 계산해줘.",
+    "expected_result": null,
+    "run_status": "waiting_for_user_input",
+    "status": "pending",
+    "stop_reason": null,
+    "final_answer": "",
+    "clarification_question": "계산을 계속하려면 출처가 확인된 시뮬레이션 모델/관계식, 변화시킬 변수와 시작·종료 값, 변수 변화 간격이(가) 필요합니다. 필요한 값을 알려주세요.",
+    "required_inputs": [
+      "출처가 확인된 시뮬레이션 모델/관계식",
+      "변화시킬 변수와 시작·종료 값",
+      "변수 변화 간격"
+    ],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "846906736134eff3e2fcc2aec9c5545ac3fd6c5d76fa6b35e9cee33f3a0f04fb",
+    "criteria": [],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "Darcy velocity u의 정의식이 Q와 A의 관계로 표현되어 있는지 확인한다.",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "주어진 Q=0.045 m³/s와 A=0.015 m²을 사용하여 u를 계산할 수 있는 수식이 제공되었는지 확인한다.",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "계산된 u의 단위가 m/s로 올바르게 표현되었는지 확인한다.",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 2,
+    "current_iteration": 2,
+    "max_iterations": 6,
+    "current_stage": "waiting_for_user_input",
+    "current_action": null,
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "simulation_formula_missing",
+        "started_at": "2026-10-11T06:46:06.838855Z",
+        "finished_at": "2026-10-11T06:46:21.877138Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "query": "Simulation 교재에서 Darcy velocity u의 Q와 전체 단면적 A 관계식을 확인해줘. Q=0.045 m³/s, A=0.015 m²라면 u를 계산해줘.\nMissing: Darcy velocity u의 정의식이 Q와 A의 관계로 표현되어 있는지 확인한다.; 주어진 Q=0.045 m³/s와 A=0.015 m²을 사용하여 u를 계산할 수 있는 수식이 제공되었는지 확인한다.; 계산된 u의 단위가 m/s로 올바르게 표현되었는지 확인한다.\nparameter sweep storage capacity model equation required variables\nequation formula variables units Simulation Darcy velocity A Q s",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "blocked",
+        "reason_code": "simulation_formula_missing",
+        "started_at": "2026-10-11T06:46:21.905015Z",
+        "finished_at": "2026-10-11T06:46:21.915967Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "retrieve_no_progress",
+        "details": {
+          "new_evidence_count": 0,
+          "retrieval_mode": "hybrid",
+          "query": "Simulation 교재에서 Darcy velocity u의 Q와 전체 단면적 A 관계식을 확인해줘. Q=0.045 m³/s, A=0.015 m²라면 u를 계산해줘.\nMissing: Darcy velocity u의 정의식이 Q와 A의 관계로 표현되어 있는지 확인한다.; 주어진 Q=0.045 m³/s와 A=0.015 m²을 사용하여 u를 계산할 수 있는 수식이 제공되었는지 확인한다.; 계산된 u의 단위가 m/s로 올바르게 표현되었는지 확인한다.\nparameter sweep storage capacity model equation required variables\nequation formula variables units Simulation Darcy velocity A Q s",
+          "cache_hit": true
+        }
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "출처가 확인된 시뮬레이션 모델/관계식",
+          "변화시킬 변수와 시작·종료 값",
+          "변수 변화 간격"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 79,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p79:c1",
+        "score": 0.04718344,
+        "excerpt": "er and oil, \nrespectively. Using this notation, the Darcy velocity vectors for the water and oil, uw \nand uo, may be written in 3D as follows:\n \nu\nk\nP\ng z\nu\nk\nP\ng z\nw\nw\nw\nw\nw\no\no\no\no\no\n= −\n∇\n−\n∇\n(\n)\n= −\n∇\n−\n∇\n(\n)\n1\n1\nµ\nρ\nµ\nρ\n \n \n \n \n.\n.\nThis form of these equations is particularly useful in deriving the two-phase flow \nequations in their most general form (this will done in Chapter 5).  \n5.  CLOSING REMARKS\nThe purpose of Chapter 2 is to review some key concepts in reservoir engineering \nwhich impact directly on the subject matter of reservoir simulation.  The topics \nreviewed specifically involved:\n- Material balance and its particular relationship with reservoir simulation;\n- The single-phase Darcy law and its extension using vector calculus terminology \nto a 3D version of the Darcy Law including tensor permeabilities;"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 375,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p375:c0",
+        "score": 0.04680819,
+        "excerpt": "10\nQ\nk A\nP\nx\n= −\n\n\n\n\n\n\n\n\n\n\n\n∂\n∂\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.\nµ\nNote that the β in the equation in Figure 5 is a factor for units conversion (see Chapter \n2).\nDarcy Velocity: This is the velocity, u, calculated as, u = Q/A; this may be expressed\nas, \nu\nQ\nA\nk\nP\nx\n=\n= −\n\n\n\n\n\n\n\n\n\n\n\n\n\n∂\n∂\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nµ\nPore Velocity:  This is the fl uid velocity, v, given by, \nv =\n=\nQ\nA\nu\n.φ\nφ\n∆P\nL\nQ\nQ\nQ = β. k.A\nµ . ∆P\n∆P\n∆\nL\n\n \n \n\n \n\n\n\n \n  \n\n\n\n\n\n\n\n\n \n\n \n\nPermeability Anisotropy:  Since permeability can be directional, then it is  possible\nfor kx ≠ky ≠kz in a given system.  This is often seen in practice when comparing the\nhorizontal permeability, (kh), with the vertical permeability, (kv) - usually as the ratio,\n(kv/kh). It is often found (kv/kh) <  1,  i.e. there is more resistance to vertical fl ow than \nhorizontal fl ow.   The value of (kv/kh) must be evaluated with respect to the scale (i.e.\nthe size) of the sample or system.  The value of this quantity will be different in a\ncore plug or in a large simulator grid block in which the core plug was a smal"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 69,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p69:c1",
+        "score": 0.04663462,
+        "excerpt": "the ground water supply at \nDijon.  A schematic of the essential Darcy experiment is shown in Figure 5 where \nwe imagine a single phase fluid (e.g. water) being pumped through a homogeneous \nsand pack or rock core.  (Darcy used a gravitational head of water as his driving force \nwhereas, in modern core laboratories, we would normally use a pump.)\nThe Darcy law given in Figure 5, is in its “experimental” form where a conversion \nfactor, β, is indicated that allows us to work in various units as may be convenient \nto the problem at hand.  In differential form, a more useful way to express the Darcy \nLaw and introducing the Darcy velocity, u, is as follows:\n \n= \n\n\n= −\n= −\n∂\n∂\n\n\n\n\nu\nQ\nA\nk\nP\nL\nk\nP\nx\n.\n.\n∆\nµ\nµ\n \n(9)\nwhere the minus sign in equation 9 indicates that the direction of fluid flow is down \nthe pressure gradient from high pressure to low pressure i.e. in the opposite direction \nto the positive pressure gradient. \n∆P\nL\nQ = β. k.A\nµ\n∆P\nL\nQ\nQ\n."
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 234,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p234:c0",
+        "score": 0.04598643,
+        "excerpt": "24\n\t\nV  =  -  \n, \n=  zero\n=  -  \ns\nk dP\nds\ng\nx\ndz\nds\ng\nx\ndz\nds\nQ\nrh\nk dP\ndr\nµ\nρ\nρ\nπ\nµ\n(\n.\n)\n.\n−\n−\n1 0113 10\n1 0113 10\n2\n6\n6\nIf the assumption is made that the temperature is constant, then \n\t\nQP =  Q P\nQ =\nb\nb\nQ P\nP\nb\nb\nand substituting into the equation, 10 \n\t\nQ P\nP\n2 rh k dP\ndr\nb\nb = π\nµ\nseparating the variables\n\t\nQ P\ndr\nr\n2 kh\nPdP\nb\nb\nr\nr\nP\nP\nw\ne\nw\ne\n∫\n∫\n=\nπ\nµ\nand integrating produces\n\t\nQ P\nln r\nr\n2 kh P\nP\n2\nQ\nkh\nP ln r\nr\nP\nP\nb\nb\ne\nw\ne\n2\nw\n2\nb\nb\ne\nw\ne\n2\nw\n2\n\n\n\n=\n−\n\n\n\n\n=\n\n\n\n\n−\n(\n)\nπ\nµ\nπ\nµ\n \n \n \n \n \n(10)\n4.7 Field Units\nMeasurements made in the field are often quoted in field units and to ensure \ncompatibility with the Darcy equation, a conversion is required. The field units are \nusually as follows:\nFlow rate, Q - bbl/day or ft3/day\nPermeability, k - Darcy\nThickness or height of reservoir, h - feet\nPressure, P - psia\nViscosity, m - centipoise\nRadius, r - feet\nLength, L - feet"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 750,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p750:c0",
+        "score": 0.044175,
+        "excerpt": "18\nThe oil rate qo can also be expressed as;\n\t qo = qt - qw\nIf the Darcy equations for water and oil are subtracted  (using field units P in atmos.) \nthe equations become;\n\t\nq\nkk\nkk\nq\nkk\nA\nP\nx\ng\nw\nw\nrw\no\nro\nt\no\nro\nc\nµ\nµ\nµ\nr\nθ\n+\n\n\n\n=\n+\n∂\n∂\n−\n×\n\n\n\n\nD\n sin \n.1 0133\n106\n\t \t\n\t\n(11)\nwhere;\n∂\n∂\n= ∂\n∂\n−∂\n∂\nP\nx\np\nx\np\nx\nc\no\nw\n which is the capillary pressure in the direction of flow and,\nDr = rw - ro  is the density difference of water and oil.\nIf values for flow rates using Darcy’s Law are now substituted in fraction flow equation \n(equation 9) it becomes;\n\t\nf\nkk A\nq\nP\nx\ng\nk\nk\nw\nro\nt\no\nc\nro\nw\nrw\no\n=\n+\n∂\n∂\n−\n×\n\n\n\n\n+\n1\n1 0133\n10\n1\n6\nµ\nr\nθ\nµ\nµ\nD\n sin \n.\n\t\n\t\n\t\n\t\n(12)\nDake2 has also simplified this equation as; \n\t\nf\nG\nk\nk\nw\nw\no\nro\nrw\n=\n−\n+\n1\n1\nµ\nµ\n  where G is a positive gravity number; \t\n\t\n(13)\n\t\nG\nkk A\ng\nq\nro\nt\no\n=\n×\n−\n4 886\n10 4\n.\n sin \nDr\nθ\nµ\n in field units. \n \n \n(14)\nwhere ∆ρ is the specific gravity difference relative to water. \nThe above term not only considers gravity effects but also includes a velocity term \n,v, which is qt/A\nThe impact of the various components of this equation is worthy of consideration.\nThe angle of dip. If water is being injected downdip than the"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 2.524071,
+      "retrieval_seconds": 15.021386,
+      "llm_generation_seconds": 7.8e-05,
+      "python_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "evaluation_seconds": 0.0,
+      "synthesis_seconds": 0.0,
+      "retrieve_action_seconds": 15.048854,
+      "elapsed_seconds": 17.654691,
+      "total_seconds": 17.654882,
+      "message_parsing_seconds": 0.000191
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "intent_route": "kb_formula_calc",
+      "source_requirement": "kb_formula"
+    },
+    "validation": {},
+    "cancel_requested": false,
+    "error": null
+  },
+  "resume_response": null,
+  "response": {
+    "run_id": "GR-20261011-064604-C6C8FD",
+    "topic": "Simulation 교재에서 Darcy velocity u의 Q와 전체 단면적 A 관계식을 확인해줘. Q=0.045 m³/s, A=0.015 m²라면 u를 계산해줘.",
+    "goal": "Simulation 교재에서 Darcy velocity u의 Q와 전체 단면적 A 관계식을 확인해줘. Q=0.045 m³/s, A=0.015 m²라면 u를 계산해줘.",
+    "expected_result": null,
+    "run_status": "waiting_for_user_input",
+    "status": "pending",
+    "stop_reason": null,
+    "final_answer": "",
+    "clarification_question": "계산을 계속하려면 출처가 확인된 시뮬레이션 모델/관계식, 변화시킬 변수와 시작·종료 값, 변수 변화 간격이(가) 필요합니다. 필요한 값을 알려주세요.",
+    "required_inputs": [
+      "출처가 확인된 시뮬레이션 모델/관계식",
+      "변화시킬 변수와 시작·종료 값",
+      "변수 변화 간격"
+    ],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "846906736134eff3e2fcc2aec9c5545ac3fd6c5d76fa6b35e9cee33f3a0f04fb",
+    "criteria": [],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "Darcy velocity u의 정의식이 Q와 A의 관계로 표현되어 있는지 확인한다.",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "주어진 Q=0.045 m³/s와 A=0.015 m²을 사용하여 u를 계산할 수 있는 수식이 제공되었는지 확인한다.",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "계산된 u의 단위가 m/s로 올바르게 표현되었는지 확인한다.",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 2,
+    "current_iteration": 2,
+    "max_iterations": 6,
+    "current_stage": "waiting_for_user_input",
+    "current_action": null,
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "simulation_formula_missing",
+        "started_at": "2026-10-11T06:46:06.838855Z",
+        "finished_at": "2026-10-11T06:46:21.877138Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "query": "Simulation 교재에서 Darcy velocity u의 Q와 전체 단면적 A 관계식을 확인해줘. Q=0.045 m³/s, A=0.015 m²라면 u를 계산해줘.\nMissing: Darcy velocity u의 정의식이 Q와 A의 관계로 표현되어 있는지 확인한다.; 주어진 Q=0.045 m³/s와 A=0.015 m²을 사용하여 u를 계산할 수 있는 수식이 제공되었는지 확인한다.; 계산된 u의 단위가 m/s로 올바르게 표현되었는지 확인한다.\nparameter sweep storage capacity model equation required variables\nequation formula variables units Simulation Darcy velocity A Q s",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "blocked",
+        "reason_code": "simulation_formula_missing",
+        "started_at": "2026-10-11T06:46:21.905015Z",
+        "finished_at": "2026-10-11T06:46:21.915967Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "retrieve_no_progress",
+        "details": {
+          "new_evidence_count": 0,
+          "retrieval_mode": "hybrid",
+          "query": "Simulation 교재에서 Darcy velocity u의 Q와 전체 단면적 A 관계식을 확인해줘. Q=0.045 m³/s, A=0.015 m²라면 u를 계산해줘.\nMissing: Darcy velocity u의 정의식이 Q와 A의 관계로 표현되어 있는지 확인한다.; 주어진 Q=0.045 m³/s와 A=0.015 m²을 사용하여 u를 계산할 수 있는 수식이 제공되었는지 확인한다.; 계산된 u의 단위가 m/s로 올바르게 표현되었는지 확인한다.\nparameter sweep storage capacity model equation required variables\nequation formula variables units Simulation Darcy velocity A Q s",
+          "cache_hit": true
+        }
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "출처가 확인된 시뮬레이션 모델/관계식",
+          "변화시킬 변수와 시작·종료 값",
+          "변수 변화 간격"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 79,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p79:c1",
+        "score": 0.04718344,
+        "excerpt": "er and oil, \nrespectively. Using this notation, the Darcy velocity vectors for the water and oil, uw \nand uo, may be written in 3D as follows:\n \nu\nk\nP\ng z\nu\nk\nP\ng z\nw\nw\nw\nw\nw\no\no\no\no\no\n= −\n∇\n−\n∇\n(\n)\n= −\n∇\n−\n∇\n(\n)\n1\n1\nµ\nρ\nµ\nρ\n \n \n \n \n.\n.\nThis form of these equations is particularly useful in deriving the two-phase flow \nequations in their most general form (this will done in Chapter 5).  \n5.  CLOSING REMARKS\nThe purpose of Chapter 2 is to review some key concepts in reservoir engineering \nwhich impact directly on the subject matter of reservoir simulation.  The topics \nreviewed specifically involved:\n- Material balance and its particular relationship with reservoir simulation;\n- The single-phase Darcy law and its extension using vector calculus terminology \nto a 3D version of the Darcy Law including tensor permeabilities;"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 375,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p375:c0",
+        "score": 0.04680819,
+        "excerpt": "10\nQ\nk A\nP\nx\n= −\n\n\n\n\n\n\n\n\n\n\n\n∂\n∂\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.\nµ\nNote that the β in the equation in Figure 5 is a factor for units conversion (see Chapter \n2).\nDarcy Velocity: This is the velocity, u, calculated as, u = Q/A; this may be expressed\nas, \nu\nQ\nA\nk\nP\nx\n=\n= −\n\n\n\n\n\n\n\n\n\n\n\n\n\n∂\n∂\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nµ\nPore Velocity:  This is the fl uid velocity, v, given by, \nv =\n=\nQ\nA\nu\n.φ\nφ\n∆P\nL\nQ\nQ\nQ = β. k.A\nµ . ∆P\n∆P\n∆\nL\n\n \n \n\n \n\n\n\n \n  \n\n\n\n\n\n\n\n\n \n\n \n\nPermeability Anisotropy:  Since permeability can be directional, then it is  possible\nfor kx ≠ky ≠kz in a given system.  This is often seen in practice when comparing the\nhorizontal permeability, (kh), with the vertical permeability, (kv) - usually as the ratio,\n(kv/kh). It is often found (kv/kh) <  1,  i.e. there is more resistance to vertical fl ow than \nhorizontal fl ow.   The value of (kv/kh) must be evaluated with respect to the scale (i.e.\nthe size) of the sample or system.  The value of this quantity will be different in a\ncore plug or in a large simulator grid block in which the core plug was a smal"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 69,
+        "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p69:c1",
+        "score": 0.04663462,
+        "excerpt": "the ground water supply at \nDijon.  A schematic of the essential Darcy experiment is shown in Figure 5 where \nwe imagine a single phase fluid (e.g. water) being pumped through a homogeneous \nsand pack or rock core.  (Darcy used a gravitational head of water as his driving force \nwhereas, in modern core laboratories, we would normally use a pump.)\nThe Darcy law given in Figure 5, is in its “experimental” form where a conversion \nfactor, β, is indicated that allows us to work in various units as may be convenient \nto the problem at hand.  In differential form, a more useful way to express the Darcy \nLaw and introducing the Darcy velocity, u, is as follows:\n \n= \n\n\n= −\n= −\n∂\n∂\n\n\n\n\nu\nQ\nA\nk\nP\nL\nk\nP\nx\n.\n.\n∆\nµ\nµ\n \n(9)\nwhere the minus sign in equation 9 indicates that the direction of fluid flow is down \nthe pressure gradient from high pressure to low pressure i.e. in the opposite direction \nto the positive pressure gradient. \n∆P\nL\nQ = β. k.A\nµ\n∆P\nL\nQ\nQ\n."
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 234,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p234:c0",
+        "score": 0.04598643,
+        "excerpt": "24\n\t\nV  =  -  \n, \n=  zero\n=  -  \ns\nk dP\nds\ng\nx\ndz\nds\ng\nx\ndz\nds\nQ\nrh\nk dP\ndr\nµ\nρ\nρ\nπ\nµ\n(\n.\n)\n.\n−\n−\n1 0113 10\n1 0113 10\n2\n6\n6\nIf the assumption is made that the temperature is constant, then \n\t\nQP =  Q P\nQ =\nb\nb\nQ P\nP\nb\nb\nand substituting into the equation, 10 \n\t\nQ P\nP\n2 rh k dP\ndr\nb\nb = π\nµ\nseparating the variables\n\t\nQ P\ndr\nr\n2 kh\nPdP\nb\nb\nr\nr\nP\nP\nw\ne\nw\ne\n∫\n∫\n=\nπ\nµ\nand integrating produces\n\t\nQ P\nln r\nr\n2 kh P\nP\n2\nQ\nkh\nP ln r\nr\nP\nP\nb\nb\ne\nw\ne\n2\nw\n2\nb\nb\ne\nw\ne\n2\nw\n2\n\n\n\n=\n−\n\n\n\n\n=\n\n\n\n\n−\n(\n)\nπ\nµ\nπ\nµ\n \n \n \n \n \n(10)\n4.7 Field Units\nMeasurements made in the field are often quoted in field units and to ensure \ncompatibility with the Darcy equation, a conversion is required. The field units are \nusually as follows:\nFlow rate, Q - bbl/day or ft3/day\nPermeability, k - Darcy\nThickness or height of reservoir, h - feet\nPressure, P - psia\nViscosity, m - centipoise\nRadius, r - feet\nLength, L - feet"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 750,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p750:c0",
+        "score": 0.044175,
+        "excerpt": "18\nThe oil rate qo can also be expressed as;\n\t qo = qt - qw\nIf the Darcy equations for water and oil are subtracted  (using field units P in atmos.) \nthe equations become;\n\t\nq\nkk\nkk\nq\nkk\nA\nP\nx\ng\nw\nw\nrw\no\nro\nt\no\nro\nc\nµ\nµ\nµ\nr\nθ\n+\n\n\n\n=\n+\n∂\n∂\n−\n×\n\n\n\n\nD\n sin \n.1 0133\n106\n\t \t\n\t\n(11)\nwhere;\n∂\n∂\n= ∂\n∂\n−∂\n∂\nP\nx\np\nx\np\nx\nc\no\nw\n which is the capillary pressure in the direction of flow and,\nDr = rw - ro  is the density difference of water and oil.\nIf values for flow rates using Darcy’s Law are now substituted in fraction flow equation \n(equation 9) it becomes;\n\t\nf\nkk A\nq\nP\nx\ng\nk\nk\nw\nro\nt\no\nc\nro\nw\nrw\no\n=\n+\n∂\n∂\n−\n×\n\n\n\n\n+\n1\n1 0133\n10\n1\n6\nµ\nr\nθ\nµ\nµ\nD\n sin \n.\n\t\n\t\n\t\n\t\n(12)\nDake2 has also simplified this equation as; \n\t\nf\nG\nk\nk\nw\nw\no\nro\nrw\n=\n−\n+\n1\n1\nµ\nµ\n  where G is a positive gravity number; \t\n\t\n(13)\n\t\nG\nkk A\ng\nq\nro\nt\no\n=\n×\n−\n4 886\n10 4\n.\n sin \nDr\nθ\nµ\n in field units. \n \n \n(14)\nwhere ∆ρ is the specific gravity difference relative to water. \nThe above term not only considers gravity effects but also includes a velocity term \n,v, which is qt/A\nThe impact of the various components of this equation is worthy of consideration.\nThe angle of dip. If water is being injected downdip than the"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 2.524071,
+      "retrieval_seconds": 15.021386,
+      "llm_generation_seconds": 7.8e-05,
+      "python_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "evaluation_seconds": 0.0,
+      "synthesis_seconds": 0.0,
+      "retrieve_action_seconds": 15.048854,
+      "elapsed_seconds": 17.654691,
+      "total_seconds": 17.654882,
+      "message_parsing_seconds": 0.000191
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "intent_route": "kb_formula_calc",
+      "source_requirement": "kb_formula"
+    },
+    "validation": {},
+    "cancel_requested": false,
+    "error": null
+  },
+  "same_run_resume": false,
+  "wall_seconds": 18.628
+}

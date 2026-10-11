@@ -1,0 +1,574 @@
+{
+  "task_id": "K07",
+  "model_id": "qwen3:8b",
+  "run_id": "GR-20261011-064622-17D46C",
+  "initial_response": {
+    "run_id": "GR-20261011-064622-17D46C",
+    "topic": "압력 변환기와 perforation 심도가 다른 경우 초기 압력 보정식을 내부 Well Test 자료에서 찾아줘. Ptranducer=3200 psi, hydrostatic correction rh=140 psi라면 Pi를 구해줘.",
+    "goal": "압력 변환기와 perforation 심도가 다른 경우 초기 압력 보정식을 내부 Well Test 자료에서 찾아줘. Ptranducer=3200 psi, hydrostatic correction rh=140 psi라면 Pi를 구해줘.",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "calculation_blocked",
+    "final_answer": "근거 자료에서 필요한 관계식이나 입력값을 확인하지 못해 수치 결과를 계산하거나 추정하지 않았습니다.",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "035102074f886d59aa73b231ccc8254239486779d3fc24804edf8aa98bd0b6f7",
+    "criteria": [],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "압력 변환기와 perforation 심도가 다른 경우, 내부 Well Test 자료에서 초기 압력 보정식을 정확하게 식별할 수 있는지 확인",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "주어진 압력 변환기 값(Ptranducer=3200 psi)과 수압 보정 값(rh=140 psi)을 기반으로 초기 압력(Pi)을 계산할 수 있는지 확인",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "보정식 적용 시, 사용된 수학적 관계식과 단위가 일관되며, 계산 과정이 명확하게 기술되어 있는지 확인",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 1,
+    "current_iteration": 1,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "calculate",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "blocked",
+        "reason_code": "calculation_ready",
+        "started_at": "2026-10-11T06:46:25.569536Z",
+        "finished_at": "2026-10-11T06:46:49.930758Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "calculation_code_preflight_failed",
+        "details": {
+          "subprocess_reached": false,
+          "blocked_stage": "calculation_code_preflight_failed",
+          "source_complete": true,
+          "python_calls": 1,
+          "user_fact_ids": [
+            "USERF1",
+            "USERF2"
+          ],
+          "evidence_fact_ids": [],
+          "formula_id": null,
+          "missing_variables": [],
+          "unit_mismatch_variables": []
+        }
+      },
+      {
+        "iteration": 1,
+        "action_id": "ACT-STOP-1",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "calculation_blocked",
+        "started_at": "2026-10-11T06:46:49.943965Z",
+        "finished_at": "2026-10-11T06:46:49.943965Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "calculation_code_preflight_failed"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [
+          "calculation_code_preflight_failed"
+        ],
+        "source_complete": true
+      },
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "calculation_code_preflight_failed"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [
+          "calculation_code_preflight_failed"
+        ],
+        "source_complete": true
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [],
+    "web_sources": [],
+    "figures": [],
+    "computations": [
+      {
+        "computation_id": "CALC1",
+        "analysis_id": "PA-001",
+        "purpose": "initial_pressure_calculation",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "source_evidence_ids": [],
+        "source_input_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "formula_evidence_ids": [],
+        "formula_source_ids": [
+          "USER_REQUEST"
+        ],
+        "input_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "bound_variables": {
+          "Ptranducer": "USERF1",
+          "hydrostatic_correction_rh": "USERF2"
+        },
+        "normalized_formula": "difference=hydrostatic_correction_rh-ptranducer",
+        "source_formula": "difference = hydrostatic_correction_rh - Ptranducer",
+        "units": {
+          "Ptranducer": "psi",
+          "hydrostatic_correction_rh": "psi"
+        },
+        "execution_hash": null,
+        "output": {},
+        "formula_source_id": null,
+        "canonical_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "canonical_formula_ids": [],
+        "input_facts": [
+          {
+            "name": "Ptranducer",
+            "value": 3200.0,
+            "unit": "psi",
+            "evidence_id": "USERF1",
+            "source_excerpt": "Ptranducer=3200 psi",
+            "source_type": "user_fact",
+            "canonical_fact_id": "USERF1",
+            "span_start": null,
+            "span_end": null
+          },
+          {
+            "name": "hydrostatic_correction_rh",
+            "value": 140.0,
+            "unit": "psi",
+            "evidence_id": "USERF2",
+            "source_excerpt": "hydrostatic correction rh=140 psi",
+            "source_type": "user_fact",
+            "canonical_fact_id": "USERF2",
+            "span_start": null,
+            "span_end": null
+          }
+        ],
+        "formula": "difference = hydrostatic_correction_rh - Ptranducer",
+        "code_record": "",
+        "output_files": [],
+        "summary": "",
+        "validation_passed": false,
+        "attempts": 2,
+        "attempt_records": [
+          {
+            "attempt": 1,
+            "code": "import json\nimport numpy as np\n\n# Input facts\nUSERF1 = 3200.0  # Ptranducer in psi\nUSERF2 = 140.0  # hydrostatic_correction_rh in psi\n\n# Formula\ndifference = USERF2 - USERF1\n\n# Output\nPi = difference\n\n# Result\nresult = {\n    'contract_id': 'initial_pressure_calculation',\n    'outputs': {\n        'Pi': {\n            'value': Pi,\n            'unit': 'psi'\n        }\n    },\n    'used_input_ids': ['USERF1', 'USERF2'],\n    'used_formula_id': None,\n    'summary': 'The initial pressure (Pi) is calculated as the difference between the hydrostatic correction (hydrostatic_correction_rh) and the transducer pressure (Ptranducer).'\n}\n\n# Save to JSON\nwith open('analysis_001.json', 'w') as f:\n    json.dump(result, f, indent=4)",
+            "validation_passed": false,
+            "error": "unsupported_numeric_assumption"
+          },
+          {
+            "attempt": 2,
+            "code": "import json\nimport numpy as np\n\n# Input facts\nUSERF1 = 3200.0  # Ptranducer in psi\nUSERF2 = 140.0  # hydrostatic_correction_rh in psi\n\n# Formula\ndifference = USERF2 - USERF1\n\n# Output\nPi = difference\n\n# Result\nresult = {\n    'contract_id': 'initial_pressure_calculation',\n    'outputs': {\n        'Pi': {\n            'value': Pi,\n            'unit': 'psi'\n        }\n    },\n    'used_input_ids': ['USERF1', 'USERF2'],\n    'used_formula_id': None,\n    'summary': 'The initial pressure (Pi) is calculated as the difference between the hydrostatic correction (hydrostatic_correction_rh) and the transducer pressure (Ptranducer).'\n}\n\n# Save to JSON\nwith open('analysis_001.json', 'w') as f:\n    json.dump(result, f, indent=4)",
+            "validation_passed": false,
+            "error": "unsupported_numeric_assumption"
+          }
+        ],
+        "fingerprint": "598bcf8d7762b681469f90ad72cbea7d1cdcaf2f2646330b2054db743f6d12cb",
+        "contract_id": "initial_pressure_calculation",
+        "required_output_ids": [
+          "Pi"
+        ],
+        "produced_output_ids": [],
+        "used_input_ids": [],
+        "used_formula_id": null,
+        "output_manifest": {},
+        "contract_validation_passed": false
+      }
+    ],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 1,
+    "python_attempts_total": 2,
+    "python_failures": 1,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 2.621656,
+      "retrieval_seconds": 0.0,
+      "llm_generation_seconds": 10.15218,
+      "python_seconds": 14.200767,
+      "verification_seconds": 0.0,
+      "evaluation_seconds": 0.0,
+      "synthesis_seconds": 0.0,
+      "calculate_action_seconds": 24.361155,
+      "elapsed_seconds": 27.007592,
+      "total_seconds": 27.007859,
+      "message_parsing_seconds": 0.000267
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "intent_route": "direct_calc",
+      "source_requirement": "none",
+      "python_needed": false,
+      "python_calls": 1,
+      "python_attempts": 2,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 27.007592,
+      "python_seconds": 14.200767
+    },
+    "validation": {},
+    "cancel_requested": false,
+    "error": null
+  },
+  "resume_response": null,
+  "response": {
+    "run_id": "GR-20261011-064622-17D46C",
+    "topic": "압력 변환기와 perforation 심도가 다른 경우 초기 압력 보정식을 내부 Well Test 자료에서 찾아줘. Ptranducer=3200 psi, hydrostatic correction rh=140 psi라면 Pi를 구해줘.",
+    "goal": "압력 변환기와 perforation 심도가 다른 경우 초기 압력 보정식을 내부 Well Test 자료에서 찾아줘. Ptranducer=3200 psi, hydrostatic correction rh=140 psi라면 Pi를 구해줘.",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "calculation_blocked",
+    "final_answer": "근거 자료에서 필요한 관계식이나 입력값을 확인하지 못해 수치 결과를 계산하거나 추정하지 않았습니다.",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "035102074f886d59aa73b231ccc8254239486779d3fc24804edf8aa98bd0b6f7",
+    "criteria": [],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "압력 변환기와 perforation 심도가 다른 경우, 내부 Well Test 자료에서 초기 압력 보정식을 정확하게 식별할 수 있는지 확인",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "주어진 압력 변환기 값(Ptranducer=3200 psi)과 수압 보정 값(rh=140 psi)을 기반으로 초기 압력(Pi)을 계산할 수 있는지 확인",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "보정식 적용 시, 사용된 수학적 관계식과 단위가 일관되며, 계산 과정이 명확하게 기술되어 있는지 확인",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 1,
+    "current_iteration": 1,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "calculate",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "blocked",
+        "reason_code": "calculation_ready",
+        "started_at": "2026-10-11T06:46:25.569536Z",
+        "finished_at": "2026-10-11T06:46:49.930758Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "calculation_code_preflight_failed",
+        "details": {
+          "subprocess_reached": false,
+          "blocked_stage": "calculation_code_preflight_failed",
+          "source_complete": true,
+          "python_calls": 1,
+          "user_fact_ids": [
+            "USERF1",
+            "USERF2"
+          ],
+          "evidence_fact_ids": [],
+          "formula_id": null,
+          "missing_variables": [],
+          "unit_mismatch_variables": []
+        }
+      },
+      {
+        "iteration": 1,
+        "action_id": "ACT-STOP-1",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "calculation_blocked",
+        "started_at": "2026-10-11T06:46:49.943965Z",
+        "finished_at": "2026-10-11T06:46:49.943965Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "calculation_code_preflight_failed"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [
+          "calculation_code_preflight_failed"
+        ],
+        "source_complete": true
+      },
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "calculation_code_preflight_failed"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [
+          "calculation_code_preflight_failed"
+        ],
+        "source_complete": true
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [],
+    "web_sources": [],
+    "figures": [],
+    "computations": [
+      {
+        "computation_id": "CALC1",
+        "analysis_id": "PA-001",
+        "purpose": "initial_pressure_calculation",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "source_evidence_ids": [],
+        "source_input_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "formula_evidence_ids": [],
+        "formula_source_ids": [
+          "USER_REQUEST"
+        ],
+        "input_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "bound_variables": {
+          "Ptranducer": "USERF1",
+          "hydrostatic_correction_rh": "USERF2"
+        },
+        "normalized_formula": "difference=hydrostatic_correction_rh-ptranducer",
+        "source_formula": "difference = hydrostatic_correction_rh - Ptranducer",
+        "units": {
+          "Ptranducer": "psi",
+          "hydrostatic_correction_rh": "psi"
+        },
+        "execution_hash": null,
+        "output": {},
+        "formula_source_id": null,
+        "canonical_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "canonical_formula_ids": [],
+        "input_facts": [
+          {
+            "name": "Ptranducer",
+            "value": 3200.0,
+            "unit": "psi",
+            "evidence_id": "USERF1",
+            "source_excerpt": "Ptranducer=3200 psi",
+            "source_type": "user_fact",
+            "canonical_fact_id": "USERF1",
+            "span_start": null,
+            "span_end": null
+          },
+          {
+            "name": "hydrostatic_correction_rh",
+            "value": 140.0,
+            "unit": "psi",
+            "evidence_id": "USERF2",
+            "source_excerpt": "hydrostatic correction rh=140 psi",
+            "source_type": "user_fact",
+            "canonical_fact_id": "USERF2",
+            "span_start": null,
+            "span_end": null
+          }
+        ],
+        "formula": "difference = hydrostatic_correction_rh - Ptranducer",
+        "code_record": "",
+        "output_files": [],
+        "summary": "",
+        "validation_passed": false,
+        "attempts": 2,
+        "attempt_records": [
+          {
+            "attempt": 1,
+            "code": "import json\nimport numpy as np\n\n# Input facts\nUSERF1 = 3200.0  # Ptranducer in psi\nUSERF2 = 140.0  # hydrostatic_correction_rh in psi\n\n# Formula\ndifference = USERF2 - USERF1\n\n# Output\nPi = difference\n\n# Result\nresult = {\n    'contract_id': 'initial_pressure_calculation',\n    'outputs': {\n        'Pi': {\n            'value': Pi,\n            'unit': 'psi'\n        }\n    },\n    'used_input_ids': ['USERF1', 'USERF2'],\n    'used_formula_id': None,\n    'summary': 'The initial pressure (Pi) is calculated as the difference between the hydrostatic correction (hydrostatic_correction_rh) and the transducer pressure (Ptranducer).'\n}\n\n# Save to JSON\nwith open('analysis_001.json', 'w') as f:\n    json.dump(result, f, indent=4)",
+            "validation_passed": false,
+            "error": "unsupported_numeric_assumption"
+          },
+          {
+            "attempt": 2,
+            "code": "import json\nimport numpy as np\n\n# Input facts\nUSERF1 = 3200.0  # Ptranducer in psi\nUSERF2 = 140.0  # hydrostatic_correction_rh in psi\n\n# Formula\ndifference = USERF2 - USERF1\n\n# Output\nPi = difference\n\n# Result\nresult = {\n    'contract_id': 'initial_pressure_calculation',\n    'outputs': {\n        'Pi': {\n            'value': Pi,\n            'unit': 'psi'\n        }\n    },\n    'used_input_ids': ['USERF1', 'USERF2'],\n    'used_formula_id': None,\n    'summary': 'The initial pressure (Pi) is calculated as the difference between the hydrostatic correction (hydrostatic_correction_rh) and the transducer pressure (Ptranducer).'\n}\n\n# Save to JSON\nwith open('analysis_001.json', 'w') as f:\n    json.dump(result, f, indent=4)",
+            "validation_passed": false,
+            "error": "unsupported_numeric_assumption"
+          }
+        ],
+        "fingerprint": "598bcf8d7762b681469f90ad72cbea7d1cdcaf2f2646330b2054db743f6d12cb",
+        "contract_id": "initial_pressure_calculation",
+        "required_output_ids": [
+          "Pi"
+        ],
+        "produced_output_ids": [],
+        "used_input_ids": [],
+        "used_formula_id": null,
+        "output_manifest": {},
+        "contract_validation_passed": false
+      }
+    ],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 1,
+    "python_attempts_total": 2,
+    "python_failures": 1,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 2.621656,
+      "retrieval_seconds": 0.0,
+      "llm_generation_seconds": 10.15218,
+      "python_seconds": 14.200767,
+      "verification_seconds": 0.0,
+      "evaluation_seconds": 0.0,
+      "synthesis_seconds": 0.0,
+      "calculate_action_seconds": 24.361155,
+      "elapsed_seconds": 27.007592,
+      "total_seconds": 27.007859,
+      "message_parsing_seconds": 0.000267
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "intent_route": "direct_calc",
+      "source_requirement": "none",
+      "python_needed": false,
+      "python_calls": 1,
+      "python_attempts": 2,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 27.007592,
+      "python_seconds": 14.200767
+    },
+    "validation": {},
+    "cancel_requested": false,
+    "error": null
+  },
+  "same_run_resume": false,
+  "wall_seconds": 27.506
+}

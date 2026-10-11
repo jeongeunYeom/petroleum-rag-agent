@@ -1,0 +1,160 @@
+{
+  "task_id": "U03",
+  "provider": "openai",
+  "track": "same_evidence",
+  "question": "Stock-tank oil API gravity만 29 °API로 알려졌는데 reservoir 압력·온도·조성 자료 없이 그 상태의 점도 cP를 정확히 숫자로 결정해줘.",
+  "continuation": null,
+  "system_prompt": "Answer the petroleum-engineering request in the user's language. Be concise and state uncertainty. No tools, Python, retrieval or web access. Do not invent formulas, measurements or citations. Explicitly correct a false premise. If essential input is absent, ask for it. Cite evidence IDs only when evidence is supplied. Use only supplied KB/FIG text and the user's values for sourced engineering claims. Cite supporting IDs in square brackets. No other evidence is available.",
+  "user_prompt": "Stock-tank oil API gravity만 29 °API로 알려졌는데 reservoir 압력·온도·조성 자료 없이 그 상태의 점도 cP를 정확히 숫자로 결정해줘.\n\n=== Captured Agent KB/FIG text evidence ===\n[{\"evidence_id\": \"KB1\", \"document\": \"Heriot-Watt University - Reservoir Engineering.pdf\", \"page\": 87, \"chunk_id\": \"f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p87:c0\", \"kind\": \"KB\", \"excerpt\": \"12\\n  \\nDegrees API =      141.5        -131.5\\nSp.Gr.at 60ºF\\n \\n \\n \\n \\n(1)\\nSp.Gr = specific gravity relative to water ar 60oF.\\nThe API gravity of water is 10º.  A light crude oil would  have an API gravity of 40º, \\nwhile a heavy crude would have an API gravity of less than 20º. In the field, the API \\ngravity is readily measured using a calibrated hydrometer.\\nThere are no definitions for categorising reservoir fluids, but the following  table 5 \\nindicates typical GOR, API and gas and oil gravities for the five main types. The \\ncompositions show that the dry gases contain mostly paraffins, with the fraction \\nof longer chain components increasing as the GOR and API gravity of the fluids \\ndecrease.\\nIn  chapter 4 we give a classification for the various reservoir fluid types in the context \\nof phase behaviour.  \\n \\nType \\nDry Gas \\nWetGas  \\nGas Condensate  \\nVolatile Oil  \\nBlack Oil \\nAppearance  Colourless \\nColourless \\nColourless  \\nBrown  liquid \\nBlack   \\nat surface \\nGas   \\nGas +      \\n+ significant     \\nSome  \\nViscous \\n \\n \\nclear liquid \\nclear/straw \\nRed/Green  \\nLiquid \\n \\n \\n \\nColour \\nLiquid \\nInitial GOR \\nNo Liquids \\n>15000 \\n3000-15000 \\n2500-3000  \\n100-2500 \\n(scf/stb)\\nºAPI \\n- \\n60-70 \\n50-70 \\n40-5\"}, {\"evidence_id\": \"KB2\", \"document\": \"Heriot-Watt University - Reservoir Engineering.pdf\", \"page\": 90, \"chunk_id\": \"f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p90:c0\", \"kind\": \"KB\", \"excerpt\": \"Reservoir Fluids Composition\\n Institute of Petroleum Engineering,  Heriot-Watt University  \\n15\\nSolutions to Exercises\\nEXERCISE 1\\nCalculate the Specific Gravity (SG) of a 38o API oil. What is its density in lbs/\\ncu.ft?\\n(62.32 lbs/cu.ft equals an SG of 1.0 and 43.28 API)\\nNow convert an oil with an SG of 0.744 to Degrees API.\\nSOLUTION\\nConvert using the equation 1:\\nAPI = (141.5 / SG) -131.5\\n38  = (141.5 / SG) -131.5\\nSg = 141.5 / (131.5 + 38)\\n SG = 0.835\\nSimilarly, to convert SG into API:\\nAPI = (141.5 / 0.744) -131.5\\nAPI = 58.7o\\nEXERCISE 2\\nA reservoir oil is quoted as having a Gas Oil Ratio (GOR) of 604 scf/bbl. Convert \\nthis to Standard  Cubic Meters (SCM)gas per Stock Tank Cubic Meters (SM3)\\n1 Foot = 0.3048m\\n1 barrel = 5.615 cu ft.\\n1 barrel = 0.159 M3\\nSOLUTION \\n604 scf/bbl = 604 * 0.30483 STM/bbl = 17.09 SCM/bbl= 107.48 SCM/STM3 \\nEXERCISE 3\\nA reservoir is said to contain an ‘initial GOR’ of 11,000scf/bbl. What type of reservoir \\nis described, and what API oil could be typically expected from such a field?\\nSOLUTION\\nA reservoir with a GOR of 11,000 scf/bbl would be typically termed a ‘Gas Condensate \\nReservoir’. The API gravity would probably be in the low 50’s.\"}, {\"evidence_id\": \"KB3\", \"document\": \"Heriot-Watt University - Reservoir Engineering.pdf\", \"page\": 89, \"chunk_id\": \"f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p89:c0\", \"kind\": \"KB\", \"excerpt\": \"14\\nEXERCISE 1\\nCalculate the Specific Gravity (SG) of a 38o API oil. What is its density in lbs/cu.ft?\\n(62.32 lbs/cu.ft equals an SG of 1.0 and 43.28 API)\\nNow convert an oil with an SG of 0.744 to Degrees API.\\n \\nEXERCISE 2\\nA reservoir oil is quoted as having a Gas Oil Ratio (GOR) of 604 scf/bbl. Convert \\nthis to Standard  Cubic Meters (SCM)gas per Stock Tank Cubic Meters (SM3)\\n1 Foot = 0.3048m\\n1 barrel = 5.615 cu ft.\\n1 barrel = 0.159 M3\\nEXERCISE 3\\nA reservoir is said to contain an ‘initial GOR’ of 11,000scf/bbl. What type of \\nreservoir is described, and what API oil could be typically expected from such a \\nfield?\\nEXERCISE 4\\nDefine the ‘Black Oil Model’ and the ‘Compositional Model’\"}, {\"evidence_id\": \"KB4\", \"document\": \"Heriot-Watt University - Reservoir Engineering.pdf\", \"page\": 86, \"chunk_id\": \"f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p86:c1\", \"kind\": \"KB\", \"excerpt\": \"ry according to density.  For liquids we express surface conditions as \\nstock tank volumes either stock tank barrels STB or stock tank cubic meters STM3. \\nThe relative amount of gas to oil is expressed by the gas-oil ratio GOR SCF/STB. \\nSince there are so many types of oil, each with a wide range of specific gravity, an \\narbitrary non-linear relationship was developed by the American Petroleum Institute \\n(API) to classify crude oils by weight on a linear-scaled hydrometer.  The observed \\nreadings are always corrected for temperature to 60oF, by using a prepared table of \\nstandard values.\"}, {\"evidence_id\": \"KB5\", \"document\": \"Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf\", \"page\": 1517, \"chunk_id\": \"779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1517:c3\", \"kind\": \"KB\", \"excerpt\": \"the static phase of reserves\\nestimation, and to allow only qualitative guidelines to be provided here.\\nDepending  on  geologic  setting,  drive  mechanism,  and  reservoir  geometry,  RE  might  be\\nstrongly influenced by well spacing. Such scenarios include thin oil columns producing by bot-\\ntom  waterdrive;  heavy  oil,  in  general;  low-permeability  gas  reservoirs;  and  reservoirs  with\\ndiscontinuities.\\nOil Reservoirs.  The viscosity of the reservoir oil strongly influences RE for oil reservoirs,\\nand  roughly  correlates  to  the  stock-tank  oil  gravity.  Reservoir  oils  are  broadly  classified  as\\neither  heavy  (stock-tank  gravity  less  than  approximately  25°API)  or  light  (stock-tank  gravity\\ngreater than approximately 25°API).\\nFor light oils that are producing by solution gas drive with insignificant gravity segregation,\\nREs from reasonably homogeneous reservoirs generally range from 5 to 35% OIP, depending\\non formation quality, initial solution gas/oil ratio (GOR), and stock-tank gravity.\\nFor heavy oils that are producing by solution gas drive, REs from reasonably homogeneous\\nreservoirs generally range from < 5 to 20% OIP, depending on production mechanism, for\"}]",
+  "evidence": [
+    {
+      "evidence_id": "KB1",
+      "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+      "page": 87,
+      "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p87:c0",
+      "kind": "KB",
+      "excerpt": "12\n  \nDegrees API =      141.5        -131.5\nSp.Gr.at 60ºF\n \n \n \n \n(1)\nSp.Gr = specific gravity relative to water ar 60oF.\nThe API gravity of water is 10º.  A light crude oil would  have an API gravity of 40º, \nwhile a heavy crude would have an API gravity of less than 20º. In the field, the API \ngravity is readily measured using a calibrated hydrometer.\nThere are no definitions for categorising reservoir fluids, but the following  table 5 \nindicates typical GOR, API and gas and oil gravities for the five main types. The \ncompositions show that the dry gases contain mostly paraffins, with the fraction \nof longer chain components increasing as the GOR and API gravity of the fluids \ndecrease.\nIn  chapter 4 we give a classification for the various reservoir fluid types in the context \nof phase behaviour.  \n \nType \nDry Gas \nWetGas  \nGas Condensate  \nVolatile Oil  \nBlack Oil \nAppearance  Colourless \nColourless \nColourless  \nBrown  liquid \nBlack   \nat surface \nGas   \nGas +      \n+ significant     \nSome  \nViscous \n \n \nclear liquid \nclear/straw \nRed/Green  \nLiquid \n \n \n \nColour \nLiquid \nInitial GOR \nNo Liquids \n>15000 \n3000-15000 \n2500-3000  \n100-2500 \n(scf/stb)\nºAPI \n- \n60-70 \n50-70 \n40-5"
+    },
+    {
+      "evidence_id": "KB2",
+      "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+      "page": 90,
+      "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p90:c0",
+      "kind": "KB",
+      "excerpt": "Reservoir Fluids Composition\n Institute of Petroleum Engineering,  Heriot-Watt University  \n15\nSolutions to Exercises\nEXERCISE 1\nCalculate the Specific Gravity (SG) of a 38o API oil. What is its density in lbs/\ncu.ft?\n(62.32 lbs/cu.ft equals an SG of 1.0 and 43.28 API)\nNow convert an oil with an SG of 0.744 to Degrees API.\nSOLUTION\nConvert using the equation 1:\nAPI = (141.5 / SG) -131.5\n38  = (141.5 / SG) -131.5\nSg = 141.5 / (131.5 + 38)\n SG = 0.835\nSimilarly, to convert SG into API:\nAPI = (141.5 / 0.744) -131.5\nAPI = 58.7o\nEXERCISE 2\nA reservoir oil is quoted as having a Gas Oil Ratio (GOR) of 604 scf/bbl. Convert \nthis to Standard  Cubic Meters (SCM)gas per Stock Tank Cubic Meters (SM3)\n1 Foot = 0.3048m\n1 barrel = 5.615 cu ft.\n1 barrel = 0.159 M3\nSOLUTION \n604 scf/bbl = 604 * 0.30483 STM/bbl = 17.09 SCM/bbl= 107.48 SCM/STM3 \nEXERCISE 3\nA reservoir is said to contain an ‘initial GOR’ of 11,000scf/bbl. What type of reservoir \nis described, and what API oil could be typically expected from such a field?\nSOLUTION\nA reservoir with a GOR of 11,000 scf/bbl would be typically termed a ‘Gas Condensate \nReservoir’. The API gravity would probably be in the low 50’s."
+    },
+    {
+      "evidence_id": "KB3",
+      "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+      "page": 89,
+      "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p89:c0",
+      "kind": "KB",
+      "excerpt": "14\nEXERCISE 1\nCalculate the Specific Gravity (SG) of a 38o API oil. What is its density in lbs/cu.ft?\n(62.32 lbs/cu.ft equals an SG of 1.0 and 43.28 API)\nNow convert an oil with an SG of 0.744 to Degrees API.\n \nEXERCISE 2\nA reservoir oil is quoted as having a Gas Oil Ratio (GOR) of 604 scf/bbl. Convert \nthis to Standard  Cubic Meters (SCM)gas per Stock Tank Cubic Meters (SM3)\n1 Foot = 0.3048m\n1 barrel = 5.615 cu ft.\n1 barrel = 0.159 M3\nEXERCISE 3\nA reservoir is said to contain an ‘initial GOR’ of 11,000scf/bbl. What type of \nreservoir is described, and what API oil could be typically expected from such a \nfield?\nEXERCISE 4\nDefine the ‘Black Oil Model’ and the ‘Compositional Model’"
+    },
+    {
+      "evidence_id": "KB4",
+      "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+      "page": 86,
+      "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p86:c1",
+      "kind": "KB",
+      "excerpt": "ry according to density.  For liquids we express surface conditions as \nstock tank volumes either stock tank barrels STB or stock tank cubic meters STM3. \nThe relative amount of gas to oil is expressed by the gas-oil ratio GOR SCF/STB. \nSince there are so many types of oil, each with a wide range of specific gravity, an \narbitrary non-linear relationship was developed by the American Petroleum Institute \n(API) to classify crude oils by weight on a linear-scaled hydrometer.  The observed \nreadings are always corrected for temperature to 60oF, by using a prepared table of \nstandard values."
+    },
+    {
+      "evidence_id": "KB5",
+      "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+      "page": 1517,
+      "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1517:c3",
+      "kind": "KB",
+      "excerpt": "the static phase of reserves\nestimation, and to allow only qualitative guidelines to be provided here.\nDepending  on  geologic  setting,  drive  mechanism,  and  reservoir  geometry,  RE  might  be\nstrongly influenced by well spacing. Such scenarios include thin oil columns producing by bot-\ntom  waterdrive;  heavy  oil,  in  general;  low-permeability  gas  reservoirs;  and  reservoirs  with\ndiscontinuities.\nOil Reservoirs.  The viscosity of the reservoir oil strongly influences RE for oil reservoirs,\nand  roughly  correlates  to  the  stock-tank  oil  gravity.  Reservoir  oils  are  broadly  classified  as\neither  heavy  (stock-tank  gravity  less  than  approximately  25°API)  or  light  (stock-tank  gravity\ngreater than approximately 25°API).\nFor light oils that are producing by solution gas drive with insignificant gravity segregation,\nREs from reasonably homogeneous reservoirs generally range from 5 to 35% OIP, depending\non formation quality, initial solution gas/oil ratio (GOR), and stock-tank gravity.\nFor heavy oils that are producing by solution gas drive, REs from reasonably homogeneous\nreservoirs generally range from < 5 to 20% OIP, depending on production mechanism, for"
+    }
+  ],
+  "initial_answer": "정확한 **점도(cP)를 API 29° 하나만으로는 결정할 수 없습니다**.  \n이 전제는 틀렸습니다. **API gravity는 밀도(비중) 지표일 뿐이고, 점도는 온도·압력·용존가스량·조성에 크게 좌우**되기 때문입니다. 제공된 자료도 **stock-tank oil gravity와 점도는 대체로 상관**된다고만 말하고, **정확한 점도값은 주지 않습니다** [KB5]. 또한 API는 60°F 기준으로 보정된 표면유체 밀도 지표입니다 [KB4][KB1].\n\n따라서 지금 정보만으로는:\n- **“정확한 숫자”는 불가**\n- **압력, 온도, 조성, 그리고 어떤 점도(예: stock-tank/dead oil, saturated, live oil)인지**가 필요합니다\n\n원하시면 제가 다음 중 하나로 도와드릴 수 있습니다:\n1. **29°API에 대한 대략적 범위 추정**\n2. **주어진 P–T–조성으로 점도 계산 절차 정리**\n3. **실무에서 쓰는 상관식 선택 기준** 정리\n\n원하시는 방식과 추가 조건을 주시면 이어서 계산/추정해드리겠습니다.",
+  "answer": "정확한 **점도(cP)를 API 29° 하나만으로는 결정할 수 없습니다**.  \n이 전제는 틀렸습니다. **API gravity는 밀도(비중) 지표일 뿐이고, 점도는 온도·압력·용존가스량·조성에 크게 좌우**되기 때문입니다. 제공된 자료도 **stock-tank oil gravity와 점도는 대체로 상관**된다고만 말하고, **정확한 점도값은 주지 않습니다** [KB5]. 또한 API는 60°F 기준으로 보정된 표면유체 밀도 지표입니다 [KB4][KB1].\n\n따라서 지금 정보만으로는:\n- **“정확한 숫자”는 불가**\n- **압력, 온도, 조성, 그리고 어떤 점도(예: stock-tank/dead oil, saturated, live oil)인지**가 필요합니다\n\n원하시면 제가 다음 중 하나로 도와드릴 수 있습니다:\n1. **29°API에 대한 대략적 범위 추정**\n2. **주어진 P–T–조성으로 점도 계산 절차 정리**\n3. **실무에서 쓰는 상관식 선택 기준** 정리\n\n원하시는 방식과 추가 조건을 주시면 이어서 계산/추정해드리겠습니다.",
+  "model_id": "gpt-5.4-mini-2026-03-17",
+  "input_tokens": 2090,
+  "output_tokens": 423,
+  "response_id": "resp_080966e0cb219376016acb363b233487d0809d602fc13ff52a",
+  "provider_payload": {
+    "id": "resp_080966e0cb219376016acb363b233487d0809d602fc13ff52a",
+    "object": "response",
+    "created_at": 1791702587,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1791702590,
+    "error": null,
+    "frequency_penalty": 0.0,
+    "incomplete_details": null,
+    "instructions": "Answer the petroleum-engineering request in the user's language. Be concise and state uncertainty. No tools, Python, retrieval or web access. Do not invent formulas, measurements or citations. Explicitly correct a false premise. If essential input is absent, ask for it. Cite evidence IDs only when evidence is supplied. Use only supplied KB/FIG text and the user's values for sourced engineering claims. Cite supporting IDs in square brackets. No other evidence is available.",
+    "max_output_tokens": 1800,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-mini-2026-03-17",
+    "moderation": null,
+    "output": [
+      {
+        "id": "rs_080966e0cb219376016acb363c4b9087d098d2b89192ae0fce",
+        "type": "reasoning",
+        "content": [],
+        "encrypted_content": "gAAAAABqyzY-9mydXX-Xa1tc40XzBSshPokLTxNDPjfrChzKzURBBzY8XtSTnMJRlyZFwD5K9g9yqMmJvMXZOWwklOYfq9zgqf9teFx6JWRDAgMXhevlEI_oTpEl1KR8xOQ2utWIL8iVJwVO0m1VhyngApfwhK5KLo6de_nRTrm2nzg1OGpdjwOHjEUpTRVC_JnUTyEid6WN1avejYlPvpFVmwLOcgrToaJV1PYUIusEQP9g7VLIooaM4_zjAJmGDt6FIHA1A-81PNc-9l_CP9RQkt2CsMlgW8qexxX1rc0CKPxxNoytRUWucXZJBwegmymtUtcmSurQcm7PyKe0hvJSF27C6-wGK7qrrfja8rnr1SFJxzhxVQPF95nA87aJ5R-9wk4EODl4EkHNN7ondxVCdnmIw6pSsQ8s9nnN8lQK0kZfzDJPil9kVeXn971Kwo8qeE9z0rSd2eZWUix_mk4dsWB6sSjTYuJAXOgbmWjCMouDZnRiNDeB1Pw40uSmtOjCDBgHibtPI7Wsgd699TdtvJqQ5pAP5hAMbAYhekxHTGkRVz_REHJ19S3UNWD641F7MN5IKXwjDRDENyOLQFctF9FHJq0A6_vQzz_c9JaoKG5hV0aXF-HLHdsRIp2okGX0XGY3zPES4c6pSVEhMMCVKovq9xB51WbqDW-Rq8in_7Xb7reWkEf0I0K13GFJ7u3wA1wjaAokCKQyodKUjuXttbOSm18xqFYUZRCcbWImgRBy9xh_aQHl_sc-2Af1unSlGyKl9bX9AGduD46vIosgC58GKw6UW_7vmCinmqVmlk6Un_z8gBbbmGBy68d9wEIBYvrPIMZxzzxVP4lbupVsupuijVlK7L1zdrDTzlPDXVVZb5LFF6ud4zApPV99tod9wXOcl-51jKMumk1hrLIR1Gvp_WYlfOi4XD6w0Erg_MuaLa2IXW16am48sjFJf9g-5mj2RuNiMmhx5MYnD9tx3rYHKKH5I1Ir7U7wdLIWfmaq0di8YgKSVeTiONJI66hk65-gDscTvM2lCQC4YQX5rHd4uc7V5kI3IPw5_7bk221yooYPzk-XSwT3t0M03XoAeWgbA7zbcXg0AXdy9tzgG5n65jGdnSFlto-A4yr4KaQfTdjvFkWIG1HnlSfrl15yqKUyUU_MEm5EpgpC889h2ZehLYmrTAzgRcMOZfV7BUGnZZb5N0Zng8fc_ODoDk-LeAGwW9j8w4mUeYxNl00dY7wKBbmwTk8uE8xE8PL8ovzJu1jR3eAWmvAuEpIbyfXnO6HHRY02JeNbcSYtAp3PVfFjjVcMl0imhevtw493lxyYn1vtXjy9iX1_xvl9lRJ8ZvsXoS4mlQTC3ESdGGlqfPXFMRA-e-QnVC1c0005NEla54Sn8S-oyzmazkz74-QwX9KKi0nWVhVtcPtjGIvvASRv6wp9zm_rrqj33IWetaZmIq6qI-mVw16qZqvwhTTJEpsrnWQ5u3KWFMUOKelnxS2su3WO3IiQfNhnlYclhSpQfrZL0Nx2OX1ly8UFpD50B42dvGsRvmOKczt7En_KIWk4OTzWEUpxBBKUvsY1hyzq8BTHKOKEyYEzljxZhffd3CUjT7Q6u5sSNdX-DQUQoQxbDxKiZwPqcw-KqPd3S-awJtcP8ofd87V5QUNAPRw40id2n9Wt3CGRYQTOUtsIMT4d7422pvzKMUxpWJ0_omNS2Feb6pXf8HcKk_fi-7j0gnLXnvs_nyaJfbD4H-btBIIxxnaT08NfYhI4RT6zNAH-p7HCTGgA5j8qHHBp7bSannqNF_tkVnzEp7fESEXRMuScehEo2nVVyCjsby6SxE-EP81UsZ0-wwo03Qpjo71yb-h0Pkhk5wK71JV0ltuo5VjD9GCyCD2I0N4YUPajT-CWEihEhbfqwGhndUQ73r4-DfDhEPC5MnO0ypcUZTxbdVi1xWEgg34yfQgQ8bYBdydAMSwWveFXlzARVOzyb9lOtb7owOcTbitFUKJg19TEvumC6R8jDcClDGL8B7k4hFRQzZ3f7dTRCGPVjpCbg7pUHqJcXl8oyU_OdmUSN1QmCKe6KWAa6dhyOAHTyNdVJR4IMASdNTzL9fm0A6IFeunewhNAf5-vSsI-baKsM-g34xCjyZtEkWuNL3IMLcDhNqv0y8V1tmXpL5yx_sfQxbyeAJLPMySMwTnMpToIPC_nDhzK-C4V2kRDI80H9sxd8r_4etH70HNpG_sH-hSQELZ7w-IAUu6mhz-jjzYS5hNGqULzEw5GqyfSUCX2eexcslVx1wita-QZptSb6US3StBORQ0_P4gWalcgfp9GZUfvPC5Y_G7UocYk9oTij_Z6z-1zuECPec-M4k3qQQs8xIgmMuaEZVq51xnFQ1KvCL8RSqwAeD3d59JM_jgBv0AncsETjKxbEN3Dh5C1PcQpqKS-Wl5wP8DnQiVi8SKlPgMzDzJH9XltSBXJx2OUdj2GhmyaE9jmi37XtlLpQOgoBq9BjUppA4s9HP3D6d4_KsFn1rWMz0bJkJs3s1PRScHy-4YBpamwYi4PRHoEHC32A1ymSDKHc62dKiliXt7PycNPWi-1O_RQ3L7EwCD-A8zoS7LTW5vm4zq6M3lm4Krhz-v1HUkOfGbDamIk9AIfAC-qg7KW2XihO203eHVOpTJuoG6__m99mvqrntqhc5TtAasg7kqz0k132vNn0iuz_OLntAgWPy6HRILnarExoLu2op-kvGKdeJPGFKNpYq57x2ZmUlt21lCwEeB_cCYs5E0DybykitlWJz4JgP6CaUDpNm7L-PZyQwrh-_1zfKj8fGPxiT0M2Z2bMba4oNKj3CxLDJ_YwDtN5FLjIWI_xZzmPYNqk3-fsKRrbnBffOMv9KGNmed_LfOt6PWp4G32gJqFibiftLxogRY6heKmivlWVtz1ULT8C4gxjw7vtsBOvX9CghWAKXCEKEl10h1p-0iuSS-b1iPnNGA0hIGI6aWf1Q0xBW5LKPCY9wNAsZzR5QcFKVRC39juaymtEmI9nPgoZ5ZhBGb1GVFaPOQMM7mVcdXFWDJ5UsY52ueJYiXVAcs8P3USPkxYp3H8gFqCXg8r6iCMFc0qNw==",
+        "summary": []
+      },
+      {
+        "id": "msg_080966e0cb219376016acb363d175c87d0855bf069fc819fc1",
+        "type": "message",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "annotations": [],
+            "logprobs": [],
+            "text": "정확한 **점도(cP)를 API 29° 하나만으로는 결정할 수 없습니다**.  \n이 전제는 틀렸습니다. **API gravity는 밀도(비중) 지표일 뿐이고, 점도는 온도·압력·용존가스량·조성에 크게 좌우**되기 때문입니다. 제공된 자료도 **stock-tank oil gravity와 점도는 대체로 상관**된다고만 말하고, **정확한 점도값은 주지 않습니다** [KB5]. 또한 API는 60°F 기준으로 보정된 표면유체 밀도 지표입니다 [KB4][KB1].\n\n따라서 지금 정보만으로는:\n- **“정확한 숫자”는 불가**\n- **압력, 온도, 조성, 그리고 어떤 점도(예: stock-tank/dead oil, saturated, live oil)인지**가 필요합니다\n\n원하시면 제가 다음 중 하나로 도와드릴 수 있습니다:\n1. **29°API에 대한 대략적 범위 추정**\n2. **주어진 P–T–조성으로 점도 계산 절차 정리**\n3. **실무에서 쓰는 상관식 선택 기준** 정리\n\n원하시는 방식과 추가 조건을 주시면 이어서 계산/추정해드리겠습니다."
+          }
+        ],
+        "phase": "final_answer",
+        "role": "assistant"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0.0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "low",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 2090,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 423,
+      "output_tokens_details": {
+        "reasoning_tokens": 125
+      },
+      "total_tokens": 2513
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "wall_seconds": 4.083
+}

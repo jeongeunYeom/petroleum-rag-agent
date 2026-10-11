@@ -1,0 +1,618 @@
+{
+  "task_id": "K03",
+  "model_id": "qwen3:8b",
+  "run_id": "GR-20261011-064443-2F17CB",
+  "initial_response": {
+    "run_id": "GR-20261011-064443-2F17CB",
+    "topic": "ESP pump intake pressure의 교재식을 원문에서 찾아줘. Reservoir pressure Pr=2400 psi, rate Q=900 stb/d, productivity index PI=1.5 stb/d/psi라면 PIn은 얼마인가?",
+    "goal": "ESP pump intake pressure의 교재식을 원문에서 찾아줘. Reservoir pressure Pr=2400 psi, rate Q=900 stb/d, productivity index PI=1.5 stb/d/psi라면 PIn은 얼마인가?",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "insufficient_evidence",
+    "final_answer": "검색된 자료에서 답변을 뒷받침할 직접 근거를 확인하지 못했습니다.",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "c19157fc2403c935609070d680325645e825949229f3fffc4fa11c69be860b03",
+    "criteria": [
+      {
+        "criterion_id": "C1",
+        "status": "unmet",
+        "reason": "교재식을 원문에서 찾을 수 없습니다. 제공된 자료 중에서 ESP pump intake pressure에 대한 공식이 명시되지 않았습니다. 관련 내용은 일부 자료에서 언급되었지만, 정확한 공식은 제공되지 않았습니다. 예를 들어, KB1과 KB4에서는 productivity index에 대한 공식이 언급되었지만, ESP pump intake pressure에 대한 직접적인 공식은 없습니다. 이로 인해 C1 기준은 충족되지 않았습니다.",
+        "supporting_evidence": [
+          "KB1",
+          "KB4"
+        ]
+      },
+      {
+        "criterion_id": "C2",
+        "status": "unmet",
+        "reason": "PIn을 계산하기 위한 공식이 제공되지 않았기 때문에 계산이 불가능합니다. 예를 들어, KB1과 KB4에서는 productivity index에 대한 공식이 제공되었지만, ESP pump intake pressure에 대한 공식은 제공되지 않았습니다. 이로 인해 C2 기준은 충족되지 않았습니다.",
+        "supporting_evidence": [
+          "KB1",
+          "KB4"
+        ]
+      }
+    ],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "Identify the original formula for ESP pump intake pressure from a textbook source.",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "Calculate the intake pressure (PIn) using the given parameters: reservoir pressure (Pr = 2400 psi), flow rate (Q = 900 stb/d), and productivity index (PI = 1.5 stb/d/psi).",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 2,
+    "current_iteration": 2,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "completed",
+        "reason_code": "source_evidence_needed",
+        "started_at": "2026-10-11T06:44:45.940850Z",
+        "finished_at": "2026-10-11T06:44:53.814694Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "query": "ESP pump intake pressure의 교재식을 원문에서 찾아줘. Reservoir pressure Pr=2400 psi, rate Q=900 stb/d, productivity index PI=1.5 stb/d/psi라면 PIn은 얼마인가?\nMissing: Identify the original formula for ESP pump intake pressure from a textbook source.; Calculate the intake pressure (PIn) using the given parameters: reservoir pressure (Pr = 2400 psi), flow rate (Q = 900 stb/d), and productivity index (PI = 1.5 stb/d/psi).",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "verify",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "completed",
+        "reason_code": "verify_current_support",
+        "started_at": "2026-10-11T06:44:53.845033Z",
+        "finished_at": "2026-10-11T06:45:08.853858Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "engineering_validation_passed": true,
+          "goal_achieved": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-STOP-2",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "insufficient_evidence",
+        "started_at": "2026-10-11T06:45:08.877373Z",
+        "finished_at": "2026-10-11T06:45:08.877373Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "교재식을 원문에서 찾을 수 없습니다.",
+          "PIn을 계산하기 위한 공식이 제공되지 않았습니다."
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "교재식을 원문에서 찾을 수 없습니다.",
+          "PIn을 계산하기 위한 공식이 제공되지 않았습니다."
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+        "page": 65,
+        "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p65:c1",
+        "score": 0.04839549,
+        "excerpt": "re loss ∆PND.\n1.6 Productivity Index\nThe productivity index of PI provides a measure of the capability of a reservoir to\ndeliver fluids to the bottom of a wellbore for production.  it defines the relationship\nbetween the surface production rate and the pressure drop across the reservoir, known\nas the drawdown.\nPI\nJ\nq\nP\nP\nSTB d psi\ns\ne\nw\n=\n=\n−\n \n/\n/\n(35)\nIn the above definition, it is assumed that the entire thickness of the formation is\nproducing fluid.  To further assist in defining productivity, taking into account the\nthickness of producing interval, we can define the Specific Productivity Index Js,\nJ\nq\nP\nP\nh STB d psi ft\ns\ns\ne\nw\n=\n−\n(\n)⋅\n \n/\n/\n/\n(36)\nFigure 9(b)\nInitial reservoir pressure at\nor below bubble point"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+        "page": 114,
+        "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p114:c0",
+        "score": 0.04765107,
+        "excerpt": "50\n           \n0\n250\n500\n750\n1000\nWell Production Rate (STB / day)\nPressure at ESP Inlet (psi)\n1250\n1500\n1750\n2000\n500\n750\n1000\n1250\n1500\n1700\ne\nv\nr\nu\nC\ne\nk\na\nt\nn\nI\np\nm\nu\nP\nPI = 4 STB/psi\nPI = 2 STB/psi\nPI = 1.0 STB/psi\nPI = 0.5 STB/psi\nThis figure shows that:\n(a)\nThe well fluid level above the pump (1000 psi or 2310 ft TVD) is high if the\nwell’s PI was 2 STB/d/psi and 1400 STB/day were being produced i.e. the well\nis not being “pumped off” and a larger pump could have been installed.  The\nproduction rises to 1540 STB/d (and the fluid level to 1315 psi or 3035 ft\nTVD) if the well productivity index increased to 4 STB/d/psi.\n(b)\nThe well production reduced to 1190 STB/d for the lower well productivity\nindex of 1 STB/day.  The lowest well PI plotted (0.5 STB/d/psi) results in a\nnegative well inflow pressure.  The well has now been “pumped off” - an\nunacceptable situation which would be corrected by restricting the tubing\noutflow with a choke.  The minimum well inflow pressure will be dictated by\nthe minimum pump charging pressure required (depends on pump design), gas\ninterference e.g. bubble point etc.\n(vii) Cable selection - which depends on pump power, voltage selected and downhol"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+        "page": 111,
+        "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p111:c0",
+        "score": 0.04740958,
+        "excerpt": "Department of Petroleum Engineering,  Heriot-Watt University\n47\n2\nSelection of Artificial Lift Types2\nwhile the mechanical power is the work done by the electrical motor which is required\nto drive the pump.  The pump efficiency (E) is thus:\nE = hydraulic power/mechanical power\nPump Efficiency is also recorded in the pump characteristic curve and a recommended\npump operating range indicated based on ±10% of the maximum efficiency point.\n7.7.1. Simplified Electric Submersible Pump Design\nESP design is available as an option in many of the commercially available well\nperformance programs, e.g. WellfloTM.  The simplified, manual procedure outlined\nbelow to evaluate the installation of an ESP into the vertical well Edinburgh-1 follows\nthe same basic steps as the more complex, computerised, design procedures.\nTable 7 summarises the Edinburgh-1 well conditions.\n                      \nWell Edinburgh 1\nDepth (h)\n7000ft\nReservoir pressure (Pr)\n1700psi\nWell productivity Index (PI)\n2 STB / day / psi\nTubing Internal Diameter (d)\n2.26 in or 0.188ft\nSurface manifold Pressure (Pm)\n50 psi\nDesign Well Production (Q)\n1400 STB / day\nProduced Fluid properties\nWater\nFluid Density\n0.433 psi / ft\nViscosit"
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 677,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p677:c1",
+        "score": 0.04627565,
+        "excerpt": "ime \ncan be predicted.\nThe productivity index of a well is:\n\t\nJ\nQ\np\np STB\npsi\no\ne\nw\n=\n−\n/\n\t\n\t\n\t\n\t\n\t\n\t\n(89)\nwhere:\nQo \t= Oil Producing rate, STB/day  bbl/day\nPe \t= Reservoir pressure, psia\nPw \t= Well bore producing pressure, psia\nReplacing Qo in equation 89 with the Darcy radial flow equation results in the \nfollowing equation:\n\t\nJ\nk h p\np\nr\nr B p\np\neo\ne\nw\no\ne\nw\no\ne\nw\n=\n−\n−\n7 07\n.\n(\n)\nln(\n/\n)\n(\n)\nµ\n\t\n\t\n\t\n\t\n\t\n(90)\nFor most reservoir producing conditions, the height and drainage area remains \nconstant and therefore:\n\t\n7 07\n1\n.\n/\ntan\nh\nnr\nr\nCons\nt\nC\ne\nw\n=\n=\n\t\n\t\n\t\n\t\n\t\n\t\n(91)\nCombining equations 90 and 91, and eliminating the identical (pe - pw) terms gives:"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+        "page": 448,
+        "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p448:c0",
+        "score": 0.04476507,
+        "excerpt": "6\n(1b)\ni) The Productivity Index is described by\nPI\nq\nP\nP\nP\nP\nq\nPI\nP\n2\nq\n2.3\nr\nwf\nwf\nr\nwf\n=\n-\n=\n-\n=\n-\n700\nThe Inflow Performance Relationship is developed by assuming\nseveral flow rates\n                                 \nflow\trate,\tq\t\nflowing\tbottomhole\tpressure,\tPwf\n0\t\n\t\n2700\n1000\t \t\n2265\n6210\t \t\n0\nii) For the given tubing and fluid properties, assume various flow rates\nand calculate the flowing bottomhole pressure required to flow the\nfluid up the tubing at that particular flow rate. Try the following flow rates:\n                   \n\t\nFig\t1\t\t\nFig\t2\t\nFig\t3\t\nFig\t4\nflow\trate,\tb/d\t\n1000\t\n2000\t\n3000\t\n4000\nequivalent\tdepth\tof\ttop\t\t 2700\t\n2100\t\n1800\t\n1500\nof\ttubing,\tft\nequivalent\tdepth\tof\t\t\n8700\t\n8100\t\n7800\t\n7500\nbottom\tof\ttubing,\tft\nflowing\tbottomhole\t\t\n1280\t\n1000\t\n1085\t\n1160\npressure,\tpsi"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 1.937989,
+      "retrieval_seconds": 7.859491,
+      "llm_generation_seconds": 13.554037,
+      "python_seconds": 0.0,
+      "verification_seconds": 15.008323,
+      "evaluation_seconds": 6.010218,
+      "synthesis_seconds": 7.543733,
+      "retrieve_action_seconds": 7.873721,
+      "verify_action_seconds": 15.008319,
+      "elapsed_seconds": 24.88677,
+      "total_seconds": 24.887075,
+      "message_parsing_seconds": 0.000305
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "intent_route": "knowledge_qa",
+      "source_requirement": "none",
+      "extractive_fallback_used": true,
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 24.88677,
+      "python_seconds": 0.0
+    },
+    "validation": {
+      "engineering_validation_passed": true,
+      "engineering_contradiction_count": 0,
+      "unsupported_engineering_claim_count": 0,
+      "citation_semantic_passed": true,
+      "unsupported_citation_claim_count": 1,
+      "unsupported_numeric_claim_count": 0,
+      "criteria_frozen": true
+    },
+    "cancel_requested": false,
+    "error": null
+  },
+  "resume_response": null,
+  "response": {
+    "run_id": "GR-20261011-064443-2F17CB",
+    "topic": "ESP pump intake pressure의 교재식을 원문에서 찾아줘. Reservoir pressure Pr=2400 psi, rate Q=900 stb/d, productivity index PI=1.5 stb/d/psi라면 PIn은 얼마인가?",
+    "goal": "ESP pump intake pressure의 교재식을 원문에서 찾아줘. Reservoir pressure Pr=2400 psi, rate Q=900 stb/d, productivity index PI=1.5 stb/d/psi라면 PIn은 얼마인가?",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "insufficient_evidence",
+    "final_answer": "검색된 자료에서 답변을 뒷받침할 직접 근거를 확인하지 못했습니다.",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "c19157fc2403c935609070d680325645e825949229f3fffc4fa11c69be860b03",
+    "criteria": [
+      {
+        "criterion_id": "C1",
+        "status": "unmet",
+        "reason": "교재식을 원문에서 찾을 수 없습니다. 제공된 자료 중에서 ESP pump intake pressure에 대한 공식이 명시되지 않았습니다. 관련 내용은 일부 자료에서 언급되었지만, 정확한 공식은 제공되지 않았습니다. 예를 들어, KB1과 KB4에서는 productivity index에 대한 공식이 언급되었지만, ESP pump intake pressure에 대한 직접적인 공식은 없습니다. 이로 인해 C1 기준은 충족되지 않았습니다.",
+        "supporting_evidence": [
+          "KB1",
+          "KB4"
+        ]
+      },
+      {
+        "criterion_id": "C2",
+        "status": "unmet",
+        "reason": "PIn을 계산하기 위한 공식이 제공되지 않았기 때문에 계산이 불가능합니다. 예를 들어, KB1과 KB4에서는 productivity index에 대한 공식이 제공되었지만, ESP pump intake pressure에 대한 공식은 제공되지 않았습니다. 이로 인해 C2 기준은 충족되지 않았습니다.",
+        "supporting_evidence": [
+          "KB1",
+          "KB4"
+        ]
+      }
+    ],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "Identify the original formula for ESP pump intake pressure from a textbook source.",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "Calculate the intake pressure (PIn) using the given parameters: reservoir pressure (Pr = 2400 psi), flow rate (Q = 900 stb/d), and productivity index (PI = 1.5 stb/d/psi).",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 2,
+    "current_iteration": 2,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "completed",
+        "reason_code": "source_evidence_needed",
+        "started_at": "2026-10-11T06:44:45.940850Z",
+        "finished_at": "2026-10-11T06:44:53.814694Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "query": "ESP pump intake pressure의 교재식을 원문에서 찾아줘. Reservoir pressure Pr=2400 psi, rate Q=900 stb/d, productivity index PI=1.5 stb/d/psi라면 PIn은 얼마인가?\nMissing: Identify the original formula for ESP pump intake pressure from a textbook source.; Calculate the intake pressure (PIn) using the given parameters: reservoir pressure (Pr = 2400 psi), flow rate (Q = 900 stb/d), and productivity index (PI = 1.5 stb/d/psi).",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "verify",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "completed",
+        "reason_code": "verify_current_support",
+        "started_at": "2026-10-11T06:44:53.845033Z",
+        "finished_at": "2026-10-11T06:45:08.853858Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "engineering_validation_passed": true,
+          "goal_achieved": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-STOP-2",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "insufficient_evidence",
+        "started_at": "2026-10-11T06:45:08.877373Z",
+        "finished_at": "2026-10-11T06:45:08.877373Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "교재식을 원문에서 찾을 수 없습니다.",
+          "PIn을 계산하기 위한 공식이 제공되지 않았습니다."
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "교재식을 원문에서 찾을 수 없습니다.",
+          "PIn을 계산하기 위한 공식이 제공되지 않았습니다."
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+        "page": 65,
+        "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p65:c1",
+        "score": 0.04839549,
+        "excerpt": "re loss ∆PND.\n1.6 Productivity Index\nThe productivity index of PI provides a measure of the capability of a reservoir to\ndeliver fluids to the bottom of a wellbore for production.  it defines the relationship\nbetween the surface production rate and the pressure drop across the reservoir, known\nas the drawdown.\nPI\nJ\nq\nP\nP\nSTB d psi\ns\ne\nw\n=\n=\n−\n \n/\n/\n(35)\nIn the above definition, it is assumed that the entire thickness of the formation is\nproducing fluid.  To further assist in defining productivity, taking into account the\nthickness of producing interval, we can define the Specific Productivity Index Js,\nJ\nq\nP\nP\nh STB d psi ft\ns\ns\ne\nw\n=\n−\n(\n)⋅\n \n/\n/\n/\n(36)\nFigure 9(b)\nInitial reservoir pressure at\nor below bubble point"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+        "page": 114,
+        "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p114:c0",
+        "score": 0.04765107,
+        "excerpt": "50\n           \n0\n250\n500\n750\n1000\nWell Production Rate (STB / day)\nPressure at ESP Inlet (psi)\n1250\n1500\n1750\n2000\n500\n750\n1000\n1250\n1500\n1700\ne\nv\nr\nu\nC\ne\nk\na\nt\nn\nI\np\nm\nu\nP\nPI = 4 STB/psi\nPI = 2 STB/psi\nPI = 1.0 STB/psi\nPI = 0.5 STB/psi\nThis figure shows that:\n(a)\nThe well fluid level above the pump (1000 psi or 2310 ft TVD) is high if the\nwell’s PI was 2 STB/d/psi and 1400 STB/day were being produced i.e. the well\nis not being “pumped off” and a larger pump could have been installed.  The\nproduction rises to 1540 STB/d (and the fluid level to 1315 psi or 3035 ft\nTVD) if the well productivity index increased to 4 STB/d/psi.\n(b)\nThe well production reduced to 1190 STB/d for the lower well productivity\nindex of 1 STB/day.  The lowest well PI plotted (0.5 STB/d/psi) results in a\nnegative well inflow pressure.  The well has now been “pumped off” - an\nunacceptable situation which would be corrected by restricting the tubing\noutflow with a choke.  The minimum well inflow pressure will be dictated by\nthe minimum pump charging pressure required (depends on pump design), gas\ninterference e.g. bubble point etc.\n(vii) Cable selection - which depends on pump power, voltage selected and downhol"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+        "page": 111,
+        "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p111:c0",
+        "score": 0.04740958,
+        "excerpt": "Department of Petroleum Engineering,  Heriot-Watt University\n47\n2\nSelection of Artificial Lift Types2\nwhile the mechanical power is the work done by the electrical motor which is required\nto drive the pump.  The pump efficiency (E) is thus:\nE = hydraulic power/mechanical power\nPump Efficiency is also recorded in the pump characteristic curve and a recommended\npump operating range indicated based on ±10% of the maximum efficiency point.\n7.7.1. Simplified Electric Submersible Pump Design\nESP design is available as an option in many of the commercially available well\nperformance programs, e.g. WellfloTM.  The simplified, manual procedure outlined\nbelow to evaluate the installation of an ESP into the vertical well Edinburgh-1 follows\nthe same basic steps as the more complex, computerised, design procedures.\nTable 7 summarises the Edinburgh-1 well conditions.\n                      \nWell Edinburgh 1\nDepth (h)\n7000ft\nReservoir pressure (Pr)\n1700psi\nWell productivity Index (PI)\n2 STB / day / psi\nTubing Internal Diameter (d)\n2.26 in or 0.188ft\nSurface manifold Pressure (Pm)\n50 psi\nDesign Well Production (Q)\n1400 STB / day\nProduced Fluid properties\nWater\nFluid Density\n0.433 psi / ft\nViscosit"
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 677,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p677:c1",
+        "score": 0.04627565,
+        "excerpt": "ime \ncan be predicted.\nThe productivity index of a well is:\n\t\nJ\nQ\np\np STB\npsi\no\ne\nw\n=\n−\n/\n\t\n\t\n\t\n\t\n\t\n\t\n(89)\nwhere:\nQo \t= Oil Producing rate, STB/day  bbl/day\nPe \t= Reservoir pressure, psia\nPw \t= Well bore producing pressure, psia\nReplacing Qo in equation 89 with the Darcy radial flow equation results in the \nfollowing equation:\n\t\nJ\nk h p\np\nr\nr B p\np\neo\ne\nw\no\ne\nw\no\ne\nw\n=\n−\n−\n7 07\n.\n(\n)\nln(\n/\n)\n(\n)\nµ\n\t\n\t\n\t\n\t\n\t\n(90)\nFor most reservoir producing conditions, the height and drainage area remains \nconstant and therefore:\n\t\n7 07\n1\n.\n/\ntan\nh\nnr\nr\nCons\nt\nC\ne\nw\n=\n=\n\t\n\t\n\t\n\t\n\t\n\t\n(91)\nCombining equations 90 and 91, and eliminating the identical (pe - pw) terms gives:"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+        "page": 448,
+        "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p448:c0",
+        "score": 0.04476507,
+        "excerpt": "6\n(1b)\ni) The Productivity Index is described by\nPI\nq\nP\nP\nP\nP\nq\nPI\nP\n2\nq\n2.3\nr\nwf\nwf\nr\nwf\n=\n-\n=\n-\n=\n-\n700\nThe Inflow Performance Relationship is developed by assuming\nseveral flow rates\n                                 \nflow\trate,\tq\t\nflowing\tbottomhole\tpressure,\tPwf\n0\t\n\t\n2700\n1000\t \t\n2265\n6210\t \t\n0\nii) For the given tubing and fluid properties, assume various flow rates\nand calculate the flowing bottomhole pressure required to flow the\nfluid up the tubing at that particular flow rate. Try the following flow rates:\n                   \n\t\nFig\t1\t\t\nFig\t2\t\nFig\t3\t\nFig\t4\nflow\trate,\tb/d\t\n1000\t\n2000\t\n3000\t\n4000\nequivalent\tdepth\tof\ttop\t\t 2700\t\n2100\t\n1800\t\n1500\nof\ttubing,\tft\nequivalent\tdepth\tof\t\t\n8700\t\n8100\t\n7800\t\n7500\nbottom\tof\ttubing,\tft\nflowing\tbottomhole\t\t\n1280\t\n1000\t\n1085\t\n1160\npressure,\tpsi"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 1.937989,
+      "retrieval_seconds": 7.859491,
+      "llm_generation_seconds": 13.554037,
+      "python_seconds": 0.0,
+      "verification_seconds": 15.008323,
+      "evaluation_seconds": 6.010218,
+      "synthesis_seconds": 7.543733,
+      "retrieve_action_seconds": 7.873721,
+      "verify_action_seconds": 15.008319,
+      "elapsed_seconds": 24.88677,
+      "total_seconds": 24.887075,
+      "message_parsing_seconds": 0.000305
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "intent_route": "knowledge_qa",
+      "source_requirement": "none",
+      "extractive_fallback_used": true,
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 24.88677,
+      "python_seconds": 0.0
+    },
+    "validation": {
+      "engineering_validation_passed": true,
+      "engineering_contradiction_count": 0,
+      "unsupported_engineering_claim_count": 0,
+      "citation_semantic_passed": true,
+      "unsupported_citation_claim_count": 1,
+      "unsupported_numeric_claim_count": 0,
+      "criteria_frozen": true
+    },
+    "cancel_requested": false,
+    "error": null
+  },
+  "same_run_resume": false,
+  "wall_seconds": 25.118
+}

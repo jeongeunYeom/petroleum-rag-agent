@@ -1,0 +1,33 @@
+{
+  "task_id": "C01",
+  "provider": "qwen",
+  "track": "same_evidence",
+  "question": "내부 ESP 교재의 PIn 식으로 pump intake pressure를 계산해줘. Pr=2500 psi, Q=900 stb/d는 알지만 productivity index PI는 아직 측정값을 받지 못했어.",
+  "continuation": "PI는 1.8 stb/d/psi로 측정됐습니다.",
+  "system_prompt": "Answer the petroleum-engineering request in the user's language. Be concise and state uncertainty. No tools, Python, retrieval or web access. Do not invent formulas, measurements or citations. Explicitly correct a false premise. If essential input is absent, ask for it. Cite evidence IDs only when evidence is supplied. Use only supplied KB/FIG text and the user's values for sourced engineering claims. Cite supporting IDs in square brackets. No other evidence is available.",
+  "user_prompt": "내부 ESP 교재의 PIn 식으로 pump intake pressure를 계산해줘. Pr=2500 psi, Q=900 stb/d는 알지만 productivity index PI는 아직 측정값을 받지 못했어.\n\n=== Captured Agent KB/FIG text evidence ===\n[]",
+  "evidence": [],
+  "initial_answer": "ESP 교재의 PIn 식을 사용하여 pump intake pressure를 계산하려면 productivity index (PI)가 필요합니다. 현재 제공된 Pr=2500 psi, Q=900 stb/d만으로는 PI 값을 알 수 없기 때문에 PIn을 계산할 수 없습니다. PI 값을 제공해 주시면 계산을 진행할 수 있습니다.",
+  "answer": "PIn을 계산하기 위해 ESP 교재의 PIn 식을 사용할 수 있습니다. 일반적으로 PIn은 다음과 같이 계산됩니다:\n\n$$\nP_{In} = P_r - Q \\times PI\n$$\n\n주어진 값:\n- $ P_r = 2500 \\, \\text{psi} $\n- $ Q = 900 \\, \\text{stb/d} $\n- $ PI = 1.8 \\, \\text{stb/d/psi} $\n\n계산:\n$$\nP_{In} = 2500 - 900 \\times 1.8 = 2500 - 1620 = 880 \\, \\text{psi}\n$$\n\n따라서, pump intake pressure $ P_{In} $은 **880 psi**입니다.",
+  "model_id": "qwen3:8b",
+  "input_tokens": 295,
+  "output_tokens": 185,
+  "provider_payload": {
+    "model": "qwen3:8b",
+    "created_at": "2026-10-11T07:05:07.3925411Z",
+    "message": {
+      "role": "assistant",
+      "content": "PIn을 계산하기 위해 ESP 교재의 PIn 식을 사용할 수 있습니다. 일반적으로 PIn은 다음과 같이 계산됩니다:\n\n$$\nP_{In} = P_r - Q \\times PI\n$$\n\n주어진 값:\n- $ P_r = 2500 \\, \\text{psi} $\n- $ Q = 900 \\, \\text{stb/d} $\n- $ PI = 1.8 \\, \\text{stb/d/psi} $\n\n계산:\n$$\nP_{In} = 2500 - 900 \\times 1.8 = 2500 - 1620 = 880 \\, \\text{psi}\n$$\n\n따라서, pump intake pressure $ P_{In} $은 **880 psi**입니다."
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 1615925400,
+    "load_duration": 4228500,
+    "prompt_eval_count": 295,
+    "prompt_eval_cached_count": 171,
+    "prompt_eval_duration": 37830000,
+    "eval_count": 185,
+    "eval_duration": 1568689000
+  },
+  "wall_seconds": 2.573
+}

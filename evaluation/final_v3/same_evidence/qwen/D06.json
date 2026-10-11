@@ -1,0 +1,50 @@
+{
+  "task_id": "D06",
+  "provider": "qwen",
+  "track": "same_evidence",
+  "question": "깊이 1000 m에서 온도 40 °C, 2000 m에서 80 °C를 측정했다. 이 두 점 사이 온도가 선형이라는 사용자 가정으로 1500 m의 온도를 보간해줘.",
+  "continuation": null,
+  "system_prompt": "Answer the petroleum-engineering request in the user's language. Be concise and state uncertainty. No tools, Python, retrieval or web access. Do not invent formulas, measurements or citations. Explicitly correct a false premise. If essential input is absent, ask for it. Cite evidence IDs only when evidence is supplied. Use only supplied KB/FIG text and the user's values for sourced engineering claims. Cite supporting IDs in square brackets. No other evidence is available.",
+  "user_prompt": "깊이 1000 m에서 온도 40 °C, 2000 m에서 80 °C를 측정했다. 이 두 점 사이 온도가 선형이라는 사용자 가정으로 1500 m의 온도를 보간해줘.\n\n=== Captured Agent KB/FIG text evidence ===\n[{\"evidence_id\": \"KB1\", \"document\": \"Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf\", \"page\": 516, \"chunk_id\": \"779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p516:c1\", \"kind\": \"KB\", \"excerpt\": \"the same as the “entry temperature” used in the text\\nabove.  T1  is  the  temperature  at  the  warming  signature  at  Depth  1,  because  there  is  no  flow\\nbelow this depth. The value of Ti at higher depths must be determined along with the rate ratios.\\nOn the left side of the mixing equation appears the ratio qi /q1; on the right side all numeri-\\ncal  values  are  available  from  the  temperature  profiles  of  Fig.  4.6  with  the  exception  of  Ti.\\nThus,  there  are  two  unknowns:  qi /q1  and  Ti.  Various  trial  values  of  Ti  are  entered  into  the\\nwarming  and  mixing  relationships  to  give  two  values  for  qi /q1.  A  solution  for  Ti  is  the  trial\\nvalue  for  which  the  two  values  of  qi /q1  are  substantially  in  agreement.  A  trial  value  for  Tini\\nshould exceed the final temperature after mixing at Depth i, but should be less than the static\\ntemperature at Depth i.\\nThe process of using trial values is shown by Table 4.2, which relates to finding the value\\nof q2/q1 and T2 . As can be seen, the two values of the rate ratio are in close agreement at a\\ntrial temperature of 201.54°F.\\nFrom the same technique illustrated previously, the ratio of the thi\"}, {\"evidence_id\": \"KB2\", \"document\": \"Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf\", \"page\": 1386, \"chunk_id\": \"779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1386:c1\", \"kind\": \"KB\", \"excerpt\": \"given up\\nby the steam is 1,000 Btu/lbm, and the other numbers are similar to those in Eq. 16.10. Thus,\\nthe calculated temperature is lower than it was in Eq. 16.14, as shown below:\\nFig. 16.6—Idealized temperature profile assuming all heat stays in the burned zone; x is the distance\\ncoordinate away from an injector at x = 0.\\nV-1378\\nPetroleum Engineering Handbook—Vol. V\\nPrint\\nSearch\\nHome\\nBookmarks\\nHelp\\nChapter 17\\nChapter 15\"}]",
+  "evidence": [
+    {
+      "evidence_id": "KB1",
+      "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+      "page": 516,
+      "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p516:c1",
+      "kind": "KB",
+      "excerpt": "the same as the “entry temperature” used in the text\nabove.  T1  is  the  temperature  at  the  warming  signature  at  Depth  1,  because  there  is  no  flow\nbelow this depth. The value of Ti at higher depths must be determined along with the rate ratios.\nOn the left side of the mixing equation appears the ratio qi /q1; on the right side all numeri-\ncal  values  are  available  from  the  temperature  profiles  of  Fig.  4.6  with  the  exception  of  Ti.\nThus,  there  are  two  unknowns:  qi /q1  and  Ti.  Various  trial  values  of  Ti  are  entered  into  the\nwarming  and  mixing  relationships  to  give  two  values  for  qi /q1.  A  solution  for  Ti  is  the  trial\nvalue  for  which  the  two  values  of  qi /q1  are  substantially  in  agreement.  A  trial  value  for  Tini\nshould exceed the final temperature after mixing at Depth i, but should be less than the static\ntemperature at Depth i.\nThe process of using trial values is shown by Table 4.2, which relates to finding the value\nof q2/q1 and T2 . As can be seen, the two values of the rate ratio are in close agreement at a\ntrial temperature of 201.54°F.\nFrom the same technique illustrated previously, the ratio of the thi"
+    },
+    {
+      "evidence_id": "KB2",
+      "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+      "page": 1386,
+      "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1386:c1",
+      "kind": "KB",
+      "excerpt": "given up\nby the steam is 1,000 Btu/lbm, and the other numbers are similar to those in Eq. 16.10. Thus,\nthe calculated temperature is lower than it was in Eq. 16.14, as shown below:\nFig. 16.6—Idealized temperature profile assuming all heat stays in the burned zone; x is the distance\ncoordinate away from an injector at x = 0.\nV-1378\nPetroleum Engineering Handbook—Vol. V\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 17\nChapter 15"
+    }
+  ],
+  "initial_answer": "주어진 두 점(1000 m에서 40 °C, 2000 m에서 80 °C) 사이의 온도 변화가 선형이라고 가정할 때, 1500 m의 온도는 다음과 같이 계산됩니다:\n\n온도 변화율 = (80 °C - 40 °C) / (2000 m - 1000 m) = 0.04 °C/m  \n1500 m의 온도 = 40 °C + (1500 m - 1000 m) × 0.04 °C/m = 52 °C  \n\n따라서, 1500 m의 예상 온도는 **52 °C**입니다.",
+  "answer": "주어진 두 점(1000 m에서 40 °C, 2000 m에서 80 °C) 사이의 온도 변화가 선형이라고 가정할 때, 1500 m의 온도는 다음과 같이 계산됩니다:\n\n온도 변화율 = (80 °C - 40 °C) / (2000 m - 1000 m) = 0.04 °C/m  \n1500 m의 온도 = 40 °C + (1500 m - 1000 m) × 0.04 °C/m = 52 °C  \n\n따라서, 1500 m의 예상 온도는 **52 °C**입니다.",
+  "model_id": "qwen3:8b",
+  "input_tokens": 920,
+  "output_tokens": 178,
+  "provider_payload": {
+    "model": "qwen3:8b",
+    "created_at": "2026-10-11T07:04:10.4524018Z",
+    "message": {
+      "role": "assistant",
+      "content": "주어진 두 점(1000 m에서 40 °C, 2000 m에서 80 °C) 사이의 온도 변화가 선형이라고 가정할 때, 1500 m의 온도는 다음과 같이 계산됩니다:\n\n온도 변화율 = (80 °C - 40 °C) / (2000 m - 1000 m) = 0.04 °C/m  \n1500 m의 온도 = 40 °C + (1500 m - 1000 m) × 0.04 °C/m = 52 °C  \n\n따라서, 1500 m의 예상 온도는 **52 °C**입니다."
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 2097901400,
+    "load_duration": 4946400,
+    "prompt_eval_count": 920,
+    "prompt_eval_cached_count": 103,
+    "prompt_eval_duration": 175919000,
+    "eval_count": 178,
+    "eval_duration": 1584953000
+  },
+  "wall_seconds": 2.1
+}
