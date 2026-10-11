@@ -1,0 +1,81 @@
+{
+  "benchmark_id": "petroleum-final-v3",
+  "evaluated_product_sha": "1fd303255ea151869905092d55096d29f6771128",
+  "benchmark_sha256": "e8a92fb47b7571d9263dc4a5fb0ff2fb0ff949cd15e4d64b981dc0544d6453c1",
+  "freeze_commit": "350e3d5eecaee438ca4b529d6c46024ae5cec851",
+  "creation_time_utc": "2026-10-11T06:32:00Z",
+  "task_count": 60,
+  "category_distribution": {
+    "literature": 16,
+    "direct_calculation": 10,
+    "kb_calculation": 12,
+    "user_formula_calculation": 3,
+    "user_formula_simulation": 3,
+    "false_premise": 6,
+    "clarification": 4,
+    "unsupported": 3,
+    "figure": 3
+  },
+  "domain_distribution": {
+    "petrophysics": 7,
+    "reservoir_engineering": 10,
+    "drilling": 11,
+    "reservoir_simulation": 8,
+    "well_testing": 10,
+    "production": 14
+  },
+  "source_page_distribution": {
+    "catalog_source_records": 32,
+    "task_referenced_pages": 31,
+    "task_referenced_documents": 7,
+    "by_document": {
+      "Heriot_Watt_University_-_Formation_Evaluation.pdf": {"pages": [76, 124, 140], "task_references": 4},
+      "Heriot-Watt University - Reservoir Engineering.pdf": {"pages": [170, 339, 481, 504, 639, 749], "task_references": 6},
+      "Heriot-Watt_University_-_Drilling_Engineering.pdf": {"pages": [40, 263, 277, 278, 282, 358], "task_references": 6},
+      "Heriot-Watt_University_-_Reservoir_Simulation.pdf": {"pages": [123, 137, 354, 375], "task_references": 5},
+      "Heriot-Watt_University_-_Well_Test_Analysis.pdf": {"pages": [365, 439, 449, 617], "task_references": 6},
+      "Heriot-Watt_University_-_Production_Technology_I.pdf": {"pages": [32, 113], "task_references": 2},
+      "Heriot-Watt_University_-_Production_Technology_II.pdf": {"pages": [97, 112, 315, 404, 450, 532], "task_references": 10}
+    }
+  },
+  "deduplication": {
+    "old_question_count": 284,
+    "old_sets": [
+      "final_benchmark_v1",
+      "final_benchmark_v2",
+      "petroleum_agent_heldout_v1",
+      "agentic_heldout_v1",
+      "well_test_agent_benchmark",
+      "v9_development_smoke_scenarios",
+      "v9_v10_development_tests_and_smoke"
+    ],
+    "embedding_model": "qwen3-embedding:0.6b",
+    "maximum_semantic_similarity": 0.7442,
+    "maximum_numeric_masked_similarity": 0.4306,
+    "near_duplicates_retained": 0,
+    "v1_v2_source_page_overlap": 0,
+    "preflight_details": "evaluation/final_v3/benchmark_preflight.json"
+  },
+  "pre_freeze_checks": {
+    "existing_chroma_collection": "petroleum_knowledge",
+    "existing_chroma_chunks": 18976,
+    "formula_exact_ast_span_checks_passed": 12,
+    "source_pdf_pages_checked": 31,
+    "figure_images_visually_checked": 3,
+    "numeric_gold_independently_checked": 32
+  },
+  "evaluation_policy": {
+    "product_code": "Fixed at evaluated_product_sha; no backend or frontend edits during evaluation",
+    "freeze": "Question, expected claims, numeric gold, source references and tolerance are immutable after freeze_commit",
+    "invalid": "A demonstrably incorrect or ambiguous frozen task is recorded as INVALID with a reason; frozen task text and gold are not edited",
+    "track_a": "All valid tasks: Agent v10 with local qwen3:8b, hybrid retrieval, existing 12-document/18976-chunk Chroma, web off, autonomous bounded Python; Qwen and OpenAI closed-book without retrieval or tools",
+    "track_b": "Qwen and OpenAI receive only the Agent's captured KB/FIG text evidence, with no additional retrieval, tools, Python or web; Agent rows are reused from Track A",
+    "figure_evidence": "Text baselines receive captured Agent figure-note text, not image pixels; figure gold was visually checked against existing images",
+    "agent_calculation_goal_success": "Correct intent, source requirement, action, numeric result and unit, exact equation-bearing source when KB formula is required, complete provenance, validated CALC, and final answer adoption are jointly required",
+    "false_premise_goal_success": "Explicit rejection, corrected engineering relation, and semantically supporting citation are jointly required",
+    "scoring": "Deterministic evaluator, structured expected-claim comparison, and single-reviewer AI-assisted semantic adjudication with local gemma4:latest",
+    "statistics": "Task-paired nonparametric bootstrap percentile 95% confidence intervals with at least 4000 resamples",
+    "missing_provider_results": "Provider or infrastructure errors are not task invalidity; incomplete tracks are reported separately and are not ranked as complete",
+    "output_driven_changes": "No product changes, frozen-answer edits, or task replacement based on model outputs"
+  }
+}
