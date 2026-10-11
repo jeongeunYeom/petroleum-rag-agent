@@ -22,8 +22,9 @@ from app.models.goal_research_schemas import ComputationRecord, GoalResearchRequ
 from app.services.goal_execution_state import SimulationSpec
 from app.services.formula_source_registry import normalize_formula
 from app.services.formula_source_registry import expression_variables
-from app.services.calculation_requirements import normalize_symbol
+from app.services.calculation_requirements import normalize_symbol, symbol_names
 from app.services.user_fact_registry import UserFactRegistry
+from app.services.direct_operation_v3 import OPERATIONS as V3_OPERATIONS, build as build_v3_operation
 from app.tools.python_tools import PythonTools
 
 
@@ -35,7 +36,7 @@ def user_formula_bindings(equation: str, facts: UserFactRegistry) -> tuple[dict[
     bound: dict[str, object] = {}
     missing = []
     for variable in sorted(variables):
-        matches = [fact for fact in facts.records if normalize_symbol(fact.name) == normalize_symbol(variable)]
+        matches = [fact for fact in facts.records if normalize_symbol(fact.name) in symbol_names(variable)]
         if len(matches) != 1:
             missing.append(f"{variable} 값" if not matches else f"{variable} 값 확인")
         else:
@@ -79,6 +80,8 @@ def direct_operation_operands(text: str, facts: UserFactRegistry,
 def _special_direct(operation: str, text: str, values: dict[str, float],
                     units: dict[str, str]) -> tuple[str, dict[str, float], dict[str, str | None]]:
     """Build bounded code from named user facts; calculate an independent expected result."""
+    if operation in V3_OPERATIONS:
+        return build_v3_operation(operation, text, values, units)
     if operation == "weighted_average":
         weights = {key[:-7]: value for key, value in values.items() if key.endswith("_weight")}
         if not weights or any(key not in values for key in weights):
@@ -155,7 +158,7 @@ def _special_direct(operation: str, text: str, values: dict[str, float],
 def direct_readiness(text: str, facts: UserFactRegistry, operations: list[str]) -> list[str]:
     """Check special primitive operands before selecting Python; never search KB for them."""
     special = {"weighted_average", "combined_rate", "interpolation", "trapezoid",
-               "repeated_percent", "allocation", "piecewise_cost"}
+               "repeated_percent", "allocation", "piecewise_cost"} | V3_OPERATIONS
     chosen = set(operations) & special
     if not chosen:
         return []
@@ -186,6 +189,36 @@ def _arithmetic_value(node: ast.AST, values: dict[str, float]) -> float:
     raise ValueError("unsupported user formula expression")
 
 
+def _formula_output_unit(node: ast.AST, units: dict[str, str]) -> str:
+    """Infer simple dimensions from the same bounded AST used for numeric validation."""
+    if isinstance(node, ast.Constant):
+        return ""
+    if isinstance(node, ast.Name):
+        return units[node.id]
+    if isinstance(node, ast.UnaryOp):
+        return _formula_output_unit(node.operand, units)
+    if not isinstance(node, ast.BinOp):
+        raise ValueError("unsupported user formula expression")
+    left = _formula_output_unit(node.left, units)
+    right = _formula_output_unit(node.right, units)
+    if isinstance(node.op, (ast.Add, ast.Sub)):
+        if left.casefold() != right.casefold():
+            raise ValueError("incompatible user formula units")
+        return left
+    if isinstance(node.op, ast.Mult):
+        return "*".join(part for part in (left, right) if part)
+    if isinstance(node.op, ast.Div):
+        if not right:
+            return left
+        if left.casefold() == right.casefold():
+            return ""
+        return f"{left}/{right}" if left else f"1/{right}"
+    if isinstance(node.op, ast.Pow):
+        exponent = node.right.value
+        return "" if not left or exponent == 0 else left if exponent == 1 else f"{left}^{exponent}"
+    raise ValueError("unsupported user formula expression")
+
+
 async def run_user_formula_calculation(settings: Settings, request: GoalResearchRequest,
                                        run_id: str, equation: str, facts: UserFactRegistry,
                                        calc_id: str, source_id: str) -> ComputationRecord:
@@ -208,11 +241,7 @@ async def run_user_formula_calculation(settings: Settings, request: GoalResearch
             or abs(node.right.value) > 8) for node in ast.walk(tree)):
         raise ValueError("formula exponent exceeds safe bounds")
     units = {name: fact.unit for name, fact in variables.items()}
-    if any(isinstance(node, ast.BinOp) and isinstance(node.op, (ast.Add, ast.Sub)) and
-           isinstance(node.left, ast.Name) and isinstance(node.right, ast.Name) and
-           units[node.left.id].casefold() != units[node.right.id].casefold()
-           for node in ast.walk(tree)):
-        raise ValueError("incompatible user formula units")
+    output_unit = _formula_output_unit(tree.body, units)
     values = {name: fact.value for name, fact in variables.items()}
     try:
         expected = _arithmetic_value(tree.body, values)
@@ -252,7 +281,7 @@ async def run_user_formula_calculation(settings: Settings, request: GoalResearch
             actual, expected, rel_tol=1e-10, abs_tol=1e-12):
         raise ValueError("user formula result failed independent validation")
     input_ids = [fact.fact_id for fact in variables.values()]
-    manifest = {"OUT_RESULT": {"name": lhs, "value": actual, "unit": None,
+    manifest = {"OUT_RESULT": {"name": lhs, "value": actual, "unit": output_unit or None,
                                "semantic_type": "numeric", "source_fact_ids": input_ids,
                                "required": True}}
     return ComputationRecord(
@@ -261,7 +290,7 @@ async def run_user_formula_calculation(settings: Settings, request: GoalResearch
         formula_source_ids=[source_id], input_fact_ids=input_ids,
         bound_variables={name: fact.fact_id for name, fact in variables.items()},
         normalized_formula=normalize_formula(equation), source_formula=equation,
-        units={**units, lhs: ""}, execution_hash=hashlib.sha256(code.encode()).hexdigest(),
+        units={**units, lhs: output_unit}, execution_hash=hashlib.sha256(code.encode()).hexdigest(),
         output={"OUT_RESULT": actual}, formula=equation,
         input_facts=[{"name": name, "value": fact.value, "unit": fact.unit,
                       "evidence_id": fact.fact_id, "source_type": "user_fact"}
@@ -284,12 +313,12 @@ async def run_direct_arithmetic(settings: Settings, request: GoalResearchRequest
                "median", "std_population", "std_sample", "variance_population", "variance",
                "geometric_mean", "add", "multiply", "divide", "subtract", "elapsed_time",
                "percent_conversion", "weighted_average", "combined_rate", "interpolation",
-               "trapezoid", "repeated_percent", "allocation", "piecewise_cost"}
+               "trapezoid", "repeated_percent", "allocation", "piecewise_cost"} | V3_OPERATIONS
     selected = list(dict.fromkeys(operations))
     operand_orders = operand_orders or {}
     special = {"weighted_average", "combined_rate", "interpolation", "trapezoid",
-               "repeated_percent", "allocation", "piecewise_cost"}
-    if (not selected or set(selected) - allowed or len(facts.records) < (1 if selected == ["percent_conversion"] else 2)
+               "repeated_percent", "allocation", "piecewise_cost"} | V3_OPERATIONS
+    if (not selected or set(selected) - allowed or len(facts.records) < (1 if selected in (["percent_conversion"], ["unit_conversion"]) else 2)
             or len(facts.records) > 30 or (set(selected) & special and len(selected) != 1)):
         raise ValueError("direct arithmetic inputs or operations are unsupported")
     if any(name not in operand_orders for name in set(selected) & {"ratio", "difference", "divide", "subtract"}):

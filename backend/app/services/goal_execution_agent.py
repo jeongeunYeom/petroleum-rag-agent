@@ -18,8 +18,8 @@ from app.models.goal_research_schemas import (
     GoalResearchResponse, GoalRunStatus, GoalStatus, GoalStopReason,
 )
 from app.models.research_schemas import EvidenceCounts, ResearchRequest, ResearchResponse, ResearchTiming
-from app.services.formula_source_registry import FormulaSourceRegistry, equation_ast, normalize_formula, source_contains_equation
-from app.services.calculation_requirements import rank_formula_candidates, select_formula_candidate
+from app.services.formula_source_registry import FormulaSourceRegistry, equation_ast, expression_variables, normalize_formula, source_contains_equation
+from app.services.calculation_requirements import infer_dimensionless, rank_formula_candidates, select_formula_candidate
 from app.services.calculation_request_ir import OPERATIONS, parse_request_ir, validate_ir
 from app.services.goal_clarification import (calculation_missing, calculation_readiness, clarification_question,
                                              parse_user_simulation_spec, simulation_readiness,
@@ -31,8 +31,9 @@ from app.services.premise_grounding import PremiseAssessment, assess_premise, ex
 from app.services.goal_knowledge_retrieval import plan_query, rerank_sources
 from app.services.goal_action_planner import (CALC_WORDS, ENGINEERING_TERMS, SIMULATE_WORDS,
                                               GoalActionPlanner)
-from app.services.goal_intent import (GoalIntentKind, SourceRequirement, asks_for_api_gravity_calculation,
+from app.services.goal_intent import (FormulaOrigin, GoalIntentKind, SourceRequirement, asks_for_api_gravity_calculation,
                                       ambiguous_premise_candidate, classify_goal_intent, prefers_korean,
+                                      formula_origin, user_equation,
                                       GoalIntent)
 from app.services.engineering.drilling import DrillingValidator
 from app.services.engineering_validator import EngineeringValidator
@@ -194,8 +195,14 @@ class GoalExecutionAgent(GoalResearchAgent):
         if asks_for_api_gravity_calculation(request):
             descriptions = (["교재의 비중-API도 변환 관계식을 근거와 함께 제시", "제공된 비중으로 API도를 계산하고 검증된 결과를 제시"]
                             if prefers_korean(request) else
-                            ["Cite the source-backed specific gravity to API gravity equation",
+                             ["Cite the source-backed specific gravity to API gravity equation",
                              "Calculate API gravity from the supplied specific gravity with a validated result"])
+        elif (users.records and user_equation(f"{request.topic} {request.goal or ''}") and
+              formula_origin(f"{request.topic} {request.goal or ''}") != FormulaOrigin.KB_REFERENCED):
+            descriptions = (["제공된 값과 사용자 식으로 계산", "검증된 결과와 출처를 답변에 제시"]
+                            if prefers_korean(request) else
+                            ["Calculate from the supplied values and user equation",
+                             "Present the validated result with provenance"])
         elif simulation_spec:
             descriptions.append("Report all simulated cases from the validated parameter sweep")
             for word, phrase in ((r"\bbest\b|\bmaxim|최적|최대|최댓", "Identify the best case"),
@@ -208,7 +215,8 @@ class GoalExecutionAgent(GoalResearchAgent):
             descriptions.append("출처 있는 관계식과 제공된 입력으로 검증된 계산 결과를 제시" if prefers_korean(request)
                                 else "Provide a validated result from a sourced equation and supplied inputs")
         elif re.search(r"중앙값|표준편차|분산|보간|사다리꼴|기하\s*평균|가중\s*평균|경과\s*시간|비례\s*(?:배분|할당)|구간별\s*(?:비용|요금)|"
-                       r"\b(?:median|deviation|variance|interpolat\w*|trapezoid|geometric\s+mean|weighted\s+average|elapsed\s+time|allocation|piecewise)\b", goal, re.I):
+                       r"단위\s*변환|시간당|원기둥\s*부피|전력|에너지|농도|차분|압력\s*변화율|감소율|순\s*변화|"
+                       r"\b(?:median|deviation|variance|interpolat\w*|trapezoid|geometric\s+mean|weighted\s+average|elapsed\s+time|allocation|piecewise|convert|conversion|cylinder|energy|concentration|finite\s+difference|regression\s+slope|percent\s+decrease)\b", goal, re.I):
             requested = parse_request_ir(request, []).requested_operation_types
             descriptions.append(("제공된 값으로 요청한 " + ", ".join(requested) + " 계산을 검증하여 제시")
                                 if prefers_korean(request) else
@@ -322,6 +330,10 @@ class GoalExecutionAgent(GoalResearchAgent):
         if reason == "knowledge_insufficient":
             return ("검색된 자료에서 답변을 뒷받침할 직접 근거를 확인하지 못했습니다." if korean else
                     "The retrieved sources did not directly support an answer.")
+        if reason.startswith("direct_") and not state.computation_ids:
+            return ("제공된 값의 계산 조건을 확인하지 못해 결과를 추정하지 않았습니다. 누락된 값, 단위 또는 연산을 확인해 주세요."
+                    if korean else "The supplied values did not establish a complete calculation. "
+                                   "Please check the missing input, unit, or operation; no result was guessed.")
         if candidate.strip():
             return candidate
         if reason in {"calculation_permission_required", "simulation_permission_required"}:
@@ -406,8 +418,10 @@ class GoalExecutionAgent(GoalResearchAgent):
         if computation.formula_source_ids == ["USER_REQUEST"]:
             return bool(re.search(r"평균|합계|비율|차이|순위|최대|최소|범위|중앙값|표준편차|분산|기하\s*평균|가중\s*평균|"
                                   r"경과\s*시간|퍼센트|보간|사다리꼴|배분|할당|구간별|속도|"
+                                  r"단위\s*변환|시간당|원기둥|원통|에너지|농도|차분|기울기|감소율|순\s*변화|"
                                   r"mean|average|sum|ratio|difference|rank|max|min|range|median|deviation|variance|"
-                                  r"elapsed|percent|add|multiply|interpolat|trapezoid|allocation|weighted|combined|piecewise",
+                                  r"elapsed|percent|add|multiply|interpolat|trapezoid|allocation|weighted|combined|piecewise|"
+                                  r"convert|conversion|cylinder|energy|concentration|slope|derivative",
                                   request_text, re.I))
         if any(source_id not in sources for source_id in computation.formula_source_ids):
             return False
@@ -715,6 +729,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                  "best": any(line.startswith(("Best ", "최적 ")) for line in lines),
                  "mean": any(line.startswith(("Mean ", "평균 ")) for line in lines),
                  "range": any(line.startswith(("Range ", "범위 ")) for line in lines)}
+        supplied = {name.casefold() for name in getattr(computation, "bound_variables", {})}
         updates = []
         by_id = {item.criterion_id: item for item in criteria}
         for item in evaluation.criteria:
@@ -731,6 +746,11 @@ class GoalExecutionAgent(GoalResearchAgent):
                 requirements.append("mean")
             if re.search(r"\brange\b|범위", description):
                 requirements.append("range")
+            missing_input = re.search(r"\b(?:missing|supply|provide)\s+([A-Za-z][A-Za-z0-9_]*)\b|"
+                                      r"([A-Za-z][A-Za-z0-9_]*)\s*값(?:이|을)?\s*(?:없|제공)", description)
+            if missing_input and (missing_input.group(1) or missing_input.group(2)).casefold() in supplied:
+                requirements.append("supplied_input")
+                proof["supplied_input"] = True
             if requirements and all(proof[key] for key in requirements):
                 updates.append(item.model_copy(update={
                     "status": CriterionStatus.MET,
@@ -747,6 +767,103 @@ class GoalExecutionAgent(GoalResearchAgent):
                             if by_id[item.criterion_id].required))
         return replace(evaluation, criteria=updates, coverage=coverage, achieved=achieved,
                        gaps=[] if achieved else evaluation.gaps)
+
+    @staticmethod
+    def _deterministic_calculation_criteria(evaluation: Any, criteria: list[GoalCriterion],
+                                             candidate: str, computations: list[Any],
+                                             evidence: list[dict[str, Any]],
+                                             source_requirement: SourceRequirement,
+                                             korean: bool = False) -> Any:
+        """Operational criteria follow validated current state, not a stale LLM grade."""
+        if not candidate.strip() or not evaluation.engineering_validation_passed:
+            return evaluation
+        valid = [row for row in computations if row.validation_passed and row.contract_validation_passed]
+        if not valid:
+            return evaluation
+        cited = set(re.findall(r"\[((?:CALC|USERF|KB|FIG|WEB)\d+)\]", candidate))
+        sources = {str(row.get("evidence_id")) for row in evidence}
+        proven = []
+        for calc in valid:
+            if calc.computation_id not in cited or not GoalExecutionAgent._provenance_complete(
+                    calc, evidence, " ".join(item.description for item in criteria)):
+                continue
+            if source_requirement == SourceRequirement.KB_FORMULA and not (
+                    calc.formula_source_ids and all(value in sources and value.startswith(("KB", "FIG", "WEB"))
+                                                    for value in calc.formula_source_ids)):
+                continue
+            if source_requirement == SourceRequirement.USER_FORMULA and not all(
+                    value.startswith("USERF") for value in calc.formula_source_ids):
+                continue
+            outputs = [row for row in calc.output_manifest.values() if row.get("required", True)]
+            if not outputs or any(
+                    isinstance(row.get("value"), (int, float)) and not any(
+                        _matches_reported_value(match, float(row["value"]))
+                        for match in NUMERIC.finditer(candidate)) for row in outputs):
+                continue
+            if any(row.get("unit") and str(row["unit"]) not in candidate for row in outputs):
+                continue
+            proven.append(calc)
+        if not proven:
+            return evaluation
+        by_id = {item.criterion_id: item for item in criteria}
+        updates = []
+        for item in evaluation.criteria:
+            description = by_id[item.criterion_id].description
+            requested_units = set(re.findall(
+                r"(?<![A-Za-z0-9/])(?:psi|psia|psig|kPa|stb/d|bbl/d|m3/d|kg/m3|"
+                r"kWh|kW|m3|ft3|bbl|stb)(?![A-Za-z0-9/])", description, re.I))
+            if requested_units and not all(any(
+                    str(row.get("unit") or "").casefold() == unit.casefold()
+                    for calc in proven for row in calc.output_manifest.values())
+                    for unit in requested_units):
+                updates.append(item)
+                continue
+            if re.search(r"\b(?:explain|interpret|why|causal|discuss)\b|설명|해석|원인", description, re.I):
+                updates.append(item)
+                continue
+            if re.search(r"\b(?:calculat|comput|validat|result|output|formula|equation|input|unit|provenance|"
+                         r"values|supplied|provided|"
+                         r"mean|average|sum|ratio|difference|rank|conversion|slope|energy|concentration)\w*\b|"
+                         r"계산|검증|결과|공식|관계식|식|입력|제공된\s*값|단위|평균|합계|비율|차이|순위|변환|기울기|에너지|농도", description, re.I):
+                parents = list(dict.fromkeys(value for calc in proven for value in
+                                             [calc.computation_id, *calc.input_fact_ids, *calc.formula_source_ids]
+                                             if value != "USER_REQUEST"))
+                updates.append(item.model_copy(update={"status": CriterionStatus.MET,
+                    "reason": "현재 입력과 검증된 계산 결과로 조건을 충족했습니다." if korean else
+                              "Current inputs and validated calculation satisfy this criterion.",
+                    "supporting_evidence": parents}))
+            else:
+                updates.append(item)
+        coverage = GoalEvaluator.coverage(criteria, updates)
+        achieved = bool(all(item.status == CriterionStatus.MET for item in updates
+                            if by_id[item.criterion_id].required))
+        return replace(evaluation, criteria=updates, coverage=coverage,
+                       achieved=achieved, gaps=[] if achieved else evaluation.gaps)
+
+    @staticmethod
+    def _calculation_failure_stage(reason: str, *, resumed: bool = False) -> str:
+        value = reason.casefold()
+        if "unit_not_local" in value:
+            return "VALUE_UNIT_LOCALITY"
+        if "ambiguous" in value and "formula" in value:
+            return "FORMULA_AMBIGUITY"
+        if "formula" in value or "source_unavailable" in value:
+            return "FORMULA_RETRIEVAL"
+        if "unit" in value or "dimension" in value:
+            return "UNIT_COMPATIBILITY"
+        if "binding" in value or "required_input" in value:
+            return "VARIABLE_BINDING"
+        if "spec_missing" in value or "simulation_input" in value:
+            return "RESUME_SPEC_PARSE" if resumed else "CALCULATION_READINESS"
+        if "permission" in value or "preflight" in value:
+            return "PYTHON_PREFLIGHT"
+        if "validation" in value or "provenance" in value:
+            return "VALIDATION"
+        if "operation" in value or "arithmetic" in value:
+            return "OPERATION_IR"
+        if "python" in value or "subprocess" in value:
+            return "PYTHON_EXECUTION"
+        return "CALCULATION_READINESS"
 
     async def run(
         self, run_id: str, request: GoalResearchRequest, *,
@@ -866,12 +983,14 @@ class GoalExecutionAgent(GoalResearchAgent):
             result.telemetry["python_authorization_source"] = "autonomous_execution_mode"
         result.telemetry["intent_route"] = intent.kind.value
         result.telemetry["intent"] = {"selected_intent": intent.kind.value, "intent_reason": intent.reason,
-                                      "premise_cue_detected": intent.premise_cue_detected}
+                                      "premise_cue_detected": intent.premise_cue_detected,
+                                      "formula_origin": intent.formula_origin.value}
         result.telemetry["source_requirement"] = intent.source_requirement.value
         result.telemetry["fact_extraction"] = {
             "deterministic_fact_count": len(users.records) - fallback_added,
             "fallback_fact_count": fallback_added,
             "rejected_fact_count": fallback_rejected,
+            "fact_rejection_reasons": users.rejection_reasons,
             "normalized_units": {item.fact_id: {"raw": item.raw_unit, "canonical": item.canonical_unit}
                                  for item in users.records if item.raw_unit},
         }
@@ -879,8 +998,19 @@ class GoalExecutionAgent(GoalResearchAgent):
         direct_operations = [name for name, pattern in OPERATIONS.items()
                              if re.search(pattern, operation_text, re.I)] if intent.kind == GoalIntentKind.DIRECT_CALC else []
         for dominant, subsumed in (("weighted_average", "mean"), ("geometric_mean", "mean"),
+                                   ("cylinder_volume", "unit_conversion"),
                                    ("combined_rate", "sum"), ("allocation", "sum"),
-                                   ("piecewise_cost", "sum"), ("repeated_percent", "percent_change")):
+                                   ("piecewise_cost", "sum"), ("repeated_percent", "percent_change"),
+                                   ("weighted_average_by_duration", "weighted_average"),
+                                   ("weighted_average_by_duration", "mean"),
+                                   ("unit_conversion", "mean"),
+                                   ("finite_difference", "percent_change"),
+                                   ("finite_difference", "difference"),
+                                   ("centered_difference", "finite_difference"),
+                                   ("centered_difference", "difference"),
+                                   ("linear_regression_slope", "linear_regression"),
+                                   ("percentage_decrease", "percent_change"),
+                                   ("net_difference", "difference")):
             if dominant in direct_operations and subsumed in direct_operations:
                 direct_operations.remove(subsumed)
         direct_fast = bool(direct_operations and set(direct_operations) <= {
@@ -888,7 +1018,10 @@ class GoalExecutionAgent(GoalResearchAgent):
             "median", "std_population", "std_sample", "variance_population", "variance",
             "geometric_mean", "add", "multiply", "divide", "subtract", "elapsed_time", "percent_conversion",
             "weighted_average", "combined_rate", "interpolation", "trapezoid", "repeated_percent",
-            "allocation", "piecewise_cost"})
+            "allocation", "piecewise_cost", "unit_conversion", "finite_difference",
+            "centered_difference", "linear_regression_slope", "percentage_decrease",
+            "net_difference", "cylinder_volume", "power_times_duration",
+            "concentration_mass_per_volume", "weighted_average_by_duration"})
         direct_orders, direct_missing = direct_operation_operands(user_text, users, direct_operations)
         if intent.kind == GoalIntentKind.DIRECT_CALC:
             direct_missing.extend(direct_readiness(user_text, users, direct_operations))
@@ -933,6 +1066,12 @@ class GoalExecutionAgent(GoalResearchAgent):
                                              "candidate_scores": formula_selection.candidate_scores}
                                             if formula_selection else {"candidates_found": 0,
                                                                        "selected_formula_id": None})
+            if selected_formula and selected_formula.expression_candidate:
+                source_text = next((str(row.get("text") or "") for row in evidence_rows
+                                    if row.get("evidence_id") == selected_formula.source_id), "")
+                result.telemetry["dimension_inference"] = [inference for variable in
+                    sorted(expression_variables(selected_formula.expression_candidate) or ())
+                    if (inference := infer_dimensionless(variable, source_text))]
             user_formula_missing = (user_formula_bindings(intent.user_equation, users)[1]
                                     if intent.kind == GoalIntentKind.USER_FORMULA_CALC and intent.user_equation else [])
             user_simulation_missing_inputs = (user_simulation_missing(user_text, intent.user_equation, users)
@@ -990,12 +1129,18 @@ class GoalExecutionAgent(GoalResearchAgent):
                     "python_call_budget_exhausted": GoalStopReason.CALCULATION_BLOCKED,
                 }.get(action.reason_code, GoalStopReason.INSUFFICIENT_EVIDENCE)
                 self._record_stop(result, state, action.reason_code)
+                if intent.kind in {GoalIntentKind.DIRECT_CALC, GoalIntentKind.USER_FORMULA_CALC,
+                                   GoalIntentKind.USER_FORMULA_SIMULATION, GoalIntentKind.KB_FORMULA_CALC}:
+                    result.telemetry["calculation_failure_stage"] = self._calculation_failure_stage(
+                        action.reason_code, resumed=bool(resume_state))
                 safe_reason = ("missing_validated_formula"
                                if autonomous_python and requires_sourced_formula and not state.computation_ids
                                and action.reason_code in {"no_progress", "calculation_blocked", "insufficient_evidence"}
                                else "premise_insufficient" if intent.kind == GoalIntentKind.PREMISE_CHECK
                                else "knowledge_insufficient" if intent.kind in {
-                                   GoalIntentKind.KNOWLEDGE_QA, GoalIntentKind.FIGURE_QA} else action.reason_code)
+                                   GoalIntentKind.KNOWLEDGE_QA, GoalIntentKind.FIGURE_QA}
+                               else "direct_" + action.reason_code if intent.kind == GoalIntentKind.DIRECT_CALC
+                               else action.reason_code)
                 return self._finish(result, GoalRunStatus.STOPPED, GoalStatus.STOPPED,
                                     reason, self._safe_unavailable_answer(
                                         latest_candidate, state, safe_reason, selected_formula, korean), started)
@@ -1477,6 +1622,11 @@ class GoalExecutionAgent(GoalResearchAgent):
                     if simulation:
                         evaluation = self._deterministic_simulation_criteria(
                             evaluation, criteria, latest_candidate, simulation, korean)
+                    elif intent.kind in {GoalIntentKind.DIRECT_CALC, GoalIntentKind.USER_FORMULA_CALC,
+                                         GoalIntentKind.KB_FORMULA_CALC}:
+                        evaluation = self._deterministic_calculation_criteria(
+                            evaluation, criteria, latest_candidate, result.computations, evidence,
+                            intent.source_requirement, korean)
                     citation_semantic_passed = bool(latest_candidate.strip()) and (
                         intent.kind != GoalIntentKind.PREMISE_CHECK or
                         bool(re.search(r"\[(?:KB|WEB|FIG)\d+\]", latest_candidate)))
@@ -1524,7 +1674,11 @@ class GoalExecutionAgent(GoalResearchAgent):
                 status, failure = "failed", type(exc).__name__
                 state.blocked_reasons = [failure]
                 state.unresolved_information = [failure]
-                details = {"error_type": type(exc).__name__}
+                details = {"error_type": type(exc).__name__,
+                           "failure_stage": self._calculation_failure_stage(str(exc), resumed=bool(resume_state))
+                           if action.action_type in {GoalActionType.CALCULATE, GoalActionType.SIMULATE} else None}
+                if details["failure_stage"]:
+                    result.telemetry["calculation_failure_stage"] = details["failure_stage"]
 
             self._add_time(result, f"{action.action_type.value}_action_seconds",
                            time.perf_counter() - action_clock)
@@ -1580,5 +1734,6 @@ class GoalExecutionAgent(GoalResearchAgent):
                                                                   reason="missing_validated_formula" if formula_unverified else
                                                                   "premise_insufficient" if intent.kind == GoalIntentKind.PREMISE_CHECK else
                                                                   "knowledge_insufficient" if intent.kind in {
-                                                                      GoalIntentKind.KNOWLEDGE_QA, GoalIntentKind.FIGURE_QA} else "",
+                                                                      GoalIntentKind.KNOWLEDGE_QA, GoalIntentKind.FIGURE_QA} else
+                                                                  "direct_calculation_blocked" if intent.kind == GoalIntentKind.DIRECT_CALC else "",
                                                                   korean=korean), started)

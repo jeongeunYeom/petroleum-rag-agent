@@ -9,10 +9,12 @@ from pydantic import BaseModel, Field
 
 
 NUMBER = r"[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d*)?(?:[eE][-+]?\d+)?|[-+]?\.\d+(?:[eE][-+]?\d+)?|[-+]?\d+\s*/\s*\d+"
-UNIT = (r"(?:kg/m(?:\^?3|³)|m(?:\^?3|³)/(?:s|d|h)|\$/m(?:\^?3|³)|"
-        r"m(?:\^?3|³)|mm(?:\^?2|²|⁻¹)|m(?:\^?2|²)|psi(?:⁻¹|\^-?1)?|stb/d|bbl/d|"
-        r"acres?|feet|ft|mD|md|psia|psig|kPa|Pa|bbl|stb|days?|hours?|hr|h|"
-        r"kg|kJ|lbf|cP|°C|USD|달러|시간|분|min|m/s|mm|m|%)")
+UNIT = (r"(?:kg/m(?:\^?3|³)|mg/L|mD[·*\-]ft|m(?:\^?3|³)/(?:day|hr|hour|s|d|h)|"
+        r"\$/m(?:\^?3|³)|m(?:\^?3|³)|ft(?:\^?3|³)|mm(?:\^?2|²|⁻¹)|"
+        r"m(?:\^?2|²)|psi/(?:day|d)|psi(?:⁻¹|\^-?1)?|stb/(?:day|h|d)|"
+        r"bbl/d|lbf/ft|lb/ft|gpm|kWh|kW|hp|acres?|feet|inch|in|ft|mD|md|"
+        r"psia|psig|kPa|Pa|bbl|stb|days?|seconds?|secs?|hours?|hr|h|"
+        r"mg|kg|kJ|lbf|cP|°C|USD|달러|시간|분|min|m/s|m/h|mm|m|L|%|dimensionless)")
 ASSIGNMENT = re.compile(
     rf"(?P<label>[A-Za-z][A-Za-z0-9 _/\-]{{0,48}}?)\s*[:=]\s*(?P<value>{NUMBER})\s*(?P<unit>{UNIT})?(?=$|[,;\s]|\.(?!\d)|[가-힣])",
     re.IGNORECASE,
@@ -58,23 +60,58 @@ TIER = re.compile(rf"(?P<volume>{NUMBER})\s*(?P<unit>m(?:\^?3|³)|stb|bbl)"
                   rf".{{0,40}}?(?:단가|price|rate|cost)\s*(?P<price>{NUMBER})\s*(?:달러|USD|\$)?", re.I)
 KOREAN_ORDINAL = re.compile(rf"(?P<ordinal>첫|둘째|셋째|넷째|다섯째|여섯째|일곱째|여덟째|아홉째|열째)\s*"
                              rf"(?P<label>구간|run|단계)?\s*(?:은|는|에서)?\s*(?P<value>{NUMBER})\s*(?P<unit>{UNIT})", re.I)
+SEGMENT_PAIR = re.compile(
+    rf"(?P<label>(?:[A-Z]|\d+)\s*구간|(?:첫|둘째|셋째|넷째)(?:\s*구간)?|"
+    rf"(?:segment|pump)\s*[-#]?\s*[A-Za-z0-9]+)\s*(?:은|는|이|가|에서|:|=|is|at)?\s*"
+    rf"(?P<value>{NUMBER})\s*(?P<unit>{UNIT})", re.I)
+SERIES = re.compile(rf"(?P<label>[가-힣]{{2,12}}(?:\s+[가-힣]{{2,12}})?|[A-Za-z][A-Za-z ]{{1,24}})\s*"
+                    rf"(?:은|는|이|가|:|=|are|were)?\s*(?:각각\s*)?"
+                    rf"(?P<values>(?:{NUMBER})(?:\s*[,，]\s*(?:{NUMBER})){{2,12}})\s*(?P<unit>{UNIT})", re.I)
+SHARED_DURATION = re.compile(rf"(?:모두|각각|each|all)\s*(?P<value>{NUMBER})\s*"
+                             rf"(?P<unit>시간|hours?|hr|h|days?|s|sec|seconds?)", re.I)
 
 
 def normalize_unit(raw: str) -> str:
     """Canonical spelling only; no unverified dimensional conversion."""
-    value = raw.strip().replace("³", "3").replace("²", "2").replace("^", "")
+    value = raw.strip().replace("³", "3").replace("²", "2").replace("^", "").replace("·", "*")
     value = value.replace("⁻¹", "-1")
     if value.endswith("-1"):
         return "1/" + value[:-2]
-    aliases = {"시간": "h", "hours": "h", "hour": "h", "hr": "h",
-               "분": "min", "달러": "USD", "md": "mD"}
+    aliases = {"시간": "h", "hours": "h", "hour": "h", "hr": "h", "days": "d", "day": "d",
+               "seconds": "s", "second": "s", "secs": "s", "sec": "s", "inch": "in",
+               "feet": "ft", "분": "min", "달러": "USD", "md": "mD", "md*ft": "mD*ft",
+               "md-ft": "mD*ft", "m3/day": "m3/d", "m3/hr": "m3/h", "stb/day": "stb/d",
+               "psi/day": "psi/d", "lb/ft": "lbf/ft"}
     return aliases.get(value.casefold(), value)
+
+
+def semantic_role(name: str, unit: str) -> str:
+    label = name.casefold()
+    if label in {"target_day", "target_x"}:
+        return "time_coordinate"
+    if "duration" in label or unit in {"h", "d", "s", "min"}:
+        return "duration"
+    if "rate" in label or unit in {"stb/d", "stb/h", "gpm", "m3/d", "m3/h"}:
+        return "rate"
+    for role, units in {"pressure": {"psi", "psia", "psig", "kPa", "Pa", "psi/d"},
+                        "length": {"ft", "in", "m", "mm"},
+                        "volume": {"ft3", "m3", "stb", "bbl", "L"},
+                        "power": {"kW", "hp"}, "energy": {"kWh", "kJ"},
+                        "mass": {"kg", "mg"}, "concentration": {"mg/L", "kg/m3"},
+                        "permeability": {"mD", "mD*ft"},
+                        "dimensionless_fraction": {"%", "dimensionless"}}.items():
+        if unit in units:
+            return role
+    if any(word in label for word in ("fraction", "ratio", "porosity", "saturation")):
+        return "dimensionless_fraction"
+    return "parameter" if not unit else "measurement"
 
 
 def _natural_name(label: str) -> str:
     original = label.strip().casefold()
     value = re.sub(r"(?:은|는|이|가|을|를|에서|에는)$", "", original).strip()
     aliases = {"유량": "q", "유량 q": "q", "속도": "speed", "허용 속도": "allowed_speed",
+               "입구": "inlet", "출구": "outlet",
                "깊이": "depth", "온도": "temperature", "밀도": "density",
                "부피": "volume", "저류층 부피": "bulk_volume", "벌크 부피": "bulk_volume",
                "압력": "pressure", "거리": "distance", "시간": "time", "비중": "SG",
@@ -110,10 +147,18 @@ class UserFactRecord(BaseModel):
     context_span: str | None = None
     topic_start: int
     topic_end: int
+    semantic_role: str = "parameter"
+    entity_id: str | None = None
+    dimension: str | None = None
+    value_span: tuple[int, int] | None = None
+    unit_span: tuple[int, int] | None = None
+    confidence: float = 1.0
+    extraction_method: str = "deterministic"
 
 
 class UserFactRegistry(BaseModel):
     records: list[UserFactRecord] = Field(default_factory=list)
+    rejection_reasons: list[str] = Field(default_factory=list)
 
     def add_literal_fallback(self, topic: str, candidates: list[dict[str, object]]) -> tuple[int, int]:
         """Admit model-extracted facts only when their exact numeric/unit quote exists."""
@@ -123,20 +168,37 @@ class UserFactRegistry(BaseModel):
             name = _name(str(candidate.get("name") or ""))
             raw_unit = str(candidate.get("unit") or "")
             raw_value = candidate.get("value")
-            if (not name or not quote or quote not in topic or
-                    raw_value is None or isinstance(raw_value, bool) or
-                    raw_unit and raw_unit not in quote):
+            if not name or not quote or quote not in topic or raw_value is None or isinstance(raw_value, bool):
+                self.rejection_reasons.append("value_not_literal")
+                rejected += 1
+                continue
+            if raw_unit and raw_unit not in quote:
+                self.rejection_reasons.append("unit_not_literal")
                 rejected += 1
                 continue
             try:
                 value = float(raw_value)
             except (TypeError, ValueError):
+                self.rejection_reasons.append("value_not_literal")
                 rejected += 1
                 continue
-            numeric_spans = [(match.group(), _number(match.group())) for match in re.finditer(NUMBER, quote)]
-            matching = [(raw, parsed) for raw, parsed in numeric_spans if parsed is not None and
+            numeric_spans = [(match, _number(match.group())) for match in re.finditer(NUMBER, quote)]
+            matching = [(match, parsed) for match, parsed in numeric_spans if parsed is not None and
                         math.isclose(parsed, value, rel_tol=0, abs_tol=1e-12)]
-            if not math.isfinite(value) or len(matching) != 1 or any(row.name == name for row in self.records):
+            if not math.isfinite(value) or len(matching) != 1:
+                self.rejection_reasons.append("value_not_literal")
+                rejected += 1
+                continue
+            if any(row.name == name for row in self.records):
+                self.rejection_reasons.append("duplicate_semantic_fact")
+                rejected += 1
+                continue
+            value_match = matching[0][0]
+            unit_match = re.search(re.escape(raw_unit), quote) if raw_unit else None
+            between = quote[value_match.end():unit_match.start()] if unit_match else ""
+            if unit_match and (unit_match.start() < value_match.end() or
+                               len(between.split()) > 1 or re.search(r"[,:;.]|\b(?:and|with)\b|이고|이며", between, re.I)):
+                self.rejection_reasons.append("value_unit_not_local")
                 rejected += 1
                 continue
             start = topic.index(quote)
@@ -144,8 +206,11 @@ class UserFactRegistry(BaseModel):
             self.records.append(UserFactRecord(
                 fact_id=f"USERF{len(self.records) + 1}", name=name, value=value,
                 unit=canonical, raw_unit=raw_unit, canonical_unit=canonical,
-                raw_value_text=matching[0][0], source_span=quote,
-                topic_start=start, topic_end=start + len(quote)))
+                raw_value_text=value_match.group(), source_span=quote,
+                topic_start=start, topic_end=start + len(quote), semantic_role=semantic_role(name, canonical),
+                dimension=semantic_role(name, canonical), value_span=(start + value_match.start(), start + value_match.end()),
+                unit_span=(start + unit_match.start(), start + unit_match.end()) if unit_match else None,
+                confidence=.7, extraction_method="literal_fallback"))
             accepted += 1
         return accepted, rejected
 
@@ -187,16 +252,63 @@ class UserFactRegistry(BaseModel):
                    (item.name == normalized_name or item.source_span in span or span in item.source_span)
                    for item in records):
                 return
+            value_start = span.find(raw)
+            unit_start = span.find(unit, value_start + len(raw)) if unit else -1
+            role = semantic_role(normalized_name, canonical)
+            entity = (normalized_name.rsplit("_", 1)[0]
+                      if normalized_name.startswith(("segment_", "pump_", "measurement_")) else
+                      "time_" + normalized_name.split("_", 1)[1]
+                      if normalized_name.startswith(("day_", "point_")) else None)
             records.append(UserFactRecord(
                 fact_id=f"USERF{len(records) + 1}", name=normalized_name, value=value,
                 unit=canonical, raw_unit=unit, canonical_unit=canonical,
                 raw_value_text=raw, source_span=span,
                 context_span=context, topic_start=start, topic_end=start + len(span),
+                semantic_role=role, entity_id=entity, dimension=role,
+                value_span=(start + value_start, start + value_start + len(raw)) if value_start >= 0 else None,
+                unit_span=(start + unit_start, start + unit_start + len(unit)) if unit_start >= 0 else None,
             ))
 
         for line in topic.splitlines(keepends=True):
             text = line.rstrip("\r\n")
             protected_spans: list[tuple[int, int]] = []
+            for found in SEGMENT_PAIR.finditer(text):
+                label = found["label"].strip()
+                ordinal = re.match(r"(첫|둘째|셋째|넷째)", label)
+                if ordinal:
+                    entity = f"segment_{('첫', '둘째', '셋째', '넷째').index(ordinal.group(1)) + 1}"
+                elif "구간" in label:
+                    entity = f"segment_{label[0]}"
+                else:
+                    entity = re.sub(r"\s+", "_", label.casefold())
+                unit = normalize_unit(found["unit"])
+                role = semantic_role(entity, unit)
+                name = entity if role == "duration" and entity.startswith("segment_") else f"{entity}_{role}"
+                add(name, found["value"], found["unit"],
+                    found.group(0), label, offset + found.start())
+                protected_spans.append(found.span())
+                tail = text[found.end():found.end() + 35]
+                duration = re.match(rf"\s*(?:로|으로|for|during|,)?\s*(?P<value>{NUMBER})\s*"
+                                    rf"(?P<unit>시간|hours?|hr|h|days?|s|sec|seconds?)", tail, re.I)
+                if duration and role != "duration":
+                    span = duration.group(0)
+                    add(f"{entity}_duration", duration["value"], duration["unit"], span,
+                        label, offset + found.end())
+                    protected_spans.append((found.end(), found.end() + duration.end()))
+            for found in SERIES.finditer(text):
+                values = list(re.finditer(NUMBER, found["values"]))
+                if not values:
+                    continue
+                role = semantic_role(found["label"], normalize_unit(found["unit"]))
+                entity = "pump" if re.search(r"펌프|pump", found["label"], re.I) else "measurement"
+                for index, item in enumerate(values, 1):
+                    add(f"{entity}_{index}_{role}", item.group(), found["unit"],
+                        found.group(0), found["label"], offset + found.start())
+                protected_spans.append(found.span())
+            for found in SHARED_DURATION.finditer(text):
+                add("shared_duration", found["value"], found["unit"], found.group(0),
+                    "all_entities", offset + found.start())
+                protected_spans.append(found.span())
             match = TUPLE_HEADER.search(text)
             if match:
                 columns = []
@@ -224,6 +336,8 @@ class UserFactRegistry(BaseModel):
                 for (column, unit), raw in zip(header, values):
                     add(f"{row.group('label')}_{column}", raw, unit, row.group(0), header_text, offset + row.start())
             for found in ASSIGNMENT.finditer(text):
+                if any(start < found.end() and found.start() < end for start, end in protected_spans):
+                    continue
                 if any(start <= found.start() < end for start, end in tuple_spans):
                     continue
                 if any(start < found.end() and found.start() < end for start, end in coordinate_spans):
@@ -263,6 +377,8 @@ class UserFactRegistry(BaseModel):
             if piecewise:
                 protected_spans.extend(found.span() for found in TIER.finditer(text))
             for found in KOREAN_ORDINAL.finditer(text):
+                if any(start < found.end() and found.start() < end for start, end in protected_spans):
+                    continue
                 ordinal = ("첫", "둘째", "셋째", "넷째", "다섯째", "여섯째", "일곱째", "여덟째", "아홉째", "열째").index(found["ordinal"]) + 1
                 add(f"segment_{ordinal}", found["value"], found["unit"],
                     found.group(0), None, offset + found.start())

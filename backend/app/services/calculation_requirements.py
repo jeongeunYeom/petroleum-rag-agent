@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 from app.services.evidence_fact_registry import EvidenceFactRegistry
 from app.services.formula_source_registry import FormulaSourceRegistry, FormulaSourceRecord, expression_variables
 from app.services.goal_tool_planner import InputFact, PythonAnalysisPlan
-from app.services.user_fact_registry import UNIT
+from app.services.user_fact_registry import UNIT, normalize_unit
 
 
 ALIASES: dict[str, tuple[str, ...]] = {
@@ -25,6 +25,18 @@ ALIASES: dict[str, tuple[str, ...]] = {
     "td": ("dimensionless_time",),
     "cd": ("dimensionless_storage", "dimensionless_wellbore_storage"),
     "pd": ("dimensionless_pressure",),
+    "wob": ("weight_on_bit", "bit_weight"),
+    "w": ("buoyant_unit_weight", "unit_weight"),
+    "kh": ("horizontal_permeability",),
+    "kv": ("vertical_permeability",),
+    "sim": ("initial_saturation", "initial_movable_saturation", "saturation_fraction"),
+    "qt": ("total_rate", "total_flow_rate"),
+    "qw": ("water_rate", "water_flow_rate"),
+    "psc": ("surface_pressure", "surface_casing_pressure"),
+    "pb": ("back_pressure",),
+    "pa": ("annular_pressure",),
+    "kfw": ("fracture_permeability_width",),
+    "klf": ("lateral_fracture_permeability",),
 }
 SUBSCRIPTS = str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789")
 
@@ -35,6 +47,34 @@ def normalize_symbol(name: str) -> str:
 
 def symbol_names(variable: str) -> set[str]:
     return {normalize_symbol(value) for value in (variable, *ALIASES.get(variable.casefold(), ()))}
+
+
+def infer_dimensionless(variable: str, source_text: str, user_label: str = "") -> dict[str, Any] | None:
+    """Only a local definition or explicit semantic role can waive a unit requirement."""
+    name = normalize_symbol(variable)
+    if name in {"sg", "phi", "porosity", "fraction", "ratio", "sw", "saturation"}:
+        return {"variable": variable, "dimension": "dimensionless", "source": "known_semantic_role",
+                "confidence": .95}
+    if re.search(r"fraction|ratio|saturation|dimensionless|공극률|포화도|비율|무차원", user_label, re.I):
+        return {"variable": variable, "dimension": "dimensionless", "source": "user_label",
+                "confidence": .9}
+    local = re.search(rf"\b{re.escape(variable)}\b.{{0,55}}?\b(?:fraction|ratio|saturation|dimensionless)\b|"
+                      rf"\b(?:fraction|ratio|saturation|dimensionless)\b.{{0,55}}?\b{re.escape(variable)}\b",
+                      source_text, re.I | re.S)
+    if local:
+        return {"variable": variable, "dimension": "dimensionless", "source": "source_definition",
+                "confidence": .85}
+    quotient = re.search(rf"\b{re.escape(variable)}\s*=\s*([A-Za-z][A-Za-z0-9_]*)\s*/\s*"
+                         r"([A-Za-z][A-Za-z0-9_]*)\b", source_text)
+    if quotient:
+        units = []
+        for operand in quotient.groups():
+            mention = re.search(rf"\b{re.escape(operand)}\s*\((?P<unit>{UNIT})\)", source_text, re.I)
+            units.append(normalize_unit(mention["unit"]) if mention else None)
+        if units[0] and units[0] == units[1]:
+            return {"variable": variable, "dimension": "dimensionless",
+                    "source": "same_dimension_quotient", "confidence": .8}
+    return None
 
 
 def scenario_fact_match(name: str, scenario: str) -> bool:
@@ -58,6 +98,40 @@ class FormulaSelectionRecord:
     selection_reason: str
     candidates_found: int
     candidate_scores: dict[str, int] = field(default_factory=dict)
+    lhs_match: bool = False
+    required_variable_match: int = 0
+    extra_variable_penalty: int = 0
+    term_count_match: bool = False
+    requested_structure_match: bool = False
+    negative_constraint_penalty: int = 0
+    nearby_definition_match: bool = False
+    same_sentence_match: bool = False
+    same_paragraph_match: bool = False
+    equation_number: str | None = None
+
+
+def _requested_term_count(text: str) -> int | None:
+    found = re.search(r"\b([2-9])[- ]?(?:term|component)\b|([2-9])\s*성분|"
+                      r"(두|세|네|다섯)\s*성분|"
+                      r"\b(two|three|four|five)[- ](?:term|component)\b", text, re.I)
+    if not found:
+        return None
+    return int(found.group(1) or found.group(2)) if found.group(1) or found.group(2) else {
+        "두": 2, "세": 3, "네": 4, "다섯": 5,
+        "two": 2, "three": 3, "four": 4, "five": 5}[(found.group(3) or found.group(4)).casefold()]
+
+
+def _additive_terms(formula: str) -> int:
+    import ast
+    try:
+        tree = ast.parse(formula.split("=", 1)[1].strip(), mode="eval").body
+    except (SyntaxError, IndexError):
+        return 0
+    def count(node: ast.AST) -> int:
+        if isinstance(node, ast.BinOp) and isinstance(node.op, (ast.Add, ast.Sub)):
+            return count(node.left) + count(node.right)
+        return 1
+    return count(tree)
 
 
 def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
@@ -71,7 +145,11 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
                  "using", "find", "given", "what", "식으로", "계산해줘", "내부", "자료에서"}
     context_tokens = {token for token in tokens if len(token) > 2 and token not in stopwords}
     source_by_id = {str(row.get("evidence_id")): str(row.get("text") or "") for row in evidence}
-    ranked: list[tuple[int, int, int, int, int, FormulaSourceRecord]] = []
+    requested_terms = _requested_term_count(intent)
+    excludes_reduced = bool(re.search(r"축약식\s*말고|두\s*성분.{0,12}혼동하지\s*마|"
+                                      r"not\s+(?:the\s+)?(?:two[- ]term|reduced\s+form)|simplified\s+form\s*말고|"
+                                      r"exclude\s+.{0,20}form|do\s+not\s+use", intent, re.I))
+    ranked: list[tuple[tuple[int, ...], FormulaSourceRecord, dict[str, Any]]] = []
     for record in FormulaSourceRegistry.from_evidence(evidence).records:
         if not record.expression_candidate:
             continue
@@ -80,7 +158,7 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
         if not variables:
             # A worked numeric example is not a reusable relation to bind.
             continue
-        overlap = sum(any(name == normalize_symbol(variable) or name.endswith(normalize_symbol(variable))
+        overlap = sum(any(name in symbol_names(variable) or name.endswith(normalize_symbol(variable))
                           for name in facts) for variable in variables)
         source_text = source_by_id.get(record.source_id, "")
         line_start = source_text.rfind("\n", 0, record.span_start) + 1
@@ -96,20 +174,36 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
         variable_score = 2 * overlap
         heading_score = min(4, len(context_tokens & heading_tokens))
         context_score = min(4, len(context_tokens & nearby_tokens))
-        score = lhs_score + variable_score + heading_score + context_score
+        terms = _additive_terms(record.expression_candidate)
+        term_match = requested_terms is not None and terms == requested_terms
+        extra = (sum(not any(name in symbol_names(variable) for name in facts)
+                     and normalize_symbol(variable) not in tokens for variable in variables)
+                 if facts else 0)
+        negative = 6 if excludes_reduced and terms == 2 else 0
+        structure = 4 if term_match else 0
+        score = lhs_score + variable_score + heading_score + context_score + structure - negative
+        details = {"lhs_match": bool(lhs_score), "required_variable_match": overlap,
+                   "extra_variable_penalty": extra, "term_count_match": term_match,
+                   "requested_structure_match": term_match, "negative_constraint_penalty": negative,
+                   "nearby_definition_match": bool(context_score),
+                   "same_sentence_match": bool(context_score), "same_paragraph_match": bool(heading_score),
+                   "equation_number": (re.search(r"\((\d{1,3})\)\s*$", source_text[:record.span_start]) or [None, None])[1]}
         if score >= 2:
-            ranked.append((score, lhs_score, variable_score, context_score, heading_score, record))
+            key = (score, lhs_score, overlap, -extra, int(term_match), -negative,
+                   context_score, heading_score)
+            ranked.append((key, record, details))
     ranked.sort(key=lambda row: row[0], reverse=True)
     if not ranked:
         return None, FormulaSelectionRecord(None, 0, 0, 0, 0, 0, 0, "no_relevant_literal_formula", 0)
     top = ranked[0]
-    runner = next((row for row in ranked[1:] if row[5].equation_ast != top[5].equation_ast), None)
-    margin = top[0] - runner[0] if runner else top[0]
-    selected = top[5] if top[0] >= 2 and (runner is None or margin >= 2) else None
-    reason = "unique_contextual_match" if selected else "ambiguous_literal_formulas"
-    return selected, FormulaSelectionRecord(selected.formula_id if selected else None, *top[:5],
-                                            margin, reason, len(ranked),
-                                            {row[5].formula_id: row[0] for row in ranked})
+    runner = next((row for row in ranked[1:] if row[1].equation_ast != top[1].equation_ast), None)
+    margin = top[0][0] - runner[0][0] if runner else top[0][0]
+    selected = top[1] if top[0][0] >= 2 and (runner is None or top[0] > runner[0]) else None
+    reason = "unique_structural_match" if selected else "ambiguous_literal_formulas"
+    return selected, FormulaSelectionRecord(
+        selected.formula_id if selected else None, top[0][0], top[0][1], top[0][2] * 2,
+        top[0][6], top[0][7], margin, reason, len(ranked),
+        {row[1].formula_id: row[0][0] for row in ranked}, **top[2])
 
 
 def select_formula_candidate(evidence: list[dict[str, Any]], intent: str,

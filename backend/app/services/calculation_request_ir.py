@@ -9,7 +9,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from app.models.goal_research_schemas import GoalCriterion, GoalResearchRequest
-from app.services.goal_intent import asks_for_api_gravity_calculation, user_equation
+from app.services.goal_intent import FormulaOrigin, asks_for_api_gravity_calculation, formula_origin, user_equation
 from app.services.user_fact_registry import UserFactRegistry
 from app.services.user_fact_registry import UNIT
 
@@ -25,8 +25,16 @@ class RequestedOutput(BaseModel):
     unit: str | None = None
 
 
+class OperationNode(BaseModel):
+    operator: str
+    input_fact_ids: list[str] = Field(default_factory=list)
+    output_name: str
+    output_unit: str | None = None
+    conversion_steps: list[str] = Field(default_factory=list)
+
+
 class CalculationRequestIR(BaseModel):
-    schema_version: int = 2
+    schema_version: int = 3
     request_id: str = "CRI-1"
     computation_class: Literal["generic_arithmetic", "generic_statistics", "specialist_formula", "mixed"]
     requested_operation_types: list[str] = Field(default_factory=list)
@@ -48,9 +56,20 @@ class CalculationRequestIR(BaseModel):
     requires_domain_formula: bool = False
     requires_user_formula: bool = False
     requires_external_evidence: bool = False
+    operation_nodes: list[OperationNode] = Field(default_factory=list)
 
 
 OPERATIONS = {
+    "unit_conversion": r"\b(?:convert|conversion|per hour|per day)\b|시간당|일당|단위\s*변환|으로\s*바꿔",
+    "centered_difference": r"\b(?:centered|central)\s+(?:difference|derivative)\b|중심\s*(?:차분|미분)",
+    "finite_difference": r"\bfinite\s+difference\b|\b(?:pressure|rate)\s+(?:change\s+)?rate\b|유한\s*차분|압력\s*변화율|변화\s*속도",
+    "linear_regression_slope": r"\b(?:linear\s+regression\s+slope|least[- ]squares\s+slope)\b|선형\s*회귀\s*기울기",
+    "cylinder_volume": r"\b(?:cylinder|cylindrical)\s+volume\b|원기둥\s*부피|원통\s*부피",
+    "power_times_duration": r"\b(?:energy\s+use|power\s*(?:times|×|\*)\s*time|power\s+consumption)\b|전력.{0,16}(?:시간|에너지)|소비\s*에너지",
+    "concentration_mass_per_volume": r"\b(?:mass\s+concentration|concentration\s+from\s+mass)\b|질량\s*농도|농도를\s*계산",
+    "weighted_average_by_duration": r"\b(?:time[- ]weighted|duration[- ]weighted)\s+(?:average|mean)\b|시간\s*가중\s*평균|가중\s*시간\s*평균",
+    "percentage_decrease": r"\bpercent(?:age)?\s+decrease\b|감소율|몇\s*퍼센트\s*감소",
+    "net_difference": r"\bnet\s+(?:difference|change)\b|순\s*변화|순\s*차이",
     "add": r"\b(?:add|addition)\b|더하기",
     "subtract": r"\b(?:subtract|subtraction)\b|빼기",
     "multiply": r"\b(?:multiply|multiplication|product)\b|곱하기",
@@ -149,7 +168,22 @@ def parse_request_ir(request: GoalResearchRequest, criteria: list[GoalCriterion]
         )
     goal = " ".join([request.goal or request.topic, *(item.description for item in criteria if item.required)])
     literal_user_formula = user_equation(f"{request.topic} {request.goal or ''}")
+    if formula_origin(f"{request.topic} {request.goal or ''}") == FormulaOrigin.KB_REFERENCED:
+        literal_user_formula = None
     found = [name for name, pattern in OPERATIONS.items() if re.search(pattern, goal, re.I)]
+    for dominant, subsumed in (("weighted_average_by_duration", "weighted_average"),
+                               ("cylinder_volume", "unit_conversion"),
+                               ("weighted_average_by_duration", "mean"),
+                               ("unit_conversion", "mean"),
+                               ("finite_difference", "percent_change"),
+                               ("finite_difference", "difference"),
+                               ("centered_difference", "finite_difference"),
+                               ("centered_difference", "difference"),
+                               ("linear_regression_slope", "linear_regression"),
+                               ("percentage_decrease", "percent_change"),
+                               ("net_difference", "difference")):
+        if dominant in found and subsumed in found:
+            found.remove(subsumed)
     if "std_population" in found or "std_sample" in found:
         found = [name for name in found if name != "std_unspecified"]
     if "variance_population" in found:
@@ -164,12 +198,16 @@ def parse_request_ir(request: GoalResearchRequest, criteria: list[GoalCriterion]
     phrase_match = re.search(r"\b(?:calculate|compute|estimate|derive|report)\s+(?:the\s+)?"
                              r"([A-Za-z][A-Za-z0-9_]*(?:\s+[A-Za-z][A-Za-z0-9_]*){0,2})"
                              r"(?=\s+(?:using|from|for|in|then|with)\b|[,.;]|$)", goal, re.I)
-    explicit_specialist = bool(re.search(r"\b(?:equation|formula|correlation|scientific relation|productivity index|dimensionless pressure)\b|공식|수식|관계식", goal, re.I))
+    explicit_specialist = bool(re.search(r"\b(?:equation|formula|correlation|scientific relation|productivity index|dimensionless pressure)\b|공식|수식|관계식", goal, re.I)
+                               or formula_origin(goal) == FormulaOrigin.KB_REFERENCED)
     specialist = explicit_specialist or (target != "result" and target.casefold() not in GENERIC
                                           and target.casefold() not in {"values", "measurements", "statistics", "results",
                                                                           "addition", "subtraction", "multiplication", "division",
                                                                           "product", "quotient", "normalize"})
-    if "linear_regression" in found and not explicit_specialist:
+    if any(item in found for item in {"linear_regression", "unit_conversion", "linear_regression_slope",
+                                      "finite_difference", "centered_difference", "percentage_decrease",
+                                      "net_difference", "cylinder_volume", "power_times_duration",
+                                      "concentration_mass_per_volume", "weighted_average_by_duration"}) and not explicit_specialist:
         specialist = False
     concepts = [target] if target != "result" else []
     if specialist and phrase_match:
@@ -226,7 +264,9 @@ def parse_request_ir(request: GoalResearchRequest, criteria: list[GoalCriterion]
         time_points=[row.fact_id for row in parsed_facts if row.name in {"start_time", "end_time"}],
         requires_domain_formula=specialist and not bool(literal_user_formula),
         requires_user_formula=bool(literal_user_formula),
-        requires_external_evidence=bool(request.use_external))
+        requires_external_evidence=bool(request.use_external),
+        operation_nodes=[OperationNode(operator=name, input_fact_ids=[row.fact_id for row in parsed_facts],
+                                       output_name=name) for name in found])
 
 
 async def resolve_request_ir(request: GoalResearchRequest, criteria: list[GoalCriterion], ollama: object) -> CalculationRequestIR | None:

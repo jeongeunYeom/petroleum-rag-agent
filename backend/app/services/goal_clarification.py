@@ -23,7 +23,7 @@ _ENGLISH_STEP = re.compile(rf"\bsteps?\s+(?:of\s+)?(?P<step>{_NUMBER})", re.I)
 _ENGLISH_RANGE = re.compile(rf"(?P<name>[A-Za-z][A-Za-z0-9_]*)\s+from\s+"
                             rf"(?P<start>{_NUMBER})\s+to\s+(?P<stop>{_NUMBER})", re.I)
 _NAMED_RANGE = re.compile(
-    rf"(?P<name>[A-Za-z][A-Za-z0-9_]*)\s*(?:를|을|은|는|이|가)?\s*"
+    rf"(?P<name>[A-Za-z][A-Za-z0-9_]*)\s*(?:=|를|을|은|는|이|가)?\s*"
     rf"(?P<start>{_NUMBER})\s*(?:~|∼|부터|에서|to)\s*(?P<stop>{_NUMBER})", re.I,
 )
 
@@ -237,13 +237,16 @@ def calculation_readiness(formula: FormulaSourceRecord | None, evidence: list[di
     if source is None or not source_contains_equation(formula, str(source.get("text") or "")):
         return ["실제 식이 포함된 근거 구간"]
     missing = []
-    dimensionless = {"sg", "specificgravity", "phi", "porosity", "fraction", "ratio"}
+    from app.services.calculation_requirements import infer_dimensionless, symbol_names
+    source_text = str(source.get("text") or "")
     for variable in sorted(expression_variables(formula.expression_candidate or "") or set()):
         facts = [fact for fact in [*users.records, *derived_facts]
-                 if normalize_symbol(fact.name) == normalize_symbol(variable)]
+                 if normalize_symbol(fact.name) in symbol_names(variable)]
+        inferred = infer_dimensionless(variable, source_text,
+                                       facts[0].source_span if len(facts) == 1 and hasattr(facts[0], "source_span") else "")
         if len(facts) != 1:
-            suffix = "값" if normalize_symbol(variable) in dimensionless else "값과 단위"
+            suffix = "값" if inferred else "값과 단위"
             missing.append(f"{variable} {suffix}" if not facts else f"{variable} 값 확인")
-        elif not facts[0].unit and normalize_symbol(variable) not in dimensionless:
+        elif not facts[0].unit and not inferred:
             missing.append(f"{variable} 단위")
     return missing

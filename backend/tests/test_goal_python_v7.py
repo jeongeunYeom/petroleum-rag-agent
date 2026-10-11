@@ -237,7 +237,7 @@ def test_generic_linear_regression_is_source_bound_and_unit_typed(tmp_path):
     graph = build_requirement_graph(plan, evidence)
     contract = build_contract_skeleton(ir, checklist_from_ir(ir), plan, graph)
     assert validate_contract(contract, plan, graph, checklist_from_ir(ir)) is None
-    assert next(item.unit for item in contract.required_outputs if item.name == "slope") == "psi/days"
+    assert next(item.unit for item in contract.required_outputs if item.name == "slope") == "psi/d"
     settings = Settings(data_dir=tmp_path / "data", agent_workspace_dir=tmp_path / "workspace")
     trace = PythonExecutionTrace(requirement_graph=graph.model_dump(mode="json"), source_complete=True,
                                  calculation_contract_schema_version=3)
