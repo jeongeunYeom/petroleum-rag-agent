@@ -1,0 +1,971 @@
+{
+  "task_id": "TC03",
+  "question": "Does 'underbalanced' mean the mud hydrostatic pressure is above formation pressure? Use the drilling example's sign convention.",
+  "model": "qwen3:8b",
+  "retrieval_mode": "hybrid",
+  "web_enabled": false,
+  "wall_seconds": 29.391,
+  "result": {
+    "run_id": "GR-20261011-175908-1B6FD7",
+    "topic": "Does 'underbalanced' mean the mud hydrostatic pressure is above formation pressure? Use the drilling example's sign convention.",
+    "goal": "Does 'underbalanced' mean the mud hydrostatic pressure is above formation pressure? Use the drilling example's sign convention.",
+    "expected_result": null,
+    "run_status": "completed",
+    "status": "achieved",
+    "stop_reason": "goal_achieved",
+    "final_answer": "That premise is incorrect.\nA kick may occur when formation (pore) pressure exceeds mud hydrostatic pressure and fluid enters the wellbore. [KB3]",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 1.0,
+    "goal_coverage_percent": 100.0,
+    "criteria_source": "inferred_premise",
+    "criteria_hash": "812bb3d49e795ee30c1ee0b4d672e6e4fe8f3051fa33938626138215ee4b7233",
+    "criteria": [
+      {
+        "criterion_id": "C1",
+        "status": "met",
+        "reason": "The false premise was corrected with cited evidence.",
+        "supporting_evidence": [
+          "KB3"
+        ]
+      },
+      {
+        "criterion_id": "C2",
+        "status": "met",
+        "reason": "The false premise was corrected with cited evidence.",
+        "supporting_evidence": [
+          "KB3"
+        ]
+      },
+      {
+        "criterion_id": "C3",
+        "status": "met",
+        "reason": "The false premise was corrected with cited evidence.",
+        "supporting_evidence": [
+          "KB3"
+        ]
+      }
+    ],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "Explicitly reject the false premise",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "State the corrected engineering relation",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "Cite evidence supporting the correction",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 3,
+    "current_iteration": 3,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "source_evidence_needed",
+        "started_at": "2026-10-11T17:59:08.638148Z",
+        "finished_at": "2026-10-11T17:59:16.121174Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "query": "drilling underbalanced mean mud hydrostatic pressure above formation use example\ndrilling drilling underbalanced mean mud hydrostatic",
+          "cache_hit": false,
+          "relevance_confidence": "HIGH"
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "verify",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "verify_current_support",
+        "started_at": "2026-10-11T17:59:16.147058Z",
+        "finished_at": "2026-10-11T17:59:37.295280Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 1.0,
+        "failure_reason": null,
+        "details": {
+          "engineering_validation_passed": true,
+          "goal_achieved": true
+        }
+      },
+      {
+        "iteration": 3,
+        "action_id": "ACT-3",
+        "action_type": "synthesize",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "goal_achieved",
+        "started_at": "2026-10-11T17:59:37.322957Z",
+        "finished_at": "2026-10-11T17:59:37.326939Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 1.0,
+        "coverage_after": 1.0,
+        "failure_reason": null,
+        "details": {}
+      },
+      {
+        "iteration": 3,
+        "action_id": "ACT-STOP-3",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "goal_achieved",
+        "started_at": "2026-10-11T17:59:37.339880Z",
+        "finished_at": "2026-10-11T17:59:37.339880Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 1.0,
+        "coverage_after": 1.0,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "met",
+          "C2": "met",
+          "C3": "met"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 1.0,
+        "goal_achieved": true,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "met",
+          "C2": "met",
+          "C3": "met"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 1.0,
+        "goal_achieved": true,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "met",
+          "C2": "met",
+          "C3": "met"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 1.0,
+        "goal_achieved": true,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 75,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p75:c1",
+        "score": 0.04012882,
+        "excerpt": "ydrostatic \npressure exerted by the mud colom.   If this is so, formation fluids will enter the \nwellbore and start displacing mud from the hole.  Any influx of formation fluids (oil, \ngas or water) in the borehole is known as a kick. \nThe well control system is designed to:\n•\t Detect a kick\n•\t Close-in the well at surface\n• Remove the formation fluid which has flowed into the well\n•\t Make the well safe\nFailure to do this results in the uncontrolled flow of fluids - known as a blow-out \n- which may cause loss of lives and equipment, damage to the environment and the \nloss of oil or gas reserves.  Primary well control is achieved by ensuring that the \nhydrostatic mud pressure is sufficient to overcome formation pressure.   Hydrostatic \npressure is calculated from:\n\t \t\n\t P  =  0.052 x MW x TVD\nwhere:\nP   \t =\t hydrostatic pressure (psi)\nMW  \t=\tmud weight (ppg)\nTVD \t=\t vertical height of mud column (ft)\nRig Components"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+        "page": 526,
+        "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p526:c0",
+        "score": 0.06504495,
+        "excerpt": "Chapter 12\nUnderbalanced Drilling\nSteve Nas, Weatherford Underbalanced Systems\n12.1 What is Underbalanced Drilling?\nIn underbalanced drilling (UBD), the hydrostatic head of the drilling fluid is intentionally de-\nsigned to be lower than the pressure of the formations that are being drilled. The hydrostatic\nhead  of  the  fluid  may  naturally  be  less  than  the  formation  pressure,  or  it  can  be  induced  by\nadding natural gas, nitrogen, or air to the liquid phase of the drilling fluid. Whether the under-\nbalanced status is induced or natural, the result may be an influx of formation fluids that must\nbe circulated from the well and controlled at surface.\nThe effective downhole circulating pressure of the drilling fluid is equal to the hydrostatic\npressure  of  the  fluid  column,  plus  associated  friction  pressures,  plus  any  pressure  applied  on\nsurface.\nOverbalanced Drilling (OBD) : Preservoir < Pbottom hole = Phydrostatic + Pfriction + Pchoke.\nUBD : Preservoir > Pbottom hole = Phydrostatic + Pfriction + Pchoke.\nConventionally, wells are drilled overbalanced. In these wells, a column of fluid of a cer-\ntain  density  in  the  hole  provides  the  primary  well-control"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+        "page": 534,
+        "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p534:c1",
+        "score": 0.06402049,
+        "excerpt": "ing a UBD Operation. A basic four-step process can be applied to determine the\noptions and requirements for drilling underbalanced:\n1. Determine BHP requirements.\n2. Identify the drilling fluid options.\n3. Establish the well design and perform flowing modeling.\n4. Select the surface equipment.\n12.1.10 BHP  Requirements.  In  OBD,  a  mud  weight  is  selected  that  provides  a  hydrostatic\npressure of 200 to 1,000 psi above the reservoir pressure. In UBD, we select a fluid that pro-\nvides  a  hydrostatic  pressure  of  around  200  psi  below  the  initial  reservoir  pressure.  This\nprovides a good starting point for the selection of a fluid system. During the feasibility study,\nthis drawdown is normally further refined, depending on the expected reservoir inflow and oth-\ner  drilling  parameters.  This  first  look  provides  an  indication  if  the  fluid  should  be  foam  or\ngasified or if the well is drilling with a single-phase fluid (Fig. 12.4).\nFig. 12.4—BHP requirements\nChapter 12—Underbalanced Drilling\nII-527\nSHORTMAN UTT\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 13\nChapter 11"
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+        "page": 528,
+        "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p528:c2",
+        "score": 0.05854916,
+        "excerpt": "le and then helps minimize sticking of conventional drillpipe.\nNo Losses. In  general,  a  reduction  of  the  hydrostatic  pressure  in  the  annulus  reduces  the\nfluid losses into a reservoir formation. In UBD, the hydrostatic pressure is reduced to a level at\nwhich losses do not occur. This is especially important in the protection of fractures in a reservoir.\nFig. 12.1b—Pressures in underbalanced drilling.\nChapter 12—Underbalanced Drilling\nII-521\nSHORTMAN UTT\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 13\nChapter 11"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+        "page": 423,
+        "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p423:c1",
+        "score": 0.06281683,
+        "excerpt": "servoirs for which underbalanced drilling (UBD) is likely to be successful include:\n•\nHighly permeable consolidated intercrystalline sands and carbonates\n•\nHighly permeable/poorly consolidated sands\n•\nMacro-fractured formations\n•\nUnderpressured/depleted formations where conventional drilling would exert\nmore than 1,000 psi hydrostatic overbalanced pressures\nThere are also some reservoirs where underbalanced drilling might be successful:\n•\nFormations containing significant concentrations of water-based mud filtrate\nsensitive materials\n•\nFormations exhibiting severe potential incompatibility issues with water based\nmud filtrates\n•\nDehydrated formations exhibiting sub-irreducible water saturation or\nhydrocarbon saturation\nFigure 33\nProduction decline"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 0.003445,
+      "retrieval_seconds": 7.467091,
+      "llm_generation_seconds": 21.139454,
+      "python_seconds": 0.0,
+      "verification_seconds": 21.147903,
+      "evaluation_seconds": 17.757552,
+      "synthesis_seconds": 3.381871,
+      "retrieve_action_seconds": 7.483317,
+      "verify_action_seconds": 21.147898,
+      "synthesize_action_seconds": 0.003776,
+      "elapsed_seconds": 28.725667,
+      "total_seconds": 28.725951,
+      "message_parsing_seconds": 0.000284
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "intent_route": "knowledge_qa",
+      "intent": {
+        "selected_intent": "knowledge_qa",
+        "intent_reason": "knowledge_question",
+        "premise_cue_detected": false,
+        "formula_origin": "unknown"
+      },
+      "source_requirement": "none",
+      "fact_extraction": {
+        "deterministic_fact_count": 0,
+        "fallback_fact_count": 0,
+        "rejected_fact_count": 0,
+        "fact_rejection_reasons": [],
+        "normalized_units": {}
+      },
+      "calculation": {
+        "requested_operation_family": "",
+        "direct_calc_ready": false,
+        "missing_operands": [],
+        "selected_input_fact_ids": []
+      },
+      "formula": {
+        "candidates_found": 0,
+        "selected_formula_id": null
+      },
+      "transition": {
+        "formula_ready": false,
+        "calculation_ready": false,
+        "blocking_reason": null
+      },
+      "retrieval_rerank": {
+        "domain_hint": "drilling",
+        "candidate_documents": [
+          "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+          "Heriot-Watt_University_-_Production_Technology_I.pdf",
+          "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+          "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "Heriot_Watt_University_-_Formation_Evaluation.pdf"
+        ],
+        "scores": [
+          {
+            "id": "KB1",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 526,
+            "score": 13.0,
+            "concept_matches": [
+              "drilling",
+              "underbalanced",
+              "hydrostatic",
+              "pressure",
+              "formation",
+              "sign",
+              "convention"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB2",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 534,
+            "score": 12.5,
+            "concept_matches": [
+              "drilling",
+              "underbalanced",
+              "mud",
+              "hydrostatic",
+              "pressure",
+              "above",
+              "sign"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB3",
+            "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+            "page": 423,
+            "score": 10.3333,
+            "concept_matches": [
+              "drilling",
+              "underbalanced",
+              "mud",
+              "hydrostatic",
+              "pressure",
+              "formation",
+              "sign",
+              "convention"
+            ],
+            "relation_matches": [],
+            "family": "production",
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB4",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 528,
+            "score": 12.25,
+            "concept_matches": [
+              "drilling",
+              "underbalanced",
+              "hydrostatic",
+              "pressure",
+              "formation",
+              "convention"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB5",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 527,
+            "score": 12.2,
+            "concept_matches": [
+              "drilling",
+              "underbalanced",
+              "hydrostatic",
+              "pressure",
+              "above",
+              "formation",
+              "use",
+              "convention"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB6",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 530,
+            "score": 10.1667,
+            "concept_matches": [
+              "drilling",
+              "underbalanced",
+              "pressure",
+              "use",
+              "example"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB7",
+            "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "page": 45,
+            "score": 10.1429,
+            "concept_matches": [
+              "drilling",
+              "mud",
+              "hydrostatic",
+              "pressure",
+              "formation",
+              "sign"
+            ],
+            "relation_matches": [],
+            "family": "well_testing",
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB8",
+            "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+            "page": 424,
+            "score": 10.125,
+            "concept_matches": [
+              "drilling",
+              "underbalanced",
+              "mean",
+              "mud",
+              "use",
+              "convention"
+            ],
+            "relation_matches": [],
+            "family": "production",
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB9",
+            "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "page": 417,
+            "score": 8.1111,
+            "concept_matches": [
+              "mud",
+              "hydrostatic",
+              "pressure",
+              "formation",
+              "use"
+            ],
+            "relation_matches": [],
+            "family": "well_testing",
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB10",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 527,
+            "score": 12.1,
+            "concept_matches": [
+              "drilling",
+              "underbalanced",
+              "mud",
+              "hydrostatic",
+              "pressure",
+              "formation",
+              "convention"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB11",
+            "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+            "page": 75,
+            "score": 19.0909,
+            "concept_matches": [
+              "mud",
+              "hydrostatic",
+              "pressure",
+              "formation",
+              "use",
+              "sign"
+            ],
+            "relation_matches": [],
+            "family": "drilling",
+            "confidence": "HIGH"
+          },
+          {
+            "id": "KB12",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 530,
+            "score": 10.0833,
+            "concept_matches": [
+              "drilling",
+              "underbalanced",
+              "pressure",
+              "use",
+              "sign"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB13",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 528,
+            "score": 12.0769,
+            "concept_matches": [
+              "drilling",
+              "underbalanced",
+              "hydrostatic",
+              "pressure",
+              "formation",
+              "use",
+              "convention"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB14",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 193,
+            "score": 12.0714,
+            "concept_matches": [
+              "drilling",
+              "mud",
+              "hydrostatic",
+              "pressure",
+              "formation",
+              "use"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB15",
+            "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+            "page": 87,
+            "score": 10.0667,
+            "concept_matches": [
+              "drilling",
+              "mud",
+              "hydrostatic",
+              "pressure",
+              "formation"
+            ],
+            "relation_matches": [],
+            "family": "petrophysics",
+            "confidence": "MEDIUM"
+          }
+        ],
+        "selected_sources": [
+          "KB1",
+          "KB11",
+          "KB2",
+          "KB3",
+          "KB4"
+        ],
+        "dropped_sources": [
+          "KB5",
+          "KB6",
+          "KB7",
+          "KB8",
+          "KB9",
+          "KB10",
+          "KB12",
+          "KB13",
+          "KB14",
+          "KB15"
+        ],
+        "confidence": "HIGH"
+      },
+      "retrieval_rerank_history": [
+        {
+          "domain_hint": "drilling",
+          "candidate_documents": [
+            "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "Heriot-Watt_University_-_Production_Technology_I.pdf",
+            "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+            "Heriot_Watt_University_-_Formation_Evaluation.pdf"
+          ],
+          "scores": [
+            {
+              "id": "KB1",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 526,
+              "score": 13.0,
+              "concept_matches": [
+                "drilling",
+                "underbalanced",
+                "hydrostatic",
+                "pressure",
+                "formation",
+                "sign",
+                "convention"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB2",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 534,
+              "score": 12.5,
+              "concept_matches": [
+                "drilling",
+                "underbalanced",
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "above",
+                "sign"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB3",
+              "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+              "page": 423,
+              "score": 10.3333,
+              "concept_matches": [
+                "drilling",
+                "underbalanced",
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "formation",
+                "sign",
+                "convention"
+              ],
+              "relation_matches": [],
+              "family": "production",
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB4",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 528,
+              "score": 12.25,
+              "concept_matches": [
+                "drilling",
+                "underbalanced",
+                "hydrostatic",
+                "pressure",
+                "formation",
+                "convention"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB5",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 527,
+              "score": 12.2,
+              "concept_matches": [
+                "drilling",
+                "underbalanced",
+                "hydrostatic",
+                "pressure",
+                "above",
+                "formation",
+                "use",
+                "convention"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB6",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 530,
+              "score": 10.1667,
+              "concept_matches": [
+                "drilling",
+                "underbalanced",
+                "pressure",
+                "use",
+                "example"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB7",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 45,
+              "score": 10.1429,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "formation",
+                "sign"
+              ],
+              "relation_matches": [],
+              "family": "well_testing",
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB8",
+              "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+              "page": 424,
+              "score": 10.125,
+              "concept_matches": [
+                "drilling",
+                "underbalanced",
+                "mean",
+                "mud",
+                "use",
+                "convention"
+              ],
+              "relation_matches": [],
+              "family": "production",
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB9",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 417,
+              "score": 8.1111,
+              "concept_matches": [
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "formation",
+                "use"
+              ],
+              "relation_matches": [],
+              "family": "well_testing",
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB10",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 527,
+              "score": 12.1,
+              "concept_matches": [
+                "drilling",
+                "underbalanced",
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "formation",
+                "convention"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB11",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 75,
+              "score": 19.0909,
+              "concept_matches": [
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "formation",
+                "use",
+                "sign"
+              ],
+              "relation_matches": [],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB12",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 530,
+              "score": 10.0833,
+              "concept_matches": [
+                "drilling",
+                "underbalanced",
+                "pressure",
+                "use",
+                "sign"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB13",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 528,
+              "score": 12.0769,
+              "concept_matches": [
+                "drilling",
+                "underbalanced",
+                "hydrostatic",
+                "pressure",
+                "formation",
+                "use",
+                "convention"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB14",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 193,
+              "score": 12.0714,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "formation",
+                "use"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB15",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 87,
+              "score": 10.0667,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "formation"
+              ],
+              "relation_matches": [],
+              "family": "petrophysics",
+              "confidence": "MEDIUM"
+            }
+          ],
+          "selected_sources": [
+            "KB1",
+            "KB11",
+            "KB2",
+            "KB3",
+            "KB4"
+          ],
+          "dropped_sources": [
+            "KB5",
+            "KB6",
+            "KB7",
+            "KB8",
+            "KB9",
+            "KB10",
+            "KB12",
+            "KB13",
+            "KB14",
+            "KB15"
+          ],
+          "confidence": "HIGH"
+        }
+      ],
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": 3,
+      "total_research_seconds": 28.725667,
+      "python_seconds": 0.0
+    },
+    "validation": {
+      "engineering_validation_passed": true,
+      "engineering_contradiction_count": 0,
+      "unsupported_engineering_claim_count": 0,
+      "citation_semantic_passed": true,
+      "unsupported_citation_claim_count": 0,
+      "unsupported_numeric_claim_count": 0,
+      "criteria_frozen": true
+    },
+    "cancel_requested": false,
+    "error": null
+  }
+}

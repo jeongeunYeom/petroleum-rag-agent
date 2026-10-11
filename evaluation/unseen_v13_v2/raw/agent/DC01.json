@@ -1,0 +1,893 @@
+{
+  "task_id": "DC01",
+  "question": "Three injectors delivered 1,260, 1,410 and 1,530 bbl yesterday. Give their combined injected volume in bbl. The separator ran at 190 psi, which is irrelevant.",
+  "model": "qwen3:8b",
+  "retrieval_mode": "hybrid",
+  "web_enabled": false,
+  "wall_seconds": 19.061,
+  "result": {
+    "run_id": "GR-20261011-175503-33839E",
+    "topic": "Three injectors delivered 1,260, 1,410 and 1,530 bbl yesterday. Give their combined injected volume in bbl. The separator ran at 190 psi, which is irrelevant.",
+    "goal": "Three injectors delivered 1,260, 1,410 and 1,530 bbl yesterday. Give their combined injected volume in bbl. The separator ran at 190 psi, which is irrelevant.",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "insufficient_evidence",
+    "final_answer": "The retrieved sources did not directly support an answer.",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 0.25,
+    "goal_coverage_percent": 25.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "4897b8dfba775a3b8424e279a9357bbfa5e6b9b74ee1509e9aa6935864d39f5d",
+    "criteria": [
+      {
+        "criterion_id": "C1",
+        "status": "blocked",
+        "reason": "The numerical result has not been validated.",
+        "supporting_evidence": []
+      },
+      {
+        "criterion_id": "C2",
+        "status": "partial",
+        "reason": "The numerical result has not been validated.",
+        "supporting_evidence": []
+      }
+    ],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "Accurate calculation of the combined injected volume from the three injectors.",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "Correct identification and exclusion of irrelevant information (e.g., separator pressure).",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 2,
+    "current_iteration": 2,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "completed",
+        "reason_code": "source_evidence_needed",
+        "started_at": "2026-10-11T17:55:05.858051Z",
+        "finished_at": "2026-10-11T17:55:13.962093Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "query": "production three injectors delivered bbl yesterday give their combined injected\nproduction production three injectors delivered bbl",
+          "cache_hit": false,
+          "relevance_confidence": "HIGH"
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "verify",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "completed",
+        "reason_code": "verify_current_support",
+        "started_at": "2026-10-11T17:55:13.996095Z",
+        "finished_at": "2026-10-11T17:55:22.773328Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.25,
+        "failure_reason": null,
+        "details": {
+          "engineering_validation_passed": true,
+          "goal_achieved": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-STOP-2",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "insufficient_evidence",
+        "started_at": "2026-10-11T17:55:22.803065Z",
+        "finished_at": "2026-10-11T17:55:22.803065Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.25,
+        "coverage_after": 0.25,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "blocked",
+          "C2": "partial"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "Direct source support needed for the answer"
+        ],
+        "coverage": 0.25,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "blocked",
+          "C2": "partial"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "Direct source support needed for the answer"
+        ],
+        "coverage": 0.25,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+        "page": 348,
+        "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p348:c0",
+        "score": 0.01492537,
+        "excerpt": "40\n               \nBase Fluid\nProppant\nPump Rate\nWellhead Treating Pressure\nCost\nFracture\nLength\nHeight\nWidth\nDimensionless Fracture\nConductivity\nProduction Improvement\nFactor\n6000 bbl\n1,000,000 lb\n30 - 50 bbl / min\n10,000 psi\n1,000,000 US$ (offshore, UK Southern North Sea)\n350,000    US$ (land, USA)\n500 ft\n200 ft\n0.5 - 2 inch\n3 - 100\n2 - 5\n9. OPTIMISATION OF HYDRAULIC FRACTURE DIMENSIONS\nThe expense of carrying out a hydraulic fracturing treatment dictates that the propped\nhydraulic fracture dimensions are carefully optimised to generate the maximum\ndiscounted net present value (NPV) for the stimulation project.  Part of this process\nis illustrated in Figure 29.  It consists of two strands, (A) and (B), which are combined\nto generate a plot of NPV against fracture length.\nA well performance prediction computer program is used to generate a plot of\nwell production rate against time for various fracture lengths (Lf) (see Figure 29a).\nWe assume a high {CFD > 15} dimensionless fracture conductivity at this stage.  As\ndiscussed in section (6.3) longer fractures will give higher production rates.  These\nfigures can be translated into a plot of cumulative production against time, for eac"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+        "page": 452,
+        "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p452:c0",
+        "score": 0.01515152,
+        "excerpt": "1\n24\n8. TEST SEPARATOR\nThe production from each well has to be regularly measured accurately as part of the\nfield's well surveillence programme. Accurate three phase flow meters have only\nrecently become available, so traditionally a small three phase separator (the test\nseparator)  has been used for this purpose. Here, the well production is split into its\nconstituent phases (oil/water/gas); the flow rates of each measured separately with\nconventional orifice meters. The oil and water flows recombined for further processing.\n                     \nGas Out\nGas Measurement\nWater Flow Meters\nOil Flow Meters\nBSW\nInterface\nControllers\nRecombined\nFlow\nInlet\nfrom Well\nOrifice Box\nGas \nOil\nWater\nMulti phase flow meters are now becoming reliable. This is reducing the need to install\na test separator (platform space and weight saving) as well as the need to install a\nsecond (test) pipeline in subsea field developments between the manifold and the host\nfacility (module 10, figure 7).\n9. COMPRESSORS\nThe gas liberated from the produced fluids must be delivered to the export pipeline at\nthe specified pressure.  It is flashed from the produced liquid at a variety of pressures\nduring the productio"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+        "page": 99,
+        "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p99:c0",
+        "score": 0.01470588,
+        "excerpt": "Department of Petroleum Engineering,  Heriot-Watt University\n55\n33\nPerformance of Flowing Wells\nThe higher GLR case of 1000 SCF / BBL is illustrated in Figure 27 but there are a\nnumber of changes compared to the 400 SCF / bbl case in Figure 26:\n(1)\nOverall, all tubing sizes require a lower flowing bottom hole pressure in the low\nproduction case with 1000 SCF / bbl compared to the 400 SCF / bbl, ie, reduced\nslippage because of the higher in situ tubing velocities due to the higher gas flowrate.\n(2)\nFor all tubing sizes except the 1.66\", the minimum FBHP is achieved in the\n1000 SCF / bbl case compared to the 400 SCF / bbl.\n(3)\nFor the 1.66\" tubing, the gas flowrate is too high, even at very low production\nrates.  The FBHP does not pass through a minimum at a GLR of 1000 SCF/bbl and\nthe FBHP increases continuously with increasing production rate as a result of the\nhigh frictional gradients.\nThe data is alternatively presented in Figures 28 and 29.  The data for the 1000 SCF\n/ bbl clearly shows a minimum pressure loss associated with flowrates of 100 bbl / d\nor more.  The tubing size which provides the minimum intake pressure, increases with\nincreasing flowrate."
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 1359,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1359:c1",
+        "score": 0.03225806,
+        "excerpt": "ducers. There are 11 producers. Table 15.9 gives the key data for the\nproject. Fig. 15.35 shows the first well, together with the estimated sizes of the steam zones\naround the vertical injectors at three different times. The original horizontal well (400 m [1,312\nft] in length, but only 107 m [351 ft] were open to flow) was drilled for primary production,\nbut  the  water  cut  became  prohibitive  within  months,  at  which  time  it  was  decided  to  inject\nsteam into the offset vertical wells. As a result, the water cut declined rapidly and stayed at a\nlow  value.  The  well  produced  almost  2.5  million bbl  of  oil.  It  should  be  noted  that  a  small,\ndiscontinuous primary gas cap is present over the field. Temperature surveys showed that the\ninjected  steam  migrated  into  the  gas  cap  and  during  the  early  part  of  the  project,  exerted  a\nFig. 15.30—Produced oil/fuel burned ratio for three steam-injection scenarios.31\nChapter 15—Thermal Recovery by Steam Injection\nV-1351\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 16\nChapter 14"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 1098,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1098:c0",
+        "score": 0.02987737,
+        "excerpt": "was reached that required voidage-replacement waterflooding to be implemented from its begin-\nning to prevent further subsidence. LBU was developed in the mid-1960s, with the directional\ndrilling  of  more  than  1,000  wells  from  four  artificial  islands  and  from  the  nearby  pier  area.\nThe early completions consisted of gravel-packed slotted liners that were up to 1,000 ft long in\nthe injectors and the producers.\nThe LBU Ranger-zone waterflood was a 3:1 staggered line drive on a 10-acre well spacing\n(see  Fig.  11.49);  peripheral  waterflooding  has  been  used  in  the  other  zones.  Oil  production\npeaked in 1969 at 150,000 BOPD. The oil production has declined slowly since then, and the\nwater production rate has increased steadily over the years. Water has been injected at rates of\nup to 1 million BWPD. Current oil production is approximately 32,000 BOPD at an average\nwater cut of approximately 96%. To date, total production is > 940 million bbl of oil.\nFig.  11.48—Areal  map  of  Ekofisk  field  with  injection-  and  production-well  locations  (image  provided\ncourtesy of ConocoPhillips).\nV-1090\nPetroleum Engineering Handbook—Vol. V\nPrint\nSearch\nHome\nBookmarks\nHelp"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 1.921732,
+      "retrieval_seconds": 8.079786,
+      "llm_generation_seconds": 7.203908,
+      "python_seconds": 0.0,
+      "verification_seconds": 8.776969,
+      "evaluation_seconds": 3.952338,
+      "synthesis_seconds": 3.25154,
+      "retrieve_action_seconds": 8.103366,
+      "verify_action_seconds": 8.776965,
+      "elapsed_seconds": 18.887128,
+      "total_seconds": 18.887527,
+      "message_parsing_seconds": 0.000399
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "intent_route": "knowledge_qa",
+      "intent": {
+        "selected_intent": "knowledge_qa",
+        "intent_reason": "knowledge_question",
+        "premise_cue_detected": false,
+        "formula_origin": "unknown"
+      },
+      "source_requirement": "none",
+      "fact_extraction": {
+        "deterministic_fact_count": 2,
+        "fallback_fact_count": 0,
+        "rejected_fact_count": 0,
+        "fact_rejection_reasons": [],
+        "normalized_units": {
+          "USERF1": {
+            "raw": "bbl",
+            "canonical": "bbl"
+          },
+          "USERF2": {
+            "raw": "psi",
+            "canonical": "psi"
+          }
+        }
+      },
+      "calculation": {
+        "requested_operation_family": "",
+        "direct_calc_ready": false,
+        "missing_operands": [],
+        "selected_input_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ]
+      },
+      "formula": {
+        "candidates_found": 0,
+        "selected_formula_id": null
+      },
+      "transition": {
+        "formula_ready": false,
+        "calculation_ready": false,
+        "blocking_reason": "insufficient_evidence"
+      },
+      "retrieval_rerank": {
+        "domain_hint": "production",
+        "candidate_documents": [
+          "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "Heriot-Watt University - Reservoir Engineering.pdf",
+          "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+          "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+          "Heriot-Watt_University_-_Production_Technology_II.pdf",
+          "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+          "Heriot-Watt_University_-_Production_Technology_I.pdf"
+        ],
+        "scores": [
+          {
+            "id": "KB1",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 1359,
+            "score": 13.0,
+            "concept_matches": [
+              "production",
+              "three",
+              "injectors",
+              "bbl",
+              "give",
+              "injected",
+              "which"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB2",
+            "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+            "page": 772,
+            "score": 6.5,
+            "concept_matches": [
+              "production",
+              "injectors",
+              "bbl",
+              "injected"
+            ],
+            "relation_matches": [],
+            "family": "reservoir_engineering",
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB3",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 1098,
+            "score": 12.3333,
+            "concept_matches": [
+              "production",
+              "injectors",
+              "bbl",
+              "injected",
+              "ran"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB4",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 1247,
+            "score": 12.25,
+            "concept_matches": [
+              "production",
+              "three",
+              "bbl",
+              "injected",
+              "volume",
+              "ran"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB5",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 684,
+            "score": 12.2,
+            "concept_matches": [
+              "production",
+              "three",
+              "injectors",
+              "injected",
+              "volume",
+              "which"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB6",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 676,
+            "score": 12.1667,
+            "concept_matches": [
+              "production",
+              "give",
+              "their",
+              "combined",
+              "injected",
+              "volume"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB7",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+            "page": 204,
+            "score": 8.1429,
+            "concept_matches": [
+              "three",
+              "delivered",
+              "bbl",
+              "volume"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB8",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+            "page": 166,
+            "score": 8.125,
+            "concept_matches": [
+              "injectors",
+              "delivered",
+              "ran"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB9",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 660,
+            "score": 10.1111,
+            "concept_matches": [
+              "production",
+              "injectors",
+              "their",
+              "injected"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB10",
+            "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+            "page": 452,
+            "score": 17.1,
+            "concept_matches": [
+              "production",
+              "three",
+              "delivered",
+              "combined",
+              "separator"
+            ],
+            "relation_matches": [],
+            "family": "production",
+            "confidence": "HIGH"
+          },
+          {
+            "id": "KB11",
+            "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+            "page": 348,
+            "score": 19.0909,
+            "concept_matches": [
+              "production",
+              "bbl",
+              "give",
+              "combined",
+              "ran",
+              "psi",
+              "which"
+            ],
+            "relation_matches": [],
+            "family": "production",
+            "confidence": "HIGH"
+          },
+          {
+            "id": "KB12",
+            "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+            "page": 65,
+            "score": 4.0833,
+            "concept_matches": [
+              "production",
+              "bbl",
+              "volume"
+            ],
+            "relation_matches": [],
+            "family": "reservoir_simulation",
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB13",
+            "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+            "page": 99,
+            "score": 13.0769,
+            "concept_matches": [
+              "production",
+              "bbl",
+              "which"
+            ],
+            "relation_matches": [],
+            "family": "production",
+            "confidence": "HIGH"
+          },
+          {
+            "id": "KB14",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+            "page": 778,
+            "score": 10.0714,
+            "concept_matches": [
+              "delivered",
+              "bbl",
+              "volume",
+              "ran",
+              "which"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB15",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 680,
+            "score": 10.0667,
+            "concept_matches": [
+              "production",
+              "injectors",
+              "give",
+              "injected"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          }
+        ],
+        "selected_sources": [
+          "KB1",
+          "KB10",
+          "KB11",
+          "KB13",
+          "KB3"
+        ],
+        "dropped_sources": [
+          "KB2",
+          "KB4",
+          "KB5",
+          "KB6",
+          "KB7",
+          "KB8",
+          "KB9",
+          "KB12",
+          "KB14",
+          "KB15"
+        ],
+        "confidence": "HIGH"
+      },
+      "retrieval_rerank_history": [
+        {
+          "domain_hint": "production",
+          "candidate_documents": [
+            "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "Heriot-Watt University - Reservoir Engineering.pdf",
+            "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+            "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+            "Heriot-Watt_University_-_Production_Technology_II.pdf",
+            "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+            "Heriot-Watt_University_-_Production_Technology_I.pdf"
+          ],
+          "scores": [
+            {
+              "id": "KB1",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 1359,
+              "score": 13.0,
+              "concept_matches": [
+                "production",
+                "three",
+                "injectors",
+                "bbl",
+                "give",
+                "injected",
+                "which"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB2",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 772,
+              "score": 6.5,
+              "concept_matches": [
+                "production",
+                "injectors",
+                "bbl",
+                "injected"
+              ],
+              "relation_matches": [],
+              "family": "reservoir_engineering",
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB3",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 1098,
+              "score": 12.3333,
+              "concept_matches": [
+                "production",
+                "injectors",
+                "bbl",
+                "injected",
+                "ran"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB4",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 1247,
+              "score": 12.25,
+              "concept_matches": [
+                "production",
+                "three",
+                "bbl",
+                "injected",
+                "volume",
+                "ran"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB5",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 684,
+              "score": 12.2,
+              "concept_matches": [
+                "production",
+                "three",
+                "injectors",
+                "injected",
+                "volume",
+                "which"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB6",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 676,
+              "score": 12.1667,
+              "concept_matches": [
+                "production",
+                "give",
+                "their",
+                "combined",
+                "injected",
+                "volume"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB7",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+              "page": 204,
+              "score": 8.1429,
+              "concept_matches": [
+                "three",
+                "delivered",
+                "bbl",
+                "volume"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB8",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+              "page": 166,
+              "score": 8.125,
+              "concept_matches": [
+                "injectors",
+                "delivered",
+                "ran"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB9",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 660,
+              "score": 10.1111,
+              "concept_matches": [
+                "production",
+                "injectors",
+                "their",
+                "injected"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB10",
+              "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+              "page": 452,
+              "score": 17.1,
+              "concept_matches": [
+                "production",
+                "three",
+                "delivered",
+                "combined",
+                "separator"
+              ],
+              "relation_matches": [],
+              "family": "production",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB11",
+              "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+              "page": 348,
+              "score": 19.0909,
+              "concept_matches": [
+                "production",
+                "bbl",
+                "give",
+                "combined",
+                "ran",
+                "psi",
+                "which"
+              ],
+              "relation_matches": [],
+              "family": "production",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB12",
+              "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+              "page": 65,
+              "score": 4.0833,
+              "concept_matches": [
+                "production",
+                "bbl",
+                "volume"
+              ],
+              "relation_matches": [],
+              "family": "reservoir_simulation",
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB13",
+              "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+              "page": 99,
+              "score": 13.0769,
+              "concept_matches": [
+                "production",
+                "bbl",
+                "which"
+              ],
+              "relation_matches": [],
+              "family": "production",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB14",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+              "page": 778,
+              "score": 10.0714,
+              "concept_matches": [
+                "delivered",
+                "bbl",
+                "volume",
+                "ran",
+                "which"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB15",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 680,
+              "score": 10.0667,
+              "concept_matches": [
+                "production",
+                "injectors",
+                "give",
+                "injected"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            }
+          ],
+          "selected_sources": [
+            "KB1",
+            "KB10",
+            "KB11",
+            "KB13",
+            "KB3"
+          ],
+          "dropped_sources": [
+            "KB2",
+            "KB4",
+            "KB5",
+            "KB6",
+            "KB7",
+            "KB8",
+            "KB9",
+            "KB12",
+            "KB14",
+            "KB15"
+          ],
+          "confidence": "HIGH"
+        }
+      ],
+      "extractive_fallback_used": false,
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 18.887128,
+      "python_seconds": 0.0
+    },
+    "validation": {
+      "engineering_validation_passed": true,
+      "engineering_contradiction_count": 0,
+      "unsupported_engineering_claim_count": 0,
+      "citation_semantic_passed": false,
+      "unsupported_citation_claim_count": 2,
+      "unsupported_numeric_claim_count": 0,
+      "criteria_frozen": true
+    },
+    "cancel_requested": false,
+    "error": null
+  }
+}
