@@ -69,6 +69,7 @@ OPERATIONS = {
     "concentration_mass_per_volume": r"\b(?:mass\s+concentration|concentration\s+from\s+mass)\b|질량\s*농도|농도를\s*계산",
     "weighted_average_by_duration": r"\b(?:time[- ]weighted|duration[- ]weighted)\s+(?:average|mean)\b|시간\s*가중\s*평균|가중\s*시간\s*평균",
     "percentage_decrease": r"\bpercent(?:age)?\s+decrease\b|감소율|몇\s*퍼센트\s*감소",
+    "percentage_increase": r"\bpercent(?:age)?\s+increase\b|증가율",
     "net_difference": r"\bnet\s+(?:difference|change)\b|순\s*변화|순\s*차이",
     "add": r"\b(?:add|addition)\b|더하기",
     "subtract": r"\b(?:subtract|subtraction)\b|빼기",
@@ -181,6 +182,7 @@ def parse_request_ir(request: GoalResearchRequest, criteria: list[GoalCriterion]
                                ("centered_difference", "difference"),
                                ("linear_regression_slope", "linear_regression"),
                                ("percentage_decrease", "percent_change"),
+                               ("percentage_increase", "percent_change"),
                                ("net_difference", "difference")):
         if dominant in found and subsumed in found:
             found.remove(subsumed)
@@ -205,7 +207,7 @@ def parse_request_ir(request: GoalResearchRequest, criteria: list[GoalCriterion]
                                                                           "addition", "subtraction", "multiplication", "division",
                                                                           "product", "quotient", "normalize"})
     if any(item in found for item in {"linear_regression", "unit_conversion", "linear_regression_slope",
-                                      "finite_difference", "centered_difference", "percentage_decrease",
+                                      "finite_difference", "centered_difference", "percentage_decrease", "percentage_increase",
                                       "net_difference", "cylinder_volume", "power_times_duration",
                                       "concentration_mass_per_volume", "weighted_average_by_duration"}) and not explicit_specialist:
         specialist = False

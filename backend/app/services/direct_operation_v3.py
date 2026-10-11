@@ -7,7 +7,7 @@ import re
 
 
 OPERATIONS = {"unit_conversion", "finite_difference", "centered_difference",
-              "linear_regression_slope", "percentage_decrease", "net_difference",
+              "linear_regression_slope", "percentage_decrease", "percentage_increase", "net_difference",
               "cylinder_volume", "power_times_duration", "concentration_mass_per_volume",
               "weighted_average_by_duration"}
 
@@ -62,20 +62,32 @@ def build(operation: str, text: str, values: dict[str, float],
                     f"(points[{right}][1]-points[0][1])/(points[{right}][0]-points[0][0])\n")
         return code, {operation: value}, {operation: None}
 
-    if operation in {"percentage_decrease", "net_difference"}:
+    if operation in {"percentage_decrease", "percentage_increase", "net_difference"}:
+        # Named temporal roles outrank number order; unrelated readings stay unused.
+        for role, pattern in (("initial", r"^(?:start|initial|before)(?:_|$)"),
+                              ("final", r"^(?:end|final|after)(?:_|$)")):
+            matches = [name for name in values if re.search(pattern, name, re.I)]
+            if role not in values and len(matches) == 1:
+                name = matches[0]
+                values = {**values, role: values[name]}
+                units = {**units, role: units[name]}
         if not {"initial", "final"} <= set(values) or units["initial"] != units["final"]:
             raise ValueError("initial/final values and matching units required")
-        if operation == "percentage_decrease":
+        if operation in {"percentage_decrease", "percentage_increase"}:
             if values["initial"] == 0:
                 raise ValueError("percentage baseline is zero")
             expression = "(values['initial']-values['final'])/values['initial']*100"
             value = (values["initial"] - values["final"]) / values["initial"] * 100
+            if operation == "percentage_increase":
+                expression = "-1 * (" + expression + ")"
+                value = -value
             unit = "%"
         else:
             expression = "values['final']-values['initial']"
             value = values["final"] - values["initial"]
             unit = units["initial"] or None
-        return f"result[{operation!r}] = {expression}\n", {operation: value}, {operation: unit}
+        return (f"values.update({{'initial': {values['initial']!r}, 'final': {values['final']!r}}})\n"
+                f"result[{operation!r}] = {expression}\n", {operation: value}, {operation: unit})
 
     if operation == "cylinder_volume":
         diameter = next((name for name in values if "diameter" in name.casefold() or name.casefold() in {"d", "직경"}), None)
@@ -103,6 +115,10 @@ def build(operation: str, text: str, values: dict[str, float],
     if operation == "power_times_duration":
         powers = [(name, value) for name, value in values.items() if units[name] == "kW"]
         shared = values.get("shared_duration")
+        durations = [name for name in values if units[name] == "h"]
+        if shared is None and len(powers) == 1 and len(durations) == 1:
+            shared = values[durations[0]]
+            units = {**units, "shared_duration": "h"}
         if not powers or (shared is None and not all(name.rsplit("_", 1)[0] + "_duration" in values
                                                      for name, _ in powers)):
             raise ValueError("power and matching duration required")

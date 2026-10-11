@@ -331,6 +331,13 @@ class GoalExecutionAgent(GoalResearchAgent):
             return ("검색된 자료에서 답변을 뒷받침할 직접 근거를 확인하지 못했습니다." if korean else
                     "The retrieved sources did not directly support an answer.")
         if reason.startswith("direct_") and not state.computation_ids:
+            if state.unresolved_information:
+                return clarification_question(state.unresolved_information, korean)
+            target = re.search(r"\b(?:calculate|determine|find|compute)\s+(?:the\s+)?([A-Za-z][A-Za-z_ ]{1,45}?)(?=[.,;?]|$)", state.goal, re.I)
+            if target:
+                name = target.group(1).strip()
+                return (f"{name} 계산에 필요한 관계식과 해당 변수의 측정값·단위를 알려주세요. 값을 추측하지 않습니다."
+                        if korean else f"Please provide the equation for {name} and measured values and units for its variables. No value was guessed.")
             return ("제공된 값의 계산 조건을 확인하지 못해 결과를 추정하지 않았습니다. 누락된 값, 단위 또는 연산을 확인해 주세요."
                     if korean else "The supplied values did not establish a complete calculation. "
                                    "Please check the missing input, unit, or operation; no result was guessed.")
@@ -1026,6 +1033,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                                    ("centered_difference", "difference"),
                                    ("linear_regression_slope", "linear_regression"),
                                    ("percentage_decrease", "percent_change"),
+                                   ("percentage_increase", "percent_change"),
                                    ("net_difference", "difference")):
             if dominant in direct_operations and subsumed in direct_operations:
                 direct_operations.remove(subsumed)
@@ -1035,7 +1043,7 @@ class GoalExecutionAgent(GoalResearchAgent):
             "geometric_mean", "add", "multiply", "divide", "subtract", "elapsed_time", "percent_conversion",
             "weighted_average", "combined_rate", "interpolation", "trapezoid", "repeated_percent",
             "allocation", "piecewise_cost", "unit_conversion", "finite_difference",
-            "centered_difference", "linear_regression_slope", "percentage_decrease",
+            "centered_difference", "linear_regression_slope", "percentage_decrease", "percentage_increase",
             "net_difference", "cylinder_volume", "power_times_duration",
             "concentration_mass_per_volume", "weighted_average_by_duration"})
         direct_users = users.named_operands(user_text, direct_operations)

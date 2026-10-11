@@ -58,7 +58,7 @@ def direct_operation_operands(text: str, facts: UserFactRegistry,
             for right in names:
                 if left == right:
                     continue
-                a, b = re.escape(left), re.escape(right)
+                a, b = (re.escape(name).replace("_", r"[ _]+") for name in (left, right))
                 separator = (r"\s*(?:/|divided\s+by|to)\s*" if operation in {"ratio", "divide"} else
                              r"\s*(?:-|minus)\s*")
                 english_or_symbol = re.search(

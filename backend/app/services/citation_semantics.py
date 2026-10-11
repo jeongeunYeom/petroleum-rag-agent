@@ -94,9 +94,11 @@ async def ground_research_claims(ollama: Any, request: GoalResearchRequest, answ
             "If uncertain, return false and no IDs. Do not provide private reasoning. JSON only."
         )},
         {"role": "user", "content": json.dumps({
+            "question": request.topic,
+            "required_goal": request.goal or request.topic,
             "claims": claims,
             "sources": [{"id": key, "type": row["source_type"],
-                         "text": str(row.get("text") or "")[:1800]}
+                         "text": str(row.get("text") or "")}
                         for key, row in sources.items()],
         }, ensure_ascii=False)},
     ]

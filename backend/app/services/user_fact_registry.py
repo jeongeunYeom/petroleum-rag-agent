@@ -45,6 +45,9 @@ NATURAL_FACT = re.compile(
 )
 ENGLISH_IS_VALUE = re.compile(rf"\b(?P<label>[A-Za-z][A-Za-z0-9_]*)\s+(?:is|was)\s+"
                               rf"(?P<value>[-+]?\d+(?:\.\d+)?)(?:\s*(?P<unit>{UNIT}))?(?=$|[.,;\s])", re.I)
+DIMENSIONLESS_NAMED = re.compile(
+    rf"\b(?P<label>porosity|power\s+factor|water\s+saturation|fraction)\s+"
+    rf"(?P<value>{NUMBER})(?=$|[,;.]|\s+(?:and|이며|이고)\b)", re.I)
 DAY_POINT = re.compile(rf"\bday\s*(?P<day>\d+)(?![\d.])\s*(?:에는|에서|:|=|is|was)\s*"
                        rf"(?P<value>{NUMBER})(?!\s*(?:{UNIT}))", re.I)
 COORD_POINT = re.compile(rf"\b(?P<axis>x|t|time)\s*(?P<coordinate>[-+]?\d+(?:\.\d+)?)\s*"
@@ -174,6 +177,12 @@ class UserFactRegistry(BaseModel):
 
     def named_operands(self, text: str, operations: list[str]) -> "UserFactRegistry":
         """Exclude unrelated facts only when an aggregate names its exact operands."""
+        if operations and set(operations) <= {"difference", "subtract", "ratio", "divide"}:
+            from app.services.goal_simulation import direct_operation_operands
+            orders, missing = direct_operation_operands(text, self, operations)
+            if not missing and orders:
+                names = {name for pair in orders.values() for name in pair}
+                return self.model_copy(update={"records": [row for row in self.records if row.name in names]})
         aggregate = {"mean", "sum", "median", "ranking", "maximum", "minimum", "range",
                      "variance", "variance_population", "std_population", "std_sample"}
         if not operations or not set(operations) <= aggregate:
@@ -304,6 +313,9 @@ class UserFactRegistry(BaseModel):
         for line in topic.splitlines(keepends=True):
             text = line.rstrip("\r\n")
             protected_spans: list[tuple[int, int]] = []
+            for found in DIMENSIONLESS_NAMED.finditer(text):
+                add(found["label"], found["value"], "", found.group(0), None, offset + found.start())
+                protected_spans.append(found.span())
             for found in ENGLISH_ENTITY_FACT.finditer(text):
                 add(found["label"].replace(" ", "_"), found["value"], found["unit"],
                     found.group(0), found["label"], offset + found.start())
@@ -397,7 +409,7 @@ class UserFactRegistry(BaseModel):
                 if any(start < found.end() and found.start() < end for start, end in coordinate_spans):
                     continue
                 label = found.group("label").strip()
-                label = re.split(r"\b(?:has|have|with|where|given|and|at)\b", label, flags=re.I)[-1].strip()
+                label = re.split(r"\b(?:has|have|with|where|given|and|at|using|use)\b", label, flags=re.I)[-1].strip()
                 tokens = label.split()
                 if (len(tokens) > 1 and re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", tokens[-1])
                         and ("_" in tokens[-1] or len(tokens[-1]) == 1)):
