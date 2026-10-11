@@ -1,0 +1,107 @@
+{
+  "task_id": "D10",
+  "reviewer_model_id": "gpt-6-astra",
+  "response_id": "resp_0d6e6f53b7da242d016acb960dc2e087d09af9d82968e21482",
+  "usage": {
+    "input_tokens": 2261,
+    "input_tokens_details": {
+      "cache_write_tokens": 2258,
+      "cached_tokens": 0
+    },
+    "output_tokens": 581,
+    "output_tokens_details": {
+      "reasoning_tokens": 56
+    },
+    "total_tokens": 2842
+  },
+  "scores_by_track": {
+    "agent": {
+      "claim_verdicts": [
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": false,
+      "unit_accuracy": false,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Refuses to calculate despite sufficient supplied inputs; provides neither the endpoint calculation nor the requested result."
+    },
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly uses (2860−3000)/(2×2) and obtains −35 psi/day."
+    },
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correct endpoint difference over four days gives −35 psi/day; correctly notes that the middle pressure is not directly used."
+    },
+    "openai_closed_book": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly calculates the centered estimate as (2860−3000)/4 = −35 psi/day."
+    },
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        false
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 4,
+      "hallucination": true,
+      "engineering_contradiction_count": 2,
+      "numeric_accuracy": false,
+      "unit_accuracy": true,
+      "formula_accuracy": false,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "States the general centered-difference formula correctly, but misassigns both endpoint pressures and uses a one-day half-step instead of two days. The resulting +40 psi/day is incorrect; the output unit is appropriate."
+    }
+  },
+  "anonymized_label_map": {
+    "A": "agent",
+    "B": "qwen_closed_book",
+    "C": "openai_same_evidence",
+    "D": "openai_closed_book",
+    "E": "qwen_same_evidence"
+  },
+  "wall_seconds": 8.84
+}

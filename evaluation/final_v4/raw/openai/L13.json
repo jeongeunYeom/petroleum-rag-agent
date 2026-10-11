@@ -1,0 +1,17 @@
+{
+  "task_id": "L13",
+  "provider": "openai",
+  "track": "closed_book",
+  "question": "Gravel-filled perforation의 생산성 손상을 completion 모델에서 어떤 방식으로 표현할 수 있나?",
+  "continuation": null,
+  "system_prompt": "Answer the petroleum-engineering request in the user's language. Be concise and state uncertainty. No tools, Python, retrieval or web access. Do not invent formulas, measurements or citations. Explicitly correct a false premise. If essential input is absent, ask for it. Cite evidence IDs only when evidence is supplied.",
+  "user_prompt": "Gravel-filled perforation의 생산성 손상을 completion 모델에서 어떤 방식으로 표현할 수 있나?",
+  "evidence": [],
+  "initial_answer": "**Gravel-filled perforation은 completion 모델에서 ‘천공 구간의 추가 유동저항’으로 표현하는 것이 일반적입니다.** 다만, gravel이 채워졌다는 사실만으로 생산성 손상이 있다고 단정할 수는 없습니다. Gravel의 투과도, 충전 상태, 천공 형상, 운전 유량에 따라 저항이 달라집니다.\n\n모델의 상세도에 따라 다음처럼 처리할 수 있습니다.\n\n| 표현 방식 | 모델에 반영하는 항목 | 적용 상황 |\n|---|---|---|\n| **등가 completion skin** | Gravel-filled perforation의 압력손실을 추가 skin으로 환산 | 저류층 시뮬레이터나 간단한 생산성 모델 |\n| **명시적 천공 유동저항** | 천공 길이·직경·개수, gravel 투과도 및 실제 유동면적으로 압력손실 계산 | 상세 completion 모델 |\n| **유량 의존 저항** | Darcy 저항에 비-Darcy 저항을 추가 | 고유량, 특히 가스 생산 |\n| **시간 의존 손상** | 미세입자 유입·막힘 등에 따른 gravel 투과도 또는 유효 천공 수 감소 | 생산성 저하 추적 및 이력 매칭 |\n\n실무적으로는 **지층 → 천공 주변 손상대 → gravel-filled perforation → wellbore**의 압력손실을 구분하는 것이 좋습니다. 천공 내부 gravel 저항과 annular gravel pack·screen 저항도 가능하면 별도로 둡니다. 이미 gravel 저항을 명시적으로 계산했다면, 같은 손실을 completion skin에 다시 넣어 **이중 계산하지 않아야 합니다.**\n\n단일 운전점만 맞추려면 등가 skin으로 충분할 수 있지만, 여러 유량에서 생산성을 예측하려면 유량 의존 저항을 분리하는 편이 낫습니다. 다만 생산자료만으로 gravel 저항과 지층 손상 skin을 유일하게 구분하기는 어렵습니다.\n\n구체적인 구현을 위해서는 **사용 중인 모델/시뮬레이터, 유체 종류, 천공 형상·개수, gravel 투과도, 유량–압력 자료**가 필요합니다. 어떤 completion 모델을 사용하고 계신가요?",
+  "answer": "**Gravel-filled perforation은 completion 모델에서 ‘천공 구간의 추가 유동저항’으로 표현하는 것이 일반적입니다.** 다만, gravel이 채워졌다는 사실만으로 생산성 손상이 있다고 단정할 수는 없습니다. Gravel의 투과도, 충전 상태, 천공 형상, 운전 유량에 따라 저항이 달라집니다.\n\n모델의 상세도에 따라 다음처럼 처리할 수 있습니다.\n\n| 표현 방식 | 모델에 반영하는 항목 | 적용 상황 |\n|---|---|---|\n| **등가 completion skin** | Gravel-filled perforation의 압력손실을 추가 skin으로 환산 | 저류층 시뮬레이터나 간단한 생산성 모델 |\n| **명시적 천공 유동저항** | 천공 길이·직경·개수, gravel 투과도 및 실제 유동면적으로 압력손실 계산 | 상세 completion 모델 |\n| **유량 의존 저항** | Darcy 저항에 비-Darcy 저항을 추가 | 고유량, 특히 가스 생산 |\n| **시간 의존 손상** | 미세입자 유입·막힘 등에 따른 gravel 투과도 또는 유효 천공 수 감소 | 생산성 저하 추적 및 이력 매칭 |\n\n실무적으로는 **지층 → 천공 주변 손상대 → gravel-filled perforation → wellbore**의 압력손실을 구분하는 것이 좋습니다. 천공 내부 gravel 저항과 annular gravel pack·screen 저항도 가능하면 별도로 둡니다. 이미 gravel 저항을 명시적으로 계산했다면, 같은 손실을 completion skin에 다시 넣어 **이중 계산하지 않아야 합니다.**\n\n단일 운전점만 맞추려면 등가 skin으로 충분할 수 있지만, 여러 유량에서 생산성을 예측하려면 유량 의존 저항을 분리하는 편이 낫습니다. 다만 생산자료만으로 gravel 저항과 지층 손상 skin을 유일하게 구분하기는 어렵습니다.\n\n구체적인 구현을 위해서는 **사용 중인 모델/시뮬레이터, 유체 종류, 천공 형상·개수, gravel 투과도, 유량–압력 자료**가 필요합니다. 어떤 completion 모델을 사용하고 계신가요?",
+  "model_id": "gpt-6.1-sol",
+  "input_tokens": 94,
+  "output_tokens": 567,
+  "response_id": "resp_0db1957e514adb4e016acb910ecaf887d09ac6394a2f1da0b9",
+  "wall_seconds": 13.223
+}

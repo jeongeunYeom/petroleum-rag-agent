@@ -1,0 +1,33 @@
+{
+  "task_id": "C01",
+  "provider": "qwen",
+  "track": "same_evidence",
+  "question": "두 생산 구간의 시간가중 평균을 계산해줘. 첫 구간은 100 stb/d로 3시간, 둘째는 200 stb/d였는데 둘째 지속시간은 아직 적지 않았어.",
+  "continuation": "둘째 구간은 2시간 지속됐어.",
+  "system_prompt": "Answer the petroleum-engineering request in the user's language. Be concise and state uncertainty. No tools, Python, retrieval or web access. Do not invent formulas, measurements or citations. Explicitly correct a false premise. If essential input is absent, ask for it. Cite evidence IDs only when evidence is supplied. Use only supplied KB/FIG text and the user's values for sourced engineering claims. Cite supporting IDs in square brackets. No other evidence is available.",
+  "user_prompt": "두 생산 구간의 시간가중 평균을 계산해줘. 첫 구간은 100 stb/d로 3시간, 둘째는 200 stb/d였는데 둘째 지속시간은 아직 적지 않았어.\n\n=== Captured Agent KB/FIG text evidence ===\n[]",
+  "evidence": [],
+  "initial_answer": "시간가중 평균 생산량을 계산하려면 두 구간의 총 생산량을 해당 구간의 시간으로 나누어야 합니다. 그러나 두 번째 구간의 지속시간이 알려지지 않았기 때문에 계산이 불가능합니다. 두 번째 구간의 지속시간을 제공해 주세요.",
+  "answer": "시간가중 평균 생산량을 계산하기 위해 각 구간의 총 생산량을 구해야 합니다.  \n\n- 첫 구간: $100 \\, \\text{stb/d} \\times 3 \\, \\text{시간} = 300 \\, \\text{stb}$  \n- 둘째 구간: $200 \\, \\text{stb/d} \\times 2 \\, \\text{시간} = 400 \\, \\text{stb}$  \n\n총 생산량: $300 + 400 = 700 \\, \\text{stb}$  \n총 시간: $3 + 2 = 5 \\, \\text{시간}$  \n\n시간가중 평균 생산량: $\\frac{700}{5} = 140 \\, \\text{stb/d}$",
+  "model_id": "qwen3:8b",
+  "input_tokens": 288,
+  "output_tokens": 197,
+  "provider_payload": {
+    "model": "qwen3:8b",
+    "created_at": "2026-10-11T13:44:56.3633739Z",
+    "message": {
+      "role": "assistant",
+      "content": "시간가중 평균 생산량을 계산하기 위해 각 구간의 총 생산량을 구해야 합니다.  \n\n- 첫 구간: $100 \\, \\text{stb/d} \\times 3 \\, \\text{시간} = 300 \\, \\text{stb}$  \n- 둘째 구간: $200 \\, \\text{stb/d} \\times 2 \\, \\text{시간} = 400 \\, \\text{stb}$  \n\n총 생산량: $300 + 400 = 700 \\, \\text{stb}$  \n총 시간: $3 + 2 = 5 \\, \\text{시간}$  \n\n시간가중 평균 생산량: $\\frac{700}{5} = 140 \\, \\text{stb/d}$"
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 1685574200,
+    "load_duration": 4334400,
+    "prompt_eval_count": 288,
+    "prompt_eval_cached_count": 177,
+    "prompt_eval_duration": 33905000,
+    "eval_count": 197,
+    "eval_duration": 1642029000
+  },
+  "wall_seconds": 2.633
+}

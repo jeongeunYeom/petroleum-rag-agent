@@ -1,0 +1,112 @@
+{
+  "task_id": "L12",
+  "reviewer_model_id": "gpt-6-astra",
+  "response_id": "resp_040a72a322318a38016acb95933d1c87d0bfb5d65cb2e78ef3",
+  "usage": {
+    "input_tokens": 8414,
+    "input_tokens_details": {
+      "cache_write_tokens": 8411,
+      "cached_tokens": 0
+    },
+    "output_tokens": 665,
+    "output_tokens_details": {
+      "reasoning_tokens": 70
+    },
+    "total_tokens": 9079
+  },
+  "scores_by_track": {
+    "openai_closed_book": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly explains level and hydrostatic-pressure reduction without replacement mud, and precise small-volume measurement using a small tank cross-section."
+    },
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        false,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 0.5,
+      "note": "Explains narrow-tank sensitivity but does not state that pulling pipe lowers the column unless mud is replaced. KB1 supports the geometry claim; KB2 does not establish the cited loss-detection and pressure-change claim."
+    },
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 1.0,
+      "note": "Accurately connects pipe withdrawal to falling mud level and replacement, and narrow tank geometry to accurate small-volume measurement. Cited passages support the explanation."
+    },
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        false,
+        false
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 4,
+      "hallucination": true,
+      "engineering_contradiction_count": 3,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Recognizes small-loss detection, but omits withdrawal displacement and narrow-tank sensitivity. Invents a head-to-instrument column mechanism, describes direct real-time column measurement, confuses wellbore pressure management with stabilizing formation pressure, and asserts formation absorption evaluation."
+    },
+    "agent": {
+      "claim_verdicts": [
+        false,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 1.0,
+      "note": "Conveys narrow tank geometry and accurate small-loss measurement, supported by the cited volume-monitoring passages. Does not explain column reduction during withdrawal or the need to replace displaced volume."
+    }
+  },
+  "anonymized_label_map": {
+    "A": "openai_closed_book",
+    "B": "qwen_same_evidence",
+    "C": "openai_same_evidence",
+    "D": "qwen_closed_book",
+    "E": "agent"
+  },
+  "wall_seconds": 10.859
+}

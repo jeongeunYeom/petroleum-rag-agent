@@ -103,7 +103,7 @@ def call_reviewer(item: dict) -> tuple[dict, dict]:
     if not key:
         raise RuntimeError("OPENAI_API_KEY absent")
     body = {"model": REVIEWER_MODEL, "instructions": INSTRUCTIONS,
-            "input": [{"role": "user", "content": json.dumps(item, ensure_ascii=False)}],
+            "input": [{"role": "user", "content": "Return JSON only.\n" + json.dumps(item, ensure_ascii=False)}],
             "reasoning": {"effort": "low"}, "max_output_tokens": 6000,
             "tools": [], "store": False,
             "text": {"format": {"type": "json_object"}}}
@@ -114,19 +114,40 @@ def call_reviewer(item: dict) -> tuple[dict, dict]:
         with urllib.request.urlopen(request, timeout=360) as response:
             payload = json.load(response)
     except urllib.error.HTTPError as exc:
-        raise RuntimeError(f"Reviewer provider returned HTTP {exc.code}") from None
+        try:
+            error = json.loads(exc.read().decode("utf-8")).get("error") or {}
+            detail = f"{error.get('code') or error.get('type')}; param={error.get('param')}; {str(error.get('message') or '')[:240]}"
+        except (ValueError, UnicodeDecodeError):
+            detail = "unavailable"
+        raise RuntimeError(f"Reviewer provider returned HTTP {exc.code}: {detail}") from None
     scores = json.loads(extract_text(payload))
     if set(scores.get("scores", {})) != set(item["answers"]):
         raise ValueError("Reviewer label set mismatch")
     required = {"claim_verdicts", "partial_or_better", "unsupported_claim_count", "hallucination",
                 "engineering_contradiction_count", "numeric_accuracy", "unit_accuracy", "formula_accuracy",
                 "false_premise_handled", "safe_refusal_correct", "citation_semantic_support", "note"}
+    always_boolean = {"partial_or_better", "hallucination"}
+    optional_boolean = {"numeric_accuracy", "unit_accuracy", "formula_accuracy",
+                        "false_premise_handled", "safe_refusal_correct"}
     for label, score in scores["scores"].items():
         if not required.issubset(score) or len(score["claim_verdicts"]) != len(item["expected_claims"]):
             raise ValueError(f"Reviewer schema/claim count mismatch: {label}")
+        if not isinstance(score["claim_verdicts"], list) or any(
+                not isinstance(value, bool) for value in score["claim_verdicts"]):
+            raise ValueError(f"Reviewer claim types invalid: {label}")
+        if any(not isinstance(score[key], bool) for key in always_boolean):
+            raise ValueError(f"Reviewer boolean type invalid: {label}")
+        if any(score[key] is not None and not isinstance(score[key], bool) for key in optional_boolean):
+            raise ValueError(f"Reviewer optional boolean type invalid: {label}")
+        if any(not isinstance(score[key], int) or isinstance(score[key], bool) or score[key] < 0
+               for key in ("unsupported_claim_count", "engineering_contradiction_count")):
+            raise ValueError(f"Reviewer count type invalid: {label}")
         fraction = score["citation_semantic_support"]
-        if fraction is not None and not (0 <= float(fraction) <= 1):
+        if fraction is not None and (not isinstance(fraction, (int, float))
+                                     or isinstance(fraction, bool) or not (0 <= float(fraction) <= 1)):
             raise ValueError(f"Reviewer citation fraction out of range: {label}")
+        if not isinstance(score["note"], str):
+            raise ValueError(f"Reviewer note type invalid: {label}")
     meta = {"reviewer_model_id": payload.get("model"), "response_id": payload.get("id"),
             "usage": payload.get("usage")}
     return scores["scores"], meta

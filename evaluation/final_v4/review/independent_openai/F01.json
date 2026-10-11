@@ -1,0 +1,112 @@
+{
+  "task_id": "F01",
+  "reviewer_model_id": "gpt-6-astra",
+  "response_id": "resp_0fb3964b125f98bc016acb96e2300c87d088deffbbfb1e1d30",
+  "usage": {
+    "input_tokens": 8593,
+    "input_tokens_details": {
+      "cache_write_tokens": 8590,
+      "cached_tokens": 0
+    },
+    "output_tokens": 627,
+    "output_tokens_details": {
+      "reasoning_tokens": 53
+    },
+    "total_tokens": 9220
+  },
+  "scores_by_track": {
+    "openai_closed_book": {
+      "claim_verdicts": [
+        true,
+        false
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": true,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Rejects complete maintenance and explains the unreplaced exported hydrocarbons. Mentions make-up gas only as a possibility rather than explicitly stating the equivalent-volume requirement for full maintenance."
+    },
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": true,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 1.0,
+      "note": "Correctly explains the exported-condensate gas-equivalent deficit and imported dry-gas requirement. KB1, KB2, and KB4 support their respective claims."
+    },
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        false,
+        false
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 2,
+      "hallucination": true,
+      "engineering_contradiction_count": 2,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": false,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly rejects guaranteed full maintenance, but does not explain exported-volume replacement. Incorrectly attributes depletion to phase change and describes condensation as a pressure-restoring process."
+    },
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": true,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 1.0,
+      "note": "Rejects the premise and explains both the unreplaced condensate volume and imported gas-equivalent requirement, supported by KB1."
+    },
+    "agent": {
+      "claim_verdicts": [
+        true,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 1,
+      "hallucination": true,
+      "engineering_contradiction_count": 1,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": true,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 1.0,
+      "note": "Rejects the premise and quotes KB2's correct imported-gas replacement relation. However, its own explanation wrongly presents staying above dew point as a requirement for pressure maintenance rather than for preventing retrograde condensation."
+    }
+  },
+  "anonymized_label_map": {
+    "A": "openai_closed_book",
+    "B": "openai_same_evidence",
+    "C": "qwen_closed_book",
+    "D": "qwen_same_evidence",
+    "E": "agent"
+  },
+  "wall_seconds": 9.186
+}

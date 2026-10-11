@@ -1,0 +1,112 @@
+{
+  "task_id": "G01",
+  "reviewer_model_id": "gpt-6-astra",
+  "response_id": "resp_00a10f60f21964bb016acb977f1be087d0ada2d3cda94ebd8c",
+  "usage": {
+    "input_tokens": 5243,
+    "input_tokens_details": {
+      "cache_write_tokens": 5240,
+      "cached_tokens": 0
+    },
+    "output_tokens": 600,
+    "output_tokens_details": {
+      "reasoning_tokens": 44
+    },
+    "total_tokens": 5843
+  },
+  "scores_by_track": {
+    "agent": {
+      "claim_verdicts": [
+        false,
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 0.0,
+      "note": "Repeats the user's requests with citations but supplies neither a figure identification nor either requested interpretation."
+    },
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        false,
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 2,
+      "hallucination": true,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Incorrectly denies that the supplied evidence identifies the sonde figure or the two receiver groups; KB2 and FIG2 provide that information."
+    },
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        false,
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Requests the drawing instead of answering. No evidence was supplied to this answer, but neither expected claim is conveyed."
+    },
+    "openai_closed_book": {
+      "claim_verdicts": [
+        false,
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Asks for an image and discusses design dependence, but does not identify the figure, transmitter position, or receiver groups. The user did not assert a universal placement rule."
+    },
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        false,
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 1.0,
+      "note": "Correctly identifies page 70 Figure 2 and distinguishes eight wideband ceramic receivers from two ceramic receivers. It declines to determine transmitter placement, so it misses the below-receivers claim. Its citations support the stated figure and label information."
+    }
+  },
+  "anonymized_label_map": {
+    "A": "agent",
+    "B": "qwen_same_evidence",
+    "C": "qwen_closed_book",
+    "D": "openai_closed_book",
+    "E": "openai_same_evidence"
+  },
+  "wall_seconds": 8.665
+}

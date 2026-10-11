@@ -10,7 +10,7 @@ from pathlib import Path
 import random
 import statistics
 
-from run_experiment import HERE, MODELS, load_benchmark
+from run_experiment import HERE, MANIFEST, MODELS, load_benchmark
 from score_deterministic import NUMBER, SCIENTIFIC, TRACKS
 
 
@@ -49,12 +49,8 @@ def score_row(row: dict, review: dict, task: dict) -> dict:
         and row.get("validated_calc_adoption") is True
         and (not formula_applicable or machine_formula_verified)
         and row.get("numeric_accuracy_deterministic") is True
-        and (not task.get("expected_units") or row.get("unit_accuracy_deterministic") is not False))
+        and row.get("validated_calc_numeric_match") is True)
     claim_verdicts = [False] * len(task["expected_claims"]) if empty_answer else review["claim_verdicts"]
-    if machine_numeric_verified and task["category"] == "user_formula_calculation":
-        # This category's frozen expected claim is use of the supplied expression
-        # and inputs. The validated execution chain proves that operational fact.
-        claim_verdicts = [True] * len(task["expected_claims"])
     out["claim_verdicts"] = claim_verdicts
     out["claim_coverage"] = sum(claim_verdicts) / len(claim_verdicts) if claim_verdicts else 0.0
     out["partial_or_better"] = (bool(review["partial_or_better"]) or machine_numeric_verified) and not empty_answer
@@ -68,12 +64,18 @@ def score_row(row: dict, review: dict, task: dict) -> dict:
                           for value in (task.get("expected_units") or {}).values())
     out["numeric_accuracy"] = ((bool(review["numeric_accuracy"]) and has_numeric_expression) or machine_numeric_verified
                                if numeric_applicable and not empty_answer else (False if numeric_applicable else None))
-    out["unit_accuracy"] = ((bool(review["unit_accuracy"]) and has_numeric_expression) or
-                            (machine_numeric_verified and row.get("unit_accuracy_deterministic") is True)
+    out["unit_accuracy"] = (bool(review["unit_accuracy"]) and has_numeric_expression
                             if unit_applicable and not empty_answer else (False if unit_applicable else None))
     out["formula_accuracy"] = (bool(review["formula_accuracy"]) or machine_formula_verified
                                if formula_applicable and not empty_answer else (False if formula_applicable else None))
-    out["false_premise_handling"] = bool(review["false_premise_handled"]) if task["category"] == "false_premise" else None
+    out["false_premise_handling"] = None
+    if task["category"] == "false_premise":
+        corrected = (bool(review["false_premise_handled"]) and not out["hallucination"]
+                     and not out["unsupported_claim"] and not out["engineering_contradiction"])
+        if row["track"] == "agent":
+            corrected = (corrected and row.get("citation_id_correctness") is True
+                         and review["citation_semantic_support"] == 1)
+        out["false_premise_handling"] = bool(corrected)
     out["safe_refusal"] = bool(review["safe_refusal_correct"]) if task["category"] == "unsupported" else None
     out["citation_semantic_support"] = (float(review["citation_semantic_support"] or 0)
                                         if row.get("citation_ids") else None)
@@ -212,6 +214,7 @@ def write_csv(path: Path, rows: list[dict], columns: list[str]) -> None:
 
 def main() -> None:
     benchmark = load_benchmark()
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     invalid_file = HERE / "invalid_tasks.json"
     invalid = {row["task_id"] for row in json.loads(invalid_file.read_text(encoding="utf-8")).get("invalid", [])} if invalid_file.exists() else set()
     tasks = {task["task_id"]: task for task in benchmark["tasks"] if task["task_id"] not in invalid}
@@ -243,10 +246,20 @@ def main() -> None:
     if len(reviewer_ids) != 1:
         raise RuntimeError(f"Mixed or missing semantic reviewer models: {reviewer_ids}")
     reviewer_id = next(iter(reviewer_ids))
+    actual_models = {}
+    for track in TRACKS:
+        observed = {row.get("model_id") for row in rows if row["track"] == track}
+        if len(observed) != 1 or None in observed:
+            raise RuntimeError(f"Mixed or missing model IDs for {track}: {observed}")
+        actual_models[track] = next(iter(observed))
+    if actual_models["agent"] != MODELS["qwen"] or actual_models["openai_closed_book"] != MODELS["openai"]:
+        raise RuntimeError(f"Unexpected actual model ID: {actual_models}")
     metrics = {"benchmark_id": benchmark["benchmark_id"], "evaluated_product_sha": benchmark["evaluated_product_sha"],
+               "benchmark_sha256": manifest["benchmark_sha256"], "freeze_commit": manifest["freeze_commit"],
                "frozen_tasks": len(benchmark["tasks"]), "valid_tasks": len(tasks), "invalid_tasks": sorted(invalid),
-               "model_ids": {"agent": MODELS["qwen"], "qwen": MODELS["qwen"],
-                             "openai": MODELS["openai"], "semantic_reviewer": reviewer_id},
+               "model_ids": {"agent": actual_models["agent"], "qwen": actual_models["qwen_closed_book"],
+                             "openai": actual_models["openai_closed_book"],
+                             "semantic_reviewer": reviewer_id, "by_track": actual_models},
                "tracks": by_track, "categories": by_category,
                "agent_run_status_counts": dict(Counter(row.get("run_status") for row in rows if row["track"] == "agent")),
                "agent_empty_final_answers": sum(not str(row.get("answer") or "").strip() for row in rows if row["track"] == "agent"),
@@ -269,9 +282,9 @@ def main() -> None:
               for track in TRACKS]
     write_csv(HERE / "poster_metrics.csv", poster, list(poster[0]))
     agent = by_track["agent"]
-    reliability = [{"Intent Routing Accuracy %": agent["intent_routing_accuracy"],
-                    "Fact Extraction Recall %": agent["natural_language_fact_extraction_recall"],
+    reliability = [{"Fact Extraction Recall %": agent["natural_language_fact_extraction_recall"],
                     "Unit Normalization Accuracy %": agent["unit_normalization_accuracy"],
+                    "Intent Routing Accuracy %": agent["intent_routing_accuracy"],
                     "Source Requirement Accuracy %": agent["source_requirement_accuracy"],
                     "Document Recall@K %": agent["document_recall_at_k"],
                     "Page Recall@K %": agent["page_recall_at_k"],
@@ -281,7 +294,7 @@ def main() -> None:
                     "Wrong-Domain Dominance %": agent["wrong_domain_dominance_rate"],
                     "Refined Retrieval Recovery Rate %": agent["refined_retrieval_recovery_rate"],
                     "Exact Formula Span Recall %": agent["exact_formula_span_recall"],
-                    "Formula Candidate Selection Success %": agent["formula_candidate_selection_success"],
+                    "Formula Candidate Selection %": agent["formula_candidate_selection_success"],
                     "Formula Source Correctness %": agent["formula_source_correctness"],
                     "Formula-to-CALCULATE %": agent["formula_to_calculate_success"],
                     "Variable Binding Success %": agent["variable_binding_success"],
@@ -293,11 +306,11 @@ def main() -> None:
                     "Clarification Success %": agent["clarification_success"],
                     "Same-run ID Success %": agent["same_run_id_success"],
                     "Resume Fact Ingestion Success %": agent["resume_fact_ingestion_success"],
-                    "Resume Completion Success %": agent["resume_completion_success"],
+                    "Resume Completion %": agent["resume_completion_success"],
                     "Same-run Resume %": agent["same_run_resume_success"],
                     "Citation ID Correctness %": agent["citation_id_correctness"],
                     "Citation Semantic Support %": agent["citation_semantic_support"],
-                    "Empty Final Answer Rate %": agent["empty_final_answer"],
+                    "Empty Final Answer %": agent["empty_final_answer"],
                     "No-progress Action Rate %": agent["repeated_no_progress_action_rate"]}]
     write_csv(HERE / "agent_reliability_metrics.csv", reliability, list(reliability[0]))
     print(f"valid={len(tasks)} rows={len(rows)} agent_goal_success={agent['goal_success']}%")

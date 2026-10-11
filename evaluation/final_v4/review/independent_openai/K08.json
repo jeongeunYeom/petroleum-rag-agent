@@ -1,0 +1,107 @@
+{
+  "task_id": "K08",
+  "reviewer_model_id": "gpt-6-astra",
+  "response_id": "resp_0ba1eb22e5913c0a016acb966104ec87d0a2a0bff9b86584d3",
+  "usage": {
+    "input_tokens": 2072,
+    "input_tokens_details": {
+      "cache_write_tokens": 2069,
+      "cached_tokens": 0
+    },
+    "output_tokens": 513,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 2585
+  },
+  "scores_by_track": {
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 2,
+      "hallucination": true,
+      "engineering_contradiction_count": 1,
+      "numeric_accuracy": false,
+      "unit_accuracy": false,
+      "formula_accuracy": false,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Invents a shale-volume-weighted relation instead of MSIG=MPHI+MCBW and incorrectly requires Vsh; no MSIG result is given."
+    },
+    "openai_closed_book": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly states the additive relation and calculates MSIG=0.30 (30%), while distinguishing calculation from direct textbook verification."
+    },
+    "agent": {
+      "claim_verdicts": [
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": false,
+      "unit_accuracy": false,
+      "formula_accuracy": false,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Declines calculation and supplies neither the requested relation nor the numerical result."
+    },
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Provides the correct additive formula and MSIG=0.30 (30%), explicitly qualifying that textbook verification is unavailable."
+    },
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 2,
+      "hallucination": true,
+      "engineering_contradiction_count": 1,
+      "numeric_accuracy": false,
+      "unit_accuracy": false,
+      "formula_accuracy": false,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Gives an incorrect shale-volume-weighted formula and unjustifiably requests Vsh rather than summing the supplied components."
+    }
+  },
+  "anonymized_label_map": {
+    "A": "qwen_closed_book",
+    "B": "openai_closed_book",
+    "C": "agent",
+    "D": "openai_same_evidence",
+    "E": "qwen_same_evidence"
+  },
+  "wall_seconds": 8.03
+}

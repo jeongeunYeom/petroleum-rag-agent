@@ -127,7 +127,7 @@ def captured_evidence(task_id: str) -> list[dict]:
                "excerpt": item.get("excerpt", "")}
               for item in run.get("internal_sources", [])]
     result.extend({"evidence_id": item.get("evidence_id"), "document": item.get("document"),
-                   "page": item.get("page"), "image_path": item.get("image_path"), "kind": "FIG",
+                   "page": item.get("page"), "kind": "FIG",
                    "excerpt": item.get("source_note") or item.get("excerpt", "")}
                   for item in run.get("figures", []))
     return result

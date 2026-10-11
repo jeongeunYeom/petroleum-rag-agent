@@ -1,0 +1,112 @@
+{
+  "task_id": "G03",
+  "reviewer_model_id": "gpt-6-astra",
+  "response_id": "resp_0cacceda9fd1380a016acb9796f30887d0862783d23f632f92",
+  "usage": {
+    "input_tokens": 8669,
+    "input_tokens_details": {
+      "cache_write_tokens": 8666,
+      "cached_tokens": 0
+    },
+    "output_tokens": 701,
+    "output_tokens_details": {
+      "reasoning_tokens": 88
+    },
+    "total_tokens": 9370
+  },
+  "scores_by_track": {
+    "agent": {
+      "claim_verdicts": [
+        false,
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 1.0,
+      "note": "Accurately quotes KB3 about gas viscosity, but does not identify or explain the requested reservoir-fluid curve."
+    },
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        false,
+        false
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 1,
+      "hallucination": true,
+      "engineering_contradiction_count": 1,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 1.0,
+      "note": "Identifies the relevant figure and initial decrease, but omits its sharpness. Continued decrease after 3000 psig follows the supplied metadata but contradicts the gold curve's gentle rise."
+    },
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        false,
+        false
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 4,
+      "hallucination": true,
+      "engineering_contradiction_count": 3,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Mentions initial decrease but not its sharpness, and never establishes the minimum and gentle rise near 3000 psig. Generalizing decreasing viscosity to liquids and natural gas and the molecular explanation are incorrect; 3000 psig is approximately 20.7 MPa gauge, not 30 MPa."
+    },
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true,
+        false
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 1,
+      "hallucination": true,
+      "engineering_contradiction_count": 1,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": 1.0,
+      "note": "Correctly locates the figure and describes the sharp initial decrease. Its explicitly metadata-based continued decrease beyond 3000 psig is supported by the supplied excerpts but contradicts the gold curve."
+    },
+    "openai_closed_book": {
+      "claim_verdicts": [
+        false,
+        false
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": null,
+      "unit_accuracy": null,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Provides sound conditional oil-viscosity behavior and appropriately distinguishes it from an unobserved figure. Does not convey the sharp initial fall or establish the minimum and gentle rise around 3000 psig in the requested curve."
+    }
+  },
+  "anonymized_label_map": {
+    "A": "agent",
+    "B": "qwen_same_evidence",
+    "C": "qwen_closed_book",
+    "D": "openai_same_evidence",
+    "E": "openai_closed_book"
+  },
+  "wall_seconds": 10.824
+}

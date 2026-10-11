@@ -1,0 +1,578 @@
+{
+  "task_id": "K12",
+  "model_id": "qwen3:8b",
+  "run_id": "GR-20261011-132704-5AF1B3",
+  "initial_response": {
+    "run_id": "GR-20261011-132704-5AF1B3",
+    "topic": "Fractional-flow 유도 부분에서 oil rate qo와 total/water rates qt, qw의 관계식을 찾아줘. qt=430 stb/d, qw=95 stb/d일 때 qo를 계산해줘.",
+    "goal": "Fractional-flow 유도 부분에서 oil rate qo와 total/water rates qt, qw의 관계식을 찾아줘. qt=430 stb/d, qw=95 stb/d일 때 qo를 계산해줘.",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "insufficient_evidence",
+    "final_answer": "근거 자료에서 필요한 관계식이나 입력값을 확인하지 못해 수치 결과를 계산하거나 추정하지 않았습니다.",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "69526e97203333604d57fe9e434c36048bdb84def2feb08631fd4f416833af9f",
+    "criteria": [],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "출처 있는 관계식과 제공된 입력으로 검증된 계산 결과를 제시",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 1,
+    "current_iteration": 1,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1"
+        ],
+        "status": "completed",
+        "reason_code": "formula_source_missing",
+        "started_at": "2026-10-11T13:27:04.249154Z",
+        "finished_at": "2026-10-11T13:27:16.159671Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "query": "Fractional-flow 유도 부분에서 oil rate qo와 total/water rates qt, qw의 관계식을 찾아줘. qt=430 stb/d, qw=95 stb/d일 때 qo를 계산해줘.\nMissing: 출처 있는 관계식과 제공된 입력으로 검증된 계산 결과를 제시\nequation formula variables units Fractional flow oil rate total water rates qt stb d qw",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 1,
+        "action_id": "ACT-STOP-1",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "formula_source_unavailable",
+        "started_at": "2026-10-11T13:27:16.198501Z",
+        "finished_at": "2026-10-11T13:27:16.198501Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      },
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 1061,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1061:c1",
+        "score": 0.10436066,
+        "excerpt": "incorporated  into  these  equa-\ntions. The three fractional-flow equations are:\nfo =\nqo\nqt\n=\nqo\nqw + qo\n, ....................................................... (11.12)\nfw =\nqw\nqt\n=\nqw\nqw + qo\n, ....................................................... (11.13)\nand\nfo + fw = 1.0, ............................................................ (11.14)\nwhere fo = fractional flow of oil; qt = the total production rate, B/D; and fw = fractional flow\nof water.\nSubstituting Eq. 11.13 into Eq. 11.11 yields:\n−\n∂fw\n∂x = f A\nqt\n∂Sw\n∂t\n. ....................................................... (11.15)\n11.3.1 Buckley-Leverett Solution.  Further mathematical manipulation of these equations ob-\ntains  the  Buckley-Leverett  equation  (Eq.  11.16),  or  frontal-advance  equation.  To  derive  this\nChapter 11—Waterflooding\nV-1053\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 12\nChapter 10"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 1061,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1061:c0",
+        "score": 0.10029845,
+        "excerpt": "−∂\n∂x (ρouox) = ∂\n∂t (ρoSof ).................................................... (11.8)\nand\n−∂\n∂x (ρwuwx) = ∂\n∂t (ρwSwf ), .................................................. (11.9)\nwhere  x  =  position  in  x-coordinate  system,  ft;  ρo  =  oil  density,  lbm/ft3  or  g/cm3;  uox  =  oil\nvelocity in the x direction, ft/day; t = time, days; So = oil saturation, fraction PV; f  = porosi-\nty, fraction BV; ρw = water density, lbm/ft3 or g/cm3; uwx = water velocity in the x direction,\nft/day; and Sw = water saturation, fraction.\nAssuming that the oil and water are incompressible and that the porosity is constant, these\nequations become:\n−\n∂qo\n∂x = Af\n∂So\n∂t ........................................................... (11.10)\nand\n−\n∂qw\n∂x = Af\n∂Sw\n∂t , ......................................................... (11.11)\nwhere qo = oil-production rate, B/D; A = cross-sectional area available for flow, ft2; and qw =\nwater-production rate, B/D.\nNext,  the  equations  for  fractional  flow  of  oil  and  water  are  incorporated  into  these  equa-\ntions. The three fractional-flow equations are:\nfo =\nqo\nqt\n=\nqo\nqw + qo\n, ....................................................... (11.12)\nfw =\nqw"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 750,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p750:c0",
+        "score": 0.09601354,
+        "excerpt": "18\nThe oil rate qo can also be expressed as;\n\t qo = qt - qw\nIf the Darcy equations for water and oil are subtracted  (using field units P in atmos.) \nthe equations become;\n\t\nq\nkk\nkk\nq\nkk\nA\nP\nx\ng\nw\nw\nrw\no\nro\nt\no\nro\nc\nµ\nµ\nµ\nr\nθ\n+\n\n\n\n=\n+\n∂\n∂\n−\n×\n\n\n\n\nD\n sin \n.1 0133\n106\n\t \t\n\t\n(11)\nwhere;\n∂\n∂\n= ∂\n∂\n−∂\n∂\nP\nx\np\nx\np\nx\nc\no\nw\n which is the capillary pressure in the direction of flow and,\nDr = rw - ro  is the density difference of water and oil.\nIf values for flow rates using Darcy’s Law are now substituted in fraction flow equation \n(equation 9) it becomes;\n\t\nf\nkk A\nq\nP\nx\ng\nk\nk\nw\nro\nt\no\nc\nro\nw\nrw\no\n=\n+\n∂\n∂\n−\n×\n\n\n\n\n+\n1\n1 0133\n10\n1\n6\nµ\nr\nθ\nµ\nµ\nD\n sin \n.\n\t\n\t\n\t\n\t\n(12)\nDake2 has also simplified this equation as; \n\t\nf\nG\nk\nk\nw\nw\no\nro\nrw\n=\n−\n+\n1\n1\nµ\nµ\n  where G is a positive gravity number; \t\n\t\n(13)\n\t\nG\nkk A\ng\nq\nro\nt\no\n=\n×\n−\n4 886\n10 4\n.\n sin \nDr\nθ\nµ\n in field units. \n \n \n(14)\nwhere ∆ρ is the specific gravity difference relative to water. \nThe above term not only considers gravity effects but also includes a velocity term \n,v, which is qt/A\nThe impact of the various components of this equation is worthy of consideration.\nThe angle of dip. If water is being injected downdip than the"
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 1104,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1104:c1",
+        "score": 0.09312767,
+        "excerpt": "efficiency\nEVbt = volumetric sweep efficiency at breakthrough\nfo = fractional flow of oil\nfw = fractional flow of water\nf w = average fractional flow of water\nfwf = fractional flow of water at flood front\nFwo = water/oil ratio\nFpvg = fraction of displaceable pore volume that is gas saturated\ng = gravity constant\nG = value as defined by Eq. 11.24, dimensionless\nh = reservoir thickness, ft\ni = fluid phase i\nk = absolute permeability, darcies\nk50 = median permeability value, md\nk84.1 = permeability at 1 standard deviation above mean value, md\nka = air permeability\nki = permeability of fluid phase i, darcies\nko = permeability to oil, darcies\nkr = relative permeability\nkro = relative permeability to oil, fraction\nkroe = relative permeability to oil at endpoint (Swi)\nkrw = relative permeability to water, fraction\nkrwe = relative permeability to water at endpoint (Sorw)\nkrwo = water/oil relative permeability\nkw = permeability to water, darcies\nkx = permeability in the x direction, darcies\nL = length, ft\nM = mobility ratio\nPc = capillary pressure, psia\nqc = critical rate, B/D\nqo = oil-production rate, B/D\nqt = total production rate, B/D\nV-1096\nPetroleum Engineering Handbook—Vol. V\nPrint\nS"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 1062,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1062:c0",
+        "score": 0.07676041,
+        "excerpt": "equation, it is assumed that the fractional flow of water is a function only of the water satura-\ntion and that there is no mass transfer between the oil and water phases.\n(\ndx\ndt )Sw =\nqt\nf A(\n∂fw\n∂Sw)t\n. .................................................... (11.16)\nThis equation shows that in a linear displacement of water displacing oil, each water saturation\nmoves  through  the  rock  at  a  velocity  that  is  computed  from  the  derivative  of  the  fractional\nflow with respect to water saturation.\nThe general form of the fractional-flow equation for water is:\nfw =\n1\n1 +(\nko\nkw)(\nμw\nμo )\n+\nko A\nμoqt\n∂Pc\n∂x + (ρo −ρw)g sin α\n1 +(\nko\nkw)(\nμw\nμo )\n, ............................ (11.17)\nwhere ko = permeability to oil, darcies; g = gravity constant; α = reservoir dip angle, degrees;\nand  kw  =  permeability  to  water,  darcies.  This  equation  includes  terms  for  capillary  pressure\nvariation (as a function of saturation) in the linear direction and for the linear system possibly\ndipping at angle α.\nAssuming that the gradient in Pc with position is very small and that the linear system is\nhorizontal reduces Eq. 11.17 to:\nfw =\n1\n1 +(\nko\nkw)(\nμw\nμo )\n. .........................."
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 0.002228,
+      "retrieval_seconds": 11.893583,
+      "llm_generation_seconds": 5.4e-05,
+      "python_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "evaluation_seconds": 0.0,
+      "synthesis_seconds": 0.0,
+      "retrieve_action_seconds": 11.911105,
+      "elapsed_seconds": 11.972998,
+      "total_seconds": 11.973186,
+      "message_parsing_seconds": 0.000188
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "intent_route": "kb_formula_calc",
+      "intent": {
+        "selected_intent": "kb_formula_calc",
+        "intent_reason": "requested_sourced_relation",
+        "premise_cue_detected": false
+      },
+      "source_requirement": "kb_formula",
+      "fact_extraction": {
+        "deterministic_fact_count": 2,
+        "fallback_fact_count": 0,
+        "rejected_fact_count": 0,
+        "normalized_units": {
+          "USERF1": {
+            "raw": "stb/d",
+            "canonical": "stb/d"
+          },
+          "USERF2": {
+            "raw": "stb/d",
+            "canonical": "stb/d"
+          }
+        }
+      },
+      "calculation": {
+        "requested_operation_family": "",
+        "direct_calc_ready": false,
+        "missing_operands": []
+      },
+      "formula": {
+        "candidates_found": 25,
+        "selected_formula_id": null,
+        "selection_scores": {
+          "total": 13,
+          "lhs": 6,
+          "variable_overlap": 0,
+          "context": 4,
+          "heading": 3
+        },
+        "ambiguity_reason": "ambiguous_literal_formulas",
+        "candidate_scores": {
+          "FORMULA7": 13,
+          "FORMULA21": 13,
+          "FORMULA25": 10,
+          "FORMULA19": 9,
+          "FORMULA4": 8,
+          "FORMULA8": 8,
+          "FORMULA55": 8,
+          "FORMULA56": 8,
+          "FORMULA2": 6,
+          "FORMULA23": 6,
+          "FORMULA20": 5,
+          "FORMULA6": 4,
+          "FORMULA28": 3,
+          "FORMULA29": 3,
+          "FORMULA30": 3,
+          "FORMULA31": 3,
+          "FORMULA3": 2,
+          "FORMULA11": 2,
+          "FORMULA15": 2,
+          "FORMULA24": 2,
+          "FORMULA26": 2,
+          "FORMULA32": 2,
+          "FORMULA48": 2,
+          "FORMULA57": 2,
+          "FORMULA60": 2
+        }
+      },
+      "transition": {
+        "formula_ready": false,
+        "calculation_ready": false,
+        "blocking_reason": "formula_source_unavailable"
+      },
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 11.972998,
+      "python_seconds": 0.0
+    },
+    "validation": {},
+    "cancel_requested": false,
+    "error": null
+  },
+  "resume_response": null,
+  "response": {
+    "run_id": "GR-20261011-132704-5AF1B3",
+    "topic": "Fractional-flow 유도 부분에서 oil rate qo와 total/water rates qt, qw의 관계식을 찾아줘. qt=430 stb/d, qw=95 stb/d일 때 qo를 계산해줘.",
+    "goal": "Fractional-flow 유도 부분에서 oil rate qo와 total/water rates qt, qw의 관계식을 찾아줘. qt=430 stb/d, qw=95 stb/d일 때 qo를 계산해줘.",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "insufficient_evidence",
+    "final_answer": "근거 자료에서 필요한 관계식이나 입력값을 확인하지 못해 수치 결과를 계산하거나 추정하지 않았습니다.",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "69526e97203333604d57fe9e434c36048bdb84def2feb08631fd4f416833af9f",
+    "criteria": [],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "출처 있는 관계식과 제공된 입력으로 검증된 계산 결과를 제시",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 1,
+    "current_iteration": 1,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1"
+        ],
+        "status": "completed",
+        "reason_code": "formula_source_missing",
+        "started_at": "2026-10-11T13:27:04.249154Z",
+        "finished_at": "2026-10-11T13:27:16.159671Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "query": "Fractional-flow 유도 부분에서 oil rate qo와 total/water rates qt, qw의 관계식을 찾아줘. qt=430 stb/d, qw=95 stb/d일 때 qo를 계산해줘.\nMissing: 출처 있는 관계식과 제공된 입력으로 검증된 계산 결과를 제시\nequation formula variables units Fractional flow oil rate total water rates qt stb d qw",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 1,
+        "action_id": "ACT-STOP-1",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "formula_source_unavailable",
+        "started_at": "2026-10-11T13:27:16.198501Z",
+        "finished_at": "2026-10-11T13:27:16.198501Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      },
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 1061,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1061:c1",
+        "score": 0.10436066,
+        "excerpt": "incorporated  into  these  equa-\ntions. The three fractional-flow equations are:\nfo =\nqo\nqt\n=\nqo\nqw + qo\n, ....................................................... (11.12)\nfw =\nqw\nqt\n=\nqw\nqw + qo\n, ....................................................... (11.13)\nand\nfo + fw = 1.0, ............................................................ (11.14)\nwhere fo = fractional flow of oil; qt = the total production rate, B/D; and fw = fractional flow\nof water.\nSubstituting Eq. 11.13 into Eq. 11.11 yields:\n−\n∂fw\n∂x = f A\nqt\n∂Sw\n∂t\n. ....................................................... (11.15)\n11.3.1 Buckley-Leverett Solution.  Further mathematical manipulation of these equations ob-\ntains  the  Buckley-Leverett  equation  (Eq.  11.16),  or  frontal-advance  equation.  To  derive  this\nChapter 11—Waterflooding\nV-1053\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 12\nChapter 10"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 1061,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1061:c0",
+        "score": 0.10029845,
+        "excerpt": "−∂\n∂x (ρouox) = ∂\n∂t (ρoSof ).................................................... (11.8)\nand\n−∂\n∂x (ρwuwx) = ∂\n∂t (ρwSwf ), .................................................. (11.9)\nwhere  x  =  position  in  x-coordinate  system,  ft;  ρo  =  oil  density,  lbm/ft3  or  g/cm3;  uox  =  oil\nvelocity in the x direction, ft/day; t = time, days; So = oil saturation, fraction PV; f  = porosi-\nty, fraction BV; ρw = water density, lbm/ft3 or g/cm3; uwx = water velocity in the x direction,\nft/day; and Sw = water saturation, fraction.\nAssuming that the oil and water are incompressible and that the porosity is constant, these\nequations become:\n−\n∂qo\n∂x = Af\n∂So\n∂t ........................................................... (11.10)\nand\n−\n∂qw\n∂x = Af\n∂Sw\n∂t , ......................................................... (11.11)\nwhere qo = oil-production rate, B/D; A = cross-sectional area available for flow, ft2; and qw =\nwater-production rate, B/D.\nNext,  the  equations  for  fractional  flow  of  oil  and  water  are  incorporated  into  these  equa-\ntions. The three fractional-flow equations are:\nfo =\nqo\nqt\n=\nqo\nqw + qo\n, ....................................................... (11.12)\nfw =\nqw"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 750,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p750:c0",
+        "score": 0.09601354,
+        "excerpt": "18\nThe oil rate qo can also be expressed as;\n\t qo = qt - qw\nIf the Darcy equations for water and oil are subtracted  (using field units P in atmos.) \nthe equations become;\n\t\nq\nkk\nkk\nq\nkk\nA\nP\nx\ng\nw\nw\nrw\no\nro\nt\no\nro\nc\nµ\nµ\nµ\nr\nθ\n+\n\n\n\n=\n+\n∂\n∂\n−\n×\n\n\n\n\nD\n sin \n.1 0133\n106\n\t \t\n\t\n(11)\nwhere;\n∂\n∂\n= ∂\n∂\n−∂\n∂\nP\nx\np\nx\np\nx\nc\no\nw\n which is the capillary pressure in the direction of flow and,\nDr = rw - ro  is the density difference of water and oil.\nIf values for flow rates using Darcy’s Law are now substituted in fraction flow equation \n(equation 9) it becomes;\n\t\nf\nkk A\nq\nP\nx\ng\nk\nk\nw\nro\nt\no\nc\nro\nw\nrw\no\n=\n+\n∂\n∂\n−\n×\n\n\n\n\n+\n1\n1 0133\n10\n1\n6\nµ\nr\nθ\nµ\nµ\nD\n sin \n.\n\t\n\t\n\t\n\t\n(12)\nDake2 has also simplified this equation as; \n\t\nf\nG\nk\nk\nw\nw\no\nro\nrw\n=\n−\n+\n1\n1\nµ\nµ\n  where G is a positive gravity number; \t\n\t\n(13)\n\t\nG\nkk A\ng\nq\nro\nt\no\n=\n×\n−\n4 886\n10 4\n.\n sin \nDr\nθ\nµ\n in field units. \n \n \n(14)\nwhere ∆ρ is the specific gravity difference relative to water. \nThe above term not only considers gravity effects but also includes a velocity term \n,v, which is qt/A\nThe impact of the various components of this equation is worthy of consideration.\nThe angle of dip. If water is being injected downdip than the"
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 1104,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1104:c1",
+        "score": 0.09312767,
+        "excerpt": "efficiency\nEVbt = volumetric sweep efficiency at breakthrough\nfo = fractional flow of oil\nfw = fractional flow of water\nf w = average fractional flow of water\nfwf = fractional flow of water at flood front\nFwo = water/oil ratio\nFpvg = fraction of displaceable pore volume that is gas saturated\ng = gravity constant\nG = value as defined by Eq. 11.24, dimensionless\nh = reservoir thickness, ft\ni = fluid phase i\nk = absolute permeability, darcies\nk50 = median permeability value, md\nk84.1 = permeability at 1 standard deviation above mean value, md\nka = air permeability\nki = permeability of fluid phase i, darcies\nko = permeability to oil, darcies\nkr = relative permeability\nkro = relative permeability to oil, fraction\nkroe = relative permeability to oil at endpoint (Swi)\nkrw = relative permeability to water, fraction\nkrwe = relative permeability to water at endpoint (Sorw)\nkrwo = water/oil relative permeability\nkw = permeability to water, darcies\nkx = permeability in the x direction, darcies\nL = length, ft\nM = mobility ratio\nPc = capillary pressure, psia\nqc = critical rate, B/D\nqo = oil-production rate, B/D\nqt = total production rate, B/D\nV-1096\nPetroleum Engineering Handbook—Vol. V\nPrint\nS"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 1062,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1062:c0",
+        "score": 0.07676041,
+        "excerpt": "equation, it is assumed that the fractional flow of water is a function only of the water satura-\ntion and that there is no mass transfer between the oil and water phases.\n(\ndx\ndt )Sw =\nqt\nf A(\n∂fw\n∂Sw)t\n. .................................................... (11.16)\nThis equation shows that in a linear displacement of water displacing oil, each water saturation\nmoves  through  the  rock  at  a  velocity  that  is  computed  from  the  derivative  of  the  fractional\nflow with respect to water saturation.\nThe general form of the fractional-flow equation for water is:\nfw =\n1\n1 +(\nko\nkw)(\nμw\nμo )\n+\nko A\nμoqt\n∂Pc\n∂x + (ρo −ρw)g sin α\n1 +(\nko\nkw)(\nμw\nμo )\n, ............................ (11.17)\nwhere ko = permeability to oil, darcies; g = gravity constant; α = reservoir dip angle, degrees;\nand  kw  =  permeability  to  water,  darcies.  This  equation  includes  terms  for  capillary  pressure\nvariation (as a function of saturation) in the linear direction and for the linear system possibly\ndipping at angle α.\nAssuming that the gradient in Pc with position is very small and that the linear system is\nhorizontal reduces Eq. 11.17 to:\nfw =\n1\n1 +(\nko\nkw)(\nμw\nμo )\n. .........................."
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 0.002228,
+      "retrieval_seconds": 11.893583,
+      "llm_generation_seconds": 5.4e-05,
+      "python_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "evaluation_seconds": 0.0,
+      "synthesis_seconds": 0.0,
+      "retrieve_action_seconds": 11.911105,
+      "elapsed_seconds": 11.972998,
+      "total_seconds": 11.973186,
+      "message_parsing_seconds": 0.000188
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "intent_route": "kb_formula_calc",
+      "intent": {
+        "selected_intent": "kb_formula_calc",
+        "intent_reason": "requested_sourced_relation",
+        "premise_cue_detected": false
+      },
+      "source_requirement": "kb_formula",
+      "fact_extraction": {
+        "deterministic_fact_count": 2,
+        "fallback_fact_count": 0,
+        "rejected_fact_count": 0,
+        "normalized_units": {
+          "USERF1": {
+            "raw": "stb/d",
+            "canonical": "stb/d"
+          },
+          "USERF2": {
+            "raw": "stb/d",
+            "canonical": "stb/d"
+          }
+        }
+      },
+      "calculation": {
+        "requested_operation_family": "",
+        "direct_calc_ready": false,
+        "missing_operands": []
+      },
+      "formula": {
+        "candidates_found": 25,
+        "selected_formula_id": null,
+        "selection_scores": {
+          "total": 13,
+          "lhs": 6,
+          "variable_overlap": 0,
+          "context": 4,
+          "heading": 3
+        },
+        "ambiguity_reason": "ambiguous_literal_formulas",
+        "candidate_scores": {
+          "FORMULA7": 13,
+          "FORMULA21": 13,
+          "FORMULA25": 10,
+          "FORMULA19": 9,
+          "FORMULA4": 8,
+          "FORMULA8": 8,
+          "FORMULA55": 8,
+          "FORMULA56": 8,
+          "FORMULA2": 6,
+          "FORMULA23": 6,
+          "FORMULA20": 5,
+          "FORMULA6": 4,
+          "FORMULA28": 3,
+          "FORMULA29": 3,
+          "FORMULA30": 3,
+          "FORMULA31": 3,
+          "FORMULA3": 2,
+          "FORMULA11": 2,
+          "FORMULA15": 2,
+          "FORMULA24": 2,
+          "FORMULA26": 2,
+          "FORMULA32": 2,
+          "FORMULA48": 2,
+          "FORMULA57": 2,
+          "FORMULA60": 2
+        }
+      },
+      "transition": {
+        "formula_ready": false,
+        "calculation_ready": false,
+        "blocking_reason": "formula_source_unavailable"
+      },
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 11.972998,
+      "python_seconds": 0.0
+    },
+    "validation": {},
+    "cancel_requested": false,
+    "error": null
+  },
+  "same_run_resume": false,
+  "wall_seconds": 12.952
+}

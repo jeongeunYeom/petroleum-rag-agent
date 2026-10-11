@@ -1,0 +1,107 @@
+{
+  "task_id": "D04",
+  "reviewer_model_id": "gpt-6-astra",
+  "response_id": "resp_01c1d9a1c42967ce016acb95d591e087d0b677440f386a8814",
+  "usage": {
+    "input_tokens": 1978,
+    "input_tokens_details": {
+      "cache_write_tokens": 1975,
+      "cached_tokens": 0
+    },
+    "output_tokens": 486,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 2464
+  },
+  "scores_by_track": {
+    "qwen_closed_book": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly computes the signed slope as -30 psi/day; the middle point is consistent."
+    },
+    "agent": {
+      "claim_verdicts": [
+        false
+      ],
+      "partial_or_better": false,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": false,
+      "unit_accuracy": false,
+      "formula_accuracy": null,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Declines to calculate despite sufficient supplied observations; provides no slope."
+    },
+    "openai_same_evidence": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correct signed slope, units, and interpretation of the collinear observations."
+    },
+    "openai_closed_book": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 0,
+      "hallucination": false,
+      "engineering_contradiction_count": 0,
+      "numeric_accuracy": true,
+      "unit_accuracy": true,
+      "formula_accuracy": true,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly calculates -30 psi/day and describes the uniform daily decline."
+    },
+    "qwen_same_evidence": {
+      "claim_verdicts": [
+        true
+      ],
+      "partial_or_better": true,
+      "unsupported_claim_count": 1,
+      "hallucination": true,
+      "engineering_contradiction_count": 1,
+      "numeric_accuracy": false,
+      "unit_accuracy": true,
+      "formula_accuracy": false,
+      "false_premise_handled": null,
+      "safe_refusal_correct": null,
+      "citation_semantic_support": null,
+      "note": "Correctly conveys a daily decline of 30 psi, but labels the positive decline magnitude as the slope; the signed pressure slope is -30 psi/day."
+    }
+  },
+  "anonymized_label_map": {
+    "A": "qwen_closed_book",
+    "B": "agent",
+    "C": "openai_same_evidence",
+    "D": "openai_closed_book",
+    "E": "qwen_same_evidence"
+  },
+  "wall_seconds": 7.375
+}

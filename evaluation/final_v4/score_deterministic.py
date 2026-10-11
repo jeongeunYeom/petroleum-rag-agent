@@ -105,6 +105,17 @@ def retrieval_quality(task: dict, response: dict, catalog: dict) -> dict:
     expected_pages = {(ref["document"], ref["page"]) for ref in refs}
     family_docs = family_documents().get(task.get("expected_domain_family"), set())
     matched = lambda hit: (hit.get("document"), int(hit.get("page") or -1)) in expected_pages
+    def span_relevant(hit: dict) -> bool:
+        if not matched(hit):
+            return False
+        text_tokens = set(re.findall(r"[a-z0-9]+", (hit.get("excerpt") or hit.get("source_note") or "").casefold()))
+        for ref in refs:
+            if (hit.get("document"), int(hit.get("page") or -1)) != (ref["document"], ref["page"]):
+                continue
+            gold_tokens = set(re.findall(r"[a-z0-9]+", str(ref.get("span") or "").casefold()))
+            if gold_tokens and len(text_tokens & gold_tokens) / len(gold_tokens) >= 0.6:
+                return True
+        return False
     top = hits[:3]
     history = (response.get("telemetry") or {}).get("retrieval_rerank_history") or []
     refined = any(bool(item.get("refined_recovery") or item.get("refined_retrieval")) for item in history)
@@ -113,11 +124,11 @@ def retrieval_quality(task: dict, response: dict, catalog: dict) -> dict:
     recovered = bool(refined and not (initial_ids & expected_pages) and any(matched(hit) for hit in hits))
     return {
         "domain_matched_document_recall_at_k": float(any(hit.get("document") in family_docs for hit in hits)),
-        "relevant_chunk_at_k": float(any(matched(hit) for hit in hits)),
-        "top3_relevant_precision": sum(matched(hit) for hit in top) / len(top) if top else 0.0,
+        "relevant_chunk_at_k": float(any(span_relevant(hit) for hit in hits)),
+        "top3_relevant_precision": sum(span_relevant(hit) for hit in top) / len(top) if top else 0.0,
         "wrong_domain_dominance_rate": float(sum(hit.get("document") not in family_docs for hit in top) > len(top) / 2)
                                        if top else None,
-        "refined_retrieval_recovery_rate": float(recovered) if task.get("refined_probe") else None,
+        "refined_retrieval_recovery_rate": float(recovered) if task.get("refined_probe") and refined else None,
         "refined_retrieval_triggered": refined if task.get("refined_probe") else None,
     }
 
@@ -139,6 +150,30 @@ def exact_formula_span_recall(task: dict, response: dict, catalog: dict) -> bool
                    text[record.span_start:record.span_end] == record.raw_span
                    for record in registry.records):
                 return True
+    return False
+
+
+def selected_formula_correct(task: dict, response: dict, catalog: dict) -> bool | None:
+    if task.get("expected_source_requirement") != "KB_FORMULA":
+        return None
+    selected_id = ((response.get("telemetry") or {}).get("formula") or {}).get("selected_formula_id")
+    if not selected_id:
+        return False
+    from app.services.formula_source_registry import FormulaSourceRegistry, equation_ast
+    sources = response.get("internal_sources", [])
+    registry = FormulaSourceRegistry.from_evidence([
+        {"source_type": "knowledge_base", "evidence_id": item.get("evidence_id"),
+         "text": item.get("excerpt") or ""} for item in sources])
+    loci = {(catalog[key]["document"], catalog[key]["page"])
+            for key in task["expected_source_ids"]}
+    source_by_id = {item.get("evidence_id"): item for item in sources}
+    target = equation_ast(task.get("expected_formula") or "")
+    for record in registry.records:
+        source = source_by_id.get(record.source_id)
+        if (record.formula_id == selected_id and record.equation_ast == target and source
+                and (source.get("document"), int(source.get("page") or -1)) in loci
+                and (source.get("excerpt") or "")[record.span_start:record.span_end] == record.raw_span):
+            return True
     return False
 
 
@@ -210,8 +245,12 @@ def fact_metrics(task: dict, payload: dict, response: dict) -> dict:
     normalized = facts.get("normalized_units") or {}
     units = [item for item in normalized.values() if item.get("raw")]
     def normalized_unit(value: object) -> str:
-        return (str(value).casefold().replace("³", "3").replace("²", "2")
+        unit = (str(value).casefold().replace("³", "3").replace("²", "2")
                 .replace("⁻", "-").replace(" ", "").strip())
+        return {"시간": "h", "시": "h", "hour": "h", "hours": "h", "hr": "h",
+                "분": "min", "minute": "min", "minutes": "min",
+                "초": "s", "second": "s", "seconds": "s",
+                "피트": "ft", "feet": "ft", "배럴": "bbl"}.get(unit, unit)
     unit_ok = (sum(normalized_unit(item["raw"]) == normalized_unit(item.get("canonical"))
                    for item in units) / len(units)) if units else None
     resume_ingestion = None
@@ -305,6 +344,13 @@ def grade(task: dict, track: str, payload: dict | None, catalog: dict, invalid: 
         result["source_requirement_accuracy"] = str(telemetry.get("source_requirement") or "").upper() == task["expected_source_requirement"]
         result["python_calls"] = response.get("python_calls_total", 0)
         result["validated_calculations"] = sum(bool(row.get("validation_passed")) for row in response.get("computations", []))
+        validated_outputs = [value for item in response.get("computations", []) if item.get("validation_passed")
+                             for value in (item.get("output") or {}).values()
+                             if isinstance(value, (int, float)) and not isinstance(value, bool)]
+        result["validated_calc_numeric_match"] = (
+            all(any(math.isclose(float(gold), float(value), rel_tol=0, abs_tol=tolerance)
+                    for value in validated_outputs) for gold in expected.values())
+            if expected else None)
         result["document_recall_at_k"], result["page_recall_at_k"], result["figure_retrieval_accuracy"] = source_recall(task, response, catalog)
         result.update(retrieval_quality(task, response, catalog))
         result["exact_formula_span_recall"] = exact_formula_span_recall(task, response, catalog)
@@ -321,13 +367,11 @@ def grade(task: dict, track: str, payload: dict | None, catalog: dict, invalid: 
             result["formula_to_calculate_success"] = None
             result["formula_to_calculate_given_span"] = None
         result["calculation_provenance_completeness"], result["formula_source_correctness"], result["formula_accuracy_deterministic"] = provenance(task, response, catalog)
-        formula_telemetry = telemetry.get("formula") or {}
-        result["formula_candidate_selection_success"] = (
-            bool(formula_telemetry.get("selected_formula_id") and result["formula_source_correctness"])
-            if task["expected_source_requirement"] == "KB_FORMULA" else None)
+        result["formula_candidate_selection_success"] = selected_formula_correct(task, response, catalog)
         validated = [item for item in response.get("computations", []) if item.get("validation_passed")]
         result["variable_binding_success"] = (
-            any(bool(item.get("bound_variables")) and all(
+            any(item.get("contract_validation_passed") is True
+                and bool(item.get("bound_variables")) and all(
                 fact_id in (item.get("input_fact_ids") or [])
                 for fact_id in item.get("bound_variables", {}).values()) for item in validated)
             if task["category"] in CALC_CATEGORIES else None)
