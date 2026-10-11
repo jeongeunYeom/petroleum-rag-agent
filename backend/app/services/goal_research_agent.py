@@ -156,6 +156,8 @@ class EvidenceAccumulator:
             {
                 "evidence_id": item.evidence_id,
                 "source_type": "knowledge_base",
+                "document": item.document,
+                "page": item.page,
                 "locator": f"{item.document} p.{item.page or '?'} chunk {item.chunk_id}",
                 "text": item.excerpt,
             }
@@ -174,6 +176,8 @@ class EvidenceAccumulator:
             {
                 "evidence_id": item.evidence_id,
                 "source_type": "figure",
+                "document": item.document,
+                "page": item.page,
                 "locator": (
                     f"{item.document} p.{item.page or '?'} "
                     f"figure {item.figure_number or item.filename or '?'}"

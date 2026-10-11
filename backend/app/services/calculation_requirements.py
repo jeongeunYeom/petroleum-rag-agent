@@ -145,7 +145,7 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
     stopwords = {"from", "with", "calculate", "compute", "equation", "formula", "the", "for", "and",
                  "using", "find", "given", "what", "식으로", "계산해줘", "내부", "자료에서"}
     context_tokens = {token for token in tokens if len(token) > 2 and token not in stopwords}
-    generic_context = stopwords | {"internal", "locate", "model", "assume", "result", "value",
+    generic_context = stopwords | {"internal", "textbook", "use", "locate", "model", "assume", "result", "value",
                                    "values", "input", "units", "source", "sourced", "relation",
                                    "please", "expression", "number", "without", "known", "needed"}
     source_by_id = {str(row.get("evidence_id")): str(row.get("text") or "") for row in evidence}
@@ -209,6 +209,13 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
                    context_score, heading_score)
             ranked.append((key, record, details))
     ranked.sort(key=lambda row: row[0], reverse=True)
+    families = {}
+    for row in ranked:
+        record = row[1]
+        family = (record.equation_ast, record.source_document or record.locator or record.source_id,
+                  re.sub(r"\s+", " ", record.context).casefold())
+        families.setdefault(family, row)
+    ranked = list(families.values())
     if not ranked:
         return None, FormulaSelectionRecord(None, 0, 0, 0, 0, 0, 0, "no_relevant_literal_formula", 0)
     top = ranked[0]

@@ -242,6 +242,14 @@ def calculation_readiness(formula: FormulaSourceRecord | None, evidence: list[di
     for variable in sorted(expression_variables(formula.expression_candidate or "") or set()):
         facts = [fact for fact in [*users.records, *derived_facts]
                  if normalize_symbol(fact.name) in symbol_names(variable)]
+        exact = [fact for fact in facts if fact.name == variable]
+        if not exact:
+            exact = [fact for fact in facts if normalize_symbol(fact.name) == normalize_symbol(variable)]
+        if exact:
+            facts = exact
+        explicit = [fact for fact in facts if getattr(fact, "extraction_method", "") == "explicit_assignment"]
+        if explicit:
+            facts = explicit
         inferred = infer_dimensionless(variable, source_text,
                                        facts[0].source_span if len(facts) == 1 and hasattr(facts[0], "source_span") else "")
         if len(facts) != 1:

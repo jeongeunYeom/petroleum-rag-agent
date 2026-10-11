@@ -101,6 +101,13 @@ def formula_origin(text: str) -> FormulaOrigin:
     return FormulaOrigin.UNKNOWN
 
 
+def explicitly_underdetermined(text: str) -> bool:
+    """Only explicit missing-data requests; never infer unavailable engineering values."""
+    return bool(re.search(r"\b(?:exact|optimal|specific)\b|정확한|최적", text, re.I)
+                and re.search(r"\b(?:no|without|not\s+(?:provided|known|available)|missing|unspecified)\b|"
+                              r"없(?:다|는|고|음|어)|미제공|모르|주어지지|제공되지", text, re.I))
+
+
 def classify_goal_intent(request: GoalResearchRequest, *, has_user_facts: bool,
                          has_simulation_spec: bool = False) -> GoalIntent:
     """Choose the execution route from the request before the action planner runs."""
@@ -114,12 +121,16 @@ def classify_goal_intent(request: GoalResearchRequest, *, has_user_facts: bool,
     if equation and (_CALC.search(text) or origin == FormulaOrigin.USER_DEFINED or has_user_facts) and origin != FormulaOrigin.KB_REFERENCED:
         return GoalIntent(GoalIntentKind.USER_FORMULA_CALC, SourceRequirement.USER_FORMULA,
                           equation, "literal_user_formula", formula_origin=origin)
+    if not equation and not has_simulation_spec and explicitly_underdetermined(text):
+        return GoalIntent(GoalIntentKind.KNOWLEDGE_QA, SourceRequirement.NONE,
+                          reason="check_source_answerability_before_numeric_routing")
     premise = bool(_PREMISE.search(text)) and not bool(re.search(
         r"몇|얼마|무엇|어떻게|\b(?:how\s+many|how\s+much|what\s+is)\b", text, re.I))
     if premise:
         return GoalIntent(GoalIntentKind.PREMISE_CHECK, SourceRequirement.NONE,
                           reason="assertion_verification_cue", premise_cue_detected=True)
     kb_formula = bool(asks_for_api_gravity_calculation(request) or _FORMULA_REQUEST.search(text)
+                      or (origin == FormulaOrigin.KB_REFERENCED and re.search(r"식(?:으로|을|에|의)|equation|formula", text, re.I))
                       or (equation and origin == FormulaOrigin.KB_REFERENCED))
     if (not kb_formula and re.search(r"\b(?:explain|describe|define|why)\b|설명|정의|왜", text, re.I)
             and not _EXPLICIT_CALC.search(text)):
@@ -127,6 +138,8 @@ def classify_goal_intent(request: GoalResearchRequest, *, has_user_facts: bool,
     if _NO_KB.search(text) or (has_user_facts and _DIRECT.search(text) and not kb_formula and not sweep):
         return GoalIntent(GoalIntentKind.DIRECT_CALC, SourceRequirement.NONE,
                           reason="user_requested_generic_operation")
+    if has_user_facts and re.search(r"\b(?:minimum|maximum|min|max)\b|최댓값|최솟값", text, re.I) and not kb_formula and not sweep:
+        return GoalIntent(GoalIntentKind.DIRECT_CALC, SourceRequirement.NONE, reason="user_requested_extremum")
     if kb_formula and (_CALC.search(text) or sweep or asks_for_api_gravity_calculation(request)):
         return GoalIntent(GoalIntentKind.KB_FORMULA_CALC, SourceRequirement.KB_FORMULA,
                           reason="requested_sourced_relation", formula_origin=origin)

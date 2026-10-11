@@ -68,6 +68,12 @@ class FormulaSourceRecord(BaseModel):
     span_end: int
     expression_candidate: str | None = None
     equation_ast: str | None = None
+    lhs: str | None = None
+    rhs: str | None = None
+    required_variables: list[str] = Field(default_factory=list)
+    source_document: str | None = None
+    source_page: int | str | None = None
+    context: str = ""
 
 
 class FormulaSourceRegistry(BaseModel):
@@ -103,5 +109,9 @@ class FormulaSourceRegistry(BaseModel):
                     normalized_span=normalize_formula(raw), locator=source.get("locator"),
                     span_start=start, span_end=end, expression_candidate=candidate if variables is not None else None,
                     equation_ast=equation_ast(candidate) if variables is not None else None,
+                    lhs=candidate.split("=", 1)[0].strip(), rhs=candidate.split("=", 1)[1].strip(),
+                    required_variables=sorted(variables or []),
+                    source_document=source.get("document"), source_page=source.get("page"),
+                    context=str(source.get("heading") or text[max(0, start-180):start]).strip(),
                 ))
         return cls(records=records)

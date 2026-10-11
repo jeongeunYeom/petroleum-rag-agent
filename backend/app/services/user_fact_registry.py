@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 
 
 NUMBER = r"[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d*)?(?:[eE][-+]?\d+)?|[-+]?\.\d+(?:[eE][-+]?\d+)?|[-+]?\d+\s*/\s*\d+"
-UNIT = (r"(?:kg/m(?:\^?3|³)|mg/L|mD[·*\-]ft|m(?:\^?3|³)/(?:day|hr|hour|s|d|h)|"
+UNIT = (r"(?:USD/m|MMscf/d|psi/ft|kg/m(?:\^?3|³)|mg/L|mD[·*\-]ft|m(?:\^?3|³)/(?:day|hr|hour|s|d|h)|"
         r"\$/m(?:\^?3|³)|m(?:\^?3|³)|ft(?:\^?3|³)|mm(?:\^?2|²|⁻¹)|"
         r"m(?:\^?2|²)|psi/(?:day|d)|psi(?:⁻¹|\^-?1)?|stb/(?:day|h|d)|"
         r"bbl/d|lbf/ft|lb/ft|gpm|kWh|kW|hp|ppg|acres?|feet|inch|in|ft|mD|md|"
@@ -84,6 +84,22 @@ SERIES = re.compile(rf"(?P<label>[가-힣]{{2,12}}(?:\s+[가-힣]{{2,12}})?|[A-Z
                     rf"(?P<values>(?:{NUMBER})(?:\s*[,，]\s*(?:{NUMBER})){{2,12}})\s*(?P<unit>{UNIT})", re.I)
 SHARED_DURATION = re.compile(rf"(?:모두|각각|each|all)\s*(?P<value>{NUMBER})\s*"
                              rf"(?P<unit>시간|hours?|hr|h|days?|s|sec|seconds?)", re.I)
+
+# Comma-separated observations, not assignments, coordinates, or thousands separators.
+LIST_ITEM = rf"(?:{NUMBER})(?:\s*{UNIT}(?![A-Za-z0-9/]))?"
+NUMERIC_LIST = re.compile(
+    rf"(?<![\w.]){LIST_ITEM}(?:\s*(?:[,，]\s*(?:and\s+|및\s*)?|\band\s+|및\s*){LIST_ITEM})+", re.I)
+
+
+def numeric_lists(text: str):
+    for match in NUMERIC_LIST.finditer(text):
+        if (match.start() and text[match.start()-1] == "(" or
+                text[match.end():].lstrip().startswith(")")):
+            continue
+        tokens = list(re.finditer(rf"(?P<value>{NUMBER})(?:\s*(?P<unit>{UNIT})(?![A-Za-z0-9/]))?", match.group(), re.I))
+        operation = re.search(r"mean|median|sum|min|max|average|평균|중앙값|합계|최대|최소|가중", text, re.I)
+        if len(tokens) >= 2 and (any(token['unit'] for token in tokens) or operation):
+            yield match, tokens
 
 
 def normalize_unit(raw: str) -> str:
@@ -184,7 +200,7 @@ class UserFactRegistry(BaseModel):
                 names = {name for pair in orders.values() for name in pair}
                 return self.model_copy(update={"records": [row for row in self.records if row.name in names]})
         aggregate = {"mean", "sum", "median", "ranking", "maximum", "minimum", "range",
-                     "variance", "variance_population", "std_population", "std_sample"}
+                     "variance", "variance_population", "std_population", "std_sample", "weighted_average"}
         if not operations or not set(operations) <= aggregate:
             return self
         match = re.search(
@@ -192,7 +208,8 @@ class UserFactRegistry(BaseModel):
             r"standard\s+deviation)\s+(?:of|for)\s+([A-Za-z][A-Za-z0-9_]*"
             r"(?:\s*(?:,|and)\s*[A-Za-z][A-Za-z0-9_]*)+)\b", text, re.I)
         if not match:
-            return self
+            observations = [row for row in self.records if row.extraction_method == "numeric_list"]
+            return self.model_copy(update={"records": observations}) if observations else self
         names = [part for part in re.split(r"\s*(?:,|\band\b)\s*", match.group(1), flags=re.I) if part]
         by_name = {row.name.casefold(): row for row in self.records}
         if len(names) < 2 or len({name.casefold() for name in names}) != len(names) or any(
@@ -313,6 +330,21 @@ class UserFactRegistry(BaseModel):
         for line in topic.splitlines(keepends=True):
             text = line.rstrip("\r\n")
             protected_spans: list[tuple[int, int]] = []
+            for group, tokens in numeric_lists(text):
+                shared = tokens[-1]["unit"] or ""
+                context = text[max(0, group.start()-45):group.start()]
+                weight = bool(re.search(r"weights?\s*(?:are|were|[:=])?\s*$|가중치\s*(?:는|:|=)?\s*$", context, re.I))
+                for index, token in enumerate(tokens, 1):
+                    unit = token["unit"] or shared
+                    name = f"observation_{index}" + ("_weight" if weight else "")
+                    start = offset + group.start() + token.start()
+                    # One position per observation preserves equal-valued independent readings.
+                    previous_count = len(records)
+                    add(name, token["value"], unit, token.group(), group.group(), start)
+                    if len(records) > previous_count:
+                        records[-1].extraction_method = "numeric_list"
+                        records[-1].context_span = group.group()
+                protected_spans.append(group.span())
             for found in DIMENSIONLESS_NAMED.finditer(text):
                 add(found["label"], found["value"], "", found.group(0), None, offset + found.start())
                 protected_spans.append(found.span())
@@ -362,6 +394,8 @@ class UserFactRegistry(BaseModel):
                     found.group(0), offset + found.end("unit"))
                 protected_spans.append(found.span())
             for found in SERIES.finditer(text):
+                if any(start < found.end() and found.start() < end for start, end in protected_spans):
+                    continue
                 values = list(re.finditer(NUMBER, found["values"]))
                 if not values:
                     continue
@@ -420,12 +454,16 @@ class UserFactRegistry(BaseModel):
                 if label.casefold() in {"measurements", "values", "data", "inputs"} and not found.group("unit"):
                     continue
                 if (not found.group("unit") and not found.group("value").endswith(".")
-                        and re.match(r"\s+[A-Za-z]", text[found.end():])):
+                        and re.match(r"\s+[A-Za-z]", text[found.end():])
+                        and not re.match(r"\s*(?:\r?\n|and\b|[A-Za-z_]\w*\s*=)", text[found.end():])):
                     # A following word may be an unsupported unit; do not erase it.
                     continue
                 prefix = f"Well_{well}_" if well and label.casefold() not in {"well", "layer"} else ""
                 normalized_label = label.casefold() if len(label) > 2 and label.istitle() else label
                 add(prefix + normalized_label, found.group("value"), found.group("unit") or "", found.group(0), f"Well {well}" if well else None, offset + found.start())
+                if records and records[-1].topic_start == offset + found.start():
+                    records[-1].extraction_method = "explicit_assignment"
+                protected_spans.append(found.span())
             for found in KOREAN_SG.finditer(text):
                 add("SG", found.group("value"), "", found.group(0), None, offset + found.start())
             for found in KOREAN_NAMED_SG.finditer(text):
@@ -518,3 +556,49 @@ class UserFactRegistry(BaseModel):
             }
             for item in self.records
         ]
+
+
+def validate_original_operands(text: str, facts: UserFactRegistry, *, list_operation: bool = False) -> None:
+    """Reconcile original literals, not a second calculation over the extracted objects."""
+    from collections import Counter
+    if list_operation:
+        expected = []
+        expected_positions = {}
+        expected_names = {}
+        for group, _ in numeric_lists(text):
+            # Independently tokenize the original list; never trust registry length or values.
+            # Keep thousands separators inside literals, and units with digits intact.
+            matches = list(re.finditer(rf"(?:{NUMBER})(?:\s*{UNIT}(?![A-Za-z0-9/]))?", group.group(), re.I))
+            parts = [m.group() for m in matches]
+            trailing = re.search(rf"({UNIT})\s*$", parts[-1], re.I)
+            explicit_units = [re.search(rf"({UNIT})\s*$", part, re.I) for part in parts]
+            if any(unit is None for unit in explicit_units) and len({normalize_unit(unit[1]) for unit in explicit_units if unit}) > 1:
+                raise ValueError("operand_extraction_error: ambiguous shared unit")
+            context = text[max(0, group.start()-45):group.start()]
+            weight = bool(re.search(r"weights?\s*(?:are|were|[:=])?\s*$|가중치\s*(?:는|:|=)?\s*$", context, re.I))
+            for index, (part_match, part) in enumerate(zip(matches, parts), 1):
+                number = re.match(rf"\s*({NUMBER})", part)
+                if not number:
+                    raise ValueError("operand_extraction_error: unparsed list value")
+                unit = re.search(rf"({UNIT})\s*$", part, re.I)
+                pair = (_number(number.group(1)), normalize_unit(unit.group(1) if unit else trailing.group(1) if trailing else ""))
+                expected.append(pair)
+                start = group.start() + part_match.start() + number.start(1)
+                expected_positions[(start, start + len(number.group(1)))] = pair
+                expected_names[(start, start + len(number.group(1)))] = f"observation_{index}" + ("_weight" if weight else "")
+        if expected:
+            actual = [(row.value, row.unit) for row in facts.records]
+            if (Counter(actual) != Counter(expected) or len({row.value_span for row in facts.records}) != len(actual)
+                    or any(expected_positions.get(row.value_span) != (row.value, row.unit)
+                           or expected_names.get(row.value_span) != row.name for row in facts.records)):
+                raise ValueError(f"operand_extraction_error: expected {len(expected)} operands, bound {len(actual)}; values/positions must match")
+    for fact in facts.records:
+        # Exact name anchors have precedence over heuristic aliases; last explicit correction wins.
+        name = re.escape(fact.name).replace("_", r"[ _]+")
+        assignments = list(re.finditer(rf"(?<![\w:]){name}\s*[:=]\s*(?P<value>{NUMBER})\s*(?P<unit>{UNIT})?(?=$|[,;\s]|\.(?!\d)|[가-힣])", text, re.I))
+        if assignments:
+            last = assignments[-1]
+            if _number(last["value"]) != fact.value or normalize_unit(last["unit"] or "") != fact.unit:
+                raise ValueError(f"operand_source_mismatch: {fact.name}")
+        elif fact.extraction_method == "explicit_assignment":
+            raise ValueError(f"operand_source_missing: {fact.name}")

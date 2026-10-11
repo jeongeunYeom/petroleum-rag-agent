@@ -422,6 +422,11 @@ class GoalExecutionAgent(GoalResearchAgent):
             return False
         if any(value not in computation.input_fact_ids for value in computation.bound_variables.values()):
             return False
+        for fact in computation.input_facts:
+            source = sources.get(str(fact.get("evidence_id")), {})
+            if source.get("source_type") == "user_fact" and "value" in source:
+                if fact.get("value") != source["value"] or str(fact.get("unit") or "") != str(source.get("unit") or ""):
+                    return False
         if computation.formula_source_ids == ["USER_REQUEST"]:
             return bool(re.search(r"평균|합계|비율|차이|순위|최대|최소|범위|중앙값|표준편차|분산|기하\s*평균|가중\s*평균|"
                                   r"경과\s*시간|퍼센트|보간|사다리꼴|배분|할당|구간별|속도|"
@@ -601,36 +606,9 @@ class GoalExecutionAgent(GoalResearchAgent):
     @staticmethod
     def _extractive_source_answer(request: GoalResearchRequest,
                                   evidence: list[dict[str, Any]]) -> str | None:
-        """Provide a cited literal passage when a generative claim was removed."""
-        question = f"{request.topic} {request.goal or ''}"
-        translated = " ".join(english for korean, english in ENGINEERING_TERMS.items() if korean in question)
-        terms = {term.casefold() for term in re.findall(r"[A-Za-z]{4,}", question + " " + translated)}
-        terms -= {"what", "with", "from", "explain", "describe", "please", "using", "source",
-                  "internal", "relationship", "relation", "provide", "evidence", "about"}
-        ranked = []
-        for row in evidence:
-            if row.get("source_type") not in {"knowledge_base", "figure", "web"}:
-                continue
-            for sentence in re.split(r"(?<=[.!?])\s+", str(row.get("text") or "")):
-                quote = sentence.strip()
-                if not 30 <= len(quote) <= 350 or NUMERIC.search(quote):
-                    continue
-                if not re.search(r"defined|means|refers|function|depend|var(?:y|ies)|"
-                                 r"ratio|correlat|increas|decreas|affect|"
-                                 r"related|versus|관계|증가|감소|의존", quote, re.I):
-                    continue
-                overlap = len(terms & {word.casefold() for word in re.findall(r"[A-Za-z]{4,}", quote)})
-                if overlap >= 2:
-                    strength = bool(re.search(r"function\s+of|depend\w*\s+on|var(?:y|ies)\s+with|"
-                                              r"increas\w*\s+with|decreas\w*\s+with|"
-                                              r"defined\s+as|ratio\s+of", quote, re.I))
-                    ranked.append((overlap, int(strength), str(row["evidence_id"]),
-                                   re.sub(r"\s+", " ", quote)))
-        if not ranked:
-            return None
-        _, _, source_id, quote = max(ranked, key=lambda item: (item[0], item[1], -len(item[3])))
-        prefix = "근거 자료에 명시된 내용: " if prefers_korean(request) else "The source states: "
-        return f'{prefix}"{quote}" [{source_id}]'
+        """Require complete literal relation coverage, not merely related source terms."""
+        from app.services.source_answerability import literal_answer
+        return literal_answer(request, evidence, allow_partial=True)
 
     @staticmethod
     def _simulation_answer(computation: Any, spec: SimulationSpec,
@@ -802,13 +780,13 @@ class GoalExecutionAgent(GoalResearchAgent):
             return evaluation
         valid = [row for row in computations if row.validation_passed and row.contract_validation_passed]
         if not valid:
-            return evaluation
+            return replace(evaluation, achieved=False, gaps=[*evaluation.gaps, "Validated calculation required"])
         cited = set(re.findall(r"\[((?:CALC|USERF|KB|FIG|WEB)\d+)\]", candidate))
         sources = {str(row.get("evidence_id")) for row in evidence}
         proven = []
         for calc in valid:
             if calc.computation_id not in cited or not GoalExecutionAgent._provenance_complete(
-                    calc, evidence, " ".join(item.description for item in criteria)):
+                    calc, evidence, getattr(calc, "purpose", "") + " " + " ".join(item.description for item in criteria)):
                 continue
             if source_requirement == SourceRequirement.KB_FORMULA and not (
                     calc.formula_source_ids and all(value in sources and value.startswith(("KB", "FIG", "WEB"))
@@ -827,7 +805,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                 continue
             proven.append(calc)
         if not proven:
-            return evaluation
+            return replace(evaluation, achieved=False, gaps=[*evaluation.gaps, "Calculation result, unit or provenance not adopted"])
         by_id = {item.criterion_id: item for item in criteria}
         updates = []
         for item in evaluation.criteria:
@@ -928,8 +906,12 @@ class GoalExecutionAgent(GoalResearchAgent):
             except (AttributeError, TypeError, ValueError, RuntimeError):
                 pass
         fallback_added = fallback_rejected = 0
+        from app.services.user_fact_registry import numeric_lists
+        # List completeness is checked against the original text at the deterministic gate.
+        # Model extraction cannot repair a missing observation or reinterpret digits in units.
+        explicit_list = any(numeric_lists(user_text))
         if intent.kind == GoalIntentKind.DIRECT_CALC and (
-                not users.records or len(re.findall(NUMBER, user_text)) > len(users.records) + 1):
+                not users.records or len(re.findall(NUMBER, user_text)) > len(users.records) + 1) and not explicit_list:
             try:
                 schema = {"type": "object", "properties": {"facts": {"type": "array", "items": {
                     "type": "object", "properties": {"name": {"type": "string"}, "value": {"type": "number"},
@@ -1269,7 +1251,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                     python_started = time.perf_counter()
                     computation = await run_direct_arithmetic(
                         get_settings(), request, run_id, direct_users, direct_operations,
-                        f"CALC{len(result.computations) + 1}", direct_orders)
+                        f"CALC{len(result.computations) + 1}", direct_orders, original_text=user_text)
                     self._add_time(result, "python_seconds", time.perf_counter() - python_started)
                     if not self._provenance_complete(
                             computation, self._evidence(accumulator, users, [], simulation_spec,
@@ -1294,7 +1276,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                     python_started = time.perf_counter()
                     computation = await run_user_formula_calculation(
                         get_settings(), request, run_id, intent.user_equation, users,
-                        f"CALC{len(result.computations) + 1}", simulation_source_id)
+                        f"CALC{len(result.computations) + 1}", simulation_source_id, original_text=user_text)
                     self._add_time(result, "python_seconds", time.perf_counter() - python_started)
                     if not self._provenance_complete(
                             computation, self._evidence(accumulator, users, [], simulation_spec,
@@ -1321,7 +1303,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                     python_started = time.perf_counter()
                     computation = await run_user_formula_calculation(
                         get_settings(), request, run_id, selected_formula.expression_candidate,
-                        users, f"CALC{len(result.computations) + 1}", selected_formula.source_id)
+                        users, f"CALC{len(result.computations) + 1}", selected_formula.source_id, original_text=user_text)
                     self._add_time(result, "python_seconds", time.perf_counter() - python_started)
                     computation.analysis_id = f"KB-FORMULA-{computation.computation_id}"
                     computation.formula_evidence_ids = [selected_formula.source_id]
@@ -1595,27 +1577,32 @@ class GoalExecutionAgent(GoalResearchAgent):
                                                                evidence, research_validation,
                                                                computations=result.computations)
                     if (not evaluation.achieved and intent.kind == GoalIntentKind.KNOWLEDGE_QA
-                            and len(criteria) == 1 and evaluation.engineering_validation_passed):
-                        extracted = self._extractive_source_answer(request, evidence)
+                            and evaluation.engineering_validation_passed):
+                        from app.services.source_answerability import literal_answer
+                        extracted = literal_answer(request, evidence, criteria)
                         if extracted:
                             latest_candidate = extracted
                             result.telemetry["extractive_fallback_used"] = True
-                    if (result.telemetry.get("extractive_fallback_used") and len(criteria) == 1
+                    if (result.telemetry.get("extractive_fallback_used")
                             and evaluation.engineering_validation_passed):
-                        literal = re.search(r'"(.+)"\s*\[((?:KB|WEB|FIG)\d+)\]$',
-                                            latest_candidate, re.S)
-                        if literal and any(str(row.get("evidence_id")) == literal.group(2)
-                                           and re.sub(r"\s+", " ", literal.group(1)) in
+                        from app.services.source_answerability import literal_answer
+                        evaluation = replace(evaluation, achieved=False,
+                                             gaps=[*evaluation.gaps, "All requested relations need direct support"])
+                        literals = re.findall(r'"([^"\n]+)"\s*\[((?:KB|WEB|FIG)\d+)\]', latest_candidate)
+                        if (literals and latest_candidate == literal_answer(request, evidence, criteria)
+                                and all(any(str(row.get("evidence_id")) == source_id
+                                           and re.sub(r"\s+", " ", quote) in
                                            re.sub(r"\s+", " ", str(row.get("text") or ""))
                                            and EngineeringValidator().validate_claim(
                                                latest_candidate, str(row.get("text") or ""),
                                                query=request.topic).passed
-                                           for row in evidence):
+                                           for row in evidence) for quote, source_id in literals)):
                             reason = ("질문과 관련된 원문 관계를 직접 인용했습니다." if korean else
                                       "A directly relevant source relation is quoted verbatim.")
                             evaluation = replace(evaluation, criteria=[CriterionEvaluation(
-                                criterion_id=criteria[0].criterion_id, status=CriterionStatus.MET,
-                                reason=reason, supporting_evidence=[literal.group(2)])],
+                                criterion_id=item.criterion_id, status=CriterionStatus.MET,
+                                reason=reason, supporting_evidence=list(dict.fromkeys(sid for _, sid in literals)))
+                                for item in criteria],
                                 coverage=1.0, achieved=True, gaps=[])
                             rejected_claims = []
                     if premise_criteria:

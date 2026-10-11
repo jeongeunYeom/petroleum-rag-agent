@@ -23,7 +23,7 @@ from app.services.goal_execution_state import SimulationSpec
 from app.services.formula_source_registry import normalize_formula
 from app.services.formula_source_registry import expression_variables
 from app.services.calculation_requirements import normalize_symbol, symbol_names
-from app.services.user_fact_registry import UserFactRegistry
+from app.services.user_fact_registry import UserFactRegistry, validate_original_operands
 from app.services.direct_operation_v3 import OPERATIONS as V3_OPERATIONS, build as build_v3_operation
 from app.tools.python_tools import PythonTools
 
@@ -37,6 +37,14 @@ def user_formula_bindings(equation: str, facts: UserFactRegistry) -> tuple[dict[
     missing = []
     for variable in sorted(variables):
         matches = [fact for fact in facts.records if normalize_symbol(fact.name) in symbol_names(variable)]
+        exact = [fact for fact in matches if fact.name == variable]
+        if not exact:
+            exact = [fact for fact in matches if normalize_symbol(fact.name) == normalize_symbol(variable)]
+        if exact:
+            matches = exact
+        explicit = [fact for fact in matches if fact.extraction_method == "explicit_assignment"]
+        if explicit:
+            matches = explicit
         if len(matches) != 1:
             missing.append(f"{variable} 값" if not matches else f"{variable} 값 확인")
         else:
@@ -84,8 +92,11 @@ def _special_direct(operation: str, text: str, values: dict[str, float],
         return build_v3_operation(operation, text, values, units)
     if operation == "weighted_average":
         weights = {key[:-7]: value for key, value in values.items() if key.endswith("_weight")}
-        if not weights or any(key not in values for key in weights):
+        measured = {key for key in values if not key.endswith("_weight")}
+        if not weights or set(weights) != measured:
             raise ValueError("weighted average needs paired values and weights")
+        if len({units[key] for key in weights}) != 1 or len({units[key + '_weight'] for key in weights}) != 1:
+            raise ValueError("weighted average has incompatible units")
         pairs = {key: (values[key], weight) for key, weight in weights.items()}
         if sum(weights.values()) <= 0 or any(weight < 0 for weight in weights.values()):
             raise ValueError("invalid nonpositive weights")
@@ -157,6 +168,11 @@ def _special_direct(operation: str, text: str, values: dict[str, float],
 
 def direct_readiness(text: str, facts: UserFactRegistry, operations: list[str]) -> list[str]:
     """Check special primitive operands before selecting Python; never search KB for them."""
+    try:
+        validate_original_operands(text, facts, list_operation=bool(set(operations) & {
+            "mean", "median", "sum", "minimum", "maximum", "weighted_average", "ranking", "range"}))
+    except ValueError as exc:
+        return [str(exc)]
     special = {"weighted_average", "combined_rate", "interpolation", "trapezoid",
                "repeated_percent", "allocation", "piecewise_cost"} | V3_OPERATIONS
     chosen = set(operations) & special
@@ -193,14 +209,24 @@ def _combine_formula_units(left: str, right: str, *, divide: bool) -> str:
     """Cancel only identical literal unit factors; never infer a conversion."""
     def factors(unit: str) -> tuple[list[str], list[str]]:
         parts = unit.split("/")
-        numerator = [part for part in parts[0].split("*") if part and part != "1"]
-        denominator = [factor for part in parts[1:] for factor in part.split("*") if factor]
+        def expand(parts):
+            result = []
+            for part in parts:
+                if part.casefold() in {"", "1", "dimensionless"}:
+                    continue
+                power = re.fullmatch(r"(.+)\^([0-8])", part)
+                result.extend([power[1]] * int(power[2]) if power else [part])
+            return result
+        numerator = expand(parts[0].split("*"))
+        denominator = expand([factor for part in parts[1:] for factor in part.split("*")])
         return numerator, denominator
 
     left_num, left_den = factors(left)
     right_num, right_den = factors(right)
     numerator = left_num + (right_den if divide else right_num)
     denominator = left_den + (right_num if divide else right_den)
+    if len(numerator) + len(denominator) > 64:
+        raise ValueError("formula unit expansion exceeds safe bounds")
     for factor in numerator[:]:
         counterpart = next((item for item in denominator if item.casefold() == factor.casefold()), None)
         if counterpart is not None:
@@ -215,7 +241,7 @@ def _formula_output_unit(node: ast.AST, units: dict[str, str]) -> str:
     if isinstance(node, ast.Constant):
         return ""
     if isinstance(node, ast.Name):
-        return units[node.id]
+        return _combine_formula_units(units[node.id], "", divide=False)
     if isinstance(node, ast.UnaryOp):
         return _formula_output_unit(node.operand, units)
     if not isinstance(node, ast.BinOp):
@@ -232,18 +258,26 @@ def _formula_output_unit(node: ast.AST, units: dict[str, str]) -> str:
         return _combine_formula_units(left, right, divide=True)
     if isinstance(node.op, ast.Pow):
         exponent = node.right.value
-        return "" if not left or exponent == 0 else left if exponent == 1 else f"{left}^{exponent}"
+        if right or int(exponent) != exponent:
+            if left or right:
+                raise ValueError("unsupported dimensional exponent")
+            return ""
+        result = ""
+        for _ in range(abs(int(exponent))):
+            result = _combine_formula_units(result, left, divide=exponent < 0)
+        return result
     raise ValueError("unsupported user formula expression")
 
 
 async def run_user_formula_calculation(settings: Settings, request: GoalResearchRequest,
                                        run_id: str, equation: str, facts: UserFactRegistry,
-                                       calc_id: str, source_id: str) -> ComputationRecord:
+                                       calc_id: str, source_id: str, *, original_text: str | None = None) -> ComputationRecord:
     if not (request.allow_python_execution and request.python_execution_approved):
         raise PermissionError("Python calculation requires approval")
     variables, missing = user_formula_bindings(equation, facts)
     if missing:
         raise ValueError("missing user formula inputs: " + ", ".join(missing))
+    validate_original_operands(original_text or request.topic, UserFactRegistry(records=list(variables.values())))
     lhs, rhs = [part.strip() for part in equation.split("=", 1)]
     if len(rhs) > 200 or len(variables) > 12:
         raise ValueError("user formula exceeds safe bounds")
@@ -324,7 +358,8 @@ async def run_user_formula_calculation(settings: Settings, request: GoalResearch
 async def run_direct_arithmetic(settings: Settings, request: GoalResearchRequest,
                                 run_id: str, facts: UserFactRegistry,
                                 operations: list[str], calc_id: str,
-                                operand_orders: dict[str, tuple[str, str]] | None = None) -> ComputationRecord:
+                                operand_orders: dict[str, tuple[str, str]] | None = None, *,
+                                original_text: str | None = None) -> ComputationRecord:
     """Execute explicit generic arithmetic from user facts without retrieval or an LLM plan."""
     allowed = {"mean", "sum", "ranking", "maximum", "minimum", "range", "ratio", "difference",
                "median", "std_population", "std_sample", "variance_population", "variance",
@@ -332,6 +367,9 @@ async def run_direct_arithmetic(settings: Settings, request: GoalResearchRequest
                "percent_conversion", "weighted_average", "combined_rate", "interpolation",
                "trapezoid", "repeated_percent", "allocation", "piecewise_cost"} | V3_OPERATIONS
     selected = list(dict.fromkeys(operations))
+    errors = direct_readiness(original_text or request.topic, facts, selected)
+    if errors:
+        raise ValueError("; ".join(errors))
     operand_orders = operand_orders or {}
     special = {"weighted_average", "combined_rate", "interpolation", "trapezoid",
                "repeated_percent", "allocation", "piecewise_cost"} | V3_OPERATIONS
