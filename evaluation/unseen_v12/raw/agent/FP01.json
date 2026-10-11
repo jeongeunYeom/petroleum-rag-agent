@@ -1,0 +1,1311 @@
+{
+  "task_id": "FP01",
+  "question": "The safest drilling rule is that mud hydrostatic pressure may exceed fracture pressure as long as it exceeds pore pressure, correct? Check the internal drilling text.",
+  "model": "qwen3:8b",
+  "retrieval_mode": "hybrid",
+  "web_enabled": false,
+  "wall_seconds": 26.599,
+  "result": {
+    "run_id": "GR-20261011-163640-034B0A",
+    "topic": "The safest drilling rule is that mud hydrostatic pressure may exceed fracture pressure as long as it exceeds pore pressure, correct? Check the internal drilling text.",
+    "goal": "The safest drilling rule is that mud hydrostatic pressure may exceed fracture pressure as long as it exceeds pore pressure, correct? Check the internal drilling text.",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "no_progress",
+    "final_answer": "The retrieved evidence does not establish whether the premise is correct.",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 1.0,
+    "goal_coverage_percent": 100.0,
+    "criteria_source": "inferred_premise",
+    "criteria_hash": "812bb3d49e795ee30c1ee0b4d672e6e4fe8f3051fa33938626138215ee4b7233",
+    "criteria": [
+      {
+        "criterion_id": "C1",
+        "status": "met",
+        "reason": "The premise that 'mud hydrostatic pressure may exceed fracture pressure as long as it exceeds pore pressure' is explicitly rejected by the evidence. The text states that the hydrostatic pressure must not exceed the fracture pressure of the formation to prevent lost circulation and casing failure (KB2, KB4, KB5). This directly contradicts the hypothesis that exceeding fracture pressure is acceptable as long as pore pressure is exceeded, making the premise false and thus explicitly rejected by the evidence provided.",
+        "supporting_evidence": [
+          "KB2",
+          "KB4",
+          "KB5"
+        ]
+      },
+      {
+        "criterion_id": "C2",
+        "status": "met",
+        "reason": "The corrected engineering relation is that the hydrostatic pressure exerted by the mud column must not exceed the fracture pressure of the formation to prevent formation fracturing and lost circulation. This is supported by the evidence which emphasizes the importance of maintaining pressures below the fracture gradient to avoid wellbore instability and formation damage (KB2, KB4, KB5).",
+        "supporting_evidence": [
+          "KB2",
+          "KB4",
+          "KB5"
+        ]
+      },
+      {
+        "criterion_id": "C3",
+        "status": "met",
+        "reason": "The evidence supporting the correction includes multiple references to the importance of maintaining hydrostatic pressure below the fracture pressure to prevent formation fracturing and lost circulation. Specifically, KB2 discusses the need to ensure that pressures do not exceed the fracture gradient at the weakest point (the casing shoe), KB4 explains that hydrostatic pressures must not exceed the fracture pressure to prevent formation breakdown, and KB5 highlights the risks of exceeding fracture gradients in deepwater operations, leading to well-control problems and lost circulation.",
+        "supporting_evidence": [
+          "KB2",
+          "KB4",
+          "KB5"
+        ]
+      }
+    ],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "Explicitly reject the false premise",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "State the corrected engineering relation",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "Cite evidence supporting the correction",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 3,
+    "current_iteration": 3,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "source_evidence_needed",
+        "started_at": "2026-10-11T16:36:40.033103Z",
+        "finished_at": "2026-10-11T16:36:47.174686Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "query": "drilling safest rule mud hydrostatic pressure may exceed fracture long\ndrilling safest rule mud relationship definition",
+          "cache_hit": false,
+          "relevance_confidence": "HIGH"
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "verify",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "status": "completed",
+        "reason_code": "verify_current_support",
+        "started_at": "2026-10-11T16:36:47.202565Z",
+        "finished_at": "2026-10-11T16:36:58.575285Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 1.0,
+        "failure_reason": null,
+        "details": {
+          "engineering_validation_passed": true,
+          "goal_achieved": false
+        }
+      },
+      {
+        "iteration": 3,
+        "action_id": "ACT-3",
+        "action_type": "retrieve",
+        "target_criteria": [],
+        "status": "blocked",
+        "reason_code": "premise_evidence_retry",
+        "started_at": "2026-10-11T16:36:58.619486Z",
+        "finished_at": "2026-10-11T16:37:05.191529Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 1.0,
+        "coverage_after": 1.0,
+        "failure_reason": "retrieve_no_progress",
+        "details": {
+          "new_evidence_count": 0,
+          "retrieval_mode": "hybrid",
+          "query": "drilling safest rule mud hydrostatic pressure may exceed fracture long\ndrilling safest rule mud relationship definition relationship",
+          "cache_hit": false,
+          "relevance_confidence": "HIGH"
+        }
+      },
+      {
+        "iteration": 3,
+        "action_id": "ACT-STOP-3",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "retrieve_no_progress",
+        "started_at": "2026-10-11T16:37:05.234341Z",
+        "finished_at": "2026-10-11T16:37:05.234341Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 1.0,
+        "coverage_after": 1.0,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "met",
+          "C2": "met",
+          "C3": "met"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6",
+          "KB7",
+          "KB8",
+          "KB9"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "Premise lacks source-grounded assessment",
+          "False premise lacks a supported correction",
+          "Direct source support needed for the answer",
+          "premise_relation_not_supported_by_retrieved_evidence"
+        ],
+        "coverage": 1.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "met",
+          "C2": "met",
+          "C3": "met"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6",
+          "KB7",
+          "KB8",
+          "KB9"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 1.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "met",
+          "C2": "met",
+          "C3": "met"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6",
+          "KB7",
+          "KB8",
+          "KB9"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 1.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 359,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p359:c2",
+        "score": 0.03077652,
+        "excerpt": "he hydrostatic pressure exerted by the mud colom must be high enough to prevent \nan influx of formation fluids into the wellbore.  However, the pressure in the wellbore \nmust not be too high or it may cause the formation to fracture and this will result in \nthe loss of expensive mud into the formation.  The flow of mud into the formation \nwhilst drilling is known as lost circulation.  This is because a certain proportion \nof the mud is not returning to surface but flowing into the formation."
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 229,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p229:c0",
+        "score": 0.02920635,
+        "excerpt": "25\nInstitute of Petroleum Engineering,  Heriot-Watt University  \njust below the casing shoe is exceeded.   Remember that an increase in the annulus \npressure at surface will mean that the pressures along the entire wellbore are \nincreasing also.  Normally the weakest point in a drilled well is the highest point \nin the open hole section (i.e. at the previous casing shoe).  During the well control \noperation it is important that the pressure is not allowed to exceed the fracture \ngradient at this weakest point.  The fracture pressure of the formation just below the \ncasing shoe will be available from leak off tests carried out after the casing was set. \nIf no leak-off test was carried out an estimate can be made by taking a percentage of \nthe minimum geostatic gradient for that depth.  \nIf an influx occurs and the well is killed with a kill mud this calculation should be \nrepeated to determine the new MAASP.  The MAASP should not exceed 70% of the \nburst resistance of the casing.\n5.  WELL KILLING PROCEDURES\nThe procedure used to kill the well depends primarily on whether the kick occurs \nwhilst drilling (there is a drillstring in the well) or whilst tripping (there is no \ndrillstrin"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 233,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p233:c1",
+        "score": 0.02825871,
+        "excerpt": "choke, in the case of a gas kick  .\nSafety factors are sometimes built into the procedure by: \n• \nUsing extra back pressure (200 psi) on the choke to ensure no further influx \n \noccurs.  The  effect of this is to raise the pressure profiles in Figure 16 by 200 psi.\n•\t Using a slightly higher mud weight.  Due to the uncertainties in reading and  \n\t calculating mud densities it is sometimes recommended to increase mud \n \t weight by  0.5 ppg more than the calculated kill weight.  This will slightly \n \t increase the value  of Pc2, and mean that the shut in drill pipe pressure at the \n \t end of phase I will be negative.  Whenever mud weight is increased care should \n  be taken not to exceed  the fracture pressure of the formations in the openhole.   \n\t (An increase of 0.5 ppg mud weight means an increased hydrostatic pressure \n \t of 260 psi at 10000ft).  Some so-called safety margins may lead to problems \n \t of overkill."
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+        "page": 378,
+        "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p378:c2",
+        "score": 0.03100962,
+        "excerpt": "wellbore, the hydrostatic pressure exerted by the cement,\ndrilling fluid, etc. must not exceed the fracture pressure of the weakest formation. The fracture\npressure  is  the  upper  safe  pressure  limitation  of  the  formation  before  the  formation  breaks\ndown (the pressure necessary to extend the formation’s fractures). The hydrostatic pressures of\nthe fluids in the wellbore, along with the friction pressures created by the fluids’ movement,\ncannot  exceed  the  fracture  pressure,  or  the  formation  will  break  down.  If  the  formation  does\nbreak down, the formation is no longer controlled, and lost circulation results. Lost circulation,\nor fluid loss, must be controlled for successful primary cementing. Pressures experienced in the\nwellbore also affect the strength development of the cement.\n9.2.5 Formation  Characteristics.  The  composition  of  formations  can  present  compatibility\nproblems.  Shale  formations  are  sensitive  to  fresh  water  and  can  slough  off  if  special precau-\ntions, such as increasing the salinity of the water, are not taken. Other formation and chemistry\nconsiderations, such as swelling clays and high-pH fluids, should be taken into co"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+        "page": 113,
+        "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p113:c0",
+        "score": 0.02903091,
+        "excerpt": "in  the  first  2,000  ft  below  the  mudline  and  often  are  encountered  while  drilling  in  riserless\nmode. Stopping the flow under these circumstances is difficult. Pumping weighted mud that is\ncut with seawater on the fly generally is successful, but it requires pumping thousands of bar-\nrels of weighted WBF that returns to the seafloor because the riser is not yet connected to the\nwellbore. If the SWF is not brought under control or cased off successfully, its continued flow\ncan undermine the structural integrity of the well and even affect neighboring wells.22\nPP/FG.  Because of the long riser that is required in deepwater operations, the hydrostatic\npressure from the column of drilling fluid can approach or exceed the fracture gradient, espe-\ncially  when  breaking  circulation  after  a  static  period,  tripping  in  the  hole,  or  running  casing.\nSignificant loss of whole mud can occur and might lead to well-control problems. Control of\nthe  ECD,  as  verified  by  PWD  data,  is  critical  to  maintaining  wellbore  stability.  The  drilling\nfluid that is selected should be evaluated for its demonstrated capacity to minimize or eliminate\nwhole-mud losses. A suitab"
+      },
+      {
+        "evidence_id": "KB6",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 359,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p359:c1",
+        "score": 0.0,
+        "excerpt": "ttings while not circulating\n•\t  Drop the cuttings out of suspension at surface.\nThe rheological  properties of the mud must be carefully engineered to fulfil these \nrequirements.  The carrying capacity of the mud depends on the annular velocity, \ndensity and viscosity of the mud.  The ability to suspend the cuttings depends on \nthe gelling (thixotropic) properties of the mud.  This gel forms when circulation \nis stopped and the mud is static.  The drilled solids are removed from the mud at \nsurface by mechanical devices such as shale shakers, desanders and desilters \n(see Section 5 below).  It is not economically feasible to remove all the drilled solids \nbefore re-circulating the mud.  However, if the drilled solids are not removed the \nmud may require a lot of chemical treatment and dilution to control the rheological \nproperties of the mud.  For a thorough treatment of the rheology of drilling fluids \nrefer to the chapter on Drilling Hydraulics.\nb.  Prevent Formation Fluids Flowing into the Wellbore\nThe hydrostatic pressure exerted by the mud colom must be high enough to prevent \nan influx of formation fluids into the wellbore.  However, the pressure in the wellbore \nmust not b"
+      },
+      {
+        "evidence_id": "KB7",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 229,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p229:c1",
+        "score": 0.0,
+        "excerpt": "S\nThe procedure used to kill the well depends primarily on whether the kick occurs \nwhilst drilling (there is a drillstring in the well) or whilst tripping (there is no \ndrillstring in the well).\n5.1 Drillstring out of the Well\nOne method of killing a well when there is no drillstring in the hole is the Volumetric \nMethod.  The volumetric method uses the expansion of the gas to maintain bottom \nhole pressure greater than formation pressure.  Pressures are adjusted by bleeding \noff at the choke in small amounts.  This is a slow process which maintains constant \nbottom hole pressure while allowing the gas bubble to migrate to surface under the \neffects of buoyancy. When the gas reaches surface it is gradually bled off whilst \nmud is pumped slowly into the well through the kill line. Once the gas is out of \nthe well, heavier mud must be circulated.  This can be done with a snubbing unit. \nThis equipment allows a small diameter pipe to be into the hole through the closed \nBOPs.\n5.2 Drillstring in the Well\nWhen the kick occurs during drilling, the well can be killed directly since:\n• \nThe formation fluids can be circulated out\n• \nThe existing mud can be replaced with a mud with sufficie"
+      },
+      {
+        "evidence_id": "KB8",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 228,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p228:c0",
+        "score": 0.0,
+        "excerpt": "24\n4.6.2 Gas Buoyancy Effect\nAn influx of gas into the wellbore can have a significant effect on the annulus \npressure. \nSince there is such a large difference in density between the gas and the mud a \ngas bubble entering the well will be subjected to a large buoyancy effect.  The gas \nbubble will therefore rise up the annulus.  As the gas rises it will expand and, if the \nwell is open, displace mud from the annulus.  If, however, the well is shut in mud \ncannot be displaced and so the gas cannot expand. The gas influx will rise, due to \nbuoyancy, but will maintain its high pressure since it cannot expand.  As a result of \nthis Pann will increase and higher pressures will be exerted all down the wellbore \n(note the increase in bottom hole pressure). The situation is as shown in Figure 14.\n \nThis increase in annulus, and therefore bottom hole, pressure will be reflected in the \ndrillpipe pressure (Pph = bhp - ρmd).  This situation can, therefore, be identified by a \nsimultaneous rise in drillpipe and annulus pressure.\nIt is evident that this situation cannot be allowed to develop as it may lead to the \nproblems mentioned earlier (casing bursting or underground blow-out).  From the \n"
+      },
+      {
+        "evidence_id": "KB9",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 230,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p230:c0",
+        "score": 0.0,
+        "excerpt": "26\n5.2.1 The \"One circulation Method\" (\"balanced mud density\" or \"wait \nand weight\" method):\nThe procedure used in this method is to circulate out the influx and circulate in the \nheavier mud simultaneously.  The influx is circulated out by pumping kill mud down \nthe drillstring displacing the influx up the annulus.  The kill mud is pumped into the \ndrillstring at a constant pump rate and the pressure on the annulus is controlled on \nthe choke so that the bottomhole pressure does not fall, allowing a further influx to \noccur.  \nThe advantages of this method are:\n• \nSince heavy mud will usually enter the annulus before the  influx reaches   \n\t\nsurface the annulus pressure will be kept low. Thus there is less risk of \t\n\t\n\t\nfracturing the formation at the casing shoe.\n• \nThe maximum annulus pressure will only be exerted on the wellhead for a  \n\t\nshort time\n•    \t  It is easier to maintain a constant Pbh by adjusting the choke.\nb. Driller’s Method (Two Circulation Method)\nIn this method the influx is first of all removed with the original mud.  Then the well \nis displaced to heavier mud during a second circulation.\nThe one circulation method is generally considered better than the Dril"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 0.005208,
+      "retrieval_seconds": 13.645529,
+      "llm_generation_seconds": 11.361841,
+      "python_seconds": 0.0,
+      "verification_seconds": 11.372301,
+      "evaluation_seconds": 7.988922,
+      "synthesis_seconds": 3.37286,
+      "retrieve_action_seconds": 13.713735,
+      "verify_action_seconds": 11.372298,
+      "elapsed_seconds": 25.227397,
+      "total_seconds": 25.227716,
+      "message_parsing_seconds": 0.000319
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "intent_route": "premise_check",
+      "intent": {
+        "selected_intent": "premise_check",
+        "intent_reason": "assertion_verification_cue",
+        "premise_cue_detected": true,
+        "formula_origin": "unknown"
+      },
+      "source_requirement": "none",
+      "fact_extraction": {
+        "deterministic_fact_count": 0,
+        "fallback_fact_count": 0,
+        "rejected_fact_count": 0,
+        "fact_rejection_reasons": [],
+        "normalized_units": {}
+      },
+      "calculation": {
+        "requested_operation_family": "",
+        "direct_calc_ready": false,
+        "missing_operands": []
+      },
+      "formula": {
+        "candidates_found": 0,
+        "selected_formula_id": null
+      },
+      "transition": {
+        "formula_ready": false,
+        "calculation_ready": false,
+        "blocking_reason": "retrieve_no_progress"
+      },
+      "retrieval_rerank": {
+        "domain_hint": "drilling",
+        "candidate_documents": [
+          "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+          "Heriot-Watt_University_-_Drilling_Engineering.pdf"
+        ],
+        "scores": [
+          {
+            "id": "KB1",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 122,
+            "score": 11.0,
+            "concept_matches": [
+              "drilling",
+              "rule",
+              "mud",
+              "exceed",
+              "long"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB2",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 378,
+            "score": 12.5,
+            "concept_matches": [
+              "drilling",
+              "hydrostatic",
+              "pressure",
+              "exceed",
+              "fracture",
+              "long"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB3",
+            "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+            "page": 359,
+            "score": 19.3333,
+            "concept_matches": [
+              "drilling",
+              "mud",
+              "hydrostatic",
+              "pressure",
+              "may",
+              "fracture"
+            ],
+            "relation_matches": [],
+            "family": "drilling",
+            "confidence": "HIGH"
+          },
+          {
+            "id": "KB4",
+            "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+            "page": 229,
+            "score": 19.25,
+            "concept_matches": [
+              "drilling",
+              "mud",
+              "pressure",
+              "exceed",
+              "fracture",
+              "long"
+            ],
+            "relation_matches": [],
+            "family": "drilling",
+            "confidence": "HIGH"
+          },
+          {
+            "id": "KB5",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 113,
+            "score": 12.2,
+            "concept_matches": [
+              "drilling",
+              "mud",
+              "hydrostatic",
+              "pressure",
+              "exceed",
+              "fracture",
+              "long"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB6",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 504,
+            "score": 12.1667,
+            "concept_matches": [
+              "drilling",
+              "rule",
+              "mud",
+              "pressure",
+              "exceed",
+              "long",
+              "exceeds"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB7",
+            "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+            "page": 233,
+            "score": 19.1429,
+            "concept_matches": [
+              "mud",
+              "hydrostatic",
+              "pressure",
+              "may",
+              "exceed",
+              "fracture"
+            ],
+            "relation_matches": [],
+            "family": "drilling",
+            "confidence": "HIGH"
+          },
+          {
+            "id": "KB8",
+            "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+            "page": 193,
+            "score": 19.125,
+            "concept_matches": [
+              "drilling",
+              "mud",
+              "hydrostatic",
+              "pressure",
+              "exceed",
+              "fracture"
+            ],
+            "relation_matches": [],
+            "family": "drilling",
+            "confidence": "HIGH"
+          },
+          {
+            "id": "KB9",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 216,
+            "score": 8.1111,
+            "concept_matches": [
+              "mud",
+              "hydrostatic",
+              "pressure",
+              "fracture"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB10",
+            "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+            "page": 192,
+            "score": 19.1,
+            "concept_matches": [
+              "drilling",
+              "mud",
+              "hydrostatic",
+              "pressure",
+              "exceed",
+              "fracture"
+            ],
+            "relation_matches": [],
+            "family": "drilling",
+            "confidence": "HIGH"
+          },
+          {
+            "id": "KB11",
+            "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+            "page": 173,
+            "score": 17.0909,
+            "concept_matches": [
+              "drilling",
+              "mud",
+              "pressure",
+              "may",
+              "fracture"
+            ],
+            "relation_matches": [],
+            "family": "drilling",
+            "confidence": "HIGH"
+          },
+          {
+            "id": "KB12",
+            "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+            "page": 192,
+            "score": 19.0833,
+            "concept_matches": [
+              "drilling",
+              "mud",
+              "hydrostatic",
+              "pressure",
+              "may",
+              "fracture"
+            ],
+            "relation_matches": [],
+            "family": "drilling",
+            "confidence": "HIGH"
+          },
+          {
+            "id": "KB13",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 193,
+            "score": 8.0769,
+            "concept_matches": [
+              "drilling",
+              "mud",
+              "hydrostatic",
+              "pressure"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB14",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 196,
+            "score": 12.0714,
+            "concept_matches": [
+              "drilling",
+              "mud",
+              "hydrostatic",
+              "pressure",
+              "may",
+              "check"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB15",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 54,
+            "score": 10.0667,
+            "concept_matches": [
+              "drilling",
+              "mud",
+              "pressure",
+              "fracture",
+              "long"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          }
+        ],
+        "selected_sources": [
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB7"
+        ],
+        "dropped_sources": [
+          "KB1",
+          "KB6",
+          "KB8",
+          "KB9",
+          "KB10",
+          "KB11",
+          "KB12",
+          "KB13",
+          "KB14",
+          "KB15"
+        ],
+        "confidence": "HIGH"
+      },
+      "retrieval_rerank_history": [
+        {
+          "domain_hint": "drilling",
+          "candidate_documents": [
+            "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "Heriot-Watt_University_-_Drilling_Engineering.pdf"
+          ],
+          "scores": [
+            {
+              "id": "KB1",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 122,
+              "score": 11.0,
+              "concept_matches": [
+                "drilling",
+                "rule",
+                "mud",
+                "exceed",
+                "long"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB2",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 378,
+              "score": 12.5,
+              "concept_matches": [
+                "drilling",
+                "hydrostatic",
+                "pressure",
+                "exceed",
+                "fracture",
+                "long"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB3",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 359,
+              "score": 19.3333,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "may",
+                "fracture"
+              ],
+              "relation_matches": [],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB4",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 229,
+              "score": 19.25,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "pressure",
+                "exceed",
+                "fracture",
+                "long"
+              ],
+              "relation_matches": [],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB5",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 113,
+              "score": 12.2,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "exceed",
+                "fracture",
+                "long"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB6",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 504,
+              "score": 12.1667,
+              "concept_matches": [
+                "drilling",
+                "rule",
+                "mud",
+                "pressure",
+                "exceed",
+                "long",
+                "exceeds"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB7",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 233,
+              "score": 19.1429,
+              "concept_matches": [
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "may",
+                "exceed",
+                "fracture"
+              ],
+              "relation_matches": [],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB8",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 193,
+              "score": 19.125,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "exceed",
+                "fracture"
+              ],
+              "relation_matches": [],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB9",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 216,
+              "score": 8.1111,
+              "concept_matches": [
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "fracture"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB10",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 192,
+              "score": 19.1,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "exceed",
+                "fracture"
+              ],
+              "relation_matches": [],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB11",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 173,
+              "score": 17.0909,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "pressure",
+                "may",
+                "fracture"
+              ],
+              "relation_matches": [],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB12",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 192,
+              "score": 19.0833,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "may",
+                "fracture"
+              ],
+              "relation_matches": [],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB13",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 193,
+              "score": 8.0769,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "hydrostatic",
+                "pressure"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB14",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 196,
+              "score": 12.0714,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "may",
+                "check"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB15",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 54,
+              "score": 10.0667,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "pressure",
+                "fracture",
+                "long"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            }
+          ],
+          "selected_sources": [
+            "KB2",
+            "KB3",
+            "KB4",
+            "KB5",
+            "KB7"
+          ],
+          "dropped_sources": [
+            "KB1",
+            "KB6",
+            "KB8",
+            "KB9",
+            "KB10",
+            "KB11",
+            "KB12",
+            "KB13",
+            "KB14",
+            "KB15"
+          ],
+          "confidence": "HIGH"
+        },
+        {
+          "domain_hint": "drilling",
+          "candidate_documents": [
+            "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "Heriot-Watt_University_-_Drilling_Engineering.pdf"
+          ],
+          "scores": [
+            {
+              "id": "KB1",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 122,
+              "score": 11.0,
+              "concept_matches": [
+                "drilling",
+                "rule",
+                "mud",
+                "exceed",
+                "long"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB2",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 378,
+              "score": 12.5,
+              "concept_matches": [
+                "drilling",
+                "hydrostatic",
+                "pressure",
+                "exceed",
+                "fracture",
+                "long"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB3",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 359,
+              "score": 19.3333,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "may",
+                "fracture"
+              ],
+              "relation_matches": [],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB4",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 229,
+              "score": 19.25,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "pressure",
+                "exceed",
+                "fracture",
+                "long"
+              ],
+              "relation_matches": [],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB5",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 113,
+              "score": 12.2,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "exceed",
+                "fracture",
+                "long"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB6",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 504,
+              "score": 12.1667,
+              "concept_matches": [
+                "drilling",
+                "rule",
+                "mud",
+                "pressure",
+                "exceed",
+                "long",
+                "exceeds"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB7",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 233,
+              "score": 19.1429,
+              "concept_matches": [
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "may",
+                "exceed",
+                "fracture"
+              ],
+              "relation_matches": [],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB8",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 193,
+              "score": 19.125,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "exceed",
+                "fracture"
+              ],
+              "relation_matches": [],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB9",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 216,
+              "score": 8.1111,
+              "concept_matches": [
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "fracture"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB10",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 192,
+              "score": 19.1,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "exceed",
+                "fracture"
+              ],
+              "relation_matches": [],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB11",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 173,
+              "score": 17.0909,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "pressure",
+                "may",
+                "fracture"
+              ],
+              "relation_matches": [],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB12",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 192,
+              "score": 19.0833,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "may",
+                "fracture"
+              ],
+              "relation_matches": [],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB13",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 193,
+              "score": 8.0769,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "hydrostatic",
+                "pressure"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB14",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 196,
+              "score": 12.0714,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "may",
+                "check"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB15",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 54,
+              "score": 10.0667,
+              "concept_matches": [
+                "drilling",
+                "mud",
+                "pressure",
+                "fracture",
+                "long"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            }
+          ],
+          "selected_sources": [
+            "KB2",
+            "KB3",
+            "KB4",
+            "KB5",
+            "KB7"
+          ],
+          "dropped_sources": [
+            "KB1",
+            "KB6",
+            "KB8",
+            "KB9",
+            "KB10",
+            "KB11",
+            "KB12",
+            "KB13",
+            "KB14",
+            "KB15"
+          ],
+          "confidence": "HIGH"
+        }
+      ],
+      "premise_context_expansion": [
+        {
+          "source_id": "KB1",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 359,
+          "adjacent_chunks_added": 1
+        },
+        {
+          "source_id": "KB2",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 229,
+          "adjacent_chunks_added": 3
+        }
+      ],
+      "premise_grounding_method": "",
+      "premise_source_id": "",
+      "premise_supporting_source_ids": [],
+      "premise_relation_type": "",
+      "premise_grounding_failure_reason": "engineering_validator_rejected_correction",
+      "premise_candidate_retained": false,
+      "premise_numeric_rejections": 0,
+      "premise_verdict": "insufficient",
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 25.227397,
+      "python_seconds": 0.0
+    },
+    "validation": {
+      "engineering_validation_passed": true,
+      "engineering_contradiction_count": 0,
+      "unsupported_engineering_claim_count": 0,
+      "citation_semantic_passed": false,
+      "unsupported_citation_claim_count": 0,
+      "unsupported_numeric_claim_count": 0,
+      "criteria_frozen": true
+    },
+    "cancel_requested": false,
+    "error": null
+  }
+}

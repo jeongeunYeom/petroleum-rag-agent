@@ -1,0 +1,927 @@
+{
+  "task_id": "MS05",
+  "question": "WFT 압력-깊이 해석 전에 깊이 품질 확인과 이수 정수압 판독의 선형성 확인이 각각 왜 필요한가?",
+  "model": "qwen3:8b",
+  "retrieval_mode": "hybrid",
+  "web_enabled": false,
+  "wall_seconds": 23.271,
+  "result": {
+    "run_id": "GR-20261011-162422-D85F8B",
+    "topic": "WFT 압력-깊이 해석 전에 깊이 품질 확인과 이수 정수압 판독의 선형성 확인이 각각 왜 필요한가?",
+    "goal": "WFT 압력-깊이 해석 전에 깊이 품질 확인과 이수 정수압 판독의 선형성 확인이 각각 왜 필요한가?",
+    "expected_result": null,
+    "run_status": "completed",
+    "status": "achieved",
+    "stop_reason": "goal_achieved",
+    "final_answer": "깊이 품질 확인이 필요한 이유 [KB1]\n이수 정수압 판독의 선형성 확인이 필요한 이유 [KB3]",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 1.0,
+    "goal_coverage_percent": 100.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "9fd391d26d44ef539559abb85935d5f89e1be3155a03e06984fbcd9eeddb18ac",
+    "criteria": [
+      {
+        "criterion_id": "C1",
+        "status": "met",
+        "reason": "깊이 품질 확인이 필요한 이유는 지하수압 측정의 정확성을 보장하기 위해서입니다. 지하수압 측정은 현대의 고해상도 계측기기를 사용하여 깊이 차이를 결정하지만, 이는 지하수의 균질성을 가정합니다. 지하수의 온도 변화는 지하수 밀도에 영향을 주어 방정식(8)을 통해 대기압을 예측하지 못하게 합니다. 또한, 측정 중 지하수 수위가 일정하게 유지되어야 하며, 측정 깊이를 실제 수직 깊이로 정확히 변환해야 합니다. 이 과정에서 깊이 품질 확인이 필수적입니다.",
+        "supporting_evidence": [
+          "KB1"
+        ]
+      },
+      {
+        "criterion_id": "C2",
+        "status": "met",
+        "reason": "이수 정수압 판독의 선형성 확인이 필요한 이유는 WFT 조사 해석의 정확성을 보장하기 위해서입니다. 해석은 먼저 압력-깊이 데이터를 통계적으로 분석하여 선형 프로파일을 식별하고, 각 선형 구간의 기울기 m과 그 불확실성 εm을 결정해야 합니다. 이 과정에서 선형성 확인이 필수적이며, 측정된 기울기를 알려진 현장 유체 밀도에 따른 수직 압력 기울기와 비교하여 점성 성분을 계산해야 합니다.",
+        "supporting_evidence": [
+          "KB3"
+        ]
+      }
+    ],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "깊이 품질 확인이 필요한 이유",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "이수 정수압 판독의 선형성 확인이 필요한 이유",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 3,
+    "current_iteration": 3,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "completed",
+        "reason_code": "source_evidence_needed",
+        "started_at": "2026-10-11T16:24:24.500101Z",
+        "finished_at": "2026-10-11T16:24:31.284761Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "query": "hydrostatic pressure wft 압력 깊이 해석 전에 품질 확인과 이수\nhydrostatic pressure wft 압력 깊이 해석",
+          "cache_hit": false,
+          "relevance_confidence": "HIGH"
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "verify",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "completed",
+        "reason_code": "verify_current_support",
+        "started_at": "2026-10-11T16:24:31.317616Z",
+        "finished_at": "2026-10-11T16:24:45.240302Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 1.0,
+        "failure_reason": null,
+        "details": {
+          "engineering_validation_passed": true,
+          "goal_achieved": true
+        }
+      },
+      {
+        "iteration": 3,
+        "action_id": "ACT-3",
+        "action_type": "synthesize",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "goal_achieved",
+        "started_at": "2026-10-11T16:24:45.269180Z",
+        "finished_at": "2026-10-11T16:24:45.274159Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 1.0,
+        "coverage_after": 1.0,
+        "failure_reason": null,
+        "details": {}
+      },
+      {
+        "iteration": 3,
+        "action_id": "ACT-STOP-3",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "goal_achieved",
+        "started_at": "2026-10-11T16:24:45.287101Z",
+        "finished_at": "2026-10-11T16:24:45.287101Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 1.0,
+        "coverage_after": 1.0,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "EFACT1",
+          "EFACT2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "met",
+          "C2": "met"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "EFACT1",
+          "EFACT2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 1.0,
+        "goal_achieved": true,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "met",
+          "C2": "met"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "EFACT1",
+          "EFACT2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 1.0,
+        "goal_achieved": true,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      },
+      {
+        "iteration": 3,
+        "criteria": {
+          "C1": "met",
+          "C2": "met"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "EFACT1",
+          "EFACT2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 1.0,
+        "goal_achieved": true,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+        "page": 417,
+        "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p417:c1",
+        "score": 0.04841189,
+        "excerpt": "mud hydrostatic pressure measurements.  This utilizes the very high \nresolution of modern gauges to determine depth differences: the method depends \non the assumption of mud homogeneity.  Over the interval of WFT testing the mud \ntemperature will be essentially constant; however over the whole well temperature \nvariation will cause changes in the mud density and equation (8) will not predict \natmospheric pressure at the well head.  For the technique to succeed it is essential that \nmud be circulated over the well head to ensure that the mud level remains absolutely \nconstant during the testing.  It is also important that the conversion from measured \ndepth to true vertical depth, D, be carried out accurately.\nUnfortunately the main problem in gradient estimation is not usually related to \npressure or depth measurement error.  In tight formations the phenomenon of \nsupercharging results in WFT registered pressures exceeding the true formation \nfluid pressure, thus:\n              pWFT = ptrue + Δpv \n(10)\nwhere the excess pressure, Δpv , varies from test to test according to the local \nformation permeability and mud fluid loss rate.  The effect of supercharging is to \nshift the WFT pr"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+        "page": 356,
+        "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p356:c0",
+        "score": 0.04713865,
+        "excerpt": "Department of Petroleum Engineering,  Heriot-Watt University  \n5\n6\nDistributed Pressure Measurement6\n        \nTool  Setting\nHydrostatic\nPressure\nHydrostatic\nPressure\nTob\npretest 1\npretest 2\nShut-in  Pressure\nfrom  Pretest\nT  = 210 sec\nob\nDepth = 4465 ft\npretest  buildup\nBefore the tool is set for a test the transducer is registering the mud hydrostatic \npressure at the present depth.  As the packer is set the pressure rises slightly because of \nmud-cake compression and then the probe piston retracts and the pressure drops due \nto the resulting flowline volume expansion and communication with the formation.  \nThe pressure drawdown during the movement of each piston is clearly visible on the \nlog and the travel times can be measured for computation of the exact withdrawal \nrates denoted q1 and q2 . When the second piston reaches the end of its motion the \nbuildup to reservoir pressure takes place.  There is a classical rise to a final stabilised \npressure (except in very low permeability) which is the reservoir pressure at the \nsetting depth.  A WFT device can be reset at any number of locations in the well \nand a plot of reservoir pressure versus true vertical depth is the principal"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+        "page": 445,
+        "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p445:c0",
+        "score": 0.04482184,
+        "excerpt": "1\n10\nA zone in a developed reservoir which exhibits an essentially hydrostatic fluid \ngradient, even when vertical flow is occurring, is said to be in vertical pressure \nequilibrium.  It should be emphasised that uz values in reservoirs are very small \nbecause of the extremely large areas available for vertical flow and the frictional \ncomponent of the pressure gradient is only detectable when the effective vertical \npermeability, kz, is also very low.\nThe interpretation of a WFT survey in a developed reservoir should commence by \na statistical analysis of the pressure-depth data firstly to identify zones with linear \nprofiles and then to determine the best-fit slope, m, and its uncertainty, εm, for each \nlinear zone.  It is very important that the cumulative set of observations presented \non a pressure-depth diagram be displayed at the well-site so that testing can be \ncontinued until a statistically adequate number of data points has been obtained.  \nThe measured gradient is then compared to the hydrostatic gradient corresponding \nto the known in-situ fluid density.  When the difference is significant the viscous \ncomponent may be calculated and finally if uz is available from re"
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 63,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p63:c2",
+        "score": 0.01587302,
+        "excerpt": "ave been generated and trapped, \nwe can expect a hydrostatic pressure. For a column of fresh water the hydrostatic \npressure is  0.433 psi/ft. For water with 55,000 ppm of dissolved salts the gradient is \n0.45 psi/ft; for 88,000 ppm of dissolved salts the gradient is about 0.465 psi/ft.\nIts variation with depth is given by the equation.\n Pf = ρwDg \n \n \n \n \n \n \n \n(2)\nwhere g is the acceleration due to gravity.\nThere is another fluid pressure which arises as a result of fluid movement and that \nis called the  hydrodynamic pressure. This is the fluid potential pressure gradient \nwhich is caused by fluid flow. This however does not contribute to in-situ pressures \nat rest."
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 64,
+        "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p64:c0",
+        "score": 0.01538462,
+        "excerpt": "4\n                      \nPressure  (psia)\nDepth (Ft.)\nFP\nGP\nOverburden\nPressure (OP)\nUnderpressure\nOverpressure\nNormal\n14.7\n(FP = Fluid Pressure, GP = Grain Pressure)\n0\nFigure 1  Gives the relationship between the lithostatic pressure and the hydrostatic \npressure. 1\nFluid pressure in hydrocarbon accumulations are dictated by the prevailing water \npressure in the vicinity of the reservoir.  In a normal situation the water pressure at \nany depth is:\n \nP\ndP\ndD\nx D\n14.7psia\nw\nwater\n= \n\n\n\n+\n \n \n \n \n \n(3)\nwhere dP/dD is the hydrostatic pressure gradient \nThis equation assumes continuity of water pressure from the surface and constant \nsalinity.  In most cases even though the water bearing sands are divided between \nimpermeable shales, any break of such sealing systems will lead to hydrostatic pres-\nsure continuity, but the salinity can vary with depth.\nReservoirs whose water pressure gradient when extrapolated to zero depth give an \nabsolute pressure equivalent to atmospheric pressure are called normal pressured \nreservoirs.\nEXERCISE 1\nIf the average pressure gradient in a region is 0.47 psi/ft, calculate the pore \npressure in a normally pressurised formation at 7400ft. Convert the"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 1.765528,
+      "retrieval_seconds": 6.761665,
+      "llm_generation_seconds": 12.106969,
+      "python_seconds": 0.0,
+      "verification_seconds": 13.922116,
+      "evaluation_seconds": 7.557172,
+      "synthesis_seconds": 4.549778,
+      "retrieve_action_seconds": 6.784525,
+      "verify_action_seconds": 13.922112,
+      "synthesize_action_seconds": 0.005025,
+      "elapsed_seconds": 22.572701,
+      "total_seconds": 22.572952,
+      "message_parsing_seconds": 0.000251
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "intent_route": "knowledge_qa",
+      "intent": {
+        "selected_intent": "knowledge_qa",
+        "intent_reason": "knowledge_question",
+        "premise_cue_detected": false,
+        "formula_origin": "unknown"
+      },
+      "source_requirement": "none",
+      "fact_extraction": {
+        "deterministic_fact_count": 0,
+        "fallback_fact_count": 0,
+        "rejected_fact_count": 0,
+        "fact_rejection_reasons": [],
+        "normalized_units": {}
+      },
+      "calculation": {
+        "requested_operation_family": "",
+        "direct_calc_ready": false,
+        "missing_operands": []
+      },
+      "formula": {
+        "candidates_found": 0,
+        "selected_formula_id": null
+      },
+      "transition": {
+        "formula_ready": false,
+        "calculation_ready": false,
+        "blocking_reason": null
+      },
+      "retrieval_rerank": {
+        "domain_hint": null,
+        "candidate_documents": [
+          "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+          "Heriot-Watt University - Reservoir Engineering.pdf"
+        ],
+        "scores": [
+          {
+            "id": "KB1",
+            "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "page": 417,
+            "score": 11.0,
+            "concept_matches": [
+              "hydrostatic",
+              "pressure",
+              "wft"
+            ],
+            "relation_matches": [
+              "hydrostatic",
+              "pressure"
+            ],
+            "family": "well_testing",
+            "confidence": "HIGH"
+          },
+          {
+            "id": "KB2",
+            "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "page": 356,
+            "score": 10.5,
+            "concept_matches": [
+              "hydrostatic",
+              "pressure",
+              "wft"
+            ],
+            "relation_matches": [
+              "hydrostatic",
+              "pressure"
+            ],
+            "family": "well_testing",
+            "confidence": "HIGH"
+          },
+          {
+            "id": "KB3",
+            "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "page": 445,
+            "score": 10.3333,
+            "concept_matches": [
+              "hydrostatic",
+              "pressure",
+              "wft"
+            ],
+            "relation_matches": [
+              "hydrostatic",
+              "pressure"
+            ],
+            "family": "well_testing",
+            "confidence": "HIGH"
+          },
+          {
+            "id": "KB4",
+            "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "page": 443,
+            "score": 10.25,
+            "concept_matches": [
+              "hydrostatic",
+              "pressure",
+              "wft"
+            ],
+            "relation_matches": [
+              "hydrostatic",
+              "pressure"
+            ],
+            "family": "well_testing",
+            "confidence": "HIGH"
+          },
+          {
+            "id": "KB5",
+            "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "page": 357,
+            "score": 6.2,
+            "concept_matches": [
+              "pressure",
+              "wft"
+            ],
+            "relation_matches": [
+              "pressure"
+            ],
+            "family": "well_testing",
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB6",
+            "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "page": 409,
+            "score": 8.1667,
+            "concept_matches": [
+              "hydrostatic",
+              "pressure"
+            ],
+            "relation_matches": [
+              "hydrostatic",
+              "pressure"
+            ],
+            "family": "well_testing",
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB7",
+            "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "page": 417,
+            "score": 10.1429,
+            "concept_matches": [
+              "hydrostatic",
+              "pressure",
+              "wft"
+            ],
+            "relation_matches": [
+              "hydrostatic",
+              "pressure"
+            ],
+            "family": "well_testing",
+            "confidence": "HIGH"
+          },
+          {
+            "id": "KB8",
+            "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "page": 393,
+            "score": 10.125,
+            "concept_matches": [
+              "hydrostatic",
+              "pressure",
+              "wft"
+            ],
+            "relation_matches": [
+              "hydrostatic",
+              "pressure"
+            ],
+            "family": "well_testing",
+            "confidence": "HIGH"
+          },
+          {
+            "id": "KB9",
+            "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "page": 354,
+            "score": 10.1111,
+            "concept_matches": [
+              "hydrostatic",
+              "pressure",
+              "wft"
+            ],
+            "relation_matches": [
+              "hydrostatic",
+              "pressure"
+            ],
+            "family": "well_testing",
+            "confidence": "HIGH"
+          },
+          {
+            "id": "KB10",
+            "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "page": 358,
+            "score": 10.1,
+            "concept_matches": [
+              "hydrostatic",
+              "pressure",
+              "wft"
+            ],
+            "relation_matches": [
+              "hydrostatic",
+              "pressure"
+            ],
+            "family": "well_testing",
+            "confidence": "HIGH"
+          },
+          {
+            "id": "KB11",
+            "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+            "page": 63,
+            "score": 8.0909,
+            "concept_matches": [
+              "hydrostatic",
+              "pressure"
+            ],
+            "relation_matches": [
+              "hydrostatic",
+              "pressure"
+            ],
+            "family": "reservoir_engineering",
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB12",
+            "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "page": 356,
+            "score": 6.0833,
+            "concept_matches": [
+              "pressure",
+              "wft"
+            ],
+            "relation_matches": [
+              "pressure"
+            ],
+            "family": "well_testing",
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB13",
+            "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+            "page": 64,
+            "score": 8.0769,
+            "concept_matches": [
+              "hydrostatic",
+              "pressure"
+            ],
+            "relation_matches": [
+              "hydrostatic",
+              "pressure"
+            ],
+            "family": "reservoir_engineering",
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB14",
+            "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "page": 392,
+            "score": 6.0714,
+            "concept_matches": [
+              "pressure",
+              "wft"
+            ],
+            "relation_matches": [
+              "pressure"
+            ],
+            "family": "well_testing",
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB15",
+            "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "page": 438,
+            "score": 6.0667,
+            "concept_matches": [
+              "pressure",
+              "wft"
+            ],
+            "relation_matches": [
+              "pressure"
+            ],
+            "family": "well_testing",
+            "confidence": "MEDIUM"
+          }
+        ],
+        "selected_sources": [
+          "KB1",
+          "KB11",
+          "KB13",
+          "KB2",
+          "KB3"
+        ],
+        "dropped_sources": [
+          "KB4",
+          "KB5",
+          "KB6",
+          "KB7",
+          "KB8",
+          "KB9",
+          "KB10",
+          "KB12",
+          "KB14",
+          "KB15"
+        ],
+        "confidence": "HIGH"
+      },
+      "retrieval_rerank_history": [
+        {
+          "domain_hint": null,
+          "candidate_documents": [
+            "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "Heriot-Watt University - Reservoir Engineering.pdf"
+          ],
+          "scores": [
+            {
+              "id": "KB1",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 417,
+              "score": 11.0,
+              "concept_matches": [
+                "hydrostatic",
+                "pressure",
+                "wft"
+              ],
+              "relation_matches": [
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB2",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 356,
+              "score": 10.5,
+              "concept_matches": [
+                "hydrostatic",
+                "pressure",
+                "wft"
+              ],
+              "relation_matches": [
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB3",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 445,
+              "score": 10.3333,
+              "concept_matches": [
+                "hydrostatic",
+                "pressure",
+                "wft"
+              ],
+              "relation_matches": [
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB4",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 443,
+              "score": 10.25,
+              "concept_matches": [
+                "hydrostatic",
+                "pressure",
+                "wft"
+              ],
+              "relation_matches": [
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB5",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 357,
+              "score": 6.2,
+              "concept_matches": [
+                "pressure",
+                "wft"
+              ],
+              "relation_matches": [
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB6",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 409,
+              "score": 8.1667,
+              "concept_matches": [
+                "hydrostatic",
+                "pressure"
+              ],
+              "relation_matches": [
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB7",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 417,
+              "score": 10.1429,
+              "concept_matches": [
+                "hydrostatic",
+                "pressure",
+                "wft"
+              ],
+              "relation_matches": [
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB8",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 393,
+              "score": 10.125,
+              "concept_matches": [
+                "hydrostatic",
+                "pressure",
+                "wft"
+              ],
+              "relation_matches": [
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB9",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 354,
+              "score": 10.1111,
+              "concept_matches": [
+                "hydrostatic",
+                "pressure",
+                "wft"
+              ],
+              "relation_matches": [
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB10",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 358,
+              "score": 10.1,
+              "concept_matches": [
+                "hydrostatic",
+                "pressure",
+                "wft"
+              ],
+              "relation_matches": [
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB11",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 63,
+              "score": 8.0909,
+              "concept_matches": [
+                "hydrostatic",
+                "pressure"
+              ],
+              "relation_matches": [
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB12",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 356,
+              "score": 6.0833,
+              "concept_matches": [
+                "pressure",
+                "wft"
+              ],
+              "relation_matches": [
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB13",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 64,
+              "score": 8.0769,
+              "concept_matches": [
+                "hydrostatic",
+                "pressure"
+              ],
+              "relation_matches": [
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB14",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 392,
+              "score": 6.0714,
+              "concept_matches": [
+                "pressure",
+                "wft"
+              ],
+              "relation_matches": [
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB15",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 438,
+              "score": 6.0667,
+              "concept_matches": [
+                "pressure",
+                "wft"
+              ],
+              "relation_matches": [
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "MEDIUM"
+            }
+          ],
+          "selected_sources": [
+            "KB1",
+            "KB11",
+            "KB13",
+            "KB2",
+            "KB3"
+          ],
+          "dropped_sources": [
+            "KB4",
+            "KB5",
+            "KB6",
+            "KB7",
+            "KB8",
+            "KB9",
+            "KB10",
+            "KB12",
+            "KB14",
+            "KB15"
+          ],
+          "confidence": "HIGH"
+        }
+      ],
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": 3,
+      "total_research_seconds": 22.572701,
+      "python_seconds": 0.0
+    },
+    "validation": {
+      "engineering_validation_passed": true,
+      "engineering_contradiction_count": 0,
+      "unsupported_engineering_claim_count": 0,
+      "citation_semantic_passed": true,
+      "unsupported_citation_claim_count": 1,
+      "unsupported_numeric_claim_count": 0,
+      "criteria_frozen": true
+    },
+    "cancel_requested": false,
+    "error": null
+  }
+}

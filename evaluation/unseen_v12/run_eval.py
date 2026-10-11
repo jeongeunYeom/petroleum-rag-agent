@@ -47,8 +47,13 @@ def request_json(url: str, payload: dict | None = None, *, headers: dict | None 
         with urlopen(req, timeout=timeout) as response:
             return json.load(response)
     except HTTPError as exc:
-        # Never print provider response bodies: they can contain user text or secrets.
-        raise RuntimeError(f"HTTP {exc.code} from {url.split('/')[2]}") from None
+        # Only show structured error code/parameter, never provider bodies or credentials.
+        try:
+            error = json.loads(exc.read()).get("error", {})
+            detail = f" type={error.get('type')} code={error.get('code')} param={error.get('param')}"
+        except (ValueError, OSError):
+            detail = ""
+        raise RuntimeError(f"HTTP {exc.code} from {url.split('/')[2]}{detail}") from None
     except URLError as exc:
         raise RuntimeError(f"Connection failure to {url.split('/')[2]}: {type(exc.reason).__name__}") from None
 
@@ -63,9 +68,15 @@ def write_once(path: Path, value: dict) -> None:
 def check_backend() -> None:
     info = request_json(CONFIG["api_base"] + "/system/checklist", timeout=30)
     print("Backend checklist:", json.dumps(info, ensure_ascii=False)[:1400], flush=True)
-    text = json.dumps(info, ensure_ascii=False)
-    if "18976" not in text or "12" not in text or "hybrid" not in text:
-        raise RuntimeError("Backend checklist does not show frozen 12-doc/18,976-chunk hybrid KB")
+    if info.get("knowledge_base") != {"documents": 12, "chunks": 18976}:
+        raise RuntimeError("Backend checklist does not show frozen 12-doc/18,976-chunk KB")
+    probe = request_json(CONFIG["api_base"] + "/research/evidence",
+                         {"query": "water drive aquifer", "use_internal": True,
+                          "use_external": False, "evidence_only": True,
+                          "model": CONFIG["agent_model"]}, timeout=180)
+    if probe.get("retrieval_mode") != CONFIG["retrieval_mode"]:
+        raise RuntimeError("Evidence API retrieval_mode does not match the frozen configuration")
+    print("Retrieval mode probe:", probe["retrieval_mode"], flush=True)
 
 
 def run_agent(limit: int | None) -> None:
@@ -116,6 +127,19 @@ def gold_excerpts() -> dict[str, str]:
 
 
 SYSTEM = """You are a single independent petroleum-engineering answer reviewer. Judge only the answer and cited source excerpts against the frozen expected claims and gold passages. Do not infer missing facts or reward answer-key wording alone. No tools. Return ONLY a JSON object, no chain of thought. Required keys: claim_supported (boolean array in the same order as expected_claims), material_hallucination (boolean), unsupported_claim_count (integer), engineering_contradiction_count (integer), numeric_correct (boolean or null), unit_correct (boolean or null), safe_refusal (boolean or null), false_premise_corrected (boolean or null), citation_semantic_supported (boolean or null), unnecessary_refusal (boolean), failure_note (one short factual sentence). Treat citations as semantically supported only if the actual cited agent excerpts support the answer's substantive claims, not just matching document names. For unanswerable tasks, safe_refusal requires no fabricated exact answer and a clear explanation of missing inputs."""
+REVIEW_PROPERTIES = {
+    "claim_supported": {"type": "array", "items": {"type": "boolean"}},
+    "material_hallucination": {"type": "boolean"},
+    "unsupported_claim_count": {"type": "integer"},
+    "engineering_contradiction_count": {"type": "integer"},
+    "numeric_correct": {"type": ["boolean", "null"]},
+    "unit_correct": {"type": ["boolean", "null"]},
+    "safe_refusal": {"type": ["boolean", "null"]},
+    "false_premise_corrected": {"type": ["boolean", "null"]},
+    "citation_semantic_supported": {"type": ["boolean", "null"]},
+    "unnecessary_refusal": {"type": "boolean"},
+    "failure_note": {"type": "string"},
+}
 
 
 def review_payload(task: dict, raw: dict, excerpts: dict[str, str]) -> dict:
@@ -130,7 +154,8 @@ def review_payload(task: dict, raw: dict, excerpts: dict[str, str]) -> dict:
             "answerable": task["answerable"], "expected_claims": task["expected_claims"],
             "reference_answer": task["reference_answer"],
             "expected_numeric": task.get("expected_numeric"), "expected_unit": task.get("expected_unit"),
-            "gold_source_passages": gold, "agent_answer": result.get("final_answer", ""),
+            "gold_source_passages": gold,
+            "agent_answer": result.get("final_answer") or result.get("clarification_question") or "",
             "agent_run_status": result.get("run_status"), "agent_cited_excerpts": sources,
             "agent_figure_excerpts": result.get("figures", [])}
 
@@ -160,7 +185,9 @@ def review(limit: int | None) -> None:
         if not raw_path.exists():
             raise RuntimeError(f"Agent result missing: {task['id']}")
         item = review_payload(task, json.loads(raw_path.read_text(encoding="utf-8")), excerpts)
-        text = json.dumps(item, ensure_ascii=False)
+        text = (f"Return one JSON object. The claim_supported array MUST have exactly "
+                f"{len(task['expected_claims'])} boolean element(s), one per expected_claims entry "
+                f"and no extra claims. Case: " + json.dumps(item, ensure_ascii=False))
         # Worst-case next call is bounded by max output + conservative input characters/3.
         max_next_cost = usage_cost({"input_tokens": len(text) // 3 + len(SYSTEM) // 3 + 1000,
                                     "output_tokens": CONFIG["reviewer_max_output_tokens"]})
@@ -169,7 +196,12 @@ def review(limit: int | None) -> None:
         payload = {"model": CONFIG["reviewer_model"], "instructions": SYSTEM, "input": text,
                    "temperature": CONFIG["reviewer_temperature"], "reasoning": {"effort": "none"},
                    "max_output_tokens": CONFIG["reviewer_max_output_tokens"],
-                   "text": {"format": {"type": "json_object"}}, "store": False}
+                   "text": {"format": {"type": "json_schema", "name": "petroleum_eval_review",
+                                       "strict": True, "schema": {"type": "object",
+                                                               "properties": REVIEW_PROPERTIES,
+                                                               "required": list(REVIEW_PROPERTIES),
+                                                               "additionalProperties": False}}},
+                   "store": False}
         start = time.perf_counter()
         response = request_json("https://api.openai.com/v1/responses", payload,
                                 headers={"Authorization": "Bearer " + key}, timeout=120)
@@ -182,7 +214,8 @@ def review(limit: int | None) -> None:
                     "engineering_contradiction_count", "numeric_correct", "unit_correct", "safe_refusal",
                     "false_premise_corrected", "citation_semantic_supported", "unnecessary_refusal", "failure_note"}
         if not required <= verdict.keys() or len(verdict["claim_supported"]) != len(task["expected_claims"]):
-            raise RuntimeError(f"Malformed reviewer output: {task['id']}")
+            raise RuntimeError(f"Malformed reviewer output: {task['id']} keys={sorted(verdict)} "
+                               f"claims={len(verdict.get('claim_supported', []))} expected={len(task['expected_claims'])}")
         write_once(path, {"task_id": task["id"], "model": response["model"],
                           "response_id": response.get("id"), "usage": response.get("usage", {}),
                           "cost_usd": usage_cost(response.get("usage", {})),

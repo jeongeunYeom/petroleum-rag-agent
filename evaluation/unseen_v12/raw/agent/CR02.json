@@ -1,0 +1,807 @@
+{
+  "task_id": "CR02",
+  "question": "When should the oil- or gas-bearing sonic-porosity correction factors from the training text be applied, and when not?",
+  "model": "qwen3:8b",
+  "retrieval_mode": "hybrid",
+  "web_enabled": false,
+  "wall_seconds": 25.31,
+  "result": {
+    "run_id": "GR-20261011-163226-F3EC00",
+    "topic": "When should the oil- or gas-bearing sonic-porosity correction factors from the training text be applied, and when not?",
+    "goal": "When should the oil- or gas-bearing sonic-porosity correction factors from the training text be applied, and when not?",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "insufficient_evidence",
+    "final_answer": "The retrieved sources did not directly support an answer.",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 0.875,
+    "goal_coverage_percent": 87.5,
+    "criteria_source": "inferred",
+    "criteria_hash": "735b130baa85eba4e0f185daa5a89153f28082927f52826415e138965340ef70",
+    "criteria": [
+      {
+        "criterion_id": "C1",
+        "status": "met",
+        "reason": "The correction factors should be applied when the formation is known to contain oil or gas based on well log data or core analysis. [KB1] [KB2] [KB3]",
+        "supporting_evidence": [
+          "KB1",
+          "KB2",
+          "KB3"
+        ]
+      },
+      {
+        "criterion_id": "C2",
+        "status": "met",
+        "reason": "The correction factors should not be applied when the formation is water-saturated or when there is no evidence of hydrocarbon presence in the formation. [KB1] [KB2] [KB3]",
+        "supporting_evidence": [
+          "KB1",
+          "KB2",
+          "KB3"
+        ]
+      },
+      {
+        "criterion_id": "C3",
+        "status": "partial",
+        "reason": "The correction factors should be applied when the sonic porosity calculation is being used for reservoir characterization or fluid identification purposes. [KB1] [KB2] [KB3]",
+        "supporting_evidence": [
+          "KB1",
+          "KB2",
+          "KB3"
+        ]
+      },
+      {
+        "criterion_id": "C4",
+        "status": "met",
+        "reason": "The correction factors should not be applied when the sonic porosity is being used for lithology identification or when the formation is non-reservoir quality. [KB2] [KB3]",
+        "supporting_evidence": [
+          "KB2",
+          "KB3"
+        ]
+      }
+    ],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "The correction factors should be applied when the formation is known to contain oil or gas based on well log data or core analysis.",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "The correction factors should not be applied when the formation is water-saturated or when there is no evidence of hydrocarbon presence in the formation.",
+        "required": true
+      },
+      {
+        "criterion_id": "C3",
+        "description": "The correction factors should be applied when the sonic porosity calculation is being used for reservoir characterization or fluid identification purposes.",
+        "required": true
+      },
+      {
+        "criterion_id": "C4",
+        "description": "The correction factors should not be applied when the sonic porosity is being used for lithology identification or when the formation is non-reservoir quality.",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 2,
+    "current_iteration": 2,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3",
+          "C4"
+        ],
+        "status": "completed",
+        "reason_code": "source_evidence_needed",
+        "started_at": "2026-10-11T16:32:28.938649Z",
+        "finished_at": "2026-10-11T16:32:35.885066Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "query": "formation evaluation should oil- gas-bearing sonic-porosity correction factors training text\nformation evaluation formation evaluation should oil- gas-bearing sonic-porosity",
+          "cache_hit": false,
+          "relevance_confidence": "HIGH"
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "verify",
+        "target_criteria": [
+          "C1",
+          "C2",
+          "C3",
+          "C4"
+        ],
+        "status": "completed",
+        "reason_code": "verify_current_support",
+        "started_at": "2026-10-11T16:32:35.913938Z",
+        "finished_at": "2026-10-11T16:32:51.452071Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.875,
+        "failure_reason": null,
+        "details": {
+          "engineering_validation_passed": true,
+          "goal_achieved": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-STOP-2",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "insufficient_evidence",
+        "started_at": "2026-10-11T16:32:51.475666Z",
+        "finished_at": "2026-10-11T16:32:51.475666Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.875,
+        "coverage_after": 0.875,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet",
+          "C3": "unmet",
+          "C4": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "met",
+          "C2": "met",
+          "C3": "partial",
+          "C4": "met"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.875,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "met",
+          "C2": "met",
+          "C3": "partial",
+          "C4": "met"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.875,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+        "page": 132,
+        "chunk_id": "d3d33e53ea2478fe3729bba7019d8604095c5b6c2c2d3dc0bd7e9608a9931ebb:p132:c0",
+        "score": 0.03278689,
+        "excerpt": "Institute of Petroleum Engineering,  Heriot-Watt University  \n17\n55\nDetermination of Porosity\nIn some shallowly invaded high-porosity rocks with high hydrocarbon saturation, \nsonic-derived porosity may be too high because of fluid effect.  Both oil and gas \ntransmit sound at lower velocities (higher transit times) than does water.  Therefore, \nthe transit time-to-porosity transform, which assumes water as the saturating pore \nfluid, sometimes overstates rock porosity.  In these cases, the time average-derived \nporosity is multiplied by 0.9 in oil-bearing formations and by 0.7 in gas-bearing \nformations.  These fluid corrections are applied only when the time average-derived \nporosity is obviously too high.\nFigure 6  Density-sonic crossplot as used for compaction-factor determination\n9 EFFECT OF PRESSURE ON POROSITY DETERMINATION \nINTERPRETATION CHARTS\n9.1  Acoustic Log\nFormations having abnormally high fluid pressures are often overlain by over-pressured \nshales, which have an excess of pore water.  Sonic transit time is greater in these \nshales than in normally compacted shales.  Thus, a sonic log may be used to predict \nthe possibility of over-pressure.\nThe sonic travel time in s"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+        "page": 140,
+        "chunk_id": "d3d33e53ea2478fe3729bba7019d8604095c5b6c2c2d3dc0bd7e9608a9931ebb:p140:c0",
+        "score": 0.01587302,
+        "excerpt": "Institute of Petroleum Engineering,  Heriot-Watt University  \n3\n6\nLithology and Porosity in Complex Formations6\n1 POROSITY DETERMINATION IN COMPLEX CONDITIONS\nThe measurements of the neutron, density, and sonic logs depend not only on porosity \n(φ) but also on the formation lithology, on the fluid in the pores, and, in some instances, \non the geometry of the pore structure.  When the lithology and, therefore, the matrix \nparameters (tma, ρma,  φma) are known, correct porosity values can be derived from these \nlogs, appropriately corrected for environmental effects, in clean water-filled formations. \nUnder these conditions, a single log, either the neutron or the density or, if there is no \nsecondary porosity, the sonic, can be used to determine porosity (Chapter 5).\nAccurate porosity determination is more difficult when the matrix lithology is unknown \nor consists of two or more minerals in unknown proportions.  Determination is further \ncomplicated when the response of the pore fluids in the portion of the formation \ninvestigated by the tool differs appreciably from that of water.  In particular, light \nhydrocarbons (gas) can significantly influence the response of all three poros"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+        "page": 150,
+        "chunk_id": "d3d33e53ea2478fe3729bba7019d8604095c5b6c2c2d3dc0bd7e9608a9931ebb:p150:c1",
+        "score": 0.015625,
+        "excerpt": "ty plot as a result of the increase in  \nφD  because of the presence of gas.  In uncompacted formations, the sonic  t  reading \nmay also be increased by the effect of the gas.\nHydrocarbon shifts in oil-bearing formations are usually negligible;  for clean formations, \nporosities can be read directly from the porosity graduations on the chart.\n11 M-N PLOT\nIn more complex mineral mixtures, lithology interpretation is facilitated by use of \nthe M-N plot.  These plots combine the data of all three porosity logs to provide \nthe lithology-dependent quantities M and N.  M and N are simply the slopes of the \nindividual lithology lines on the sonic-density and density neutron crossplot charts, \nrespectively.  Thus, M and N are essentially independent of porosity, and a crossplot \nprovides lithology identification."
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 345,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p345:c0",
+        "score": 0.02480974,
+        "excerpt": "3E.8.2 NMR Acoustic/Density Combination.  Because NMR tools are affected by the lower\nHI in gas-bearing reservoirs, a moving tool may not fully polarize the gas, which has a long\nT1. Conventional acoustic and density logs are not influenced by these factors and, when used\njointly  with  NMR  logs,  they  can  provide  robust  porosity  evaluation.155,156  The  basic  assump-\nFig. 3E.38—Integrated-NMR-resistivity shaly sand analysis. Whereas resistivity logs (Track 2) read very\nlow values and indicate that the zone below XX200 is water wet, NMR measurements show that BVI (Track\n4, gray) increases with depth. However, T2 measurements (Tracks 3 and 4) suggested the presence of\nhydrocarbon, which testing confirmed in what turned out to be a water-free zone.\nChapter 3E—Nuclear Magnetic Resonance Applications in Petrophysics and Formation Evaluation\nV-337\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 3D\nChapter 3F"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+        "page": 385,
+        "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p385:c3",
+        "score": 0.01111111,
+        "excerpt": "Conference, The Hague, 20–22\nOctober.\n37. Gas Detection: Theory and Practice, training manual, Geoservices Inc. (1995).\n38. Mercer, R.F. and McAdams, J.B.: “Standards for Hydrocarbon Well Logging,” presented at the\n1982 SPWLA Annual Logging Symposium, 6–9 June.\n39. Mud Logging: Principles and Interpretation, Exploration Logging Inc. (1979)\n40. “Mud Logging: Methods and Interpretation Workshop,” workshop notes, 1989 SPWLA Annual\nLogging Symposium, 11 June.\n41. Helander, D.P.: Fundamentals of Formation Evaluation, OGCI Publications, Tulsa (1983).\n42. “Advances in Mud Logging,” presented at the 1995 SPWLA/CWLS Symposium, 17 June.\nSI Metric Conversion Factors\nft ×\n3.048*\nE − 01 = m\n*Conversion factor is exact.\nChapter 3F—Mud Logging\nV-377\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 3E\nChapter 3G"
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 2.667939,
+      "retrieval_seconds": 6.918737,
+      "llm_generation_seconds": 13.241774,
+      "python_seconds": 0.0,
+      "verification_seconds": 15.537688,
+      "evaluation_seconds": 6.676717,
+      "synthesis_seconds": 6.565013,
+      "retrieve_action_seconds": 6.946071,
+      "verify_action_seconds": 15.537685,
+      "elapsed_seconds": 25.217984,
+      "total_seconds": 25.218538,
+      "message_parsing_seconds": 0.000554
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "intent_route": "knowledge_qa",
+      "intent": {
+        "selected_intent": "knowledge_qa",
+        "intent_reason": "knowledge_question",
+        "premise_cue_detected": false,
+        "formula_origin": "unknown"
+      },
+      "source_requirement": "none",
+      "fact_extraction": {
+        "deterministic_fact_count": 0,
+        "fallback_fact_count": 0,
+        "rejected_fact_count": 0,
+        "fact_rejection_reasons": [],
+        "normalized_units": {}
+      },
+      "calculation": {
+        "requested_operation_family": "",
+        "direct_calc_ready": false,
+        "missing_operands": []
+      },
+      "formula": {
+        "candidates_found": 0,
+        "selected_formula_id": null
+      },
+      "transition": {
+        "formula_ready": false,
+        "calculation_ready": false,
+        "blocking_reason": "insufficient_evidence"
+      },
+      "retrieval_rerank": {
+        "domain_hint": "petrophysics",
+        "candidate_documents": [
+          "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+          "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf"
+        ],
+        "scores": [
+          {
+            "id": "KB1",
+            "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+            "page": 132,
+            "score": 20.0,
+            "concept_matches": [
+              "formation",
+              "oil-",
+              "gas-bearing",
+              "correction",
+              "applied"
+            ],
+            "relation_matches": [],
+            "family": "petrophysics",
+            "confidence": "HIGH"
+          },
+          {
+            "id": "KB2",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 345,
+            "score": 10.5,
+            "concept_matches": [
+              "formation",
+              "evaluation",
+              "gas-bearing",
+              "factors",
+              "not"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB3",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 211,
+            "score": 8.3333,
+            "concept_matches": [
+              "formation",
+              "correction",
+              "factors",
+              "not"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB4",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 379,
+            "score": 2.25,
+            "concept_matches": [
+              "formation"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "LOW"
+          },
+          {
+            "id": "KB5",
+            "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+            "page": 140,
+            "score": 13.2,
+            "concept_matches": [
+              "formation",
+              "not"
+            ],
+            "relation_matches": [],
+            "family": "petrophysics",
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB6",
+            "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+            "page": 150,
+            "score": 13.1667,
+            "concept_matches": [
+              "formation",
+              "oil-"
+            ],
+            "relation_matches": [],
+            "family": "petrophysics",
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB7",
+            "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+            "page": 150,
+            "score": 13.1429,
+            "concept_matches": [
+              "formation",
+              "gas-bearing"
+            ],
+            "relation_matches": [],
+            "family": "petrophysics",
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB8",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 630,
+            "score": 8.125,
+            "concept_matches": [
+              "evaluation",
+              "should",
+              "factors",
+              "training"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB9",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 175,
+            "score": 6.1111,
+            "concept_matches": [
+              "formation",
+              "evaluation",
+              "gas-bearing"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB10",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 385,
+            "score": 10.1,
+            "concept_matches": [
+              "formation",
+              "evaluation",
+              "factors",
+              "training",
+              "not"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB11",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 322,
+            "score": 10.0909,
+            "concept_matches": [
+              "formation",
+              "should",
+              "correction",
+              "factors",
+              "not"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB12",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+            "page": 508,
+            "score": 10.0833,
+            "concept_matches": [
+              "formation",
+              "should",
+              "correction",
+              "factors",
+              "not"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          },
+          {
+            "id": "KB13",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 347,
+            "score": 6.0769,
+            "concept_matches": [
+              "formation",
+              "evaluation",
+              "should"
+            ],
+            "relation_matches": [],
+            "family": null,
+            "confidence": "MEDIUM"
+          }
+        ],
+        "selected_sources": [
+          "KB1",
+          "KB10",
+          "KB2",
+          "KB5",
+          "KB6"
+        ],
+        "dropped_sources": [
+          "KB3",
+          "KB4",
+          "KB7",
+          "KB8",
+          "KB9",
+          "KB11",
+          "KB12",
+          "KB13"
+        ],
+        "confidence": "HIGH"
+      },
+      "retrieval_rerank_history": [
+        {
+          "domain_hint": "petrophysics",
+          "candidate_documents": [
+            "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+            "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf"
+          ],
+          "scores": [
+            {
+              "id": "KB1",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 132,
+              "score": 20.0,
+              "concept_matches": [
+                "formation",
+                "oil-",
+                "gas-bearing",
+                "correction",
+                "applied"
+              ],
+              "relation_matches": [],
+              "family": "petrophysics",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB2",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 345,
+              "score": 10.5,
+              "concept_matches": [
+                "formation",
+                "evaluation",
+                "gas-bearing",
+                "factors",
+                "not"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB3",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 211,
+              "score": 8.3333,
+              "concept_matches": [
+                "formation",
+                "correction",
+                "factors",
+                "not"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB4",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 379,
+              "score": 2.25,
+              "concept_matches": [
+                "formation"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "LOW"
+            },
+            {
+              "id": "KB5",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 140,
+              "score": 13.2,
+              "concept_matches": [
+                "formation",
+                "not"
+              ],
+              "relation_matches": [],
+              "family": "petrophysics",
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB6",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 150,
+              "score": 13.1667,
+              "concept_matches": [
+                "formation",
+                "oil-"
+              ],
+              "relation_matches": [],
+              "family": "petrophysics",
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB7",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 150,
+              "score": 13.1429,
+              "concept_matches": [
+                "formation",
+                "gas-bearing"
+              ],
+              "relation_matches": [],
+              "family": "petrophysics",
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB8",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 630,
+              "score": 8.125,
+              "concept_matches": [
+                "evaluation",
+                "should",
+                "factors",
+                "training"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB9",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 175,
+              "score": 6.1111,
+              "concept_matches": [
+                "formation",
+                "evaluation",
+                "gas-bearing"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB10",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 385,
+              "score": 10.1,
+              "concept_matches": [
+                "formation",
+                "evaluation",
+                "factors",
+                "training",
+                "not"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB11",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 322,
+              "score": 10.0909,
+              "concept_matches": [
+                "formation",
+                "should",
+                "correction",
+                "factors",
+                "not"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB12",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+              "page": 508,
+              "score": 10.0833,
+              "concept_matches": [
+                "formation",
+                "should",
+                "correction",
+                "factors",
+                "not"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            },
+            {
+              "id": "KB13",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 347,
+              "score": 6.0769,
+              "concept_matches": [
+                "formation",
+                "evaluation",
+                "should"
+              ],
+              "relation_matches": [],
+              "family": null,
+              "confidence": "MEDIUM"
+            }
+          ],
+          "selected_sources": [
+            "KB1",
+            "KB10",
+            "KB2",
+            "KB5",
+            "KB6"
+          ],
+          "dropped_sources": [
+            "KB3",
+            "KB4",
+            "KB7",
+            "KB8",
+            "KB9",
+            "KB11",
+            "KB12",
+            "KB13"
+          ],
+          "confidence": "HIGH"
+        }
+      ],
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 25.217984,
+      "python_seconds": 0.0
+    },
+    "validation": {
+      "engineering_validation_passed": true,
+      "engineering_contradiction_count": 0,
+      "unsupported_engineering_claim_count": 0,
+      "citation_semantic_passed": true,
+      "unsupported_citation_claim_count": 0,
+      "unsupported_numeric_claim_count": 0,
+      "criteria_frozen": true
+    },
+    "cancel_requested": false,
+    "error": null
+  }
+}
