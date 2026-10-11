@@ -599,7 +599,7 @@ class ResearchAgent:
             raise ValueError("top_k must be between 1 and 20")
 
         candidate_count = min(top_k * 4, 80)
-        query_variants = self.engineering_retrieval_queries(query)
+        query_variants = self.engineering_retrieval_queries(query.splitlines()[0])
         for line in query.splitlines()[1:]:
             line = line.strip()
             if line and not line.casefold().startswith("missing:") and len(line.split()) >= 2:

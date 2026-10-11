@@ -1,0 +1,4876 @@
+{
+  "label": "DEVELOPMENT ONLY — NOT FINAL BENCHMARK",
+  "model": "qwen3:8b",
+  "retrieval_mode": "hybrid",
+  "web": false,
+  "documents": 12,
+  "chunks": 18976,
+  "cases": [
+    {
+      "id": "P-RES",
+      "kind": "premise",
+      "domain": "reservoir_engineering",
+      "passed": true,
+      "intent": "premise_check",
+      "status": "achieved",
+      "actions": [
+        "retrieve",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "premise_verdict": "contradicts",
+      "premise_method": "source_grounded",
+      "premise_failure_reason": "",
+      "premise_supporting_source_ids": [
+        "KB1",
+        "KB4"
+      ],
+      "context_expansion": [],
+      "domain_document_hit": true,
+      "relevant_chunk_hit": true,
+      "top3_relevant": 3,
+      "wrong_domain_top5": 0,
+      "citation_semantic_support": true,
+      "explicit_correction": true,
+      "supported_answer": false,
+      "refined_attempted": false,
+      "refined_recovered": false,
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 713,
+          "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p713:c0",
+          "excerpt_prefix": "Institute of Petroleum Engineering,  Heriot-Watt University  \n31\nWater Influx\nThe pressure time relationship is as follows:\n                                     \n Period  \nTime  \nPressure\n \n \nMonths  \npsi\n \n \n0  \n3,800\n \n1  \n6  \n3,780\n \n2  \n12  \n3,750\n \n3  \n18  \n3,700\n \n4  \n24  \n"
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 686,
+          "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p686:c2",
+          "excerpt_prefix": "production and pressure data becomes \navailable.”  Dake 1978.1\nIn relation to artesian aquifer support it is considered that their occurrence is probably \nrare, although there are some reservoirs which purportedly have this type of drive. \nDue to faulting or pinchouts, most hydro"
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 693,
+          "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p693:c0",
+          "excerpt_prefix": "Institute of Petroleum Engineering,  Heriot-Watt University  \n11\nWater Influx\nin water influx modelling.  Before developing the equations we will consider the \nhydraulic analogue of Craft & Hawkins2.Figure 5.\n        \npi\np4\np3\np2\np\np1\nReservoir\nAquifer\nFigure 5  Hydraulic Analogu"
+        },
+        {
+          "id": "KB4",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 1130,
+          "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1130:c0",
+          "excerpt_prefix": "The  gas/oil  gravity  drainage  process  is  complicated  if  the  oil  column  is  underlain  by  an\naquifer because the aquifer will provide pressure support to the oil column in response to any\ndecrease from original reservoir pressure caused by oil production. If the aquifer"
+        },
+        {
+          "id": "KB5",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 954,
+          "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p954:c1",
+          "excerpt_prefix": "feeding initially\nundersaturated  reservoirs  may  behave  quite  differently.  The  difference  stems  from  the  differ-\nence  in  the  reservoir  pressure  histories.  The  reservoir  pressure  in  initially  undersaturated  oil\nreservoirs initially declines much more quickly "
+        }
+      ],
+      "retrieval_rerank": [
+        {
+          "domain_hint": "reservoir_engineering",
+          "candidate_documents": [
+            "Heriot-Watt University - Reservoir Engineering.pdf",
+            "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "Heriot-Watt_University_-_Production_Technology_I.pdf"
+          ],
+          "scores": [
+            {
+              "id": "KB1",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 713,
+              "score": 26.0,
+              "concept_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure",
+                "support",
+                "reservoir",
+                "engineering"
+              ],
+              "relation_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure",
+                "support"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB2",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 686,
+              "score": 25.5,
+              "concept_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure",
+                "support",
+                "reservoir"
+              ],
+              "relation_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure",
+                "support"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB3",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 693,
+              "score": 25.3333,
+              "concept_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure",
+                "reservoir",
+                "engineering"
+              ],
+              "relation_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB4",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 479,
+              "score": 25.25,
+              "concept_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure",
+                "support",
+                "reservoir",
+                "engineering"
+              ],
+              "relation_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure",
+                "support"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB5",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 695,
+              "score": 25.2,
+              "concept_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "support",
+                "reservoir",
+                "engineering"
+              ],
+              "relation_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "support"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB6",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 1130,
+              "score": 20.1667,
+              "concept_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure",
+                "support",
+                "reservoir"
+              ],
+              "relation_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure",
+                "support"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB7",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 688,
+              "score": 25.1429,
+              "concept_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure",
+                "reservoir"
+              ],
+              "relation_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB8",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 713,
+              "score": 25.125,
+              "concept_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure",
+                "reservoir"
+              ],
+              "relation_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB9",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 709,
+              "score": 25.1111,
+              "concept_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure",
+                "reservoir",
+                "engineering"
+              ],
+              "relation_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB10",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 954,
+              "score": 20.1,
+              "concept_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure",
+                "reservoir",
+                "engineering"
+              ],
+              "relation_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB11",
+              "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+              "page": 20,
+              "score": 14.0909,
+              "concept_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure",
+                "reservoir"
+              ],
+              "relation_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure"
+              ],
+              "family": "production",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB12",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 711,
+              "score": 25.0833,
+              "concept_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure",
+                "reservoir",
+                "engineering"
+              ],
+              "relation_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB13",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 687,
+              "score": 25.0769,
+              "concept_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure",
+                "support",
+                "reservoir",
+                "engineering"
+              ],
+              "relation_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure",
+                "support"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB14",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 946,
+              "score": 18.0714,
+              "concept_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "reservoir",
+                "engineering"
+              ],
+              "relation_matches": [
+                "aquifer",
+                "water",
+                "influx"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB15",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 685,
+              "score": 25.0667,
+              "concept_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure",
+                "reservoir",
+                "engineering"
+              ],
+              "relation_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "pressure"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            }
+          ],
+          "selected_sources": [
+            "KB1",
+            "KB10",
+            "KB2",
+            "KB3",
+            "KB6"
+          ],
+          "dropped_sources": [
+            "KB4",
+            "KB5",
+            "KB7",
+            "KB8",
+            "KB9",
+            "KB11",
+            "KB12",
+            "KB13",
+            "KB14",
+            "KB15"
+          ],
+          "confidence": "HIGH"
+        }
+      ],
+      "answer": "그 전제는 맞지 않습니다. 올바른 관계: 대수층 물 유입은 저류층 압력 유지에 영향을 미친다. 근거: \"HISTORY MATCHING WATER INFLUX In carrying out water influx calculations it has become clear that a number of pa- rameters have a big impact on the pressure support from an aquifer.\" \"Institute of Petroleum Engineering, Heriot-Watt University 31 Water Influx The pressure time relationship is as follows: Period Time Pressure Months psi 0 3,800 1 6 3,780 2 12 3,750 3 18 3,700 4 24 3,620 i.e.\" \"If the aquifer is weak or if there is a tar mat at the oil/water contact (OWC) inhibiting water influx, then the gas cap will be the primary means of pressure support for the oil column and the reservoir will perform almost as if there were no aquifer present.\" [KB1] [KB4]",
+      "validation": {
+        "engineering_validation_passed": true,
+        "engineering_contradiction_count": 0,
+        "unsupported_engineering_claim_count": 0,
+        "citation_semantic_passed": true,
+        "unsupported_citation_claim_count": 0,
+        "unsupported_numeric_claim_count": 0,
+        "criteria_frozen": true
+      },
+      "seconds": 24.935
+    },
+    {
+      "id": "P-SIM",
+      "kind": "premise",
+      "domain": "reservoir_simulation",
+      "passed": true,
+      "intent": "premise_check",
+      "status": "achieved",
+      "actions": [
+        "retrieve",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "premise_verdict": "contradicts",
+      "premise_method": "source_grounded",
+      "premise_failure_reason": "",
+      "premise_supporting_source_ids": [
+        "KB3",
+        "KB1"
+      ],
+      "context_expansion": [],
+      "domain_document_hit": true,
+      "relevant_chunk_hit": true,
+      "top3_relevant": 3,
+      "wrong_domain_top5": 1,
+      "citation_semantic_support": true,
+      "explicit_correction": true,
+      "supported_answer": false,
+      "refined_attempted": false,
+      "refined_recovered": false,
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+          "page": 12,
+          "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p12:c0",
+          "excerpt_prefix": "12\nreservoir.  Within a grid block the properties are uniform (porosity, permeability, \nrelative permeability etc.) although they may change with time as the reservoir \nprocess progresses.  Blocks are generally connected to neighbouring blocks are fluid \nmay flow in a block-to-bl"
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+          "page": 171,
+          "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p171:c0",
+          "excerpt_prefix": "Institute of Petroleum Engineering,  Heriot-Watt University  \n21\n66\nNumerical Methods in Reservoir Simulation\nsystem may be anisotropic (kx ≠ ky) and heterogeneous (the permeability may vary \nfrom grid block to grid block). \nEquation 25 above can be discretised in a similar way t"
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+          "page": 85,
+          "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p85:c0",
+          "excerpt_prefix": "2\nLEARNING OBJECTIVES\nHaving worked through this chapter and the associated tutorials the student \nshould be able to:\nSimulation Input\n• Identify what questions the simulation is expected to address.\n• Identify what data is required as input to perform the desired calculations.\n•"
+        },
+        {
+          "id": "KB4",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 683,
+          "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p683:c1",
+          "excerpt_prefix": "method for integration of the convection part of\nthe  tracer  equation.  To  reduce  numerical  smearing  of  the  tracer  pulses,  the  timestep  for  the\ntracer  calculation  is  selected  as  large  as  possible  but  may  still  be  much  smaller  than  the\ntimesteps of the h"
+        },
+        {
+          "id": "KB5",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 639,
+          "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p639:c2",
+          "excerpt_prefix": "compressibility of water and rock. This \naverage pressure determination may be obtained from a range of pressures from wells \nwithin the drainage area.  We will discuss this in the next chapter.\n\t\nThe material balance is also a backbone in all mathematical reservoir simulators, \n"
+        }
+      ],
+      "retrieval_rerank": [
+        {
+          "domain_hint": "reservoir_simulation",
+          "candidate_documents": [
+            "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+            "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "Heriot-Watt University - Reservoir Engineering.pdf",
+            "Heriot-Watt_University_-_Well_Test_Analysis.pdf"
+          ],
+          "scores": [
+            {
+              "id": "KB1",
+              "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+              "page": 12,
+              "score": 24.0,
+              "concept_matches": [
+                "reservoir",
+                "simulation",
+                "grid",
+                "size",
+                "numerical"
+              ],
+              "relation_matches": [
+                "grid",
+                "size",
+                "numerical"
+              ],
+              "family": "reservoir_simulation",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB2",
+              "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+              "page": 171,
+              "score": 23.5,
+              "concept_matches": [
+                "reservoir",
+                "simulation",
+                "grid",
+                "size",
+                "numerical"
+              ],
+              "relation_matches": [
+                "grid",
+                "size",
+                "numerical"
+              ],
+              "family": "reservoir_simulation",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB3",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 683,
+              "score": 16.3333,
+              "concept_matches": [
+                "reservoir",
+                "simulation",
+                "grid",
+                "numerical",
+                "resolution"
+              ],
+              "relation_matches": [
+                "grid",
+                "numerical",
+                "resolution"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB4",
+              "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+              "page": 85,
+              "score": 23.25,
+              "concept_matches": [
+                "reservoir",
+                "simulation",
+                "grid",
+                "size",
+                "numerical"
+              ],
+              "relation_matches": [
+                "grid",
+                "size",
+                "numerical"
+              ],
+              "family": "reservoir_simulation",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB5",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 639,
+              "score": 16.2,
+              "concept_matches": [
+                "reservoir",
+                "simulation",
+                "grid",
+                "size",
+                "numerical"
+              ],
+              "relation_matches": [
+                "grid",
+                "size",
+                "numerical"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB6",
+              "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+              "page": 163,
+              "score": 23.1667,
+              "concept_matches": [
+                "reservoir",
+                "simulation",
+                "grid",
+                "size",
+                "numerical"
+              ],
+              "relation_matches": [
+                "grid",
+                "size",
+                "numerical"
+              ],
+              "family": "reservoir_simulation",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB7",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 735,
+              "score": 16.1429,
+              "concept_matches": [
+                "reservoir",
+                "simulation",
+                "grid",
+                "size",
+                "numerical"
+              ],
+              "relation_matches": [
+                "grid",
+                "size",
+                "numerical"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB8",
+              "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+              "page": 25,
+              "score": 19.125,
+              "concept_matches": [
+                "reservoir",
+                "simulation",
+                "grid",
+                "size"
+              ],
+              "relation_matches": [
+                "grid",
+                "size"
+              ],
+              "family": "reservoir_simulation",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB9",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 487,
+              "score": 6.1111,
+              "concept_matches": [
+                "reservoir",
+                "simulation",
+                "grid"
+              ],
+              "relation_matches": [
+                "grid"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB10",
+              "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+              "page": 126,
+              "score": 15.1,
+              "concept_matches": [
+                "reservoir",
+                "simulation",
+                "grid"
+              ],
+              "relation_matches": [
+                "grid"
+              ],
+              "family": "reservoir_simulation",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB11",
+              "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+              "page": 457,
+              "score": 19.0909,
+              "concept_matches": [
+                "reservoir",
+                "simulation",
+                "grid",
+                "numerical"
+              ],
+              "relation_matches": [
+                "grid",
+                "numerical"
+              ],
+              "family": "reservoir_simulation",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB12",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 1430,
+              "score": 8.0833,
+              "concept_matches": [
+                "reservoir",
+                "simulation",
+                "grid"
+              ],
+              "relation_matches": [
+                "grid"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB13",
+              "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+              "page": 53,
+              "score": 19.0769,
+              "concept_matches": [
+                "reservoir",
+                "simulation",
+                "grid",
+                "numerical"
+              ],
+              "relation_matches": [
+                "grid",
+                "numerical"
+              ],
+              "family": "reservoir_simulation",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB14",
+              "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+              "page": 398,
+              "score": 19.0714,
+              "concept_matches": [
+                "reservoir",
+                "simulation",
+                "grid",
+                "size"
+              ],
+              "relation_matches": [
+                "grid",
+                "size"
+              ],
+              "family": "reservoir_simulation",
+              "confidence": "HIGH"
+            }
+          ],
+          "selected_sources": [
+            "KB1",
+            "KB2",
+            "KB3",
+            "KB4",
+            "KB5"
+          ],
+          "dropped_sources": [
+            "KB6",
+            "KB7",
+            "KB8",
+            "KB9",
+            "KB10",
+            "KB11",
+            "KB12",
+            "KB13",
+            "KB14"
+          ],
+          "confidence": "HIGH"
+        }
+      ],
+      "answer": "그 전제는 맞지 않습니다. 올바른 관계: 격자 크기는 수치 해상도에 영향을 미친다. 근거: \"• Identify numerical effects and impact of grid block size and orientation on results.\" \"To run a reservoir simulation model, you must: (a) Gather and input the fluid and rock (reservoir description) data as outlined above; (b) Choose certain numerical features of the grid (number of grid blocks, time step sizes etc); (c) Set up the correct field well controls (injection rates\" [KB3] [KB1]",
+      "validation": {
+        "engineering_validation_passed": true,
+        "engineering_contradiction_count": 0,
+        "unsupported_engineering_claim_count": 0,
+        "citation_semantic_passed": true,
+        "unsupported_citation_claim_count": 0,
+        "unsupported_numeric_claim_count": 0,
+        "criteria_frozen": true
+      },
+      "seconds": 16.291
+    },
+    {
+      "id": "P-WELL",
+      "kind": "premise",
+      "domain": "well_testing",
+      "passed": true,
+      "intent": "premise_check",
+      "status": "achieved",
+      "actions": [
+        "retrieve",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "premise_verdict": "contradicts",
+      "premise_method": "source_grounded",
+      "premise_failure_reason": "",
+      "premise_supporting_source_ids": [
+        "KB4",
+        "KB1"
+      ],
+      "context_expansion": [],
+      "domain_document_hit": true,
+      "relevant_chunk_hit": true,
+      "top3_relevant": 3,
+      "wrong_domain_top5": 0,
+      "citation_semantic_support": true,
+      "explicit_correction": true,
+      "supported_answer": false,
+      "refined_attempted": false,
+      "refined_recovered": false,
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+          "page": 111,
+          "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p111:c1",
+          "excerpt_prefix": "od ensures that \nnegligible depletion of the reservoir will occur even if a small compartment is being \ninvestigated. The well is then shutin for the first buildup to determine the initial \nreservoir pressure, denoted pi , and the duration of this first buildup is long enough \nfo"
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+          "page": 341,
+          "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p341:c1",
+          "excerpt_prefix": "es \njust prior to the change are replaced by physical no-flow boundaries.  This implies that \nthe MBH functions cannot be used in multiple well situations.\nWhen an individual well in a multiple well system is shut in the pressure buildup \nresponse has the form shown in Figure 24."
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+          "page": 277,
+          "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p277:c2",
+          "excerpt_prefix": "esponse during the shut-in following \na constant-rate flow period of duration T it is necessary to carry out a double \nsuperposition - one in time to handle the two-rate schedule and one in space \nto accommodate the fault through an image well.  For the build-up test rate \nschedu"
+        },
+        {
+          "id": "KB4",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 1024,
+          "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1024:c0",
+          "excerpt_prefix": "By combining the assumptions used to assign drainage shapes and considerations of the gas\nlaw, the following procedure could be used for developing an average reservoir pressure at any\npoint in time.\n1. Be certain to determine average reservoir pressure accurately. Sometimes, shu"
+        },
+        {
+          "id": "KB5",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 783,
+          "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p783:c1",
+          "excerpt_prefix": "when shut-in time is much larger than producing time.\nFig. 8.64 is the diagnostic plot for a buildup test with derivative taken with respect to radi-\nal equivalent time and plotted vs. equivalent time. This plot is not particularly useful for test\nanalysis.  However,  linear  equ"
+        }
+      ],
+      "retrieval_rerank": [
+        {
+          "domain_hint": "well_testing",
+          "candidate_documents": [
+            "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "Heriot-Watt_University_-_Well_Test_Analysis.pdf"
+          ],
+          "scores": [
+            {
+              "id": "KB1",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 1024,
+              "score": 15.0,
+              "concept_matches": [
+                "pressure",
+                "buildup",
+                "test",
+                "well",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure",
+                "buildup"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB2",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 111,
+              "score": 21.5,
+              "concept_matches": [
+                "pressure",
+                "buildup",
+                "test",
+                "well",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure",
+                "buildup"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB3",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 783,
+              "score": 14.3333,
+              "concept_matches": [
+                "pressure",
+                "buildup",
+                "test",
+                "well",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure",
+                "buildup"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB4",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 341,
+              "score": 21.25,
+              "concept_matches": [
+                "pressure",
+                "buildup",
+                "test",
+                "well",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure",
+                "buildup"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB5",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 782,
+              "score": 14.2,
+              "concept_matches": [
+                "pressure",
+                "buildup",
+                "test",
+                "well",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure",
+                "buildup"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB6",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 735,
+              "score": 14.1667,
+              "concept_matches": [
+                "pressure",
+                "buildup",
+                "test",
+                "well",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure",
+                "buildup"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB7",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 744,
+              "score": 12.1429,
+              "concept_matches": [
+                "pressure",
+                "buildup",
+                "test",
+                "well"
+              ],
+              "relation_matches": [
+                "pressure",
+                "buildup"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB8",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 783,
+              "score": 14.125,
+              "concept_matches": [
+                "pressure",
+                "buildup",
+                "test",
+                "well",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure",
+                "buildup"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB9",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 277,
+              "score": 21.1111,
+              "concept_matches": [
+                "pressure",
+                "buildup",
+                "test",
+                "well",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure",
+                "buildup"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB10",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 836,
+              "score": 14.1,
+              "concept_matches": [
+                "pressure",
+                "buildup",
+                "test",
+                "well",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure",
+                "buildup"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB11",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 322,
+              "score": 21.0909,
+              "concept_matches": [
+                "pressure",
+                "buildup",
+                "test",
+                "well",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure",
+                "buildup"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB12",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 332,
+              "score": 21.0833,
+              "concept_matches": [
+                "pressure",
+                "buildup",
+                "test",
+                "well",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure",
+                "buildup"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB13",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 717,
+              "score": 14.0769,
+              "concept_matches": [
+                "pressure",
+                "buildup",
+                "test",
+                "well",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure",
+                "buildup"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB14",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 157,
+              "score": 17.0714,
+              "concept_matches": [
+                "pressure",
+                "test",
+                "well",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB15",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 623,
+              "score": 21.0667,
+              "concept_matches": [
+                "pressure",
+                "buildup",
+                "test",
+                "well",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure",
+                "buildup"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            }
+          ],
+          "selected_sources": [
+            "KB1",
+            "KB2",
+            "KB3",
+            "KB4",
+            "KB9"
+          ],
+          "dropped_sources": [
+            "KB5",
+            "KB6",
+            "KB7",
+            "KB8",
+            "KB10",
+            "KB11",
+            "KB12",
+            "KB13",
+            "KB14",
+            "KB15"
+          ],
+          "confidence": "HIGH"
+        }
+      ],
+      "answer": "그 전제는 맞지 않습니다. 올바른 관계: 유정 압력 상승 시험은 shut-in 이후 압력을 기록할 필요가 있으며, 이는 초기 유정 압력을 결정하기 위해 수행된다. 근거: \"reser- voir pressure from a long shut-in is to use the Matthew-Brons-Hazebroek method16 estimating the semilog straight-line slope from reservoir properties rather than a buildup test.\" \"The well is then shutin for the first buildup to determine the initial reservoir pressure, denoted pi , and the duration of this first buildup is long enough for the pressure to essentially stabilise so that no, or very little, extrapolation is required to fix pi .\" [KB4] [KB1]",
+      "validation": {
+        "engineering_validation_passed": true,
+        "engineering_contradiction_count": 0,
+        "unsupported_engineering_claim_count": 0,
+        "citation_semantic_passed": true,
+        "unsupported_citation_claim_count": 0,
+        "unsupported_numeric_claim_count": 0,
+        "criteria_frozen": true
+      },
+      "seconds": 18.115
+    },
+    {
+      "id": "P-PETRO",
+      "kind": "premise",
+      "domain": "petrophysics",
+      "passed": true,
+      "intent": "premise_check",
+      "status": "achieved",
+      "actions": [
+        "retrieve",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "premise_verdict": "contradicts",
+      "premise_method": "source_grounded",
+      "premise_failure_reason": "",
+      "premise_supporting_source_ids": [
+        "KB1",
+        "KB4"
+      ],
+      "context_expansion": [],
+      "domain_document_hit": true,
+      "relevant_chunk_hit": true,
+      "top3_relevant": 3,
+      "wrong_domain_top5": 0,
+      "citation_semantic_support": true,
+      "explicit_correction": true,
+      "supported_answer": false,
+      "refined_attempted": false,
+      "refined_recovered": false,
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 164,
+          "chunk_id": "d3d33e53ea2478fe3729bba7019d8604095c5b6c2c2d3dc0bd7e9608a9931ebb:p164:c0",
+          "excerpt_prefix": "Institute of Petroleum Engineering,  Heriot-Watt University  \n3\n7\nSaturation Determination7\n1 INTRODUCTION\nWater saturation is the fraction (or percentage) of the pore volume of the reservoir \nrock that is filled with water.  It is generally assumed, unless otherwise known, that "
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 194,
+          "chunk_id": "d3d33e53ea2478fe3729bba7019d8604095c5b6c2c2d3dc0bd7e9608a9931ebb:p194:c0",
+          "excerpt_prefix": "Institute of Petroleum Engineering,  Heriot-Watt University  \n33\n7\nSaturation Determination7\nAppendix 1 - Determination of Rw\nIn addition to formation factor or porosity, values of formation water resistivity, Rw, \nand mud filtrate resistivity, Rmf, are needed for the water satur"
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 44,
+          "chunk_id": "d3d33e53ea2478fe3729bba7019d8604095c5b6c2c2d3dc0bd7e9608a9931ebb:p44:c1",
+          "excerpt_prefix": "ty log.  The way in which \nthe porosity can be determined in these situations will be described in Chapter 6.\n7 DETERMINATION OF SATURATION\nThe electrical resistivity of a formation is a very good indicator of the fluid in the \npore space of that formation. Neither oil nor gas co"
+        },
+        {
+          "id": "KB4",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 153,
+          "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p153:c1",
+          "excerpt_prefix": "e pore volume of\nthe  reservoir  rock  that  is  filled  with  water.  It  is  generally  assumed,  unless  otherwise  known,\nthat the pore volume not filled with water is filled with hydrocarbons. Determining water and\nhydrocarbon saturation is one of the basic objectives of wel"
+        },
+        {
+          "id": "KB5",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 154,
+          "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p154:c0",
+          "excerpt_prefix": "resonance,  or  other)  or  combination  of  porosity  and  lithology  measurements  must  be  used  to\nobtain porosity, and the proper porosity-to-formation factor relationship must be used. Finally,\nthe Rw value should be verified in as many ways as possible: calculation from t"
+        }
+      ],
+      "retrieval_rerank": [
+        {
+          "domain_hint": "petrophysics",
+          "candidate_documents": [
+            "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "Heriot_Watt_University_-_Formation_Evaluation.pdf"
+          ],
+          "scores": [
+            {
+              "id": "KB1",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 153,
+              "score": 19.0,
+              "concept_matches": [
+                "well",
+                "log",
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "well",
+                "log",
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB2",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 164,
+              "score": 25.5,
+              "concept_matches": [
+                "well",
+                "log",
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "well",
+                "log",
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": "petrophysics",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB3",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 194,
+              "score": 25.3333,
+              "concept_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": "petrophysics",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB4",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 44,
+              "score": 25.25,
+              "concept_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": "petrophysics",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB5",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 86,
+              "score": 23.2,
+              "concept_matches": [
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": "petrophysics",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB6",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 154,
+              "score": 18.1667,
+              "concept_matches": [
+                "well",
+                "log",
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "well",
+                "log",
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB7",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 235,
+              "score": 23.1429,
+              "concept_matches": [
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": "petrophysics",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB8",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 7,
+              "score": 25.125,
+              "concept_matches": [
+                "well",
+                "log",
+                "resistivity",
+                "saturation",
+                "formation",
+                "evaluation"
+              ],
+              "relation_matches": [
+                "well",
+                "log",
+                "resistivity",
+                "saturation"
+              ],
+              "family": "petrophysics",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB9",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 339,
+              "score": 18.1111,
+              "concept_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation",
+                "formation",
+                "evaluation"
+              ],
+              "relation_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB10",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 163,
+              "score": 16.1,
+              "concept_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB11",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 497,
+              "score": 14.0909,
+              "concept_matches": [
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB12",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 196,
+              "score": 25.0833,
+              "concept_matches": [
+                "well",
+                "log",
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "well",
+                "log",
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": "petrophysics",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB13",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 86,
+              "score": 25.0769,
+              "concept_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": "petrophysics",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB14",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 164,
+              "score": 23.0714,
+              "concept_matches": [
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": "petrophysics",
+              "confidence": "HIGH"
+            }
+          ],
+          "selected_sources": [
+            "KB1",
+            "KB2",
+            "KB3",
+            "KB4",
+            "KB6"
+          ],
+          "dropped_sources": [
+            "KB5",
+            "KB7",
+            "KB8",
+            "KB9",
+            "KB10",
+            "KB11",
+            "KB12",
+            "KB13",
+            "KB14"
+          ],
+          "confidence": "HIGH"
+        }
+      ],
+      "answer": "그 전제는 맞지 않습니다. 올바른 관계: 저항도 검층 결과는 물 포화도를 결정하는 데 사용되며, 물 포화도는 저항도 검층 결과에 의존한다. 근거: \"2 DETERMINATION OF SATURATION IN CLEAN FORMATIONS All water saturation determinations from resistivity logs in clean (nonshaly) formations with homogeneous intergranular porosity are based on Archie’s water saturation equation, or variations thereof.\" \"The equation is: Sw n = F Rw Rt Equation 1 Archies water saturation equation where Rw is the formation water resistivity (see Appendix 1), Rt is the true formation resistivity (see Chapter 4),and F is the formation resistivity factor F is usually obtained from the measured porosity of the formation through the relationship shown in Chart Por-1.\" \"All water saturation determinations from resistivity logs in clean (non- shaly) formations with homogeneous intergranular porosity are based on Archie’s water satura- tion equation, or variations thereof.66,67 The equation is Sw n = FRw Rt .\" [KB1] [KB4]",
+      "validation": {
+        "engineering_validation_passed": true,
+        "engineering_contradiction_count": 0,
+        "unsupported_engineering_claim_count": 0,
+        "citation_semantic_passed": true,
+        "unsupported_citation_claim_count": 0,
+        "unsupported_numeric_claim_count": 0,
+        "criteria_frozen": true
+      },
+      "seconds": 20.15
+    },
+    {
+      "id": "P-DRILL",
+      "kind": "premise",
+      "domain": "drilling",
+      "passed": true,
+      "intent": "premise_check",
+      "status": "achieved",
+      "actions": [
+        "retrieve",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "premise_verdict": "contradicts",
+      "premise_method": "source_grounded",
+      "premise_failure_reason": "",
+      "premise_supporting_source_ids": [
+        "KB2"
+      ],
+      "context_expansion": [],
+      "domain_document_hit": true,
+      "relevant_chunk_hit": true,
+      "top3_relevant": 3,
+      "wrong_domain_top5": 0,
+      "citation_semantic_support": true,
+      "explicit_correction": true,
+      "supported_answer": false,
+      "refined_attempted": false,
+      "refined_recovered": false,
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 192,
+          "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p192:c1",
+          "excerpt_prefix": "uid\nIt is clear from all of the preceding discussion that the pressure at the bottom of the \nborehole must be accurately determined if the leak off or fracture pressure of the \nformation is not to be exceeded. When the drilling fluid is circulating through the \ndrillstring, the b"
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 360,
+          "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p360:c0",
+          "excerpt_prefix": "Drilling Fluids\n5\nInstitute of Petroleum Engineering,  Heriot-Watt University  \nThe pressure in the wellbore will be equal to: \nP\t =  0.052 x MW x TVD\nwhere,   \nP\t = hydrostatic pressure (psi)       \nMW \t = mud density of the mud or mud weight (ppg)      \nTVD \t = true vertical de"
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 359,
+          "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p359:c1",
+          "excerpt_prefix": "ttings while not circulating\n•\t  Drop the cuttings out of suspension at surface.\nThe rheological  properties of the mud must be carefully engineered to fulfil these \nrequirements.  The carrying capacity of the mud depends on the annular velocity, \ndensity and viscosity of the mud"
+        },
+        {
+          "id": "KB4",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+          "page": 196,
+          "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p196:c3",
+          "excerpt_prefix": "cur, only that a new\nformation has been drilled that may have kick potential.\nIt is recommended when a drilling break is recorded that the driller should drill 3 to 5 ft (1\nto 1.5 m) into the sand and then stop to check for flowing formation fluids. Flow checks are\nnot always per"
+        },
+        {
+          "id": "KB5",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+          "page": 84,
+          "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p84:c0",
+          "excerpt_prefix": "1.9 Making Decisions in Real Time\nIn situations in which predrill analysis reveals high risk but has a large uncertainty, it is possi-\nble to mitigate that risk by carrying out geomechanical analysis in real time. This can be done\nbut requires acquisition of a variety of data whi"
+        }
+      ],
+      "retrieval_rerank": [
+        {
+          "domain_hint": "drilling",
+          "candidate_documents": [
+            "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+            "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf"
+          ],
+          "scores": [
+            {
+              "id": "KB1",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 192,
+              "score": 24.0,
+              "concept_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure",
+                "drilling"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB2",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 417,
+              "score": 12.5,
+              "concept_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB3",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 360,
+              "score": 23.3333,
+              "concept_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure",
+                "drilling"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB4",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 359,
+              "score": 23.25,
+              "concept_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure",
+                "drilling"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB5",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 388,
+              "score": 23.2,
+              "concept_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure",
+                "drilling"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB6",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 579,
+              "score": 14.1667,
+              "concept_matches": [
+                "mud",
+                "density",
+                "pressure",
+                "drilling"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB7",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 211,
+              "score": 21.1429,
+              "concept_matches": [
+                "mud",
+                "density",
+                "pressure",
+                "drilling"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "pressure"
+              ],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB8",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 196,
+              "score": 16.125,
+              "concept_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure",
+                "drilling"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB9",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 417,
+              "score": 12.1111,
+              "concept_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB10",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 710,
+              "score": 14.1,
+              "concept_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB11",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 192,
+              "score": 23.0909,
+              "concept_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure",
+                "drilling"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB12",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 211,
+              "score": 21.0833,
+              "concept_matches": [
+                "mud",
+                "density",
+                "pressure",
+                "drilling"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "pressure"
+              ],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB13",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 84,
+              "score": 16.0769,
+              "concept_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure",
+                "drilling"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB14",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 208,
+              "score": 12.0714,
+              "concept_matches": [
+                "mud",
+                "density",
+                "pressure"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB15",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 195,
+              "score": 14.0667,
+              "concept_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            }
+          ],
+          "selected_sources": [
+            "KB1",
+            "KB13",
+            "KB3",
+            "KB4",
+            "KB8"
+          ],
+          "dropped_sources": [
+            "KB2",
+            "KB5",
+            "KB6",
+            "KB7",
+            "KB9",
+            "KB10",
+            "KB11",
+            "KB12",
+            "KB14",
+            "KB15"
+          ],
+          "confidence": "HIGH"
+        }
+      ],
+      "answer": "그 전제는 맞지 않습니다. 올바른 관계: 정수압은 시추 이수 밀도가 증가할수록 증가한다. 근거: \"Drilling Fluids 5 Institute of Petroleum Engineering, Heriot-Watt University The pressure in the wellbore will be equal to: P = 0.052 x MW x TVD where, P = hydrostatic pressure (psi) MW = mud density of the mud or mud weight (ppg) TVD = true vertical depth of point of interest = vertical height of mud column (ft) The density of the mud may be expressed in either of the following units: To obtain the following Units\" \"1.0 0.433 8.33 psi/ft 2.31 1.0 19.23 ppg 0.12 0.052 1.0 Table 2 Conversion of Commonly used Units of Density Example: A mudweight of 12 ppg is equivalent to a mudweight of 12\" [KB2]",
+      "validation": {
+        "engineering_validation_passed": true,
+        "engineering_contradiction_count": 0,
+        "unsupported_engineering_claim_count": 0,
+        "citation_semantic_passed": true,
+        "unsupported_citation_claim_count": 0,
+        "unsupported_numeric_claim_count": 0,
+        "criteria_frozen": true
+      },
+      "seconds": 19.9
+    },
+    {
+      "id": "P-PROD",
+      "kind": "premise",
+      "domain": "production",
+      "passed": true,
+      "intent": "premise_check",
+      "status": "achieved",
+      "actions": [
+        "retrieve",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "premise_verdict": "contradicts",
+      "premise_method": "source_grounded",
+      "premise_failure_reason": "",
+      "premise_supporting_source_ids": [
+        "KB1"
+      ],
+      "context_expansion": [],
+      "domain_document_hit": true,
+      "relevant_chunk_hit": true,
+      "top3_relevant": 3,
+      "wrong_domain_top5": 0,
+      "citation_semantic_support": true,
+      "explicit_correction": true,
+      "supported_answer": false,
+      "refined_attempted": false,
+      "refined_recovered": false,
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+          "page": 452,
+          "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p452:c1",
+          "excerpt_prefix": "from the produced fluids must be delivered to the export pipeline at\nthe specified pressure.  It is flashed from the produced liquid at a variety of pressures\nduring the production process - so economically achieving this export pressure\nrequires a number of gas compressors rathe"
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+          "page": 624,
+          "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p624:c0",
+          "excerpt_prefix": "4\nBonus marks\nBonus marks\nBonus marks\nBonus marks\nBonus marks\n-\ncoalescer pack\n-\nsolids wash facility\n-\nproduction chemical addition\n-\nfresh water wash\n1(b)\nIn a gravity type separator => the separation process takes\nplace due to the action of gravitycombined with the difference "
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+          "page": 458,
+          "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p458:c1",
+          "excerpt_prefix": "trate at the\ntray operating at just below its boiling point under the column operating pressure.  A\nseparator may be installed on this tray and the water drawn off for disposal.\nPC\nLow\nTemperature\nSeparator\nIntermediate\nTemperature\nSeparator\nHigh\nTemperature\nSeparator\nHeater\nHeat"
+        },
+        {
+          "id": "KB4",
+          "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+          "page": 32,
+          "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p32:c0",
+          "excerpt_prefix": "1\n18\nseparation and treatment operations over a wide range of reservoir conditions.\nDownstream of the choke is a separator which is designed to separate out the liquid\nphases continuously to provide produced gas and oil for export and water for disposal.\nDepending on the shrinkag"
+        },
+        {
+          "id": "KB5",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+          "page": 26,
+          "chunk_id": "3ef043ce163a7809b2d9e47c3676b2f3afdac2d7570be1005afaaaa36942e61c:p26:c0",
+          "excerpt_prefix": "In most oil/gas surface production equipment systems, the oil/gas separator is the first ves-\nsel the well fluid flows through after it leaves the producing well. However, other equipment\nsuch as heaters may be installed upstream of the separator.\n2.1.4 Separator Orientation.  Ta"
+        }
+      ],
+      "retrieval_rerank": [
+        {
+          "domain_hint": "production",
+          "candidate_documents": [
+            "Heriot-Watt_University_-_Production_Technology_II.pdf",
+            "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+            "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+            "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "Heriot-Watt_University_-_Production_Technology_I.pdf",
+            "Heriot-Watt University - Reservoir Engineering.pdf"
+          ],
+          "scores": [
+            {
+              "id": "KB1",
+              "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+              "page": 452,
+              "score": 24.0,
+              "concept_matches": [
+                "production",
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": "production",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB2",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+              "page": 18,
+              "score": 14.5,
+              "concept_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB3",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+              "page": 26,
+              "score": 16.3333,
+              "concept_matches": [
+                "production",
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB4",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+              "page": 196,
+              "score": 16.25,
+              "concept_matches": [
+                "production",
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB5",
+              "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+              "page": 624,
+              "score": 23.2,
+              "concept_matches": [
+                "production",
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": "production",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB6",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 995,
+              "score": 14.1667,
+              "concept_matches": [
+                "production",
+                "separator",
+                "gas",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB7",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+              "page": 22,
+              "score": 16.1429,
+              "concept_matches": [
+                "production",
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB8",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+              "page": 11,
+              "score": 16.125,
+              "concept_matches": [
+                "production",
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB9",
+              "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+              "page": 458,
+              "score": 23.1111,
+              "concept_matches": [
+                "production",
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": "production",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB10",
+              "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+              "page": 448,
+              "score": 23.1,
+              "concept_matches": [
+                "production",
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": "production",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB11",
+              "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+              "page": 32,
+              "score": 23.0909,
+              "concept_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": "production",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB12",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+              "page": 12,
+              "score": 14.0833,
+              "concept_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB13",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 559,
+              "score": 12.0769,
+              "concept_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB14",
+              "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+              "page": 63,
+              "score": 21.0714,
+              "concept_matches": [
+                "production",
+                "separator",
+                "gas",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "pressure"
+              ],
+              "family": "production",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB15",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+              "page": 91,
+              "score": 16.0667,
+              "concept_matches": [
+                "production",
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            }
+          ],
+          "selected_sources": [
+            "KB1",
+            "KB11",
+            "KB3",
+            "KB5",
+            "KB9"
+          ],
+          "dropped_sources": [
+            "KB2",
+            "KB4",
+            "KB6",
+            "KB7",
+            "KB8",
+            "KB10",
+            "KB12",
+            "KB13",
+            "KB14",
+            "KB15"
+          ],
+          "confidence": "HIGH"
+        }
+      ],
+      "answer": "그 전제는 맞지 않습니다. 올바른 관계: 생산 분리기의 압력은 가스 분리 거동과 관련이 있으며, 가스 분리 거동은 압력 조절에 따라 달라진다. 근거: \"Minimising the compression power requirements while maximising the liquid recovery (determined by the thermodynamics of the produced fluids), will dictate that the gas from each oil separation stage is compressed to the operating pressure of the previous stage.\" \"It is flashed from the produced liquid at a variety of pressures during the production process - so economically achieving this export pressure requires a number of gas compressors rather than one large one.\" [KB1]",
+      "validation": {
+        "engineering_validation_passed": true,
+        "engineering_contradiction_count": 0,
+        "unsupported_engineering_claim_count": 0,
+        "citation_semantic_passed": true,
+        "unsupported_citation_claim_count": 0,
+        "unsupported_numeric_claim_count": 0,
+        "criteria_frozen": true
+      },
+      "seconds": 19.331
+    },
+    {
+      "id": "K-RES",
+      "kind": "knowledge",
+      "domain": "reservoir_engineering",
+      "passed": true,
+      "intent": "knowledge_qa",
+      "status": "achieved",
+      "actions": [
+        "retrieve",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "premise_verdict": null,
+      "premise_method": null,
+      "premise_failure_reason": null,
+      "premise_supporting_source_ids": null,
+      "context_expansion": [],
+      "domain_document_hit": true,
+      "relevant_chunk_hit": true,
+      "top3_relevant": 3,
+      "wrong_domain_top5": 0,
+      "citation_semantic_support": true,
+      "explicit_correction": false,
+      "supported_answer": true,
+      "refined_attempted": false,
+      "refined_recovered": false,
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 639,
+          "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p639:c0",
+          "excerpt_prefix": "Institute of Petroleum Engineering,  Heriot-Watt University  \n27\nMaterial Balance Equation\npetrophysical related information.  The material balance generated result provides a \nmore effective value since it would not include volumes in undrained or low perme-\nability areas of the"
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 713,
+          "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p713:c0",
+          "excerpt_prefix": "Institute of Petroleum Engineering,  Heriot-Watt University  \n31\nWater Influx\nThe pressure time relationship is as follows:\n                                     \n Period  \nTime  \nPressure\n \n \nMonths  \npsi\n \n \n0  \n3,800\n \n1  \n6  \n3,780\n \n2  \n12  \n3,750\n \n3  \n18  \n3,700\n \n4  \n24  \n"
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 651,
+          "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p651:c0",
+          "excerpt_prefix": "Institute of Petroleum Engineering,  Heriot-Watt University  \n7\nMaterial Balance Equation Application\n2.5 Water Drive Systems\nWater influx is discussed in greater detail in a later chapter and we will examine this \nlinearisation of the MB equation in that context then.\n3 DEPLETIO"
+        },
+        {
+          "id": "KB4",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 955,
+          "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p955:c0",
+          "excerpt_prefix": "es  more  rapidly  in  initially  undersaturated  reservoirs  than  initially  saturated  reservoirs.  Once\nthe bubblepoint is reached, the pressure differential between the aquifer and reservoir may de-\ncline  temporarily.  Later,  the  pressure  differential  may  increase,  re"
+        },
+        {
+          "id": "KB5",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 986,
+          "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p986:c0",
+          "excerpt_prefix": "42. McEwen, C.R.: “Material Balance Calculations with Water Influx in the Presence of Uncertainty\nin Pressures,” SPEJ (June 1962) 120.\n43. van Everdingen, A.F. and Hurst, W.: “The Application of the Laplace Transformation to Flow\nProblems in Reservoirs,” Trans., AIME (1949) 186, "
+        }
+      ],
+      "retrieval_rerank": [
+        {
+          "domain_hint": "reservoir_engineering",
+          "candidate_documents": [
+            "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "Heriot-Watt University - Reservoir Engineering.pdf",
+            "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "Heriot-Watt_University_-_Reservoir_Simulation.pdf"
+          ],
+          "scores": [
+            {
+              "id": "KB1",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 608,
+              "score": 17.0,
+              "concept_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx",
+                "reservoir"
+              ],
+              "relation_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB2",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 639,
+              "score": 25.5,
+              "concept_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx",
+                "reservoir",
+                "engineering"
+              ],
+              "relation_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB3",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 955,
+              "score": 20.3333,
+              "concept_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx",
+                "reservoir"
+              ],
+              "relation_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB4",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 608,
+              "score": 16.25,
+              "concept_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx",
+                "reservoir"
+              ],
+              "relation_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB5",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 713,
+              "score": 25.2,
+              "concept_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx",
+                "reservoir",
+                "engineering"
+              ],
+              "relation_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB6",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 651,
+              "score": 25.1667,
+              "concept_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx",
+                "reservoir",
+                "engineering"
+              ],
+              "relation_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB7",
+              "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+              "page": 62,
+              "score": 18.1429,
+              "concept_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx",
+                "reservoir",
+                "engineering"
+              ],
+              "relation_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx"
+              ],
+              "family": "reservoir_simulation",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB8",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 986,
+              "score": 20.125,
+              "concept_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx",
+                "reservoir",
+                "engineering"
+              ],
+              "relation_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB9",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 731,
+              "score": 25.1111,
+              "concept_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx",
+                "reservoir",
+                "engineering"
+              ],
+              "relation_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB10",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 637,
+              "score": 25.1,
+              "concept_matches": [
+                "material",
+                "balance",
+                "water",
+                "influx",
+                "reservoir"
+              ],
+              "relation_matches": [
+                "material",
+                "balance",
+                "water",
+                "influx"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB11",
+              "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+              "page": 371,
+              "score": 18.0909,
+              "concept_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "reservoir",
+                "engineering"
+              ],
+              "relation_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water"
+              ],
+              "family": "reservoir_simulation",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB12",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 1038,
+              "score": 18.0833,
+              "concept_matches": [
+                "aquifer",
+                "water",
+                "influx",
+                "reservoir",
+                "engineering"
+              ],
+              "relation_matches": [
+                "aquifer",
+                "water",
+                "influx"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB13",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 940,
+              "score": 20.0769,
+              "concept_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx",
+                "reservoir"
+              ],
+              "relation_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB14",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 685,
+              "score": 25.0714,
+              "concept_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx",
+                "reservoir",
+                "engineering"
+              ],
+              "relation_matches": [
+                "material",
+                "balance",
+                "aquifer",
+                "water",
+                "influx"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB15",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 615,
+              "score": 19.0667,
+              "concept_matches": [
+                "material",
+                "balance",
+                "reservoir",
+                "engineering"
+              ],
+              "relation_matches": [
+                "material",
+                "balance"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            }
+          ],
+          "selected_sources": [
+            "KB2",
+            "KB3",
+            "KB5",
+            "KB6",
+            "KB8"
+          ],
+          "dropped_sources": [
+            "KB1",
+            "KB4",
+            "KB7",
+            "KB9",
+            "KB10",
+            "KB11",
+            "KB12",
+            "KB13",
+            "KB14",
+            "KB15"
+          ],
+          "confidence": "HIGH"
+        }
+      ],
+      "answer": "대수층 물 유입 항은 저류층 물질수지 해석에서 유입되는 물의 양을 반영하여 저류층의 압력 변화와 생산량을 예측하는 데 중요한 역할을 한다. [KB1] [KB2] [KB3] [KB4] [KB5]\n대수층 물 유입 항은 저류층의 압력 지원을 제공하며, 이는 저류층의 생산 메커니즘을 이해하고 미래의 생산량을 예측하는 데 필수적이다. [KB1] [KB2] [KB4] [KB5]\n대수층 물 유입 항은 물질수지 방정식에서 유입되는 물의 양을 계산하여 저류층의 압력 변화를 분석하는 데 사용된다. [KB1] [KB2] [KB3] [KB4] [KB5]\n대수층 물 유입 항은 저류층의 물질수지 방정식에서 유입되는 물의 양을 반영하여 저류층의 압력 변화를 분석하는 데 사용된다. [KB1] [KB2] [KB3] [KB4] [KB5]",
+      "validation": {
+        "engineering_validation_passed": true,
+        "engineering_contradiction_count": 0,
+        "unsupported_engineering_claim_count": 0,
+        "citation_semantic_passed": true,
+        "unsupported_citation_claim_count": 1,
+        "unsupported_numeric_claim_count": 0,
+        "criteria_frozen": true
+      },
+      "seconds": 33.969
+    },
+    {
+      "id": "K-SIM",
+      "kind": "knowledge",
+      "domain": "reservoir_simulation",
+      "passed": true,
+      "intent": "knowledge_qa",
+      "status": "achieved",
+      "actions": [
+        "retrieve",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "premise_verdict": null,
+      "premise_method": null,
+      "premise_failure_reason": null,
+      "premise_supporting_source_ids": null,
+      "context_expansion": [],
+      "domain_document_hit": true,
+      "relevant_chunk_hit": true,
+      "top3_relevant": 1,
+      "wrong_domain_top5": 0,
+      "citation_semantic_support": true,
+      "explicit_correction": false,
+      "supported_answer": true,
+      "refined_attempted": false,
+      "refined_recovered": false,
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+          "page": 27,
+          "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p27:c0",
+          "excerpt_prefix": "Institute of Petroleum Engineering,  Heriot-Watt University  \n27\n11\nIntroduction and Case Studies\n28.  A reasonably good initial forward prediction from 1978 - 1981 is shown in Figs. \n13 and 14.\n29. Conclusions are given which, in summary, are as follows:\n1.     Detailed reservoi"
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+          "page": 107,
+          "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p107:c0",
+          "excerpt_prefix": "24\nECLIPSE TUTORIAL 1\n(A 3D 2-Phase Reservoir Simulation Problem)\nA.      \nPrepare an input data file for simulating the performance of a two-phase (water/oil) \nthree dimensional reservoir of size 2500’ x 2500’ x 150’, dividing it into three layers of \nequal thickness.  The numbe"
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+          "page": 116,
+          "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p116:c1",
+          "excerpt_prefix": "PEBI grids, distorted grids and local \ngrid refinement (LGR) are illustrated with examples. A brief discussion of streamline \nsimulation is also presented.   Treatment of the block to block flows in reservoir \nsimulation is presented and it shown how the various inter-block quant"
+        },
+        {
+          "id": "KB4",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 1425,
+          "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1425:c2",
+          "excerpt_prefix": "this simple pattern, and some-\nthing more flexible is required.\nBlock-Center Geometry.  A simple model in which transmissibility between blocks is calcu-\nlated on the basis of linear interpolation between the center values of the cells. This is a simple\nway of representing variab"
+        },
+        {
+          "id": "KB5",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 1425,
+          "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1425:c0",
+          "excerpt_prefix": "the cell in that direction. Such a two-point transmissibility assumes a permeability tensor with\nprimary axes aligned along the grid axes.\nAlthough regular grids are normally defined in normal Cartesian coordinates, it is also pos-\nsible to use an (r, f , z) radial system.52 The "
+        }
+      ],
+      "retrieval_rerank": [
+        {
+          "domain_hint": "reservoir_simulation",
+          "candidate_documents": [
+            "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "Heriot-Watt_University_-_Reservoir_Simulation.pdf"
+          ],
+          "scores": [
+            {
+              "id": "KB1",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 1425,
+              "score": 15.0,
+              "concept_matches": [
+                "between",
+                "cells",
+                "reservoir",
+                "simulation",
+                "transmissibility"
+              ],
+              "relation_matches": [
+                "between",
+                "cells"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB2",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 488,
+              "score": 10.5,
+              "concept_matches": [
+                "between",
+                "permeability",
+                "reservoir",
+                "transmissibility"
+              ],
+              "relation_matches": [
+                "between",
+                "permeability"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB3",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 495,
+              "score": 8.3333,
+              "concept_matches": [
+                "between",
+                "reservoir",
+                "simulation",
+                "transmissibility"
+              ],
+              "relation_matches": [
+                "between"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB4",
+              "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+              "page": 107,
+              "score": 19.25,
+              "concept_matches": [
+                "cells",
+                "permeability",
+                "reservoir",
+                "simulation"
+              ],
+              "relation_matches": [
+                "cells",
+                "permeability"
+              ],
+              "family": "reservoir_simulation",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB5",
+              "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+              "page": 116,
+              "score": 19.2,
+              "concept_matches": [
+                "between",
+                "permeability",
+                "reservoir",
+                "simulation"
+              ],
+              "relation_matches": [
+                "between",
+                "permeability"
+              ],
+              "family": "reservoir_simulation",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB6",
+              "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+              "page": 2,
+              "score": 17.1667,
+              "concept_matches": [
+                "permeability",
+                "reservoir",
+                "simulation",
+                "transmissibility"
+              ],
+              "relation_matches": [
+                "permeability"
+              ],
+              "family": "reservoir_simulation",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB7",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 1469,
+              "score": 12.1429,
+              "concept_matches": [
+                "between",
+                "cells",
+                "reservoir",
+                "simulation"
+              ],
+              "relation_matches": [
+                "between",
+                "cells"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB8",
+              "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+              "page": 27,
+              "score": 17.125,
+              "concept_matches": [
+                "permeability",
+                "reservoir",
+                "simulation",
+                "transmissibility"
+              ],
+              "relation_matches": [
+                "permeability"
+              ],
+              "family": "reservoir_simulation",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB9",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 491,
+              "score": 8.1111,
+              "concept_matches": [
+                "between",
+                "reservoir",
+                "simulation",
+                "transmissibility"
+              ],
+              "relation_matches": [
+                "between"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB10",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 492,
+              "score": 6.1,
+              "concept_matches": [
+                "cells",
+                "reservoir",
+                "transmissibility"
+              ],
+              "relation_matches": [
+                "cells"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB11",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 1472,
+              "score": 12.0909,
+              "concept_matches": [
+                "between",
+                "cells",
+                "reservoir",
+                "simulation"
+              ],
+              "relation_matches": [
+                "between",
+                "cells"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB12",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 1425,
+              "score": 14.0833,
+              "concept_matches": [
+                "cells",
+                "permeability",
+                "reservoir",
+                "simulation",
+                "transmissibility"
+              ],
+              "relation_matches": [
+                "cells",
+                "permeability"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB13",
+              "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+              "page": 27,
+              "score": 21.0769,
+              "concept_matches": [
+                "between",
+                "permeability",
+                "reservoir",
+                "simulation",
+                "transmissibility"
+              ],
+              "relation_matches": [
+                "between",
+                "permeability"
+              ],
+              "family": "reservoir_simulation",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB14",
+              "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+              "page": 12,
+              "score": 15.0714,
+              "concept_matches": [
+                "permeability",
+                "reservoir",
+                "simulation"
+              ],
+              "relation_matches": [
+                "permeability"
+              ],
+              "family": "reservoir_simulation",
+              "confidence": "HIGH"
+            }
+          ],
+          "selected_sources": [
+            "KB1",
+            "KB12",
+            "KB13",
+            "KB4",
+            "KB5"
+          ],
+          "dropped_sources": [
+            "KB2",
+            "KB3",
+            "KB6",
+            "KB7",
+            "KB8",
+            "KB9",
+            "KB10",
+            "KB11",
+            "KB14"
+          ],
+          "confidence": "HIGH"
+        }
+      ],
+      "answer": "저류층 시뮬레이터에서 셀 간 transmissibility는 투과도와 직접적인 관계가 있다. [KB1] [KB4] [KB5]\ntransmissibility는 셀 간 투과도를 기반으로 계산되며, 이는 투과도의 방향성과 관련이 있다. [KB1] [KB4] [KB5]\n투과도가 높은 셀 간 transmissibility도 높아지며, 이는 유체 흐름의 양을 결정하는 중요한 요소이다. [KB2] [KB4] [KB5]\ntransmissibility는 셀 간 투과도의 선형 보간을 통해 계산되며, 이는 투과도의 방향성과 관련이 있다. [KB4] [KB5]",
+      "validation": {
+        "engineering_validation_passed": true,
+        "engineering_contradiction_count": 0,
+        "unsupported_engineering_claim_count": 0,
+        "citation_semantic_passed": true,
+        "unsupported_citation_claim_count": 1,
+        "unsupported_numeric_claim_count": 0,
+        "criteria_frozen": true
+      },
+      "seconds": 22.2
+    },
+    {
+      "id": "K-WELL",
+      "kind": "knowledge",
+      "domain": "well_testing",
+      "passed": true,
+      "intent": "knowledge_qa",
+      "status": "achieved",
+      "actions": [
+        "retrieve",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "premise_verdict": null,
+      "premise_method": null,
+      "premise_failure_reason": null,
+      "premise_supporting_source_ids": null,
+      "context_expansion": [],
+      "domain_document_hit": true,
+      "relevant_chunk_hit": true,
+      "top3_relevant": 3,
+      "wrong_domain_top5": 0,
+      "citation_semantic_support": true,
+      "explicit_correction": false,
+      "supported_answer": true,
+      "refined_attempted": false,
+      "refined_recovered": false,
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+          "page": 157,
+          "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p157:c0",
+          "excerpt_prefix": "54\n                 \np - p\ni\nw\nT1\n0\nt\nTotal Response\nInjection Well\nat Rate q2 - q1\nWell at\nRate q1\nExtrapolated\nPressure\n2.5 Pressure Build-Up Testing\n2.5.1 Introduction\nThe most widely used form of transient well testing technique is pressure build-up \nanalysis.  This type of t"
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+          "page": 149,
+          "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p149:c2",
+          "excerpt_prefix": "ically illustrates the production and pressure history during a \ndrawdown test.  Ideally the well is shut-in until it reaches static reservoir pressure \nbefore the test.  This requirement is met in new reservoirs; it is less often met in old \nreservoirs.  The drawdown test is run"
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+          "page": 117,
+          "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p117:c0",
+          "excerpt_prefix": "14\nOne of the main objectives of a drillstem test is the identification of any depletion \nas illustrated in Figure 7.  Here the pressure attained in the final buildup is less than \nthe initial pressure, pi , indicating a closed system of finite volume.  The detection of \ndepletio"
+        },
+        {
+          "id": "KB4",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 701,
+          "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p701:c2",
+          "excerpt_prefix": "tion, the sensor electronics are coupled to a telemetry\nsystem  for  uphole  transmission,  and  the  cable  supplies  downhole  power.  In  the  DHR  option,\ndownhole batteries supply power, and the data are stored in memory boards for future readout\nor downloading to suitable c"
+        },
+        {
+          "id": "KB5",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 707,
+          "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p707:c3",
+          "excerpt_prefix": "samples  withdrawn  create  much  greater\npressure disturbances.\nStatic Pressure From Buildup Tests.  The static pressure of a reservoir is one of the interpre-\ntation outputs of pressure transient tests. Many short-duration buildup tests (including wireline\npressure “pretests”) "
+        }
+      ],
+      "retrieval_rerank": [
+        {
+          "domain_hint": "well_testing",
+          "candidate_documents": [
+            "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "Heriot-Watt_University_-_Well_Test_Analysis.pdf"
+          ],
+          "scores": [
+            {
+              "id": "KB1",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 1024,
+              "score": 13.0,
+              "concept_matches": [
+                "pressure",
+                "well",
+                "test",
+                "buildup",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB2",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 744,
+              "score": 10.5,
+              "concept_matches": [
+                "pressure",
+                "well",
+                "test",
+                "buildup"
+              ],
+              "relation_matches": [
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB3",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 707,
+              "score": 14.3333,
+              "concept_matches": [
+                "pressure",
+                "recording",
+                "well",
+                "test",
+                "buildup"
+              ],
+              "relation_matches": [
+                "pressure",
+                "recording"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB4",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 836,
+              "score": 12.25,
+              "concept_matches": [
+                "pressure",
+                "well",
+                "test",
+                "buildup",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB5",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 735,
+              "score": 12.2,
+              "concept_matches": [
+                "pressure",
+                "well",
+                "test",
+                "buildup",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB6",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 157,
+              "score": 21.1667,
+              "concept_matches": [
+                "pressure",
+                "recording",
+                "well",
+                "test",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure",
+                "recording"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB7",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 701,
+              "score": 16.1429,
+              "concept_matches": [
+                "pressure",
+                "recording",
+                "well",
+                "test",
+                "buildup",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure",
+                "recording"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB8",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 149,
+              "score": 21.125,
+              "concept_matches": [
+                "pressure",
+                "recording",
+                "well",
+                "test",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure",
+                "recording"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB9",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 117,
+              "score": 19.1111,
+              "concept_matches": [
+                "pressure",
+                "well",
+                "test",
+                "buildup",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB10",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 826,
+              "score": 12.1,
+              "concept_matches": [
+                "pressure",
+                "well",
+                "test",
+                "buildup",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB11",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 111,
+              "score": 19.0909,
+              "concept_matches": [
+                "pressure",
+                "well",
+                "test",
+                "buildup",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB12",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 341,
+              "score": 19.0833,
+              "concept_matches": [
+                "pressure",
+                "well",
+                "test",
+                "buildup",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB13",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 171,
+              "score": 17.0769,
+              "concept_matches": [
+                "pressure",
+                "well",
+                "test",
+                "buildup"
+              ],
+              "relation_matches": [
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB14",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 277,
+              "score": 19.0714,
+              "concept_matches": [
+                "pressure",
+                "well",
+                "test",
+                "buildup",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB15",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 332,
+              "score": 19.0667,
+              "concept_matches": [
+                "pressure",
+                "well",
+                "test",
+                "buildup",
+                "shut-in"
+              ],
+              "relation_matches": [
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            }
+          ],
+          "selected_sources": [
+            "KB3",
+            "KB6",
+            "KB7",
+            "KB8",
+            "KB9"
+          ],
+          "dropped_sources": [
+            "KB1",
+            "KB2",
+            "KB4",
+            "KB5",
+            "KB10",
+            "KB11",
+            "KB12",
+            "KB13",
+            "KB14",
+            "KB15"
+          ],
+          "confidence": "HIGH"
+        }
+      ],
+      "answer": "유정 pressure buildup 시험에서 shut-in 뒤 압력 기록을 사용하는 목적은 압력 분포의 안정화를 확인하고, 지층의 유동 특성을 분석하는 데 있습니다. [KB1]\nshut-in 뒤 압력 기록은 지층의 유동 특성과 압력 분포를 분석하는 데 중요한 역할을 하며, 이는 유정의 생산성과 지층의 물성 파악에 기여합니다. [KB1]\n압력 기록을 통해 유정의 압력 분포가 안정화되었는지를 확인할 수 있으며, 이는 지층의 유동 특성과 압력 분포를 분석하는 데 필수적입니다. [KB1]\nshut-in 뒤 압력 기록은 지층의 유동 특성과 압력 분포를 분석하는 데 사용되며, 이는 유정의 생산성과 지층의 물성 파악에 기여합니다. [KB1]\n압력 기록을 통해 유정의 압력 분포가 안정화되었는지를 확인할 수 있으며, 이는 지층의 유동 특성과 압력 분포를 분석하는 데 필수적입니다. [KB1]",
+      "validation": {
+        "engineering_validation_passed": true,
+        "engineering_contradiction_count": 0,
+        "unsupported_engineering_claim_count": 0,
+        "citation_semantic_passed": true,
+        "unsupported_citation_claim_count": 1,
+        "unsupported_numeric_claim_count": 0,
+        "criteria_frozen": true
+      },
+      "seconds": 24.72
+    },
+    {
+      "id": "K-PETRO",
+      "kind": "knowledge",
+      "domain": "petrophysics",
+      "passed": true,
+      "intent": "knowledge_qa",
+      "status": "achieved",
+      "actions": [
+        "retrieve",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "premise_verdict": null,
+      "premise_method": null,
+      "premise_failure_reason": null,
+      "premise_supporting_source_ids": null,
+      "context_expansion": [],
+      "domain_document_hit": true,
+      "relevant_chunk_hit": true,
+      "top3_relevant": 3,
+      "wrong_domain_top5": 0,
+      "citation_semantic_support": true,
+      "explicit_correction": false,
+      "supported_answer": true,
+      "refined_attempted": false,
+      "refined_recovered": false,
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 164,
+          "chunk_id": "d3d33e53ea2478fe3729bba7019d8604095c5b6c2c2d3dc0bd7e9608a9931ebb:p164:c0",
+          "excerpt_prefix": "Institute of Petroleum Engineering,  Heriot-Watt University  \n3\n7\nSaturation Determination7\n1 INTRODUCTION\nWater saturation is the fraction (or percentage) of the pore volume of the reservoir \nrock that is filled with water.  It is generally assumed, unless otherwise known, that "
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 194,
+          "chunk_id": "d3d33e53ea2478fe3729bba7019d8604095c5b6c2c2d3dc0bd7e9608a9931ebb:p194:c0",
+          "excerpt_prefix": "Institute of Petroleum Engineering,  Heriot-Watt University  \n33\n7\nSaturation Determination7\nAppendix 1 - Determination of Rw\nIn addition to formation factor or porosity, values of formation water resistivity, Rw, \nand mud filtrate resistivity, Rmf, are needed for the water satur"
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 44,
+          "chunk_id": "d3d33e53ea2478fe3729bba7019d8604095c5b6c2c2d3dc0bd7e9608a9931ebb:p44:c1",
+          "excerpt_prefix": "ty log.  The way in which \nthe porosity can be determined in these situations will be described in Chapter 6.\n7 DETERMINATION OF SATURATION\nThe electrical resistivity of a formation is a very good indicator of the fluid in the \npore space of that formation. Neither oil nor gas co"
+        },
+        {
+          "id": "KB4",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 153,
+          "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p153:c1",
+          "excerpt_prefix": "e pore volume of\nthe  reservoir  rock  that  is  filled  with  water.  It  is  generally  assumed,  unless  otherwise  known,\nthat the pore volume not filled with water is filled with hydrocarbons. Determining water and\nhydrocarbon saturation is one of the basic objectives of wel"
+        },
+        {
+          "id": "KB5",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 154,
+          "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p154:c0",
+          "excerpt_prefix": "resonance,  or  other)  or  combination  of  porosity  and  lithology  measurements  must  be  used  to\nobtain porosity, and the proper porosity-to-formation factor relationship must be used. Finally,\nthe Rw value should be verified in as many ways as possible: calculation from t"
+        }
+      ],
+      "retrieval_rerank": [
+        {
+          "domain_hint": "petrophysics",
+          "candidate_documents": [
+            "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+            "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf"
+          ],
+          "scores": [
+            {
+              "id": "KB1",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 164,
+              "score": 26.0,
+              "concept_matches": [
+                "well",
+                "log",
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "well",
+                "log",
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": "petrophysics",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB2",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 153,
+              "score": 18.5,
+              "concept_matches": [
+                "well",
+                "log",
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "well",
+                "log",
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB3",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 194,
+              "score": 25.3333,
+              "concept_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": "petrophysics",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB4",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 44,
+              "score": 25.25,
+              "concept_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": "petrophysics",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB5",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 154,
+              "score": 18.2,
+              "concept_matches": [
+                "well",
+                "log",
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "well",
+                "log",
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB6",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 163,
+              "score": 16.1667,
+              "concept_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB7",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 86,
+              "score": 23.1429,
+              "concept_matches": [
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": "petrophysics",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB8",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 196,
+              "score": 25.125,
+              "concept_matches": [
+                "well",
+                "log",
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "well",
+                "log",
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": "petrophysics",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB9",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 44,
+              "score": 23.1111,
+              "concept_matches": [
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": "petrophysics",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB10",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 86,
+              "score": 25.1,
+              "concept_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": "petrophysics",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB11",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 164,
+              "score": 23.0909,
+              "concept_matches": [
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": "petrophysics",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB12",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 97,
+              "score": 16.0833,
+              "concept_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB13",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 86,
+              "score": 25.0769,
+              "concept_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation",
+                "formation"
+              ],
+              "relation_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": "petrophysics",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB14",
+              "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+              "page": 7,
+              "score": 25.0714,
+              "concept_matches": [
+                "well",
+                "log",
+                "resistivity",
+                "saturation",
+                "formation",
+                "evaluation"
+              ],
+              "relation_matches": [
+                "well",
+                "log",
+                "resistivity",
+                "saturation"
+              ],
+              "family": "petrophysics",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB15",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 339,
+              "score": 18.0667,
+              "concept_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation",
+                "formation",
+                "evaluation"
+              ],
+              "relation_matches": [
+                "log",
+                "resistivity",
+                "water",
+                "saturation"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            }
+          ],
+          "selected_sources": [
+            "KB1",
+            "KB2",
+            "KB3",
+            "KB4",
+            "KB5"
+          ],
+          "dropped_sources": [
+            "KB6",
+            "KB7",
+            "KB8",
+            "KB9",
+            "KB10",
+            "KB11",
+            "KB12",
+            "KB13",
+            "KB14",
+            "KB15"
+          ],
+          "confidence": "HIGH"
+        }
+      ],
+      "answer": "저항도 검층과 물 포화도 추정은 내부 교재에서 설명된 관계로, 물 포화도는 지층의 기공 부피 중 물이 차지하는 비율을 나타내며, 이는 저항도 측정을 통해 추정할 수 있다. [KB1] [KB3] [KB4]\n물 포화도는 아치의 물 포화도 방정식을 통해 계산되며, 이 방정식은 지층의 저항도, 지층 물 저항도, 그리고 지층 저항도 인자와 관련이 있다. [KB1] [KB4]\n아치의 물 포화도 방정식은 지층의 기공도와 관련된 지층 저항도 인자와 함께 사용되며, 이 인자는 지층의 기공도를 통해 계산된다. [KB1] [KB4]\n물 포화도는 지층의 저항도와 반비례 관계에 있으며, 이는 지층의 물 저항도가 높을수록 물 포화도가 낮고, 반대로 물 저항도가 낮을수록 물 포화도가 높다는 의미이다. [KB3] [KB4]\n물 포화도는 지층의 저항도와 기공도, 그리고 물의 염도와 같은 다른 요인들에 영향을 받는다. [KB3] [KB4]",
+      "validation": {
+        "engineering_validation_passed": true,
+        "engineering_contradiction_count": 0,
+        "unsupported_engineering_claim_count": 0,
+        "citation_semantic_passed": true,
+        "unsupported_citation_claim_count": 1,
+        "unsupported_numeric_claim_count": 0,
+        "criteria_frozen": true
+      },
+      "seconds": 25.374
+    },
+    {
+      "id": "K-DRILL",
+      "kind": "knowledge",
+      "domain": "drilling",
+      "passed": true,
+      "intent": "knowledge_qa",
+      "status": "achieved",
+      "actions": [
+        "retrieve",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "premise_verdict": null,
+      "premise_method": null,
+      "premise_failure_reason": null,
+      "premise_supporting_source_ids": null,
+      "context_expansion": [],
+      "domain_document_hit": true,
+      "relevant_chunk_hit": true,
+      "top3_relevant": 3,
+      "wrong_domain_top5": 0,
+      "citation_semantic_support": true,
+      "explicit_correction": false,
+      "supported_answer": true,
+      "refined_attempted": false,
+      "refined_recovered": false,
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 360,
+          "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p360:c0",
+          "excerpt_prefix": "Drilling Fluids\n5\nInstitute of Petroleum Engineering,  Heriot-Watt University  \nThe pressure in the wellbore will be equal to: \nP\t =  0.052 x MW x TVD\nwhere,   \nP\t = hydrostatic pressure (psi)       \nMW \t = mud density of the mud or mud weight (ppg)      \nTVD \t = true vertical de"
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 388,
+          "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p388:c0",
+          "excerpt_prefix": "Drilling Fluids\n33\nInstitute of Petroleum Engineering,  Heriot-Watt University  \nthey are required to maintain the properties of the mud.  If these desirable solids are \nremoved they must be replaced by more additions at surface which will increase the \nmud cost.\nFor most practic"
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 192,
+          "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p192:c1",
+          "excerpt_prefix": "uid\nIt is clear from all of the preceding discussion that the pressure at the bottom of the \nborehole must be accurately determined if the leak off or fracture pressure of the \nformation is not to be exceeded. When the drilling fluid is circulating through the \ndrillstring, the b"
+        },
+        {
+          "id": "KB4",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+          "page": 97,
+          "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p97:c2",
+          "excerpt_prefix": "l-Control Issues.  The column of drilling fluid in the well exerts hydrostatic\npressure on the wellbore. Under normal drilling conditions, this pressure should balance or ex-\nceed the natural formation pressure to help prevent an influx of gas or other formation fluids.\nAs the fo"
+        },
+        {
+          "id": "KB5",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+          "page": 195,
+          "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p195:c0",
+          "excerpt_prefix": "installed with the positive-displacement pump to measure the pump strokes required to fill the\nhole. This device will automatically shut off the pump when the hole is full.\nSwabbing. Pulling the drillstring from the borehole creates swab pressures. Swab pressures\nare  negative  a"
+        }
+      ],
+      "retrieval_rerank": [
+        {
+          "domain_hint": "drilling",
+          "candidate_documents": [
+            "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+            "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf"
+          ],
+          "scores": [
+            {
+              "id": "KB1",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 417,
+              "score": 13.0,
+              "concept_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB2",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 360,
+              "score": 23.5,
+              "concept_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure",
+                "drilling"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB3",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 388,
+              "score": 23.3333,
+              "concept_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure",
+                "drilling"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB4",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 97,
+              "score": 14.25,
+              "concept_matches": [
+                "density",
+                "hydrostatic",
+                "pressure",
+                "drilling"
+              ],
+              "relation_matches": [
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB5",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 195,
+              "score": 14.2,
+              "concept_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB6",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 211,
+              "score": 21.1667,
+              "concept_matches": [
+                "mud",
+                "density",
+                "pressure",
+                "drilling"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "pressure"
+              ],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB7",
+              "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+              "page": 417,
+              "score": 12.1429,
+              "concept_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "well_testing",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB8",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 192,
+              "score": 23.125,
+              "concept_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure",
+                "drilling"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB9",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 225,
+              "score": 14.1111,
+              "concept_matches": [
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "drilling"
+              ],
+              "relation_matches": [
+                "mud",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB10",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+              "page": 579,
+              "score": 14.1,
+              "concept_matches": [
+                "mud",
+                "density",
+                "pressure",
+                "drilling"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB11",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 222,
+              "score": 21.0909,
+              "concept_matches": [
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "drilling"
+              ],
+              "relation_matches": [
+                "mud",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB12",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 63,
+              "score": 21.0833,
+              "concept_matches": [
+                "mud",
+                "hydrostatic",
+                "pressure",
+                "drilling"
+              ],
+              "relation_matches": [
+                "mud",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB13",
+              "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+              "page": 710,
+              "score": 14.0769,
+              "concept_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "relation_matches": [
+                "mud",
+                "density",
+                "hydrostatic",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB14",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 365,
+              "score": 17.0714,
+              "concept_matches": [
+                "mud",
+                "density",
+                "drilling"
+              ],
+              "relation_matches": [
+                "mud",
+                "density"
+              ],
+              "family": "drilling",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB15",
+              "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+              "page": 365,
+              "score": 13.0667,
+              "concept_matches": [
+                "mud",
+                "drilling"
+              ],
+              "relation_matches": [
+                "mud"
+              ],
+              "family": "drilling",
+              "confidence": "MEDIUM"
+            }
+          ],
+          "selected_sources": [
+            "KB2",
+            "KB3",
+            "KB4",
+            "KB5",
+            "KB8"
+          ],
+          "dropped_sources": [
+            "KB1",
+            "KB6",
+            "KB7",
+            "KB9",
+            "KB10",
+            "KB11",
+            "KB12",
+            "KB13",
+            "KB14",
+            "KB15"
+          ],
+          "confidence": "HIGH"
+        }
+      ],
+      "answer": "시추 이수 밀도는 정수압 관리에 중요한 영향을 미친다. [KB1] [KB4]\n시추 이수 밀도가 너무 낮으면 정수압이 부족해지며, 이는 지층 압력에 대비하지 못해 유출( kick )이 발생할 수 있다. [KB4]\n시추 이수 밀도가 너무 높으면 지층이 파괴될 수 있으며, 이는 유출을 유발할 수 있다. [KB4]\n시추 이수 밀도는 지층 압력과 균형을 맞추는 데 필수적이며, 이는 정수압 관리의 핵심 요소이다. [KB1] [KB4]\n시추 이수 밀도는 유체의 점도와 밀도에 따라 정수압 관리에 영향을 미친다. [KB1] [KB4]",
+      "validation": {
+        "engineering_validation_passed": true,
+        "engineering_contradiction_count": 0,
+        "unsupported_engineering_claim_count": 0,
+        "citation_semantic_passed": true,
+        "unsupported_citation_claim_count": 1,
+        "unsupported_numeric_claim_count": 0,
+        "criteria_frozen": true
+      },
+      "seconds": 34.49
+    },
+    {
+      "id": "K-PROD",
+      "kind": "knowledge",
+      "domain": "production",
+      "passed": true,
+      "intent": "knowledge_qa",
+      "status": "achieved",
+      "actions": [
+        "retrieve",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "premise_verdict": null,
+      "premise_method": null,
+      "premise_failure_reason": null,
+      "premise_supporting_source_ids": null,
+      "context_expansion": [],
+      "domain_document_hit": true,
+      "relevant_chunk_hit": true,
+      "top3_relevant": 3,
+      "wrong_domain_top5": 0,
+      "citation_semantic_support": true,
+      "explicit_correction": false,
+      "supported_answer": true,
+      "refined_attempted": false,
+      "refined_recovered": false,
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+          "page": 452,
+          "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p452:c1",
+          "excerpt_prefix": "from the produced fluids must be delivered to the export pipeline at\nthe specified pressure.  It is flashed from the produced liquid at a variety of pressures\nduring the production process - so economically achieving this export pressure\nrequires a number of gas compressors rathe"
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+          "page": 32,
+          "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p32:c0",
+          "excerpt_prefix": "1\n18\nseparation and treatment operations over a wide range of reservoir conditions.\nDownstream of the choke is a separator which is designed to separate out the liquid\nphases continuously to provide produced gas and oil for export and water for disposal.\nDepending on the shrinkag"
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+          "page": 448,
+          "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p448:c2",
+          "excerpt_prefix": "n breakers can be employed for treating water-in-oil emul-\nsions.\n6.4.4 Surging Flow\nThe primary separator provides pressure control on all three (gas/oil/water) outlets.  It\ncontrols residence time via the oil/water level controls.  Production wells frequently\ndo not produce flu"
+        },
+        {
+          "id": "KB4",
+          "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+          "page": 63,
+          "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p63:c0",
+          "excerpt_prefix": "Institute of Petroleum Engineering,  Heriot-Watt University\n63\n1\nWell Performance1\n                     \n Pressure at Wellhead \nProduction Rate \nRe\nser\nvoi\nr I\nnfl\now\nTu\nbin\ng O\nut F\nlow\nq500 q200 q50\nT\nu\nbi\nn\ng\nO\nut\nFlo\nw\nT\nu\nb\ni\nn\ng\nO\nut\nFlow\n500 psi\n200 psi\n50 psi\nReservoir Pr"
+        },
+        {
+          "id": "KB5",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+          "page": 26,
+          "chunk_id": "3ef043ce163a7809b2d9e47c3676b2f3afdac2d7570be1005afaaaa36942e61c:p26:c0",
+          "excerpt_prefix": "In most oil/gas surface production equipment systems, the oil/gas separator is the first ves-\nsel the well fluid flows through after it leaves the producing well. However, other equipment\nsuch as heaters may be installed upstream of the separator.\n2.1.4 Separator Orientation.  Ta"
+        }
+      ],
+      "retrieval_rerank": [
+        {
+          "domain_hint": "production",
+          "candidate_documents": [
+            "Heriot-Watt_University_-_Production_Technology_II.pdf",
+            "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+            "Heriot-Watt_University_-_Production_Technology_I.pdf",
+            "Heriot-Watt University - Reservoir Engineering.pdf",
+            "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf"
+          ],
+          "scores": [
+            {
+              "id": "KB1",
+              "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+              "page": 452,
+              "score": 24.0,
+              "concept_matches": [
+                "production",
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": "production",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB2",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+              "page": 21,
+              "score": 14.5,
+              "concept_matches": [
+                "production",
+                "separator",
+                "gas",
+                "separation"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB3",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+              "page": 26,
+              "score": 16.3333,
+              "concept_matches": [
+                "production",
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB4",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+              "page": 18,
+              "score": 14.25,
+              "concept_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB5",
+              "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+              "page": 32,
+              "score": 23.2,
+              "concept_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": "production",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB6",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 498,
+              "score": 12.1667,
+              "concept_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB7",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+              "page": 11,
+              "score": 16.1429,
+              "concept_matches": [
+                "production",
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB8",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+              "page": 12,
+              "score": 14.125,
+              "concept_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB9",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+              "page": 196,
+              "score": 16.1111,
+              "concept_matches": [
+                "production",
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB10",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 500,
+              "score": 12.1,
+              "concept_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB11",
+              "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+              "page": 559,
+              "score": 12.0909,
+              "concept_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": "reservoir_engineering",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB12",
+              "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+              "page": 63,
+              "score": 21.0833,
+              "concept_matches": [
+                "production",
+                "separator",
+                "gas",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "pressure"
+              ],
+              "family": "production",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB13",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+              "page": 21,
+              "score": 14.0769,
+              "concept_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB14",
+              "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+              "page": 448,
+              "score": 23.0714,
+              "concept_matches": [
+                "production",
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": "production",
+              "confidence": "HIGH"
+            },
+            {
+              "id": "KB15",
+              "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+              "page": 213,
+              "score": 14.0667,
+              "concept_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "relation_matches": [
+                "separator",
+                "gas",
+                "separation",
+                "pressure"
+              ],
+              "family": null,
+              "confidence": "HIGH"
+            }
+          ],
+          "selected_sources": [
+            "KB1",
+            "KB12",
+            "KB14",
+            "KB3",
+            "KB5"
+          ],
+          "dropped_sources": [
+            "KB2",
+            "KB4",
+            "KB6",
+            "KB7",
+            "KB8",
+            "KB9",
+            "KB10",
+            "KB11",
+            "KB13",
+            "KB15"
+          ],
+          "confidence": "HIGH"
+        }
+      ],
+      "answer": "생산 분리기 압력은 가스 분리 과정에 직접적인 영향을 미치며, 이는 분리 효율과 관련이 있다. [KB1] [KB2] [KB4]\n분리기 압력이 높아질수록, 가스 분리 과정에서 압력 손실이 증가하며, 이는 분리 효율에 부정적인 영향을 줄 수 있다. [KB2] [KB4]\n분리기 압력은 분리 과정에서의 유체의 물리적 특성과 관련되어 있으며, 이는 분리 효율을 결정하는 중요한 요소이다. [KB1] [KB2] [KB5]\n분리기 압력은 분리 과정에서의 유체의 흐름 속도와 관련되어 있으며, 이는 분리 효율에 영향을 미친다. [KB1] [KB4]",
+      "validation": {
+        "engineering_validation_passed": true,
+        "engineering_contradiction_count": 0,
+        "unsupported_engineering_claim_count": 0,
+        "citation_semantic_passed": true,
+        "unsupported_citation_claim_count": 1,
+        "unsupported_numeric_claim_count": 0,
+        "criteria_frozen": true
+      },
+      "seconds": 20.779
+    }
+  ]
+}

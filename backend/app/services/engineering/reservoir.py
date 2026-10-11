@@ -146,6 +146,9 @@ class ReservoirValidator:
                     re.search(r"s[owg]|oil.{0,20}water.{0,20}gas", evidence_n)
                     and re.search(r"(?:sum|total|합).{0,20}(?:=|is|은|는)?\s*1", evidence_n)
                 )
+            # A verbatim source claim is supported even if a narrower definition
+            # template does not apply; contradiction checks above still run.
+            specifically_supported = specifically_supported or bool(normalized and normalized in evidence_n)
             if not evidence or not specifically_supported:
                 unsupported += 1
                 reasons.append(

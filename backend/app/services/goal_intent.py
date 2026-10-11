@@ -40,7 +40,7 @@ _CALC = re.compile(r"\b(?:calculat\w*|comput\w*|determine|mean|average|sum|ratio
 _SIMULATION = re.compile(r"\b(?:sweep|vary\w*|sensitiv\w*|optim\w*|parameter\s+range|over\s+(?:a|the)\s+range)\b|최적|간격|변화시키|바꿔가며|바꾸면서|여러\s*값으로|매개변수\s*변화|부터.{0,30}까지", re.I)
 _FORMULA_REQUEST = re.compile(r"(?<![A-Za-z0-9_])(?:formula|equation|correlation|relation|law|model|coupling)(?![A-Za-z0-9_])|공식|수식|관계식|식(?:을|이|의)?\s*찾|모델", re.I)
 _PREMISE = re.compile(r"(?:맞(?:지|나요|습니까|아)?|옳(?:지|나요)?|(?:되|하|인|없|않)는?\s*거지|"
-                      r"보면\s*되나|보면\s*되지|거지\s*\?|항상|언제나|필요\s*없지|무관하지|단점\s*없지|"
+                      r"보면\s*되나|보면\s*되지|거지\s*\?|없지|않지|항상|언제나|필요\s*없지|무관하지|단점\s*없지|"
                       r"라고\s*보면\s*되지|그렇(?:지|습니까)|"
                       r"\b(?:is\s+it\s+(?:true|correct)|isn['’]?t\s+it\s+true\s+that|"
                       r"can\s+i\s+assume|always)\b|\b(?:right|correct)\s*\?)", re.I)

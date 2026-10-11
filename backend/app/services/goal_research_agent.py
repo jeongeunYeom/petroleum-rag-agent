@@ -109,16 +109,7 @@ class EvidenceAccumulator:
         return value
 
     def add(self, response: ResearchResponse) -> list[str]:
-        added: list[str] = []
-        for item in response.internal_sources:
-            key = ("internal", item.document, item.page, item.chunk_id)
-            if key not in self._keys:
-                self._keys.add(key)
-                copied = item.model_copy(
-                    update={"evidence_id": f"KB{len(self.internal) + 1}"}
-                )
-                self.internal.append(copied)
-                added.append(copied.evidence_id)
+        added: list[str] = self.add_internal(response.internal_sources)
         for item in response.web_sources:
             passage = (item.passage or item.snippet or "").strip()
             key = ("web", self._canonical_url(item.url), passage)
@@ -143,6 +134,19 @@ class EvidenceAccumulator:
                     update={"evidence_id": f"FIG{len(self.figures) + 1}"}
                 )
                 self.figures.append(copied)
+                added.append(copied.evidence_id)
+        return added
+
+    def add_internal(self, sources: list[InternalEvidence]) -> list[str]:
+        added: list[str] = []
+        for item in sources:
+            key = ("internal", item.document, item.page, item.chunk_id)
+            if key not in self._keys:
+                self._keys.add(key)
+                copied = item.model_copy(
+                    update={"evidence_id": f"KB{len(self.internal) + 1}"}
+                )
+                self.internal.append(copied)
                 added.append(copied.evidence_id)
         return added
 

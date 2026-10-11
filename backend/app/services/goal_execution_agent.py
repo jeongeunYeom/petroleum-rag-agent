@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import re
 import time
 import json
@@ -26,7 +27,8 @@ from app.services.goal_clarification import (calculation_missing, calculation_re
 from app.services.evidence_fact_registry import EvidenceFactRegistry
 from app.services.calc_claim_grounding import NUMERIC, _matches_reported_value, validate_calc_claim
 from app.services.citation_semantics import ground_research_claims
-from app.services.premise_grounding import PremiseAssessment, assess_premise
+from app.services.premise_grounding import PremiseAssessment, assess_premise, expand_premise_context
+from app.services.goal_knowledge_retrieval import plan_query, rerank_sources
 from app.services.goal_action_planner import (CALC_WORDS, ENGINEERING_TERMS, SIMULATE_WORDS,
                                               GoalActionPlanner)
 from app.services.goal_intent import (GoalIntentKind, SourceRequirement, asks_for_api_gravity_calculation,
@@ -1024,6 +1026,15 @@ class GoalExecutionAgent(GoalResearchAgent):
             try:
                 if action.action_type == GoalActionType.RETRIEVE:
                     query = action.query or request.goal or request.topic
+                    qa_retrieval = (intent.kind in {GoalIntentKind.KNOWLEDGE_QA, GoalIntentKind.PREMISE_CHECK}
+                                    and request.use_internal and
+                                    getattr(self.research_agent, "vector_store", None) is not None)
+                    query_plan = (plan_query(request.topic or request.goal or query,
+                                             premise=intent.kind == GoalIntentKind.PREMISE_CHECK,
+                                             refined=action.reason_code == "premise_evidence_retry")
+                                  if qa_retrieval else None)
+                    if query_plan:
+                        query = query_plan.search_text
                     cache_key = (query, request.use_internal, request.use_external, request.model)
                     cached = retrieval_cache.get(cache_key)
                     response = cached.model_copy(deep=True) if cached else await self.research_agent.research(ResearchRequest(
@@ -1031,13 +1042,41 @@ class GoalExecutionAgent(GoalResearchAgent):
                         use_internal=request.use_internal, use_external=request.use_external,
                         engineering_validation=request.engineering_validation, evidence_only=True,
                         model=request.model,
-                        internal_top_k=request.internal_top_k, external_top_k=request.external_top_k,
+                        internal_top_k=min(20, max(request.internal_top_k * 3, 12)) if query_plan
+                        else request.internal_top_k, external_top_k=request.external_top_k,
                         temperature=request.temperature, seed=request.seed,
                     ))
                     if cached is None:
                         retrieval_cache[cache_key] = response.model_copy(deep=True)
                         self._add_time(result, "retrieval_seconds", response.timing.retrieval_seconds)
                         self._add_time(result, "llm_generation_seconds", response.timing.reasoning_seconds)
+                    rerank_debug = None
+                    if query_plan:
+                        selected, rerank_debug = rerank_sources(response.internal_sources, query_plan,
+                                                                limit=request.internal_top_k)
+                        if rerank_debug["confidence"] == "LOW" and action.reason_code != "premise_evidence_retry":
+                            refined = plan_query(request.topic or request.goal or query,
+                                                 premise=intent.kind == GoalIntentKind.PREMISE_CHECK,
+                                                 refined=True)
+                            if refined.search_text != query:
+                                followup = await self.research_agent.research(ResearchRequest(
+                                    query=refined.search_text, use_internal=True,
+                                    use_external=False, engineering_validation=request.engineering_validation,
+                                    evidence_only=True, model=request.model,
+                                    internal_top_k=min(20, max(request.internal_top_k * 3, 12)),
+                                    temperature=request.temperature, seed=request.seed))
+                                self._add_time(result, "retrieval_seconds", followup.timing.retrieval_seconds)
+                                selected, second_debug = rerank_sources(
+                                    [*response.internal_sources, *followup.internal_sources], refined,
+                                    limit=request.internal_top_k)
+                                rerank_debug["refined_retrieval"] = second_debug
+                                rerank_debug["refined_recovery"] = bool(selected)
+                                rerank_debug["confidence"] = second_debug["confidence"]
+                        response = response.model_copy(update={"internal_sources": selected,
+                            "evidence_counts": EvidenceCounts(internal=len(selected),
+                                                               external=len(response.web_sources))})
+                        result.telemetry["retrieval_rerank"] = rerank_debug
+                        result.telemetry.setdefault("retrieval_rerank_history", []).append(rerank_debug)
                     added = accumulator.add(response)
                     state.evidence_ids.extend(added)
                     state.known_facts = list(dict.fromkeys(
@@ -1047,6 +1086,8 @@ class GoalExecutionAgent(GoalResearchAgent):
                     details = {"new_evidence_count": len(added), "retrieval_mode": response.retrieval_mode,
                                "query": query,
                                "cache_hit": cached is not None}
+                    if rerank_debug:
+                        details["relevance_confidence"] = rerank_debug["confidence"]
                     state.verified = False
                     if not added:
                         status, failure = "blocked", "retrieve_no_progress"
@@ -1320,9 +1361,27 @@ class GoalExecutionAgent(GoalResearchAgent):
                     self._notify(result, on_progress)
                     premise_assessment = (await assess_premise(self.ollama, request, evidence)
                                           if intent.kind == GoalIntentKind.PREMISE_CHECK else PremiseAssessment())
+                    if (intent.kind == GoalIntentKind.PREMISE_CHECK and
+                            premise_assessment.verdict == "insufficient" and
+                            "premise_context_expansion" not in result.telemetry and
+                            getattr(self.research_agent, "vector_store", None) is not None):
+                        neighbors, expansion = await asyncio.to_thread(
+                            expand_premise_context, self.research_agent.vector_store,
+                            accumulator.internal)
+                        result.telemetry["premise_context_expansion"] = expansion
+                        context_ids = accumulator.add_internal(neighbors)
+                        state.evidence_ids.extend(context_ids)
+                        if context_ids:
+                            evidence = self._evidence(accumulator, users, result.computations,
+                                                      simulation_spec, simulation_source_id,
+                                                      intent.user_equation)
+                            premise_assessment = await assess_premise(self.ollama, request, evidence)
                     if intent.kind == GoalIntentKind.PREMISE_CHECK:
                         result.telemetry["premise_grounding_method"] = premise_assessment.method
                         result.telemetry["premise_source_id"] = premise_assessment.source_id
+                        result.telemetry["premise_supporting_source_ids"] = list(premise_assessment.supporting_source_ids)
+                        result.telemetry["premise_relation_type"] = premise_assessment.relation_type
+                        result.telemetry["premise_grounding_failure_reason"] = premise_assessment.failure_reason
                     latest_candidate = (premise_assessment.answer if intent.kind == GoalIntentKind.PREMISE_CHECK else
                                         self._simulation_answer(simulation, simulation_spec, evidence,
                                                                 simulation_source_id, korean)
