@@ -115,7 +115,8 @@ class UserFactRegistry(BaseModel):
                     continue
                 if label.casefold() in {"measurements", "values", "data", "inputs"} and not found.group("unit"):
                     continue
-                if not found.group("unit") and re.match(r"\s+[A-Za-z]", text[found.end():]):
+                if (not found.group("unit") and not found.group("value").endswith(".")
+                        and re.match(r"\s+[A-Za-z]", text[found.end():])):
                     # A following word may be an unsupported unit; do not erase it.
                     continue
                 prefix = f"Well_{well}_" if well and label.casefold() not in {"well", "layer"} else ""

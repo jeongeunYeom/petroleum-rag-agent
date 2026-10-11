@@ -23,6 +23,7 @@ from app.models.research_schemas import (
     WebEvidence,
 )
 from app.services.engineering_validator import EngineeringValidator
+from app.services.formula_source_registry import FormulaSourceRegistry
 from app.services.figure_analysis import (
     FigureAnalysisService,
     normalize_list,
@@ -599,6 +600,21 @@ class ResearchAgent:
 
         candidate_count = min(top_k * 4, 80)
         query_variants = self.engineering_retrieval_queries(query)
+        for line in query.splitlines()[1:]:
+            line = line.strip()
+            if line and not line.casefold().startswith("missing:") and len(line.split()) >= 2:
+                query_variants.append(line[:220])
+        query_variants = list(dict.fromkeys(query_variants[:5]))
+        formula_query = bool(re.search(r"\b(?:equation|formula|correlation)\b|공식|수식|관계식", query, re.I))
+        if formula_query:
+            # Search equation-bearing terminology separately from a long natural-language goal.
+            symbols = [value for value in re.findall(r"\b[A-Za-z][A-Za-z0-9_]{1,24}\b", query)
+                       if value.casefold() not in {"equation", "formula", "variables", "units",
+                                                  "missing", "calculate", "calculation", "from",
+                                                  "with", "source", "the", "and"}]
+            concise = " ".join(list(dict.fromkeys(symbols))[:12])
+            if concise:
+                query_variants = list(dict.fromkeys([*query_variants, concise + " equation relationship"]))
         merged: dict[str, dict[str, Any]] = {}
         rrf_k = 60
         for query_index, retrieval_query in enumerate(query_variants):
@@ -639,6 +655,20 @@ class ResearchAgent:
             key=lambda item: float(item.get("rrf_score") or 0.0),
             reverse=True,
         )
+        if formula_query:
+            symbols = {value.casefold() for value in re.findall(r"\b[A-Za-z][A-Za-z0-9_]{1,24}\b", query)}
+            for hit in ranked:
+                records = FormulaSourceRegistry.from_evidence([{
+                    "evidence_id": str(hit.get("id") or ""), "source_type": "knowledge_base",
+                    "text": str(hit.get("text") or ""),
+                }]).records
+                overlap = max((len({value.casefold() for value in re.findall(
+                    r"\b[A-Za-z][A-Za-z0-9_]{1,24}\b", record.raw_span)} & symbols)
+                               for record in records if record.expression_candidate), default=0)
+                if overlap:
+                    hit["rrf_score"] = float(hit.get("rrf_score") or 0) + min(0.003 * overlap, 0.012)
+                    hit["equation_span_present"] = True
+            ranked.sort(key=lambda item: float(item.get("rrf_score") or 0), reverse=True)
         if self.settings.retrieval_mode == "hybrid_rerank":
             ranked = self._rerank_hits(query, ranked)
         if not FIGURE_RE.search(query):

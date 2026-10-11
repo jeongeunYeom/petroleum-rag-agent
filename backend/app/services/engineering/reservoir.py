@@ -137,7 +137,8 @@ class ReservoirValidator:
             specifically_supported = bool(concepts & evidence_concepts)
             if "porosity_definition" in concepts:
                 specifically_supported = bool(
-                    re.search(r"pore\s+volume|공극\s*부피", evidence_n)
+                    re.search(r"pore\s+volume|volumes?\s+of\s+(?:all\s+)?(?:the\s+)?pores|"
+                              r"void\s+volume|공극\s*부피", evidence_n)
                     and re.search(r"bulk\s+volume|전체\s*부피", evidence_n)
                 )
             elif "saturation_sum" in concepts:

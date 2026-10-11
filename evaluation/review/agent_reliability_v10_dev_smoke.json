@@ -1,0 +1,1561 @@
+{
+  "summary": {
+    "label": "DEVELOPMENT SMOKE, NOT FINAL BENCHMARK",
+    "model": "qwen3:8b",
+    "retrieval_mode": "hybrid",
+    "chroma_chunks": 18976,
+    "cases": 9,
+    "achieved": 8,
+    "passed": 9,
+    "validated_calcs": 6,
+    "no_progress_actions": 0,
+    "development_metrics": {
+      "direct_calculation_execution": true,
+      "ordered_ratio_execution": true,
+      "user_formula_execution": true,
+      "user_formula_sweep_execution": true,
+      "kb_formula_retrieval": true,
+      "exact_formula_span_retrieval": true,
+      "formula_to_calculate_transition": true,
+      "calculation_provenance_complete": 6,
+      "calculation_provenance_denominator": 6,
+      "false_premise_correction": true,
+      "same_run_resume": true,
+      "nonempty_supported_final": 8,
+      "repeated_or_no_progress_actions": 0
+    },
+    "development_rates": {
+      "formula_source_correctness": {
+        "numerator": 1,
+        "denominator": 1,
+        "percent": 100.0
+      },
+      "calculation_provenance_completeness": {
+        "numerator": 6,
+        "denominator": 6,
+        "percent": 100.0
+      },
+      "false_premise_handling": {
+        "numerator": 1,
+        "denominator": 1,
+        "percent": 100.0
+      },
+      "python_simulation_execution_success": {
+        "numerator": 6,
+        "denominator": 6,
+        "percent": 100.0
+      },
+      "correct_action_selection": {
+        "numerator": 9,
+        "denominator": 9,
+        "percent": 100.0
+      },
+      "repeated_no_progress_action_rate": {
+        "numerator": 0,
+        "denominator": 37,
+        "percent": 0.0
+      },
+      "same_run_resume_success": {
+        "numerator": 1,
+        "denominator": 1,
+        "percent": 100.0
+      }
+    }
+  },
+  "cases": [
+    {
+      "case": "direct",
+      "status": "achieved",
+      "run_status": "completed",
+      "run_id": "DEV-V10-direct",
+      "actions": [
+        "calculate",
+        "analyze",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "python_calls": 1,
+      "action_history": [
+        {
+          "iteration": 1,
+          "action_id": "ACT-1",
+          "action_type": "calculate",
+          "target_criteria": [
+            "C1"
+          ],
+          "status": "completed",
+          "reason_code": "calculation_ready",
+          "started_at": "2026-10-11T05:29:09.948305Z",
+          "finished_at": "2026-10-11T05:29:10.058004Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [
+            "CALC1"
+          ],
+          "coverage_before": 0.0,
+          "coverage_after": 0.0,
+          "failure_reason": null,
+          "details": {
+            "subprocess_reached": true,
+            "source_requirement": "none",
+            "operations": [
+              "mean",
+              "ranking"
+            ]
+          }
+        },
+        {
+          "iteration": 2,
+          "action_id": "ACT-2",
+          "action_type": "analyze",
+          "target_criteria": [
+            "C1"
+          ],
+          "status": "completed",
+          "reason_code": "derived_outputs_need_analysis",
+          "started_at": "2026-10-11T05:29:10.058004Z",
+          "finished_at": "2026-10-11T05:29:10.058004Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 0.0,
+          "coverage_after": 0.0,
+          "failure_reason": null,
+          "details": {
+            "derived_fact_ids_used": [
+              "CALC1:OUT_mean"
+            ],
+            "case_mean": null,
+            "case_range": null
+          }
+        },
+        {
+          "iteration": 3,
+          "action_id": "ACT-3",
+          "action_type": "verify",
+          "target_criteria": [
+            "C1"
+          ],
+          "status": "completed",
+          "reason_code": "verify_validated_calculation",
+          "started_at": "2026-10-11T05:29:10.058999Z",
+          "finished_at": "2026-10-11T05:29:13.279645Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 0.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {
+            "engineering_validation_passed": true,
+            "goal_achieved": true
+          }
+        },
+        {
+          "iteration": 4,
+          "action_id": "ACT-4",
+          "action_type": "synthesize",
+          "target_criteria": [],
+          "status": "completed",
+          "reason_code": "goal_achieved",
+          "started_at": "2026-10-11T05:29:13.280165Z",
+          "finished_at": "2026-10-11T05:29:13.280165Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 1.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {}
+        },
+        {
+          "iteration": 4,
+          "action_id": "ACT-STOP-4",
+          "action_type": "stop",
+          "target_criteria": [],
+          "status": "completed",
+          "reason_code": "goal_achieved",
+          "started_at": "2026-10-11T05:29:13.280165Z",
+          "finished_at": "2026-10-11T05:29:13.280165Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 1.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {}
+        }
+      ],
+      "validated_calcs": 1,
+      "formula_source_correct": null,
+      "provenance_complete": true,
+      "premise_verdict": null,
+      "repeated_or_no_progress_actions": 0,
+      "answer_nonempty": true,
+      "answer": "평균 mean: 20.0 stb/d [CALC1] [USERF1] [USERF2] [USERF3]\n\n순위 ranking: Q > R > P; 최고 top: Q [CALC1] [USERF1] [USERF2] [USERF3]",
+      "seconds": 3.338,
+      "evidence_count": 0,
+      "sources": [],
+      "stop_reason": "goal_achieved",
+      "validation": {
+        "engineering_validation_passed": true,
+        "engineering_contradiction_count": 0,
+        "unsupported_engineering_claim_count": 0,
+        "citation_semantic_passed": true,
+        "unsupported_citation_claim_count": 0,
+        "unsupported_numeric_claim_count": 0,
+        "criteria_frozen": true
+      },
+      "telemetry": {
+        "python_authorization_source": "autonomous_execution_mode",
+        "intent_route": "direct_calc",
+        "source_requirement": "none",
+        "python_needed": false,
+        "python_calls": 1,
+        "python_attempts": 1,
+        "python_success_rate": 1.0,
+        "calculation_count": 1,
+        "generated_chart_count": 0,
+        "goal_coverage_per_iteration": [],
+        "iterations_to_success": 4,
+        "total_research_seconds": 3.338379,
+        "python_seconds": 0.10892
+      },
+      "action_selection_passed": true,
+      "passed": true
+    },
+    {
+      "case": "ratio",
+      "status": "achieved",
+      "run_status": "completed",
+      "run_id": "DEV-V10-ratio",
+      "actions": [
+        "calculate",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "python_calls": 1,
+      "action_history": [
+        {
+          "iteration": 1,
+          "action_id": "ACT-1",
+          "action_type": "calculate",
+          "target_criteria": [
+            "C1"
+          ],
+          "status": "completed",
+          "reason_code": "calculation_ready",
+          "started_at": "2026-10-11T05:29:13.284866Z",
+          "finished_at": "2026-10-11T05:29:13.398178Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [
+            "CALC1"
+          ],
+          "coverage_before": 0.0,
+          "coverage_after": 0.0,
+          "failure_reason": null,
+          "details": {
+            "subprocess_reached": true,
+            "source_requirement": "none",
+            "operations": [
+              "ratio"
+            ]
+          }
+        },
+        {
+          "iteration": 2,
+          "action_id": "ACT-2",
+          "action_type": "verify",
+          "target_criteria": [
+            "C1"
+          ],
+          "status": "completed",
+          "reason_code": "verify_validated_calculation",
+          "started_at": "2026-10-11T05:29:13.399173Z",
+          "finished_at": "2026-10-11T05:29:15.984234Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 0.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {
+            "engineering_validation_passed": true,
+            "goal_achieved": true
+          }
+        },
+        {
+          "iteration": 3,
+          "action_id": "ACT-3",
+          "action_type": "synthesize",
+          "target_criteria": [],
+          "status": "completed",
+          "reason_code": "goal_achieved",
+          "started_at": "2026-10-11T05:29:15.984234Z",
+          "finished_at": "2026-10-11T05:29:15.984742Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 1.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {}
+        },
+        {
+          "iteration": 3,
+          "action_id": "ACT-STOP-3",
+          "action_type": "stop",
+          "target_criteria": [],
+          "status": "completed",
+          "reason_code": "goal_achieved",
+          "started_at": "2026-10-11T05:29:15.984761Z",
+          "finished_at": "2026-10-11T05:29:15.984761Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 1.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {}
+        }
+      ],
+      "validated_calcs": 1,
+      "formula_source_correct": null,
+      "provenance_complete": true,
+      "premise_verdict": null,
+      "repeated_or_no_progress_actions": 0,
+      "answer_nonempty": true,
+      "answer": "비율 ratio: 4.0 [CALC1] [USERF1] [USERF2]",
+      "seconds": 2.704,
+      "evidence_count": 0,
+      "sources": [],
+      "stop_reason": "goal_achieved",
+      "validation": {
+        "engineering_validation_passed": true,
+        "engineering_contradiction_count": 0,
+        "unsupported_engineering_claim_count": 0,
+        "citation_semantic_passed": true,
+        "unsupported_citation_claim_count": 0,
+        "unsupported_numeric_claim_count": 0,
+        "criteria_frozen": true
+      },
+      "telemetry": {
+        "python_authorization_source": "autonomous_execution_mode",
+        "intent_route": "direct_calc",
+        "source_requirement": "none",
+        "python_needed": false,
+        "python_calls": 1,
+        "python_attempts": 1,
+        "python_success_rate": 1.0,
+        "calculation_count": 1,
+        "generated_chart_count": 0,
+        "goal_coverage_per_iteration": [],
+        "iterations_to_success": 3,
+        "total_research_seconds": 2.703799,
+        "python_seconds": 0.112765
+      },
+      "action_selection_passed": true,
+      "passed": true
+    },
+    {
+      "case": "user_formula",
+      "status": "achieved",
+      "run_status": "completed",
+      "run_id": "DEV-V10-user_formula",
+      "actions": [
+        "calculate",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "python_calls": 1,
+      "action_history": [
+        {
+          "iteration": 1,
+          "action_id": "ACT-1",
+          "action_type": "calculate",
+          "target_criteria": [
+            "C1"
+          ],
+          "status": "completed",
+          "reason_code": "calculation_ready",
+          "started_at": "2026-10-11T05:29:15.987476Z",
+          "finished_at": "2026-10-11T05:29:16.087675Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [
+            "CALC1"
+          ],
+          "coverage_before": 0.0,
+          "coverage_after": 0.0,
+          "failure_reason": null,
+          "details": {
+            "subprocess_reached": true,
+            "source_requirement": "user_formula",
+            "formula_source_ids": [
+              "USERF3"
+            ]
+          }
+        },
+        {
+          "iteration": 2,
+          "action_id": "ACT-2",
+          "action_type": "verify",
+          "target_criteria": [
+            "C1"
+          ],
+          "status": "completed",
+          "reason_code": "verify_validated_calculation",
+          "started_at": "2026-10-11T05:29:16.088671Z",
+          "finished_at": "2026-10-11T05:29:19.065529Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 0.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {
+            "engineering_validation_passed": true,
+            "goal_achieved": true
+          }
+        },
+        {
+          "iteration": 3,
+          "action_id": "ACT-3",
+          "action_type": "synthesize",
+          "target_criteria": [],
+          "status": "completed",
+          "reason_code": "goal_achieved",
+          "started_at": "2026-10-11T05:29:19.066581Z",
+          "finished_at": "2026-10-11T05:29:19.066581Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 1.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {}
+        },
+        {
+          "iteration": 3,
+          "action_id": "ACT-STOP-3",
+          "action_type": "stop",
+          "target_criteria": [],
+          "status": "completed",
+          "reason_code": "goal_achieved",
+          "started_at": "2026-10-11T05:29:19.066581Z",
+          "finished_at": "2026-10-11T05:29:19.066581Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 1.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {}
+        }
+      ],
+      "validated_calcs": 1,
+      "formula_source_correct": null,
+      "provenance_complete": true,
+      "premise_verdict": null,
+      "repeated_or_no_progress_actions": 0,
+      "answer_nonempty": true,
+      "answer": "검증된 계산 결과: index = 38.0 [CALC1] [USERF1] [USERF2] [USERF3]",
+      "seconds": 3.082,
+      "evidence_count": 0,
+      "sources": [],
+      "stop_reason": "goal_achieved",
+      "validation": {
+        "engineering_validation_passed": true,
+        "engineering_contradiction_count": 0,
+        "unsupported_engineering_claim_count": 0,
+        "citation_semantic_passed": true,
+        "unsupported_citation_claim_count": 0,
+        "unsupported_numeric_claim_count": 0,
+        "criteria_frozen": true
+      },
+      "telemetry": {
+        "python_authorization_source": "autonomous_execution_mode",
+        "intent_route": "user_formula_calc",
+        "source_requirement": "user_formula",
+        "python_needed": false,
+        "python_calls": 1,
+        "python_attempts": 1,
+        "python_success_rate": 1.0,
+        "calculation_count": 1,
+        "generated_chart_count": 0,
+        "goal_coverage_per_iteration": [],
+        "iterations_to_success": 3,
+        "total_research_seconds": 3.081418,
+        "python_seconds": 0.100239
+      },
+      "action_selection_passed": true,
+      "passed": true
+    },
+    {
+      "case": "user_sweep",
+      "status": "achieved",
+      "run_status": "completed",
+      "run_id": "DEV-V10-user_sweep",
+      "actions": [
+        "simulate",
+        "analyze",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "python_calls": 1,
+      "action_history": [
+        {
+          "iteration": 1,
+          "action_id": "ACT-1",
+          "action_type": "simulate",
+          "target_criteria": [
+            "C1"
+          ],
+          "status": "completed",
+          "reason_code": "user_formula_simulation_ready",
+          "started_at": "2026-10-11T05:29:19.069765Z",
+          "finished_at": "2026-10-11T05:29:19.185827Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [
+            "CALC1"
+          ],
+          "coverage_before": 0.0,
+          "coverage_after": 0.0,
+          "failure_reason": null,
+          "details": {
+            "subprocess_reached": true,
+            "case_count": 5,
+            "best": 0.6
+          }
+        },
+        {
+          "iteration": 2,
+          "action_id": "ACT-2",
+          "action_type": "analyze",
+          "target_criteria": [
+            "C1"
+          ],
+          "status": "completed",
+          "reason_code": "derived_outputs_need_analysis",
+          "started_at": "2026-10-11T05:29:19.186822Z",
+          "finished_at": "2026-10-11T05:29:19.186822Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 0.0,
+          "coverage_after": 0.0,
+          "failure_reason": null,
+          "details": {
+            "derived_fact_ids_used": [
+              "CALC1:OUT_PARAMETER_001",
+              "CALC1:OUT_CASE_001",
+              "CALC1:OUT_PARAMETER_002",
+              "CALC1:OUT_CASE_002",
+              "CALC1:OUT_PARAMETER_003",
+              "CALC1:OUT_CASE_003",
+              "CALC1:OUT_PARAMETER_004",
+              "CALC1:OUT_CASE_004",
+              "CALC1:OUT_PARAMETER_005",
+              "CALC1:OUT_CASE_005",
+              "CALC1:OUT_BEST_PARAMETER",
+              "CALC1:OUT_BEST_RESULT",
+              "CALC1:OUT_WORST_PARAMETER",
+              "CALC1:OUT_WORST_RESULT",
+              "CALC1:OUT_MEAN_RESULT",
+              "CALC1:OUT_RANGE_RESULT"
+            ],
+            "case_mean": 4.6,
+            "case_range": 1.6000000000000005
+          }
+        },
+        {
+          "iteration": 3,
+          "action_id": "ACT-3",
+          "action_type": "verify",
+          "target_criteria": [
+            "C1"
+          ],
+          "status": "completed",
+          "reason_code": "verify_validated_calculation",
+          "started_at": "2026-10-11T05:29:19.186822Z",
+          "finished_at": "2026-10-11T05:29:22.935842Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 0.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {
+            "engineering_validation_passed": true,
+            "goal_achieved": true
+          }
+        },
+        {
+          "iteration": 4,
+          "action_id": "ACT-4",
+          "action_type": "synthesize",
+          "target_criteria": [],
+          "status": "completed",
+          "reason_code": "goal_achieved",
+          "started_at": "2026-10-11T05:29:22.936842Z",
+          "finished_at": "2026-10-11T05:29:22.936842Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 1.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {}
+        },
+        {
+          "iteration": 4,
+          "action_id": "ACT-STOP-4",
+          "action_type": "stop",
+          "target_criteria": [],
+          "status": "completed",
+          "reason_code": "goal_achieved",
+          "started_at": "2026-10-11T05:29:22.936842Z",
+          "finished_at": "2026-10-11T05:29:22.936842Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 1.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {}
+        }
+      ],
+      "validated_calcs": 1,
+      "formula_source_correct": null,
+      "provenance_complete": true,
+      "premise_verdict": null,
+      "repeated_or_no_progress_actions": 0,
+      "answer_nonempty": true,
+      "answer": "alpha=0.2, score=3.8 [CALC1] [USERF1]\nalpha=0.3, score=4.2 [CALC1] [USERF1]\nalpha=0.4, score=4.6 [CALC1] [USERF1]\nalpha=0.5, score=5.0 [CALC1] [USERF1]\nalpha=0.6, score=5.4 [CALC1] [USERF1]\nBest alpha=0.6, score=5.4 [CALC1] [USERF1]\nWorst alpha=0.2, score=3.8 [CALC1] [USERF1]\nMean score=4.6 [CALC1] [USERF1]\nRange score=1.6000000000000005 [CALC1] [USERF1]",
+      "seconds": 3.87,
+      "evidence_count": 0,
+      "sources": [],
+      "stop_reason": "goal_achieved",
+      "validation": {
+        "engineering_validation_passed": true,
+        "engineering_contradiction_count": 0,
+        "unsupported_engineering_claim_count": 0,
+        "citation_semantic_passed": true,
+        "unsupported_citation_claim_count": 0,
+        "unsupported_numeric_claim_count": 0,
+        "criteria_frozen": true
+      },
+      "telemetry": {
+        "python_authorization_source": "autonomous_execution_mode",
+        "intent_route": "user_formula_simulation",
+        "source_requirement": "user_formula",
+        "python_needed": false,
+        "python_calls": 1,
+        "python_attempts": 1,
+        "python_success_rate": 1.0,
+        "calculation_count": 1,
+        "generated_chart_count": 0,
+        "goal_coverage_per_iteration": [],
+        "iterations_to_success": 4,
+        "total_research_seconds": 3.869449,
+        "python_seconds": 0.115507
+      },
+      "action_selection_passed": true,
+      "passed": true
+    },
+    {
+      "case": "kb_formula",
+      "status": "achieved",
+      "run_status": "completed",
+      "run_id": "DEV-V10-kb_formula",
+      "actions": [
+        "retrieve",
+        "calculate",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "python_calls": 1,
+      "action_history": [
+        {
+          "iteration": 1,
+          "action_id": "ACT-1",
+          "action_type": "retrieve",
+          "target_criteria": [
+            "C1"
+          ],
+          "status": "completed",
+          "reason_code": "formula_source_missing",
+          "started_at": "2026-10-11T05:29:22.939831Z",
+          "finished_at": "2026-10-11T05:29:45.573531Z",
+          "new_evidence_count": 8,
+          "evidence_added": [
+            "KB1",
+            "KB2",
+            "KB3",
+            "KB4",
+            "KB5",
+            "KB6",
+            "KB7",
+            "KB8"
+          ],
+          "computation_ids": [],
+          "coverage_before": 0.0,
+          "coverage_after": 0.0,
+          "failure_reason": null,
+          "details": {
+            "new_evidence_count": 8,
+            "retrieval_mode": "hybrid",
+            "query": "SG=0.943인 원유야. 내부 문서의 비중–API gravity 관계식을 찾아 API도를 계산해줘.\nMissing: Cite the actual KB equation span and calculate API gravity\nspecific gravity SG API gravity conversion equation\nequation formula variables units SG API gravity",
+            "cache_hit": false
+          }
+        },
+        {
+          "iteration": 2,
+          "action_id": "ACT-2",
+          "action_type": "calculate",
+          "target_criteria": [
+            "C1"
+          ],
+          "status": "completed",
+          "reason_code": "calculation_ready",
+          "started_at": "2026-10-11T05:29:45.613355Z",
+          "finished_at": "2026-10-11T05:30:01.702803Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [
+            "CALC1"
+          ],
+          "coverage_before": 0.0,
+          "coverage_after": 0.0,
+          "failure_reason": null,
+          "details": {
+            "subprocess_reached": true,
+            "blocked_stage": "validated",
+            "source_complete": true,
+            "python_calls": 1,
+            "user_fact_ids": [
+              "USERF1"
+            ],
+            "evidence_fact_ids": [
+              "EFACT1",
+              "EFACT2",
+              "EFACT3",
+              "EFACT4"
+            ],
+            "formula_id": "FORMULA1",
+            "missing_variables": [],
+            "unit_mismatch_variables": []
+          }
+        },
+        {
+          "iteration": 3,
+          "action_id": "ACT-3",
+          "action_type": "verify",
+          "target_criteria": [
+            "C1"
+          ],
+          "status": "completed",
+          "reason_code": "verify_validated_calculation",
+          "started_at": "2026-10-11T05:30:01.743621Z",
+          "finished_at": "2026-10-11T05:30:06.992882Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 0.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {
+            "engineering_validation_passed": true,
+            "goal_achieved": true
+          }
+        },
+        {
+          "iteration": 4,
+          "action_id": "ACT-4",
+          "action_type": "synthesize",
+          "target_criteria": [],
+          "status": "completed",
+          "reason_code": "goal_achieved",
+          "started_at": "2026-10-11T05:30:07.032442Z",
+          "finished_at": "2026-10-11T05:30:07.032442Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 1.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {}
+        },
+        {
+          "iteration": 4,
+          "action_id": "ACT-STOP-4",
+          "action_type": "stop",
+          "target_criteria": [],
+          "status": "completed",
+          "reason_code": "goal_achieved",
+          "started_at": "2026-10-11T05:30:07.032442Z",
+          "finished_at": "2026-10-11T05:30:07.032442Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 1.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {}
+        }
+      ],
+      "validated_calcs": 1,
+      "formula_source_correct": true,
+      "provenance_complete": true,
+      "premise_verdict": null,
+      "repeated_or_no_progress_actions": 0,
+      "answer_nonempty": true,
+      "answer": "근거 자료의 비중–API도 관계식: API = (141.5 / SG) -131.5 [KB1]\n검증된 API도 18.55 °API [CALC1] [USERF1] [KB1]",
+      "seconds": 44.095,
+      "evidence_count": 8,
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 90,
+          "excerpt_prefix": "Reservoir Fluids Composition\n Institute of Petroleum Engineering,  Heriot-Watt University  \n15\nSolutions to Exercises\nEXERCISE 1\nCalculate the Specific Gravity (SG) of a 38o API oil. What is its density in lbs/\ncu.ft?\n(62.32 lbs/cu.ft equals an SG of 1.0 and 43.28 API)\nNow convert an oil with an SG "
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 89,
+          "excerpt_prefix": "14\nEXERCISE 1\nCalculate the Specific Gravity (SG) of a 38o API oil. What is its density in lbs/cu.ft?\n(62.32 lbs/cu.ft equals an SG of 1.0 and 43.28 API)\nNow convert an oil with an SG of 0.744 to Degrees API.\n \nEXERCISE 2\nA reservoir oil is quoted as having a Gas Oil Ratio (GOR) of 604 scf/bbl. Conv"
+        },
+        {
+          "id": "KB3",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+          "page": 275,
+          "excerpt_prefix": "factor to correlation of bubblepoint pressure offers increased flexibility in the use of a correla-\ntion on a worldwide basis. Whitson and Brulé present graphs detailing the relationship between\nbubblepoint pressure and characterization that show bubblepoint pressure declining with an in-\ncrease in "
+        },
+        {
+          "id": "KB4",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+          "page": 342,
+          "excerpt_prefix": "and\nSG = specific gravity of liquid, relative to water, lbm/ft3.\nThe density of the mixture is given by\nρM = 12,409(SG)P + 2.7RSP\n198.7P + RTZ\n, ............................................... (9.18)\nwhere\nP = operating pressure, psia,\nR = gas/liquid ratio, ft3/bbl,\nT = operating temperature, °R,\nSG"
+        },
+        {
+          "id": "KB5",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+          "page": 362,
+          "excerpt_prefix": "must  be\nrelatively high to keep the liquids moving and prevent or minimize slugging. The recommend-\ned minimum velocity is 10 to 15 ft/sec. The maximum recommended velocity is 60 ft/sec to\ninhibit noise and 50 ft/sec for CO2 corrosion inhibition.\nIn two-phase flow, it is possible that liquid drople"
+        },
+        {
+          "id": "KB6",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+          "page": 331,
+          "excerpt_prefix": "where\nγ = kinematic viscosity, centistokes,\nΦ = absolute viscosity, cp,\nand\nSG = specific gravity.\n9.2.3 Pressure Drop for Liquid Flow.  General Equation.  Eq. 9.3 can be expressed in terms\nof pipe inside diameter (ID) as stated next.\nd5 = (11.5 × 10−6)\nf LQl\n2(SG)\nΔP\n, ............................."
+        },
+        {
+          "id": "KB7",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 87,
+          "excerpt_prefix": "12\n  \nDegrees API =      141.5        -131.5\nSp.Gr.at 60ºF\n \n \n \n \n(1)\nSp.Gr = specific gravity relative to water ar 60oF.\nThe API gravity of water is 10º.  A light crude oil would  have an API gravity of 40º, \nwhile a heavy crude would have an API gravity of less than 20º. In the field, the API \ngr"
+        },
+        {
+          "id": "KB8",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 419,
+          "excerpt_prefix": "value.  A\nsecond gravity survey (Run 2) allowed the change in gas saturation, ΔSg, to be calculated from\nthe change in measured density, Δρb, porosity, f , and the densities of oil, ρo, and gas, ρg.\nΔSg = Δρb / f (ρg −ρo) . ................................................... (3G.20)\nOnce ΔSg was kno"
+        }
+      ],
+      "stop_reason": "goal_achieved",
+      "validation": {
+        "engineering_validation_passed": true,
+        "engineering_contradiction_count": 0,
+        "unsupported_engineering_claim_count": 0,
+        "citation_semantic_passed": true,
+        "unsupported_citation_claim_count": 0,
+        "unsupported_numeric_claim_count": 0,
+        "criteria_frozen": true
+      },
+      "telemetry": {
+        "python_authorization_source": "autonomous_execution_mode",
+        "intent_route": "kb_formula_calc",
+        "source_requirement": "kb_formula",
+        "python_needed": false,
+        "python_calls": 1,
+        "python_attempts": 1,
+        "python_success_rate": 1.0,
+        "calculation_count": 1,
+        "generated_chart_count": 0,
+        "goal_coverage_per_iteration": [],
+        "iterations_to_success": 4,
+        "total_research_seconds": 44.09496,
+        "python_seconds": 5.08249
+      },
+      "action_selection_passed": true,
+      "passed": true
+    },
+    {
+      "case": "literature",
+      "status": "achieved",
+      "run_status": "completed",
+      "run_id": "DEV-V10-literature",
+      "actions": [
+        "retrieve",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "python_calls": 0,
+      "action_history": [
+        {
+          "iteration": 1,
+          "action_id": "ACT-1",
+          "action_type": "retrieve",
+          "target_criteria": [
+            "C1"
+          ],
+          "status": "completed",
+          "reason_code": "source_evidence_needed",
+          "started_at": "2026-10-11T05:30:07.044388Z",
+          "finished_at": "2026-10-11T05:30:14.019653Z",
+          "new_evidence_count": 8,
+          "evidence_added": [
+            "KB1",
+            "KB2",
+            "KB3",
+            "KB4",
+            "KB5",
+            "KB6",
+            "KB7",
+            "KB8"
+          ],
+          "computation_ids": [],
+          "coverage_before": 0.0,
+          "coverage_after": 0.0,
+          "failure_reason": null,
+          "details": {
+            "new_evidence_count": 8,
+            "retrieval_mode": "hybrid",
+            "query": "내부 자료를 근거로 상대투과도와 유체 포화도의 관계를 설명해줘.\nMissing: Explain the source-supported relationship with a citation\nrelative permeability saturation",
+            "cache_hit": false
+          }
+        },
+        {
+          "iteration": 2,
+          "action_id": "ACT-2",
+          "action_type": "verify",
+          "target_criteria": [
+            "C1"
+          ],
+          "status": "completed",
+          "reason_code": "verify_current_support",
+          "started_at": "2026-10-11T05:30:14.032596Z",
+          "finished_at": "2026-10-11T05:30:45.143193Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 0.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {
+            "engineering_validation_passed": true,
+            "goal_achieved": true
+          }
+        },
+        {
+          "iteration": 3,
+          "action_id": "ACT-3",
+          "action_type": "synthesize",
+          "target_criteria": [],
+          "status": "completed",
+          "reason_code": "goal_achieved",
+          "started_at": "2026-10-11T05:30:45.163614Z",
+          "finished_at": "2026-10-11T05:30:45.163614Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 1.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {}
+        },
+        {
+          "iteration": 3,
+          "action_id": "ACT-STOP-3",
+          "action_type": "stop",
+          "target_criteria": [],
+          "status": "completed",
+          "reason_code": "goal_achieved",
+          "started_at": "2026-10-11T05:30:45.164609Z",
+          "finished_at": "2026-10-11T05:30:45.164609Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 1.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {}
+        }
+      ],
+      "validated_calcs": 0,
+      "formula_source_correct": null,
+      "provenance_complete": null,
+      "premise_verdict": null,
+      "repeated_or_no_progress_actions": 0,
+      "answer_nonempty": true,
+      "answer": "근거 자료에 명시된 내용: \"As the water saturation increases, the relative permeability of oil decreases until some critical level is reached, at which\" [KB5]",
+      "seconds": 38.12,
+      "evidence_count": 8,
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+          "page": 743,
+          "excerpt_prefix": "e to the change\nof oil/water interfacial area and water/solid interfacial area with water saturation. Alpak et al.18\napplied their model to drainage and imbibition data with fair success. Research in the years to\ncome may show whether this approach to interpreting capillary pressure is useful.\n15.4 "
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+          "page": 386,
+          "excerpt_prefix": "21\nInstitute of Petroleum Engineering,  Heriot-Watt University  \nGlossary of Terms\nExamples:  Relative Permeabilitites\nExamples of experimental relative permeabilities in cores  for Water Wet and \nt\nOil \nWet systems. Figure 22.\nt t\n100\n100\n80\n80\n60\n60\n40\n40\n20\n20\n0\n0\nWater Saturation, %PV\nWater Satu"
+        },
+        {
+          "id": "KB3",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+          "page": 748,
+          "excerpt_prefix": "low\nthrough rock, the trapped or residual gas saturation is one-half of its initial saturation; this Naar-\nFig. 15.19—Effect of reduced IFT on relative permeability (from Haniff and Ali27).\nChapter 15—Relative Permeability and Capillary Pressure\nI-741\nHome\nSearch\nPrint\nHelp\nChapter 14\nChapter 16 Boo"
+        },
+        {
+          "id": "KB4",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 748,
+          "excerpt_prefix": "16\n                            \nø\nx\ny\nqi\nqt\nh\nz\nX\nO\nX\nX\nO\nO\nInjection\nProduction\nqo\nqw\n(Plan view)\nw\n(Cross section view)\nFigure 10  Configuration of water injection in a reservior\nThe relative permeabilities are a function of saturation and reflect the surface, and \nwettability forces of the fluid-"
+        },
+        {
+          "id": "KB5",
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 29,
+          "excerpt_prefix": "ter are present and the oil is flowing, \nthe effective permeability of the oil will be less than absolute permeability.  This is \ndue to the water reducing the effective diameters of the pores through which the oil \nis flowing.\n5.3 Relative Permeability \nRelative permeability is the ratio of effecti"
+        },
+        {
+          "id": "KB6",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 1118,
+          "excerpt_prefix": "titial water saturation.\nFluid Viscosities.  The effect of oil viscosity on fractional flow is illustrated in Fig. 12.4. In\nthis plot, the Sg at breakthrough increases from 12 to 38% with a 10-fold decrease in oil viscos-\nity.\nRelative Permeability Ratios.  The concepts of relative permeability can "
+        },
+        {
+          "id": "KB7",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 1292,
+          "excerpt_prefix": "ecause  the  imbibition  relative  permeability  is  substantially  less  than  the  primary-\ndrainage  relative  permeability  and  will  cause  the  mobility  ratio  to  be  lower  and  the\ndisplacement more effective than would be the case with primary-drainage relative permeability\nonly.\nFig. 14"
+        },
+        {
+          "id": "KB8",
+          "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+          "page": 303,
+          "excerpt_prefix": "w can be used for each phase in turn, resulting in a pair of relative permeability values\nvalid at that particular saturation.  The  fluid flux ratio is then changed (whilst keeping\nthe total flowrate constant), yielding a second set of data once a new steady-state has\nbeen achieved.  Similar measur"
+        }
+      ],
+      "stop_reason": "goal_achieved",
+      "validation": {
+        "engineering_validation_passed": true,
+        "engineering_contradiction_count": 0,
+        "unsupported_engineering_claim_count": 0,
+        "citation_semantic_passed": true,
+        "unsupported_citation_claim_count": 0,
+        "unsupported_numeric_claim_count": 0,
+        "criteria_frozen": true
+      },
+      "telemetry": {
+        "python_authorization_source": "autonomous_execution_mode",
+        "intent_route": "knowledge_qa",
+        "source_requirement": "none",
+        "extractive_fallback_used": true,
+        "python_needed": false,
+        "python_calls": 0,
+        "python_attempts": 0,
+        "python_success_rate": 0.0,
+        "calculation_count": 0,
+        "generated_chart_count": 0,
+        "goal_coverage_per_iteration": [],
+        "iterations_to_success": 3,
+        "total_research_seconds": 38.120124,
+        "python_seconds": 0.0
+      },
+      "action_selection_passed": true,
+      "passed": true
+    },
+    {
+      "case": "premise",
+      "status": "achieved",
+      "run_status": "completed",
+      "run_id": "DEV-V10-premise",
+      "actions": [
+        "retrieve",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "python_calls": 0,
+      "action_history": [
+        {
+          "iteration": 1,
+          "action_id": "ACT-1",
+          "action_type": "retrieve",
+          "target_criteria": [
+            "C1",
+            "C2"
+          ],
+          "status": "completed",
+          "reason_code": "source_evidence_needed",
+          "started_at": "2026-10-11T05:30:45.165605Z",
+          "finished_at": "2026-10-11T05:30:56.410051Z",
+          "new_evidence_count": 8,
+          "evidence_added": [
+            "KB1",
+            "KB2",
+            "KB3",
+            "KB4",
+            "KB5",
+            "KB6",
+            "KB7",
+            "KB8"
+          ],
+          "computation_ids": [],
+          "coverage_before": 0.0,
+          "coverage_after": 0.0,
+          "failure_reason": null,
+          "details": {
+            "new_evidence_count": 8,
+            "retrieval_mode": "hybrid",
+            "query": "공극률이 작아지면 같은 벌크 부피에서 공극 부피가 늘어난다는 거 맞지?\nMissing: 질문의 전제를 실제 근거와 대조; 근거가 지지하는 관계를 출처와 함께 제시\nporosity pore volume bulk volume\ndefinition governing relation evidence",
+            "cache_hit": false
+          }
+        },
+        {
+          "iteration": 2,
+          "action_id": "ACT-2",
+          "action_type": "verify",
+          "target_criteria": [
+            "C1",
+            "C2"
+          ],
+          "status": "completed",
+          "reason_code": "verify_current_support",
+          "started_at": "2026-10-11T05:30:56.444897Z",
+          "finished_at": "2026-10-11T05:31:03.407332Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 0.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {
+            "engineering_validation_passed": true,
+            "goal_achieved": true
+          }
+        },
+        {
+          "iteration": 3,
+          "action_id": "ACT-3",
+          "action_type": "synthesize",
+          "target_criteria": [],
+          "status": "completed",
+          "reason_code": "goal_achieved",
+          "started_at": "2026-10-11T05:31:03.442823Z",
+          "finished_at": "2026-10-11T05:31:03.442823Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 1.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {}
+        },
+        {
+          "iteration": 3,
+          "action_id": "ACT-STOP-3",
+          "action_type": "stop",
+          "target_criteria": [],
+          "status": "completed",
+          "reason_code": "goal_achieved",
+          "started_at": "2026-10-11T05:31:03.442823Z",
+          "finished_at": "2026-10-11T05:31:03.442823Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 1.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {}
+        }
+      ],
+      "validated_calcs": 0,
+      "formula_source_correct": null,
+      "provenance_complete": null,
+      "premise_verdict": "contradicts",
+      "repeated_or_no_progress_actions": 0,
+      "answer_nonempty": true,
+      "answer": "그 전제는 잘못되었습니다. 벌크 부피가 같으면 공극률과 공극 부피는 같은 방향으로 변합니다. 자료의 정의: \"Total porosity is defined as the ratio of the volumes of all the pores to the bulk of a material, regardless of whether or not all of the pores are interconnected.\" [KB1]",
+      "seconds": 18.279,
+      "evidence_count": 8,
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 217,
+          "excerpt_prefix": "Institute of Petroleum Engineering,  Heriot-Watt University  \n7\nfundamental Properties of Reservoir Rocks\n   \nBulk Volume\nRepresentation\nGrain Volume\nRepresentation\nPore Volume\nRepresentation\nFigure 4  Representation of bulk, grain and pore volumes\nThese components are illustrated in figure 4 for mo"
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 632,
+          "excerpt_prefix": "servoir behaviour \nin terms of pore volume compressibility, since it is the pore volume which is avail-\nable for containing fluids.  If the compressibility is in terms of the change in pore \nvolume per unit bulk volume, dividing it by the porosity changes the numeric value \nwhen expressed as pore vo"
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 24,
+          "excerpt_prefix": "Institute of Petroleum Engineering,  Heriot-Watt University  \n5\n22\nRock and Fluid Properties\n \nPorosity\nVoid volume\nBulk volume\nPorosity\nB\nvolume\nBulk volume\n=\n=\n−\n=\n+\n×\nx\nulk\nGrain volume x\nPorosity\npore volume\nvoid volume\ngrain volume\n100\n100\n100\n \n \n \n          \n \nFigure 2   Column stacking of ro"
+        },
+        {
+          "id": "KB4",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 1453,
+          "excerpt_prefix": "and  changes  in  block  pore  volume  Vp  are  computed  as  Vp  =  Vb\n0f ,  where  Vb\n0  is  the  block\n(bulk)  volume.  In  reality,  pore  volume  changes  are  a  result  of  complex  interaction  of  fluid\n(pore) pressure, stresses acting on the element of the rock and temperature. The deforma"
+        },
+        {
+          "id": "KB5",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 216,
+          "excerpt_prefix": "6\nof porosity of this kind is found in dolomite zones which occur in conjunction with \nlarge limestone deposits. Dolomite may be deposited originally as a sedimentary \nrock, or it may be formed by replacing the calcium carbonate in limestone rock with \nmagnesium.\nThe impact of isolated pore space cl"
+        },
+        {
+          "id": "KB6",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 218,
+          "excerpt_prefix": "8\n          \t                                    \nFigure 5  Cube defined by the centres of each adjacent sphere\nThe length of each side would be 2x radius, giving the bulk volume as:\n\t Vb = (2r)3 = 8r3\nThe grain volume would be the equivalent of the volume of one sphere\n\t\nV\nr\nm = 4\n3\n3\nπ\nand the por"
+        },
+        {
+          "id": "KB7",
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 23,
+          "excerpt_prefix": "al.  Porosity can however be subdivided into primary and secondary \nporosity.\n3.1 Primary Porosity\nPrimary Porosity, usually related to granular, is the porosity developed by the original \nsedimentation process by which the rock was created.  For all practical purposes, \nporosity is the non-solid pa"
+        },
+        {
+          "id": "KB8",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 275,
+          "excerpt_prefix": "Institute of Petroleum Engineering,  Heriot-Watt University  \n9\nRock Properties Measurement\n    \nWater                      Oil                        Gas\nPore  Volume Determination\nGrain  Volume Determination\nPorosity\nVacuum Gauge\nValve\nDisplacement Pump\nPressure Gauge\nGas Inlet Valve\nOutlet Valve\n"
+        }
+      ],
+      "stop_reason": "goal_achieved",
+      "validation": {
+        "engineering_validation_passed": true,
+        "engineering_contradiction_count": 0,
+        "unsupported_engineering_claim_count": 0,
+        "citation_semantic_passed": true,
+        "unsupported_citation_claim_count": 0,
+        "unsupported_numeric_claim_count": 0,
+        "criteria_frozen": true
+      },
+      "telemetry": {
+        "python_authorization_source": "autonomous_execution_mode",
+        "intent_route": "premise_check",
+        "source_requirement": "none",
+        "premise_grounding_method": "source_ratio",
+        "premise_source_id": "KB1",
+        "premise_candidate_retained": true,
+        "premise_numeric_rejections": 0,
+        "premise_verdict": "contradicts",
+        "python_needed": false,
+        "python_calls": 0,
+        "python_attempts": 0,
+        "python_success_rate": 0.0,
+        "calculation_count": 0,
+        "generated_chart_count": 0,
+        "goal_coverage_per_iteration": [],
+        "iterations_to_success": 3,
+        "total_research_seconds": 18.278582,
+        "python_seconds": 0.0
+      },
+      "action_selection_passed": true,
+      "passed": true
+    },
+    {
+      "case": "unsupported",
+      "status": "stopped",
+      "run_status": "stopped",
+      "run_id": "DEV-V10-unsupported",
+      "actions": [
+        "retrieve",
+        "stop"
+      ],
+      "python_calls": 0,
+      "action_history": [
+        {
+          "iteration": 1,
+          "action_id": "ACT-1",
+          "action_type": "retrieve",
+          "target_criteria": [
+            "C1"
+          ],
+          "status": "completed",
+          "reason_code": "formula_source_missing",
+          "started_at": "2026-10-11T05:31:03.444817Z",
+          "finished_at": "2026-10-11T05:31:14.633512Z",
+          "new_evidence_count": 7,
+          "evidence_added": [
+            "KB1",
+            "KB2",
+            "KB3",
+            "KB4",
+            "KB5",
+            "KB6",
+            "KB7"
+          ],
+          "computation_ids": [],
+          "coverage_before": 0.0,
+          "coverage_after": 0.0,
+          "failure_reason": null,
+          "details": {
+            "new_evidence_count": 7,
+            "retrieval_mode": "hybrid",
+            "query": "x=3. 내부 문서에서 임의의 Theta-Omega coupling law를 찾아 Omega를 계산해줘.\nMissing: Do not calculate without an actual sourced relation\nequation formula variables units x Theta Omega coupling",
+            "cache_hit": false
+          }
+        },
+        {
+          "iteration": 1,
+          "action_id": "ACT-STOP-1",
+          "action_type": "stop",
+          "target_criteria": [],
+          "status": "completed",
+          "reason_code": "formula_source_unavailable",
+          "started_at": "2026-10-11T05:31:14.671346Z",
+          "finished_at": "2026-10-11T05:31:14.671346Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 0.0,
+          "coverage_after": 0.0,
+          "failure_reason": null,
+          "details": {}
+        }
+      ],
+      "validated_calcs": 0,
+      "formula_source_correct": null,
+      "provenance_complete": null,
+      "premise_verdict": null,
+      "repeated_or_no_progress_actions": 0,
+      "answer_nonempty": true,
+      "answer": "근거 자료에서 필요한 관계식이나 입력값을 확인하지 못해 수치 결과를 계산하거나 추정하지 않았습니다.",
+      "seconds": 11.228,
+      "evidence_count": 7,
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 178,
+          "excerpt_prefix": "her or not the formation contains \nhydrocarbons.  If sw/sxo is about 0.7 or less, movable hydrocarbons are indicated.  The \nvalue of sw/sxo along with φ  and sw, is useful in evaluating reservoirs.\nTo determine sw  from Equation 16, sxo must be known.  For moderate invasion and \naverage residual oil"
+        },
+        {
+          "id": "KB2",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 850,
+          "excerpt_prefix": "s, which are applicable at all pressures and\ntemperatures, is recommended. Consequently, all the analysis procedures in this section are pre-\nsented in terms of pseudopressure.\nAn  advantage  of  the  pseudopressure  form  of  the  theoretical  deliverability  equation  is  that\nthe  flow  coefficie"
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 234,
+          "excerpt_prefix": "24\n\t\nV  =  -  \n, \n=  zero\n=  -  \ns\nk dP\nds\ng\nx\ndz\nds\ng\nx\ndz\nds\nQ\nrh\nk dP\ndr\nµ\nρ\nρ\nπ\nµ\n(\n.\n)\n.\n−\n−\n1 0113 10\n1 0113 10\n2\n6\n6\nIf the assumption is made that the temperature is constant, then \n\t\nQP =  Q P\nQ =\nb\nb\nQ P\nP\nb\nb\nand substituting into the equation, 10 \n\t\nQ P\nP\n2 rh k dP\ndr\nb\nb = π\nµ\nseparatin"
+        },
+        {
+          "id": "KB4",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 639,
+          "excerpt_prefix": "oil contact can be logged in the well. \nHowever if edge water drive is occurring then actual well observations may not be \npossible.  Material balance provides an opportunity to determine the support from \nwater drive, but translating this information into specific aquifer characteristics is not \nst"
+        },
+        {
+          "id": "KB5",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 230,
+          "excerpt_prefix": "20\nThe flow rate and area open to flow is substituted for the flow velocity. The variables \nare separated and integrated over the length (for the flow rate) and the pressures P1 \nto P2 for the change in pressure. The pressure drop P2 minus P1 is negative and is \ncorrected by the negative sign on the"
+        },
+        {
+          "id": "KB6",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 455,
+          "excerpt_prefix": "There are circumstances when line-fits such as RMA should be considered. Some reservoirs\n(e.g., carbonates and finely laminated sandstones) are so heterogeneous that it is difficult, if not\nimpossible,  to  make  accurate  core-to-log  depth  adjustments.  In  these  cases,  where  the  data\npairs d"
+        },
+        {
+          "id": "KB7",
+          "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+          "page": 159,
+          "excerpt_prefix": "Institute of Petroleum Engineering,  Heriot-Watt University  \n9\n66\nNumerical Methods in Reservoir Simulation\nEXERCISE 1.\nApply finite differences to the solution of the equation:\n    \ndy\ndt\ny\n\n\n\n=\n+\n2\n4\n2\n.\nwhere, at t = 0, y(t = 0) = 1.  Take time steps of Δt = 0.001 (arbitrary time units) and "
+        }
+      ],
+      "stop_reason": "insufficient_evidence",
+      "validation": {},
+      "telemetry": {
+        "python_authorization_source": "autonomous_execution_mode",
+        "intent_route": "kb_formula_calc",
+        "source_requirement": "kb_formula",
+        "python_needed": false,
+        "python_calls": 0,
+        "python_attempts": 0,
+        "python_success_rate": 0.0,
+        "calculation_count": 0,
+        "generated_chart_count": 0,
+        "goal_coverage_per_iteration": [],
+        "iterations_to_success": null,
+        "total_research_seconds": 11.227664,
+        "python_seconds": 0.0
+      },
+      "action_selection_passed": true,
+      "passed": true
+    },
+    {
+      "case": "resume",
+      "status": "achieved",
+      "run_status": "completed",
+      "run_id": "DEV-V10-resume",
+      "actions": [
+        "calculate",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "python_calls": 1,
+      "action_history": [
+        {
+          "iteration": 1,
+          "action_id": "ACT-1",
+          "action_type": "calculate",
+          "target_criteria": [
+            "C1"
+          ],
+          "status": "completed",
+          "reason_code": "calculation_ready",
+          "started_at": "2026-10-11T05:31:14.674334Z",
+          "finished_at": "2026-10-11T05:31:14.783708Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [
+            "CALC1"
+          ],
+          "coverage_before": 0.0,
+          "coverage_after": 0.0,
+          "failure_reason": null,
+          "details": {
+            "subprocess_reached": true,
+            "source_requirement": "user_formula",
+            "formula_source_ids": [
+              "USERF3"
+            ]
+          }
+        },
+        {
+          "iteration": 2,
+          "action_id": "ACT-2",
+          "action_type": "verify",
+          "target_criteria": [
+            "C1"
+          ],
+          "status": "completed",
+          "reason_code": "verify_validated_calculation",
+          "started_at": "2026-10-11T05:31:14.783708Z",
+          "finished_at": "2026-10-11T05:31:18.249875Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 0.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {
+            "engineering_validation_passed": true,
+            "goal_achieved": true
+          }
+        },
+        {
+          "iteration": 3,
+          "action_id": "ACT-3",
+          "action_type": "synthesize",
+          "target_criteria": [],
+          "status": "completed",
+          "reason_code": "goal_achieved",
+          "started_at": "2026-10-11T05:31:18.250401Z",
+          "finished_at": "2026-10-11T05:31:18.250401Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 1.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {}
+        },
+        {
+          "iteration": 3,
+          "action_id": "ACT-STOP-3",
+          "action_type": "stop",
+          "target_criteria": [],
+          "status": "completed",
+          "reason_code": "goal_achieved",
+          "started_at": "2026-10-11T05:31:18.250923Z",
+          "finished_at": "2026-10-11T05:31:18.250923Z",
+          "new_evidence_count": 0,
+          "evidence_added": [],
+          "computation_ids": [],
+          "coverage_before": 1.0,
+          "coverage_after": 1.0,
+          "failure_reason": null,
+          "details": {}
+        }
+      ],
+      "validated_calcs": 1,
+      "formula_source_correct": null,
+      "provenance_complete": true,
+      "premise_verdict": null,
+      "repeated_or_no_progress_actions": 0,
+      "answer_nonempty": true,
+      "answer": "검증된 계산 결과: value = 20.0 [CALC1] [USERF1] [USERF2] [USERF3]",
+      "seconds": 3.579,
+      "evidence_count": 0,
+      "sources": [],
+      "stop_reason": "goal_achieved",
+      "validation": {
+        "engineering_validation_passed": true,
+        "engineering_contradiction_count": 0,
+        "unsupported_engineering_claim_count": 0,
+        "citation_semantic_passed": true,
+        "unsupported_citation_claim_count": 0,
+        "unsupported_numeric_claim_count": 0,
+        "criteria_frozen": true
+      },
+      "telemetry": {
+        "python_authorization_source": "autonomous_execution_mode",
+        "intent_route": "user_formula_calc",
+        "source_requirement": "user_formula",
+        "python_needed": false,
+        "python_calls": 1,
+        "python_attempts": 1,
+        "python_success_rate": 1.0,
+        "calculation_count": 1,
+        "generated_chart_count": 0,
+        "goal_coverage_per_iteration": [],
+        "iterations_to_success": 3,
+        "total_research_seconds": 3.577927,
+        "python_seconds": 0.108978
+      },
+      "action_selection_passed": true,
+      "passed": true,
+      "waited_for_input": true,
+      "same_run_resumed": true
+    }
+  ]
+}

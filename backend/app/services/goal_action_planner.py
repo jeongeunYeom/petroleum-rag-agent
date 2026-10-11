@@ -6,12 +6,21 @@ import re
 
 from app.models.goal_research_schemas import GoalResearchRequest
 from app.services.goal_execution_state import GoalAction, GoalActionType, GoalExecutionState, SimulationSpec
-from app.services.goal_intent import asks_for_api_gravity_calculation
+from app.services.goal_intent import (GoalIntent, GoalIntentKind, SourceRequirement,
+                                      asks_for_api_gravity_calculation)
 
 
 CALC_WORDS = re.compile(r"\b(?:calculat\w*|comput\w*|derive|mean|average|sum|rank\w*|compare\s+numeric|difference|ratio)\b|계산|산출|평균|합계|총합|비율|차이|순위|그래프", re.I)
 ANALYZE_WORDS = re.compile(r"\b(?:rank\w*|best|worst|maximum|minimum|optim\w*|sensitiv\w*|compare|plot|graph|chart)\b|순위|최적|최대|최소|최댓|최솟|민감도|그래프|도표", re.I)
 SIMULATE_WORDS = re.compile(r"\b(?:simulat\w*|sweep|parameter\s+range|vary\w*)\b|시뮬레이션|매개변수\s*변화|범위\s*탐색|범위로\s*계산|바꿔가며|바꾸면서|변화시키(?:며|면서|고|면|기|다|는|ㄴ)?|간격으로", re.I)
+ENGINEERING_TERMS = {
+    "공극률": "porosity", "공극 부피": "pore volume", "공극부피": "pore volume",
+    "벌크 부피": "bulk volume", "벌크부피": "bulk volume",
+    "상대투과도": "relative permeability", "상대 투과도": "relative permeability",
+    "포화도": "saturation", "이수압": "mud hydrostatic pressure",
+    "지층압": "formation pressure", "방사 유동": "radial flow",
+    "압력 도함수": "pressure derivative", "모세관압": "capillary pressure",
+}
 
 
 class GoalActionPlanner:
@@ -29,6 +38,7 @@ class GoalActionPlanner:
         python_calls_used: int = 0,
         simulation_spec: SimulationSpec | None,
         formula_inputs_ready: bool = True,
+        intent: GoalIntent | None = None,
     ) -> GoalAction:
         text = " ".join(filter(None, (request.topic, request.goal)))
         wants_simulation = bool(SIMULATE_WORDS.search(text) or simulation_spec)
@@ -61,6 +71,55 @@ class GoalActionPlanner:
                           "goal_achieved")
         if state.no_progress_count >= request.no_progress_patience:
             return action(GoalActionType.STOP, "no_progress")
+        if intent is not None:
+            if (last and last.action_type == GoalActionType.RETRIEVE and not last.evidence_added
+                    and simulation_spec is None and not (
+                        intent.kind in {GoalIntentKind.DIRECT_CALC, GoalIntentKind.USER_FORMULA_CALC}
+                        and numeric_inputs_ready and formula_inputs_ready)):
+                return action(GoalActionType.STOP, "retrieve_no_progress")
+            if intent.kind in {GoalIntentKind.PREMISE_CHECK, GoalIntentKind.KNOWLEDGE_QA,
+                               GoalIntentKind.FIGURE_QA, GoalIntentKind.UNSUPPORTED}:
+                if not state.evidence_ids and counts[GoalActionType.RETRIEVE] < request.max_retrieval_actions:
+                    return action(GoalActionType.RETRIEVE, "source_evidence_needed",
+                                  GoalActionPlanner.query(request, state, intent))
+                if not state.verified:
+                    return action(GoalActionType.VERIFY, "verify_current_support")
+                return action(GoalActionType.STOP, "insufficient_evidence")
+            if state.computation_ids:
+                if wants_analysis and not state.analyzed:
+                    return action(GoalActionType.ANALYZE, "derived_outputs_need_analysis")
+                if not state.verified:
+                    return action(GoalActionType.VERIFY, "verify_validated_calculation")
+                return action(GoalActionType.STOP, "insufficient_evidence")
+            if not permission:
+                return action(GoalActionType.STOP, "calculation_permission_required")
+            if python_calls_used >= request.max_python_calls:
+                return action(GoalActionType.STOP, "python_call_budget_exhausted")
+            if intent.kind == GoalIntentKind.USER_FORMULA_SIMULATION:
+                if simulation_spec is not None:
+                    return action(GoalActionType.SIMULATE, "user_formula_simulation_ready")
+                return action(GoalActionType.STOP, "simulation_spec_missing")
+            if intent.kind == GoalIntentKind.KB_FORMULA_CALC and wants_simulation:
+                if simulation_spec is not None:
+                    return action(GoalActionType.SIMULATE, "sourced_simulation_ready")
+                if counts[GoalActionType.RETRIEVE] < request.max_retrieval_actions and not formula_ready:
+                    return action(GoalActionType.RETRIEVE, "simulation_formula_missing",
+                                  GoalActionPlanner.query(request, state, intent))
+                return action(GoalActionType.STOP, "simulation_spec_missing")
+            if intent.kind == GoalIntentKind.KB_FORMULA_CALC and not formula_ready:
+                next_query = GoalActionPlanner.query(request, state, intent)
+                if (not wants_simulation and last and last.action_type == GoalActionType.RETRIEVE
+                        and last.details.get("query") == next_query):
+                    return action(GoalActionType.STOP, "formula_source_unavailable")
+                if counts[GoalActionType.RETRIEVE] < request.max_retrieval_actions:
+                    return action(GoalActionType.RETRIEVE, "formula_source_missing",
+                                  next_query)
+                return action(GoalActionType.STOP, "formula_source_unavailable")
+            if not numeric_inputs_ready or not formula_inputs_ready:
+                return action(GoalActionType.STOP, "calculation_blocked")
+            if last and last.action_type == GoalActionType.CALCULATE and last.status != "completed":
+                return action(GoalActionType.STOP, "calculation_blocked")
+            return action(GoalActionType.CALCULATE, "calculation_ready")
         if state.verified and last and last.action_type == GoalActionType.VERIFY:
             if (not wants_simulation and not state.computation_ids and state.unresolved_information
                     and counts[GoalActionType.RETRIEVE] < request.max_retrieval_actions):
@@ -130,7 +189,8 @@ class GoalActionPlanner:
         return action(GoalActionType.STOP, "insufficient_evidence")
 
     @staticmethod
-    def query(request: GoalResearchRequest, state: GoalExecutionState) -> str:
+    def query(request: GoalResearchRequest, state: GoalExecutionState,
+              intent: GoalIntent | None = None) -> str:
         missing = "; ".join(state.unresolved_information[:3])
         unmet = "; ".join(item.description for item in state.criteria if item.required and item.status.value != "met")
         terms = "\nspecific gravity SG API gravity conversion equation" if asks_for_api_gravity_calculation(request) else ""
@@ -139,4 +199,16 @@ class GoalActionPlanner:
             terms += "\nheavy crude light crude API gravity density specific gravity"
         if SIMULATE_WORDS.search(f"{request.goal or ''} {request.topic}"):
             terms += "\nparameter sweep storage capacity model equation required variables"
+        if intent and intent.source_requirement == SourceRequirement.KB_FORMULA:
+            # Equation-oriented terms improve recall without asserting an answer or a page.
+            symbols = list(dict.fromkeys(re.findall(r"\b[A-Za-z][A-Za-z0-9_]{0,20}\b",
+                                                 f"{request.topic} {request.goal or ''}")))[:16]
+            terms += "\nequation formula variables units " + " ".join(symbols)
+        text = f"{request.topic} {request.goal or ''}"
+        translated = list(dict.fromkeys(english for korean, english in ENGINEERING_TERMS.items()
+                                        if korean in text))
+        if translated:
+            terms += "\n" + " ".join(translated)
+        if intent and intent.kind == GoalIntentKind.PREMISE_CHECK:
+            terms += "\ndefinition governing relation evidence"
         return f"{request.goal or request.topic}\nMissing: {missing or unmet or request.topic}{terms}"[:4000]
