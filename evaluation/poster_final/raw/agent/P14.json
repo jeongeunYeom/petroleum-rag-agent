@@ -1,0 +1,217 @@
+{
+  "id": "P14",
+  "model": "qwen3:8b",
+  "answer": "To continue, please provide: planner_not_selected.",
+  "latency_seconds": 5.722002899739891,
+  "response": {
+    "run_id": "GR-20261011-183758-C159A4",
+    "topic": "A diagnostic current series has three equally weighted readings of 3, 4, and 12 amperes. Compute the root-mean-square current, not the arithmetic mean.",
+    "goal": "A diagnostic current series has three equally weighted readings of 3, 4, and 12 amperes. Compute the root-mean-square current, not the arithmetic mean.",
+    "expected_result": null,
+    "run_status": "stopped",
+    "status": "stopped",
+    "stop_reason": "calculation_blocked",
+    "final_answer": "To continue, please provide: planner_not_selected.",
+    "clarification_question": null,
+    "required_inputs": [],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "b372bd1c664471d6bc61e746b95be467cd4e9f27631db293fcaf6c150ffc6ab1",
+    "criteria": [],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "Calculate the requested mean from the supplied inputs",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 1,
+    "current_iteration": 1,
+    "max_iterations": 6,
+    "current_stage": "finalize",
+    "current_action": "stop",
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "calculate",
+        "target_criteria": [
+          "C1"
+        ],
+        "status": "blocked",
+        "reason_code": "calculation_ready",
+        "started_at": "2026-10-11T18:38:00.223073Z",
+        "finished_at": "2026-10-11T18:38:03.295818Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "planner_not_selected",
+        "details": {
+          "subprocess_reached": false,
+          "blocked_stage": "planner_not_selected",
+          "source_complete": false,
+          "python_calls": 0,
+          "user_fact_ids": [
+            "USERF1"
+          ],
+          "evidence_fact_ids": [],
+          "formula_id": null,
+          "missing_variables": [
+            "calculation_plan"
+          ],
+          "unit_mismatch_variables": []
+        }
+      },
+      {
+        "iteration": 1,
+        "action_id": "ACT-STOP-1",
+        "action_type": "stop",
+        "target_criteria": [],
+        "status": "completed",
+        "reason_code": "calculation_blocked",
+        "started_at": "2026-10-11T18:38:03.308765Z",
+        "finished_at": "2026-10-11T18:38:03.308765Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {}
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet"
+        },
+        "evidence_ids": [],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "planner_not_selected"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [
+          "planner_not_selected"
+        ],
+        "source_complete": false,
+        "formula_ready": false
+      },
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet"
+        },
+        "evidence_ids": [],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "planner_not_selected"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [
+          "planner_not_selected"
+        ],
+        "source_complete": false,
+        "formula_ready": false
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 2.112517,
+      "retrieval_seconds": 0.0,
+      "llm_generation_seconds": 3.061401,
+      "python_seconds": 0.001453,
+      "verification_seconds": 0.0,
+      "evaluation_seconds": 0.0,
+      "synthesis_seconds": 0.0,
+      "calculate_action_seconds": 3.072742,
+      "elapsed_seconds": 5.212239,
+      "total_seconds": 5.212534,
+      "message_parsing_seconds": 0.000295
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "intent_route": "direct_calc",
+      "intent": {
+        "selected_intent": "direct_calc",
+        "intent_reason": "calculation_request_pending_fact_readiness",
+        "premise_cue_detected": false,
+        "formula_origin": "unknown"
+      },
+      "source_requirement": "none",
+      "fact_extraction": {
+        "deterministic_fact_count": 0,
+        "fallback_fact_count": 1,
+        "rejected_fact_count": 2,
+        "fact_rejection_reasons": [
+          "value_unit_not_local",
+          "value_unit_not_local"
+        ],
+        "normalized_units": {
+          "USERF1": {
+            "raw": "amperes",
+            "canonical": "amperes"
+          }
+        }
+      },
+      "calculation": {
+        "requested_operation_family": "mean,rms",
+        "direct_calc_ready": false,
+        "missing_operands": [],
+        "selected_input_fact_ids": [
+          "USERF1"
+        ]
+      },
+      "formula": {
+        "candidates_found": 0,
+        "selected_formula_id": null
+      },
+      "transition": {
+        "formula_ready": false,
+        "calculation_ready": false,
+        "blocking_reason": "calculation_blocked"
+      },
+      "calculation_failure_stage": "CALCULATION_READINESS",
+      "python_needed": false,
+      "python_calls": 0,
+      "python_attempts": 0,
+      "python_success_rate": 0.0,
+      "calculation_count": 0,
+      "generated_chart_count": 0,
+      "goal_coverage_per_iteration": [],
+      "iterations_to_success": null,
+      "total_research_seconds": 5.212239,
+      "python_seconds": 0.001453
+    },
+    "validation": {},
+    "cancel_requested": false,
+    "error": null
+  }
+}

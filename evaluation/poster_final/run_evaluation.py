@@ -87,6 +87,10 @@ def judge():
     for task in tasks():
         path=OUT/'review'/f"{task['id']}.json"
         if path.exists():continue
+        waiting=time.monotonic()
+        while not all((OUT/'raw'/system/path.name).exists() for system in ['agent','chatgpt']):
+            if time.monotonic()-waiting>420:raise TimeoutError('No generation checkpoint for '+task['id'])
+            time.sleep(1)
         outputs={system:read(OUT/'raw'/system/path.name) for system in ['agent','chatgpt']}
         names=['agent','chatgpt'];random.Random(task['id']).shuffle(names)
         candidates={label:{'answer':outputs[name]['answer']} for label,name in zip(['A','B'],names)}
