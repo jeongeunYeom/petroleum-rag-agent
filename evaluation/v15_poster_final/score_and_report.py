@@ -57,7 +57,8 @@ def main():
                 run_status=r.get('run_status'),internal_status=r.get('status'),iterations=r.get('iterations_completed'),
                 python_calls=r.get('python_calls_total'),calculation_executed=bool(r.get('python_calls_total')) if system=='agent' else None,
                 validated_calculation=any(c.get('validation_passed') for c in computations) if system=='agent' else None,
-                action_sequence=[a.get('action') for a in actions],timing=r.get('timing'),telemetry=r.get('telemetry'),
+                action_sequence=[a.get('action_type') for a in actions],timing=r.get('timing'),telemetry=r.get('telemetry'),
+                extractive_fallback_used=r.get('telemetry',{}).get('extractive_fallback_used'),
                 diagnostics=j.get('diagnostics',{}),citation_bearing=bool(re.search(r'\[(?:KB|FIG|WEB)\d+\]',answer(raw,True))) if system=='agent' else None,
                 citation_links=len(citations),citation_supported=sum(c['source_exists'] and c['semantic_support'] for c in citations))
             rows.append(row)
@@ -95,7 +96,9 @@ def main():
         numeric={key:dict(true=sum(r[key] is True for r in ar if r['numeric_accuracy'] is not None),denominator=10) for key in ['calculation_executed','validated_calculation']},
         numeric_judge={k:dict(true=sum(r['diagnostics'].get(k) is True for r in ar if r['numeric_accuracy'] is not None),not_measured=sum(r['diagnostics'].get(k) is None for r in ar if r['numeric_accuracy'] is not None),denominator=10) for k in ['correct_routing','operand_completeness','formula_selected']},
         relevant_evidence_but_goal_failed=[r['task_id'] for r in ar if r['diagnostics'].get('relevant_evidence_retrieved') is True and not r['goal_success']],
-        unnecessary_refusal=[r['task_id'] for r in ar if r['diagnostics'].get('unnecessary_refusal') is True])
+        unnecessary_refusal=[r['task_id'] for r in ar if r['diagnostics'].get('unnecessary_refusal') is True],
+        extractive_fallback_used=[r['task_id'] for r in ar if r['extractive_fallback_used'] is True],
+        extractive_fallback_not_instrumented=[r['task_id'] for r in ar if r['extractive_fallback_used'] is None])
     current=snapshot();before=read(ROOT/'preflight.json')['db']
     attempts={folder:len(list((ROOT/folder).glob('P??.attempt.json'))) for folder in ['raw/agent','raw/chatgpt','review']}
     changed=subprocess.check_output(['git','diff',PRODUCT,'--name-only'],cwd=REPO,text=True).splitlines()
