@@ -1,0 +1,130 @@
+{
+  "task_id": "V17-04",
+  "system": "judge",
+  "question": "In gas-well deliverability testing, what does the absolute open-flow (AOF) potential represent, and why is it not a normal operating production rate? Use the internal handbook.",
+  "attempt": 1,
+  "labels": {
+    "A": "gpt_reference",
+    "B": "qwen_closed_book",
+    "C": "agent"
+  },
+  "response": {
+    "id": "chatcmpl-EXxVit0nupg2rGukgDP61lmC4GJgY",
+    "object": "chat.completion",
+    "created": 1791762290,
+    "model": "gpt-5.4-2026-03-05",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n  \"assessments\": [\n    {\n      \"label\": \"A\",\n      \"claim_scores\": [1, 1],\n      \"goal_success\": false,\n      \"fabricated_fact\": true,\n      \"wrong_calculation\": false,\n      \"incorrect_refusal\": false,\n      \"omission\": false,\n      \"unsupported_claim\": true,\n      \"refusal\": false,\n      \"numeric_output\": null,\n      \"output_unit\": null,\n      \"reason\": \"Gets both required claims materially right, but adds unsupported specifics not established by the handbook excerpt (e.g., liquid loading, sand production, coning, reservoir damage) and says sandface backpressure reduced to zero rather than the handbook’s atmospheric backpressure.\"\n    },\n    {\n      \"label\": \"B\",\n      \"claim_scores\": [0.5, 1],\n      \"goal_success\": false,\n      \"fabricated_fact\": true,\n      \"wrong_calculation\": false,\n      \"incorrect_refusal\": false,\n      \"omission\": false,\n      \"unsupported_claim\": true,\n      \"refusal\": false,\n      \"numeric_output\": null,\n      \"output_unit\": null,\n      \"reason\": \"Correctly says AOF is theoretical and not a normal operating rate, but misstates the definition as completely open/no restrictions instead of atmospheric sandface backpressure, and adds unsupported operational details.\"\n    },\n    {\n      \"label\": \"C\",\n      \"claim_scores\": [1, 1],\n      \"goal_success\": true,\n      \"fabricated_fact\": false,\n      \"wrong_calculation\": false,\n      \"incorrect_refusal\": false,\n      \"omission\": false,\n      \"unsupported_claim\": false,\n      \"refusal\": false,\n      \"numeric_output\": null,\n      \"output_unit\": null,\n      \"reason\": \"Directly states the handbook definition of AOF as maximum rate against theoretical atmospheric sandface backpressure and explicitly says the well cannot produce at that rate in practice.\"\n    }\n  ],\n  \"evidence_audit\": {\n    \"relevant_evidence_present\": true,\n    \"relevant_ids\": [\n      \"KB1\"\n    ],\n    \"relevance_reason\": \"KB1 contains both frozen required claims verbatim: the atmospheric sandface backpressure definition and the statement that the well cannot produce at that rate in practice.\",\n    \"citation_links\": [\n      {\n        \"citation_id\": \"KB1\",\n        \"claim\": \"AOF is a common productivity indicator obtained from deliverability tests.\",\n        \"support_score\": 1,\n        \"reason\": \"KB1 explicitly states this.\"\n      },\n      {\n        \"citation_id\": \"KB1\",\n        \"claim\": \"AOF is the maximum rate at which a well could flow against a theoretical atmospheric backpressure at the sandface.\",\n        \"support_score\": 1,\n        \"reason\": \"KB1 matches this wording directly.\"\n      },\n      {\n        \"citation_id\": \"KB1\",\n        \"claim\": \"In practice the well cannot produce at this rate.\",\n        \"support_score\": 1,\n        \"reason\": \"KB1 explicitly states this.\"\n      }\n    ],\n    \"non_refusal_final_answer\": true\n  }\n}",
+          "refusal": null,
+          "annotations": []
+        },
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 4779,
+      "completion_tokens": 667,
+      "total_tokens": 5446,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "audio_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "audio_tokens": 0,
+        "accepted_prediction_tokens": 0,
+        "rejected_prediction_tokens": 0
+      }
+    },
+    "service_tier": "default",
+    "system_fingerprint": null
+  },
+  "judgement": {
+    "assessments": [
+      {
+        "label": "A",
+        "claim_scores": [
+          1,
+          1
+        ],
+        "goal_success": false,
+        "fabricated_fact": true,
+        "wrong_calculation": false,
+        "incorrect_refusal": false,
+        "omission": false,
+        "unsupported_claim": true,
+        "refusal": false,
+        "numeric_output": null,
+        "output_unit": null,
+        "reason": "Gets both required claims materially right, but adds unsupported specifics not established by the handbook excerpt (e.g., liquid loading, sand production, coning, reservoir damage) and says sandface backpressure reduced to zero rather than the handbook’s atmospheric backpressure."
+      },
+      {
+        "label": "B",
+        "claim_scores": [
+          0.5,
+          1
+        ],
+        "goal_success": false,
+        "fabricated_fact": true,
+        "wrong_calculation": false,
+        "incorrect_refusal": false,
+        "omission": false,
+        "unsupported_claim": true,
+        "refusal": false,
+        "numeric_output": null,
+        "output_unit": null,
+        "reason": "Correctly says AOF is theoretical and not a normal operating rate, but misstates the definition as completely open/no restrictions instead of atmospheric sandface backpressure, and adds unsupported operational details."
+      },
+      {
+        "label": "C",
+        "claim_scores": [
+          1,
+          1
+        ],
+        "goal_success": true,
+        "fabricated_fact": false,
+        "wrong_calculation": false,
+        "incorrect_refusal": false,
+        "omission": false,
+        "unsupported_claim": false,
+        "refusal": false,
+        "numeric_output": null,
+        "output_unit": null,
+        "reason": "Directly states the handbook definition of AOF as maximum rate against theoretical atmospheric sandface backpressure and explicitly says the well cannot produce at that rate in practice."
+      }
+    ],
+    "evidence_audit": {
+      "relevant_evidence_present": true,
+      "relevant_ids": [
+        "KB1"
+      ],
+      "relevance_reason": "KB1 contains both frozen required claims verbatim: the atmospheric sandface backpressure definition and the statement that the well cannot produce at that rate in practice.",
+      "citation_links": [
+        {
+          "citation_id": "KB1",
+          "claim": "AOF is a common productivity indicator obtained from deliverability tests.",
+          "support_score": 1,
+          "reason": "KB1 explicitly states this."
+        },
+        {
+          "citation_id": "KB1",
+          "claim": "AOF is the maximum rate at which a well could flow against a theoretical atmospheric backpressure at the sandface.",
+          "support_score": 1,
+          "reason": "KB1 matches this wording directly."
+        },
+        {
+          "citation_id": "KB1",
+          "claim": "In practice the well cannot produce at this rate.",
+          "support_score": 1,
+          "reason": "KB1 explicitly states this."
+        }
+      ],
+      "non_refusal_final_answer": true
+    }
+  },
+  "latency_seconds": 6.580809
+}

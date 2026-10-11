@@ -1,0 +1,80 @@
+{
+  "labels": {
+    "A": "agent",
+    "B": "gpt_reference",
+    "C": "qwen_closed_book"
+  },
+  "payload": {
+    "frozen_policy": "# v17 final independent poster pilot — frozen evaluation policy\n\nThis is a **24-task pilot**, not an estimate of general petroleum-engineering performance. The primary paired ablation is qwen3:8b closed-book versus the frozen Petroleum RAG Agent using the same qwen3:8b base model. GPT-5.4 mini is a reference, not part of the primary comparison. No v16/v17 synthetic-development accuracy comparison is permitted.\n\n## Integrity and execution\n\n- Frozen product: `3c5f0fd1da77ac46cb8447ed13f9b8ad9b30d7c3`; evaluation branch only. No product, prompt, retrieval, Chroma, embedding, routing, or threshold change.\n- Exactly the `question` string in `benchmark.json` is sent to each tested system once. Attempts are durably recorded **before** each call. A failed or timed-out attempt is not retried. Incomplete phases remain incomplete, never silently shrink a denominator.\n- Agent: production `autonomous_goal_execution`, `qwen3:8b`, hybrid KB, web off, existing data and defaults. Closed-book systems get only the same question and the minimal instruction in the user request, no gold or KB. Reference exact model `gpt-5.4-mini-2026-03-17`, temperature zero, no tools. If unavailable, stop its portion without substitution.\n- Judge: exact `gpt-5.4-2026-03-05`, temperature zero, no tools/web or substitute; anonymous per-task randomized labels. One single-reviewer AI-assisted semantic adjudication call per task. Preserve all raw responses and judge input/output. Historical responses are not used.\n- Freeze benchmark, this policy, manifest, and duplicate check in commit `eval: freeze v17 final poster benchmark` before any tested model call. Afterward, only the administrative freeze-commit receipt/manifest pointer and run/results files may change. Gold, question, rubric, tolerance, category, and denominator never change.\n\n## Scores\n\n- Required claims are the independent frozen units in each task. Judge assigns each `1` correct/materially supported, `0.5` partially correct, `0` omitted/incorrect. Claim coverage is the task-wise mean of those values and then macro-averaged across tasks. Generic verbosity is not credit.\n- Goal success requires all frozen task requirements materially satisfied, every required claim score `1`, no materially false/invented factual claim or wrong requested calculation, and numeric validation if applicable. For Agent KB-grounded tasks, cited support must be semantically relevant to the claimed relation; citation ID presence alone is not support. For KB calculation, require the exact formula span and validated calculation provenance. For false premise, require explicit rejection, correction, and actual supporting evidence. For unanswerable, require nonidentifiability, specific missing inputs, and no invented numeric result; generic refusal fails.\n- Hallucination-free means no material false/invented factual claim or wrong requested calculation. Refusal alone is **not** hallucination. Record fabricated fact, incorrect refusal, omission, wrong calculation, and unsupported claim separately. Do not require closed-book systems to cite private KB.\n- Numeric accuracy denominator is the 10 calculation tasks only. Value must be within the frozen absolute **or** relative tolerance, and an accepted/equivalent unit must be attached to the asserted result. Intermediate/input numbers do not count. Unit omission fails with explicit reason. Judge identification of the result is cross-checked by deterministic numeric-and-unit scanning; the judge does not determine mathematical correctness by itself. Dimensionless values must be identified as dimensionless/unitless/무차원 or equivalent.\n- False-premise and unanswerable items retain their four-task Safety denominator. Overall Goal Success, Claim Coverage and Hallucination-free use 24 tasks for each system. Category goal success uses Knowledge 6, Reasoning 4, Calculation 10, Safety 4.\n- A stopped/WAITING Agent run on an answerable question with sufficient frozen evidence or input is an unnecessary refusal, even if its internal status says achieved. Judge user-visible answer, not internal success flags.\n\n## Diagnostics and uncertainty\n\n- Agent-only: actual action history, run status, iterations, telemetry fields, stage timing, relevant retrieved evidence, citations mapped to real source records, fallbacks, cross-language and numeric pipeline. A missing telemetry field is `unknown`, not success or zero. Stage times can overlap and must not be summed.\n- Citation semantic support is graded against the actual source excerpt; count only IDs actually in the final answer. Relevant-evidence checks compare retrieved content to frozen claims rather than lexical overlap. Citation metrics are supplementary and not a closed-book comparison.\n- Primary differences are Agent minus Qwen in percentage points. Paired bootstrap: 10,000 task-level resamples with replacement, seed `17172026`; numeric resamples use the 10 numeric paired items. Percentile 2.5/97.5 interval. Report sample size and wide intervals honestly.\n- Latency includes mean/median/p95 by system. Agent stage times are reported separately. API cost uses actual usage tokens and published list prices at analysis time; local hardware/electricity cost is not estimated. The poster demo trace is selected **after scoring** from an actual successful Agent run; no invented action.\n\n## Finalization\n\n`FINALIZED=true` only if 24 successful raw records per system, 24 complete judge records, all exact question hashes, unchanged product/backend/frontend, benchmark and policy hashes, unchanged Chroma snapshot, one attempt each, unchanged main, and no post-result tuning. Otherwise issue an incomplete report without performance ranking or reduced-denominator claims.\n",
+    "task": {
+      "id": "V17-01",
+      "category": "knowledge",
+      "domain": "drilling",
+      "question": "방향 측정기 근처에 Monel 드릴칼라를 배치하는 목적과 그 재질상 특징을 내부 시추 자료에 근거해 설명해줘.",
+      "answerable": true,
+      "required_claims": [
+        "Monel drill collars are made of a non-magnetic steel alloy.",
+        "They isolate directional survey instruments from magnetic distortion caused by the steel drillstring."
+      ],
+      "source_document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+      "source_page": 96,
+      "supporting_spans": [
+        {
+          "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p96:c0",
+          "text": "These collars are made of a special non-magnetic steel alloy."
+        },
+        {
+          "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p96:c0",
+          "text": "Their purpose is to isolate directional survey instruments from magnetic distortion due to the steel drillstring."
+        }
+      ],
+      "gold_answer_summary": "Nonmagnetic Monel collars shield directional survey instruments from drillstring magnetic interference.",
+      "reasoning_rubric": "Require nonmagnetic construction and instrument-isolation function with KB support.",
+      "numeric_gold": null,
+      "accepted_units": [],
+      "numeric_tolerance": null,
+      "false_premise_correction": null,
+      "required_missing_inputs": []
+    },
+    "candidates": [
+      {
+        "label": "A",
+        "answer": "근거 자료에 명시된 내용: \"Stabilizer\n2 Monel Drill Collars\n50 ft.\" [KB1]\n\"These collars are made of a special non-magnetic steel alloy.\" [KB2]\n\"Their purpose is to \nisolate directional survey instruments from magnetic distortion due to the steel \ndrillstring.\" [KB2]\n\"Stab\n60' DC\n30' DC\n30' DC\n30' Monel\" [KB3]",
+        "retrieved_evidence": [
+          {
+            "evidence_id": "KB1",
+            "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+            "page": 475,
+            "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p475:c0",
+            "score": 0.04839549,
+            "excerpt": "Institute of Petroleum Engineering,  Heriot-Watt University  \n33\n                               \nStabilizer\nNear Bit Stabilizer\nBit\nStabilizer\n2 Monel Drill Collars\n50 ft.\n25 ft.\n15 ft.\n7 ft.\n1 1/2 ft.\n1 1/2 ft.\nCirculating Sub\n71/8 in.240 Turbodrill\nFigure 17 Turbodrill assembly\nDirectional Drilling"
+          },
+          {
+            "evidence_id": "KB2",
+            "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+            "page": 96,
+            "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p96:c0",
+            "score": 0.03177806,
+            "excerpt": "16\n•\t Square collars\nThese collars are usually 1/16” less than bit size, and are run to provide maximum \nstabilisation of the bottom hole assembly.\n•\t Monel collars\nThese collars are made of a special non-magnetic steel alloy. Their purpose is to \nisolate directional survey instruments from magnetic distortion due to the steel \ndrillstring.\n6.  OTHER DRILLSTRING COMPONENTS\n6.1.  Stabilisers\nStabilisers consist of a length of pipe with blades on the external surface.   These \nblades may be either straight or spiral and there are numerous designs of stabilisers \n(Figure 8).   The blades can either be fixed on to the body of the pipe, or mounted on \na rubber sleeve (sleeve stabiliser), which allows the drillstring to rotate within it.\n              \nSleeve with\nTungsten\nCarbide\ninserts.\nSleeve with\nHardfacing.\n                    \nFigure 8   Stabilisers\nThe function of the stabiliser depends on the type of hole being drilled.  In this section \nwe are concerned only with drilling vertical holes.  Drilling deviated holes will be \ndealt with later.  In vertical holes the functions of stabilisers may be summarised as \nfollows:\n•\t Reduce buckling and bending stresses on drill collars\n•\t Al"
+          },
+          {
+            "evidence_id": "KB3",
+            "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+            "page": 469,
+            "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p469:c1",
+            "score": 0.01639344,
+            "excerpt": "t is very difficult to predict the impact of the above \nvariables on the rate at which the angle will increase or decrease and therefore this \ntechnique is not widely used today.   \n(a) Packed Hole\u0001\n(b) Pendulum\u0001\n(c) Fulcrum\nStab\nStab\nStab\nStab\n60' DC\n30' DC\n30' DC\n30' Monel\nReamer\nBit\nTendency to maintain angle\nStab\nStab\nStab\n90' DC\n30' DC\n30' DC\n20-30' Monel\nReamer\nBit\nTendency to drop angle\nStab\nStab\nStab\n90' DC\n30' DC\n60' Monel\nReamer\nBit\nTendency to build angle\nFigure 13 Directional BHA's\nThree types of drilling assemblies have been used in the past to control the hole \ndeviation:\n6.4.1 Packed Hole Assembly \nThis type of configuration is a very stiff assembly, consisting of drill collars and \nstabilizers positioned to reduce bending and keep the bit on course. This type of \nassembly is often used in the tangential section of a directional hole. In practice it \nis very difficult to find a tangent assembly which will maintain tangent angle and \ndirection. Short drill collars are sometimes used, and also reamers or stabilizers run \nin tandem. A typical packed hole assembly is given in Figure 13a.\n               \nDirectional Drilling"
+          }
+        ]
+      },
+      {
+        "label": "B",
+        "answer": "방향 측정기(예: MWD/LWD, 자이로, 자기식 방향 센서) 근처에 **Monel 드릴칼라**를 배치하는 주된 목적은, **자기 간섭을 최소화해서 방향 측정 정확도를 높이기 위해서**입니다.\n\n### 1) 배치 목적\n- 일반 강재 드릴칼라나 공구강은 **자성을 띠거나 자화될 수 있어** 방향 측정기의 자기 센서에 오차를 유발합니다.\n- Monel은 **비자성(또는 매우 낮은 자성)** 합금이라, 측정기 주변에 두면\n  - 지자기 측정 왜곡을 줄이고\n  - 방위각/경사 측정의 신뢰도를 높이며\n  - 보정 작업을 줄일 수 있습니다.\n\n### 2) 재질상 특징\nMonel은 보통 **니켈-구리계 합금**으로, 시추 현장에서는 다음 특성이 중요합니다.\n- **낮은 자기투과율**: 자기 센서 간섭이 적음\n- **우수한 내식성**: 염수, 해수, 황화물 환경에서 강함\n- **기계적 강도와 인성**: 다운홀 하중을 견딜 수 있음\n- **내마모성/내피로성**: 반복 하중 환경에 유리\n\n### 3) 내부 시추 자료 관점에서의 의미\n내부 시추 자료에서 보통 확인하는 포인트는 다음과 같습니다.\n- **자기장 교란 감소**: 일반 드릴칼라 대비 측정 안정성 향상\n- **방향 오차 감소**: 특히 자기식 방향 측정기 주변에서 효과 큼\n- **환경 적합성**: 부식성 유체나 해양 시추 조건에서 수명 향상\n- **운용 효율**: 보정 빈도와 측정 불확실성 감소\n\n### 4) 주의점\n- Monel은 비자성이지만, **완전히 모든 조건에서 무간섭은 아니며** 가공 이력이나 주변 강자성 부품 배치에 따라 영향이 있을 수 있습니다.\n- 또한 일반 강재보다 **비용이 높아**, 필요한 구간에만 제한적으로 사용합니다.\n\n원하시면 제가 이 내용을 **보고서용 문장**이나 **현장 교육자료 스타일**로 더 정리해드릴게요."
+      },
+      {
+        "label": "C",
+        "answer": "방향 측정기 근처에 Monel 드릴칼라를 배치하는 목적은 **지하수 또는 석유 등 자원의 방향과 위치를 정확하게 측정하기 위한 것**입니다. Monel 드릴칼라의 재질상 특징은 **내열성, 내식성, 강도가 높은 합금**으로, 지하 환경에서 오랜 시간 동안 안정적으로 작동할 수 있도록 설계되었습니다.\n\nMonel은 니켈과 철의 합금으로, **고온과 산성, 알칼리성 환경에서도 부식에 강**하며, **고강도와 내구성**을 갖추고 있습니다. 이러한 특성 덕분에, 방향 측정기와 함께 사용될 때 **정확한 측정 데이터를 제공**할 수 있으며, **지하 시추 과정에서의 안정성과 신뢰성을 높입니다.**"
+      }
+    ]
+  }
+}

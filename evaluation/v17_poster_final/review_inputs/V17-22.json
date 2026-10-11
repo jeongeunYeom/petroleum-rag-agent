@@ -1,0 +1,97 @@
+{
+  "labels": {
+    "A": "agent",
+    "B": "gpt_reference",
+    "C": "qwen_closed_book"
+  },
+  "payload": {
+    "frozen_policy": "# v17 final independent poster pilot — frozen evaluation policy\n\nThis is a **24-task pilot**, not an estimate of general petroleum-engineering performance. The primary paired ablation is qwen3:8b closed-book versus the frozen Petroleum RAG Agent using the same qwen3:8b base model. GPT-5.4 mini is a reference, not part of the primary comparison. No v16/v17 synthetic-development accuracy comparison is permitted.\n\n## Integrity and execution\n\n- Frozen product: `3c5f0fd1da77ac46cb8447ed13f9b8ad9b30d7c3`; evaluation branch only. No product, prompt, retrieval, Chroma, embedding, routing, or threshold change.\n- Exactly the `question` string in `benchmark.json` is sent to each tested system once. Attempts are durably recorded **before** each call. A failed or timed-out attempt is not retried. Incomplete phases remain incomplete, never silently shrink a denominator.\n- Agent: production `autonomous_goal_execution`, `qwen3:8b`, hybrid KB, web off, existing data and defaults. Closed-book systems get only the same question and the minimal instruction in the user request, no gold or KB. Reference exact model `gpt-5.4-mini-2026-03-17`, temperature zero, no tools. If unavailable, stop its portion without substitution.\n- Judge: exact `gpt-5.4-2026-03-05`, temperature zero, no tools/web or substitute; anonymous per-task randomized labels. One single-reviewer AI-assisted semantic adjudication call per task. Preserve all raw responses and judge input/output. Historical responses are not used.\n- Freeze benchmark, this policy, manifest, and duplicate check in commit `eval: freeze v17 final poster benchmark` before any tested model call. Afterward, only the administrative freeze-commit receipt/manifest pointer and run/results files may change. Gold, question, rubric, tolerance, category, and denominator never change.\n\n## Scores\n\n- Required claims are the independent frozen units in each task. Judge assigns each `1` correct/materially supported, `0.5` partially correct, `0` omitted/incorrect. Claim coverage is the task-wise mean of those values and then macro-averaged across tasks. Generic verbosity is not credit.\n- Goal success requires all frozen task requirements materially satisfied, every required claim score `1`, no materially false/invented factual claim or wrong requested calculation, and numeric validation if applicable. For Agent KB-grounded tasks, cited support must be semantically relevant to the claimed relation; citation ID presence alone is not support. For KB calculation, require the exact formula span and validated calculation provenance. For false premise, require explicit rejection, correction, and actual supporting evidence. For unanswerable, require nonidentifiability, specific missing inputs, and no invented numeric result; generic refusal fails.\n- Hallucination-free means no material false/invented factual claim or wrong requested calculation. Refusal alone is **not** hallucination. Record fabricated fact, incorrect refusal, omission, wrong calculation, and unsupported claim separately. Do not require closed-book systems to cite private KB.\n- Numeric accuracy denominator is the 10 calculation tasks only. Value must be within the frozen absolute **or** relative tolerance, and an accepted/equivalent unit must be attached to the asserted result. Intermediate/input numbers do not count. Unit omission fails with explicit reason. Judge identification of the result is cross-checked by deterministic numeric-and-unit scanning; the judge does not determine mathematical correctness by itself. Dimensionless values must be identified as dimensionless/unitless/무차원 or equivalent.\n- False-premise and unanswerable items retain their four-task Safety denominator. Overall Goal Success, Claim Coverage and Hallucination-free use 24 tasks for each system. Category goal success uses Knowledge 6, Reasoning 4, Calculation 10, Safety 4.\n- A stopped/WAITING Agent run on an answerable question with sufficient frozen evidence or input is an unnecessary refusal, even if its internal status says achieved. Judge user-visible answer, not internal success flags.\n\n## Diagnostics and uncertainty\n\n- Agent-only: actual action history, run status, iterations, telemetry fields, stage timing, relevant retrieved evidence, citations mapped to real source records, fallbacks, cross-language and numeric pipeline. A missing telemetry field is `unknown`, not success or zero. Stage times can overlap and must not be summed.\n- Citation semantic support is graded against the actual source excerpt; count only IDs actually in the final answer. Relevant-evidence checks compare retrieved content to frozen claims rather than lexical overlap. Citation metrics are supplementary and not a closed-book comparison.\n- Primary differences are Agent minus Qwen in percentage points. Paired bootstrap: 10,000 task-level resamples with replacement, seed `17172026`; numeric resamples use the 10 numeric paired items. Percentile 2.5/97.5 interval. Report sample size and wide intervals honestly.\n- Latency includes mean/median/p95 by system. Agent stage times are reported separately. API cost uses actual usage tokens and published list prices at analysis time; local hardware/electricity cost is not estimated. The poster demo trace is selected **after scoring** from an actual successful Agent run; no invented action.\n\n## Finalization\n\n`FINALIZED=true` only if 24 successful raw records per system, 24 complete judge records, all exact question hashes, unchanged product/backend/frontend, benchmark and policy hashes, unchanged Chroma snapshot, one attempt each, unchanged main, and no post-result tuning. Otherwise issue an incomplete report without performance ranking or reduced-denominator claims.\n",
+    "task": {
+      "id": "V17-22",
+      "category": "false_premise",
+      "domain": "formation_evaluation",
+      "question": "In SP logging the shale baseline is the large deflection opposite a clean permeable sand, while shale intervals define the variable excursions. Explain this log interpretation with an internal citation.",
+      "answerable": true,
+      "required_claims": [
+        "Explicitly reject the reversed shale-baseline premise.",
+        "SP readings opposite shales are relatively constant and define the shale baseline.",
+        "Permeable beds show excursions from that baseline; polarity can depend on mud and formation-water salinity."
+      ],
+      "source_document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+      "source_page": 59,
+      "supporting_spans": [
+        {
+          "chunk_id": "d3d33e53ea2478fe3729bba7019d8604095c5b6c2c2d3dc0bd7e9608a9931ebb:p59:c1",
+          "text": "Readings opposite shales are relatively constant and are referred to as “the shale baseline”."
+        },
+        {
+          "chunk_id": "d3d33e53ea2478fe3729bba7019d8604095c5b6c2c2d3dc0bd7e9608a9931ebb:p59:c1",
+          "text": "Opposite permeable formations the SP curve typically shows excursions"
+        }
+      ],
+      "gold_answer_summary": "Premise reversed: shale defines the relatively steady baseline; permeable sands show salinity-dependent deflection.",
+      "reasoning_rubric": "Explicit rejection plus correction and source evidence; silent reframing fails.",
+      "numeric_gold": null,
+      "accepted_units": [],
+      "numeric_tolerance": null,
+      "false_premise_correction": "Shales define the steady SP baseline; permeable formations cause excursions from it.",
+      "required_missing_inputs": []
+    },
+    "candidates": [
+      {
+        "label": "A",
+        "answer": "The source states: \"Next to permeable formations, the\ncurve departs from the shale baseline; in thick permeable beds, these excursions reach a con-\nstant departure from the shale baseline, defining the “sand line.” The deflection may be either\nto the left (negative) or to the right (positive), depending on the relative salinities of the forma-\ntion water and the mud filtrate.\" [KB1]\n\"The relevant features of the SP curve are its shape and the size of its departure from the\nshale baseline.\" [KB1]",
+        "retrieved_evidence": [
+          {
+            "evidence_id": "KB1",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 147,
+            "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p147:c1",
+            "score": 0.04891592,
+            "excerpt": "electrodes.\nBecause the electrodes are at fixed distances from each other, irregular tool movement in the\nhole is unimportant.\n3B.10 SP Log\nThe SP curve is a continuous recording vs. depth of the electrical potential difference between\na movable electrode in the borehole and a surface electrode.1 Adjacent to shales, SP readings\nusually define a straight line known as the shale baseline. Next to permeable formations, the\ncurve departs from the shale baseline; in thick permeable beds, these excursions reach a con-\nstant departure from the shale baseline, defining the “sand line.” The deflection may be either\nto the left (negative) or to the right (positive), depending on the relative salinities of the forma-\ntion water and the mud filtrate. If the formation-water salinity is greater than the mud-filtrate\nsalinity (the more common case), the deflection is to the left.\nThe relevant features of the SP curve are its shape and the size of its departure from the\nshale baseline. Because the absolute reading and position of the shale baseline on the log are\nirrelevant, the SP sensitivity scale and shale-baseline position are selected by the logging engi-\nneer for convenience. The SP log is"
+          },
+          {
+            "evidence_id": "KB2",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 151,
+            "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p151:c0",
+            "score": 0.04712302,
+            "excerpt": "shape of the SP curve. The currents shown flowing from shale bed Sh1 toward permeable bed\nP2 in Fig. 3B.43 are largely confined to the borehole by the high resistivity of the formation\nseparating Sh1 and P2. The current in the borehole over this interval is constant, so for a con-\nstant borehole diameter, the SP curve is a straight line inclined to the shale baseline.\nThe  SP  curve  consists  of  straight  portions  adjacent  to  the  high-resistivity  zones  with  a\nchange of slope at each more conductive permeable interval (the SP curve is concave toward\nthe  shale  line)  and  opposite  every  shale  bed  (the  SP  curve  is  convex  toward  the  shale  line).\nDefining permeable bed boundaries from the SP log is difficult in the vicinity of highly resis-\ntive formations.\nShale-Baseline Shifts.  A  shift  of  the  shale  baseline  can  occur  when  formation  waters  of\ndifferent  salinities  are  separated  by  a  shale  bed  that  is  not  a  perfect  cationic  membrane.65\nFig. 3B.44 shows an SP log recorded in a series of sandstones (B, D, F, and H) separated by\nthin shales or shaly sandstones (C, E, and G). The SSP of Sandstone B is –42 mV. Shale C is\nnot a perfect cationic"
+          },
+          {
+            "evidence_id": "KB3",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 147,
+            "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p147:c2",
+            "score": 0.04535178,
+            "excerpt": "osition of the shale baseline on the log are\nirrelevant, the SP sensitivity scale and shale-baseline position are selected by the logging engi-\nneer for convenience. The SP log is typically scaled at 100 mV per log track. If the resistivi-\nties of the mud filtrate and formation water are similar, the SP deflections are small and the\ncurve is rather featureless. An SP curve cannot be recorded in holes filled with nonconductive\nmuds, such as OBMs.\n3B.10.1 Origin of the SP.  Deflections of the SP curve are the result of electrochemical and\nelectrokinetic potentials in the formations that cause electric currents to flow in the mud in the\nborehole.\nElectrochemical Component.  Membrane Potential.  The structure of clay minerals in shales\nand  the  concentration  of  negative  electric  charges  on  the  clay  particle  surfaces  give  shales  a\nselective  permeability  to  electrically  charged  ions.  Most  shales  act  as  “cationic  membranes”\nthat  are  permeable  to  positively  charged  ions  (cations)  and  impermeable  to  negative  ions\n(anions).62\nThe upper part of Fig. 3B.41 shows saline formation water in a sandstone formation and\nmud in the borehole separated by a shale. Sod"
+          },
+          {
+            "evidence_id": "KB4",
+            "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+            "page": 59,
+            "chunk_id": "d3d33e53ea2478fe3729bba7019d8604095c5b6c2c2d3dc0bd7e9608a9931ebb:p59:c1",
+            "score": 0.0300905,
+            "excerpt": "resistivity, Rw.\n3.2  Spontaneous Potential (SP) Tool\nThe Spontaneous Potential (SP) log is a record of the naturally occurring potentials \nin the wellbore as a function of depth.  The SP log involves a single moving electrode \nin the borehole and a reference electrode, usually located at the surface in the mud \npit or some other suitable location.\nThe recording is a relative measurement of the DC voltage in the borehole with no zero \nbeing recorded.  Readings opposite shales are relatively constant and are referred to \nas “the shale baseline”.  Opposite permeable formations the SP curve typically shows \nexcursions to the left (negative polarity) or to the right, depending upon the salinity \nof the drilling mud and formation waters (Figure 4).  The position of the shale base \nline has no real significance.  The logging engineer sets the position and sensitivity \non the log so that deflections opposite permeable beds stay within the limits of track \n#1 (on the log).  Typically, the shale base line is set two chart divisions (where ten \ndivisions make the total width of the track) from the right edge of the SP track.\nThe variations of the measured SP indicates there are currents flow"
+          },
+          {
+            "evidence_id": "KB5",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+            "page": 676,
+            "chunk_id": "d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p676:c0",
+            "score": 0.0292735,
+            "excerpt": "lated to grain size, as seen in Fig. 13.70. Here, core plugs were analyzed for median grain size\nand  radioactivity  level  measured  directly;  crosses  are  fine-grained  sands,  while  dots  are  silts\nand clay-rich rocks.\nTo extract the shale content in rocks, a linear or near-linear relation is used to convert a\ngamma ray index, Igr, to shale volume Vsh. Because local sands can contain radioactive compo-\nnents, and the shales may vary with depth, local baseline levels are chosen near the zone of\ninterest.\nIgr =\nR −Rcleansand\nRshale −R\n, ...................................................... (13.163)\nwhere R is the measured radiation level, Rcleansand is the baseline level through a reference sand,\nand Rshale is the baseline through a representative shale. Several relations have been developed\nto derive shale volume (Fig. 13.71). A linear relation simply sets the shale content equal to the\ngamma ray index.\nFig. 13.72—Modeled gamma-ray response to different clay distributions within a shaley sand series (mod-\nified from Katahara140).\nChapter 13—Rock Properties\nI-669\nHome\nSearch\nPrint\nHelp\nChapter 14\nChapter 12\nBookmarks"
+          }
+        ]
+      },
+      {
+        "label": "B",
+        "answer": "In SP logging, the **shale baseline** is the relatively stable reference line established in **thick, impermeable shale**, because shale has little or no electrochemical response. A **clean, permeable sand** allows mud filtrate and formation water to interact, producing an SP deflection away from that baseline. So, on the log, the **baseline is the “quiet” shale response**, and the **variable excursions mark intervals where permeability and lithology change**, especially cleaner sands versus shales. This is why the SP curve is commonly used to distinguish **shale from permeable beds** and to estimate bed boundaries. **[Internal citation: SP log interpretation principles, shale baseline vs. permeable-bed deflection]**"
+      },
+      {
+        "label": "C",
+        "answer": "In spectral gamma ray (SP) logging, the shale baseline is typically characterized by a high gamma ray count due to the presence of radioactive elements like potassium, uranium, and thorium, which are more abundant in shales compared to sandstones. In a clean, permeable sand interval, the gamma ray count is lower, creating a distinct contrast against the shale baseline. This contrast helps in identifying sand intervals, as the lower gamma ray values represent the clean sand. However, in shale intervals, the gamma ray values can vary due to differences in mineralogy, organic content, or fluid saturation, leading to variable excursions from the baseline. These variations can provide insights into the lithology and fluid content of the formation. (Reference: Schlumberger Logging Interpretation Manual, 2021)"
+      }
+    ]
+  }
+}

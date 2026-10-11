@@ -1,0 +1,101 @@
+{
+  "labels": {
+    "A": "gpt_reference",
+    "B": "agent",
+    "C": "qwen_closed_book"
+  },
+  "payload": {
+    "frozen_policy": "# v17 final independent poster pilot — frozen evaluation policy\n\nThis is a **24-task pilot**, not an estimate of general petroleum-engineering performance. The primary paired ablation is qwen3:8b closed-book versus the frozen Petroleum RAG Agent using the same qwen3:8b base model. GPT-5.4 mini is a reference, not part of the primary comparison. No v16/v17 synthetic-development accuracy comparison is permitted.\n\n## Integrity and execution\n\n- Frozen product: `3c5f0fd1da77ac46cb8447ed13f9b8ad9b30d7c3`; evaluation branch only. No product, prompt, retrieval, Chroma, embedding, routing, or threshold change.\n- Exactly the `question` string in `benchmark.json` is sent to each tested system once. Attempts are durably recorded **before** each call. A failed or timed-out attempt is not retried. Incomplete phases remain incomplete, never silently shrink a denominator.\n- Agent: production `autonomous_goal_execution`, `qwen3:8b`, hybrid KB, web off, existing data and defaults. Closed-book systems get only the same question and the minimal instruction in the user request, no gold or KB. Reference exact model `gpt-5.4-mini-2026-03-17`, temperature zero, no tools. If unavailable, stop its portion without substitution.\n- Judge: exact `gpt-5.4-2026-03-05`, temperature zero, no tools/web or substitute; anonymous per-task randomized labels. One single-reviewer AI-assisted semantic adjudication call per task. Preserve all raw responses and judge input/output. Historical responses are not used.\n- Freeze benchmark, this policy, manifest, and duplicate check in commit `eval: freeze v17 final poster benchmark` before any tested model call. Afterward, only the administrative freeze-commit receipt/manifest pointer and run/results files may change. Gold, question, rubric, tolerance, category, and denominator never change.\n\n## Scores\n\n- Required claims are the independent frozen units in each task. Judge assigns each `1` correct/materially supported, `0.5` partially correct, `0` omitted/incorrect. Claim coverage is the task-wise mean of those values and then macro-averaged across tasks. Generic verbosity is not credit.\n- Goal success requires all frozen task requirements materially satisfied, every required claim score `1`, no materially false/invented factual claim or wrong requested calculation, and numeric validation if applicable. For Agent KB-grounded tasks, cited support must be semantically relevant to the claimed relation; citation ID presence alone is not support. For KB calculation, require the exact formula span and validated calculation provenance. For false premise, require explicit rejection, correction, and actual supporting evidence. For unanswerable, require nonidentifiability, specific missing inputs, and no invented numeric result; generic refusal fails.\n- Hallucination-free means no material false/invented factual claim or wrong requested calculation. Refusal alone is **not** hallucination. Record fabricated fact, incorrect refusal, omission, wrong calculation, and unsupported claim separately. Do not require closed-book systems to cite private KB.\n- Numeric accuracy denominator is the 10 calculation tasks only. Value must be within the frozen absolute **or** relative tolerance, and an accepted/equivalent unit must be attached to the asserted result. Intermediate/input numbers do not count. Unit omission fails with explicit reason. Judge identification of the result is cross-checked by deterministic numeric-and-unit scanning; the judge does not determine mathematical correctness by itself. Dimensionless values must be identified as dimensionless/unitless/무차원 or equivalent.\n- False-premise and unanswerable items retain their four-task Safety denominator. Overall Goal Success, Claim Coverage and Hallucination-free use 24 tasks for each system. Category goal success uses Knowledge 6, Reasoning 4, Calculation 10, Safety 4.\n- A stopped/WAITING Agent run on an answerable question with sufficient frozen evidence or input is an unnecessary refusal, even if its internal status says achieved. Judge user-visible answer, not internal success flags.\n\n## Diagnostics and uncertainty\n\n- Agent-only: actual action history, run status, iterations, telemetry fields, stage timing, relevant retrieved evidence, citations mapped to real source records, fallbacks, cross-language and numeric pipeline. A missing telemetry field is `unknown`, not success or zero. Stage times can overlap and must not be summed.\n- Citation semantic support is graded against the actual source excerpt; count only IDs actually in the final answer. Relevant-evidence checks compare retrieved content to frozen claims rather than lexical overlap. Citation metrics are supplementary and not a closed-book comparison.\n- Primary differences are Agent minus Qwen in percentage points. Paired bootstrap: 10,000 task-level resamples with replacement, seed `17172026`; numeric resamples use the 10 numeric paired items. Percentile 2.5/97.5 interval. Report sample size and wide intervals honestly.\n- Latency includes mean/median/p95 by system. Agent stage times are reported separately. API cost uses actual usage tokens and published list prices at analysis time; local hardware/electricity cost is not estimated. The poster demo trace is selected **after scoring** from an actual successful Agent run; no invented action.\n\n## Finalization\n\n`FINALIZED=true` only if 24 successful raw records per system, 24 complete judge records, all exact question hashes, unchanged product/backend/frontend, benchmark and policy hashes, unchanged Chroma snapshot, one attempt each, unchanged main, and no post-result tuning. Otherwise issue an incomplete report without performance ranking or reduced-denominator claims.\n",
+    "task": {
+      "id": "V17-10",
+      "category": "reasoning",
+      "domain": "well_completion",
+      "question": "완결 스트링이 장기간 안전하게 생산하도록 설계될 때, 유체 유출 경로의 봉쇄·케이싱-튜빙 환상공간의 격리·지상 격리가 안 될 때의 차단 기능을 어떻게 함께 확보해야 하나요? 내부 자료로 설명해줘.",
+      "answerable": true,
+      "required_claims": [
+        "Completion string, casing and wellhead form a pressure system keeping reservoir fluids from escaping except through production tubing and Xmas tree.",
+        "The design may need to isolate the casing-tubing annulus, particularly for instability or reducing casing contact with reservoir fluids.",
+        "It should permit downhole shut-in when isolation at the surface is not possible."
+      ],
+      "source_document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+      "source_page": 151,
+      "supporting_spans": [
+        {
+          "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p151:c1",
+          "text": "prevents formation fluids and pressure escaping from the reservoir except via the production tubing and the Xmas Tree"
+        },
+        {
+          "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p151:c1",
+          "text": "The ability to isolate the annulus between the casing and the production tubing"
+        },
+        {
+          "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p151:c2",
+          "text": "downhole shut-in either by remote control or directly activated by changing well flowing conditions"
+        }
+      ],
+      "gold_answer_summary": "Contain reservoir fluids through intended tubing/tree path, provide annulus isolation, and allow downhole shut-in when surface isolation fails.",
+      "reasoning_rubric": "Three independently supported completion-safety functions.",
+      "numeric_gold": null,
+      "accepted_units": [],
+      "numeric_tolerance": null,
+      "false_premise_correction": null,
+      "required_missing_inputs": []
+    },
+    "candidates": [
+      {
+        "label": "A",
+        "answer": "내부 자료를 제가 직접 볼 수는 없어서, **일반적인 완결 스트링 설계 원칙** 기준으로 설명드리겠습니다.\n\n장기간 안전한 생산을 목표로 할 때는 보통 아래 3가지를 **서로 독립적인 방어층**으로 함께 확보합니다.\n\n1. **유체 유출 경로의 봉쇄**\n   - 생산관, 패커, 씰 어셈블리, 밸브 등에서 유체가 의도치 않게 이동하지 못하도록 합니다.\n   - 핵심은 **압력 경계(pressure barrier)** 를 명확히 두는 것입니다.\n   - 예: 금속-금속 씰, 이중 O-ring, 검증된 패커, 백업 씰, 부식/마모 여유 설계.\n\n2. **케이싱-튜빙 환상공간(annulus)의 격리**\n   - 튜빙과 케이싱 사이 공간이 압력 전달 통로가 되지 않도록 합니다.\n   - 보통 **패커로 하부를 차단**하고, 필요 시 **상부/하부 이중 격리**를 둡니다.\n   - 환상공간 압력 모니터링 포트, 블리드/벤트, 압력 릴리프 장치도 함께 고려합니다.\n   - 장기 운전에서는 열팽창, 압력 사이클, 가스 마이그레이션까지 반영해야 합니다.\n\n3. **지상 격리가 안 될 때의 차단 기능 확보**\n   - 지상 설비가 고장나거나 격리가 불완전해도 유정/가스정이 계속 방출되지 않도록 **다운홀 차단 수단**을 둡니다.\n   - 예:\n     - **SCSSV(서브서피스 세이프티 밸브)** 같은 다운홀 안전밸브\n     - 원격/자동 차단 가능한 **ESD(비상정지) 연동**\n     - 필요 시 **이중 차단(dual barrier)** 구조\n   - 지상 차단 실패를 가정해도, 하부에서 유체 흐름을 멈출 수 있어야 합니다.\n\n### 함께 확보하는 방식\n실무적으로는 다음처럼 설계합니다.\n\n- **1차 장벽:** 튜빙/밸브/씰로 생산 유체를 정상적으로 통제\n- **2차 장벽:** 패커와 케이싱 구조로 환상공간 및 외부로의 누출 차단\n- **3차 장벽:** 다운홀 안전밸브 또는 동등한 차단 장치로 지상 실패 시 유정 봉쇄\n- **검증:** 압력시험, 무결성 시험, 주기적 모니터링으로 장기 성능 확인\n\n### 설계 시 특히 중요한 점\n- **단일 장벽에 의존하지 않기**\n- **고장 모드별로 독립된 차단 경로**를 두기\n- **부식, 스케일, 침식, 열사이클, 진동**을 고려하기\n- **정비 불가 상황에서도 안전 상태로 전환되는 fail-safe** 개념 적용하기\n\n원하시면 제가 이 내용을 바탕으로  \n1) **도식 형태로 정리**하거나,  \n2) **“완결 스트링 설계 체크리스트”** 형태로 바꿔드릴게요."
+      },
+      {
+        "label": "B",
+        "answer": "현재 검색된 근거에서 다음 요청을 직접 뒷받침하는 관계를 검증하지 못했습니다: 완결 스트링이 장기간 안전하게 생산하도록 설계될 때, 유체 유출 경로의 봉쇄·케이싱-튜빙 환상공간의 격리·지상 격리가 안 될 때의 차단 기능을 어떻게 함께 확보해야 하나요",
+        "retrieved_evidence": [
+          {
+            "evidence_id": "KB1",
+            "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+            "page": 261,
+            "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p261:c1",
+            "score": 0.02738971,
+            "excerpt": "17 1/2    \n \n \n \n            20          26    \nFigure 3  Casing string sizes\nThe advantages of running a liner, as opposed to a full string of casing, are that:\n• A shorter length of casing string is required, and this results in a significant   \n \ncost reduction;\n•\t The liner is run on drillpipe, and therefore less rig time is required to run the \t\t\n \nstring;\n• The liner can be rotated during cementing operations.  This will significantly  \n\t\nimprove the mud displacement process and the quality of the cement job.\nAfter the liner has been run and cemented it may be necessary to run a casing \nstring of the same diameter as the liner and connect onto the top of the liner hanger, \neffectively extending the liner back to surface.  The casing string which is latched \nonto the top of the liner hanger is called a tie-back string.  This tie-back string \nmay be required to protect the previous casing string from the pressures that will be \nencountered when the well is in production."
+          },
+          {
+            "evidence_id": "KB2",
+            "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+            "page": 271,
+            "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p271:c1",
+            "score": 0.02719971,
+            "excerpt": "y the Drilling engineer \nto select those joints that must be run so that the casing shoe ends up at the correct \ndepth when the casing hanger is landed in the wellhead.  \n(c) While the casing is on the racks the threads and couplings should be thoroughly \nchecked and cleaned.  Any loose couplings should be tightened\n(d) Casing should always be handled with thread protectors in place.  These need \nnot be removed until the joint is ready to be stabbed into the string.\n7.2  Casing Running Procedures\n(a) Before the casing is run, a check trip should be made to ensure that there are \nno tight spots or ledges which may obstruct the casing and prevent it reaching \nbottom\n(b) The drift I.D. of each joint should be checked before it is run.  \n(c) Joints are picked up from the catwalk and temporarily rested on the ramp.  A \nsingle joint elevator is used to lift the joint up through the “V” door into the derrick \n(Figure 10).\n(d)  A service company (casing crew) is usually hired to provide a stabber and one \nor two floormen to operate the power tongs.  The stabbing board is positioned at \nthe correct height to allow the stabber to centralise the joint directly above the box \nof the joint susp"
+          },
+          {
+            "evidence_id": "KB3",
+            "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+            "page": 260,
+            "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p260:c1",
+            "score": 0.01538462,
+            "excerpt": "ing are to seal off any fresh water sands, and support the wellhead and BOP \nequipment.  The setting depth of this casing string is important in an area where \nabnormally high pressures are expected.  If the casing is set too high, the formations \nbelow the casing may not have sufficient strength to allow the well to be shut-in and \nkilled if a gas influx occurs when drilling the next hole section.  This can result in \nthe formations around the casing cratering and the influx flowing to surface around \nthe outside of the casing.\n3.3 Intermediate Casing (13 3/8” O.D.)\nIntermediate (or protection) casing strings are used to isolate troublesome \nformations between the surface casing setting depth and the production casing \nsetting depth.  The types of problems encountered in this interval include: unstable \nshales, lost circulation zones, abnormally pressured zones and squeezing salts.  The \nnumber of intermediate casing strings will depend on the number of such problems \nencountered.\n3.4 Production Casing (9 5/8” O.D.)\nThe production casing is either run through the pay zone, or set just above the pay \nzone (for an open hole completion or prior to running a liner).  The main purpose"
+          },
+          {
+            "evidence_id": "KB4",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 480,
+            "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p480:c1",
+            "score": 0.03175403,
+            "excerpt": "The  importance  of  selecting  proper  depths  for  setting  casing  cannot  be  overemphasized.\nMany wells have been engineering or economic failures because the casing program specified\nsetting depths too shallow or deep. Applying a few basic drilling principles combined with a\nbasic  knowledge  of  the  geological  conditions  in  an  area  can  help  determine  where  casing\nstrings should be set to ensure that drilling can proceed with minimum difficulty.\n11.3.1 Types of Casing and Tubing. Drilling environments often require several casing strings\nto reach the total desired depth. Some of the strings are drive, or conductor; structural; surface;\nintermediate (also known as protection pipe); liners; production (also known as an oil string);\nand tubing (flow string). Fig. 11.13 shows the relationship of some of these strings. In addi-\ntion, the illustration shows some problems and drilling hazards the strings are designed to control.\nAll wells will not use each casing type. The conditions encountered in each well must be\nanalyzed to determine types and amount of pipe necessary to drill it. The general functions of\nall casing strings are listed next.\n• Segregate and isolate vari"
+          },
+          {
+            "evidence_id": "KB5",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 480,
+            "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p480:c3",
+            "score": 0.03151365,
+            "excerpt": "r.\nA primary purpose of this string is to provide a fluid conduit from the bit to the surface.\nVery shallow formations tend to wash out severely and must be protected with pipe. In addi-\ntion,  most  shallow  formations  exhibit  some  type  of  lost-circulation  problem  that  must  be\nminimized.\nAn  additional function  of  the  pipe  is  to  minimize hole-caving problems.  Gravel  beds  and\nunconsolidated rock may continue to fall into the well if not stabilized with casing. Typically,\nthe operator is required to drill through these zones by pumping viscous muds at high rates.\nStructural Casing. Occasionally, drilling conditions will require that an additional string of\ncasing  be  run  between  the  drive  pipe  and  surface  casing.  Typical  depths  range  from  600  to\n1,000 ft. Purposes for the pipe include solving additional lost-circulation or hole-caving prob-\nlems and minimizing kick problems from shallow gas zones.\nSurface Casing. Many purposes exist for running surface casing including:\n• Cover freshwater sands.\nChapter 11—Introduction to Well Planning\nII-473\nSHORTMAN UTT\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 12\nChapter 10"
+          }
+        ]
+      },
+      {
+        "label": "C",
+        "answer": "완결 스트링이 장기간 안전하게 생산하도록 설계될 때, 유체 유출 경로의 봉쇄, 케이싱-튜빙 환상공간의 격리, 지상 격리가 모두 실패할 경우, 다음과 같은 차단 기능을 함께 확보해야 합니다.\n\n### 1. **유체 유출 경로의 봉쇄**\n- **기능**: 유체가 케이싱 외부로 유출되지 않도록 차단\n- **설계 요소**: \n  - **프로테크션 케이싱(Packer)**: 케이싱과 환상공간 사이에 설치하여 유체 유출을 차단\n  - **스프링클러 케이싱**: 유체가 케이싱 외부로 이동하지 못하도록 고정\n  - **지하 차단 장치**: 유체가 지표면으로 이동하지 못하도록 설계\n\n### 2. **케이싱-튜빙 환상공간의 격리**\n- **기능**: 케이싱과 튜빙 사이의 환상공간에서 유체가 유출되지 않도록 차단\n- **설계 요소**:\n  - **튜브 패커(Tubing Packer)**: 튜빙과 케이싱 사이에 설치하여 환상공간을 분리\n  - **스프링클러 패커**: 튜빙과 케이싱 사이의 유체 이동을 차단\n  - **지하 차단 장치**: 환상공간이 지표면으로 연결되지 않도록 설계\n\n### 3. **지상 격리**\n- **기능**: 유체가 지표면으로 이동하지 않도록 차단\n- **설계 요소**:\n  - **지상 차단 장치**: 유체가 지표면으로 이동하지 못하도록 설계\n  - **지하 차단 장치**: 지하에서 유체가 지표면으로 이동하지 못하도록 설계\n  - **지하 유체 저장 구조**: 유체가 지표면으로 이동하지 못하도록 설계\n\n### 4. **복합 차단 시스템 설계**\n- **기능**: 위의 모든 차단 기능을 복합적으로 설계하여 유체 유출을 최소화\n- **설계 요소**:\n  - **다중 차단 장치 설치**: 유체 유출 경로를 여러 단계로 차단\n  - **차단 장치의 고정성 확보**: 유체 유출 경로가 변경되지 않도록 고정\n  - **차단 장치의 내구성 확보**: 장기간 사용 시에도 성능 저하 없도록 설계\n\n### 5. **모니터링 및 유지보수**\n- **기능**: 차단 장치의 상태를 지속적으로 모니터링하여 이상 신호를 감지\n- **설계 요소**:\n  - **감시 시스템**: 차단 장치의 상태를 실시간으로 모니터링\n  - **정기 점검**: 차단 장치의 상태를 정기적으로 점검\n  - **유지보수 계획**: 차단 장치의 고장 시 신속히 대응\n\n### 결론\n유체 유출 경로의 봉쇄, 케이싱-튜빙 환상공간의 격리, 지상 격리가 모두 실패할 경우, **다중 차단 장치 설치**, **차단 장치의 고정성 및 내구성 확보**, **모니터링 및 유지보수 시스템**을 통해 차단 기능을 복합적으로 확보해야 합니다. 이를 통해 유체 유출을 최소화하고, 장기간 안전한 생산을 달성할 수 있습니다."
+      }
+    ]
+  }
+}

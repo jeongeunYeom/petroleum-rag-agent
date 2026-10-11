@@ -1,0 +1,118 @@
+{
+  "labels": {
+    "A": "qwen_closed_book",
+    "B": "gpt_reference",
+    "C": "agent"
+  },
+  "payload": {
+    "frozen_policy": "# v17 final independent poster pilot — frozen evaluation policy\n\nThis is a **24-task pilot**, not an estimate of general petroleum-engineering performance. The primary paired ablation is qwen3:8b closed-book versus the frozen Petroleum RAG Agent using the same qwen3:8b base model. GPT-5.4 mini is a reference, not part of the primary comparison. No v16/v17 synthetic-development accuracy comparison is permitted.\n\n## Integrity and execution\n\n- Frozen product: `3c5f0fd1da77ac46cb8447ed13f9b8ad9b30d7c3`; evaluation branch only. No product, prompt, retrieval, Chroma, embedding, routing, or threshold change.\n- Exactly the `question` string in `benchmark.json` is sent to each tested system once. Attempts are durably recorded **before** each call. A failed or timed-out attempt is not retried. Incomplete phases remain incomplete, never silently shrink a denominator.\n- Agent: production `autonomous_goal_execution`, `qwen3:8b`, hybrid KB, web off, existing data and defaults. Closed-book systems get only the same question and the minimal instruction in the user request, no gold or KB. Reference exact model `gpt-5.4-mini-2026-03-17`, temperature zero, no tools. If unavailable, stop its portion without substitution.\n- Judge: exact `gpt-5.4-2026-03-05`, temperature zero, no tools/web or substitute; anonymous per-task randomized labels. One single-reviewer AI-assisted semantic adjudication call per task. Preserve all raw responses and judge input/output. Historical responses are not used.\n- Freeze benchmark, this policy, manifest, and duplicate check in commit `eval: freeze v17 final poster benchmark` before any tested model call. Afterward, only the administrative freeze-commit receipt/manifest pointer and run/results files may change. Gold, question, rubric, tolerance, category, and denominator never change.\n\n## Scores\n\n- Required claims are the independent frozen units in each task. Judge assigns each `1` correct/materially supported, `0.5` partially correct, `0` omitted/incorrect. Claim coverage is the task-wise mean of those values and then macro-averaged across tasks. Generic verbosity is not credit.\n- Goal success requires all frozen task requirements materially satisfied, every required claim score `1`, no materially false/invented factual claim or wrong requested calculation, and numeric validation if applicable. For Agent KB-grounded tasks, cited support must be semantically relevant to the claimed relation; citation ID presence alone is not support. For KB calculation, require the exact formula span and validated calculation provenance. For false premise, require explicit rejection, correction, and actual supporting evidence. For unanswerable, require nonidentifiability, specific missing inputs, and no invented numeric result; generic refusal fails.\n- Hallucination-free means no material false/invented factual claim or wrong requested calculation. Refusal alone is **not** hallucination. Record fabricated fact, incorrect refusal, omission, wrong calculation, and unsupported claim separately. Do not require closed-book systems to cite private KB.\n- Numeric accuracy denominator is the 10 calculation tasks only. Value must be within the frozen absolute **or** relative tolerance, and an accepted/equivalent unit must be attached to the asserted result. Intermediate/input numbers do not count. Unit omission fails with explicit reason. Judge identification of the result is cross-checked by deterministic numeric-and-unit scanning; the judge does not determine mathematical correctness by itself. Dimensionless values must be identified as dimensionless/unitless/무차원 or equivalent.\n- False-premise and unanswerable items retain their four-task Safety denominator. Overall Goal Success, Claim Coverage and Hallucination-free use 24 tasks for each system. Category goal success uses Knowledge 6, Reasoning 4, Calculation 10, Safety 4.\n- A stopped/WAITING Agent run on an answerable question with sufficient frozen evidence or input is an unnecessary refusal, even if its internal status says achieved. Judge user-visible answer, not internal success flags.\n\n## Diagnostics and uncertainty\n\n- Agent-only: actual action history, run status, iterations, telemetry fields, stage timing, relevant retrieved evidence, citations mapped to real source records, fallbacks, cross-language and numeric pipeline. A missing telemetry field is `unknown`, not success or zero. Stage times can overlap and must not be summed.\n- Citation semantic support is graded against the actual source excerpt; count only IDs actually in the final answer. Relevant-evidence checks compare retrieved content to frozen claims rather than lexical overlap. Citation metrics are supplementary and not a closed-book comparison.\n- Primary differences are Agent minus Qwen in percentage points. Paired bootstrap: 10,000 task-level resamples with replacement, seed `17172026`; numeric resamples use the 10 numeric paired items. Percentile 2.5/97.5 interval. Report sample size and wide intervals honestly.\n- Latency includes mean/median/p95 by system. Agent stage times are reported separately. API cost uses actual usage tokens and published list prices at analysis time; local hardware/electricity cost is not estimated. The poster demo trace is selected **after scoring** from an actual successful Agent run; no invented action.\n\n## Finalization\n\n`FINALIZED=true` only if 24 successful raw records per system, 24 complete judge records, all exact question hashes, unchanged product/backend/frontend, benchmark and policy hashes, unchanged Chroma snapshot, one attempt each, unchanged main, and no post-result tuning. Otherwise issue an incomplete report without performance ranking or reduced-denominator claims.\n",
+    "task": {
+      "id": "V17-03",
+      "category": "knowledge",
+      "domain": "petrophysics",
+      "question": "In a neutron-density log display, what opposite apparent-porosity responses can free gas create, and what is that display effect called? Use internal evidence.",
+      "answerable": true,
+      "required_claims": [
+        "Gas increases the apparent porosity seen by the density log.",
+        "Gas decreases the apparent porosity seen by the neutron log, producing gas crossover."
+      ],
+      "source_document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+      "source_page": 281,
+      "supporting_spans": [
+        {
+          "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p281:c0",
+          "text": "gas increases the apparent porosity seen by a density log, it decreases the apparent porosity seen by the neutron log"
+        },
+        {
+          "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p281:c0",
+          "text": "This is the source of “gas crossover” on neutron density-log displays"
+        }
+      ],
+      "gold_answer_summary": "Gas makes density-derived apparent porosity rise and neutron apparent porosity fall; the separation is gas crossover.",
+      "reasoning_rubric": "Both directions must be right, with crossover term and source support.",
+      "numeric_gold": null,
+      "accepted_units": [],
+      "numeric_tolerance": null,
+      "false_premise_correction": null,
+      "required_missing_inputs": []
+    },
+    "candidates": [
+      {
+        "label": "A",
+        "answer": "In a neutron-density log display, free gas can create opposite apparent-porosity responses by causing a **negative neutron porosity** (due to the low hydrogen content of gas) while simultaneously causing a **positive density porosity** (due to the low density of gas). This results in a **\"gas effect\"** or **\"gas response\"**, where the neutron and density logs show opposite trends, leading to an apparent increase in porosity when gas is present. This display effect is commonly referred to as the **\"gas effect\"** or **\"gas response\"** in log interpretation."
+      },
+      {
+        "label": "B",
+        "answer": "Free gas can make the **neutron porosity read too low** while the **density porosity reads too high**.  \n\nThat opposite response on a neutron-density log is called the **gas effect** or **crossover effect**."
+      },
+      {
+        "label": "C",
+        "answer": "No direct relation span was verified for these requests in the retrieved evidence: In a neutron-density log display, what opposite apparent-porosity responses can free gas create,; what is that display effect called",
+        "retrieved_evidence": [
+          {
+            "evidence_id": "KB1",
+            "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+            "page": 217,
+            "chunk_id": "d3d33e53ea2478fe3729bba7019d8604095c5b6c2c2d3dc0bd7e9608a9931ebb:p217:c0",
+            "score": 0.0248779,
+            "excerpt": "Crossplots for Porosity, Lithology and Saturation\nSchlumberger\n4-1\nCP\nThe neutron-density-sonic crossplot charts (Charts CP-1, CP-2\nand CP-7) provide insight into lithology and permit the determi-\nnation of porosity. Chart selection depends on the anticipated\nmineralogy. Neutron-density can be used to differentiate between\nthe common reservoir rocks [quartz sandstone, calcite (lime-\nstone) and dolomite] and shale and some evaporites. \nSonic-neutron can be used to differentiate between the common\nreservoir rocks when clay content is negligible. Sonic-density\ncan be used to differentiate between a single known reservoir\nrock and shale and to identify evaporate minerals.\nContinued on next page\nPorosity and Lithology Determination from\nFormation Density Log and SNP Sidewall Neutron Porosity Log\nCP-1a\n0                              10                             20\n             30                             40\nφSNPcor, neutron porosity index (p.u.) (apparent limestone porosity)\n1.9\n2.0\n2.1\n2.2\n2.3\n2.4\n2.5\n2.6\n2.7\n2.8\n2.9\n3.0\nρb, bulk density (g/cm3)\nφD, density porosity (p.u.) (ρma = 2.71, ρf = 1.0)\n45\n40\n35\n30\n25\n20\n15\n10\n5\n0\n–5\n–10\n–15\nSulfur\nSalt\nTrona\nPolyhalite\nLangbeinite\nApproxi"
+          },
+          {
+            "evidence_id": "KB2",
+            "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+            "page": 148,
+            "chunk_id": "d3d33e53ea2478fe3729bba7019d8604095c5b6c2c2d3dc0bd7e9608a9931ebb:p148:c0",
+            "score": 0.01538462,
+            "excerpt": "Institute of Petroleum Engineering,  Heriot-Watt University  \n11\n6\nLithology and Porosity in Complex Formations6\n8 EFFECT OF SECONDARY POROSITY ON CROSSPLOTS\nSonic logs respond differently to secondary porosity than the neutron and density logs. \nThey largely ignore vuggy porosity and fractures and respond primarily to intergranular \nporosity;  neutron and density tools respond to the total porosity.\nThus, on crossplots involving the sonic log, secondary porosity displaces the points \nfrom the correct lithology line and indicates something less than the total porosity \nThe neutron-density crossplots yield the total porosity.\n9 THE SECONDARY POROSITY INDEX LOG\nIn clean, liquid-filled carbonate formations with known matrix parameters, a secondary \nporosity index (Iφ2) can be computed as the difference between total porosity, as \ndetermined from neutron and/or density logs, and porosity from the sonic log\n\t \t\n\t Iφ2  =  φ  -  φSV.  \nEquation 1  Secondary porosity index\nA relative secondary porosity index is sometimes computed as the ratio of the absolute \nindex, defined above, to total porosity.\n10 EFFECT OF HYDROCARBONS ON CROSSPLOTS\nGas or light hydrocarbons cause the apparent porosi"
+          },
+          {
+            "evidence_id": "KB3",
+            "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+            "page": 167,
+            "chunk_id": "d3d33e53ea2478fe3729bba7019d8604095c5b6c2c2d3dc0bd7e9608a9931ebb:p167:c1",
+            "score": 0.01515152,
+            "excerpt": "ns constant over the formations under investigation, \nthe basic measurement from the sonic, density, or neutron logs can be plotted directly \nversus Rt with similar results.  This is possible because of the linear relationship between \nporosity and bulk density, sonic transit time or neutron hydrogen index response.  An \nexample of a sonic-induction crossplot is shown in Figure 2.  The transit time has been"
+          },
+          {
+            "evidence_id": "KB4",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 288,
+            "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p288:c1",
+            "score": 0.04540254,
+            "excerpt": "uppresses the gas crossover because gas fluid properties depend strong-\nly on pressure.\nIn a known sandstone reservoir, the third track is sometimes displayed on a sandstone ma-\ntrix.  In  this  case,  the  density  log  is  scaled  from  1.65  to  2.65  g/cm3,  and  the  neutron  log  is\nscaled  from  60  to  0%  porosity,  in  sandstone  units.  As  above,  1.65  g/cm3  does  indeed  corre-\nspond  to  60%  porosity,  assuming  a  quartz  matrix  density  (2.65  g/cm3)  and  freshwater-filled\nporosity  (fluid  density  equal  to  1.0  g/cm3).  In  similar  fashion  to  the  limestone  display,  the\ncurves will overlay each other exactly in clean sandstone. Generally, the neutron porosity will\nread to the left of the density in shales and to the right in gas-affected intervals.\n3D.8.2 Visualization—Crossplots.  The crossplot is another method for visualizing petrophysi-\ncal data. A clever crossplot can reveal even more about a formation than a standard log-depth\ndisplay.  In  a  crossplot,  the  analyst  plots  one  log  value  on  the  x-axis  against  a  different  log\nvalue, at the same depth, on the y-axis. This is repeated for all depths of interest, creating a\nscatterplot suc"
+          },
+          {
+            "evidence_id": "KB5",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 290,
+            "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p290:c0",
+            "score": 0.03200205,
+            "excerpt": "porosity. Qualitatively, the shaly sand progression beginning at a single clean-sand porosity is\nsketched in Fig. 3D.15 as a trend line. Even if not done quantitatively, this process can indi-\ncate the direction that points would move in the presence of a change in composition. As this\nsuggests, the neutron-density crossplot can be a useful alternative to simple gamma ray interpre-\ntation for the determination of shale volume. Fig. 3D.17 is a neutron-density crossplot overlaid\nwith  a  grid  of  lines.  The  grid  is  calculated  from  the  density  and  neutron  response  equations,\nvarying relative amounts of sand, water-filled porosity, and clay.\nAn  example  of  a  different,  less  commonly  used  nuclear-log  crossplot  is  shown  in\nFig. 3D.18. As in the neutron-density example, the sample data from the logs in Fig. 3D.16 are\nplotted as small squares. This display crossplots synthetic variables, not raw logs. On the x-axis\nis the U matrix apparent. As discussed above, this transformation converts the nonlinear Pe log\nto  Umaa,  a  characteristic  that  obeys  linear  volumetric  mixing.  On  the  y-axis  is  apparent  grain\ndensity from the neutron and density logs. Somewhat"
+          },
+          {
+            "evidence_id": "FIG1",
+            "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+            "page": 124,
+            "figure_number": "Figure 2",
+            "title": null,
+            "image_index": null,
+            "filename": null,
+            "image_path": null,
+            "url": null,
+            "excerpt": "Figure 1: [Figure Note Metadata]\ndocument_name: Heriot_Watt_University_-_Formation_Evaluation.pdf\ndocument_id: d3d33",
+            "source_note": "Figure 1: [Figure Note Metadata]\ndocument_name: Heriot_Watt_University_-_Formation_Evaluation.pdf\ndocument_id: d3d33",
+            "related_page_text": "Institute of Petroleum Engineering,  Heriot-Watt University  \n9\n55\nDetermination of Porosity\n \nρw =  1 +  0.73 P,\nwhere P is the NaCl concentration in parts per million.\nChart Por-5  shows density log (FDC log) porosities versus ρb  readings for various \nmatrices and ρf  values of 1 through 1.2.\n \nFigure 2   Density of water at various temperatures, pressures and salinities\n4 DETERMINATION OF POROSITY FROM NEUTRON LOGS\nThe responses of the neutron tools primarily reflect the amount of hydrogen in the \nformation.  Since oil and water contain practically the same amount of hydrogen \nper unit volume, the responses reflect the liquid-filled porosity in clean formations.  \nHowever, the tools respond to all the hydrogen atoms in the formation, including \nthose chemically combined in formation matrix minerals.  Thus, the neutron reading \ndepends mostly on the hydrogen index of the formation.  The hydrogen index is \nproportional to the quantity of hydrogen per unit volume, with the hydrogen index \nof fresh water at surface conditions taken as unity.\nat surface conditions taken as unity.",
+            "x_axis": null,
+            "x_axis_unit": null,
+            "y_axis": null,
+            "y_axis_unit": null,
+            "series_count": null,
+            "series_descriptions": [],
+            "legend": [],
+            "quantities": []
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "labels": {
+    "A": "qwen_closed_book",
+    "B": "gpt_reference",
+    "C": "agent"
+  },
+  "payload": {
+    "frozen_policy": "# v17 final independent poster pilot — frozen evaluation policy\n\nThis is a **24-task pilot**, not an estimate of general petroleum-engineering performance. The primary paired ablation is qwen3:8b closed-book versus the frozen Petroleum RAG Agent using the same qwen3:8b base model. GPT-5.4 mini is a reference, not part of the primary comparison. No v16/v17 synthetic-development accuracy comparison is permitted.\n\n## Integrity and execution\n\n- Frozen product: `3c5f0fd1da77ac46cb8447ed13f9b8ad9b30d7c3`; evaluation branch only. No product, prompt, retrieval, Chroma, embedding, routing, or threshold change.\n- Exactly the `question` string in `benchmark.json` is sent to each tested system once. Attempts are durably recorded **before** each call. A failed or timed-out attempt is not retried. Incomplete phases remain incomplete, never silently shrink a denominator.\n- Agent: production `autonomous_goal_execution`, `qwen3:8b`, hybrid KB, web off, existing data and defaults. Closed-book systems get only the same question and the minimal instruction in the user request, no gold or KB. Reference exact model `gpt-5.4-mini-2026-03-17`, temperature zero, no tools. If unavailable, stop its portion without substitution.\n- Judge: exact `gpt-5.4-2026-03-05`, temperature zero, no tools/web or substitute; anonymous per-task randomized labels. One single-reviewer AI-assisted semantic adjudication call per task. Preserve all raw responses and judge input/output. Historical responses are not used.\n- Freeze benchmark, this policy, manifest, and duplicate check in commit `eval: freeze v17 final poster benchmark` before any tested model call. Afterward, only the administrative freeze-commit receipt/manifest pointer and run/results files may change. Gold, question, rubric, tolerance, category, and denominator never change.\n\n## Scores\n\n- Required claims are the independent frozen units in each task. Judge assigns each `1` correct/materially supported, `0.5` partially correct, `0` omitted/incorrect. Claim coverage is the task-wise mean of those values and then macro-averaged across tasks. Generic verbosity is not credit.\n- Goal success requires all frozen task requirements materially satisfied, every required claim score `1`, no materially false/invented factual claim or wrong requested calculation, and numeric validation if applicable. For Agent KB-grounded tasks, cited support must be semantically relevant to the claimed relation; citation ID presence alone is not support. For KB calculation, require the exact formula span and validated calculation provenance. For false premise, require explicit rejection, correction, and actual supporting evidence. For unanswerable, require nonidentifiability, specific missing inputs, and no invented numeric result; generic refusal fails.\n- Hallucination-free means no material false/invented factual claim or wrong requested calculation. Refusal alone is **not** hallucination. Record fabricated fact, incorrect refusal, omission, wrong calculation, and unsupported claim separately. Do not require closed-book systems to cite private KB.\n- Numeric accuracy denominator is the 10 calculation tasks only. Value must be within the frozen absolute **or** relative tolerance, and an accepted/equivalent unit must be attached to the asserted result. Intermediate/input numbers do not count. Unit omission fails with explicit reason. Judge identification of the result is cross-checked by deterministic numeric-and-unit scanning; the judge does not determine mathematical correctness by itself. Dimensionless values must be identified as dimensionless/unitless/무차원 or equivalent.\n- False-premise and unanswerable items retain their four-task Safety denominator. Overall Goal Success, Claim Coverage and Hallucination-free use 24 tasks for each system. Category goal success uses Knowledge 6, Reasoning 4, Calculation 10, Safety 4.\n- A stopped/WAITING Agent run on an answerable question with sufficient frozen evidence or input is an unnecessary refusal, even if its internal status says achieved. Judge user-visible answer, not internal success flags.\n\n## Diagnostics and uncertainty\n\n- Agent-only: actual action history, run status, iterations, telemetry fields, stage timing, relevant retrieved evidence, citations mapped to real source records, fallbacks, cross-language and numeric pipeline. A missing telemetry field is `unknown`, not success or zero. Stage times can overlap and must not be summed.\n- Citation semantic support is graded against the actual source excerpt; count only IDs actually in the final answer. Relevant-evidence checks compare retrieved content to frozen claims rather than lexical overlap. Citation metrics are supplementary and not a closed-book comparison.\n- Primary differences are Agent minus Qwen in percentage points. Paired bootstrap: 10,000 task-level resamples with replacement, seed `17172026`; numeric resamples use the 10 numeric paired items. Percentile 2.5/97.5 interval. Report sample size and wide intervals honestly.\n- Latency includes mean/median/p95 by system. Agent stage times are reported separately. API cost uses actual usage tokens and published list prices at analysis time; local hardware/electricity cost is not estimated. The poster demo trace is selected **after scoring** from an actual successful Agent run; no invented action.\n\n## Finalization\n\n`FINALIZED=true` only if 24 successful raw records per system, 24 complete judge records, all exact question hashes, unchanged product/backend/frontend, benchmark and policy hashes, unchanged Chroma snapshot, one attempt each, unchanged main, and no post-result tuning. Otherwise issue an incomplete report without performance ranking or reduced-denominator claims.\n",
+    "task": {
+      "id": "V17-16",
+      "category": "user_formula",
+      "domain": "production",
+      "question": "이 유정의 water cut은 사용자가 정한 식 fw = qw / (qw + qo)로 계산합니다. 물 유량 qw=132 stb/d, 오일 유량 qo=468 stb/d라면 fw를 무차원 값으로 구해줘.",
+      "answerable": true,
+      "required_claims": [
+        "fw = 132/(132+468) = 0.22, dimensionless."
+      ],
+      "source_document": null,
+      "source_page": null,
+      "supporting_spans": [],
+      "gold_answer_summary": "0.22 dimensionless water cut from the supplied formula.",
+      "reasoning_rubric": "Follow supplied fraction and retain dimensionless interpretation; no KB required.",
+      "numeric_gold": {
+        "value": 0.22,
+        "unit": "dimensionless"
+      },
+      "accepted_units": [
+        "dimensionless",
+        "무차원",
+        "unitless",
+        "1"
+      ],
+      "numeric_tolerance": {
+        "absolute": 0.005,
+        "relative": 0.005
+      },
+      "false_premise_correction": null,
+      "required_missing_inputs": []
+    },
+    "candidates": [
+      {
+        "label": "A",
+        "answer": "주어진 식 $ f_w = \\frac{q_w}{q_w + q_o} $에 따라 계산합니다.\n\n- $ q_w = 132 $ stb/d  \n- $ q_o = 468 $ stb/d  \n\n$$\nf_w = \\frac{132}{132 + 468} = \\frac{132}{600} = 0.22\n$$\n\n따라서, $ f_w = 0.22 $ (무차원 값)입니다."
+      },
+      {
+        "label": "B",
+        "answer": "주어진 식은\n\n\\[\nf_w = \\frac{q_w}{q_w + q_o}\n\\]\n\n이고, 값은 \\(q_w = 132\\) stb/d, \\(q_o = 468\\) stb/d 입니다.\n\n계산하면:\n\n\\[\nf_w = \\frac{132}{132 + 468} = \\frac{132}{600} = 0.22\n\\]\n\n따라서 **water cut \\(f_w\\) = 0.22** (무차원) 입니다."
+      },
+      {
+        "label": "C",
+        "answer": "검증된 계산 결과: fw = 0.22 [CALC1] [USERF2] [USERF1] [USERF3]",
+        "retrieved_evidence": []
+      }
+    ]
+  }
+}

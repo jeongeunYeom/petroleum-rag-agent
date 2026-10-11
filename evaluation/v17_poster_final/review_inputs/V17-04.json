@@ -1,0 +1,96 @@
+{
+  "labels": {
+    "A": "gpt_reference",
+    "B": "qwen_closed_book",
+    "C": "agent"
+  },
+  "payload": {
+    "frozen_policy": "# v17 final independent poster pilot — frozen evaluation policy\n\nThis is a **24-task pilot**, not an estimate of general petroleum-engineering performance. The primary paired ablation is qwen3:8b closed-book versus the frozen Petroleum RAG Agent using the same qwen3:8b base model. GPT-5.4 mini is a reference, not part of the primary comparison. No v16/v17 synthetic-development accuracy comparison is permitted.\n\n## Integrity and execution\n\n- Frozen product: `3c5f0fd1da77ac46cb8447ed13f9b8ad9b30d7c3`; evaluation branch only. No product, prompt, retrieval, Chroma, embedding, routing, or threshold change.\n- Exactly the `question` string in `benchmark.json` is sent to each tested system once. Attempts are durably recorded **before** each call. A failed or timed-out attempt is not retried. Incomplete phases remain incomplete, never silently shrink a denominator.\n- Agent: production `autonomous_goal_execution`, `qwen3:8b`, hybrid KB, web off, existing data and defaults. Closed-book systems get only the same question and the minimal instruction in the user request, no gold or KB. Reference exact model `gpt-5.4-mini-2026-03-17`, temperature zero, no tools. If unavailable, stop its portion without substitution.\n- Judge: exact `gpt-5.4-2026-03-05`, temperature zero, no tools/web or substitute; anonymous per-task randomized labels. One single-reviewer AI-assisted semantic adjudication call per task. Preserve all raw responses and judge input/output. Historical responses are not used.\n- Freeze benchmark, this policy, manifest, and duplicate check in commit `eval: freeze v17 final poster benchmark` before any tested model call. Afterward, only the administrative freeze-commit receipt/manifest pointer and run/results files may change. Gold, question, rubric, tolerance, category, and denominator never change.\n\n## Scores\n\n- Required claims are the independent frozen units in each task. Judge assigns each `1` correct/materially supported, `0.5` partially correct, `0` omitted/incorrect. Claim coverage is the task-wise mean of those values and then macro-averaged across tasks. Generic verbosity is not credit.\n- Goal success requires all frozen task requirements materially satisfied, every required claim score `1`, no materially false/invented factual claim or wrong requested calculation, and numeric validation if applicable. For Agent KB-grounded tasks, cited support must be semantically relevant to the claimed relation; citation ID presence alone is not support. For KB calculation, require the exact formula span and validated calculation provenance. For false premise, require explicit rejection, correction, and actual supporting evidence. For unanswerable, require nonidentifiability, specific missing inputs, and no invented numeric result; generic refusal fails.\n- Hallucination-free means no material false/invented factual claim or wrong requested calculation. Refusal alone is **not** hallucination. Record fabricated fact, incorrect refusal, omission, wrong calculation, and unsupported claim separately. Do not require closed-book systems to cite private KB.\n- Numeric accuracy denominator is the 10 calculation tasks only. Value must be within the frozen absolute **or** relative tolerance, and an accepted/equivalent unit must be attached to the asserted result. Intermediate/input numbers do not count. Unit omission fails with explicit reason. Judge identification of the result is cross-checked by deterministic numeric-and-unit scanning; the judge does not determine mathematical correctness by itself. Dimensionless values must be identified as dimensionless/unitless/무차원 or equivalent.\n- False-premise and unanswerable items retain their four-task Safety denominator. Overall Goal Success, Claim Coverage and Hallucination-free use 24 tasks for each system. Category goal success uses Knowledge 6, Reasoning 4, Calculation 10, Safety 4.\n- A stopped/WAITING Agent run on an answerable question with sufficient frozen evidence or input is an unnecessary refusal, even if its internal status says achieved. Judge user-visible answer, not internal success flags.\n\n## Diagnostics and uncertainty\n\n- Agent-only: actual action history, run status, iterations, telemetry fields, stage timing, relevant retrieved evidence, citations mapped to real source records, fallbacks, cross-language and numeric pipeline. A missing telemetry field is `unknown`, not success or zero. Stage times can overlap and must not be summed.\n- Citation semantic support is graded against the actual source excerpt; count only IDs actually in the final answer. Relevant-evidence checks compare retrieved content to frozen claims rather than lexical overlap. Citation metrics are supplementary and not a closed-book comparison.\n- Primary differences are Agent minus Qwen in percentage points. Paired bootstrap: 10,000 task-level resamples with replacement, seed `17172026`; numeric resamples use the 10 numeric paired items. Percentile 2.5/97.5 interval. Report sample size and wide intervals honestly.\n- Latency includes mean/median/p95 by system. Agent stage times are reported separately. API cost uses actual usage tokens and published list prices at analysis time; local hardware/electricity cost is not estimated. The poster demo trace is selected **after scoring** from an actual successful Agent run; no invented action.\n\n## Finalization\n\n`FINALIZED=true` only if 24 successful raw records per system, 24 complete judge records, all exact question hashes, unchanged product/backend/frontend, benchmark and policy hashes, unchanged Chroma snapshot, one attempt each, unchanged main, and no post-result tuning. Otherwise issue an incomplete report without performance ranking or reduced-denominator claims.\n",
+    "task": {
+      "id": "V17-04",
+      "category": "knowledge",
+      "domain": "well_testing",
+      "question": "In gas-well deliverability testing, what does the absolute open-flow (AOF) potential represent, and why is it not a normal operating production rate? Use the internal handbook.",
+      "answerable": true,
+      "required_claims": [
+        "AOF is the theoretical maximum flow rate against atmospheric sandface backpressure.",
+        "A well cannot normally produce at that theoretical rate in practice."
+      ],
+      "source_document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+      "source_page": 848,
+      "supporting_spans": [
+        {
+          "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p848:c0",
+          "text": "The AOF is the maximum rate at which a well could flow against a theoretical atmospheric backpressure at the sandface."
+        },
+        {
+          "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p848:c0",
+          "text": "Although in practice the well cannot produce at this rate"
+        }
+      ],
+      "gold_answer_summary": "AOF is a theoretical rate at atmospheric sandface backpressure, not a routinely achievable production rate.",
+      "reasoning_rubric": "Both theoretical definition and operational caveat needed.",
+      "numeric_gold": null,
+      "accepted_units": [],
+      "numeric_tolerance": null,
+      "false_premise_correction": null,
+      "required_missing_inputs": []
+    },
+    "candidates": [
+      {
+        "label": "A",
+        "answer": "I don’t have access to your internal handbook, but in standard gas-well deliverability testing:\n\n- **Absolute open-flow (AOF) potential** is the **theoretical maximum gas rate** a well could produce if the **backpressure at the sandface were reduced to zero**. In other words, it is the extrapolated flow capacity of the reservoir-well system under idealized, unrestricted conditions.\n\n- It is **not a normal operating production rate** because:\n  - **Zero flowing pressure is not physically or operationally realistic** in normal field operation.\n  - Producing at or near AOF would usually cause **excessive drawdown**, which can lead to **liquid loading, sand production, coning, reservoir damage, or unstable well behavior**.\n  - Real wells are operated at **controlled rates and pressures** to balance deliverability, reservoir management, and equipment limits.\n\nSo, AOF is mainly a **benchmark or diagnostic capacity estimate**, not a practical day-to-day production target."
+      },
+      {
+        "label": "B",
+        "answer": "In gas-well deliverability testing, the **Absolute Open-Flow (AOF) potential** represents the maximum flow rate a well can produce when the wellbore is completely open to the reservoir pressure, with no flow restrictions (e.g., no choke, no formation damage, and no wellbore friction). It is a theoretical maximum flow rate under ideal conditions.\n\nThe AOF potential is **not a normal operating production rate** because:\n\n1. **Practical Limitations**: In real operations, wells are typically restricted by chokes, surface facilities, or economic factors to control production rates and maintain reservoir pressure.\n2. **Reservoir Pressure Decline**: As the reservoir pressure declines over time, the actual production rate will be less than the AOF potential.\n3. **Flowing Pressure Constraints**: The well is often operated at a lower flowing pressure to avoid excessive water production, sanding, or other reservoir damage mechanisms.\n\nThus, AOF is a benchmark used to evaluate well performance and reservoir characteristics, but it is not a typical or sustainable production rate in field operations."
+      },
+      {
+        "label": "C",
+        "answer": "The source states: \"A common productivity indicator obtained from these\ntests is the absolute open flow (AOF) potential.\" [KB1]\n\"The AOF is the maximum rate at which a well\ncould flow against a theoretical atmospheric backpressure at the sandface.\" [KB1]\n\"Although in practice\nthe  well  cannot  produce  at  this  rate,  regulatory  agencies  sometimes  use  the  AOF  to  allocate\nallowable production among wells or to set maximum production rates for individual wells.\" [KB1]",
+        "retrieved_evidence": [
+          {
+            "evidence_id": "KB1",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 848,
+            "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p848:c0",
+            "score": 0.06557377,
+            "excerpt": "ified isochronal tests. A summary of the fundamental gas-flow equations, both theoretical and\nempirical, used to analyze deliverability tests in terms of pseudopressure is followed by a focus\non specific tests and testing procedures, advantages and disadvantages of each testing method,\nand common analysis techniques. Examples illustrating deliverability tests analyses are included.\n8.12.2 Types and Purposes of Deliverability Tests.  Deliverability testing refers to the testing\nof a gas well to measure its production capabilities under specific conditions of reservoir and\nbottomhole flowing pressures (BHFPs). A common productivity indicator obtained from these\ntests is the absolute open flow (AOF) potential. The AOF is the maximum rate at which a well\ncould flow against a theoretical atmospheric backpressure at the sandface. Although in practice\nthe  well  cannot  produce  at  this  rate,  regulatory  agencies  sometimes  use  the  AOF  to  allocate\nallowable production among wells or to set maximum production rates for individual wells.\nAnother  application  of  deliverability  testing  is  to  generate  a  reservoir  inflow  performance\nrelationship (IPR) or gas backpressure curve"
+          },
+          {
+            "evidence_id": "KB2",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 848,
+            "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p848:c1",
+            "score": 0.04740958,
+            "excerpt": "tion rates for individual wells.\nAnother  application  of  deliverability  testing  is  to  generate  a  reservoir  inflow  performance\nrelationship (IPR) or gas backpressure curve. The IPR curve describes the relationship between\nsurface production rate and BHFP for a specific value of reservoir pressure (that is, either the\noriginal pressure or the current average value). The IPR curve can be used to evaluate gas-well\ncurrent deliverability potential under a variety of surface conditions, such as production against\na  fixed  backpressure.  In  addition,  the  IPR  can  be  used  to  forecast  future  production  at  any\nstage in the reservoir’s life.\nSeveral  deliverability  testing  methods  have  been  developed  for  gas  wells.  Flow-after-flow\ntests are conducted by producing the well at a series of different stabilized flow rates and mea-\nsuring the stabilized BHP. Each flow rate is established in succession without an intermediate\nshut-in period. A single-point test is conducted by flowing the well at a single rate until the\nBHFP is stabilized. This type of test was developed to overcome the limitation of long testing\ntimes required to reach stabilization at each rate in t"
+          },
+          {
+            "evidence_id": "KB3",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 1016,
+            "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1016:c1",
+            "score": 0.03036577,
+            "excerpt": "ability Testing.  Gas wells have historically been tested at a series of bottom-\nhole  pressures  and  rates  to  develop  stabilized-deliverability  relationships.  One  of  the  reasons\nfor  this  is  the  importance of  the  non-Darcy  flow  contribution to  well  performance. A  single-\nrate test cannot address this contribution. This section describes the types of tests typically run,\nalong with their appropriate analysis techniques.\nStabilized-Deliverability Test.  A stabilized deliverability, sometimes called a four-point or\nbackpressure test, is conducted by producing a well at four rates (Fig. 10.13). In this test, each\nrate  is  run  long  enough  to  reach  stabilized  conditions.  To  be  theoretically  valid,  “stabilized”\nshould mean to pseudosteady state, although in practice tests are sometimes run only until little\nvariation in well flowing pressure is observed.\nThe most widely used method of presenting such data was first suggested by Rawlins and\nSchellhardt.15 This method is not based on the pseudosteady-state-flow equations but is based\non  an  empirical  observation  that  Δp2  vs.  qg  plotted  on  a  log-log  graph  typically  lies  on  a\nstraight line (Fig."
+          },
+          {
+            "evidence_id": "KB4",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_VII.pdf",
+            "page": 106,
+            "chunk_id": "644f825031453f563aae70c2b0e7807a2e594ea82f31ee96a9d88a311e8c19b6:p106:c1",
+            "score": 0.02620014,
+            "excerpt": "metry and, II 370\nwell performance\n \ndeliverability testing, V 1008–1012\n \ndrainage shapes, estimation, V 1007\n \neffects of skin, V 1014\n \ngas-well deliverability relationships and, V 1012–1014\n \nideal gas, steady-state radial-ﬂ ow equation for, V 997\n \nnear-wellbore phenomena, V 1000\n \nnon-Darcy ﬂ ow, V 1001\n \npressure-transient testing of gas wells, V 1008\n \nradius of investigation, V 1007–1008\n \nreal-gas potential, V 996–998\n \nskin, V 1000–1001\n \nsteady-state radial and horizontal liquid and gas ﬂ ow, basic \n \n \nequations, V 996–999\n \ntransient ﬂ ow, V 1001–1007\nwell planning\n \nAuthority for Expenditures (AFE), II 493–516\n \nbit records and, II 463–468\n \ncasing, types of, II 473–475\n \ncasing setting-depth selection and, II 473–485\n \ncosts and, II 456–458\n \ndata collection and, II 459–460\n \ndata sources and, II 462–463\n \ndrilling engineering and, II 455\n \nflow path for, II 459\n \nformation pressure and, II 458\n \nhole-geometry selection and, II 485–493\n \nIADC reports and, II 469–470\n \nlog headers and, II 463, 472\n \nmud-logging records and, II 471–472\n \nmud records and, II 468–469\n \nobjective of, II 455–456\n \noffset-well selection and, II 460–462\n \nprocess and, II 458–459\n \nproductio"
+          },
+          {
+            "evidence_id": "KB5",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_VII.pdf",
+            "page": 48,
+            "chunk_id": "644f825031453f563aae70c2b0e7807a2e594ea82f31ee96a9d88a311e8c19b6:p48:c3",
+            "score": 0.02456299,
+            "excerpt": "VI 382–383\ngas turbine meter\n \nadvantages and disadvantages, III 454\n \nISO standard and, III 452\n \nK factor and, III 454\n \noperation theory of, III 453–454\n \noverview of, III 452–453\n \nsizing of, III 454–455\ngas velocity, III 354\ngas venting process, IV 461\ngas/water contact (GWC), V 439, 450, 466, 1487\ngas/water ratios (GWR), VI 265\ngas well(s), deliverability testing, V 839–872\ngas-well loading flow regimes, IV 841\ngas well performance, IV 5–17\n \nAOF and, IV 5–6\n \nbackpressure equation, IV 5\n \ndeliverability test, IV 7–15\n \nfuture performance methods, IV 15–17\ngas-zone porosity-correction technique, V 202\ngaseous equivalent of stock-tank condensate (GEC), V 1521\ngases (see also phase behavior)\n \nAmagat’s law and, I 221\n \napparent molecular weight and, I 220\n \nBenedict-Webb-Rubin equation and, I 587\n \nBoyle’s law and, I 218\n \nCalingeart-Davis equation and, I 242–243\n \ncapillary pressure and, I 713–714, 727–762\n \nCharles’ law and, I 218\n \nchromotography and, I 207–208\n \nClapeyron equation and, I 241–242\n \nCox chart and, I 242\n \nDalton’s law and, I 221\n \ndensity, I 233\n \ndrilling-mud, I 213\n \neconomic evaluation and, I 768–775, 783–792\n \nequilibrium, I 218–219, 224\n \nestimated rema"
+          }
+        ]
+      }
+    ]
+  }
+}

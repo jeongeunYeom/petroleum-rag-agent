@@ -1,0 +1,100 @@
+{
+  "labels": {
+    "A": "agent",
+    "B": "qwen_closed_book",
+    "C": "gpt_reference"
+  },
+  "payload": {
+    "frozen_policy": "# v17 final independent poster pilot — frozen evaluation policy\n\nThis is a **24-task pilot**, not an estimate of general petroleum-engineering performance. The primary paired ablation is qwen3:8b closed-book versus the frozen Petroleum RAG Agent using the same qwen3:8b base model. GPT-5.4 mini is a reference, not part of the primary comparison. No v16/v17 synthetic-development accuracy comparison is permitted.\n\n## Integrity and execution\n\n- Frozen product: `3c5f0fd1da77ac46cb8447ed13f9b8ad9b30d7c3`; evaluation branch only. No product, prompt, retrieval, Chroma, embedding, routing, or threshold change.\n- Exactly the `question` string in `benchmark.json` is sent to each tested system once. Attempts are durably recorded **before** each call. A failed or timed-out attempt is not retried. Incomplete phases remain incomplete, never silently shrink a denominator.\n- Agent: production `autonomous_goal_execution`, `qwen3:8b`, hybrid KB, web off, existing data and defaults. Closed-book systems get only the same question and the minimal instruction in the user request, no gold or KB. Reference exact model `gpt-5.4-mini-2026-03-17`, temperature zero, no tools. If unavailable, stop its portion without substitution.\n- Judge: exact `gpt-5.4-2026-03-05`, temperature zero, no tools/web or substitute; anonymous per-task randomized labels. One single-reviewer AI-assisted semantic adjudication call per task. Preserve all raw responses and judge input/output. Historical responses are not used.\n- Freeze benchmark, this policy, manifest, and duplicate check in commit `eval: freeze v17 final poster benchmark` before any tested model call. Afterward, only the administrative freeze-commit receipt/manifest pointer and run/results files may change. Gold, question, rubric, tolerance, category, and denominator never change.\n\n## Scores\n\n- Required claims are the independent frozen units in each task. Judge assigns each `1` correct/materially supported, `0.5` partially correct, `0` omitted/incorrect. Claim coverage is the task-wise mean of those values and then macro-averaged across tasks. Generic verbosity is not credit.\n- Goal success requires all frozen task requirements materially satisfied, every required claim score `1`, no materially false/invented factual claim or wrong requested calculation, and numeric validation if applicable. For Agent KB-grounded tasks, cited support must be semantically relevant to the claimed relation; citation ID presence alone is not support. For KB calculation, require the exact formula span and validated calculation provenance. For false premise, require explicit rejection, correction, and actual supporting evidence. For unanswerable, require nonidentifiability, specific missing inputs, and no invented numeric result; generic refusal fails.\n- Hallucination-free means no material false/invented factual claim or wrong requested calculation. Refusal alone is **not** hallucination. Record fabricated fact, incorrect refusal, omission, wrong calculation, and unsupported claim separately. Do not require closed-book systems to cite private KB.\n- Numeric accuracy denominator is the 10 calculation tasks only. Value must be within the frozen absolute **or** relative tolerance, and an accepted/equivalent unit must be attached to the asserted result. Intermediate/input numbers do not count. Unit omission fails with explicit reason. Judge identification of the result is cross-checked by deterministic numeric-and-unit scanning; the judge does not determine mathematical correctness by itself. Dimensionless values must be identified as dimensionless/unitless/무차원 or equivalent.\n- False-premise and unanswerable items retain their four-task Safety denominator. Overall Goal Success, Claim Coverage and Hallucination-free use 24 tasks for each system. Category goal success uses Knowledge 6, Reasoning 4, Calculation 10, Safety 4.\n- A stopped/WAITING Agent run on an answerable question with sufficient frozen evidence or input is an unnecessary refusal, even if its internal status says achieved. Judge user-visible answer, not internal success flags.\n\n## Diagnostics and uncertainty\n\n- Agent-only: actual action history, run status, iterations, telemetry fields, stage timing, relevant retrieved evidence, citations mapped to real source records, fallbacks, cross-language and numeric pipeline. A missing telemetry field is `unknown`, not success or zero. Stage times can overlap and must not be summed.\n- Citation semantic support is graded against the actual source excerpt; count only IDs actually in the final answer. Relevant-evidence checks compare retrieved content to frozen claims rather than lexical overlap. Citation metrics are supplementary and not a closed-book comparison.\n- Primary differences are Agent minus Qwen in percentage points. Paired bootstrap: 10,000 task-level resamples with replacement, seed `17172026`; numeric resamples use the 10 numeric paired items. Percentile 2.5/97.5 interval. Report sample size and wide intervals honestly.\n- Latency includes mean/median/p95 by system. Agent stage times are reported separately. API cost uses actual usage tokens and published list prices at analysis time; local hardware/electricity cost is not estimated. The poster demo trace is selected **after scoring** from an actual successful Agent run; no invented action.\n\n## Finalization\n\n`FINALIZED=true` only if 24 successful raw records per system, 24 complete judge records, all exact question hashes, unchanged product/backend/frontend, benchmark and policy hashes, unchanged Chroma snapshot, one attempt each, unchanged main, and no post-result tuning. Otherwise issue an incomplete report without performance ranking or reduced-denominator claims.\n",
+    "task": {
+      "id": "V17-24",
+      "category": "unanswerable",
+      "domain": "flow_assurance",
+      "question": "A natural-gas line operates at 900 psia. From that pressure alone, give the exact hydrate-formation temperature for this particular gas and explain what data are missing if it cannot be fixed.",
+      "answerable": false,
+      "required_claims": [
+        "Exact hydrate-formation temperature for this gas cannot be inferred from pressure alone.",
+        "Gas composition and water/salinity conditions or relevant phase-equilibrium data are needed."
+      ],
+      "source_document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+      "source_page": 460,
+      "supporting_spans": [
+        {
+          "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p460:c1",
+          "text": "Position of this line is a function of gas composition"
+        },
+        {
+          "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p460:c1",
+          "text": "Water contents of natural gasses with corrections for salinity and relative density."
+        }
+      ],
+      "gold_answer_summary": "No exact site-specific hydrate temperature from pressure alone; need gas composition and water/salinity/phase-equilibrium information.",
+      "reasoning_rubric": "Name missing engineering inputs, no numerical onset temperature fabricated.",
+      "numeric_gold": null,
+      "accepted_units": [],
+      "numeric_tolerance": null,
+      "false_premise_correction": null,
+      "required_missing_inputs": [
+        "gas composition",
+        "water content and/or salinity",
+        "validated hydrate-equilibrium relationship"
+      ]
+    },
+    "candidates": [
+      {
+        "label": "A",
+        "answer": "An exact value cannot be determined from the supplied information. The source identifies the required data: \"MPa (2,000 psia) and 316 K (110°F) until it strikes the hydrate formation curve at 0.53 MPa\n(780 psia) and 287 K (57°F), so 0.53 MPa (780 psia) represents the limit to hydrate-free expan-\" [KB1]\n\"11.7’s hydrate formation line and cooling lines labeled Gas A and Gas B, respectively.\" [KB2]\n\"11.6  to  determine  the  limits  to  wet  gas\nexpansion across an isentropic device such as a nozzle or turboexpander; however, that has not\nbeen done.\" [KB2]\n\"Consider the constant temperature expansion of a particular mixture composition.\" [KB3]; Not established by the available evidence (incomplete or conflicting support): A natural-gas line operates at 900 psia; From that pressure alone; give the exact hydrate-formation temperature for this particular gas",
+        "retrieved_evidence": [
+          {
+            "evidence_id": "KB1",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+            "page": 531,
+            "chunk_id": "d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p531:c1",
+            "score": 0.03009207,
+            "excerpt": "regime at the valve/\nrestriction  discharge.  Two  rapid  expansion  curves  for  the  same  0.6-gravity  gas  are  shown  in\nFig. 11.7. Intersections of the gas expansion curves with the hydrate formation line limits the\nexpansion  discharge  pressures  from  two  different  high  initial  P/T  conditions,  labeled  Gas  A\nand Gas B.\nIn  Fig.  11.7,  the  curves  determine  the  restriction  downstream  pressure  at  which  hydrate\nblockages will form for a given upstream pressure and temperature. Gas A expands from 13.6\nMPa (2,000 psia) and 316 K (110°F) until it strikes the hydrate formation curve at 0.53 MPa\n(780 psia) and 287 K (57°F), so 0.53 MPa (780 psia) represents the limit to hydrate-free expan-\nFig. 11.7—Intersection of free expansion curves with hydrate-formation region for 0.6-gravity gases (from\nKatz20).\nI-524\nPetroleum Engineering Handbook—Vol. I\nHome\nSearch\nPrint\nHelp\nChapter 10\nChapter 12 Bookmarks"
+          },
+          {
+            "evidence_id": "KB2",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+            "page": 532,
+            "chunk_id": "d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p532:c1",
+            "score": 0.02894955,
+            "excerpt": "onstant enthalpy (ΔH2 = 0) operation on expansion.\nKatz20 generated charts to determine the hydrate-free limit to gas expansion, combining the\ngas gravity chart (Fig. 11.6) and the gas enthalpy/entropy charts by Brown22 to determine Fig.\n11.7’s hydrate formation line and cooling lines labeled Gas A and Gas B, respectively. Interest-\ningly,  Brown’s  charts  also  could  be  used  with  Fig.  11.6  to  determine  the  limits  to  wet  gas\nexpansion across an isentropic device such as a nozzle or turboexpander; however, that has not\nbeen done.\nCautioning that the charts apply to gases of limited compositions, Katz20 provided constant\nenthalpy expansion charts for gases of 0.6, 0.7, and 0.8 gravities, shown in Figs. 11.8, 11.9,\nand 11.10, respectively. The abscissa (x-axis) in each figure represents the lowest downstream\npressure  without  hydrate  formation,  given  the  upstream  pressure  on  the  ordinate  (y-axis)  and\nthe upstream temperature (a parameter on each line).\nNote that maxima in Figs. 11.8 through 11.10 occur at the upstream pressure of 40.8 MPa\n(6,000 psia), the Joule-Thomson inversion pressure. At pressures above 6,000 psia, these gases\nwill cool on expansion.\nThe f"
+          },
+          {
+            "evidence_id": "KB3",
+            "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+            "page": 104,
+            "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p104:c1",
+            "score": 0.02200402,
+            "excerpt": ". Ft. per lb.\nPressure - PSIA\n454 º F\n450 º \n425 º \n400 º \n350 º \n300 º \nDew Point Line\nBubble Point Line\nFigure 10  Pressure-Volume Diagram for N-Pentane and N-Heptane (52.4 mole % \nHeptane) ref. 4\n4.2 Pressure Temperature Diagram\nCompared to the single line representing the vapour pressure curve for pure substances \nthere is a broad region in which the two phases co-exist.  The two-phase region of \nthe diagram is bounded by the bubble point line and the dew point line, and  the two \nlines meet at the critical point.  Points within a loop represent two-phase systems \n(Figure 11).\nConsider the constant temperature expansion of a particular mixture composition. At \n1 the substance is liquid and as pressure is reduced liquid expands until the bubble \npoint is reached.  The pressure at which  the first bubbles of gas appear is termed the \nbubble point pressure.  As pressure is decreased liquid and gas co-exist until a minute \namount of liquid remains at the dew point pressure.  Further reduction of pressure \ncauses expansion of the gas."
+          },
+          {
+            "evidence_id": "KB4",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 854,
+            "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p854:c2",
+            "score": 0.01315789,
+            "excerpt": "= 407.6 psia, pp(p = 407.6) = 1.617 × 107 psia2/cp. p after 10 years = 350 psia,\npp(p = 350) = 1.2239 × 107 psia2/cp. pb = 14.65 psia, pp(pb) = 2,674.8 psia2/cp.\nThe  pseudopressure  in  this  example  (and  all  others  in  this  section)  were  calculated  using\nthe methods suggested by Al-Hussainy et al.15 These methods, which involve numerical evalua-\ntion  of  the  integral  in  Eq.  8.97  and  which  require  computational  routines  to  estimate  gas\nviscosity, μ, and deviation factor, z, are widely available in basic reservoir fluid flow analysis\nsoftware.\nSolution.\nRawlins-Schellhardt  Analysis.  Plot  Δpp  vs.  q  on  log-log  graph  paper  (Fig.  8.115).  Table\n8.14  gives  the  plotting  functions.  Construct  the  best-fit  line  through  the  data  points.  All  data\npoints lie on the best-fit line and will be used for all subsequent calculations.\nNext, determine the deliverability exponent using least-squares regression analysis. Alterna-\ntively,  because  Points  1  and  4  both  lie  on  the  perceived  “best”  straight  line  through  the  test\ndata, the reciprocal slope is estimated to be\nV-846\nPetroleum Engineering Handbook—Vol. V\nPrint\nSearch\nHome\nBookmarks\nHel"
+          },
+          {
+            "evidence_id": "KB5",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+            "page": 245,
+            "chunk_id": "d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p245:c0",
+            "score": 0.01010101,
+            "excerpt": "where ρ =\npMg\nzRT = 0.00149406\npMg\nzT , K1 = (0.00094 + 2×10−6Mg)T1.5\n(209 + 19Mg +T)\n, X = 3.5 + 986\nT\n+ 0.01Mg, and\nY = 2.4 −0.2X and where μg = gas viscosity, cp; ρ =gas density, g/cm3; p = pressure, psia; T =\ntemperature, °R; and Mg = gas molecular weight = 28.967γg.\nFor the data from which the correlation was developed, the standard deviation in the calcu-\nlated  gas  viscosity  was  2.7%,  and  the  maximum  deviation  was  9%.  The  ranges  of  variables\nused in the correlation were 100 psia < p < 8,000 psia, 100 <T (°F) < 340, and 0.90 < CO2 (mol\n%)  <  3.20  and  0.0  <  N2  (mol%)  <  4.80.  In  using  these  equations,  it  is  important  either  to\nmeasure  the  density  or  to  ensure  that  the  z-factor  calculation  has  included  the  effect  of  N2,\nCO2,  and  H2S  using  the  method  of  Wichert  and  Aziz.12  The  equations  of  Lee  et  al.17  were\noriginally  written  to  give  the  viscosity  in  micropoise,  but  the  modified  form  above  gives  the\nviscosity  in  the  more  commonly  used  centipoise.  This  viscosity  unit  (cp)  is  also  easily\nconverted to the SI unit of Pa·s by dividing by 1,000.\nExample 5.2 Properties of Natural Gas. For the gas in"
+          }
+        ]
+      },
+      {
+        "label": "B",
+        "answer": "The exact hydrate-formation temperature cannot be determined from the pressure alone (900 psia). Hydrate formation temperature depends on both the pressure and the **composition of the natural gas**, particularly the presence and concentration of **hydrocarbon components** (e.g., methane, ethane, propane) and **non-hydrocarbon components** (e.g., nitrogen, carbon dioxide, hydrogen sulfide). These components significantly influence the hydrate formation temperature through their **critical temperature and pressure** properties and their **affinity for water molecule clustering**.\n\nWithout the **gas composition**, it is not possible to calculate the exact hydrate-formation temperature. The missing data includes:\n\n1. **Gas composition** (e.g., methane, ethane, propane, nitrogen, CO₂, H₂S).\n2. **Water content** in the gas (since water is a necessary component for hydrate formation).\n3. **Presence of inhibitors** (e.g., methanol, ethylene glycol), which can suppress hydrate formation.\n\nTo determine the hydrate-formation temperature, a **thermodynamic model** (e.g., using the **Peng-Robinson equation of state** or **hydrate phase behavior correlations**) must be applied with the full gas composition and operating conditions."
+      },
+      {
+        "label": "C",
+        "answer": "You can’t determine an **exact hydrate-formation temperature** from **pressure alone**.\n\nAt **900 psia**, the hydrate temperature depends on the **gas composition** and the **water content / presence of inhibitors**. Natural gas is not a single substance, so the hydrate equilibrium temperature shifts with:\n\n- **Methane/ethane/propane and heavier hydrocarbon content**\n- **Acid gases** such as **CO₂** and **H₂S**\n- **Nitrogen** content\n- Whether the gas is **dry or water-saturated**\n- Any **methanol, glycol, or salt** present in the water phase\n\n### What you would need to fix the temperature\nTo calculate the hydrate-formation temperature at 900 psia, you need at least:\n\n1. **Gas composition** (mole % of all major components)\n2. **Water phase conditions**  \n   - saturated with water or not\n   - salinity, if any\n3. **Any hydrate inhibitor concentration**  \n   - MEG, methanol, etc.\n\n### Bottom line\nAt **900 psia**, there is **no single exact hydrate-formation temperature** for “natural gas” without composition data. You need the **gas analysis** to determine it."
+      }
+    ]
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "labels": {
+    "A": "qwen_closed_book",
+    "B": "agent",
+    "C": "gpt_reference"
+  },
+  "payload": {
+    "frozen_policy": "# v17 final independent poster pilot — frozen evaluation policy\n\nThis is a **24-task pilot**, not an estimate of general petroleum-engineering performance. The primary paired ablation is qwen3:8b closed-book versus the frozen Petroleum RAG Agent using the same qwen3:8b base model. GPT-5.4 mini is a reference, not part of the primary comparison. No v16/v17 synthetic-development accuracy comparison is permitted.\n\n## Integrity and execution\n\n- Frozen product: `3c5f0fd1da77ac46cb8447ed13f9b8ad9b30d7c3`; evaluation branch only. No product, prompt, retrieval, Chroma, embedding, routing, or threshold change.\n- Exactly the `question` string in `benchmark.json` is sent to each tested system once. Attempts are durably recorded **before** each call. A failed or timed-out attempt is not retried. Incomplete phases remain incomplete, never silently shrink a denominator.\n- Agent: production `autonomous_goal_execution`, `qwen3:8b`, hybrid KB, web off, existing data and defaults. Closed-book systems get only the same question and the minimal instruction in the user request, no gold or KB. Reference exact model `gpt-5.4-mini-2026-03-17`, temperature zero, no tools. If unavailable, stop its portion without substitution.\n- Judge: exact `gpt-5.4-2026-03-05`, temperature zero, no tools/web or substitute; anonymous per-task randomized labels. One single-reviewer AI-assisted semantic adjudication call per task. Preserve all raw responses and judge input/output. Historical responses are not used.\n- Freeze benchmark, this policy, manifest, and duplicate check in commit `eval: freeze v17 final poster benchmark` before any tested model call. Afterward, only the administrative freeze-commit receipt/manifest pointer and run/results files may change. Gold, question, rubric, tolerance, category, and denominator never change.\n\n## Scores\n\n- Required claims are the independent frozen units in each task. Judge assigns each `1` correct/materially supported, `0.5` partially correct, `0` omitted/incorrect. Claim coverage is the task-wise mean of those values and then macro-averaged across tasks. Generic verbosity is not credit.\n- Goal success requires all frozen task requirements materially satisfied, every required claim score `1`, no materially false/invented factual claim or wrong requested calculation, and numeric validation if applicable. For Agent KB-grounded tasks, cited support must be semantically relevant to the claimed relation; citation ID presence alone is not support. For KB calculation, require the exact formula span and validated calculation provenance. For false premise, require explicit rejection, correction, and actual supporting evidence. For unanswerable, require nonidentifiability, specific missing inputs, and no invented numeric result; generic refusal fails.\n- Hallucination-free means no material false/invented factual claim or wrong requested calculation. Refusal alone is **not** hallucination. Record fabricated fact, incorrect refusal, omission, wrong calculation, and unsupported claim separately. Do not require closed-book systems to cite private KB.\n- Numeric accuracy denominator is the 10 calculation tasks only. Value must be within the frozen absolute **or** relative tolerance, and an accepted/equivalent unit must be attached to the asserted result. Intermediate/input numbers do not count. Unit omission fails with explicit reason. Judge identification of the result is cross-checked by deterministic numeric-and-unit scanning; the judge does not determine mathematical correctness by itself. Dimensionless values must be identified as dimensionless/unitless/무차원 or equivalent.\n- False-premise and unanswerable items retain their four-task Safety denominator. Overall Goal Success, Claim Coverage and Hallucination-free use 24 tasks for each system. Category goal success uses Knowledge 6, Reasoning 4, Calculation 10, Safety 4.\n- A stopped/WAITING Agent run on an answerable question with sufficient frozen evidence or input is an unnecessary refusal, even if its internal status says achieved. Judge user-visible answer, not internal success flags.\n\n## Diagnostics and uncertainty\n\n- Agent-only: actual action history, run status, iterations, telemetry fields, stage timing, relevant retrieved evidence, citations mapped to real source records, fallbacks, cross-language and numeric pipeline. A missing telemetry field is `unknown`, not success or zero. Stage times can overlap and must not be summed.\n- Citation semantic support is graded against the actual source excerpt; count only IDs actually in the final answer. Relevant-evidence checks compare retrieved content to frozen claims rather than lexical overlap. Citation metrics are supplementary and not a closed-book comparison.\n- Primary differences are Agent minus Qwen in percentage points. Paired bootstrap: 10,000 task-level resamples with replacement, seed `17172026`; numeric resamples use the 10 numeric paired items. Percentile 2.5/97.5 interval. Report sample size and wide intervals honestly.\n- Latency includes mean/median/p95 by system. Agent stage times are reported separately. API cost uses actual usage tokens and published list prices at analysis time; local hardware/electricity cost is not estimated. The poster demo trace is selected **after scoring** from an actual successful Agent run; no invented action.\n\n## Finalization\n\n`FINALIZED=true` only if 24 successful raw records per system, 24 complete judge records, all exact question hashes, unchanged product/backend/frontend, benchmark and policy hashes, unchanged Chroma snapshot, one attempt each, unchanged main, and no post-result tuning. Otherwise issue an incomplete report without performance ranking or reduced-denominator claims.\n",
+    "task": {
+      "id": "V17-23",
+      "category": "unanswerable",
+      "domain": "reservoir_pressure",
+      "question": "저류층 깊이가 2800 m라는 정보만으로 그 지점의 정확한 정수압을 계산해줘. 이 정보만으로 정확한 값을 낼 수 없다면 무엇이 더 필요한지 밝혀줘.",
+      "answerable": false,
+      "required_claims": [
+        "Exact hydrostatic pressure cannot be determined from depth alone.",
+        "Fluid density or water salinity/pressure gradient is needed; hydrostatic pressure depends on fluid density and depth."
+      ],
+      "source_document": "Heriot-Watt University - Reservoir Engineering.pdf",
+      "source_page": 63,
+      "supporting_spans": [
+        {
+          "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p63:c1",
+          "text": "Its value depends on the density of the water ρw, which is affected by salinity."
+        },
+        {
+          "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p63:c2",
+          "text": "Pf = ρwDg"
+        }
+      ],
+      "gold_answer_summary": "Depth alone is insufficient: need fluid density/pressure gradient or water salinity; do not assume fresh-water density.",
+      "reasoning_rubric": "No invented exact pressure; state missing density or salinity/gradient, not generic refusal.",
+      "numeric_gold": null,
+      "accepted_units": [],
+      "numeric_tolerance": null,
+      "false_premise_correction": null,
+      "required_missing_inputs": [
+        "in-situ fluid density or pressure gradient",
+        "fluid salinity/composition if estimating density"
+      ]
+    },
+    "candidates": [
+      {
+        "label": "A",
+        "answer": "저류층 깊이(2800 m)만으로는 정수압을 정확히 계산할 수 없습니다. 정수압은 다음과 같은 요소들을 고려해야 합니다:\n\n1. **지표면 고도**: 지표면의 고도가 필요합니다. 예를 들어, 지표면이 해발 0m라면, 저류층 깊이가 2800m이면 수심이 2800m가 됩니다. 하지만 지표면이 해발 100m라면, 수심은 2700m가 됩니다.\n\n2. **지표면과 저류층의 고도 차이**: 이 차이를 이용해 수심(수압의 기준)을 계산해야 합니다.\n\n3. **지하수의 밀도**: 일반적으로 지하수의 밀도는 약 1000 kg/m³으로 가정되지만, 특정 지역에서는 약간 다를 수 있습니다.\n\n4. **중력 가속도**: 일반적으로 9.81 m/s²로 사용됩니다.\n\n정수압 계산 공식은 다음과 같습니다:\n\n$$\n\\text{정수압} = \\rho \\cdot g \\cdot h\n$$\n\n- $\\rho$: 지하수 밀도 (kg/m³)\n- $g$: 중력 가속도 (m/s²)\n- $h$: 수심 (m)\n\n따라서, **지표면 고도**가 추가되면 정수압을 계산할 수 있습니다."
+      },
+      {
+        "label": "B",
+        "answer": "현재 검색된 근거에서 다음 요청을 직접 뒷받침하는 관계를 검증하지 못했습니다: 이 정보만으로 정확한 값을 낼 수 ; 이 정보만으로 정확한 값을 낼 수",
+        "retrieved_evidence": [
+          {
+            "evidence_id": "KB1",
+            "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "page": 417,
+            "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p417:c0",
+            "score": 0.03278689,
+            "excerpt": "28\nmud hydrostatic pressure readings.  In this method the mud density, ρm , is \ndetermined over the whole interval from the mud hydrostatic pressure readings \ni.e. from the equation:\n              p\np\nD\nm\nm\nD\nm\n \n \n \n .\n \n=\n+\n=0\n0 4335 ρ\n \n(8)\nUnless mud segregation has occurred (something which is occasionally observed) \nthe mud hydrostatic readings should fall on a very good straight line of gradient \n0.4335 ρm; this requirement is, of course, used to monitor the performance of the \npressure transducer.  In the short interval over which a fluid gradient is sought \nthe formation pressures are now plotted against an equivalent mud column depth, \nD’, rather than the measured true vertical depth, D.  This equivalent depth is \ndefined from equation (8) as:\n              \nD\np\np\nm\nm\nD\nm\n'  \n ( .\n \n)\n=\n−\n(\n)\n=0\n0 4335 ρ\n \n(9)\nwhere ρm is the mud hydrostatic for the test in question and  and  pm\nD=0 are constants. \nThus the relative depth of tests in the short interval are established very accurately \nusing the mud hydrostatic pressure measurements.  This utilizes the very high \nresolution of modern gauges to determine depth differences: the method depends \non the assumption of mud homoge"
+          },
+          {
+            "evidence_id": "KB2",
+            "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+            "page": 64,
+            "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p64:c0",
+            "score": 0.03225806,
+            "excerpt": "4\n                      \nPressure  (psia)\nDepth (Ft.)\nFP\nGP\nOverburden\nPressure (OP)\nUnderpressure\nOverpressure\nNormal\n14.7\n(FP = Fluid Pressure, GP = Grain Pressure)\n0\nFigure 1  Gives the relationship between the lithostatic pressure and the hydrostatic \npressure. 1\nFluid pressure in hydrocarbon accumulations are dictated by the prevailing water \npressure in the vicinity of the reservoir.  In a normal situation the water pressure at \nany depth is:\n \nP\ndP\ndD\nx D\n14.7psia\nw\nwater\n= \n\n\n\n+\n \n \n \n \n \n(3)\nwhere dP/dD is the hydrostatic pressure gradient \nThis equation assumes continuity of water pressure from the surface and constant \nsalinity.  In most cases even though the water bearing sands are divided between \nimpermeable shales, any break of such sealing systems will lead to hydrostatic pres-\nsure continuity, but the salinity can vary with depth.\nReservoirs whose water pressure gradient when extrapolated to zero depth give an \nabsolute pressure equivalent to atmospheric pressure are called normal pressured \nreservoirs.\nEXERCISE 1\nIf the average pressure gradient in a region is 0.47 psi/ft, calculate the pore \npressure in a normally pressurised formation at 7400ft. Convert the"
+          },
+          {
+            "evidence_id": "KB3",
+            "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+            "page": 63,
+            "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p63:c1",
+            "score": 0.03174603,
+            "excerpt": "supported by water pressure.  If we use this geostatic pressure gradient of \n1 psi/ft. then the geostatic pressure Pov, in psig at a depth of D  feet is\n pov = 1.0D \n \n \n \n \n \n \n \n(1)\nThe geostatic pressure is balanced in part by the pressure of the fluid within the pore \nspace, the pore pressure, and also by the grains of rock under compaction. In un-\nconsolidated sands, loose sands, the overburden pressure is totally supported by the \nfluid  and the fluid pressure Pf is equal to the overburden pressure Pov .  In deposited \nformations like reservoir rocks the fluid pressure is not supporting the rocks above \nbut arises from the continuity of the aqueous phase  from the surface to the depth D in \nthe reservoir. This fluid pressure is called the hydrostatic pressure.  The hydrostatic \npressure is imposed by a column of fluid at rest. Its value depends on the density of \nthe water ρw, which is affected by salinity.  In a sedimentary basin, where sediment \nhas settled in a region of water and hydrocarbons have been generated and trapped, \nwe can expect a hydrostatic pressure. For a column of fresh water the hydrostatic \npressure is  0.433 psi/ft. For water with 55,000 ppm of dissolve"
+          },
+          {
+            "evidence_id": "KB4",
+            "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+            "page": 95,
+            "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p95:c0",
+            "score": 0.01538462,
+            "excerpt": "Department of Petroleum Engineering,  Heriot-Watt University\n51\n33\nPerformance of Flowing Wells\nThe method of using these curves to predict bottomhole pressure is (Refer Figure 23):\nGiven:\n Well Depth\n Tubing Size\n GLR\n Production Rate\n Tubing Diameter\nCalculate\nrequired THP\n                    \nDepth\nEquivalent\nto\nTHP\nActual\nDepth /\nLength of\nTubing\nDEPTH\nPth\nPwf\nPRESSURE\n(1)\nFrom the appropriate gradient curve for the specific GLR, Qo and tubing\ndiameter, calculate the depth or length of tubing equivalent to the tubing head\npressure Pth.\n(2)\nAdd the depth equivalent to the Pth to the actual depth of the well  to obtain the\ntotal equivalent depth.\n(3)\nEntering the curve with the total equivalent depth and from the intersection with\nthe gradient curve read off the equivalent pressure which is the bottomhole hole\nflowing pressure.\nThe gradient curves exhibit several interesting features:\n(1)\nIt can be seen that the slope of the curves or pressure gradient is a function of\ndepth.  This reflects the effects of phase expansion and slippage.\n(2)\nAs the GLR increases, the gradient declines.  This reflects the reduction in the\nhydrostatic head.\nFigure 23\nBottomhole Flowing\nPressure Predic"
+          },
+          {
+            "evidence_id": "KB5",
+            "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "page": 415,
+            "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p415:c0",
+            "score": 0.01492537,
+            "excerpt": "26\n7.3. FORCED GRADIENT TECHNIQUE\n     \nGas\nZone\nOil\nZone\nWater\nZone\nGradient forced\nto know fluid\ndensity\nTVD\nDGO\nDOW\nPressure\npg = p      +ρggD\nD=0\ng\npo = p     +ρogD\nD=0\no\npw = p     +ρwgD\nD=0\nw\nIn an unproduced field it is possible to determine the in-situ fluid densities by \nmeasurement of the observed hydrostatic gradients in the gas, oil or water zones \n(when present).  This is illustrated in Figure 26.  The fluid regimes are identified by \ninspection usually aided by overlaying lines of typical gas, oil and water gradients \non the pressure-depth data plot.  Once the individual zones have been selected a least \nsquares best fit straight line through the appropriate range of points is computed.  \nThese regression lines have the form:\n              p\np\nm D\ng\ng\nD\ng\n \n \n \n \n \n=\n+\n=0\n  gas zone \n(4a)\n              p\np\nm D\no\no\nD\no\n \n \n \n \n  \n=\n+\n=0\n  oil zone \n(4b)\n              p\np\nm D\nw\nw\nD\nw\n \n \n \n \n      \n=\n+\n=0\n  water zone \n(4c)\nand the slopes, m , and intercepts, pD=0 , of the respective best-fit straight lines \nare given by the regression routine.  Here D is true vertical depth measured \nfrom some datum D = 0.  The fluid densities are obtained from the fitted \nslopes; in f"
+          }
+        ]
+      },
+      {
+        "label": "C",
+        "answer": "저류층 **깊이 2800 m만으로는 정확한 정수압(수두압, hydrostatic pressure)을 계산할 수 없습니다.**\n\n정수압은 보통 다음으로 계산합니다:\n\n\\[\nP = \\rho g h\n\\]\n\n여기서 필요한 값은:\n- \\(\\rho\\): 유체 밀도\n- \\(g\\): 중력가속도\n- \\(h\\): 깊이\n\n깊이 \\(h = 2800\\ \\text{m}\\)는 주어졌지만, **유체 밀도 \\(\\rho\\)** 가 없어서 정확한 압력을 알 수 없습니다.\n\n### 추가로 필요한 정보\n정확한 정수압을 구하려면 최소한 다음이 필요합니다:\n1. **저류층 내 유체의 밀도**  \n   - 예: 물, 염수, 원유, 가스 혼합물 등\n2. 더 정확히는 **유체의 조성 및 온도/압력 조건**\n   - 밀도는 온도와 압력에 따라 달라질 수 있음\n3. 경우에 따라 **중력가속도 값**\n   - 보통 지구 표준값 \\(9.81\\ \\text{m/s}^2\\)를 사용하지만, 엄밀히는 위치에 따라 약간 다름\n\n### 참고: 물 기준의 대략값\n만약 **순수한 물**이라고 가정하면:\n\n\\[\nP \\approx 1000 \\times 9.81 \\times 2800\n= 27{,}468{,}000\\ \\text{Pa}\n\\]\n\n즉 약:\n- **27.5 MPa**\n- **275 bar**\n- **약 3978 psi**\n\n하지만 이는 **물이라는 가정**이 있을 때만 가능한 값입니다.\n\n원하시면 제가 **염수(예: 1.05~1.2 g/cm³)** 기준으로도 범위를 계산해드릴 수 있습니다."
+      }
+    ]
+  }
+}

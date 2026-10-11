@@ -1,0 +1,94 @@
+{
+  "labels": {
+    "A": "gpt_reference",
+    "B": "agent",
+    "C": "qwen_closed_book"
+  },
+  "payload": {
+    "frozen_policy": "# v17 final independent poster pilot — frozen evaluation policy\n\nThis is a **24-task pilot**, not an estimate of general petroleum-engineering performance. The primary paired ablation is qwen3:8b closed-book versus the frozen Petroleum RAG Agent using the same qwen3:8b base model. GPT-5.4 mini is a reference, not part of the primary comparison. No v16/v17 synthetic-development accuracy comparison is permitted.\n\n## Integrity and execution\n\n- Frozen product: `3c5f0fd1da77ac46cb8447ed13f9b8ad9b30d7c3`; evaluation branch only. No product, prompt, retrieval, Chroma, embedding, routing, or threshold change.\n- Exactly the `question` string in `benchmark.json` is sent to each tested system once. Attempts are durably recorded **before** each call. A failed or timed-out attempt is not retried. Incomplete phases remain incomplete, never silently shrink a denominator.\n- Agent: production `autonomous_goal_execution`, `qwen3:8b`, hybrid KB, web off, existing data and defaults. Closed-book systems get only the same question and the minimal instruction in the user request, no gold or KB. Reference exact model `gpt-5.4-mini-2026-03-17`, temperature zero, no tools. If unavailable, stop its portion without substitution.\n- Judge: exact `gpt-5.4-2026-03-05`, temperature zero, no tools/web or substitute; anonymous per-task randomized labels. One single-reviewer AI-assisted semantic adjudication call per task. Preserve all raw responses and judge input/output. Historical responses are not used.\n- Freeze benchmark, this policy, manifest, and duplicate check in commit `eval: freeze v17 final poster benchmark` before any tested model call. Afterward, only the administrative freeze-commit receipt/manifest pointer and run/results files may change. Gold, question, rubric, tolerance, category, and denominator never change.\n\n## Scores\n\n- Required claims are the independent frozen units in each task. Judge assigns each `1` correct/materially supported, `0.5` partially correct, `0` omitted/incorrect. Claim coverage is the task-wise mean of those values and then macro-averaged across tasks. Generic verbosity is not credit.\n- Goal success requires all frozen task requirements materially satisfied, every required claim score `1`, no materially false/invented factual claim or wrong requested calculation, and numeric validation if applicable. For Agent KB-grounded tasks, cited support must be semantically relevant to the claimed relation; citation ID presence alone is not support. For KB calculation, require the exact formula span and validated calculation provenance. For false premise, require explicit rejection, correction, and actual supporting evidence. For unanswerable, require nonidentifiability, specific missing inputs, and no invented numeric result; generic refusal fails.\n- Hallucination-free means no material false/invented factual claim or wrong requested calculation. Refusal alone is **not** hallucination. Record fabricated fact, incorrect refusal, omission, wrong calculation, and unsupported claim separately. Do not require closed-book systems to cite private KB.\n- Numeric accuracy denominator is the 10 calculation tasks only. Value must be within the frozen absolute **or** relative tolerance, and an accepted/equivalent unit must be attached to the asserted result. Intermediate/input numbers do not count. Unit omission fails with explicit reason. Judge identification of the result is cross-checked by deterministic numeric-and-unit scanning; the judge does not determine mathematical correctness by itself. Dimensionless values must be identified as dimensionless/unitless/무차원 or equivalent.\n- False-premise and unanswerable items retain their four-task Safety denominator. Overall Goal Success, Claim Coverage and Hallucination-free use 24 tasks for each system. Category goal success uses Knowledge 6, Reasoning 4, Calculation 10, Safety 4.\n- A stopped/WAITING Agent run on an answerable question with sufficient frozen evidence or input is an unnecessary refusal, even if its internal status says achieved. Judge user-visible answer, not internal success flags.\n\n## Diagnostics and uncertainty\n\n- Agent-only: actual action history, run status, iterations, telemetry fields, stage timing, relevant retrieved evidence, citations mapped to real source records, fallbacks, cross-language and numeric pipeline. A missing telemetry field is `unknown`, not success or zero. Stage times can overlap and must not be summed.\n- Citation semantic support is graded against the actual source excerpt; count only IDs actually in the final answer. Relevant-evidence checks compare retrieved content to frozen claims rather than lexical overlap. Citation metrics are supplementary and not a closed-book comparison.\n- Primary differences are Agent minus Qwen in percentage points. Paired bootstrap: 10,000 task-level resamples with replacement, seed `17172026`; numeric resamples use the 10 numeric paired items. Percentile 2.5/97.5 interval. Report sample size and wide intervals honestly.\n- Latency includes mean/median/p95 by system. Agent stage times are reported separately. API cost uses actual usage tokens and published list prices at analysis time; local hardware/electricity cost is not estimated. The poster demo trace is selected **after scoring** from an actual successful Agent run; no invented action.\n\n## Finalization\n\n`FINALIZED=true` only if 24 successful raw records per system, 24 complete judge records, all exact question hashes, unchanged product/backend/frontend, benchmark and policy hashes, unchanged Chroma snapshot, one attempt each, unchanged main, and no post-result tuning. Otherwise issue an incomplete report without performance ranking or reduced-denominator claims.\n",
+    "task": {
+      "id": "V17-17",
+      "category": "user_formula",
+      "domain": "pipeline",
+      "question": "Use the supplied line-loss relation P_loss = (0.055 psi/ft) × L + 3 psi. If L is 260 ft, what pressure loss does this model give?",
+      "answerable": true,
+      "required_claims": [
+        "The supplied model gives 0.055×260+3 = 17.3 psi."
+      ],
+      "source_document": null,
+      "source_page": null,
+      "supporting_spans": [],
+      "gold_answer_summary": "17.3 psi based solely on the user-specified model.",
+      "reasoning_rubric": "Use explicit formula and unit cancellation; do not claim this is a universal pressure-loss law.",
+      "numeric_gold": {
+        "value": 17.3,
+        "unit": "psi"
+      },
+      "accepted_units": [
+        "psi"
+      ],
+      "numeric_tolerance": {
+        "absolute": 0.05,
+        "relative": 0.002
+      },
+      "false_premise_correction": null,
+      "required_missing_inputs": []
+    },
+    "candidates": [
+      {
+        "label": "A",
+        "answer": "Using  \n\\[\nP_{\\text{loss}} = (0.055\\ \\text{psi/ft}) \\times L + 3\\ \\text{psi}\n\\]\nwith \\(L = 260\\ \\text{ft}\\):\n\n\\[\nP_{\\text{loss}} = 0.055 \\times 260 + 3 = 14.3 + 3 = 17.3\\ \\text{psi}\n\\]\n\n**Pressure loss: 17.3 psi**"
+      },
+      {
+        "label": "B",
+        "answer": "No direct relation span was verified for these requests in the retrieved evidence: If L is 260 ft, what pressure loss does this model give",
+        "retrieved_evidence": [
+          {
+            "evidence_id": "KB1",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 854,
+            "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p854:c2",
+            "score": 0.01639344,
+            "excerpt": "= 407.6 psia, pp(p = 407.6) = 1.617 × 107 psia2/cp. p after 10 years = 350 psia,\npp(p = 350) = 1.2239 × 107 psia2/cp. pb = 14.65 psia, pp(pb) = 2,674.8 psia2/cp.\nThe  pseudopressure  in  this  example  (and  all  others  in  this  section)  were  calculated  using\nthe methods suggested by Al-Hussainy et al.15 These methods, which involve numerical evalua-\ntion  of  the  integral  in  Eq.  8.97  and  which  require  computational  routines  to  estimate  gas\nviscosity, μ, and deviation factor, z, are widely available in basic reservoir fluid flow analysis\nsoftware.\nSolution.\nRawlins-Schellhardt  Analysis.  Plot  Δpp  vs.  q  on  log-log  graph  paper  (Fig.  8.115).  Table\n8.14  gives  the  plotting  functions.  Construct  the  best-fit  line  through  the  data  points.  All  data\npoints lie on the best-fit line and will be used for all subsequent calculations.\nNext, determine the deliverability exponent using least-squares regression analysis. Alterna-\ntively,  because  Points  1  and  4  both  lie  on  the  perceived  “best”  straight  line  through  the  test\ndata, the reciprocal slope is estimated to be\nV-846\nPetroleum Engineering Handbook—Vol. V\nPrint\nSearch\nHome\nBookmarks\nHel"
+          },
+          {
+            "evidence_id": "KB2",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 267,
+            "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p267:c0",
+            "score": 0.01639344,
+            "excerpt": "formation  or  transmission.  In  drilling  fluids,  energy  is  called  hydraulic  energy  or  commonly\nhydraulic horsepower.\nThe basic equation for hydraulic energy is\nH = (pq) / 1,714,\nwhere H = hydraulic horsepower, p = pressure (psi or kPa), q = flow rate (gal/min or L/min),\nand 1,714 is the conversion of (psi-gal/min) to hydraulic horsepower [or (kPa·L/min) = 44 750].\nRig pumps are the source of hydraulic energy carried by drilling fluids. This energy is com-\nmonly called the total hydraulic horsepower or pump hydraulic horsepower:\nH 1 = (p1q) / 1,714,\nwhere  H1  =  total  hydraulic  energy  (hydraulic  horsepower)  and  p1  =actual  or  theoretical  rig\npump pressure (psi). (See prior equation for metric conversion.) Note that the rig pump pres-\nsure  (p1)  is  the  same  as  the  total  pressure  loss  or  the  system  pressure  loss.  H1  is  the  total\nhydraulic energy (rig pump) required to counteract all friction energy (loss) starting at the Kel-\nly  hose  (surface  line)  and  Kelly,  down  the  drillstring,  through  the  bit  nozzles,  and  up  the\nannulus at a given flow rate (q).\nBit hydraulic energy, Hb, is the energy needed to counteract frictional energy (loss)"
+          },
+          {
+            "evidence_id": "KB3",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+            "page": 98,
+            "chunk_id": "d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p98:c1",
+            "score": 0.01538462,
+            "excerpt": "est’s numerical inversion algorithm8 as discussed in Sec. 3.3.2.\nThe dashed line in Fig. 3.3 represents the numerical inversion of the solution in Eq. 3.85. An-\nother option is to find an approximate inversion. One of these asymptotic forms is known as\nthe line-source solution and commonly used in transient-pressure analysis.\nTo obtain the line-source approximation of the solution given in Eq. 3.85, we assume that\nthe radius of the wellbore is small compared with the other dimensions of the reservoir. Thus,\nif we assume rw→0 and use the relation given in Eq. 3.56, we obtain\nFig.  3.3—Finite  wellbore  radius  (Eq.  3.85)  and  line-source  (Eq.  3.87  or  3.91)  solutions  for\nExample 3.1.\nChapter 3—Mathematics of Transient Analysis\nI-91\nHome\nSearch\nPrint\nHelp\nChapter 4\nChapter 2\nBookmarks"
+          },
+          {
+            "evidence_id": "KB4",
+            "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "page": 17,
+            "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p17:c0",
+            "score": 0.01470588,
+            "excerpt": "Institute of Petroleum Engineering,  Heriot-Watt University  \n17\n11\nRadial Flow\nwhich can be integrated between the limits:\n    r  =  rw ,  \np  =  pw          and \nr  =  re ,  \n \np  =  pe\nto give:\n \nq\nkh\ndr\nr\ndp\nr\nr\np\np\nw\ne\nw\ne\n∫\n= ∫\n2\nµ\nπ\n \n(19)\ni.e.\n \nq\nkh\nr\nr\np\np\ne\nw\ne\nw\n=\n−\n2\nµ\nπ\nln\n(\n) \n(20)\nThis may be written explicitly for the flow-rate as:\n \nq\nkh\nr\nr\np\np\ne\nw\ne\nw\n=\n−\n2π\nµln\n(\n) \n(20a)\nor explicitly for the pressure difference:\n \np\np\nq\nkh\nr\nr\ne\nw\ne\nw\n=\n−\n2\nµ\nπ\nln\n \n(20b)\nThe difference between the external pressure, pe , and the well bottom hole pressure, \npw, is known as the drawdown in petroleum engineering and equation (20) is the \nimportant relation between well production rate, q, drawdown and reservoir properties. \nSuch an equation is known as a well inflow model.  The radial flow integration and the \npressure distribution is illustrated in Figure 13. The drawdown is directly proportional \nto the production rate, q, and the oil viscosity, μ, and is inversely proportional to \nthe reservoir permeability thickness product, kh .  Note that both q and μ refer to \nin-situ reservoir conditions.  The invariance of these relationships is embodied in the \ndefinition of the dimen"
+          },
+          {
+            "evidence_id": "KB5",
+            "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+            "page": 20,
+            "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p20:c0",
+            "score": 0.01449275,
+            "excerpt": "20\n1.4.5.  Well Inflow Performance\nThe steady-state radial flow equation defines the relation between well production \nrate, qs , bottom hole pressure, pw , and reservoir pressure which is identified with \npe.  It is often convenient to represent this three variable interaction graphically in \nthe form of a plot of flowing bottom hole pressure as a function of production rate \nfor several values of the reservoir pressure as shown in Figure 15.  Normally q is on \na stock tank basis and the inflow equation is:\n \np\np\nB\nr\nr\nkh\nq\ne\nw\ne\nw\ns\n=\n−\n \n2\nµ\nπ\nln\n \n(29)\n                 \nSlope   -\n1\nJ\nRelation between the three key variables :\n•  Oil production rate, qs\n•  Bottom hole pressure, pw\n•  Reservoir pressure, pe\npe - pw\nDrawdown\nProduction rate, qs\n(S.T. bbl/day)\nBottom-hole pressure, pw\n(psi)\n(pe)1\n(pe)2\n(pe)3\nHence a plot of pw versus qs is a straight line of slope -1/Jsse and intercept pe.  Such \ndiagrams are very useful for matching well inflow and vertical lift performances; \nthis aspect will be treated in detail later.\n1.4.6.  Volume Average Pressure in Steady-State Flow\nThe pressure profile in a cylindrical steady-state flow system between r = rw and r \n= re, shown in Figure 14"
+          }
+        ]
+      },
+      {
+        "label": "C",
+        "answer": "To calculate the pressure loss using the given line-loss relation:\n\n$$\nP_{\\text{loss}} = (0.055 \\, \\text{psi/ft}) \\times L + 3 \\, \\text{psi}\n$$\n\nSubstitute $ L = 260 \\, \\text{ft} $:\n\n$$\nP_{\\text{loss}} = (0.055 \\times 260) + 3 = 14.3 + 3 = 17.3 \\, \\text{psi}\n$$\n\nThe pressure loss is **17.3 psi**."
+      }
+    ]
+  }
+}

@@ -1,0 +1,291 @@
+{
+  "FINALIZED": true,
+  "tasks": 24,
+  "numeric_tasks": 10,
+  "systems": {
+    "qwen_closed_book": {
+      "goal_success": 0.375,
+      "claim_coverage": 0.625,
+      "hallucination_free": 0.625,
+      "numeric_accuracy": 0.8,
+      "counts": {
+        "goal_success": 9,
+        "hallucination_free": 15,
+        "numeric_accuracy": 8,
+        "unnecessary_refusal": 0,
+        "fabricated_fact": 9,
+        "incorrect_refusal": 0,
+        "omission": 4,
+        "wrong_calculation": 1
+      },
+      "latency_seconds": {
+        "mean": 3.019185416666667,
+        "median": 2.1375285,
+        "p95": 8.183817
+      },
+      "category_goal_success": {
+        "Knowledge": 0.16666666666666666,
+        "Reasoning": 0.0,
+        "Calculation": 0.7,
+        "Safety": 0.25
+      }
+    },
+    "agent": {
+      "goal_success": 0.16666666666666666,
+      "claim_coverage": 0.30902777777777773,
+      "hallucination_free": 1.0,
+      "numeric_accuracy": 0.1,
+      "counts": {
+        "goal_success": 4,
+        "hallucination_free": 24,
+        "numeric_accuracy": 1,
+        "unnecessary_refusal": 15,
+        "fabricated_fact": 0,
+        "incorrect_refusal": 16,
+        "omission": 17,
+        "wrong_calculation": 0
+      },
+      "latency_seconds": {
+        "mean": 20.388839708333332,
+        "median": 21.153175500000003,
+        "p95": 38.36913215
+      },
+      "category_goal_success": {
+        "Knowledge": 0.5,
+        "Reasoning": 0.0,
+        "Calculation": 0.1,
+        "Safety": 0.0
+      }
+    },
+    "gpt_reference": {
+      "goal_success": 0.4583333333333333,
+      "claim_coverage": 0.8819444444444445,
+      "hallucination_free": 0.8333333333333334,
+      "numeric_accuracy": 0.9,
+      "counts": {
+        "goal_success": 11,
+        "hallucination_free": 20,
+        "numeric_accuracy": 9,
+        "unnecessary_refusal": 0,
+        "fabricated_fact": 4,
+        "incorrect_refusal": 0,
+        "omission": 2,
+        "wrong_calculation": 0
+      },
+      "latency_seconds": {
+        "mean": 3.2811567499999996,
+        "median": 2.671626,
+        "p95": 6.935710499999998
+      },
+      "category_goal_success": {
+        "Knowledge": 0.3333333333333333,
+        "Reasoning": 0.0,
+        "Calculation": 0.8,
+        "Safety": 0.25
+      }
+    }
+  },
+  "agent_diagnostics": {
+    "status_counts": {
+      "completed": 7,
+      "stopped": 13,
+      "waiting_for_user_input": 4
+    },
+    "internal_achieved": 7,
+    "mean_iterations": 2.1666666666666665,
+    "unnecessary_refusal_count": 15,
+    "unnecessary_refusal_rate_answerable": 0.6818181818181818,
+    "unnecessary_refusal_rate_all": 0.625,
+    "relevant_evidence_but_failed": 8,
+    "relevant_evidence_count": 11,
+    "relevant_to_non_refusal_count": 5,
+    "relevant_evidence_to_success": 3,
+    "fallback_attempted": 17,
+    "fallback_used": 7,
+    "fallback_successful_finalization": 3,
+    "citation_bearing_responses": 7,
+    "citation_link_count": 16,
+    "citation_semantic_support": 0.78125,
+    "exact_span_validation_pass_rate_cited": 1.0,
+    "cross_language": {
+      "count": 10,
+      "goal_success": 0.2,
+      "fallback_attempted": 8,
+      "fallback_used": 3,
+      "exact_span_validation_passed": 3,
+      "unnecessary_refusals": 6
+    },
+    "numeric_pipeline": {
+      "correct_route": 2,
+      "operand_validation_passed": 5,
+      "formula_ready": 3,
+      "calculation_ready": 2,
+      "calculation_executed": 2,
+      "calculation_validated": 2,
+      "numeric_accuracy": 1,
+      "calculation_provenance_complete": 2
+    },
+    "numeric_pipeline_unknown": {
+      "correct_route": 0,
+      "operand_validation_passed": 0,
+      "formula_ready": 0,
+      "calculation_ready": 0,
+      "calculation_executed": 0,
+      "calculation_validated": 0
+    },
+    "kb_formula_source_correct": 0,
+    "timing_stage_mean_seconds": {
+      "message_parsing_seconds": 0.00026021247807269293,
+      "planning_seconds": 0.05278829166666666,
+      "retrieval_seconds": 8.33188575,
+      "llm_generation_seconds": 10.026381375,
+      "python_seconds": 0.02220241666666667,
+      "verification_seconds": 11.082158541666667,
+      "evaluation_seconds": 7.267506041666667,
+      "synthesis_seconds": 2.7588483333333333
+    },
+    "stage_times_overlap": true,
+    "telemetry": {
+      "claim_language": {
+        "ko": 8,
+        "en": 8,
+        "None": 8
+      },
+      "evidence_language": {
+        "['en']": 13,
+        "[]": 3,
+        "None": 8
+      },
+      "semantic_support_checked": {
+        "True": 13,
+        "False": 3,
+        "None": 8
+      },
+      "semantic_support_model": {
+        "qwen3:8b": 13,
+        "None": 11
+      },
+      "intent_route": {
+        "knowledge_qa": 16,
+        "direct_calc": 2,
+        "user_formula_calc": 2,
+        "kb_formula_calc": 3,
+        "premise_check": 1
+      },
+      "source_requirement": {
+        "none": 19,
+        "user_formula": 2,
+        "kb_formula": 3
+      },
+      "final_answer_kind": {
+        "extractive_grounded": 5,
+        "refusal": 11,
+        "partial_grounded": 2,
+        "clarification": 4,
+        "calculation": 2
+      }
+    },
+    "multi_claim": [
+      {
+        "task_id": "V17-07",
+        "required_claim_count": 2,
+        "supported_claim_count": 0,
+        "partially_supported_claim_count": 0,
+        "contradicted_claim_count": 0,
+        "claim_coverage": 0.0
+      },
+      {
+        "task_id": "V17-08",
+        "required_claim_count": 2,
+        "supported_claim_count": 0,
+        "partially_supported_claim_count": 0,
+        "contradicted_claim_count": 0,
+        "claim_coverage": 0.0
+      },
+      {
+        "task_id": "V17-09",
+        "required_claim_count": 2,
+        "supported_claim_count": 0,
+        "partially_supported_claim_count": 1,
+        "contradicted_claim_count": 0,
+        "claim_coverage": 0.0
+      },
+      {
+        "task_id": "V17-10",
+        "required_claim_count": 1,
+        "supported_claim_count": 0,
+        "partially_supported_claim_count": 0,
+        "contradicted_claim_count": 0,
+        "claim_coverage": 0.0
+      }
+    ],
+    "relevant_to_non_refusal_rate": 0.45454545454545453
+  },
+  "paired_bootstrap": {
+    "goal_success": {
+      "difference": -0.20833333333333334,
+      "ci95": [
+        -0.4583333333333333,
+        0.041666666666666664
+      ],
+      "n": 24,
+      "resamples": 10000,
+      "seed": 17172026
+    },
+    "claim_coverage": {
+      "difference": -0.31597222222222227,
+      "ci95": [
+        -0.5416666666666666,
+        -0.08333333333333333
+      ],
+      "n": 24,
+      "resamples": 10000,
+      "seed": 17172026
+    },
+    "hallucination_free": {
+      "difference": 0.375,
+      "ci95": [
+        0.20833333333333334,
+        0.5833333333333334
+      ],
+      "n": 24,
+      "resamples": 10000,
+      "seed": 17172026
+    },
+    "numeric_accuracy": {
+      "difference": -0.7,
+      "ci95": [
+        -1.0,
+        -0.4
+      ],
+      "n": 10,
+      "resamples": 10000,
+      "seed": 17172026
+    }
+  },
+  "cost": {
+    "gpt_reference": {
+      "calls": 24,
+      "input_tokens": 1797,
+      "output_tokens": 6987,
+      "cached_tokens": 0,
+      "estimated_usd": 0.03278925
+    },
+    "judge": {
+      "calls": 24,
+      "input_tokens": 95200,
+      "output_tokens": 12754,
+      "cached_tokens": 0,
+      "estimated_usd": 0.42931
+    },
+    "local": "Local inference; hardware/electricity cost not estimated"
+  },
+  "product_sha": "3c5f0fd1da77ac46cb8447ed13f9b8ad9b30d7c3",
+  "freeze": {
+    "freeze_commit": "5cee4b28a0870f2cfa8ca8679d91a3e89cc29964",
+    "product_sha": "3c5f0fd1da77ac46cb8447ed13f9b8ad9b30d7c3",
+    "benchmark_sha256": "256e4081ba6914bf0283ade0e80f715a34598e1f265c464be8e813660771ec0d",
+    "policy_sha256": "ac7f9e73547a30507f060f548d8ff6f29326d7e59fc22579024167522ded3691",
+    "note": "Administrative receipt of the already-created freeze commit; frozen task and policy bytes were not changed."
+  }
+}

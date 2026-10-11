@@ -1,0 +1,101 @@
+{
+  "labels": {
+    "A": "qwen_closed_book",
+    "B": "gpt_reference",
+    "C": "agent"
+  },
+  "payload": {
+    "frozen_policy": "# v17 final independent poster pilot — frozen evaluation policy\n\nThis is a **24-task pilot**, not an estimate of general petroleum-engineering performance. The primary paired ablation is qwen3:8b closed-book versus the frozen Petroleum RAG Agent using the same qwen3:8b base model. GPT-5.4 mini is a reference, not part of the primary comparison. No v16/v17 synthetic-development accuracy comparison is permitted.\n\n## Integrity and execution\n\n- Frozen product: `3c5f0fd1da77ac46cb8447ed13f9b8ad9b30d7c3`; evaluation branch only. No product, prompt, retrieval, Chroma, embedding, routing, or threshold change.\n- Exactly the `question` string in `benchmark.json` is sent to each tested system once. Attempts are durably recorded **before** each call. A failed or timed-out attempt is not retried. Incomplete phases remain incomplete, never silently shrink a denominator.\n- Agent: production `autonomous_goal_execution`, `qwen3:8b`, hybrid KB, web off, existing data and defaults. Closed-book systems get only the same question and the minimal instruction in the user request, no gold or KB. Reference exact model `gpt-5.4-mini-2026-03-17`, temperature zero, no tools. If unavailable, stop its portion without substitution.\n- Judge: exact `gpt-5.4-2026-03-05`, temperature zero, no tools/web or substitute; anonymous per-task randomized labels. One single-reviewer AI-assisted semantic adjudication call per task. Preserve all raw responses and judge input/output. Historical responses are not used.\n- Freeze benchmark, this policy, manifest, and duplicate check in commit `eval: freeze v17 final poster benchmark` before any tested model call. Afterward, only the administrative freeze-commit receipt/manifest pointer and run/results files may change. Gold, question, rubric, tolerance, category, and denominator never change.\n\n## Scores\n\n- Required claims are the independent frozen units in each task. Judge assigns each `1` correct/materially supported, `0.5` partially correct, `0` omitted/incorrect. Claim coverage is the task-wise mean of those values and then macro-averaged across tasks. Generic verbosity is not credit.\n- Goal success requires all frozen task requirements materially satisfied, every required claim score `1`, no materially false/invented factual claim or wrong requested calculation, and numeric validation if applicable. For Agent KB-grounded tasks, cited support must be semantically relevant to the claimed relation; citation ID presence alone is not support. For KB calculation, require the exact formula span and validated calculation provenance. For false premise, require explicit rejection, correction, and actual supporting evidence. For unanswerable, require nonidentifiability, specific missing inputs, and no invented numeric result; generic refusal fails.\n- Hallucination-free means no material false/invented factual claim or wrong requested calculation. Refusal alone is **not** hallucination. Record fabricated fact, incorrect refusal, omission, wrong calculation, and unsupported claim separately. Do not require closed-book systems to cite private KB.\n- Numeric accuracy denominator is the 10 calculation tasks only. Value must be within the frozen absolute **or** relative tolerance, and an accepted/equivalent unit must be attached to the asserted result. Intermediate/input numbers do not count. Unit omission fails with explicit reason. Judge identification of the result is cross-checked by deterministic numeric-and-unit scanning; the judge does not determine mathematical correctness by itself. Dimensionless values must be identified as dimensionless/unitless/무차원 or equivalent.\n- False-premise and unanswerable items retain their four-task Safety denominator. Overall Goal Success, Claim Coverage and Hallucination-free use 24 tasks for each system. Category goal success uses Knowledge 6, Reasoning 4, Calculation 10, Safety 4.\n- A stopped/WAITING Agent run on an answerable question with sufficient frozen evidence or input is an unnecessary refusal, even if its internal status says achieved. Judge user-visible answer, not internal success flags.\n\n## Diagnostics and uncertainty\n\n- Agent-only: actual action history, run status, iterations, telemetry fields, stage timing, relevant retrieved evidence, citations mapped to real source records, fallbacks, cross-language and numeric pipeline. A missing telemetry field is `unknown`, not success or zero. Stage times can overlap and must not be summed.\n- Citation semantic support is graded against the actual source excerpt; count only IDs actually in the final answer. Relevant-evidence checks compare retrieved content to frozen claims rather than lexical overlap. Citation metrics are supplementary and not a closed-book comparison.\n- Primary differences are Agent minus Qwen in percentage points. Paired bootstrap: 10,000 task-level resamples with replacement, seed `17172026`; numeric resamples use the 10 numeric paired items. Percentile 2.5/97.5 interval. Report sample size and wide intervals honestly.\n- Latency includes mean/median/p95 by system. Agent stage times are reported separately. API cost uses actual usage tokens and published list prices at analysis time; local hardware/electricity cost is not estimated. The poster demo trace is selected **after scoring** from an actual successful Agent run; no invented action.\n\n## Finalization\n\n`FINALIZED=true` only if 24 successful raw records per system, 24 complete judge records, all exact question hashes, unchanged product/backend/frontend, benchmark and policy hashes, unchanged Chroma snapshot, one attempt each, unchanged main, and no post-result tuning. Otherwise issue an incomplete report without performance ranking or reduced-denominator claims.\n",
+    "task": {
+      "id": "V17-07",
+      "category": "reasoning",
+      "domain": "production_corrosion",
+      "question": "For CO₂-containing lift gas, explain why liquid water location matters for corrosion and why a high gas velocity can undermine continuous inhibitor protection. Use the internal production text.",
+      "answerable": true,
+      "required_claims": [
+        "CO₂-bearing natural gas is corrosive in the presence of liquid rather than gaseous water.",
+        "Corrosion risk should be inspected at low points where liquid water collects.",
+        "High gas velocity can strip corrosion inhibitor from metal surfaces and remove protection."
+      ],
+      "source_document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+      "source_page": 186,
+      "supporting_spans": [
+        {
+          "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p186:c1",
+          "text": "Natural gas containing carbon dioxide is only corrosive in the presence of liquid water rather than gaseous water."
+        },
+        {
+          "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p186:c1",
+          "text": "where liquid water can collect (the bottom of pipelines, low points in undulating pipelines etc.)"
+        },
+        {
+          "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p186:c1",
+          "text": "will strip the inhibitor from the metal surfaces and remove this protection"
+        }
+      ],
+      "gold_answer_summary": "Liquid water enables CO₂ corrosion at collection points; high gas velocities can remove protective inhibitor films.",
+      "reasoning_rubric": "Three separate source-grounded claims; avoid unconditional CO₂ corrosion without water.",
+      "numeric_gold": null,
+      "accepted_units": [],
+      "numeric_tolerance": null,
+      "false_premise_correction": null,
+      "required_missing_inputs": []
+    },
+    "candidates": [
+      {
+        "label": "A",
+        "answer": "For CO₂-containing lift gas, the location of liquid water is critical for corrosion because water acts as a medium for the dissolution and transport of corrosive CO₂. When liquid water is present, it forms an acidic environment due to the reaction between CO₂ and water, producing carbonic acid. This acid lowers the pH, which accelerates the electrochemical corrosion of metallic surfaces, particularly steel.\n\nA high gas velocity can undermine continuous inhibitor protection because it increases the turbulence and shear stress in the liquid film. This disrupts the uniform distribution of corrosion inhibitors, reducing their effectiveness. High velocity can also cause mechanical erosion, further compromising the integrity of the metal surface and reducing the overall effectiveness of inhibitor action."
+      },
+      {
+        "label": "B",
+        "answer": "In CO₂-containing lift gas systems, **where the liquid water sits** is critical because corrosion only becomes severe when **water is present as a continuous phase on the metal surface**.\n\n- If water **collects in low spots, dead legs, or along the pipe wall**, it can form a persistent wet film or pool.\n- That water absorbs CO₂ and becomes **carbonic acid**, which drives corrosion.\n- If the water is **well dispersed or quickly removed**, the metal is less likely to stay continuously wetted, so corrosion risk is lower.\n\nA **high gas velocity** can also undermine continuous inhibitor protection because it can **strip away or prevent the inhibitor film from staying on the steel surface**.\n\n- Corrosion inhibitors work by forming a **protective film** on the metal.\n- At high velocity, the flowing gas/liquid can **shear off that film**, especially in areas with turbulence or impingement.\n- High velocity can also **disrupt liquid hold-up patterns**, making it harder for the inhibitor to remain evenly distributed.\n- So even if inhibitor is injected continuously, the protection may become **patchy or temporary** rather than stable.\n\nIn short: **liquid water location controls where corrosion can occur, and high gas velocity can remove the inhibitor barrier needed to stop it.**"
+      },
+      {
+        "label": "C",
+        "answer": "No direct relation span was verified for these requests in the retrieved evidence: For CO₂-containing lift gas, explain why liquid water location matters for corrosion; why a high gas velocity can undermine continuous inhibitor protection",
+        "retrieved_evidence": [
+          {
+            "evidence_id": "KB1",
+            "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+            "page": 145,
+            "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p145:c0",
+            "score": 0.04891592,
+            "excerpt": "Department of Petroleum Engineering,  Heriot-Watt University\n9\n33\nGas Lift\nproductivity and the volume of liquid displaced to the surface by the plunger.  This\nmethod is described in greater detail in chapter 3.12.\nGas lift has been applied to a wide range of production scenarios - as can be seen from\nTable 1.  In fact, gas lift is the only artificial lift method that actually works better in\na well that is producing at a significant gas/liquid ratio.  Gas lift is often the preferred\nartificial lift method for wells with a:\n(i)\nhigh gas-oil ratio;\n(ii)\nhigh productivity index;\n(iii) (relatively) high bottom hole pressure due to reservoir pressure support being\nprovided by a natural or artificial water drive.\n          \n1\nProduction wells which will not flow naturally.\n2\nIncrease production rate in flowing wells.\n3\nUnload liquid from wells that will flow naturally once on production.\n4\nUnload liquid in wet gas wells which would otherwise cease to flow.\n5\nBack flow injection wells.\n6\nLift aquifer wells.\nThe key point of gas lift is that a reliable, adequate (in terms of pressure and flow rate)\ngas supply has to be available at all times.  The proviso at the end of the sentence is\nthe"
+          },
+          {
+            "evidence_id": "KB2",
+            "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+            "page": 176,
+            "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p176:c1",
+            "score": 0.0297619,
+            "excerpt": "which natural flow ceases.  It should be\nremembered that the form of the Inflow Performance Relationship used to describe\nfluid inflow from the formation (e.g. Vogel or “straight line PI”) will have an impact\non these calculations.\n                       \nWell production rate\nSandface flowing pressure\nReservoir inflow at various water cuts\n60%\n40%\n20%\n80%\n0%\nTubing outflow at various water cuts 80%\n0%\nWe will assume that Gas Lift has already been identified as the most suitable form of\nartificial lift for this well and an operating valve has been installed at a suitable depth.\nThe impact of the injection of varying amounts of gas on the well production rate is\nevaluated in Figure 24.  Figure 25, a plot of production performance against lift gas\ninjection rate can now be derived.  It can be seen that the injection of the first 1.25\nMMscf/d of lift gas leads to a rapid increase in production rate.  Further increases in\nthe rate of gas injection yields ever reducing benefits until a maximum production rate\nis reached at 2.5 MMscf/d.  The same data are plotted in Figure 26.  Here the lift gas\ninjection rate is represented as a Gas-Liquid Ratio - the sum of the Produced fluid gas\nliquid"
+          },
+          {
+            "evidence_id": "KB3",
+            "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+            "page": 129,
+            "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p129:c1",
+            "score": 0.02574682,
+            "excerpt": "ump Change Cost\nSavings on \"total cost of ownership\"\n180% of ESP\n18% of ESP\n125% of ESPCP \n13% of ESPCP\n15%\n*Data provided by Thomas Lutz to the conference on Artificial Lift Equipment '97,\n Dubai, December 1997\n10. HYBRID SYSTEMS\nThe combination of two forms of artificial lift has been used in a few cases. Most\nhybrid systems combine gas lift with one of the other types of artificial lift. For\nexample it has been shown that injection of gas above an ESP or PCP can reduce the\nhydrostatic head against which the positive displacement pump (e.g. ESP, PCP etc.)\nis pumping against by upto 40%. This can lead to a significant increase in pump\nperformance. It may also allow the well to continue to produce even when the pump\nis experiencing mechanical problems e.g. ESPs are susceptible to high levels of sand\nproduction and may show frequent failure. Gas lift is tolerant of sand production and\nwill often be capable of drawing the well down sufficiently that production continues,\nalthough at a lower rate compared to when the pump is operational.\n         \n•  \nIncreased volumetric efficiency - higher liquid volumes.\n•  \nDecreased injection gas requirements compared to gas lift alone.\n•  \nIncre"
+          },
+          {
+            "evidence_id": "KB4",
+            "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+            "page": 36,
+            "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p36:c1",
+            "score": 0.02625418,
+            "excerpt": "ative of deferring gas sales due to its\ninjection would bear an economic cost.\n2.2.2  Supplementing the Vertical Lift Process\nThere are several techniques which are available to assist in bringing oil to surface\nand these are collectively referred to as Artificial Lift Techniques.  These processes\nare widely applied in all geographical areas.  In some cases, they are essential to the\ninitial economic development of a hydrocarbon reservoir whilst in other cases they are\nimplemented later in the life of the field to maintain production at economic levels.\nThe various techniques can be further classified into those which simply provide\nadditional energy to assist the lift process and those which provide some reduction in\nthe vertical lift pressure gradient.\n(1)\nGas Lift\nThe gas lift process involves the injection of gas normally into the annulus between\nthe production tubing and casing. The gas is subsequently allowed to enter the\nflowstream within the production tubing at some specific depth through a single or\nmore usually a series of gas lift valves (Figure 15).  The injection of gas into the\nproduction tubing provides a stepwise increase in the gas liquid ratio of the fluids\nflowi"
+          },
+          {
+            "evidence_id": "KB5",
+            "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+            "page": 172,
+            "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p172:c0",
+            "score": 0.02862903,
+            "excerpt": "1\n32\n                  \n9 5/8\" Casing\n7\" VAM/Hydril Production Tubing\nS.S.S.V. Nipple with\nFlow Coupling\nNipple\nLanding Nipple\nNipple\nNipple\n7\" Liner\nSide Pocket Mandrels\nfor Subsequent Gas Lift \nPerforated flow Tube\nRetrievable Packer\nCOMPLETION  NO. 5  (Figure 21)\nThis illustrates a completion which utilises gas lift to allow production to occur or to\nincrease production rates. The string comprises several side pocket mandrels containing\ninjection valves at various depths which are designed to open and allow gas to enter\nthe tubing from the annulus. The design utilises a retrievable packer which is\npreferable if it is suspected that a completion will require mechanical repair at frequent\nintervals, e.g. to replace non-operating gas lift valves.\nFigure 21\nSingle Zone Completion\nUtilising a Gas Lift Facility"
+          }
+        ]
+      }
+    ]
+  }
+}

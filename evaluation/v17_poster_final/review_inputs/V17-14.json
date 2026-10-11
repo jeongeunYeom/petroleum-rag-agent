@@ -1,0 +1,95 @@
+{
+  "labels": {
+    "A": "gpt_reference",
+    "B": "agent",
+    "C": "qwen_closed_book"
+  },
+  "payload": {
+    "frozen_policy": "# v17 final independent poster pilot — frozen evaluation policy\n\nThis is a **24-task pilot**, not an estimate of general petroleum-engineering performance. The primary paired ablation is qwen3:8b closed-book versus the frozen Petroleum RAG Agent using the same qwen3:8b base model. GPT-5.4 mini is a reference, not part of the primary comparison. No v16/v17 synthetic-development accuracy comparison is permitted.\n\n## Integrity and execution\n\n- Frozen product: `3c5f0fd1da77ac46cb8447ed13f9b8ad9b30d7c3`; evaluation branch only. No product, prompt, retrieval, Chroma, embedding, routing, or threshold change.\n- Exactly the `question` string in `benchmark.json` is sent to each tested system once. Attempts are durably recorded **before** each call. A failed or timed-out attempt is not retried. Incomplete phases remain incomplete, never silently shrink a denominator.\n- Agent: production `autonomous_goal_execution`, `qwen3:8b`, hybrid KB, web off, existing data and defaults. Closed-book systems get only the same question and the minimal instruction in the user request, no gold or KB. Reference exact model `gpt-5.4-mini-2026-03-17`, temperature zero, no tools. If unavailable, stop its portion without substitution.\n- Judge: exact `gpt-5.4-2026-03-05`, temperature zero, no tools/web or substitute; anonymous per-task randomized labels. One single-reviewer AI-assisted semantic adjudication call per task. Preserve all raw responses and judge input/output. Historical responses are not used.\n- Freeze benchmark, this policy, manifest, and duplicate check in commit `eval: freeze v17 final poster benchmark` before any tested model call. Afterward, only the administrative freeze-commit receipt/manifest pointer and run/results files may change. Gold, question, rubric, tolerance, category, and denominator never change.\n\n## Scores\n\n- Required claims are the independent frozen units in each task. Judge assigns each `1` correct/materially supported, `0.5` partially correct, `0` omitted/incorrect. Claim coverage is the task-wise mean of those values and then macro-averaged across tasks. Generic verbosity is not credit.\n- Goal success requires all frozen task requirements materially satisfied, every required claim score `1`, no materially false/invented factual claim or wrong requested calculation, and numeric validation if applicable. For Agent KB-grounded tasks, cited support must be semantically relevant to the claimed relation; citation ID presence alone is not support. For KB calculation, require the exact formula span and validated calculation provenance. For false premise, require explicit rejection, correction, and actual supporting evidence. For unanswerable, require nonidentifiability, specific missing inputs, and no invented numeric result; generic refusal fails.\n- Hallucination-free means no material false/invented factual claim or wrong requested calculation. Refusal alone is **not** hallucination. Record fabricated fact, incorrect refusal, omission, wrong calculation, and unsupported claim separately. Do not require closed-book systems to cite private KB.\n- Numeric accuracy denominator is the 10 calculation tasks only. Value must be within the frozen absolute **or** relative tolerance, and an accepted/equivalent unit must be attached to the asserted result. Intermediate/input numbers do not count. Unit omission fails with explicit reason. Judge identification of the result is cross-checked by deterministic numeric-and-unit scanning; the judge does not determine mathematical correctness by itself. Dimensionless values must be identified as dimensionless/unitless/무차원 or equivalent.\n- False-premise and unanswerable items retain their four-task Safety denominator. Overall Goal Success, Claim Coverage and Hallucination-free use 24 tasks for each system. Category goal success uses Knowledge 6, Reasoning 4, Calculation 10, Safety 4.\n- A stopped/WAITING Agent run on an answerable question with sufficient frozen evidence or input is an unnecessary refusal, even if its internal status says achieved. Judge user-visible answer, not internal success flags.\n\n## Diagnostics and uncertainty\n\n- Agent-only: actual action history, run status, iterations, telemetry fields, stage timing, relevant retrieved evidence, citations mapped to real source records, fallbacks, cross-language and numeric pipeline. A missing telemetry field is `unknown`, not success or zero. Stage times can overlap and must not be summed.\n- Citation semantic support is graded against the actual source excerpt; count only IDs actually in the final answer. Relevant-evidence checks compare retrieved content to frozen claims rather than lexical overlap. Citation metrics are supplementary and not a closed-book comparison.\n- Primary differences are Agent minus Qwen in percentage points. Paired bootstrap: 10,000 task-level resamples with replacement, seed `17172026`; numeric resamples use the 10 numeric paired items. Percentile 2.5/97.5 interval. Report sample size and wide intervals honestly.\n- Latency includes mean/median/p95 by system. Agent stage times are reported separately. API cost uses actual usage tokens and published list prices at analysis time; local hardware/electricity cost is not estimated. The poster demo trace is selected **after scoring** from an actual successful Agent run; no invented action.\n\n## Finalization\n\n`FINALIZED=true` only if 24 successful raw records per system, 24 complete judge records, all exact question hashes, unchanged product/backend/frontend, benchmark and policy hashes, unchanged Chroma snapshot, one attempt each, unchanged main, and no post-result tuning. Otherwise issue an incomplete report without performance ranking or reduced-denominator claims.\n",
+    "task": {
+      "id": "V17-14",
+      "category": "direct_calculation",
+      "domain": "surface_facilities",
+      "question": "A transfer line delivered 960 bbl of oil; 135 bbl were diverted to slops. What net oil volume reached the receiving tank?",
+      "answerable": true,
+      "required_claims": [
+        "Net delivered volume is 960−135 = 825 bbl."
+      ],
+      "source_document": null,
+      "source_page": null,
+      "supporting_spans": [],
+      "gold_answer_summary": "825 bbl reached the receiving tank.",
+      "reasoning_rubric": "Subtract diverted from gross delivered volume.",
+      "numeric_gold": {
+        "value": 825,
+        "unit": "bbl"
+      },
+      "accepted_units": [
+        "bbl",
+        "barrels"
+      ],
+      "numeric_tolerance": {
+        "absolute": 0.05,
+        "relative": 0.001
+      },
+      "false_premise_correction": null,
+      "required_missing_inputs": []
+    },
+    "candidates": [
+      {
+        "label": "A",
+        "answer": "Net oil volume to the receiving tank = **960 bbl - 135 bbl = 825 bbl**."
+      },
+      {
+        "label": "B",
+        "answer": "No direct relation span was verified for these requests in the retrieved evidence: What net oil volume reached the receiving tank",
+        "retrieved_evidence": [
+          {
+            "evidence_id": "KB1",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+            "page": 204,
+            "chunk_id": "d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p204:c2",
+            "score": 0.03226646,
+            "excerpt": "also\nmay be used in tanks up to and including a capacity of 1,000 bbl.\nIn a tank larger than 1,000-bbl capacity that contains more than 10 ft and up to 15 ft of\nliquid, equal-volume samples should be taken (1) 6 in. below the top surface of the liquid and\n(2) at the outlet connection of the merchantable oil, in the order named. This method may be\nused on tanks up to and including a capacity of 1,000 bbl.\nIn  a  tank  larger  than  1,000-bbl  capacity  that  contains  10  ft  or  less  of  liquid,  one  sample\nmay be taken in the middle of the column of liquid.\n7. Place the BS&W composite sample in a sample container. The sample should be a blend\nof  the  upper,  middle,  and  lower  samples  (if  three  samples  were  required),  containing  equal\nparts from the samples taken.\n8. Seal the sample container. In the lower 48 states, with the exception of California, the\nsample is ready to be tested for BS&W, as described in Step 17. In California, the container\nshould be labeled and delivered to the laboratory for BS&W determination. (Note: These U.S.\nstate references were part of the original standard.)\n9. With a thief, take a sample for gravity determination. The sample should be t"
+          },
+          {
+            "evidence_id": "KB2",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+            "page": 515,
+            "chunk_id": "3ef043ce163a7809b2d9e47c3676b2f3afdac2d7570be1005afaaaa36942e61c:p515:c0",
+            "score": 0.02661401,
+            "excerpt": "One alternative to bolted construction is the shop welded storage tank. The size and capaci-\nties of this type of tank are limited primarily by the method of transportation used to transfer\nthe shop built tank to the final production site. The eleventh edition of API Spec. 12F, Shop\nWelded Tanks for Storage of Production Liquids provides standard designs for capacities of 90\nto  500  bbl.  Table  13.1  presents  a  partial  listing  of  the  standard  sizes  specified  in  API  Spec.\n12F. In this table, “working capacity” refers to the maximum amount of oil that can be stored\nbetween the oil outlet and the overflow connection.\nShop-welded  storage  tanks  provide  the  production  industry  with  tanks  of  adequate  safety\nand reasonable economy for use in the storage of crude petroleum and other liquids commonly\nhandled by the production segment of the industry. A shop-fabricated tank is tested for leaks in\nthe shop, so it is ready for use once it arrives on site. Tanks are transferred from the truck to\nthe  final  location  on  site;  completed  piping  connections  and  the  tank  is  then  ready  to  be\nbrought on line.\nA second alternative for bolted construction is the shop"
+          },
+          {
+            "evidence_id": "KB3",
+            "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+            "page": 1217,
+            "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p1217:c1",
+            "score": 0.01515152,
+            "excerpt": "7  shows  how  the  incremental  oil  production  for  these  treatments  increased  as  the\namount of gel injected per perforated foot increased. Gel treatment volumes for this series of\ntreatments ranged up to 37,000 bbl of gel injected. The trend depicted in Fig. 13.27 cannot be\nextrapolated  to  an  infinite  volume  of  incremental  oil  production.  This  curve  must  eventually\nbend over and not exceed the recoverable amount of oil in any given reservoir. However, for\nthe volumes of gel injected for this series of gel treatments, the volume of gel injected had not\nyet begun to approach the volume of gel required to cause the curve to bend over.\nGel treatment volumes of 25 to 50 bbl (100 bbl in specialized cases) of gel injection per\nperforated foot of reservoir producing interval have been reported to have been injected during\nsuccessful CC/AP gel water-shutoff treatments of production wells of naturally fractured reser-\nvoirs.5 One to two barrels of gel per foot of treated wellbore interval were injected during a\nseries  of  total-shutoff  CC/AP  gel  treatments  that  were  successfully  applied  as  chemical  liner\nFig. 13.27—Incremental oil production vs. volume of gel i"
+          },
+          {
+            "evidence_id": "KB4",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+            "page": 778,
+            "chunk_id": "d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p778:c2",
+            "score": 0.0298574,
+            "excerpt": "est Texas Intermediate (WTI) delivered at Cushing, Oklahoma.\nWTI is the underlying product for the New York Mercantile Exchange (NYMEX) futures\nprices. According to the NYMEX, “crude oil is the world’s most actively traded commodity.\nOver the past decade, the NYMEX division light, sweet (low-sulfur) crude-oil futures contract\nhas become the world’s most liquid forum for crude oil trading, as well as the world’s largest\nvolume futures contract trading on a physical commodity. Because of its excellent liquidity and\nprice  transparency,  the  contract  is  used  as  a  principal  international  pricing  benchmark.”2  The\nphysical  specifications for  WTI  on  the  NYMEX  are  “crudes  with  0.42%  sulfur  by  weight  or\nless, not less than 37°API gravity nor more than 42°API gravity.” Since 1992, the spot price of\nWTI has been as low as $10.50/bbl in December 1998 and as high as more than $36.00/bbl in\nthe fall of 2000.\nThe actual price received by a producer is usually set for several days or one month at a\ntime  and  may  include  a  transportation  charge,  which  reduces  the  effective  price,  or  a  bonus\ndepending upon the supply and demand conditions in the local area. Many r"
+          },
+          {
+            "evidence_id": "KB5",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+            "page": 779,
+            "chunk_id": "d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p779:c1",
+            "score": 0.02941813,
+            "excerpt": "forecast  in  the  same  manner  as  previously  described  for  oil.  The  Henry  Hub\nfuture  price  from  the  NYMEX  is  adjusted  for  “basis”  differential.  Fig.  16.3  shows  the\nNYMEX gas strip as of September 1, 2001.\nThe NYMEX trades in “paper barrels,” in which the seller of a contract either has to pur-\nchase an offsetting contract or deliver a specified volume of a specified quality of hydrocarbon\nat  a  specified  location.  A  contract  on  the  NYMEX  consists  of  1,000  bbl  of  crude  or  10,000\nMMBtu of gas. The forward strip shows the month when the crude or natural gas will have to\nbe delivered; the prices at which the contract traded during the day; the number of contracts\nFig. 16.2—NYMEX light sweet crude oil futures prices as of September 1, 2001 (after NYMEX2).\nI-772\nPetroleum Engineering Handbook—Vol. I\nHome\nSearch\nPrint\nHelp\nChapter 17\nChapter 15\nBookmarks"
+          }
+        ]
+      },
+      {
+        "label": "C",
+        "answer": "The net oil volume that reached the receiving tank is **825 bbl**.  \n\n**Calculation:**  \n960 bbl (total) - 135 bbl (diverted to slops) = **825 bbl**."
+      }
+    ]
+  }
+}
