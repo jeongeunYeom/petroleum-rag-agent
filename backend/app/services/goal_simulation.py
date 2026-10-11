@@ -189,6 +189,27 @@ def _arithmetic_value(node: ast.AST, values: dict[str, float]) -> float:
     raise ValueError("unsupported user formula expression")
 
 
+def _combine_formula_units(left: str, right: str, *, divide: bool) -> str:
+    """Cancel only identical literal unit factors; never infer a conversion."""
+    def factors(unit: str) -> tuple[list[str], list[str]]:
+        parts = unit.split("/")
+        numerator = [part for part in parts[0].split("*") if part and part != "1"]
+        denominator = [factor for part in parts[1:] for factor in part.split("*") if factor]
+        return numerator, denominator
+
+    left_num, left_den = factors(left)
+    right_num, right_den = factors(right)
+    numerator = left_num + (right_den if divide else right_num)
+    denominator = left_den + (right_num if divide else right_den)
+    for factor in numerator[:]:
+        counterpart = next((item for item in denominator if item.casefold() == factor.casefold()), None)
+        if counterpart is not None:
+            numerator.remove(factor)
+            denominator.remove(counterpart)
+    top = "*".join(numerator) or ("1" if denominator else "")
+    return top + ("/" + "/".join(denominator) if denominator else "")
+
+
 def _formula_output_unit(node: ast.AST, units: dict[str, str]) -> str:
     """Infer simple dimensions from the same bounded AST used for numeric validation."""
     if isinstance(node, ast.Constant):
@@ -206,13 +227,9 @@ def _formula_output_unit(node: ast.AST, units: dict[str, str]) -> str:
             raise ValueError("incompatible user formula units")
         return left
     if isinstance(node.op, ast.Mult):
-        return "*".join(part for part in (left, right) if part)
+        return _combine_formula_units(left, right, divide=False)
     if isinstance(node.op, ast.Div):
-        if not right:
-            return left
-        if left.casefold() == right.casefold():
-            return ""
-        return f"{left}/{right}" if left else f"1/{right}"
+        return _combine_formula_units(left, right, divide=True)
     if isinstance(node.op, ast.Pow):
         exponent = node.right.value
         return "" if not left or exponent == 0 else left if exponent == 1 else f"{left}^{exponent}"

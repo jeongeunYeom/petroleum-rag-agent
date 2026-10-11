@@ -697,9 +697,25 @@ class GoalExecutionAgent(GoalResearchAgent):
         return result
 
     @staticmethod
-    def _focus_research_answer(candidate: str, criteria: list[GoalCriterion]) -> str:
+    def _focus_research_answer(candidate: str, criteria: list[GoalCriterion],
+                               question: str = "") -> str:
         """Discard tangential cited lines when a research goal has distinct subgoals."""
         if len(criteria) < 2:
+            translated = " ".join(english for korean, english in ENGINEERING_TERMS.items()
+                                  if korean in question)
+            terms = set(re.findall(r"[a-z]{4,}", (question + " " + translated).casefold())) - {
+                "what", "which", "does", "this", "that", "explain", "describe", "using",
+                "internal", "knowledge", "source", "evidence", "please", "affect",
+                "affects", "relationship", "between", "about", "with", "from",
+            }
+            if len(terms) >= 2 and not re.search(r"\band\b|와|과|및", question, re.I):
+                cited = [line.strip() for line in candidate.splitlines()
+                         if re.search(r"\[(?:KB|WEB|FIG)\d+\]", line)]
+                scores = [len(terms & set(re.findall(r"[a-z]{4,}", line.casefold())))
+                          for line in cited]
+                if scores and max(scores) >= 2:
+                    focused = [line for line, score in zip(cited, scores) if score == max(scores)]
+                    return "\n".join(focused[:3])
             return candidate
         words = [set(re.findall(r"[a-z]{4,}", item.description.casefold())) for item in criteria]
         common = set.intersection(*words)
@@ -1022,16 +1038,20 @@ class GoalExecutionAgent(GoalResearchAgent):
             "centered_difference", "linear_regression_slope", "percentage_decrease",
             "net_difference", "cylinder_volume", "power_times_duration",
             "concentration_mass_per_volume", "weighted_average_by_duration"})
-        direct_orders, direct_missing = direct_operation_operands(user_text, users, direct_operations)
+        direct_users = users.named_operands(user_text, direct_operations)
+        direct_orders, direct_missing = direct_operation_operands(user_text, direct_users, direct_operations)
         if intent.kind == GoalIntentKind.DIRECT_CALC:
-            direct_missing.extend(direct_readiness(user_text, users, direct_operations))
+            direct_missing.extend(direct_readiness(user_text, direct_users, direct_operations))
+            if users.records and not direct_users.records:
+                direct_missing.append("명시한 계산 대상 값")
         if intent.kind == GoalIntentKind.DIRECT_CALC and not users.records:
             direct_missing.append("계산에 사용할 입력값")
         if "std_unspecified" in direct_operations:
             direct_missing.append("표준편차의 모/표본 구분")
         result.telemetry["calculation"] = {"requested_operation_family": ",".join(direct_operations),
                                            "direct_calc_ready": bool(direct_fast and users.records and not direct_missing),
-                                           "missing_operands": direct_missing}
+                                           "missing_operands": direct_missing,
+                                           "selected_input_fact_ids": [item.fact_id for item in direct_users.records]}
         for stage in ("planning_seconds", "retrieval_seconds", "llm_generation_seconds",
                       "python_seconds", "verification_seconds", "evaluation_seconds",
                       "synthesis_seconds"):
@@ -1240,7 +1260,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                 elif (action.action_type == GoalActionType.CALCULATE and direct_fast):
                     python_started = time.perf_counter()
                     computation = await run_direct_arithmetic(
-                        get_settings(), request, run_id, users, direct_operations,
+                        get_settings(), request, run_id, direct_users, direct_operations,
                         f"CALC{len(result.computations) + 1}", direct_orders)
                     self._add_time(result, "python_seconds", time.perf_counter() - python_started)
                     if not self._provenance_complete(
@@ -1543,7 +1563,8 @@ class GoalExecutionAgent(GoalResearchAgent):
                     result.current_stage = "verify"
                     self._notify(result, on_progress)
                     if not result.computations:
-                        latest_candidate = self._focus_research_answer(latest_candidate, criteria)
+                        latest_candidate = self._focus_research_answer(
+                            latest_candidate, criteria, request.topic)
                     grounded_premise_answer = DrillingValidator().grounded_correction(
                         f"{request.topic}\n{request.goal or ''}", evidence, korean)
                     if grounded_premise_answer:

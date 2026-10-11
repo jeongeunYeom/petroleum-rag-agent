@@ -44,6 +44,7 @@ class GoalIntent:
 
 
 _CALC = re.compile(r"\b(?:calculat\w*|comput\w*|determine|mean|average|sum|ratio|difference|rank\w*|median|variance|deviation|interpolat\w*|integrat\w*)\b|계산|산출|구해|구하|평균|합계|총합|비율|차이|순위|중앙값|표준편차|분산|보간|적분|경과\s*시간|배정|할당|얼마(?:인가|야|입니까|니)|몇(?:인가|이야|입니까|니)|값은", re.I)
+_EXPLICIT_CALC = re.compile(r"\b(?:calculat\w*|comput\w*|convert|determine|solve)\b|계산|산출|구해|구하|환산", re.I)
 _SIMULATION = re.compile(r"\b(?:sweep|vary\w*|sensitiv\w*|optim\w*|parameter\s+range|over\s+(?:a|the)\s+range)\b|"
                          r"\bfrom\s+[-+]?\d+(?:\.\d+)?\s+to\s+[-+]?\d+(?:\.\d+)?\b|"
                          r"최적|간격|변화시키|바꿔가며|바꾸면서|여러\s*값으로|매개변수\s*변화|부터.{0,30}까지", re.I)
@@ -110,7 +111,7 @@ def classify_goal_intent(request: GoalResearchRequest, *, has_user_facts: bool,
     if equation and sweep and origin != FormulaOrigin.KB_REFERENCED:
         return GoalIntent(GoalIntentKind.USER_FORMULA_SIMULATION, SourceRequirement.USER_FORMULA,
                           equation, "literal_formula_and_sweep", formula_origin=origin)
-    if equation and (_CALC.search(text) or origin == FormulaOrigin.USER_DEFINED) and origin != FormulaOrigin.KB_REFERENCED:
+    if equation and (_CALC.search(text) or origin == FormulaOrigin.USER_DEFINED or has_user_facts) and origin != FormulaOrigin.KB_REFERENCED:
         return GoalIntent(GoalIntentKind.USER_FORMULA_CALC, SourceRequirement.USER_FORMULA,
                           equation, "literal_user_formula", formula_origin=origin)
     premise = bool(_PREMISE.search(text)) and not bool(re.search(
@@ -120,7 +121,7 @@ def classify_goal_intent(request: GoalResearchRequest, *, has_user_facts: bool,
                           reason="assertion_verification_cue", premise_cue_detected=True)
     kb_formula = bool(asks_for_api_gravity_calculation(request) or _FORMULA_REQUEST.search(text)
                       or (equation and origin == FormulaOrigin.KB_REFERENCED))
-    if _NO_KB.search(text) or (_DIRECT.search(text) and not kb_formula and not sweep):
+    if _NO_KB.search(text) or (has_user_facts and _DIRECT.search(text) and not kb_formula and not sweep):
         return GoalIntent(GoalIntentKind.DIRECT_CALC, SourceRequirement.NONE,
                           reason="user_requested_generic_operation")
     if kb_formula and (_CALC.search(text) or sweep or asks_for_api_gravity_calculation(request)):
@@ -129,7 +130,7 @@ def classify_goal_intent(request: GoalResearchRequest, *, has_user_facts: bool,
     if sweep:
         return GoalIntent(GoalIntentKind.KB_FORMULA_CALC, SourceRequirement.KB_FORMULA,
                           reason="requested_parameter_sweep")
-    if _CALC.search(text):
+    if _CALC.search(text) and (has_user_facts or _EXPLICIT_CALC.search(text)):
         return GoalIntent(GoalIntentKind.DIRECT_CALC, SourceRequirement.NONE,
                           reason="calculation_request_pending_fact_readiness")
     if _FIGURE.search(text):

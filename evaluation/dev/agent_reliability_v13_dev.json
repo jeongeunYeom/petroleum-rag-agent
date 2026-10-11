@@ -1,0 +1,29 @@
+{
+  "name": "agent_reliability_v13_dev",
+  "version": 1,
+  "kind": "open_synthetic_development_set",
+  "sealed": false,
+  "note": "Independently authored routing probes; not a final benchmark or a paraphrase of sealed evaluation items.",
+  "cases": [
+    {"id": "DR-01", "type": "direct_calculation", "message": "Separator A=36 psi and B=48 psi. Compute their mean.", "expected_intent": "direct_calc", "expected_first_action": "calculate"},
+    {"id": "DR-02", "type": "direct_calculation", "message": "A=36 psi, B=48 psi. Find the average pressure.", "expected_intent": "direct_calc", "expected_first_action": "calculate"},
+    {"id": "DR-03", "type": "direct_calculation", "message": "밸브 A=36 psi, B=48 psi의 평균을 계산해줘.", "expected_intent": "direct_calc", "expected_first_action": "calculate"},
+    {"id": "DR-04", "type": "direct_calculation", "message": "Metered volumes A=12 bbl and B=9 bbl. What is their sum?", "expected_intent": "direct_calc", "expected_first_action": "calculate"},
+    {"id": "DR-05", "type": "distractor", "message": "A=8 psi; B=16 psi; calibration_offset=91 psi. Find the mean of A and B.", "expected_intent": "direct_calc", "expected_first_action": "calculate"},
+    {"id": "UF-01", "type": "user_formula", "message": "rate=7 stb/d, days=6 d. produced=rate*days. What is produced?", "expected_intent": "user_formula_calc", "expected_first_action": "calculate"},
+    {"id": "UF-02", "type": "user_formula", "message": "days=6 d; rate=7 stb/d; produced=rate*days. Calculate produced.", "expected_intent": "user_formula_calc", "expected_first_action": "calculate"},
+    {"id": "UF-03", "type": "user_formula", "message": "rate=7 stb/d, days=6 d. produced=rate*days. 주어진 식의 결과는 얼마야?", "expected_intent": "user_formula_calc", "expected_first_action": "calculate"},
+    {"id": "UF-04", "type": "user_formula", "message": "Pressure p_in=155 psi, p_out=120 psi. delta=p_in-p_out. Determine delta.", "expected_intent": "user_formula_calc", "expected_first_action": "calculate"},
+    {"id": "UF-05", "type": "missing_input", "message": "q=11 bbl/d. volume=q*t. What is volume?", "expected_intent": "user_formula_calc", "expected_first_action": "stop"},
+    {"id": "KB-01", "type": "kb_formula", "message": "Qmain=90 stb/d, Qloss=13 stb/d. Find the internal source equation for auxiliary flow and calculate Qaux.", "expected_intent": "kb_formula_calc", "expected_first_action": "retrieve"},
+    {"id": "KB-02", "type": "kb_formula", "message": "Locate a sourced relation for seal flow and compute the result.", "expected_intent": "kb_formula_calc", "expected_first_action": "retrieve"},
+    {"id": "KB-03", "type": "kb_formula", "message": "내부 교재의 정수압 공식을 찾아 계산해줘.", "expected_intent": "kb_formula_calc", "expected_first_action": "retrieve"},
+    {"id": "KB-04", "type": "unanswerable", "message": "x=4. Locate the internal formula for the theta-omega flux transform and calculate z; do not assume a model.", "expected_intent": "kb_formula_calc", "expected_first_action": "retrieve"},
+    {"id": "QA-01", "type": "knowledge_qa", "message": "What is average porosity in a reservoir?", "expected_intent": "knowledge_qa", "expected_first_action": "retrieve"},
+    {"id": "QA-02", "type": "knowledge_qa", "message": "Explain how wettability affects capillary pressure.", "expected_intent": "knowledge_qa", "expected_first_action": "retrieve"},
+    {"id": "QA-03", "type": "knowledge_qa", "message": "모세관압과 젖음성의 관계를 내부 자료로 설명해줘.", "expected_intent": "knowledge_qa", "expected_first_action": "retrieve"},
+    {"id": "QA-04", "type": "knowledge_qa", "message": "What does total porosity mean?", "expected_intent": "knowledge_qa", "expected_first_action": "retrieve"},
+    {"id": "FP-01", "type": "false_premise", "message": "When area A increases, force W decreases, right?", "expected_intent": "premise_check", "expected_first_action": "retrieve"},
+    {"id": "FP-02", "type": "false_premise", "message": "Is it true that cementation always increases permeability?", "expected_intent": "premise_check", "expected_first_action": "retrieve"}
+  ]
+}

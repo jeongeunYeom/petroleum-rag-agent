@@ -37,6 +37,7 @@ ALIASES: dict[str, tuple[str, ...]] = {
     "pa": ("annular_pressure",),
     "kfw": ("fracture_permeability_width",),
     "klf": ("lateral_fracture_permeability",),
+    "pf": ("power_factor",),
 }
 SUBSCRIPTS = str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789")
 
@@ -144,6 +145,9 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
     stopwords = {"from", "with", "calculate", "compute", "equation", "formula", "the", "for", "and",
                  "using", "find", "given", "what", "식으로", "계산해줘", "내부", "자료에서"}
     context_tokens = {token for token in tokens if len(token) > 2 and token not in stopwords}
+    generic_context = stopwords | {"internal", "locate", "model", "assume", "result", "value",
+                                   "values", "input", "units", "source", "sourced", "relation",
+                                   "please", "expression", "number", "without", "known", "needed"}
     source_by_id = {str(row.get("evidence_id")): str(row.get("text") or "") for row in evidence}
     requested_terms = _requested_term_count(intent)
     excludes_reduced = bool(re.search(r"축약식\s*말고|두\s*성분.{0,12}혼동하지\s*마|"
@@ -170,6 +174,18 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
                           re.findall(r"[A-Za-z][A-Za-z0-9_]*|[가-힣]{2,}", line)}
         nearby_tokens = {normalize_symbol(word) for word in
                          re.findall(r"[A-Za-z][A-Za-z0-9_]*|[가-힣]{2,}", nearby)}
+        descriptor_tokens = context_tokens - generic_context - facts - {lhs} - {
+            normalize_symbol(variable) for variable in variables}
+        local_context = source_text[max(0, record.span_start - 180):record.span_end + 180]
+        local_tokens = {normalize_symbol(word) for word in
+                        re.findall(r"[A-Za-z][A-Za-z0-9_]*|[가-힣]{2,}", local_context)}
+        raw_lhs = record.expression_candidate.split("=", 1)[0].strip()
+        explicit_symbol_binding = (raw_lhs.isupper() and len(lhs) >= 3 and lhs in tokens
+                                   and overlap == len(variables))
+        if (len(descriptor_tokens) >= 2 and not (descriptor_tokens & local_tokens)
+                and not explicit_symbol_binding):
+            # A matching output symbol alone cannot identify a named engineering model.
+            continue
         lhs_score = 6 if lhs in tokens else 0
         variable_score = 2 * overlap
         heading_score = min(4, len(context_tokens & heading_tokens))

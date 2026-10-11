@@ -12,8 +12,8 @@ NUMBER = r"[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d*)?(?:[eE][-+]?\d+)?|[-+]?\.\d+
 UNIT = (r"(?:kg/m(?:\^?3|³)|mg/L|mD[·*\-]ft|m(?:\^?3|³)/(?:day|hr|hour|s|d|h)|"
         r"\$/m(?:\^?3|³)|m(?:\^?3|³)|ft(?:\^?3|³)|mm(?:\^?2|²|⁻¹)|"
         r"m(?:\^?2|²)|psi/(?:day|d)|psi(?:⁻¹|\^-?1)?|stb/(?:day|h|d)|"
-        r"bbl/d|lbf/ft|lb/ft|gpm|kWh|kW|hp|acres?|feet|inch|in|ft|mD|md|"
-        r"psia|psig|kPa|Pa|bbl|stb|days?|seconds?|secs?|hours?|hr|h|"
+        r"bbl/d|lbf/ft|lb/ft|gpm|kWh|kW|hp|ppg|acres?|feet|inch|in|ft|mD|md|"
+        r"psia|psig|kPa|Pa|bbl|stb|days?|seconds?|secs?|hours?|hr|h|d|s|"
         r"mg|kg|kJ|lbf|cP|°C|USD|달러|시간|분|min|m/s|m/h|mm|m|L|%|dimensionless)")
 ASSIGNMENT = re.compile(
     rf"(?P<label>[A-Za-z][A-Za-z0-9 _/\-]{{0,48}}?)\s*[:=]\s*(?P<value>{NUMBER})\s*(?P<unit>{UNIT})?(?=$|[,;\s]|\.(?!\d)|[가-힣])",
@@ -64,6 +64,18 @@ SEGMENT_PAIR = re.compile(
     rf"(?P<label>(?:[A-Z]|\d+)\s*구간|(?:첫|둘째|셋째|넷째)(?:\s*구간)?|"
     rf"(?:segment|pump)\s*[-#]?\s*[A-Za-z0-9]+)\s*(?:은|는|이|가|에서|:|=|is|at)?\s*"
     rf"(?P<value>{NUMBER})\s*(?P<unit>{UNIT})", re.I)
+ENGLISH_ENTITY_FACT = re.compile(
+    rf"\b(?P<label>[A-Z][a-z]+\s+[A-Z0-9][A-Za-z0-9_-]*)\s+"
+    rf"(?:holds|contains|has|produces|measures|reads|delivers|is|was)\s+"
+    rf"(?P<value>{NUMBER})\s*(?P<unit>{UNIT})(?![A-Za-z0-9/])", re.I)
+BARE_RATE_DURATION = re.compile(
+    rf"(?P<rate>{NUMBER})\s*(?P<rate_unit>stb/(?:d|day|h)|bbl/d|m(?:\^?3|³)/(?:d|day|h|hr))"
+    rf"\s*(?:for|during|로|으로|동안)\s*(?P<duration>{NUMBER})\s*"
+    rf"(?P<duration_unit>h|hr|hours?|d|days?|시간)(?![A-Za-z0-9/])", re.I)
+POWER_FACTOR_PAIR = re.compile(
+    rf"(?P<power>{NUMBER})\s*(?P<unit>kW|hp)\s*(?:at|with|에서|이고)\s*"
+    rf"(?:a\s+)?(?:power\s+factor|역률)\s*(?:of|=|:|은|는)?\s*"
+    rf"(?P<factor>{NUMBER})(?![A-Za-z0-9/])", re.I)
 SERIES = re.compile(rf"(?P<label>[가-힣]{{2,12}}(?:\s+[가-힣]{{2,12}})?|[A-Za-z][A-Za-z ]{{1,24}})\s*"
                     rf"(?:은|는|이|가|:|=|are|were)?\s*(?:각각\s*)?"
                     rf"(?P<values>(?:{NUMBER})(?:\s*[,，]\s*(?:{NUMBER})){{2,12}})\s*(?P<unit>{UNIT})", re.I)
@@ -102,7 +114,7 @@ def semantic_role(name: str, unit: str) -> str:
                         "dimensionless_fraction": {"%", "dimensionless"}}.items():
         if unit in units:
             return role
-    if any(word in label for word in ("fraction", "ratio", "porosity", "saturation")):
+    if any(word in label for word in ("fraction", "ratio", "porosity", "saturation", "power_factor")):
         return "dimensionless_fraction"
     return "parameter" if not unit else "measurement"
 
@@ -159,6 +171,26 @@ class UserFactRecord(BaseModel):
 class UserFactRegistry(BaseModel):
     records: list[UserFactRecord] = Field(default_factory=list)
     rejection_reasons: list[str] = Field(default_factory=list)
+
+    def named_operands(self, text: str, operations: list[str]) -> "UserFactRegistry":
+        """Exclude unrelated facts only when an aggregate names its exact operands."""
+        aggregate = {"mean", "sum", "median", "ranking", "maximum", "minimum", "range",
+                     "variance", "variance_population", "std_population", "std_sample"}
+        if not operations or not set(operations) <= aggregate:
+            return self
+        match = re.search(
+            r"\b(?:mean|average|sum|median|rank(?:ing)?|maximum|minimum|range|variance|"
+            r"standard\s+deviation)\s+(?:of|for)\s+([A-Za-z][A-Za-z0-9_]*"
+            r"(?:\s*(?:,|and)\s*[A-Za-z][A-Za-z0-9_]*)+)\b", text, re.I)
+        if not match:
+            return self
+        names = [part for part in re.split(r"\s*(?:,|\band\b)\s*", match.group(1), flags=re.I) if part]
+        by_name = {row.name.casefold(): row for row in self.records}
+        if len(names) < 2 or len({name.casefold() for name in names}) != len(names) or any(
+                name.casefold() not in by_name for name in names) or len(by_name) != len(self.records):
+            # An explicit but unresolved scope must not fall back to every number.
+            return self.model_copy(update={"records": []})
+        return self.model_copy(update={"records": [by_name[name.casefold()] for name in names]})
 
     def add_literal_fallback(self, topic: str, candidates: list[dict[str, object]]) -> tuple[int, int]:
         """Admit model-extracted facts only when their exact numeric/unit quote exists."""
@@ -272,6 +304,10 @@ class UserFactRegistry(BaseModel):
         for line in topic.splitlines(keepends=True):
             text = line.rstrip("\r\n")
             protected_spans: list[tuple[int, int]] = []
+            for found in ENGLISH_ENTITY_FACT.finditer(text):
+                add(found["label"].replace(" ", "_"), found["value"], found["unit"],
+                    found.group(0), found["label"], offset + found.start())
+                protected_spans.append(found.span())
             for found in SEGMENT_PAIR.finditer(text):
                 label = found["label"].strip()
                 ordinal = re.match(r"(첫|둘째|셋째|넷째)", label)
@@ -295,6 +331,24 @@ class UserFactRegistry(BaseModel):
                     add(f"{entity}_duration", duration["value"], duration["unit"], span,
                         label, offset + found.end())
                     protected_spans.append((found.end(), found.end() + duration.end()))
+            for found in BARE_RATE_DURATION.finditer(text):
+                if any(start < found.end() and found.start() < end for start, end in protected_spans):
+                    continue
+                rate_span = text[found.start("rate"):found.end("rate_unit")]
+                duration_span = text[found.start("duration"):found.end("duration_unit")]
+                add("rate", found["rate"], found["rate_unit"], rate_span,
+                    found.group(0), offset + found.start("rate"))
+                add("duration", found["duration"], found["duration_unit"], duration_span,
+                    found.group(0), offset + found.start("duration"))
+                protected_spans.append(found.span())
+            for found in POWER_FACTOR_PAIR.finditer(text):
+                power_span = text[found.start("power"):found.end("unit")]
+                factor_span = text[found.end("unit"):found.end()]
+                add("power", found["power"], found["unit"], power_span,
+                    found.group(0), offset + found.start("power"))
+                add("power_factor", found["factor"], "", factor_span,
+                    found.group(0), offset + found.end("unit"))
+                protected_spans.append(found.span())
             for found in SERIES.finditer(text):
                 values = list(re.finditer(NUMBER, found["values"]))
                 if not values:
@@ -344,6 +398,11 @@ class UserFactRegistry(BaseModel):
                     continue
                 label = found.group("label").strip()
                 label = re.split(r"\b(?:has|have|with|where|given|and|at)\b", label, flags=re.I)[-1].strip()
+                tokens = label.split()
+                if (len(tokens) > 1 and re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", tokens[-1])
+                        and ("_" in tokens[-1] or len(tokens[-1]) == 1)):
+                    # A prose descriptor before a literal symbol is not part of its name.
+                    label = tokens[-1]
                 if label.casefold().startswith("well "):
                     continue
                 if label.casefold() in {"measurements", "values", "data", "inputs"} and not found.group("unit"):
