@@ -50,6 +50,8 @@ from app.services.goal_simulation import (direct_operation_operands, direct_read
                                           run_user_formula_calculation,
                                           user_formula_bindings)
 from app.services.user_fact_registry import NUMBER, UserFactRegistry
+from app.services.source_answerability import (evaluate_claim_support, grounded_answer, SupportStatus,
+                                               RequiredClaim, ClaimSupport)
 
 
 class _EvidenceSnapshot:
@@ -611,6 +613,119 @@ class GoalExecutionAgent(GoalResearchAgent):
         return literal_answer(request, evidence, allow_partial=True)
 
     @staticmethod
+    def _answerability_gate(request, criteria, evidence, result, *, attempt=True):
+        """Recheck literal spans, not a rejected candidate's verdict, before discarding support."""
+        support = evaluate_claim_support(request, evidence, criteria)
+        result.telemetry.update(support.telemetry())
+        if not attempt:
+            return None, support
+        result.telemetry["extractive_fallback_attempted"] = True
+        if result.telemetry.get("source_conflict_count", 0):
+            result.telemetry["extractive_fallback_failure_reason"] = "retrieved_evidence_conflict"
+            return None, support
+        validator = EngineeringValidator()
+        for claim in support.claims:
+            valid = []
+            for sid, span in zip(claim.supporting_evidence_ids, claim.supporting_spans):
+                row = next((r for r in evidence if r.get("evidence_id") == sid), {})
+                text = re.sub(r"\s+", " ", str(row.get("text") or ""))
+                if (span in text and validator.validate_claim(span, text, query=request.topic).passed):
+                    valid.append((sid, span))
+            claim.supporting_evidence_ids = [sid for sid, _ in valid]
+            claim.supporting_spans = [span for _, span in valid]
+            if not valid:
+                claim.support_status = SupportStatus.UNSUPPORTED
+        answer = grounded_answer(request, support)
+        if answer:
+            detected, corrected, _ = validator.false_premise_correction(request.topic, answer)
+            if detected and not corrected:
+                answer = None
+        result.telemetry.update(support.telemetry())
+        result.telemetry["extractive_fallback_failure_reason"] = None if answer else "no_verified_relation_span"
+        if answer:
+            result.telemetry.update({"extractive_fallback_used": True,
+                "final_answer_kind": "partial_grounded" if not support.all_required_supported else
+                    "underdetermined" if support.underdetermined else "extractive_grounded"})
+        return answer, support
+
+    @staticmethod
+    def _support_evaluation(criteria, support, korean):
+        ids = list(dict.fromkeys(sid for c in support.claims for sid in c.supporting_evidence_ids))
+        reason = ("관련 원문 관계와 인용 연결을 검증했습니다." if korean else
+                  "The literal relation spans and citation links were verified.")
+        return [CriterionEvaluation(criterion_id=c.criterion_id,
+                    status=CriterionStatus.MET if support.all_required_supported else CriterionStatus.PARTIAL,
+                    reason=reason, supporting_evidence=ids) for c in criteria]
+
+    async def _pre_stop_answer(self, request, intent, criteria, accumulator, result, state, started):
+        if intent.kind not in {GoalIntentKind.KNOWLEDGE_QA, GoalIntentKind.FIGURE_QA, GoalIntentKind.PREMISE_CHECK}:
+            return None
+        if intent.kind == GoalIntentKind.PREMISE_CHECK:
+            # Never substitute a topical quote for an explicit premise assessment.
+            result.telemetry["claim_support_checked"] = True
+            result.telemetry["extractive_fallback_attempted"] = True
+            if state.verified or result.telemetry.get("source_conflict_count", 0):
+                result.telemetry["extractive_fallback_failure_reason"] = "premise_requires_verified_correction"
+                return None
+            premise = await assess_premise(self.ollama, request, accumulator.records())
+            if premise.verdict not in {"supports", "contradicts"} or not premise.answer:
+                result.telemetry["extractive_fallback_failure_reason"] = premise.failure_reason or "premise_not_supported"
+                return None
+            support = ClaimSupport([RequiredClaim("CLAIM1", request.topic, True, SupportStatus.SUPPORTED,
+                list(premise.supporting_source_ids), list(premise.supporting_spans))])
+            answer = premise.answer
+            result.telemetry.update(support.telemetry())
+            result.telemetry.update({"extractive_fallback_used": True, "extractive_fallback_failure_reason": None,
+                                     "final_answer_kind": "extractive_grounded"})
+        else:
+            answer, support = self._answerability_gate(request, criteria, accumulator.records(), result)
+        if not answer:
+            return None
+        achieved = support.all_required_supported
+        result.criteria = self._support_evaluation(criteria, support, prefers_korean(request))
+        result.goal_coverage = sum(c.support_status == SupportStatus.SUPPORTED for c in support.claims) / max(1, len(support.claims))
+        result.goal_coverage_percent = round(result.goal_coverage * 100, 2)
+        state.goal_achieved = achieved
+        state.current_coverage = result.goal_coverage
+        state.verified = True
+        for criterion, evaluation in zip(state.criteria, result.criteria):
+            criterion.status = evaluation.status
+            criterion.support_ids = evaluation.supporting_evidence
+        result.internal_sources, result.web_sources, result.figures = accumulator.internal, accumulator.web, accumulator.figures
+        result.validation.update({"citation_semantic_passed": True, "engineering_validation_passed": True,
+                                  "unsupported_citation_claim_count": 0, "unsupported_numeric_claim_count": 0})
+        self._record_stop(result, state, "grounded_answerability" if achieved else "partial_grounded_answer")
+        return self._finish(result, GoalRunStatus.COMPLETED if achieved else GoalRunStatus.STOPPED,
+                            GoalStatus.ACHIEVED if achieved else GoalStatus.STOPPED,
+                            GoalStopReason.GOAL_ACHIEVED if achieved else GoalStopReason.INSUFFICIENT_EVIDENCE,
+                            answer, started)
+
+    @staticmethod
+    def _finish(result, run_status, status, stop_reason, answer, started):
+        telemetry = result.telemetry
+        calculated = any(c.validation_passed for c in result.computations)
+        kind = telemetry.get("final_answer_kind")
+        if kind not in {"partial_grounded", "extractive_grounded", "underdetermined"}:
+            kind = "calculation" if calculated else "normal_grounded" if status == GoalStatus.ACHIEVED else "refusal"
+        if kind == "refusal" and telemetry.get("intent_route") in {"knowledge_qa", "figure_qa"}:
+            missing = [c["description"] for c in telemetry.get("required_claims", [])
+                       if c["support_status"] != SupportStatus.SUPPORTED]
+            if missing:
+                prefix = ("현재 검색된 근거에서 다음 요청을 직접 뒷받침하는 관계를 검증하지 못했습니다: "
+                          if re.search(r"[가-힣]", result.topic) else
+                          "No direct relation span was verified for these requests in the retrieved evidence: ")
+                answer = prefix + "; ".join(missing)
+            if telemetry.get("source_conflict_count", 0):
+                answer = ("검색된 근거가 충돌하여 단정적인 답변을 보류합니다. 상충하는 출처를 확인해야 합니다."
+                          if re.search(r"[가-힣]", result.topic) else
+                          "The retrieved evidence conflicts. An unqualified conclusion requires resolving the conflicting sources.")
+        telemetry.update({"final_answer_kind": kind, "refusal_generated": kind == "refusal",
+                          "refusal_reason": stop_reason.value if kind == "refusal" else None,
+                          "calculation_executed": result.python_calls_total > 0,
+                          "calculation_validated": calculated})
+        return GoalResearchAgent._finish(result, run_status, status, stop_reason, answer, started)
+
+    @staticmethod
     def _simulation_answer(computation: Any, spec: SimulationSpec,
                            evidence: list[dict[str, Any]], source_id: str,
                            korean: bool = False) -> str:
@@ -661,6 +776,8 @@ class GoalExecutionAgent(GoalResearchAgent):
         result.status = GoalStatus.PENDING
         result.current_stage = "waiting_for_user_input"
         result.current_action = None
+        result.telemetry.update({"final_answer_kind": "clarification", "refusal_generated": False,
+                                 "refusal_reason": None})
         result.required_inputs = list(dict.fromkeys(missing))
         result.clarification_question = clarification_question(result.required_inputs, korean)
         result.final_answer = ""
@@ -964,8 +1081,15 @@ class GoalExecutionAgent(GoalResearchAgent):
                                 for index, value in enumerate(descriptions, 1)]
                     source = "inferred_premise"
                     premise_criteria = True
+                elif intent.kind in {GoalIntentKind.KNOWLEDGE_QA, GoalIntentKind.FIGURE_QA}:
+                    # A planner must not turn plausible but unrequested effects into mandatory claims.
+                    claims = evaluate_claim_support(request, []).claims
+                    criteria = [GoalCriterion(criterion_id=f"C{index}", description=c.description[:1000])
+                                for index, c in enumerate(claims[:20], 1)]
+                    source = "inferred_from_request"
                 else:
-                    criteria = self._explicit_numeric_criteria(request, users, simulation_spec)
+                    criteria = (self._explicit_numeric_criteria(request, users, simulation_spec)
+                                if intent.kind not in {GoalIntentKind.KNOWLEDGE_QA, GoalIntentKind.FIGURE_QA} else [])
                 if not criteria:
                     criteria = await self.planner.infer_criteria(request)
             criteria_hash = self._criteria_hash(criteria)
@@ -986,6 +1110,17 @@ class GoalExecutionAgent(GoalResearchAgent):
             clarification_attempts = 0
         if autonomous_python:
             result.telemetry["python_authorization_source"] = "autonomous_execution_mode"
+        for key, value in {
+            "claim_support_checked": False, "required_claim_count": 0, "supported_claim_count": 0,
+            "partially_supported_claim_count": 0, "answerability_status": "NOT_CHECKED",
+            "extractive_fallback_attempted": False, "extractive_fallback_used": False,
+            "extractive_fallback_failure_reason": None, "refusal_generated": False, "refusal_reason": None,
+            "relevant_evidence_present": False, "final_answer_kind": None,
+            "operands_expected": 0, "operands_bound": 0, "operand_validation_passed": False,
+            "formula_selected": False, "formula_ready": False, "calculation_ready": False,
+            "calculation_executed": False, "calculation_validated": False,
+        }.items():
+            result.telemetry.setdefault(key, value)
         result.telemetry["intent_route"] = intent.kind.value
         result.telemetry["intent"] = {"selected_intent": intent.kind.value, "intent_reason": intent.reason,
                                       "premise_cue_detected": intent.premise_cue_detected,
@@ -1025,7 +1160,7 @@ class GoalExecutionAgent(GoalResearchAgent):
             "geometric_mean", "add", "multiply", "divide", "subtract", "elapsed_time", "percent_conversion",
             "weighted_average", "combined_rate", "interpolation", "trapezoid", "repeated_percent",
             "allocation", "piecewise_cost", "unit_conversion", "finite_difference",
-            "centered_difference", "linear_regression_slope", "percentage_decrease", "percentage_increase",
+            "centered_difference", "linear_regression_slope", "percentage_decrease", "percentage_increase", "percent_change",
             "net_difference", "cylinder_volume", "power_times_duration",
             "concentration_mass_per_volume", "weighted_average_by_duration"})
         direct_users = users.named_operands(user_text, direct_operations)
@@ -1112,8 +1247,22 @@ class GoalExecutionAgent(GoalResearchAgent):
             result.telemetry["transition"] = {"formula_ready": bool(selected_formula),
                                                "calculation_ready": action.reason_code in {"formula_ready", "calculation_ready"},
                                                "blocking_reason": action.reason_code if action.action_type == GoalActionType.STOP else None}
+            equation = intent.user_equation or (selected_formula.expression_candidate if selected_formula else None)
+            bindings, missing_bindings = user_formula_bindings(equation, users) if equation else ({}, [])
+            ready = action.action_type in {GoalActionType.CALCULATE, GoalActionType.SIMULATE}
+            result.telemetry.update({
+                "operands_expected": len(expression_variables(equation) or []) if equation else len(direct_users.records) + len(direct_missing),
+                "operands_bound": len(bindings) if equation else len(direct_users.records),
+                "operand_validation_passed": not (missing_bindings or formula_missing or direct_missing) and bool(users.records),
+                "formula_selected": bool(equation) or (intent.kind == GoalIntentKind.DIRECT_CALC and bool(direct_operations)),
+                "formula_ready": state.formula_ready if requires_sourced_formula else bool(equation and not missing_bindings) or direct_fast,
+                "calculation_ready": ready or result.telemetry["calculation_ready"],
+            })
             self._add_time(result, "planning_seconds", time.perf_counter() - selection_started)
             if action.action_type == GoalActionType.STOP:
+                grounded = await self._pre_stop_answer(request, intent, criteria, accumulator, result, state, started)
+                if grounded is not None:
+                    return grounded
                 calculation_stalled = (action.reason_code == "no_progress" and not state.computation_ids
                                        and bool(CALC_WORDS.search(f"{request.topic} {request.goal or ''}")))
                 needs_clarification = action.reason_code in {"simulation_spec_missing", "calculation_blocked"} or (
@@ -1157,6 +1306,9 @@ class GoalExecutionAgent(GoalResearchAgent):
             input_ids = [r.fact_id for r in users.records] + state.evidence_ids + state.computation_ids
             signature = action.fingerprint(input_ids)
             if signature in seen_actions:
+                grounded = await self._pre_stop_answer(request, intent, criteria, accumulator, result, state, started)
+                if grounded is not None:
+                    return grounded
                 self._record_stop(result, state, "repeated_action_fingerprint")
                 return self._finish(result, GoalRunStatus.STOPPED, GoalStatus.STOPPED,
                                     GoalStopReason.NO_PROGRESS,
@@ -1238,6 +1390,9 @@ class GoalExecutionAgent(GoalResearchAgent):
                         state.known_facts + [item.fact_id for item in
                                              EvidenceFactRegistry.from_evidence(accumulator.records()).records]))
                     research_validation = response.validation
+                    result.telemetry["source_conflict_count"] = max(
+                        result.telemetry.get("source_conflict_count", 0), len(response.conflicts),
+                        int(response.validation.get("conflict_count") or 0))
                     details = {"new_evidence_count": len(added), "retrieval_mode": response.retrieval_mode,
                                "query": query,
                                "cache_hit": cached is not None}
@@ -1564,9 +1719,6 @@ class GoalExecutionAgent(GoalResearchAgent):
                             and callable(getattr(self.ollama, "chat_structured", None))):
                         latest_candidate, rejected_claims = await ground_research_claims(
                             self.ollama, request, latest_candidate, evidence)
-                    if not latest_candidate.strip() and intent.kind == GoalIntentKind.KNOWLEDGE_QA:
-                        latest_candidate = self._extractive_source_answer(request, evidence) or ""
-                        result.telemetry["extractive_fallback_used"] = bool(latest_candidate)
                     latest_candidate, rejected_numeric = self._filter_numeric_claims(
                         latest_candidate, evidence, result.computations)
                     if intent.kind == GoalIntentKind.PREMISE_CHECK:
@@ -1576,35 +1728,27 @@ class GoalExecutionAgent(GoalResearchAgent):
                     evaluation = await self.evaluator.evaluate(request, criteria, latest_candidate,
                                                                evidence, research_validation,
                                                                computations=result.computations)
-                    if (not evaluation.achieved and intent.kind == GoalIntentKind.KNOWLEDGE_QA
-                            and evaluation.engineering_validation_passed):
-                        from app.services.source_answerability import literal_answer
-                        extracted = literal_answer(request, evidence, criteria)
+                    if intent.kind in {GoalIntentKind.KNOWLEDGE_QA, GoalIntentKind.FIGURE_QA}:
+                        refusal = bool(re.search(r"cannot\s+(?:answer|verify|confirm)|insufficient\s+evidence|"
+                            r"did\s+not\s+directly\s+support|근거.{0,15}(?:부족|없)|답변할\s*수\s*없", latest_candidate, re.I))
+                        extracted, support = self._answerability_gate(request, criteria, evidence, result,
+                            attempt=not evaluation.achieved or not latest_candidate.strip() or bool(rejected_claims) or refusal)
+                        if evaluation.achieved and support.some_supported and not support.all_required_supported:
+                            # Positive partial coverage must not masquerade as complete coverage.
+                            # No literal match is an abstention, not a veto of normal semantic verification.
+                            extracted, support = self._answerability_gate(request, criteria, evidence, result)
+                            evaluation = replace(evaluation, achieved=False,
+                                gaps=[c.description for c in support.claims if c.support_status != SupportStatus.SUPPORTED])
                         if extracted:
                             latest_candidate = extracted
-                            result.telemetry["extractive_fallback_used"] = True
-                    if (result.telemetry.get("extractive_fallback_used")
-                            and evaluation.engineering_validation_passed):
-                        from app.services.source_answerability import literal_answer
-                        evaluation = replace(evaluation, achieved=False,
-                                             gaps=[*evaluation.gaps, "All requested relations need direct support"])
-                        literals = re.findall(r'"([^"\n]+)"\s*\[((?:KB|WEB|FIG)\d+)\]', latest_candidate)
-                        if (literals and latest_candidate == literal_answer(request, evidence, criteria)
-                                and all(any(str(row.get("evidence_id")) == source_id
-                                           and re.sub(r"\s+", " ", quote) in
-                                           re.sub(r"\s+", " ", str(row.get("text") or ""))
-                                           and EngineeringValidator().validate_claim(
-                                               latest_candidate, str(row.get("text") or ""),
-                                               query=request.topic).passed
-                                           for row in evidence) for quote, source_id in literals)):
-                            reason = ("질문과 관련된 원문 관계를 직접 인용했습니다." if korean else
-                                      "A directly relevant source relation is quoted verbatim.")
-                            evaluation = replace(evaluation, criteria=[CriterionEvaluation(
-                                criterion_id=item.criterion_id, status=CriterionStatus.MET,
-                                reason=reason, supporting_evidence=list(dict.fromkeys(sid for _, sid in literals)))
-                                for item in criteria],
-                                coverage=1.0, achieved=True, gaps=[])
-                            rejected_claims = []
+                            coverage = sum(c.support_status == SupportStatus.SUPPORTED for c in support.claims) / max(1, len(support.claims))
+                            evaluation = replace(evaluation,
+                                criteria=self._support_evaluation(criteria, support, korean),
+                                coverage=coverage, achieved=support.all_required_supported,
+                                gaps=[c.description for c in support.claims if c.support_status != SupportStatus.SUPPORTED],
+                                engineering_validation_passed=True, engineering_contradiction_count=0,
+                                unsupported_engineering_claim_count=0)
+                            rejected_claims, rejected_numeric = [], 0
                     if premise_criteria:
                         evaluation = self._validated_premise_criteria(
                             evaluation, criteria, request, latest_candidate, evidence)
@@ -1644,8 +1788,9 @@ class GoalExecutionAgent(GoalResearchAgent):
                             evaluation, criteria, latest_candidate, result.computations, evidence,
                             intent.source_requirement, korean)
                     citation_semantic_passed = bool(latest_candidate.strip()) and (
-                        intent.kind != GoalIntentKind.PREMISE_CHECK or
-                        bool(re.search(r"\[(?:KB|WEB|FIG)\d+\]", latest_candidate)))
+                        intent.kind not in {GoalIntentKind.PREMISE_CHECK, GoalIntentKind.KNOWLEDGE_QA, GoalIntentKind.FIGURE_QA} or
+                        any(f'[{row["evidence_id"]}]' in latest_candidate for row in evidence
+                            if row.get("source_type") in {"knowledge_base", "web", "figure"}))
                     if not citation_semantic_passed:
                         evaluation = replace(evaluation, achieved=False,
                                              gaps=[*evaluation.gaps, "Direct source support needed for the answer"])
@@ -1738,6 +1883,10 @@ class GoalExecutionAgent(GoalResearchAgent):
                 return self._finish(result, GoalRunStatus.COMPLETED, GoalStatus.ACHIEVED,
                                     GoalStopReason.GOAL_ACHIEVED, latest_candidate, started)
 
+        if not state.goal_achieved:
+            grounded = await self._pre_stop_answer(request, intent, criteria, accumulator, result, state, started)
+            if grounded is not None:
+                return grounded
         reason = (GoalStopReason.GOAL_ACHIEVED if state.goal_achieved else
                   GoalStopReason.INSUFFICIENT_EVIDENCE if state.blocked_reasons and not state.computation_ids else
                   GoalStopReason.MAX_ITERATIONS)
@@ -1747,7 +1896,7 @@ class GoalExecutionAgent(GoalResearchAgent):
         return self._finish(result, GoalRunStatus.COMPLETED if state.goal_achieved else GoalRunStatus.STOPPED,
                             GoalStatus.ACHIEVED if state.goal_achieved else GoalStatus.STOPPED,
                             reason, self._safe_unavailable_answer(latest_candidate, state,
-                                                                  reason="missing_validated_formula" if formula_unverified else
+                                                                  reason="" if state.goal_achieved else "missing_validated_formula" if formula_unverified else
                                                                   "premise_insufficient" if intent.kind == GoalIntentKind.PREMISE_CHECK else
                                                                   "knowledge_insufficient" if intent.kind in {
                                                                       GoalIntentKind.KNOWLEDGE_QA, GoalIntentKind.FIGURE_QA} else

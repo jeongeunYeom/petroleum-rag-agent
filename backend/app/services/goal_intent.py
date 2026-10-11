@@ -56,11 +56,11 @@ _PREMISE = re.compile(r"(?:맞(?:지|나요|습니까|아)?|옳(?:지|나요)?|(
                       r"라고\s*보면\s*되지|그렇(?:지|습니까)|"
                       r"\b(?:is\s+it\s+(?:true|correct)|isn['’]?t\s+it\s+true\s+that|"
                       r"can\s+i\s+assume|always)\b|\b(?:right|correct)\s*\?)", re.I)
-_DIRECT = re.compile(r"\b(?:calculate|compute|convert|conversion|cylinder\s+volume|energy\s+use|mass\s+concentration|linear\s+regression\s+slope|finite\s+difference|centered\s+difference|sum|total|average|mean|median|variance|standard\s+deviation|"
+_DIRECT = re.compile(r"\b(?:calculate|compute|range|ratio|difference|convert|conversion|cylinder\s+volume|energy\s+use|mass\s+concentration|linear\s+regression\s+slope|finite\s+difference|centered\s+difference|sum|total|average|mean|median|variance|standard\s+deviation|"
                      r"rank|std|interpolate|trapezoid|geometric\s+mean|elapsed\s+time|allocate|weighted\s+average|"
                      r"combined\s+rate|repeated\s+percent|percent\s+change|piecewise\s+cost|"
                      r"percent\s+to\s+fraction|fraction\s+to\s+percent|percent(?:age)?\s+decrease)\b|"
-                     r"평균|중앙값|표준편차|분산|합계|총합|순위|보간|사다리꼴|기하평균|경과\s*시간|비례\s*배분|"
+                     r"평균|중앙값|범위|비율|차이|표준편차|분산|합계|총합|순위|보간|사다리꼴|기하평균|경과\s*시간|비례\s*배분|"
                      r"몇\s*개|얼마|이\s*값들로|사용자\s*값만|자료\s*검색하지\s*마|"
                      r"단위\s*변환|시간당|원기둥\s*부피|소비\s*에너지|질량\s*농도|중심\s*차분|압력\s*변화율|감소율|순\s*변화|"
                      r"%\s*(?:증가|감소|increase|decrease)", re.I)
@@ -103,8 +103,10 @@ def formula_origin(text: str) -> FormulaOrigin:
 
 def explicitly_underdetermined(text: str) -> bool:
     """Only explicit missing-data requests; never infer unavailable engineering values."""
-    return bool(re.search(r"\b(?:exact|optimal|specific)\b|정확한|최적", text, re.I)
-                and re.search(r"\b(?:no|without|not\s+(?:provided|known|available)|missing|unspecified)\b|"
+    # Execution restrictions ('no retrieval') are not missing engineering data.
+    text = re.sub(r"\b(?:no|without)\s+(?:retrieval|web|python|tools?|search)\b", "", text, flags=re.I)
+    return bool(re.search(r"\b(?:exact|optimal|precise|specific)\b|정확한|최적", text, re.I)
+                and re.search(r"\b(?:no|without|not\s+(?:provided|known|available)|unavailable|unknown|missing|unspecified)\b|"
                               r"없(?:다|는|고|음|어)|미제공|모르|주어지지|제공되지", text, re.I))
 
 
@@ -115,15 +117,15 @@ def classify_goal_intent(request: GoalResearchRequest, *, has_user_facts: bool,
     equation = user_equation(text)
     origin = formula_origin(text)
     sweep = bool(_SIMULATION.search(text) or has_simulation_spec)
+    if explicitly_underdetermined(text):
+        return GoalIntent(GoalIntentKind.KNOWLEDGE_QA, SourceRequirement.NONE,
+                          reason="check_source_answerability_before_numeric_routing")
     if equation and sweep and origin != FormulaOrigin.KB_REFERENCED:
         return GoalIntent(GoalIntentKind.USER_FORMULA_SIMULATION, SourceRequirement.USER_FORMULA,
                           equation, "literal_formula_and_sweep", formula_origin=origin)
     if equation and (_CALC.search(text) or origin == FormulaOrigin.USER_DEFINED or has_user_facts) and origin != FormulaOrigin.KB_REFERENCED:
         return GoalIntent(GoalIntentKind.USER_FORMULA_CALC, SourceRequirement.USER_FORMULA,
                           equation, "literal_user_formula", formula_origin=origin)
-    if not equation and not has_simulation_spec and explicitly_underdetermined(text):
-        return GoalIntent(GoalIntentKind.KNOWLEDGE_QA, SourceRequirement.NONE,
-                          reason="check_source_answerability_before_numeric_routing")
     premise = bool(_PREMISE.search(text)) and not bool(re.search(
         r"몇|얼마|무엇|어떻게|\b(?:how\s+many|how\s+much|what\s+is)\b", text, re.I))
     if premise:

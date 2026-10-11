@@ -138,6 +138,14 @@ def _additive_terms(formula: str) -> int:
 def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
                             fact_names: list[str]) -> tuple[FormulaSourceRecord | None, FormulaSelectionRecord]:
     """Rank literal source spans; weak or conflicting matches remain unresolved."""
+    # Unrelated commentary is not an extra model-name constraint. Keep every actual
+    # request/assignment clause, including negative constraints, for disambiguation.
+    clauses = re.split(r"(?<=[.!?])\s+|\n+", intent)
+    requested = [clause for clause in clauses if re.search(
+        r"[=:]|\b(?:calculate|compute|find|equation|formula|model|relation|use|not|without)\b|"
+        r"계산|공식|관계식|식으로|말고|제외", clause, re.I)]
+    if requested:
+        intent = " ".join(requested)
     tokens = {normalize_symbol(token) for token in re.findall(r"[A-Za-z][A-Za-z0-9_]*|[가-힣]{2,}", intent)}
     if re.search(r"API도", intent, re.I):
         tokens.add("api")

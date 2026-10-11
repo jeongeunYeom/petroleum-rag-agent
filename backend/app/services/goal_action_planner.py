@@ -98,6 +98,11 @@ class GoalActionPlanner:
                                   GoalActionPlanner.query(request, state, intent))
                 if not state.verified:
                     return action(GoalActionType.VERIFY, "verify_current_support")
+                if (intent.kind in {GoalIntentKind.KNOWLEDGE_QA, GoalIntentKind.FIGURE_QA}
+                        and state.unresolved_information
+                        and counts[GoalActionType.RETRIEVE] < request.max_retrieval_actions):
+                    return action(GoalActionType.RETRIEVE, "missing_claim_support",
+                                  GoalActionPlanner.query(request, state, intent))
                 return action(GoalActionType.STOP, "insufficient_evidence")
             if state.computation_ids:
                 if wants_analysis and not state.analyzed:

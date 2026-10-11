@@ -7,7 +7,7 @@ import re
 
 
 OPERATIONS = {"unit_conversion", "finite_difference", "centered_difference",
-              "linear_regression_slope", "percentage_decrease", "percentage_increase", "net_difference",
+              "linear_regression_slope", "percentage_decrease", "percentage_increase", "percent_change", "net_difference",
               "cylinder_volume", "power_times_duration", "concentration_mass_per_volume",
               "weighted_average_by_duration"}
 
@@ -62,7 +62,7 @@ def build(operation: str, text: str, values: dict[str, float],
                     f"(points[{right}][1]-points[0][1])/(points[{right}][0]-points[0][0])\n")
         return code, {operation: value}, {operation: None}
 
-    if operation in {"percentage_decrease", "percentage_increase", "net_difference"}:
+    if operation in {"percentage_decrease", "percentage_increase", "percent_change", "net_difference"}:
         # Named temporal roles outrank number order; unrelated readings stay unused.
         for role, pattern in (("initial", r"^(?:start|initial|before)(?:_|$)"),
                               ("final", r"^(?:end|final|after)(?:_|$)")):
@@ -73,12 +73,12 @@ def build(operation: str, text: str, values: dict[str, float],
                 units = {**units, role: units[name]}
         if not {"initial", "final"} <= set(values) or units["initial"] != units["final"]:
             raise ValueError("initial/final values and matching units required")
-        if operation in {"percentage_decrease", "percentage_increase"}:
+        if operation in {"percentage_decrease", "percentage_increase", "percent_change"}:
             if values["initial"] == 0:
                 raise ValueError("percentage baseline is zero")
             expression = "(values['initial']-values['final'])/values['initial']*100"
             value = (values["initial"] - values["final"]) / values["initial"] * 100
-            if operation == "percentage_increase":
+            if operation in {"percentage_increase", "percent_change"}:
                 expression = "-1 * (" + expression + ")"
                 value = -value
             unit = "%"

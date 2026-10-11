@@ -36,7 +36,9 @@ def user_formula_bindings(equation: str, facts: UserFactRegistry) -> tuple[dict[
     bound: dict[str, object] = {}
     missing = []
     for variable in sorted(variables):
-        matches = [fact for fact in facts.records if normalize_symbol(fact.name) in symbol_names(variable)]
+        explicit = [fact for fact in facts.records if fact.extraction_method == "explicit_assignment"
+                    and re.search(rf"(?<![A-Za-z0-9_]){re.escape(variable)}\s*[:=]", fact.source_span)]
+        matches = explicit or [fact for fact in facts.records if normalize_symbol(fact.name) in symbol_names(variable)]
         exact = [fact for fact in matches if fact.name == variable]
         if not exact:
             exact = [fact for fact in matches if normalize_symbol(fact.name) == normalize_symbol(variable)]
