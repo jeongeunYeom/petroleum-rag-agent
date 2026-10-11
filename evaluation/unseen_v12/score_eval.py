@@ -226,10 +226,10 @@ def summarize(rows: list[dict]) -> dict:
 def render_report(rows: list[dict], summary: dict, slices: dict, verdict: str) -> str:
     failures = Counter(label for row in rows for label in row["failure_labels"])
     lines = ["# v12 independent unseen evaluation", "",
-             "Tested version: v12  ",
-             "Dataset: new `unseen_eval_v12.json` (50 frozen tasks)  ",
-             f"OpenAI model: `{CONFIG['reviewer_model']}`  ",
-             "v12 modification during evaluation: NO  ",
+             "Tested version: v12",
+             "Dataset: new `unseen_eval_v12.json` (50 frozen tasks)",
+             f"OpenAI model: `{CONFIG['reviewer_model']}`",
+             "v12 modification during evaluation: NO",
              "main merge: NO", "",
              f"- Frozen product: `{CONFIG['product_sha']}`; benchmark SHA256: `{CONFIG['dataset_sha256']}`",
              f"- Evaluation: {len(rows)} new tasks; local `{CONFIG['agent_model']}` + hybrid Chroma (12 documents / 18,976 chunks), web off.",
@@ -265,7 +265,7 @@ def render_report(rows: list[dict], summary: dict, slices: dict, verdict: str) -
               "- Source selection and hand-authored reference claims can carry errors; post-freeze corrections are prohibited and any errors should be marked INVALID.", "",
               "## Recommended next step", "",
               "Have a domain expert inspect the listed failures and gold spans, then design a separate future development set. Do not change this frozen run or merge v12 to main from this evaluation.", ""]
-    return "\n".join(lines)
+    return "\n".join(line.rstrip() for line in "\n".join(lines).splitlines()) + "\n"
 
 
 def failure_analysis(rows: list[dict]) -> str:
@@ -294,7 +294,7 @@ def failure_analysis(rows: list[dict]) -> str:
                   f"Reviewer observation: {r['review_note']}", ""]
     lines += ["## Recommendations (not implemented)", "",
               "Review the classified failures and independently verify gold evidence before any future product changes. Do not retune v12 on this frozen set.", ""]
-    return "\n".join(lines)
+    return "\n".join(line.rstrip() for line in "\n".join(lines).splitlines()) + "\n"
 
 
 def main() -> None:

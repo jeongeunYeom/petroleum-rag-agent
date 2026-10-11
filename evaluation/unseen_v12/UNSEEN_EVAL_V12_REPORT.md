@@ -1,9 +1,9 @@
 # v12 independent unseen evaluation
 
-Tested version: v12  
-Dataset: new `unseen_eval_v12.json` (50 frozen tasks)  
-OpenAI model: `gpt-5.4-mini-2026-03-17`  
-v12 modification during evaluation: NO  
+Tested version: v12
+Dataset: new `unseen_eval_v12.json` (50 frozen tasks)
+OpenAI model: `gpt-5.4-mini-2026-03-17`
+v12 modification during evaluation: NO
 main merge: NO
 
 - Frozen product: `2fd4af7d6b12c7d42292b6b7525b0aacf5f34739`; benchmark SHA256: `780fe62c79adb836e73db33416d6a2de0eb9e36a7aac863fd73df09cc2c08d72`

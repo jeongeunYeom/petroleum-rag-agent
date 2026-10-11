@@ -26,11 +26,11 @@ Expected: It records the received acoustic wavetrain (variable-density display).
 Retrieved context:
 - KB1 Heriot-Watt_University_-_Drilling_Engineering.pdf p.341: Cementing
 41
-Institute of Petroleum Engineering,  Heriot-Watt University  
+Institute of Petroleum Engineering,  Heriot-Watt University
 (b) the Variable Density Log (VDL)
-The CBL log usually gives an amplitude curve and provides an indication of the 
-quality of the bond between the casing and cement.  A VDL (variable density log), 
-provides the wavetrain of the received  signal (Figure  28), and can indicate the 
+The CBL log usually gives an amplitude curve and provides an indication of the
+quality of the bond between the casing and cement.  A VDL (variable density log),
+provides the wavetrain of the received  signal (Figure  28), and can indicate the
 quality of the cement bond between the casin
 - KB2 Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf p.201: A BI value of 1.0 represents a perfect cement bond. A value of less than 1.0 indicates an
 incomplete bond. This technique requires attenuation measurements in zones with 100% bond
@@ -63,16 +63,16 @@ Question: An aquifer contacts both the flank and base of an oil zone. Explain th
 Expected: Aquifer contact at the edge is edge-water drive; contact at the base is bottom-water drive. Expansion of aquifer water can supply drive energy.
 
 Retrieved context:
-- KB1 Heriot-Watt University - Reservoir Engineering.pdf p.686: e of aquifers we 
-refer to infinite and finite aquifers.  Clearly there is not an aquifer which extends to 
-an infinite extent!  The terminology indicates, where in the time considerations of the 
+- KB1 Heriot-Watt University - Reservoir Engineering.pdf p.686: e of aquifers we
+refer to infinite and finite aquifers.  Clearly there is not an aquifer which extends to
+an infinite extent!  The terminology indicates, where in the time considerations of the
 analysis, the pressure disturbance has not reached the external limits of the aquifer.
-Although natural water drive provides very effective recovery characteristics “there 
+Although natural water drive provides very effective recovery characteristics “there
 are still more uncertainties a
-- KB2 Heriot-Watt University - Reservoir Engineering.pdf p.707: Institute of Petroleum Engineering,  Heriot-Watt University  
+- KB2 Heriot-Watt University - Reservoir Engineering.pdf p.707: Institute of Petroleum Engineering,  Heriot-Watt University
 25
 Water Influx
- 
+
 W
 hw
 kct
@@ -87,15 +87,15 @@ e =
 φ
 π
 ∆
- 
- 
- 
- 
+
+
+
+
 (bbls) (29)
  t in the above equation is in hours.
-Table 3 lists the summary of expressions for Hurst and Van Everdingen for both 
+Table 3 lists the summary of expressions for Hurst and Van Everdingen for both
 radial and linear system1.
-                            
+
 Oil reservoir
 Aquifer
 Oil reservoir
@@ -105,7 +105,7 @@ Linear Geometry
 θ
 ro
 re
-f= 
+f=
 - KB3 Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf p.939: de  or  flank  of  the  reservoir,  the
 waterdrive is called an edgewater drive. If the aquifer underlays the reservoir and feeds it from
 beneath, the waterdrive is called a bottomwater drive.
@@ -144,47 +144,47 @@ Question: Why can mixing drilling mud with a cement slurry leave a poor bond aro
 Expected: Mud-cement mixing increases viscosity; the hard-to-displace mixture forms annular channels, preventing a uniform cement bond. A spacer is pumped ahead of slurry to reduce contamination.
 
 Retrieved context:
-- KB1 Heriot-Watt_University_-_Drilling_Engineering.pdf p.318: owder is drawn down into the flow of mixwater and 
-a slurry is created.  The slurry flows into a slurry tub where its density is measured.  
-The density of the slurry should be regularly checked during the cement job since 
-this is the primary means by which the quality of the slurry is determined.  If the 
-density of the slurry is correct then the correct amount of mixwater has been mixed 
+- KB1 Heriot-Watt_University_-_Drilling_Engineering.pdf p.318: owder is drawn down into the flow of mixwater and
+a slurry is created.  The slurry flows into a slurry tub where its density is measured.
+The density of the slurry should be regularly checked during the cement job since
+this is the primary means by which the quality of the slurry is determined.  If the
+density of the slurry is correct then the correct amount of mixwater has been mixed
 with t
 - KB2 Heriot-Watt_University_-_Drilling_Engineering.pdf p.329: Cementing
 29
-Institute of Petroleum Engineering,  Heriot-Watt University  
-                                         
+Institute of Petroleum Engineering,  Heriot-Watt University
+
 Tubing
 Retainer or
 retrievable packer
 Top of liner
 Cement
-Figure 17 Remedial squeeze job on a liner   
+Figure 17 Remedial squeeze job on a liner
 4.7  Recommendations for a good cement job
-The main cause for poor isolation after a cement job is the presence of mud channels 
+The main cause for poor isolation after a cement job is the presence of mud channels
 in the cement sheath in the annulus.  These channel
 - KB3 Heriot-Watt_University_-_Drilling_Engineering.pdf p.314: 14
- 
- 
-calcium compounds 
- 
-decrease density 
-         diesel oil 
- 
- 
-decrease density 
- 
- 
- 
-thinners    
- 
- 
+
+
+calcium compounds
+
+decrease density
+         diesel oil
+
+
+decrease density
+
+
+
+thinners
+
+
 act as retarders
-        	 	
-   
-The mixture of mud and cement causes a sharp increase in viscosity.  The major 
-effect of a highly viscous fluid in the annulus is that it forms channels which are 
-not easily displaced.  These channels prevent a good cement bond all round the 
+
+
+The mixture of mud and cement causes a sharp increase in viscosity.  The major
+effect of a highly viscous fluid in the annulus is that it forms channels which are
+not easily displaced.  These channels prevent a good cement bond all round the
 casing.
 To
 - KB4 Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf p.102: ng  pills  can  be  mixed  and  pumped  with
@@ -224,22 +224,22 @@ These  are  the  bond  between  casing  and  cement  and,  to  a  lesser  extent
 a
 - KB3 Heriot-Watt_University_-_Drilling_Engineering.pdf p.341: Cementing
 41
-Institute of Petroleum Engineering,  Heriot-Watt University  
+Institute of Petroleum Engineering,  Heriot-Watt University
 (b) the Variable Density Log (VDL)
-The CBL log usually gives an amplitude curve and provides an indication of the 
-quality of the bond between the casing and cement.  A VDL (variable density log), 
-provides the wavetrain of the received  signal (Figure  28), and can indicate the 
+The CBL log usually gives an amplitude curve and provides an indication of the
+quality of the bond between the casing and cement.  A VDL (variable density log),
+provides the wavetrain of the received  signal (Figure  28), and can indicate the
 quality of the cement bond between the casin
 - KB4 Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf p.403: Fig. 3G.10—Example of a CBL. Track 1 contains the gamma ray (for correlation) and acoustic travel time
 (for quality control). Track 2 contains the amplitude curve and amplified amplitude, which indicates ce-
 ment-to-casing bond. Track 3 contains the CBL waveform, which indicates cement-to-casing bond as well
 as cement-to-formation bond. Straight lines in the CBL waveform, along with high amplitude
-- KB5 Heriot-Watt_University_-_Drilling_Engineering.pdf p.341: still controversial.  There is no standard API scale 
-to measure the effectiveness of the cement bond.  There are many factors which can 
+- KB5 Heriot-Watt_University_-_Drilling_Engineering.pdf p.341: still controversial.  There is no standard API scale
+to measure the effectiveness of the cement bond.  There are many factors which can
 lead to false interpretation:
-• During the setting process the velocity and amplitude of the signals varies 
-  significantly. It is recommended that the CBL log is not run until 24 - 36 hours  
- 
+• During the setting process the velocity and amplitude of the signals varies
+  significantly. It is recommended that the CBL log is not run until 24 - 36 hours
+
 after the cement job to give realistic results.
 • Cement compositi
 
@@ -258,29 +258,29 @@ Expected: P=0.052×13×8200=5543.2 psi.
 
 Retrieved context:
 - KB1 Heriot-Watt_University_-_Drilling_Engineering.pdf p.192: uid
-It is clear from all of the preceding discussion that the pressure at the bottom of the 
-borehole must be accurately determined if the leak off or fracture pressure of the 
-formation is not to be exceeded. When the drilling fluid is circulating through the 
-drillstring, the borehole pressure at the bottom of the annulus will be greater than the 
+It is clear from all of the preceding discussion that the pressure at the bottom of the
+borehole must be accurately determined if the leak off or fracture pressure of the
+formation is not to be exceeded. When the drilling fluid is circulating through the
+drillstring, the borehole pressure at the bottom of the annulus will be greater than the
 hydrostatic pressure of the mud. The extra press
 - KB2 Heriot-Watt_University_-_Drilling_Engineering.pdf p.360: Drilling Fluids
 5
-Institute of Petroleum Engineering,  Heriot-Watt University  
-The pressure in the wellbore will be equal to: 
+Institute of Petroleum Engineering,  Heriot-Watt University
+The pressure in the wellbore will be equal to:
 P	 =  0.052 x MW x TVD
-where,   
-P	 = hydrostatic pressure (psi)       
-MW 	 = mud density of the mud or mud weight (ppg)      
-TVD 	 = true vertical depth of point of interest  = vertical height of mud column 
+where,
+P	 = hydrostatic pressure (psi)
+MW 	 = mud density of the mud or mud weight (ppg)
+TVD 	 = true vertical depth of point of interest  = vertical height of mud column
 (ft)
 The density of the mud may be expressed in either of the
 - KB3 Heriot-Watt_University_-_Drilling_Engineering.pdf p.225: SPM                   BBL/MIN                               PSI
-1   SIDPP x  20                           = (                ) x  20  =                                                PPG  
-     DEPTH (TVD)                        = (                ) 
-2   SAFETY OR TRIP MARGIN (WHEN NEEDED)   =                                                 PPG  
-3   ORIGINAL MUD WEIGHT  
- 
-  =                    
+1   SIDPP x  20                           = (                ) x  20  =                                                PPG
+     DEPTH (TVD)                        = (                )
+2   SAFETY OR TRIP MARGIN (WHEN NEEDED)   =                                                 PPG
+3   ORIGINAL MUD WEIGHT
+
+  =
 - KB4 Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf p.534: ing a UBD Operation. A basic four-step process can be applied to determine the
 options and requirements for drilling underbalanced:
 1. Determine BHP requirements.
@@ -317,28 +317,28 @@ Expected: No. Mud hydrostatic pressure should exceed pore pressure but stay belo
 
 Retrieved context:
 - KB1 Heriot-Watt_University_-_Drilling_Engineering.pdf p.192: 33
-Institute of Petroleum Engineering,  Heriot-Watt University  
-Usually a safety factor of 0.5 ppg (0.026 psi/ft) is subtracted from the allowable 
-mudweight. 
-It should be noted that the leak-off test is usually done just after drilling out of the 
-casing shoe, but when drilling the next hole section other, weaker formations may 
-be encountered. 
+Institute of Petroleum Engineering,  Heriot-Watt University
+Usually a safety factor of 0.5 ppg (0.026 psi/ft) is subtracted from the allowable
+mudweight.
+It should be noted that the leak-off test is usually done just after drilling out of the
+casing shoe, but when drilling the next hole section other, weaker formations may
+be encountered.
 Example
 While performing a leak off test the surf
-- KB2 Heriot-Watt_University_-_Drilling_Engineering.pdf p.211: rcentage 
-of solids.  Water may also be added when drilling deep wells, where evaporation 
-may be significant.  During these operations mud weight must be monitored and 
+- KB2 Heriot-Watt_University_-_Drilling_Engineering.pdf p.211: rcentage
+of solids.  Water may also be added when drilling deep wells, where evaporation
+may be significant.  During these operations mud weight must be monitored and
 adjusted carefully.
 c. Gas cutting :
-If gas seeps from the formation into the circulating mud (known as gas-cutting) 
-it will reduce the density of the drilling fluid.  When this is occurs, the mudweight 
-measured at  surface can 
+If gas seeps from the formation into the circulating mud (known as gas-cutting)
+it will reduce the density of the drilling fluid.  When this is occurs, the mudweight
+measured at  surface can
 - KB3 Heriot-Watt_University_-_Drilling_Engineering.pdf p.456: .
 (d)  Location of Adjacent Wells
-Drilling close to an existing well can be very dangerous, particularly if the existing 
-well is on production.  This is especially true just below the seabed on offshore 
-platforms, where the wells are very closely spaced.  The proposed wellpath must 
-be designed so that it avoids all other wells in the vicinity.  It is essential that the 
+Drilling close to an existing well can be very dangerous, particularly if the existing
+well is on production.  This is especially true just below the seabed on offshore
+platforms, where the wells are very closely spaced.  The proposed wellpath must
+be designed so that it avoids all other wells in the vicinity.  It is essential that the
 possible errors in deter
 - KB4 Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf p.465: ting-depth  selection,  and  cement  planning.  In  addi-
 tion, the following problems must be considered as a result of high formation pressures: kicks
@@ -381,14 +381,14 @@ the bubblepoint pressure, causing a free-gas saturation and reducing the effecti
 to oil. In a retrograde gas reservoir, the pressure near the wellbore may drop below the dew-
 point and an immobile liq
 - KB4 Heriot-Watt University - Reservoir Engineering.pdf p.360: 3.26)
-Equation 3.26 shows that a positive value of skin factor will indicate that the permeability 
-around the well has been reduced (by some form of formation damage). The absolute 
-value reflects the contrast between the skin zone permeability and the unaltered zone 
-permeability and the depth to which the damage extends into the formation. Part of the 
-essential information from a well test is 
+Equation 3.26 shows that a positive value of skin factor will indicate that the permeability
+around the well has been reduced (by some form of formation damage). The absolute
+value reflects the contrast between the skin zone permeability and the unaltered zone
+permeability and the depth to which the damage extends into the formation. Part of the
+essential information from a well test is
 - KB5 Heriot-Watt_University_-_Well_Test_Analysis.pdf p.50: 50
 1.7.4.  Dimensionless Skin Factor
-                   
+
 •
 Due to Van Everdingen and Hurst
 •
@@ -403,7 +403,7 @@ Skin
 S =
 Dimensionless skin factor
 •
-Measure of how much the well has 
+Measure of how much the well has
 been damaged
 ∆ps
 pw
@@ -422,30 +422,30 @@ Question: The safest drilling rule is that mud hydrostatic pressure may exceed f
 Expected: Incorrect. The mud pressure should exceed pore pressure but remain below fracture pressure.
 
 Retrieved context:
-- KB1 Heriot-Watt_University_-_Drilling_Engineering.pdf p.359: he hydrostatic pressure exerted by the mud colom must be high enough to prevent 
-an influx of formation fluids into the wellbore.  However, the pressure in the wellbore 
-must not be too high or it may cause the formation to fracture and this will result in 
-the loss of expensive mud into the formation.  The flow of mud into the formation 
+- KB1 Heriot-Watt_University_-_Drilling_Engineering.pdf p.359: he hydrostatic pressure exerted by the mud colom must be high enough to prevent
+an influx of formation fluids into the wellbore.  However, the pressure in the wellbore
+must not be too high or it may cause the formation to fracture and this will result in
+the loss of expensive mud into the formation.  The flow of mud into the formation
 whilst drilling is known as lost circulation.  This is beca
 - KB2 Heriot-Watt_University_-_Drilling_Engineering.pdf p.229: 25
-Institute of Petroleum Engineering,  Heriot-Watt University  
-just below the casing shoe is exceeded.   Remember that an increase in the annulus 
-pressure at surface will mean that the pressures along the entire wellbore are 
-increasing also.  Normally the weakest point in a drilled well is the highest point 
-in the open hole section (i.e. at the previous casing shoe).  During the well control 
+Institute of Petroleum Engineering,  Heriot-Watt University
+just below the casing shoe is exceeded.   Remember that an increase in the annulus
+pressure at surface will mean that the pressures along the entire wellbore are
+increasing also.  Normally the weakest point in a drilled well is the highest point
+in the open hole section (i.e. at the previous casing shoe).  During the well control
 - KB3 Heriot-Watt_University_-_Drilling_Engineering.pdf p.233: choke, in the case of a gas kick  .
-Safety factors are sometimes built into the procedure by: 
-• 
-Using extra back pressure (200 psi) on the choke to ensure no further influx 
- 
+Safety factors are sometimes built into the procedure by:
+•
+Using extra back pressure (200 psi) on the choke to ensure no further influx
+
 occurs.  The  effect of this is to raise the pressure profiles in Figure 16 by 200 psi.
-•	 Using a slightly higher mud weight.  Due to the uncertainties in reading and  
+•	 Using a slightly higher mud weight.  Due to the uncertainties in reading and
 	 calculating mud densities it is sometimes recommen
 - KB4 Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf p.378: wellbore, the hydrostatic pressure exerted by the cement,
 drilling fluid, etc. must not exceed the fracture pressure of the weakest formation. The fracture
 pressure  is  the  upper  safe  pressure  limitation  of  the  formation  before  the  formation  breaks
 down (the pressure necessary to extend the formation’s fractures). The hydrostatic pressures of
-the fluids in the wellbore, along with the 
+the fluids in the wellbore, along with the
 - KB5 Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf p.113: in  the  first  2,000  ft  below  the  mudline  and  often  are  encountered  while  drilling  in  riserless
 mode. Stopping the flow under these circumstances is difficult. Pumping weighted mud that is
 cut with seawater on the fly generally is successful, but it requires pumping thousands of bar-
@@ -465,23 +465,23 @@ Question: For my unnamed reservoir, what is the exact absolute permeability in m
 Expected: Cannot determine a site-specific permeability without measurements or sufficient reservoir data; request appropriate core/log/test data.
 
 Retrieved context:
-- KB1 Heriot_Watt_University_-_Formation_Evaluation.pdf p.29: ability created by a very small fracture is the reason that fractures 
-significantly affect production capabilities in reservoirs.  One small fracture in a 
-reservoir will result in the production of most of the fluids from the fracture area as 
-the fracture acts like a pipeline through the formation.  Equivalently, if a formation 
+- KB1 Heriot_Watt_University_-_Formation_Evaluation.pdf p.29: ability created by a very small fracture is the reason that fractures
+significantly affect production capabilities in reservoirs.  One small fracture in a
+reservoir will result in the production of most of the fluids from the fracture area as
+the fracture acts like a pipeline through the formation.  Equivalently, if a formation
 is fractured while drilling, the high permeability of the fracture
 - KB2 Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf p.1651: mended Evaluation Practices
 reserves and cash ﬂ ow projection, 1578
 reserves classiﬁ cations
- 
+
 from areal perspective, 1518
- 
+
 basic guidelines, 1516–1517
 reserves estimation, 1482, 1489
 reservoir heterogeneities
- 
+
 forms of, 1055
- 
+
 by permeability variation, 1068–1072
 Reservoir Management Leadership Team, 1606–1607
 reservoir management team (RMT), 77. See also petrophysics
@@ -496,10 +496,10 @@ quent sections of this chapter.
 The traditional products delivered by a mud-logging vendor include geological evaluation,
 petrophysical/reservoir  formation  evaluation,  and  drilling  engineering  support  services.  In  this
 overview, we consider that these products support three basic proc
-- KB5 Heriot-Watt University - Reservoir Engineering.pdf p.261: turation of the wetting phase is equal to the absolute permeability. 
-Consequently, oil flowing in the presence of connate water or an irreducible water 
-saturation is assumed to have a permeability equal to the absolute permeability. 
-Similarly, gas flowing in a reservoir  in the presence of irreducible water saturation 
+- KB5 Heriot-Watt University - Reservoir Engineering.pdf p.261: turation of the wetting phase is equal to the absolute permeability.
+Consequently, oil flowing in the presence of connate water or an irreducible water
+saturation is assumed to have a permeability equal to the absolute permeability.
+Similarly, gas flowing in a reservoir  in the presence of irreducible water saturation
 is assumed to have a permeability equal to the absolute permeability.
 Relati
 
@@ -531,19 +531,19 @@ Question: 정수압식 P=0.052×MW×TVD에서 MW의 단위와 TVD의 단위를 �
 Expected: MW는 mud weight의 ppg, TVD는 진수직깊이 ft이며 P는 psi이다.
 
 Retrieved context:
-- KB1 Heriot-Watt_University_-_Well_Test_Analysis.pdf p.418: Department of Petroleum Engineering,  Heriot-Watt University  
+- KB1 Heriot-Watt_University_-_Well_Test_Analysis.pdf p.418: Department of Petroleum Engineering,  Heriot-Watt University
 29
 7
 Exploration Applications of Distributed Pressure Measurement7
-density, ρw , to be predicted from correlations.  Thus in practice the reservoir fluid 
-densities are known independently.  In this case it is much preferable to fix the 
+density, ρw , to be predicted from correlations.  Thus in practice the reservoir fluid
+densities are known independently.  In this case it is much preferable to fix the
 gradient of the fluid hydrostatic lines to the known values viz:
-mg   = 0.4335 ρg 
-(where there is 
-- KB2 Heriot-Watt_University_-_Drilling_Engineering.pdf p.75: ydrostatic 
-pressure exerted by the mud colom.   If this is so, formation fluids will enter the 
-wellbore and start displacing mud from the hole.  Any influx of formation fluids (oil, 
-gas or water) in the borehole is known as a kick. 
+mg   = 0.4335 ρg
+(where there is
+- KB2 Heriot-Watt_University_-_Drilling_Engineering.pdf p.75: ydrostatic
+pressure exerted by the mud colom.   If this is so, formation fluids will enter the
+wellbore and start displacing mud from the hole.  Any influx of formation fluids (oil,
+gas or water) in the borehole is known as a kick.
 The well control system is designed to:
 •	 Detect a kick
 •	 Close-in the well at surface
@@ -567,13 +567,13 @@ reservoir pressure. The well is dead - no fluids are being produced.  The hydros
 head of the fluid column will equal the reservoir pressure,
 - KB5 Heriot-Watt_University_-_Drilling_Engineering.pdf p.360: Drilling Fluids
 5
-Institute of Petroleum Engineering,  Heriot-Watt University  
-The pressure in the wellbore will be equal to: 
+Institute of Petroleum Engineering,  Heriot-Watt University
+The pressure in the wellbore will be equal to:
 P	 =  0.052 x MW x TVD
-where,   
-P	 = hydrostatic pressure (psi)       
-MW 	 = mud density of the mud or mud weight (ppg)      
-TVD 	 = true vertical depth of point of interest  = vertical height of mud column 
+where,
+P	 = hydrostatic pressure (psi)
+MW 	 = mud density of the mud or mud weight (ppg)
+TVD 	 = true vertical depth of point of interest  = vertical height of mud column
 (ft)
 The density of the mud may be expressed in either of the
 
@@ -603,11 +603,11 @@ drilling rig.
 Guide shoe n : See Float Shoe.
 Gumbo n : clay formations which contaminate the mud as th
 - KB2 Heriot-Watt_University_-_Drilling_Engineering.pdf p.496: 16
-very similar to that for the magnetic single shot.  Since the compass card is linked 
-to the axis of the gyroscope it records a True North bearing which does not require 
+very similar to that for the magnetic single shot.  Since the compass card is linked
+to the axis of the gyroscope it records a True North bearing which does not require
 correction for magnetic declination.
-Gyroscopes are very sensitive to vibration so the gyro single shot must be run and 
-retrieved on wireline.  The gyroscope may also drift away from its set direction 
+Gyroscopes are very sensitive to vibration so the gyro single shot must be run and
+retrieved on wireline.  The gyroscope may also drift away from its set direction
 while it is being run i
 - KB3 Heriot-Watt_University_-_Drilling_Engineering.pdf p.481: C O N T E N T S
 1. INTRODUCTION
@@ -665,7 +665,7 @@ Expected: (70×2+110×3+140×5)/(2+3+5)=117 stb/d.
 Retrieved context:
 - No KB context retrieved.
 
-Model answer: To continue, please provide: each segment needs a rate and positive duration. 
+Model answer: To continue, please provide: each segment needs a rate and positive duration.
 
 Failure type: claim_coverage, missing_validated_CALC, wrong_numeric_result, wrong_or_missing_unit, unnecessary_refusal_or_clarification, goal_not_achieved, unsupported_claim
 
