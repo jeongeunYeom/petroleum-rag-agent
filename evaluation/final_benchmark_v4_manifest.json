@@ -1,0 +1,69 @@
+{
+  "benchmark_id": "petroleum-final-v4",
+  "evaluated_product_branch": "feature/agent-reliability-v11-1",
+  "evaluated_product_sha": "9739350b95db212fd01d49683fb0d027f77d1fc7",
+  "evaluation_branch": "evaluation/final-benchmark-v4",
+  "benchmark_path": "evaluation/final_benchmark_v4.json",
+  "benchmark_sha256": "1f03d238dec454b789a53623e7665b43a19fcef8c1be8393088a440022cd65b0",
+  "freeze_commit": "bc3a0d7444e94c7f35b4b1ba00e1baa2610113b0",
+  "creation_utc": "2026-10-11T13:11:28Z",
+  "task_count": 60,
+  "category_distribution": {
+    "literature": 14,
+    "direct_calculation": 10,
+    "kb_calculation": 12,
+    "user_formula_calculation": 4,
+    "user_formula_simulation": 4,
+    "false_premise": 6,
+    "clarification": 4,
+    "unsupported": 3,
+    "figure": 3
+  },
+  "domain_distribution": {
+    "production": 13,
+    "reservoir_engineering": 10,
+    "well_testing": 10,
+    "petrophysics": 10,
+    "drilling": 10,
+    "reservoir_simulation": 7
+  },
+  "source_document_task_counts": {
+    "Heriot-Watt University - Reservoir Engineering.pdf": 8,
+    "Heriot-Watt_University_-_Reservoir_Simulation.pdf": 4,
+    "Heriot-Watt_University_-_Well_Test_Analysis.pdf": 6,
+    "Heriot_Watt_University_-_Formation_Evaluation.pdf": 5,
+    "Heriot-Watt_University_-_Drilling_Engineering.pdf": 6,
+    "Heriot-Watt_University_-_Production_Technology_II.pdf": 3,
+    "Heriot-Watt_University_-_Production_Technology_I.pdf": 3,
+    "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf": 1
+  },
+  "preflight": {
+    "path": "evaluation/final_v4/benchmark_preflight.json",
+    "old_prompt_count": 769,
+    "flagged_near_duplicate_count": 0,
+    "prior_source_page_overlap_count": 0,
+    "maximum_semantic_similarity": 0.7801,
+    "maximum_normalized_similarity": 0.4865,
+    "maximum_numeric_masked_similarity": 0.5505,
+    "coarse_equation_structure_overlap_count": 65,
+    "formula_source_span_count": 12,
+    "chroma_collection": "petroleum_knowledge",
+    "chroma_documents": 12,
+    "chroma_chunks": 18976
+  },
+  "evaluation_policy": {
+    "benchmark_and_gold_immutable_after_freeze": true,
+    "invalid_task_policy": "Do not edit a frozen task; mark INVALID with a reason and exclude it symmetrically from all tracks.",
+    "agent_model": "qwen3:8b",
+    "agent_retrieval_mode": "hybrid",
+    "web_search": false,
+    "track_a": ["agent", "qwen_closed_book", "openai_closed_book"],
+    "track_b": ["agent_same_row", "qwen_same_evidence", "openai_same_evidence"],
+    "same_evidence_scope": "Agent-captured KB excerpts and FIG text/notes only; no figure pixels, new retrieval, tools, or Python.",
+    "scoring_layers": ["deterministic", "structured_expected_claims", "single-reviewer AI-assisted semantic adjudication"],
+    "bootstrap_resamples": 5000,
+    "bootstrap_seed": 20261011,
+    "strict_calculation_goal_success": true,
+    "main_merge": false
+  }
+}
