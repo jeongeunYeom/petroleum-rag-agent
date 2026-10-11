@@ -1,0 +1,3979 @@
+{
+  "kind": "development_smoke_not_benchmark",
+  "model": "qwen3:8b",
+  "retrieval": "synthetic_in_memory_fixtures",
+  "evaluator": "intentionally_rejecting",
+  "semantic_judge": "real_local_qwen3:8b",
+  "python": "real_bounded_sandbox",
+  "frozen_evaluations_read": false,
+  "chroma_opened": false,
+  "passed": 8,
+  "total": 9,
+  "rows": [
+    {
+      "case": "cross_language",
+      "passed": true,
+      "seconds": 2.0433721002191305,
+      "question": "호박색 카트리지가 용해된 염료를 제거하는 원리를 설명해줘.",
+      "sources": [
+        "The amber cartridge removes dissolved dye by adsorption onto its porous coating.",
+        "The violet latch closes the sampling port when the spring expands.",
+        "The silver sleeve reduces sensor vibration through elastic damping."
+      ],
+      "result": {
+        "run_id": "GR-V17-DEV-cross_language",
+        "topic": "호박색 카트리지가 용해된 염료를 제거하는 원리를 설명해줘.",
+        "goal": "호박색 카트리지가 용해된 염료를 제거하는 원리를 설명해줘.",
+        "expected_result": null,
+        "run_status": "completed",
+        "status": "achieved",
+        "stop_reason": "goal_achieved",
+        "final_answer": "근거 자료에 명시된 내용: \"The amber cartridge removes dissolved dye by adsorption onto its porous coating.\" [KB1]",
+        "clarification_question": null,
+        "required_inputs": [],
+        "final_limitations": [],
+        "goal_coverage": 1.0,
+        "goal_coverage_percent": 100.0,
+        "criteria_source": "inferred_from_request",
+        "criteria_hash": "2480d1ff1cd879cfda7d683bedf0f87da8cf46562e0d935326259fbe105d4445",
+        "criteria": [
+          {
+            "criterion_id": "C1",
+            "status": "met",
+            "reason": "관련 원문 관계와 인용 연결을 검증했습니다.",
+            "supporting_evidence": [
+              "KB1"
+            ]
+          }
+        ],
+        "frozen_criteria": [
+          {
+            "criterion_id": "C1",
+            "description": "호박색 카트리지가 용해된 염료를 제거하는 원리를 설명해줘",
+            "required": true
+          }
+        ],
+        "expected_result_status": "not_provided",
+        "iterations_completed": 3,
+        "current_iteration": 3,
+        "max_iterations": 6,
+        "current_stage": "finalize",
+        "current_action": "stop",
+        "action_history": [
+          {
+            "iteration": 1,
+            "action_id": "ACT-1",
+            "action_type": "retrieve",
+            "target_criteria": [
+              "C1"
+            ],
+            "status": "completed",
+            "reason_code": "source_evidence_needed",
+            "started_at": "2026-10-11T22:58:30.446578Z",
+            "finished_at": "2026-10-11T22:58:30.447574Z",
+            "new_evidence_count": 3,
+            "evidence_added": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ],
+            "computation_ids": [],
+            "coverage_before": 0.0,
+            "coverage_after": 0.0,
+            "failure_reason": null,
+            "details": {
+              "new_evidence_count": 3,
+              "retrieval_mode": "hybrid",
+              "query": "호박색 카트리지가 용해된 염료를 제거하는 원리를 설명해줘.\nMissing: 호박색 카트리지가 용해된 염료를 제거하는 원리를 설명해줘",
+              "cache_hit": false
+            }
+          },
+          {
+            "iteration": 2,
+            "action_id": "ACT-2",
+            "action_type": "verify",
+            "target_criteria": [
+              "C1"
+            ],
+            "status": "completed",
+            "reason_code": "verify_current_support",
+            "started_at": "2026-10-11T22:58:30.448570Z",
+            "finished_at": "2026-10-11T22:58:32.477801Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 0.0,
+            "coverage_after": 1.0,
+            "failure_reason": null,
+            "details": {
+              "engineering_validation_passed": true,
+              "goal_achieved": true
+            }
+          },
+          {
+            "iteration": 3,
+            "action_id": "ACT-3",
+            "action_type": "synthesize",
+            "target_criteria": [],
+            "status": "completed",
+            "reason_code": "goal_achieved",
+            "started_at": "2026-10-11T22:58:32.479901Z",
+            "finished_at": "2026-10-11T22:58:32.479901Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 1.0,
+            "coverage_after": 1.0,
+            "failure_reason": null,
+            "details": {}
+          },
+          {
+            "iteration": 3,
+            "action_id": "ACT-STOP-3",
+            "action_type": "stop",
+            "target_criteria": [],
+            "status": "completed",
+            "reason_code": "goal_achieved",
+            "started_at": "2026-10-11T22:58:32.479901Z",
+            "finished_at": "2026-10-11T22:58:32.479901Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 1.0,
+            "coverage_after": 1.0,
+            "failure_reason": null,
+            "details": {}
+          }
+        ],
+        "state_history": [
+          {
+            "iteration": 1,
+            "criteria": {
+              "C1": "unmet"
+            },
+            "evidence_ids": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 0.0,
+            "goal_achieved": false,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          },
+          {
+            "iteration": 2,
+            "criteria": {
+              "C1": "met"
+            },
+            "evidence_ids": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 1.0,
+            "goal_achieved": true,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          },
+          {
+            "iteration": 3,
+            "criteria": {
+              "C1": "met"
+            },
+            "evidence_ids": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 1.0,
+            "goal_achieved": true,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          },
+          {
+            "iteration": 3,
+            "criteria": {
+              "C1": "met"
+            },
+            "evidence_ids": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 1.0,
+            "goal_achieved": true,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          }
+        ],
+        "iterations": [],
+        "internal_sources": [
+          {
+            "evidence_id": "KB1",
+            "document": "synthetic-device-manual.txt",
+            "page": 1,
+            "chunk_id": "fixture-1",
+            "score": 1.0,
+            "excerpt": "The amber cartridge removes dissolved dye by adsorption onto its porous coating."
+          },
+          {
+            "evidence_id": "KB2",
+            "document": "synthetic-device-manual.txt",
+            "page": 2,
+            "chunk_id": "fixture-2",
+            "score": 1.0,
+            "excerpt": "The violet latch closes the sampling port when the spring expands."
+          },
+          {
+            "evidence_id": "KB3",
+            "document": "synthetic-device-manual.txt",
+            "page": 3,
+            "chunk_id": "fixture-3",
+            "score": 1.0,
+            "excerpt": "The silver sleeve reduces sensor vibration through elastic damping."
+          }
+        ],
+        "web_sources": [],
+        "figures": [],
+        "computations": [],
+        "artifacts": [],
+        "deliverable_status": {},
+        "deliverable_errors": {},
+        "python_calls_total": 0,
+        "python_attempts_total": 0,
+        "python_failures": 0,
+        "python_call_budget_exhausted": false,
+        "timing": {
+          "planning_seconds": 0.009113,
+          "retrieval_seconds": 0.0,
+          "llm_generation_seconds": 0.905637,
+          "python_seconds": 0.0,
+          "verification_seconds": 2.029261,
+          "evaluation_seconds": 0.905451,
+          "synthesis_seconds": 0.000186,
+          "retrieve_action_seconds": 0.000916,
+          "verify_action_seconds": 2.029257,
+          "synthesize_action_seconds": 3.7e-05,
+          "elapsed_seconds": 2.042644,
+          "total_seconds": 2.042644
+        },
+        "telemetry": {
+          "python_authorization_source": "autonomous_execution_mode",
+          "claim_support_checked": true,
+          "required_claim_count": 1,
+          "supported_claim_count": 1,
+          "partially_supported_claim_count": 0,
+          "answerability_status": "ANSWERABLE",
+          "extractive_fallback_attempted": true,
+          "extractive_fallback_used": true,
+          "extractive_fallback_failure_reason": null,
+          "refusal_generated": false,
+          "refusal_reason": null,
+          "relevant_evidence_present": true,
+          "final_answer_kind": "extractive_grounded",
+          "operands_expected": 0,
+          "operands_bound": 0,
+          "operand_validation_passed": false,
+          "formula_selected": false,
+          "formula_ready": false,
+          "calculation_ready": false,
+          "calculation_executed": false,
+          "calculation_validated": false,
+          "intent_route": "knowledge_qa",
+          "intent": {
+            "selected_intent": "knowledge_qa",
+            "intent_reason": "concept_not_numeric_request",
+            "premise_cue_detected": false,
+            "formula_origin": "unknown"
+          },
+          "source_requirement": "none",
+          "fact_extraction": {
+            "deterministic_fact_count": 0,
+            "fallback_fact_count": 0,
+            "rejected_fact_count": 0,
+            "fact_rejection_reasons": [],
+            "normalized_units": {}
+          },
+          "calculation": {
+            "requested_operation_family": "",
+            "direct_calc_ready": false,
+            "missing_operands": [],
+            "selected_input_fact_ids": []
+          },
+          "formula": {
+            "candidates_found": 0,
+            "selected_formula_id": null
+          },
+          "transition": {
+            "formula_ready": false,
+            "calculation_ready": false,
+            "blocking_reason": null
+          },
+          "source_conflict_count": 0,
+          "support_fingerprint": "e6edf861382cd51145887b196ec1651d817450bc04a87a96fb855d3a6a333ca6",
+          "support_underdetermined": false,
+          "claim_language": "ko",
+          "evidence_language": [
+            "en"
+          ],
+          "support_candidate_count": 3,
+          "semantic_support_checked": true,
+          "semantic_support_model": "qwen3:8b",
+          "exact_span_validation_passed": true,
+          "semantic_support_decisions": [
+            {
+              "claim_id": "CLAIM1",
+              "status": "SUPPORTED",
+              "span_ids": [
+                "SPAN1"
+              ],
+              "evidence_conflict": false
+            }
+          ],
+          "claim_count": 1,
+          "partial_claim_count": 0,
+          "contradicted_claim_count": 0,
+          "required_claims": [
+            {
+              "claim_id": "CLAIM1",
+              "description": "호박색 카트리지가 용해된 염료를 제거하는 원리를 설명해줘",
+              "required": true,
+              "support_status": "SUPPORTED",
+              "supporting_evidence_ids": [
+                "KB1"
+              ],
+              "supporting_spans": [
+                "The amber cartridge removes dissolved dye by adsorption onto its porous coating."
+              ]
+            }
+          ],
+          "fallback_attempted": true,
+          "fallback_used": true,
+          "fallback_failure_reason": null,
+          "python_needed": false,
+          "python_calls": 0,
+          "python_attempts": 0,
+          "python_success_rate": 0.0,
+          "calculation_count": 0,
+          "generated_chart_count": 0,
+          "goal_coverage_per_iteration": [],
+          "iterations_to_success": 3,
+          "total_research_seconds": 2.042644,
+          "python_seconds": 0.0
+        },
+        "validation": {
+          "engineering_validation_passed": true,
+          "engineering_contradiction_count": 0,
+          "unsupported_engineering_claim_count": 0,
+          "citation_semantic_passed": true,
+          "unsupported_citation_claim_count": 0,
+          "unsupported_numeric_claim_count": 0,
+          "criteria_frozen": true
+        },
+        "cancel_requested": false,
+        "error": null
+      }
+    },
+    {
+      "case": "english",
+      "passed": true,
+      "seconds": 1.7271645003929734,
+      "question": "Explain how the amber cartridge removes dissolved dye.",
+      "sources": [
+        "The amber cartridge removes dissolved dye by adsorption onto its porous coating.",
+        "The violet latch closes the sampling port when the spring expands.",
+        "The silver sleeve reduces sensor vibration through elastic damping."
+      ],
+      "result": {
+        "run_id": "GR-V17-DEV-english",
+        "topic": "Explain how the amber cartridge removes dissolved dye.",
+        "goal": "Explain how the amber cartridge removes dissolved dye.",
+        "expected_result": null,
+        "run_status": "completed",
+        "status": "achieved",
+        "stop_reason": "goal_achieved",
+        "final_answer": "The source states: \"The amber cartridge removes dissolved dye by adsorption onto its porous coating.\" [KB1]",
+        "clarification_question": null,
+        "required_inputs": [],
+        "final_limitations": [],
+        "goal_coverage": 1.0,
+        "goal_coverage_percent": 100.0,
+        "criteria_source": "inferred_from_request",
+        "criteria_hash": "31a21a0ae4fb8845690d4c3e6515ee13372b06816fd34364009c85bfd6fabf74",
+        "criteria": [
+          {
+            "criterion_id": "C1",
+            "status": "met",
+            "reason": "The literal relation spans and citation links were verified.",
+            "supporting_evidence": [
+              "KB1"
+            ]
+          }
+        ],
+        "frozen_criteria": [
+          {
+            "criterion_id": "C1",
+            "description": "Explain how the amber cartridge removes dissolved dye",
+            "required": true
+          }
+        ],
+        "expected_result_status": "not_provided",
+        "iterations_completed": 3,
+        "current_iteration": 3,
+        "max_iterations": 6,
+        "current_stage": "finalize",
+        "current_action": "stop",
+        "action_history": [
+          {
+            "iteration": 1,
+            "action_id": "ACT-1",
+            "action_type": "retrieve",
+            "target_criteria": [
+              "C1"
+            ],
+            "status": "completed",
+            "reason_code": "source_evidence_needed",
+            "started_at": "2026-10-11T22:58:32.482807Z",
+            "finished_at": "2026-10-11T22:58:32.483865Z",
+            "new_evidence_count": 3,
+            "evidence_added": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ],
+            "computation_ids": [],
+            "coverage_before": 0.0,
+            "coverage_after": 0.0,
+            "failure_reason": null,
+            "details": {
+              "new_evidence_count": 3,
+              "retrieval_mode": "hybrid",
+              "query": "Explain how the amber cartridge removes dissolved dye.\nMissing: Explain how the amber cartridge removes dissolved dye",
+              "cache_hit": false
+            }
+          },
+          {
+            "iteration": 2,
+            "action_id": "ACT-2",
+            "action_type": "verify",
+            "target_criteria": [
+              "C1"
+            ],
+            "status": "completed",
+            "reason_code": "verify_current_support",
+            "started_at": "2026-10-11T22:58:32.485860Z",
+            "finished_at": "2026-10-11T22:58:34.205110Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 0.0,
+            "coverage_after": 1.0,
+            "failure_reason": null,
+            "details": {
+              "engineering_validation_passed": true,
+              "goal_achieved": true
+            }
+          },
+          {
+            "iteration": 3,
+            "action_id": "ACT-3",
+            "action_type": "synthesize",
+            "target_criteria": [],
+            "status": "completed",
+            "reason_code": "goal_achieved",
+            "started_at": "2026-10-11T22:58:34.207226Z",
+            "finished_at": "2026-10-11T22:58:34.207226Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 1.0,
+            "coverage_after": 1.0,
+            "failure_reason": null,
+            "details": {}
+          },
+          {
+            "iteration": 3,
+            "action_id": "ACT-STOP-3",
+            "action_type": "stop",
+            "target_criteria": [],
+            "status": "completed",
+            "reason_code": "goal_achieved",
+            "started_at": "2026-10-11T22:58:34.207751Z",
+            "finished_at": "2026-10-11T22:58:34.207751Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 1.0,
+            "coverage_after": 1.0,
+            "failure_reason": null,
+            "details": {}
+          }
+        ],
+        "state_history": [
+          {
+            "iteration": 1,
+            "criteria": {
+              "C1": "unmet"
+            },
+            "evidence_ids": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 0.0,
+            "goal_achieved": false,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          },
+          {
+            "iteration": 2,
+            "criteria": {
+              "C1": "met"
+            },
+            "evidence_ids": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 1.0,
+            "goal_achieved": true,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          },
+          {
+            "iteration": 3,
+            "criteria": {
+              "C1": "met"
+            },
+            "evidence_ids": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 1.0,
+            "goal_achieved": true,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          },
+          {
+            "iteration": 3,
+            "criteria": {
+              "C1": "met"
+            },
+            "evidence_ids": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 1.0,
+            "goal_achieved": true,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          }
+        ],
+        "iterations": [],
+        "internal_sources": [
+          {
+            "evidence_id": "KB1",
+            "document": "synthetic-device-manual.txt",
+            "page": 1,
+            "chunk_id": "fixture-1",
+            "score": 1.0,
+            "excerpt": "The amber cartridge removes dissolved dye by adsorption onto its porous coating."
+          },
+          {
+            "evidence_id": "KB2",
+            "document": "synthetic-device-manual.txt",
+            "page": 2,
+            "chunk_id": "fixture-2",
+            "score": 1.0,
+            "excerpt": "The violet latch closes the sampling port when the spring expands."
+          },
+          {
+            "evidence_id": "KB3",
+            "document": "synthetic-device-manual.txt",
+            "page": 3,
+            "chunk_id": "fixture-3",
+            "score": 1.0,
+            "excerpt": "The silver sleeve reduces sensor vibration through elastic damping."
+          }
+        ],
+        "web_sources": [],
+        "figures": [],
+        "computations": [],
+        "artifacts": [],
+        "deliverable_status": {},
+        "deliverable_errors": {},
+        "python_calls_total": 0,
+        "python_attempts_total": 0,
+        "python_failures": 0,
+        "python_call_budget_exhausted": false,
+        "timing": {
+          "planning_seconds": 0.002101,
+          "retrieval_seconds": 0.0,
+          "llm_generation_seconds": 0.926161,
+          "python_seconds": 0.0,
+          "verification_seconds": 1.71924,
+          "evaluation_seconds": 0.926128,
+          "synthesis_seconds": 3.3e-05,
+          "retrieve_action_seconds": 0.001279,
+          "verify_action_seconds": 1.719236,
+          "synthesize_action_seconds": 3.9e-05,
+          "elapsed_seconds": 1.726687,
+          "total_seconds": 1.726687
+        },
+        "telemetry": {
+          "python_authorization_source": "autonomous_execution_mode",
+          "claim_support_checked": true,
+          "required_claim_count": 1,
+          "supported_claim_count": 1,
+          "partially_supported_claim_count": 0,
+          "answerability_status": "ANSWERABLE",
+          "extractive_fallback_attempted": true,
+          "extractive_fallback_used": true,
+          "extractive_fallback_failure_reason": null,
+          "refusal_generated": false,
+          "refusal_reason": null,
+          "relevant_evidence_present": true,
+          "final_answer_kind": "extractive_grounded",
+          "operands_expected": 0,
+          "operands_bound": 0,
+          "operand_validation_passed": false,
+          "formula_selected": false,
+          "formula_ready": false,
+          "calculation_ready": false,
+          "calculation_executed": false,
+          "calculation_validated": false,
+          "intent_route": "knowledge_qa",
+          "intent": {
+            "selected_intent": "knowledge_qa",
+            "intent_reason": "concept_not_numeric_request",
+            "premise_cue_detected": false,
+            "formula_origin": "unknown"
+          },
+          "source_requirement": "none",
+          "fact_extraction": {
+            "deterministic_fact_count": 0,
+            "fallback_fact_count": 0,
+            "rejected_fact_count": 0,
+            "fact_rejection_reasons": [],
+            "normalized_units": {}
+          },
+          "calculation": {
+            "requested_operation_family": "",
+            "direct_calc_ready": false,
+            "missing_operands": [],
+            "selected_input_fact_ids": []
+          },
+          "formula": {
+            "candidates_found": 0,
+            "selected_formula_id": null
+          },
+          "transition": {
+            "formula_ready": false,
+            "calculation_ready": false,
+            "blocking_reason": null
+          },
+          "source_conflict_count": 0,
+          "support_fingerprint": "a3bd744a6cf3b7851e94c44fd1e9b54d5fdcd253f3193ba044ff0648a0f6f7fc",
+          "support_underdetermined": false,
+          "claim_language": "en",
+          "evidence_language": [
+            "en"
+          ],
+          "support_candidate_count": 3,
+          "semantic_support_checked": true,
+          "semantic_support_model": "qwen3:8b",
+          "exact_span_validation_passed": true,
+          "semantic_support_decisions": [
+            {
+              "claim_id": "CLAIM1",
+              "status": "SUPPORTED",
+              "span_ids": [
+                "SPAN1"
+              ],
+              "evidence_conflict": false
+            }
+          ],
+          "claim_count": 1,
+          "partial_claim_count": 0,
+          "contradicted_claim_count": 0,
+          "required_claims": [
+            {
+              "claim_id": "CLAIM1",
+              "description": "Explain how the amber cartridge removes dissolved dye",
+              "required": true,
+              "support_status": "SUPPORTED",
+              "supporting_evidence_ids": [
+                "KB1"
+              ],
+              "supporting_spans": [
+                "The amber cartridge removes dissolved dye by adsorption onto its porous coating."
+              ]
+            }
+          ],
+          "fallback_attempted": true,
+          "fallback_used": true,
+          "fallback_failure_reason": null,
+          "python_needed": false,
+          "python_calls": 0,
+          "python_attempts": 0,
+          "python_success_rate": 0.0,
+          "calculation_count": 0,
+          "generated_chart_count": 0,
+          "goal_coverage_per_iteration": [],
+          "iterations_to_success": 3,
+          "total_research_seconds": 1.726687,
+          "python_seconds": 0.0
+        },
+        "validation": {
+          "engineering_validation_passed": true,
+          "engineering_contradiction_count": 0,
+          "unsupported_engineering_claim_count": 0,
+          "citation_semantic_passed": true,
+          "unsupported_citation_claim_count": 0,
+          "unsupported_numeric_claim_count": 0,
+          "criteria_frozen": true
+        },
+        "cancel_requested": false,
+        "error": null
+      }
+    },
+    {
+      "case": "multi_claim",
+      "passed": false,
+      "seconds": 3.052518599666655,
+      "question": "호박색 카트리지의 제거 원리를 설명해줘. 그리고 보라색 걸쇠의 닫힘 조건을 설명해줘. 그리고 은색 슬리브의 역할을 설명해줘.",
+      "sources": [
+        "The amber cartridge removes dissolved dye by adsorption onto its porous coating.",
+        "The violet latch closes the sampling port when the spring expands.",
+        "The silver sleeve reduces sensor vibration through elastic damping."
+      ],
+      "result": {
+        "run_id": "GR-V17-DEV-multi_claim",
+        "topic": "호박색 카트리지의 제거 원리를 설명해줘. 그리고 보라색 걸쇠의 닫힘 조건을 설명해줘. 그리고 은색 슬리브의 역할을 설명해줘.",
+        "goal": "호박색 카트리지의 제거 원리를 설명해줘. 그리고 보라색 걸쇠의 닫힘 조건을 설명해줘. 그리고 은색 슬리브의 역할을 설명해줘.",
+        "expected_result": null,
+        "run_status": "stopped",
+        "status": "stopped",
+        "stop_reason": "insufficient_evidence",
+        "final_answer": "근거 자료에 명시된 내용: \"The amber cartridge removes dissolved dye by adsorption onto its porous coating.\" [KB1]\n\"The violet latch closes the sampling port when the spring expands.\" [KB2]\n\"The silver sleeve reduces sensor vibration through elastic damping.\" [KB3]; 현재 근거에서 확인되지 않거나 근거가 충돌하는 요청: 그리고",
+        "clarification_question": null,
+        "required_inputs": [],
+        "final_limitations": [],
+        "goal_coverage": 0.75,
+        "goal_coverage_percent": 75.0,
+        "criteria_source": "inferred_from_request",
+        "criteria_hash": "053c20dfdf214fdbfe0c593047e7846ee4878978ca1c66fec54b192014c949db",
+        "criteria": [
+          {
+            "criterion_id": "C1",
+            "status": "partial",
+            "reason": "관련 원문 관계와 인용 연결을 검증했습니다.",
+            "supporting_evidence": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ]
+          },
+          {
+            "criterion_id": "C2",
+            "status": "partial",
+            "reason": "관련 원문 관계와 인용 연결을 검증했습니다.",
+            "supporting_evidence": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ]
+          },
+          {
+            "criterion_id": "C3",
+            "status": "partial",
+            "reason": "관련 원문 관계와 인용 연결을 검증했습니다.",
+            "supporting_evidence": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ]
+          },
+          {
+            "criterion_id": "C4",
+            "status": "partial",
+            "reason": "관련 원문 관계와 인용 연결을 검증했습니다.",
+            "supporting_evidence": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ]
+          }
+        ],
+        "frozen_criteria": [
+          {
+            "criterion_id": "C1",
+            "description": "호박색 카트리지의 제거 원리를 설명해줘",
+            "required": true
+          },
+          {
+            "criterion_id": "C2",
+            "description": "그리고",
+            "required": true
+          },
+          {
+            "criterion_id": "C3",
+            "description": "보라색 걸쇠의 닫힘 조건을 설명해줘",
+            "required": true
+          },
+          {
+            "criterion_id": "C4",
+            "description": "은색 슬리브의 역할을 설명해줘",
+            "required": true
+          }
+        ],
+        "expected_result_status": "not_provided",
+        "iterations_completed": 3,
+        "current_iteration": 3,
+        "max_iterations": 6,
+        "current_stage": "finalize",
+        "current_action": "stop",
+        "action_history": [
+          {
+            "iteration": 1,
+            "action_id": "ACT-1",
+            "action_type": "retrieve",
+            "target_criteria": [
+              "C1",
+              "C2",
+              "C3",
+              "C4"
+            ],
+            "status": "completed",
+            "reason_code": "source_evidence_needed",
+            "started_at": "2026-10-11T22:58:34.210406Z",
+            "finished_at": "2026-10-11T22:58:34.211438Z",
+            "new_evidence_count": 3,
+            "evidence_added": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ],
+            "computation_ids": [],
+            "coverage_before": 0.0,
+            "coverage_after": 0.0,
+            "failure_reason": null,
+            "details": {
+              "new_evidence_count": 3,
+              "retrieval_mode": "hybrid",
+              "query": "호박색 카트리지의 제거 원리를 설명해줘. 그리고 보라색 걸쇠의 닫힘 조건을 설명해줘. 그리고 은색 슬리브의 역할을 설명해줘.\nMissing: 호박색 카트리지의 제거 원리를 설명해줘; 그리고; 보라색 걸쇠의 닫힘 조건을 설명해줘; 은색 슬리브의 역할을 설명해줘",
+              "cache_hit": false
+            }
+          },
+          {
+            "iteration": 2,
+            "action_id": "ACT-2",
+            "action_type": "verify",
+            "target_criteria": [
+              "C1",
+              "C2",
+              "C3",
+              "C4"
+            ],
+            "status": "completed",
+            "reason_code": "verify_current_support",
+            "started_at": "2026-10-11T22:58:34.213434Z",
+            "finished_at": "2026-10-11T22:58:37.254546Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 0.0,
+            "coverage_after": 0.75,
+            "failure_reason": null,
+            "details": {
+              "engineering_validation_passed": true,
+              "goal_achieved": false
+            }
+          },
+          {
+            "iteration": 3,
+            "action_id": "ACT-3",
+            "action_type": "retrieve",
+            "target_criteria": [
+              "C1",
+              "C2",
+              "C3",
+              "C4"
+            ],
+            "status": "blocked",
+            "reason_code": "missing_claim_support",
+            "started_at": "2026-10-11T22:58:37.256654Z",
+            "finished_at": "2026-10-11T22:58:37.258220Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 0.75,
+            "coverage_after": 0.75,
+            "failure_reason": "retrieve_no_progress",
+            "details": {
+              "new_evidence_count": 0,
+              "retrieval_mode": "hybrid",
+              "query": "호박색 카트리지의 제거 원리를 설명해줘. 그리고 보라색 걸쇠의 닫힘 조건을 설명해줘. 그리고 은색 슬리브의 역할을 설명해줘.\nMissing: 그리고",
+              "cache_hit": false
+            }
+          },
+          {
+            "iteration": 3,
+            "action_id": "ACT-STOP-3",
+            "action_type": "stop",
+            "target_criteria": [],
+            "status": "completed",
+            "reason_code": "partial_grounded_answer",
+            "started_at": "2026-10-11T22:58:37.260293Z",
+            "finished_at": "2026-10-11T22:58:37.260293Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 0.75,
+            "coverage_after": 0.75,
+            "failure_reason": null,
+            "details": {}
+          }
+        ],
+        "state_history": [
+          {
+            "iteration": 1,
+            "criteria": {
+              "C1": "unmet",
+              "C2": "unmet",
+              "C3": "unmet",
+              "C4": "unmet"
+            },
+            "evidence_ids": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 0.0,
+            "goal_achieved": false,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          },
+          {
+            "iteration": 2,
+            "criteria": {
+              "C1": "partial",
+              "C2": "partial",
+              "C3": "partial",
+              "C4": "partial"
+            },
+            "evidence_ids": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [
+              "그리고"
+            ],
+            "coverage": 0.75,
+            "goal_achieved": false,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          },
+          {
+            "iteration": 3,
+            "criteria": {
+              "C1": "partial",
+              "C2": "partial",
+              "C3": "partial",
+              "C4": "partial"
+            },
+            "evidence_ids": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [
+              "retrieve_no_progress"
+            ],
+            "coverage": 0.75,
+            "goal_achieved": false,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          },
+          {
+            "iteration": 3,
+            "criteria": {
+              "C1": "partial",
+              "C2": "partial",
+              "C3": "partial",
+              "C4": "partial"
+            },
+            "evidence_ids": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [
+              "retrieve_no_progress"
+            ],
+            "coverage": 0.75,
+            "goal_achieved": false,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          }
+        ],
+        "iterations": [],
+        "internal_sources": [
+          {
+            "evidence_id": "KB1",
+            "document": "synthetic-device-manual.txt",
+            "page": 1,
+            "chunk_id": "fixture-1",
+            "score": 1.0,
+            "excerpt": "The amber cartridge removes dissolved dye by adsorption onto its porous coating."
+          },
+          {
+            "evidence_id": "KB2",
+            "document": "synthetic-device-manual.txt",
+            "page": 2,
+            "chunk_id": "fixture-2",
+            "score": 1.0,
+            "excerpt": "The violet latch closes the sampling port when the spring expands."
+          },
+          {
+            "evidence_id": "KB3",
+            "document": "synthetic-device-manual.txt",
+            "page": 3,
+            "chunk_id": "fixture-3",
+            "score": 1.0,
+            "excerpt": "The silver sleeve reduces sensor vibration through elastic damping."
+          }
+        ],
+        "web_sources": [],
+        "figures": [],
+        "computations": [],
+        "artifacts": [],
+        "deliverable_status": {},
+        "deliverable_errors": {},
+        "python_calls_total": 0,
+        "python_attempts_total": 0,
+        "python_failures": 0,
+        "python_call_budget_exhausted": false,
+        "timing": {
+          "planning_seconds": 0.002195,
+          "retrieval_seconds": 0.0,
+          "llm_generation_seconds": 2.172621,
+          "python_seconds": 0.0,
+          "verification_seconds": 3.040382,
+          "evaluation_seconds": 2.172575,
+          "synthesis_seconds": 4.6e-05,
+          "retrieve_action_seconds": 0.003596,
+          "verify_action_seconds": 3.040379,
+          "elapsed_seconds": 3.051996,
+          "total_seconds": 3.051996
+        },
+        "telemetry": {
+          "python_authorization_source": "autonomous_execution_mode",
+          "claim_support_checked": true,
+          "required_claim_count": 4,
+          "supported_claim_count": 3,
+          "partially_supported_claim_count": 0,
+          "answerability_status": "PARTIAL",
+          "extractive_fallback_attempted": true,
+          "extractive_fallback_used": true,
+          "extractive_fallback_failure_reason": null,
+          "refusal_generated": false,
+          "refusal_reason": null,
+          "relevant_evidence_present": true,
+          "final_answer_kind": "partial_grounded",
+          "operands_expected": 0,
+          "operands_bound": 0,
+          "operand_validation_passed": false,
+          "formula_selected": false,
+          "formula_ready": false,
+          "calculation_ready": false,
+          "calculation_executed": false,
+          "calculation_validated": false,
+          "intent_route": "knowledge_qa",
+          "intent": {
+            "selected_intent": "knowledge_qa",
+            "intent_reason": "concept_not_numeric_request",
+            "premise_cue_detected": false,
+            "formula_origin": "unknown"
+          },
+          "source_requirement": "none",
+          "fact_extraction": {
+            "deterministic_fact_count": 0,
+            "fallback_fact_count": 0,
+            "rejected_fact_count": 0,
+            "fact_rejection_reasons": [],
+            "normalized_units": {}
+          },
+          "calculation": {
+            "requested_operation_family": "",
+            "direct_calc_ready": false,
+            "missing_operands": [],
+            "selected_input_fact_ids": []
+          },
+          "formula": {
+            "candidates_found": 0,
+            "selected_formula_id": null
+          },
+          "transition": {
+            "formula_ready": false,
+            "calculation_ready": false,
+            "blocking_reason": "retrieve_no_progress"
+          },
+          "source_conflict_count": 0,
+          "support_fingerprint": "e0a4024fdc8bdbb48f2299c695c7fdb8dc7b47687fff7f7bf687c87a3880f917",
+          "support_underdetermined": false,
+          "claim_language": "ko",
+          "evidence_language": [
+            "en"
+          ],
+          "support_candidate_count": 3,
+          "semantic_support_checked": true,
+          "semantic_support_model": "qwen3:8b",
+          "exact_span_validation_passed": true,
+          "semantic_support_decisions": [
+            {
+              "claim_id": "CLAIM1",
+              "status": "SUPPORTED",
+              "span_ids": [
+                "SPAN1"
+              ],
+              "evidence_conflict": false
+            },
+            {
+              "claim_id": "CLAIM2",
+              "status": "UNSUPPORTED",
+              "span_ids": [],
+              "evidence_conflict": false
+            },
+            {
+              "claim_id": "CLAIM3",
+              "status": "SUPPORTED",
+              "span_ids": [
+                "SPAN2"
+              ],
+              "evidence_conflict": false
+            },
+            {
+              "claim_id": "CLAIM4",
+              "status": "SUPPORTED",
+              "span_ids": [
+                "SPAN3"
+              ],
+              "evidence_conflict": false
+            }
+          ],
+          "claim_count": 4,
+          "partial_claim_count": 0,
+          "contradicted_claim_count": 0,
+          "required_claims": [
+            {
+              "claim_id": "CLAIM1",
+              "description": "호박색 카트리지의 제거 원리를 설명해줘",
+              "required": true,
+              "support_status": "SUPPORTED",
+              "supporting_evidence_ids": [
+                "KB1"
+              ],
+              "supporting_spans": [
+                "The amber cartridge removes dissolved dye by adsorption onto its porous coating."
+              ]
+            },
+            {
+              "claim_id": "CLAIM2",
+              "description": "그리고",
+              "required": true,
+              "support_status": "UNSUPPORTED",
+              "supporting_evidence_ids": [],
+              "supporting_spans": []
+            },
+            {
+              "claim_id": "CLAIM3",
+              "description": "보라색 걸쇠의 닫힘 조건을 설명해줘",
+              "required": true,
+              "support_status": "SUPPORTED",
+              "supporting_evidence_ids": [
+                "KB2"
+              ],
+              "supporting_spans": [
+                "The violet latch closes the sampling port when the spring expands."
+              ]
+            },
+            {
+              "claim_id": "CLAIM4",
+              "description": "은색 슬리브의 역할을 설명해줘",
+              "required": true,
+              "support_status": "SUPPORTED",
+              "supporting_evidence_ids": [
+                "KB3"
+              ],
+              "supporting_spans": [
+                "The silver sleeve reduces sensor vibration through elastic damping."
+              ]
+            }
+          ],
+          "fallback_attempted": true,
+          "fallback_used": true,
+          "fallback_failure_reason": null,
+          "python_needed": false,
+          "python_calls": 0,
+          "python_attempts": 0,
+          "python_success_rate": 0.0,
+          "calculation_count": 0,
+          "generated_chart_count": 0,
+          "goal_coverage_per_iteration": [],
+          "iterations_to_success": null,
+          "total_research_seconds": 3.051996,
+          "python_seconds": 0.0
+        },
+        "validation": {
+          "engineering_validation_passed": true,
+          "engineering_contradiction_count": 0,
+          "unsupported_engineering_claim_count": 0,
+          "citation_semantic_passed": true,
+          "unsupported_citation_claim_count": 0,
+          "unsupported_numeric_claim_count": 0,
+          "criteria_frozen": true
+        },
+        "cancel_requested": false,
+        "error": null
+      }
+    },
+    {
+      "case": "partial",
+      "passed": true,
+      "seconds": 2.811987599823624,
+      "question": "호박색 카트리지의 제거 원리를 설명해줘. 그리고 보라색 걸쇠의 닫힘 조건을 설명해줘. 그리고 은색 슬리브의 역할을 설명해줘.",
+      "sources": [
+        "The amber cartridge removes dissolved dye by adsorption onto its porous coating.",
+        "The violet latch closes the sampling port when the spring expands."
+      ],
+      "result": {
+        "run_id": "GR-V17-DEV-partial",
+        "topic": "호박색 카트리지의 제거 원리를 설명해줘. 그리고 보라색 걸쇠의 닫힘 조건을 설명해줘. 그리고 은색 슬리브의 역할을 설명해줘.",
+        "goal": "호박색 카트리지의 제거 원리를 설명해줘. 그리고 보라색 걸쇠의 닫힘 조건을 설명해줘. 그리고 은색 슬리브의 역할을 설명해줘.",
+        "expected_result": null,
+        "run_status": "stopped",
+        "status": "stopped",
+        "stop_reason": "insufficient_evidence",
+        "final_answer": "근거 자료에 명시된 내용: \"The amber cartridge removes dissolved dye by adsorption onto its porous coating.\" [KB1]\n\"The violet latch closes the sampling port when the spring expands.\" [KB2]; 현재 근거에서 확인되지 않거나 근거가 충돌하는 요청: 그리고; 은색 슬리브의 역할을 설명해줘",
+        "clarification_question": null,
+        "required_inputs": [],
+        "final_limitations": [],
+        "goal_coverage": 0.5,
+        "goal_coverage_percent": 50.0,
+        "criteria_source": "inferred_from_request",
+        "criteria_hash": "053c20dfdf214fdbfe0c593047e7846ee4878978ca1c66fec54b192014c949db",
+        "criteria": [
+          {
+            "criterion_id": "C1",
+            "status": "partial",
+            "reason": "관련 원문 관계와 인용 연결을 검증했습니다.",
+            "supporting_evidence": [
+              "KB1",
+              "KB2"
+            ]
+          },
+          {
+            "criterion_id": "C2",
+            "status": "partial",
+            "reason": "관련 원문 관계와 인용 연결을 검증했습니다.",
+            "supporting_evidence": [
+              "KB1",
+              "KB2"
+            ]
+          },
+          {
+            "criterion_id": "C3",
+            "status": "partial",
+            "reason": "관련 원문 관계와 인용 연결을 검증했습니다.",
+            "supporting_evidence": [
+              "KB1",
+              "KB2"
+            ]
+          },
+          {
+            "criterion_id": "C4",
+            "status": "partial",
+            "reason": "관련 원문 관계와 인용 연결을 검증했습니다.",
+            "supporting_evidence": [
+              "KB1",
+              "KB2"
+            ]
+          }
+        ],
+        "frozen_criteria": [
+          {
+            "criterion_id": "C1",
+            "description": "호박색 카트리지의 제거 원리를 설명해줘",
+            "required": true
+          },
+          {
+            "criterion_id": "C2",
+            "description": "그리고",
+            "required": true
+          },
+          {
+            "criterion_id": "C3",
+            "description": "보라색 걸쇠의 닫힘 조건을 설명해줘",
+            "required": true
+          },
+          {
+            "criterion_id": "C4",
+            "description": "은색 슬리브의 역할을 설명해줘",
+            "required": true
+          }
+        ],
+        "expected_result_status": "not_provided",
+        "iterations_completed": 3,
+        "current_iteration": 3,
+        "max_iterations": 6,
+        "current_stage": "finalize",
+        "current_action": "stop",
+        "action_history": [
+          {
+            "iteration": 1,
+            "action_id": "ACT-1",
+            "action_type": "retrieve",
+            "target_criteria": [
+              "C1",
+              "C2",
+              "C3",
+              "C4"
+            ],
+            "status": "completed",
+            "reason_code": "source_evidence_needed",
+            "started_at": "2026-10-11T22:58:37.262288Z",
+            "finished_at": "2026-10-11T22:58:37.263283Z",
+            "new_evidence_count": 2,
+            "evidence_added": [
+              "KB1",
+              "KB2"
+            ],
+            "computation_ids": [],
+            "coverage_before": 0.0,
+            "coverage_after": 0.0,
+            "failure_reason": null,
+            "details": {
+              "new_evidence_count": 2,
+              "retrieval_mode": "hybrid",
+              "query": "호박색 카트리지의 제거 원리를 설명해줘. 그리고 보라색 걸쇠의 닫힘 조건을 설명해줘. 그리고 은색 슬리브의 역할을 설명해줘.\nMissing: 호박색 카트리지의 제거 원리를 설명해줘; 그리고; 보라색 걸쇠의 닫힘 조건을 설명해줘; 은색 슬리브의 역할을 설명해줘",
+              "cache_hit": false
+            }
+          },
+          {
+            "iteration": 2,
+            "action_id": "ACT-2",
+            "action_type": "verify",
+            "target_criteria": [
+              "C1",
+              "C2",
+              "C3",
+              "C4"
+            ],
+            "status": "completed",
+            "reason_code": "verify_current_support",
+            "started_at": "2026-10-11T22:58:37.263283Z",
+            "finished_at": "2026-10-11T22:58:40.067540Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 0.0,
+            "coverage_after": 0.5,
+            "failure_reason": null,
+            "details": {
+              "engineering_validation_passed": true,
+              "goal_achieved": false
+            }
+          },
+          {
+            "iteration": 3,
+            "action_id": "ACT-3",
+            "action_type": "retrieve",
+            "target_criteria": [
+              "C1",
+              "C2",
+              "C3",
+              "C4"
+            ],
+            "status": "blocked",
+            "reason_code": "missing_claim_support",
+            "started_at": "2026-10-11T22:58:40.069106Z",
+            "finished_at": "2026-10-11T22:58:40.070149Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 0.5,
+            "coverage_after": 0.5,
+            "failure_reason": "retrieve_no_progress",
+            "details": {
+              "new_evidence_count": 0,
+              "retrieval_mode": "hybrid",
+              "query": "호박색 카트리지의 제거 원리를 설명해줘. 그리고 보라색 걸쇠의 닫힘 조건을 설명해줘. 그리고 은색 슬리브의 역할을 설명해줘.\nMissing: 그리고; 은색 슬리브의 역할을 설명해줘",
+              "cache_hit": false
+            }
+          },
+          {
+            "iteration": 3,
+            "action_id": "ACT-STOP-3",
+            "action_type": "stop",
+            "target_criteria": [],
+            "status": "completed",
+            "reason_code": "partial_grounded_answer",
+            "started_at": "2026-10-11T22:58:40.072259Z",
+            "finished_at": "2026-10-11T22:58:40.072259Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 0.5,
+            "coverage_after": 0.5,
+            "failure_reason": null,
+            "details": {}
+          }
+        ],
+        "state_history": [
+          {
+            "iteration": 1,
+            "criteria": {
+              "C1": "unmet",
+              "C2": "unmet",
+              "C3": "unmet",
+              "C4": "unmet"
+            },
+            "evidence_ids": [
+              "KB1",
+              "KB2"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 0.0,
+            "goal_achieved": false,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          },
+          {
+            "iteration": 2,
+            "criteria": {
+              "C1": "partial",
+              "C2": "partial",
+              "C3": "partial",
+              "C4": "partial"
+            },
+            "evidence_ids": [
+              "KB1",
+              "KB2"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [
+              "그리고",
+              "은색 슬리브의 역할을 설명해줘"
+            ],
+            "coverage": 0.5,
+            "goal_achieved": false,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          },
+          {
+            "iteration": 3,
+            "criteria": {
+              "C1": "partial",
+              "C2": "partial",
+              "C3": "partial",
+              "C4": "partial"
+            },
+            "evidence_ids": [
+              "KB1",
+              "KB2"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [
+              "retrieve_no_progress"
+            ],
+            "coverage": 0.5,
+            "goal_achieved": false,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          },
+          {
+            "iteration": 3,
+            "criteria": {
+              "C1": "partial",
+              "C2": "partial",
+              "C3": "partial",
+              "C4": "partial"
+            },
+            "evidence_ids": [
+              "KB1",
+              "KB2"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [
+              "retrieve_no_progress"
+            ],
+            "coverage": 0.5,
+            "goal_achieved": false,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          }
+        ],
+        "iterations": [],
+        "internal_sources": [
+          {
+            "evidence_id": "KB1",
+            "document": "synthetic-device-manual.txt",
+            "page": 1,
+            "chunk_id": "fixture-1",
+            "score": 1.0,
+            "excerpt": "The amber cartridge removes dissolved dye by adsorption onto its porous coating."
+          },
+          {
+            "evidence_id": "KB2",
+            "document": "synthetic-device-manual.txt",
+            "page": 2,
+            "chunk_id": "fixture-2",
+            "score": 1.0,
+            "excerpt": "The violet latch closes the sampling port when the spring expands."
+          }
+        ],
+        "web_sources": [],
+        "figures": [],
+        "computations": [],
+        "artifacts": [],
+        "deliverable_status": {},
+        "deliverable_errors": {},
+        "python_calls_total": 0,
+        "python_attempts_total": 0,
+        "python_failures": 0,
+        "python_call_budget_exhausted": false,
+        "timing": {
+          "planning_seconds": 0.001824,
+          "retrieval_seconds": 0.0,
+          "llm_generation_seconds": 2.050327,
+          "python_seconds": 0.0,
+          "verification_seconds": 2.803755,
+          "evaluation_seconds": 2.050289,
+          "synthesis_seconds": 3.8e-05,
+          "retrieve_action_seconds": 0.001615,
+          "verify_action_seconds": 2.803752,
+          "elapsed_seconds": 2.81155,
+          "total_seconds": 2.81155
+        },
+        "telemetry": {
+          "python_authorization_source": "autonomous_execution_mode",
+          "claim_support_checked": true,
+          "required_claim_count": 4,
+          "supported_claim_count": 2,
+          "partially_supported_claim_count": 0,
+          "answerability_status": "PARTIAL",
+          "extractive_fallback_attempted": true,
+          "extractive_fallback_used": true,
+          "extractive_fallback_failure_reason": null,
+          "refusal_generated": false,
+          "refusal_reason": null,
+          "relevant_evidence_present": true,
+          "final_answer_kind": "partial_grounded",
+          "operands_expected": 0,
+          "operands_bound": 0,
+          "operand_validation_passed": false,
+          "formula_selected": false,
+          "formula_ready": false,
+          "calculation_ready": false,
+          "calculation_executed": false,
+          "calculation_validated": false,
+          "intent_route": "knowledge_qa",
+          "intent": {
+            "selected_intent": "knowledge_qa",
+            "intent_reason": "concept_not_numeric_request",
+            "premise_cue_detected": false,
+            "formula_origin": "unknown"
+          },
+          "source_requirement": "none",
+          "fact_extraction": {
+            "deterministic_fact_count": 0,
+            "fallback_fact_count": 0,
+            "rejected_fact_count": 0,
+            "fact_rejection_reasons": [],
+            "normalized_units": {}
+          },
+          "calculation": {
+            "requested_operation_family": "",
+            "direct_calc_ready": false,
+            "missing_operands": [],
+            "selected_input_fact_ids": []
+          },
+          "formula": {
+            "candidates_found": 0,
+            "selected_formula_id": null
+          },
+          "transition": {
+            "formula_ready": false,
+            "calculation_ready": false,
+            "blocking_reason": "retrieve_no_progress"
+          },
+          "source_conflict_count": 0,
+          "support_fingerprint": "10e9817732661ac0d0db6292d183e90f507ef9762d8ff3eb9965618a04e3f57b",
+          "support_underdetermined": false,
+          "claim_language": "ko",
+          "evidence_language": [
+            "en"
+          ],
+          "support_candidate_count": 2,
+          "semantic_support_checked": true,
+          "semantic_support_model": "qwen3:8b",
+          "exact_span_validation_passed": true,
+          "semantic_support_decisions": [
+            {
+              "claim_id": "CLAIM1",
+              "status": "SUPPORTED",
+              "span_ids": [
+                "SPAN1"
+              ],
+              "evidence_conflict": false
+            },
+            {
+              "claim_id": "CLAIM2",
+              "status": "UNSUPPORTED",
+              "span_ids": [],
+              "evidence_conflict": false
+            },
+            {
+              "claim_id": "CLAIM3",
+              "status": "SUPPORTED",
+              "span_ids": [
+                "SPAN2"
+              ],
+              "evidence_conflict": false
+            },
+            {
+              "claim_id": "CLAIM4",
+              "status": "UNSUPPORTED",
+              "span_ids": [],
+              "evidence_conflict": false
+            }
+          ],
+          "claim_count": 4,
+          "partial_claim_count": 0,
+          "contradicted_claim_count": 0,
+          "required_claims": [
+            {
+              "claim_id": "CLAIM1",
+              "description": "호박색 카트리지의 제거 원리를 설명해줘",
+              "required": true,
+              "support_status": "SUPPORTED",
+              "supporting_evidence_ids": [
+                "KB1"
+              ],
+              "supporting_spans": [
+                "The amber cartridge removes dissolved dye by adsorption onto its porous coating."
+              ]
+            },
+            {
+              "claim_id": "CLAIM2",
+              "description": "그리고",
+              "required": true,
+              "support_status": "UNSUPPORTED",
+              "supporting_evidence_ids": [],
+              "supporting_spans": []
+            },
+            {
+              "claim_id": "CLAIM3",
+              "description": "보라색 걸쇠의 닫힘 조건을 설명해줘",
+              "required": true,
+              "support_status": "SUPPORTED",
+              "supporting_evidence_ids": [
+                "KB2"
+              ],
+              "supporting_spans": [
+                "The violet latch closes the sampling port when the spring expands."
+              ]
+            },
+            {
+              "claim_id": "CLAIM4",
+              "description": "은색 슬리브의 역할을 설명해줘",
+              "required": true,
+              "support_status": "UNSUPPORTED",
+              "supporting_evidence_ids": [],
+              "supporting_spans": []
+            }
+          ],
+          "fallback_attempted": true,
+          "fallback_used": true,
+          "fallback_failure_reason": null,
+          "python_needed": false,
+          "python_calls": 0,
+          "python_attempts": 0,
+          "python_success_rate": 0.0,
+          "calculation_count": 0,
+          "generated_chart_count": 0,
+          "goal_coverage_per_iteration": [],
+          "iterations_to_success": null,
+          "total_research_seconds": 2.81155,
+          "python_seconds": 0.0
+        },
+        "validation": {
+          "engineering_validation_passed": true,
+          "engineering_contradiction_count": 0,
+          "unsupported_engineering_claim_count": 0,
+          "citation_semantic_passed": true,
+          "unsupported_citation_claim_count": 0,
+          "unsupported_numeric_claim_count": 0,
+          "criteria_frozen": true
+        },
+        "cancel_requested": false,
+        "error": null
+      }
+    },
+    {
+      "case": "false_premise",
+      "passed": true,
+      "seconds": 1.8444682997651398,
+      "question": "호박색 카트리지는 염료를 첨가하므로 그 과정을 설명해줘.",
+      "sources": [
+        "The amber cartridge removes dissolved dye by adsorption onto its porous coating.",
+        "The violet latch closes the sampling port when the spring expands.",
+        "The silver sleeve reduces sensor vibration through elastic damping."
+      ],
+      "result": {
+        "run_id": "GR-V17-DEV-false_premise",
+        "topic": "호박색 카트리지는 염료를 첨가하므로 그 과정을 설명해줘.",
+        "goal": "호박색 카트리지는 염료를 첨가하므로 그 과정을 설명해줘.",
+        "expected_result": null,
+        "run_status": "stopped",
+        "status": "stopped",
+        "stop_reason": "insufficient_evidence",
+        "final_answer": "질문에 포함된 전제는 근거와 반대입니다. 올바른 관계는 다음 원문과 같습니다: \"The amber cartridge removes dissolved dye by adsorption onto its porous coating.\" [KB1]; 현재 근거에서 확인되지 않거나 근거가 충돌하는 요청: 호박색 카트리지는 염료를 첨가하므로 그 과정을 설명해줘",
+        "clarification_question": null,
+        "required_inputs": [],
+        "final_limitations": [],
+        "goal_coverage": 0.0,
+        "goal_coverage_percent": 0.0,
+        "criteria_source": "inferred_from_request",
+        "criteria_hash": "19a1b80225c82cef3d2aff0cb42c357b3c55dc1b133d8e8c2d631c17c3496d87",
+        "criteria": [
+          {
+            "criterion_id": "C1",
+            "status": "partial",
+            "reason": "관련 원문 관계와 인용 연결을 검증했습니다.",
+            "supporting_evidence": [
+              "KB1"
+            ]
+          }
+        ],
+        "frozen_criteria": [
+          {
+            "criterion_id": "C1",
+            "description": "호박색 카트리지는 염료를 첨가하므로 그 과정을 설명해줘",
+            "required": true
+          }
+        ],
+        "expected_result_status": "not_provided",
+        "iterations_completed": 3,
+        "current_iteration": 3,
+        "max_iterations": 6,
+        "current_stage": "finalize",
+        "current_action": "stop",
+        "action_history": [
+          {
+            "iteration": 1,
+            "action_id": "ACT-1",
+            "action_type": "retrieve",
+            "target_criteria": [
+              "C1"
+            ],
+            "status": "completed",
+            "reason_code": "source_evidence_needed",
+            "started_at": "2026-10-11T22:58:40.073824Z",
+            "finished_at": "2026-10-11T22:58:40.074823Z",
+            "new_evidence_count": 3,
+            "evidence_added": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ],
+            "computation_ids": [],
+            "coverage_before": 0.0,
+            "coverage_after": 0.0,
+            "failure_reason": null,
+            "details": {
+              "new_evidence_count": 3,
+              "retrieval_mode": "hybrid",
+              "query": "호박색 카트리지는 염료를 첨가하므로 그 과정을 설명해줘.\nMissing: 호박색 카트리지는 염료를 첨가하므로 그 과정을 설명해줘",
+              "cache_hit": false
+            }
+          },
+          {
+            "iteration": 2,
+            "action_id": "ACT-2",
+            "action_type": "verify",
+            "target_criteria": [
+              "C1"
+            ],
+            "status": "completed",
+            "reason_code": "verify_current_support",
+            "started_at": "2026-10-11T22:58:40.076815Z",
+            "finished_at": "2026-10-11T22:58:41.911088Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 0.0,
+            "coverage_after": 0.0,
+            "failure_reason": null,
+            "details": {
+              "engineering_validation_passed": true,
+              "goal_achieved": false
+            }
+          },
+          {
+            "iteration": 3,
+            "action_id": "ACT-3",
+            "action_type": "retrieve",
+            "target_criteria": [
+              "C1"
+            ],
+            "status": "blocked",
+            "reason_code": "missing_claim_support",
+            "started_at": "2026-10-11T22:58:41.913166Z",
+            "finished_at": "2026-10-11T22:58:41.914723Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 0.0,
+            "coverage_after": 0.0,
+            "failure_reason": "retrieve_no_progress",
+            "details": {
+              "new_evidence_count": 0,
+              "retrieval_mode": "hybrid",
+              "query": "호박색 카트리지는 염료를 첨가하므로 그 과정을 설명해줘.\nMissing: 호박색 카트리지는 염료를 첨가하므로 그 과정을 설명해줘",
+              "cache_hit": true
+            }
+          },
+          {
+            "iteration": 3,
+            "action_id": "ACT-STOP-3",
+            "action_type": "stop",
+            "target_criteria": [],
+            "status": "completed",
+            "reason_code": "partial_grounded_answer",
+            "started_at": "2026-10-11T22:58:41.917363Z",
+            "finished_at": "2026-10-11T22:58:41.917363Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 0.0,
+            "coverage_after": 0.0,
+            "failure_reason": null,
+            "details": {}
+          }
+        ],
+        "state_history": [
+          {
+            "iteration": 1,
+            "criteria": {
+              "C1": "unmet"
+            },
+            "evidence_ids": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 0.0,
+            "goal_achieved": false,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          },
+          {
+            "iteration": 2,
+            "criteria": {
+              "C1": "partial"
+            },
+            "evidence_ids": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [
+              "호박색 카트리지는 염료를 첨가하므로 그 과정을 설명해줘"
+            ],
+            "coverage": 0.0,
+            "goal_achieved": false,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          },
+          {
+            "iteration": 3,
+            "criteria": {
+              "C1": "partial"
+            },
+            "evidence_ids": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [
+              "retrieve_no_progress"
+            ],
+            "coverage": 0.0,
+            "goal_achieved": false,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          },
+          {
+            "iteration": 3,
+            "criteria": {
+              "C1": "partial"
+            },
+            "evidence_ids": [
+              "KB1",
+              "KB2",
+              "KB3"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [
+              "retrieve_no_progress"
+            ],
+            "coverage": 0.0,
+            "goal_achieved": false,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          }
+        ],
+        "iterations": [],
+        "internal_sources": [
+          {
+            "evidence_id": "KB1",
+            "document": "synthetic-device-manual.txt",
+            "page": 1,
+            "chunk_id": "fixture-1",
+            "score": 1.0,
+            "excerpt": "The amber cartridge removes dissolved dye by adsorption onto its porous coating."
+          },
+          {
+            "evidence_id": "KB2",
+            "document": "synthetic-device-manual.txt",
+            "page": 2,
+            "chunk_id": "fixture-2",
+            "score": 1.0,
+            "excerpt": "The violet latch closes the sampling port when the spring expands."
+          },
+          {
+            "evidence_id": "KB3",
+            "document": "synthetic-device-manual.txt",
+            "page": 3,
+            "chunk_id": "fixture-3",
+            "score": 1.0,
+            "excerpt": "The silver sleeve reduces sensor vibration through elastic damping."
+          }
+        ],
+        "web_sources": [],
+        "figures": [],
+        "computations": [],
+        "artifacts": [],
+        "deliverable_status": {},
+        "deliverable_errors": {},
+        "python_calls_total": 0,
+        "python_attempts_total": 0,
+        "python_failures": 0,
+        "python_call_budget_exhausted": false,
+        "timing": {
+          "planning_seconds": 0.001276,
+          "retrieval_seconds": 0.0,
+          "llm_generation_seconds": 1.017379,
+          "python_seconds": 0.0,
+          "verification_seconds": 1.833562,
+          "evaluation_seconds": 1.017343,
+          "synthesis_seconds": 3.6e-05,
+          "retrieve_action_seconds": 0.003055,
+          "verify_action_seconds": 1.833558,
+          "elapsed_seconds": 1.843975,
+          "total_seconds": 1.843975
+        },
+        "telemetry": {
+          "python_authorization_source": "autonomous_execution_mode",
+          "claim_support_checked": true,
+          "required_claim_count": 1,
+          "supported_claim_count": 0,
+          "partially_supported_claim_count": 0,
+          "answerability_status": "PARTIAL",
+          "extractive_fallback_attempted": true,
+          "extractive_fallback_used": true,
+          "extractive_fallback_failure_reason": null,
+          "refusal_generated": false,
+          "refusal_reason": null,
+          "relevant_evidence_present": true,
+          "final_answer_kind": "partial_grounded",
+          "operands_expected": 0,
+          "operands_bound": 0,
+          "operand_validation_passed": false,
+          "formula_selected": false,
+          "formula_ready": false,
+          "calculation_ready": false,
+          "calculation_executed": false,
+          "calculation_validated": false,
+          "intent_route": "knowledge_qa",
+          "intent": {
+            "selected_intent": "knowledge_qa",
+            "intent_reason": "concept_not_numeric_request",
+            "premise_cue_detected": false,
+            "formula_origin": "unknown"
+          },
+          "source_requirement": "none",
+          "fact_extraction": {
+            "deterministic_fact_count": 0,
+            "fallback_fact_count": 0,
+            "rejected_fact_count": 0,
+            "fact_rejection_reasons": [],
+            "normalized_units": {}
+          },
+          "calculation": {
+            "requested_operation_family": "",
+            "direct_calc_ready": false,
+            "missing_operands": [],
+            "selected_input_fact_ids": []
+          },
+          "formula": {
+            "candidates_found": 0,
+            "selected_formula_id": null
+          },
+          "transition": {
+            "formula_ready": false,
+            "calculation_ready": false,
+            "blocking_reason": "retrieve_no_progress"
+          },
+          "source_conflict_count": 0,
+          "support_fingerprint": "d25b86df457af2dadb87a747daff006ab143a2ec843ca4dadd620a98ab82d922",
+          "support_underdetermined": false,
+          "claim_language": "ko",
+          "evidence_language": [
+            "en"
+          ],
+          "support_candidate_count": 3,
+          "semantic_support_checked": true,
+          "semantic_support_model": "qwen3:8b",
+          "exact_span_validation_passed": true,
+          "semantic_support_decisions": [
+            {
+              "claim_id": "CLAIM1",
+              "status": "CONTRADICTED",
+              "span_ids": [
+                "SPAN1"
+              ],
+              "evidence_conflict": false
+            }
+          ],
+          "claim_count": 1,
+          "partial_claim_count": 0,
+          "contradicted_claim_count": 1,
+          "required_claims": [
+            {
+              "claim_id": "CLAIM1",
+              "description": "호박색 카트리지는 염료를 첨가하므로 그 과정을 설명해줘",
+              "required": true,
+              "support_status": "CONTRADICTED",
+              "supporting_evidence_ids": [
+                "KB1"
+              ],
+              "supporting_spans": [
+                "The amber cartridge removes dissolved dye by adsorption onto its porous coating."
+              ]
+            }
+          ],
+          "fallback_attempted": true,
+          "fallback_used": true,
+          "fallback_failure_reason": null,
+          "python_needed": false,
+          "python_calls": 0,
+          "python_attempts": 0,
+          "python_success_rate": 0.0,
+          "calculation_count": 0,
+          "generated_chart_count": 0,
+          "goal_coverage_per_iteration": [],
+          "iterations_to_success": null,
+          "total_research_seconds": 1.843975,
+          "python_seconds": 0.0
+        },
+        "validation": {
+          "engineering_validation_passed": true,
+          "engineering_contradiction_count": 0,
+          "unsupported_engineering_claim_count": 0,
+          "citation_semantic_passed": true,
+          "unsupported_citation_claim_count": 0,
+          "unsupported_numeric_claim_count": 0,
+          "criteria_frozen": true
+        },
+        "cancel_requested": false,
+        "error": null
+      }
+    },
+    {
+      "case": "numeric_prose",
+      "passed": true,
+      "seconds": 0.19929190026596189,
+      "question": "초기 측정값은 62 mm, 최종 측정값은 28 mm. 초기 측정값/최종 측정값 비율을 계산해줘.",
+      "sources": [],
+      "result": {
+        "run_id": "GR-V17-DEV-numeric_prose",
+        "topic": "초기 측정값은 62 mm, 최종 측정값은 28 mm. 초기 측정값/최종 측정값 비율을 계산해줘.",
+        "goal": "초기 측정값은 62 mm, 최종 측정값은 28 mm. 초기 측정값/최종 측정값 비율을 계산해줘.",
+        "expected_result": null,
+        "run_status": "completed",
+        "status": "achieved",
+        "stop_reason": "goal_achieved",
+        "final_answer": "비율 ratio: 2.2142857142857144 [CALC1] [USERF1] [USERF2]",
+        "clarification_question": null,
+        "required_inputs": [],
+        "final_limitations": [],
+        "goal_coverage": 1.0,
+        "goal_coverage_percent": 100.0,
+        "criteria_source": "inferred",
+        "criteria_hash": "12ed237404ebec4f69a26d6fbbfe04518e6ba3ab3a0b63ef9d71cdeec93e0993",
+        "criteria": [
+          {
+            "criterion_id": "C1",
+            "status": "met",
+            "reason": "현재 입력과 검증된 계산 결과로 조건을 충족했습니다.",
+            "supporting_evidence": [
+              "CALC1",
+              "USERF1",
+              "USERF2"
+            ]
+          }
+        ],
+        "frozen_criteria": [
+          {
+            "criterion_id": "C1",
+            "description": "제공된 입력의 비율을 계산하여 제시",
+            "required": true
+          }
+        ],
+        "expected_result_status": "not_provided",
+        "iterations_completed": 3,
+        "current_iteration": 3,
+        "max_iterations": 6,
+        "current_stage": "finalize",
+        "current_action": "stop",
+        "action_history": [
+          {
+            "iteration": 1,
+            "action_id": "ACT-1",
+            "action_type": "calculate",
+            "target_criteria": [
+              "C1"
+            ],
+            "status": "completed",
+            "reason_code": "calculation_ready",
+            "started_at": "2026-10-11T22:58:41.960683Z",
+            "finished_at": "2026-10-11T22:58:42.113013Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [
+              "CALC1"
+            ],
+            "coverage_before": 0.0,
+            "coverage_after": 0.0,
+            "failure_reason": null,
+            "details": {
+              "subprocess_reached": true,
+              "source_requirement": "none",
+              "operations": [
+                "ratio"
+              ]
+            }
+          },
+          {
+            "iteration": 2,
+            "action_id": "ACT-2",
+            "action_type": "verify",
+            "target_criteria": [
+              "C1"
+            ],
+            "status": "completed",
+            "reason_code": "verify_validated_calculation",
+            "started_at": "2026-10-11T22:58:42.113013Z",
+            "finished_at": "2026-10-11T22:58:42.116000Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 0.0,
+            "coverage_after": 1.0,
+            "failure_reason": null,
+            "details": {
+              "engineering_validation_passed": true,
+              "goal_achieved": true
+            }
+          },
+          {
+            "iteration": 3,
+            "action_id": "ACT-3",
+            "action_type": "synthesize",
+            "target_criteria": [],
+            "status": "completed",
+            "reason_code": "goal_achieved",
+            "started_at": "2026-10-11T22:58:42.116000Z",
+            "finished_at": "2026-10-11T22:58:42.116000Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 1.0,
+            "coverage_after": 1.0,
+            "failure_reason": null,
+            "details": {}
+          },
+          {
+            "iteration": 3,
+            "action_id": "ACT-STOP-3",
+            "action_type": "stop",
+            "target_criteria": [],
+            "status": "completed",
+            "reason_code": "goal_achieved",
+            "started_at": "2026-10-11T22:58:42.116000Z",
+            "finished_at": "2026-10-11T22:58:42.116000Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 1.0,
+            "coverage_after": 1.0,
+            "failure_reason": null,
+            "details": {}
+          }
+        ],
+        "state_history": [
+          {
+            "iteration": 1,
+            "criteria": {
+              "C1": "unmet"
+            },
+            "evidence_ids": [],
+            "computation_ids": [
+              "CALC1"
+            ],
+            "known_fact_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 0.0,
+            "goal_achieved": false,
+            "blocked_reasons": [],
+            "source_complete": true,
+            "formula_ready": false
+          },
+          {
+            "iteration": 2,
+            "criteria": {
+              "C1": "met"
+            },
+            "evidence_ids": [],
+            "computation_ids": [
+              "CALC1"
+            ],
+            "known_fact_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 1.0,
+            "goal_achieved": true,
+            "blocked_reasons": [],
+            "source_complete": true,
+            "formula_ready": false
+          },
+          {
+            "iteration": 3,
+            "criteria": {
+              "C1": "met"
+            },
+            "evidence_ids": [],
+            "computation_ids": [
+              "CALC1"
+            ],
+            "known_fact_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 1.0,
+            "goal_achieved": true,
+            "blocked_reasons": [],
+            "source_complete": true,
+            "formula_ready": false
+          },
+          {
+            "iteration": 3,
+            "criteria": {
+              "C1": "met"
+            },
+            "evidence_ids": [],
+            "computation_ids": [
+              "CALC1"
+            ],
+            "known_fact_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 1.0,
+            "goal_achieved": true,
+            "blocked_reasons": [],
+            "source_complete": true,
+            "formula_ready": false
+          }
+        ],
+        "iterations": [],
+        "internal_sources": [],
+        "web_sources": [],
+        "figures": [],
+        "computations": [
+          {
+            "computation_id": "CALC1",
+            "analysis_id": "DIRECT-CALC1",
+            "purpose": "초기 측정값은 62 mm, 최종 측정값은 28 mm. 초기 측정값/최종 측정값 비율을 계산해줘.",
+            "target_criteria": [],
+            "source_evidence_ids": [],
+            "source_input_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "formula_evidence_ids": [],
+            "formula_source_ids": [
+              "USER_REQUEST"
+            ],
+            "input_fact_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "bound_variables": {
+              "초기_측정값": "USERF1",
+              "최종_측정값": "USERF2"
+            },
+            "normalized_formula": "generic:ratio",
+            "source_formula": null,
+            "units": {
+              "초기_측정값": "mm",
+              "최종_측정값": "mm"
+            },
+            "execution_hash": "e85e871d0d4f52ce6889e1cf26ab45526a245798b19528f580d68e164c53543e",
+            "output": {
+              "OUT_ratio": 2.2142857142857144
+            },
+            "formula_source_id": null,
+            "canonical_fact_ids": [],
+            "canonical_formula_ids": [],
+            "input_facts": [
+              {
+                "name": "초기_측정값",
+                "value": 62.0,
+                "unit": "mm",
+                "evidence_id": "USERF1",
+                "source_type": "user_fact"
+              },
+              {
+                "name": "최종_측정값",
+                "value": 28.0,
+                "unit": "mm",
+                "evidence_id": "USERF2",
+                "source_type": "user_fact"
+              }
+            ],
+            "formula": "generic:ratio",
+            "code_record": "agent_runs/goal-research/GR-V17-DEV-numeric_prose/calculation/CALC1/python_task.py",
+            "output_files": [
+              "results/goal-research/GR-V17-DEV-numeric_prose/analysis/calculation.json"
+            ],
+            "summary": "Validated direct arithmetic: ratio",
+            "validation_passed": true,
+            "attempts": 1,
+            "attempt_records": [
+              {
+                "attempt": 1,
+                "code": "import json\nimport math\nimport statistics\nvalues = {'초기_측정값': 62.0, '최종_측정값': 28.0}\nlabels = {'초기_측정값': '초기_측정값', '최종_측정값': '최종_측정값'}\nnumbers = list(values.values())\nresult = {}\nresult['ratio'] = values['초기_측정값'] / values['최종_측정값']\nwith open('calculation.json', 'w', encoding='utf-8') as handle:\n    json.dump(result, handle, allow_nan=False)\n",
+                "validation_passed": true
+              }
+            ],
+            "fingerprint": "",
+            "contract_id": null,
+            "required_output_ids": [
+              "OUT_ratio"
+            ],
+            "produced_output_ids": [
+              "OUT_ratio"
+            ],
+            "used_input_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "used_formula_id": null,
+            "output_manifest": {
+              "OUT_ratio": {
+                "name": "ratio",
+                "value": 2.2142857142857144,
+                "unit": null,
+                "semantic_type": "numeric",
+                "source_fact_ids": [
+                  "USERF1",
+                  "USERF2"
+                ],
+                "required": true
+              }
+            },
+            "contract_validation_passed": true
+          }
+        ],
+        "artifacts": [],
+        "deliverable_status": {},
+        "deliverable_errors": {},
+        "python_calls_total": 1,
+        "python_attempts_total": 1,
+        "python_failures": 0,
+        "python_call_budget_exhausted": false,
+        "timing": {
+          "planning_seconds": 0.04297,
+          "retrieval_seconds": 0.0,
+          "llm_generation_seconds": 0.000695,
+          "python_seconds": 0.151481,
+          "verification_seconds": 0.002573,
+          "evaluation_seconds": 4.6e-05,
+          "synthesis_seconds": 0.000649,
+          "calculate_action_seconds": 0.1525,
+          "verify_action_seconds": 0.00257,
+          "synthesize_action_seconds": 2.1e-05,
+          "elapsed_seconds": 0.198792,
+          "total_seconds": 0.198792
+        },
+        "telemetry": {
+          "python_authorization_source": "autonomous_execution_mode",
+          "claim_support_checked": false,
+          "required_claim_count": 0,
+          "supported_claim_count": 0,
+          "partially_supported_claim_count": 0,
+          "answerability_status": "NOT_CHECKED",
+          "extractive_fallback_attempted": false,
+          "extractive_fallback_used": false,
+          "extractive_fallback_failure_reason": null,
+          "refusal_generated": false,
+          "refusal_reason": null,
+          "relevant_evidence_present": false,
+          "final_answer_kind": "calculation",
+          "operands_expected": 2,
+          "operands_bound": 2,
+          "operand_validation_passed": true,
+          "formula_selected": true,
+          "formula_ready": true,
+          "calculation_ready": true,
+          "calculation_executed": true,
+          "calculation_validated": true,
+          "intent_route": "direct_calc",
+          "intent": {
+            "selected_intent": "direct_calc",
+            "intent_reason": "user_requested_generic_operation",
+            "premise_cue_detected": false,
+            "formula_origin": "unknown"
+          },
+          "source_requirement": "none",
+          "fact_extraction": {
+            "deterministic_fact_count": 2,
+            "fallback_fact_count": 0,
+            "rejected_fact_count": 0,
+            "fact_rejection_reasons": [],
+            "normalized_units": {
+              "USERF1": {
+                "raw": "mm",
+                "canonical": "mm"
+              },
+              "USERF2": {
+                "raw": "mm",
+                "canonical": "mm"
+              }
+            }
+          },
+          "calculation": {
+            "requested_operation_family": "ratio",
+            "direct_calc_ready": true,
+            "missing_operands": [],
+            "selected_input_fact_ids": [
+              "USERF1",
+              "USERF2"
+            ]
+          },
+          "formula": {
+            "candidates_found": 0,
+            "selected_formula_id": null
+          },
+          "transition": {
+            "formula_ready": false,
+            "calculation_ready": false,
+            "blocking_reason": null
+          },
+          "fallback_attempted": false,
+          "fallback_used": false,
+          "fallback_failure_reason": null,
+          "python_needed": false,
+          "python_calls": 1,
+          "python_attempts": 1,
+          "python_success_rate": 1.0,
+          "calculation_count": 1,
+          "generated_chart_count": 0,
+          "goal_coverage_per_iteration": [],
+          "iterations_to_success": 3,
+          "total_research_seconds": 0.198792,
+          "python_seconds": 0.151481
+        },
+        "validation": {
+          "engineering_validation_passed": true,
+          "engineering_contradiction_count": 0,
+          "unsupported_engineering_claim_count": 0,
+          "citation_semantic_passed": true,
+          "unsupported_citation_claim_count": 0,
+          "unsupported_numeric_claim_count": 0,
+          "criteria_frozen": true
+        },
+        "cancel_requested": false,
+        "error": null
+      }
+    },
+    {
+      "case": "compound_units",
+      "passed": true,
+      "seconds": 0.16611520014703274,
+      "question": "c=3 Pa/(m/s)^2; v=4 m/s. Use P = c*v**2 to calculate P.",
+      "sources": [],
+      "result": {
+        "run_id": "GR-V17-DEV-compound_units",
+        "topic": "c=3 Pa/(m/s)^2; v=4 m/s. Use P = c*v**2 to calculate P.",
+        "goal": "c=3 Pa/(m/s)^2; v=4 m/s. Use P = c*v**2 to calculate P.",
+        "expected_result": null,
+        "run_status": "completed",
+        "status": "achieved",
+        "stop_reason": "goal_achieved",
+        "final_answer": "Validated result: P = 48.0 Pa [CALC1] [USERF1] [USERF2] [USERF3]",
+        "clarification_question": null,
+        "required_inputs": [],
+        "final_limitations": [],
+        "goal_coverage": 1.0,
+        "goal_coverage_percent": 100.0,
+        "criteria_source": "inferred",
+        "criteria_hash": "63f93a5d527d14c4cead6d38171ce9eb6b1d64204ac5ccd6b57ec3499d09e561",
+        "criteria": [
+          {
+            "criterion_id": "C1",
+            "status": "met",
+            "reason": "Current inputs and validated calculation satisfy this criterion.",
+            "supporting_evidence": [
+              "CALC1",
+              "USERF1",
+              "USERF2",
+              "USERF3"
+            ]
+          },
+          {
+            "criterion_id": "C2",
+            "status": "met",
+            "reason": "Current inputs and validated calculation satisfy this criterion.",
+            "supporting_evidence": [
+              "CALC1",
+              "USERF1",
+              "USERF2",
+              "USERF3"
+            ]
+          }
+        ],
+        "frozen_criteria": [
+          {
+            "criterion_id": "C1",
+            "description": "Calculate from the supplied values and user equation",
+            "required": true
+          },
+          {
+            "criterion_id": "C2",
+            "description": "Present the validated result with provenance",
+            "required": true
+          }
+        ],
+        "expected_result_status": "not_provided",
+        "iterations_completed": 3,
+        "current_iteration": 3,
+        "max_iterations": 6,
+        "current_stage": "finalize",
+        "current_action": "stop",
+        "action_history": [
+          {
+            "iteration": 1,
+            "action_id": "ACT-1",
+            "action_type": "calculate",
+            "target_criteria": [
+              "C1",
+              "C2"
+            ],
+            "status": "completed",
+            "reason_code": "calculation_ready",
+            "started_at": "2026-10-11T22:58:42.119982Z",
+            "finished_at": "2026-10-11T22:58:42.281272Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [
+              "CALC1"
+            ],
+            "coverage_before": 0.0,
+            "coverage_after": 0.0,
+            "failure_reason": null,
+            "details": {
+              "subprocess_reached": true,
+              "source_requirement": "user_formula",
+              "formula_source_ids": [
+                "USERF3"
+              ]
+            }
+          },
+          {
+            "iteration": 2,
+            "action_id": "ACT-2",
+            "action_type": "verify",
+            "target_criteria": [
+              "C1",
+              "C2"
+            ],
+            "status": "completed",
+            "reason_code": "verify_validated_calculation",
+            "started_at": "2026-10-11T22:58:42.281272Z",
+            "finished_at": "2026-10-11T22:58:42.282267Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 0.0,
+            "coverage_after": 1.0,
+            "failure_reason": null,
+            "details": {
+              "engineering_validation_passed": true,
+              "goal_achieved": true
+            }
+          },
+          {
+            "iteration": 3,
+            "action_id": "ACT-3",
+            "action_type": "synthesize",
+            "target_criteria": [],
+            "status": "completed",
+            "reason_code": "goal_achieved",
+            "started_at": "2026-10-11T22:58:42.282267Z",
+            "finished_at": "2026-10-11T22:58:42.282267Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 1.0,
+            "coverage_after": 1.0,
+            "failure_reason": null,
+            "details": {}
+          },
+          {
+            "iteration": 3,
+            "action_id": "ACT-STOP-3",
+            "action_type": "stop",
+            "target_criteria": [],
+            "status": "completed",
+            "reason_code": "goal_achieved",
+            "started_at": "2026-10-11T22:58:42.282267Z",
+            "finished_at": "2026-10-11T22:58:42.282267Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 1.0,
+            "coverage_after": 1.0,
+            "failure_reason": null,
+            "details": {}
+          }
+        ],
+        "state_history": [
+          {
+            "iteration": 1,
+            "criteria": {
+              "C1": "unmet",
+              "C2": "unmet"
+            },
+            "evidence_ids": [],
+            "computation_ids": [
+              "CALC1"
+            ],
+            "known_fact_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 0.0,
+            "goal_achieved": false,
+            "blocked_reasons": [],
+            "source_complete": true,
+            "formula_ready": false
+          },
+          {
+            "iteration": 2,
+            "criteria": {
+              "C1": "met",
+              "C2": "met"
+            },
+            "evidence_ids": [],
+            "computation_ids": [
+              "CALC1"
+            ],
+            "known_fact_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 1.0,
+            "goal_achieved": true,
+            "blocked_reasons": [],
+            "source_complete": true,
+            "formula_ready": false
+          },
+          {
+            "iteration": 3,
+            "criteria": {
+              "C1": "met",
+              "C2": "met"
+            },
+            "evidence_ids": [],
+            "computation_ids": [
+              "CALC1"
+            ],
+            "known_fact_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 1.0,
+            "goal_achieved": true,
+            "blocked_reasons": [],
+            "source_complete": true,
+            "formula_ready": false
+          },
+          {
+            "iteration": 3,
+            "criteria": {
+              "C1": "met",
+              "C2": "met"
+            },
+            "evidence_ids": [],
+            "computation_ids": [
+              "CALC1"
+            ],
+            "known_fact_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 1.0,
+            "goal_achieved": true,
+            "blocked_reasons": [],
+            "source_complete": true,
+            "formula_ready": false
+          }
+        ],
+        "iterations": [],
+        "internal_sources": [],
+        "web_sources": [],
+        "figures": [],
+        "computations": [
+          {
+            "computation_id": "CALC1",
+            "analysis_id": "USER-FORMULA-CALC1",
+            "purpose": "c=3 Pa/(m/s)^2; v=4 m/s. Use P = c*v**2 to calculate P.",
+            "target_criteria": [],
+            "source_evidence_ids": [],
+            "source_input_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "formula_evidence_ids": [],
+            "formula_source_ids": [
+              "USERF3"
+            ],
+            "input_fact_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "bound_variables": {
+              "c": "USERF1",
+              "v": "USERF2"
+            },
+            "normalized_formula": "p=c*v**2",
+            "source_formula": "P = c*v**2",
+            "units": {
+              "c": "Pa/(m/s)^2",
+              "v": "m/s",
+              "P": "Pa"
+            },
+            "execution_hash": "20678c750a777d9d88e8cfa89264a969c11a4b0eb694a88b85cfc8f8101cfd37",
+            "output": {
+              "OUT_RESULT": 48.0
+            },
+            "formula_source_id": null,
+            "canonical_fact_ids": [],
+            "canonical_formula_ids": [],
+            "input_facts": [
+              {
+                "name": "c",
+                "value": 3.0,
+                "unit": "Pa/(m/s)^2",
+                "evidence_id": "USERF1",
+                "source_type": "user_fact"
+              },
+              {
+                "name": "v",
+                "value": 4.0,
+                "unit": "m/s",
+                "evidence_id": "USERF2",
+                "source_type": "user_fact"
+              }
+            ],
+            "formula": "P = c*v**2",
+            "code_record": "agent_runs/goal-research/GR-V17-DEV-compound_units/calculation/CALC1/python_task.py",
+            "output_files": [
+              "results/goal-research/GR-V17-DEV-compound_units/analysis/calculation.json"
+            ],
+            "summary": "Validated P=48.0",
+            "validation_passed": true,
+            "attempts": 1,
+            "attempt_records": [
+              {
+                "attempt": 1,
+                "code": "import json\nimport math\nc = 3.0\nv = 4.0\nresult = c*v**2\nif not math.isfinite(result):\n    raise ValueError('non-finite result')\nwith open('calculation.json', 'w', encoding='utf-8') as handle:\n    json.dump({'value': result}, handle, allow_nan=False)\n",
+                "validation_passed": true
+              }
+            ],
+            "fingerprint": "",
+            "contract_id": null,
+            "required_output_ids": [
+              "OUT_RESULT"
+            ],
+            "produced_output_ids": [
+              "OUT_RESULT"
+            ],
+            "used_input_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "used_formula_id": null,
+            "output_manifest": {
+              "OUT_RESULT": {
+                "name": "P",
+                "value": 48.0,
+                "unit": "Pa",
+                "unit_origin": "inferred",
+                "semantic_type": "numeric",
+                "source_fact_ids": [
+                  "USERF1",
+                  "USERF2"
+                ],
+                "required": true
+              }
+            },
+            "contract_validation_passed": true
+          }
+        ],
+        "artifacts": [],
+        "deliverable_status": {},
+        "deliverable_errors": {},
+        "python_calls_total": 1,
+        "python_attempts_total": 1,
+        "python_failures": 0,
+        "python_call_budget_exhausted": false,
+        "timing": {
+          "planning_seconds": 0.00342,
+          "retrieval_seconds": 0.0,
+          "llm_generation_seconds": 0.000342,
+          "python_seconds": 0.160004,
+          "verification_seconds": 0.000833,
+          "evaluation_seconds": 4.6e-05,
+          "synthesis_seconds": 0.000296,
+          "calculate_action_seconds": 0.160321,
+          "verify_action_seconds": 0.000831,
+          "synthesize_action_seconds": 2.5e-05,
+          "elapsed_seconds": 0.165669,
+          "total_seconds": 0.165669
+        },
+        "telemetry": {
+          "python_authorization_source": "autonomous_execution_mode",
+          "claim_support_checked": false,
+          "required_claim_count": 0,
+          "supported_claim_count": 0,
+          "partially_supported_claim_count": 0,
+          "answerability_status": "NOT_CHECKED",
+          "extractive_fallback_attempted": false,
+          "extractive_fallback_used": false,
+          "extractive_fallback_failure_reason": null,
+          "refusal_generated": false,
+          "refusal_reason": null,
+          "relevant_evidence_present": false,
+          "final_answer_kind": "calculation",
+          "operands_expected": 2,
+          "operands_bound": 2,
+          "operand_validation_passed": true,
+          "formula_selected": true,
+          "formula_ready": true,
+          "calculation_ready": true,
+          "calculation_executed": true,
+          "calculation_validated": true,
+          "intent_route": "user_formula_calc",
+          "intent": {
+            "selected_intent": "user_formula_calc",
+            "intent_reason": "literal_user_formula",
+            "premise_cue_detected": false,
+            "formula_origin": "unknown"
+          },
+          "source_requirement": "user_formula",
+          "fact_extraction": {
+            "deterministic_fact_count": 2,
+            "fallback_fact_count": 0,
+            "rejected_fact_count": 0,
+            "fact_rejection_reasons": [],
+            "normalized_units": {
+              "USERF1": {
+                "raw": "Pa/(m/s)^2",
+                "canonical": "Pa/(m/s)^2"
+              },
+              "USERF2": {
+                "raw": "m/s",
+                "canonical": "m/s"
+              }
+            }
+          },
+          "calculation": {
+            "requested_operation_family": "",
+            "direct_calc_ready": false,
+            "missing_operands": [],
+            "selected_input_fact_ids": [
+              "USERF1",
+              "USERF2"
+            ]
+          },
+          "formula": {
+            "candidates_found": 0,
+            "selected_formula_id": null
+          },
+          "transition": {
+            "formula_ready": false,
+            "calculation_ready": false,
+            "blocking_reason": null
+          },
+          "fallback_attempted": false,
+          "fallback_used": false,
+          "fallback_failure_reason": null,
+          "python_needed": false,
+          "python_calls": 1,
+          "python_attempts": 1,
+          "python_success_rate": 1.0,
+          "calculation_count": 1,
+          "generated_chart_count": 0,
+          "goal_coverage_per_iteration": [],
+          "iterations_to_success": 3,
+          "total_research_seconds": 0.165669,
+          "python_seconds": 0.160004
+        },
+        "validation": {
+          "engineering_validation_passed": true,
+          "engineering_contradiction_count": 0,
+          "unsupported_engineering_claim_count": 0,
+          "citation_semantic_passed": true,
+          "unsupported_citation_claim_count": 0,
+          "unsupported_numeric_claim_count": 0,
+          "criteria_frozen": true
+        },
+        "cancel_requested": false,
+        "error": null
+      }
+    },
+    {
+      "case": "kb_calculation",
+      "passed": true,
+      "seconds": 0.1967905000783503,
+      "question": "p=17 Pa, q=8 Pa. 내부 교재의 R 보정량 정의를 적용하여 R을 계산해줘.",
+      "sources": [
+        "Correction R is the combined offset. R = p + q. p (Pa) and q (Pa) are supplied offsets; R is in Pa."
+      ],
+      "result": {
+        "run_id": "GR-V17-DEV-kb_calculation",
+        "topic": "p=17 Pa, q=8 Pa. 내부 교재의 R 보정량 정의를 적용하여 R을 계산해줘.",
+        "goal": "p=17 Pa, q=8 Pa. 내부 교재의 R 보정량 정의를 적용하여 R을 계산해줘.",
+        "expected_result": null,
+        "run_status": "completed",
+        "status": "achieved",
+        "stop_reason": "goal_achieved",
+        "final_answer": "R: 25.0 Pa [CALC1] [USERF1] [USERF2] [KB1]",
+        "clarification_question": null,
+        "required_inputs": [],
+        "final_limitations": [],
+        "goal_coverage": 1.0,
+        "goal_coverage_percent": 100.0,
+        "criteria_source": "inferred",
+        "criteria_hash": "b600e15cf81132440fdb0cfdefdaeae5c47ba004b9c39085ae9da9194a20c1c6",
+        "criteria": [
+          {
+            "criterion_id": "C1",
+            "status": "met",
+            "reason": "현재 입력과 검증된 계산 결과로 조건을 충족했습니다.",
+            "supporting_evidence": [
+              "CALC1",
+              "USERF1",
+              "USERF2",
+              "KB1"
+            ]
+          },
+          {
+            "criterion_id": "C2",
+            "status": "met",
+            "reason": "현재 입력과 검증된 계산 결과로 조건을 충족했습니다.",
+            "supporting_evidence": [
+              "CALC1",
+              "USERF1",
+              "USERF2",
+              "KB1"
+            ]
+          }
+        ],
+        "frozen_criteria": [
+          {
+            "criterion_id": "C1",
+            "description": "요청한 관계식의 실제 출처를 검증",
+            "required": true
+          },
+          {
+            "criterion_id": "C2",
+            "description": "제공된 입력으로 계산하고 검증된 결과와 단위를 제시",
+            "required": true
+          }
+        ],
+        "expected_result_status": "not_provided",
+        "iterations_completed": 4,
+        "current_iteration": 4,
+        "max_iterations": 6,
+        "current_stage": "finalize",
+        "current_action": "stop",
+        "action_history": [
+          {
+            "iteration": 1,
+            "action_id": "ACT-1",
+            "action_type": "retrieve",
+            "target_criteria": [
+              "C1",
+              "C2"
+            ],
+            "status": "completed",
+            "reason_code": "formula_source_missing",
+            "started_at": "2026-10-11T22:58:42.286250Z",
+            "finished_at": "2026-10-11T22:58:42.286250Z",
+            "new_evidence_count": 1,
+            "evidence_added": [
+              "KB1"
+            ],
+            "computation_ids": [],
+            "coverage_before": 0.0,
+            "coverage_after": 0.0,
+            "failure_reason": null,
+            "details": {
+              "new_evidence_count": 1,
+              "retrieval_mode": "hybrid",
+              "query": "p=17 Pa, q=8 Pa. 내부 교재의 R 보정량 정의를 적용하여 R을 계산해줘.\nMissing: 요청한 관계식의 실제 출처를 검증; 제공된 입력으로 계산하고 검증된 결과와 단위를 제시\nequation formula variables units p Pa q R",
+              "cache_hit": false
+            }
+          },
+          {
+            "iteration": 2,
+            "action_id": "ACT-2",
+            "action_type": "calculate",
+            "target_criteria": [
+              "C1",
+              "C2"
+            ],
+            "status": "completed",
+            "reason_code": "formula_ready",
+            "started_at": "2026-10-11T22:58:42.293220Z",
+            "finished_at": "2026-10-11T22:58:42.476412Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [
+              "CALC1"
+            ],
+            "coverage_before": 0.0,
+            "coverage_after": 0.0,
+            "failure_reason": null,
+            "details": {
+              "subprocess_reached": true,
+              "source_requirement": "kb_formula",
+              "formula_source_ids": [
+                "KB1"
+              ]
+            }
+          },
+          {
+            "iteration": 3,
+            "action_id": "ACT-3",
+            "action_type": "verify",
+            "target_criteria": [
+              "C1",
+              "C2"
+            ],
+            "status": "completed",
+            "reason_code": "verify_validated_calculation",
+            "started_at": "2026-10-11T22:58:42.477408Z",
+            "finished_at": "2026-10-11T22:58:42.478403Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 0.0,
+            "coverage_after": 1.0,
+            "failure_reason": null,
+            "details": {
+              "engineering_validation_passed": true,
+              "goal_achieved": true
+            }
+          },
+          {
+            "iteration": 4,
+            "action_id": "ACT-4",
+            "action_type": "synthesize",
+            "target_criteria": [],
+            "status": "completed",
+            "reason_code": "goal_achieved",
+            "started_at": "2026-10-11T22:58:42.479399Z",
+            "finished_at": "2026-10-11T22:58:42.479399Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 1.0,
+            "coverage_after": 1.0,
+            "failure_reason": null,
+            "details": {}
+          },
+          {
+            "iteration": 4,
+            "action_id": "ACT-STOP-4",
+            "action_type": "stop",
+            "target_criteria": [],
+            "status": "completed",
+            "reason_code": "goal_achieved",
+            "started_at": "2026-10-11T22:58:42.479399Z",
+            "finished_at": "2026-10-11T22:58:42.479399Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 1.0,
+            "coverage_after": 1.0,
+            "failure_reason": null,
+            "details": {}
+          }
+        ],
+        "state_history": [
+          {
+            "iteration": 1,
+            "criteria": {
+              "C1": "unmet",
+              "C2": "unmet"
+            },
+            "evidence_ids": [
+              "KB1"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 0.0,
+            "goal_achieved": false,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          },
+          {
+            "iteration": 2,
+            "criteria": {
+              "C1": "unmet",
+              "C2": "unmet"
+            },
+            "evidence_ids": [
+              "KB1"
+            ],
+            "computation_ids": [
+              "CALC1"
+            ],
+            "known_fact_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 0.0,
+            "goal_achieved": false,
+            "blocked_reasons": [],
+            "source_complete": true,
+            "formula_ready": true
+          },
+          {
+            "iteration": 3,
+            "criteria": {
+              "C1": "met",
+              "C2": "met"
+            },
+            "evidence_ids": [
+              "KB1"
+            ],
+            "computation_ids": [
+              "CALC1"
+            ],
+            "known_fact_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 1.0,
+            "goal_achieved": true,
+            "blocked_reasons": [],
+            "source_complete": true,
+            "formula_ready": true
+          },
+          {
+            "iteration": 4,
+            "criteria": {
+              "C1": "met",
+              "C2": "met"
+            },
+            "evidence_ids": [
+              "KB1"
+            ],
+            "computation_ids": [
+              "CALC1"
+            ],
+            "known_fact_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 1.0,
+            "goal_achieved": true,
+            "blocked_reasons": [],
+            "source_complete": true,
+            "formula_ready": true
+          },
+          {
+            "iteration": 4,
+            "criteria": {
+              "C1": "met",
+              "C2": "met"
+            },
+            "evidence_ids": [
+              "KB1"
+            ],
+            "computation_ids": [
+              "CALC1"
+            ],
+            "known_fact_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 1.0,
+            "goal_achieved": true,
+            "blocked_reasons": [],
+            "source_complete": true,
+            "formula_ready": true
+          }
+        ],
+        "iterations": [],
+        "internal_sources": [
+          {
+            "evidence_id": "KB1",
+            "document": "synthetic-device-manual.txt",
+            "page": 1,
+            "chunk_id": "fixture-1",
+            "score": 1.0,
+            "excerpt": "Correction R is the combined offset. R = p + q. p (Pa) and q (Pa) are supplied offsets; R is in Pa."
+          }
+        ],
+        "web_sources": [],
+        "figures": [],
+        "computations": [
+          {
+            "computation_id": "CALC1",
+            "analysis_id": "KB-FORMULA-CALC1",
+            "purpose": "p=17 Pa, q=8 Pa. 내부 교재의 R 보정량 정의를 적용하여 R을 계산해줘.",
+            "target_criteria": [],
+            "source_evidence_ids": [
+              "KB1"
+            ],
+            "source_input_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "formula_evidence_ids": [
+              "KB1"
+            ],
+            "formula_source_ids": [
+              "KB1"
+            ],
+            "input_fact_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "bound_variables": {
+              "p": "USERF1",
+              "q": "USERF2"
+            },
+            "normalized_formula": "r=p+q",
+            "source_formula": "R = p + q",
+            "units": {
+              "p": "Pa",
+              "q": "Pa",
+              "R": "Pa"
+            },
+            "execution_hash": "25340784b8decf51471b2379285af5fc14f5f9907fd351cd29759fa5ab5f446b",
+            "output": {
+              "OUT_RESULT": 25.0
+            },
+            "formula_source_id": null,
+            "canonical_fact_ids": [],
+            "canonical_formula_ids": [],
+            "input_facts": [
+              {
+                "name": "p",
+                "value": 17.0,
+                "unit": "Pa",
+                "evidence_id": "USERF1",
+                "source_type": "user_fact"
+              },
+              {
+                "name": "q",
+                "value": 8.0,
+                "unit": "Pa",
+                "evidence_id": "USERF2",
+                "source_type": "user_fact"
+              }
+            ],
+            "formula": "R = p + q",
+            "code_record": "agent_runs/goal-research/GR-V17-DEV-kb_calculation/calculation/CALC1/python_task.py",
+            "output_files": [
+              "results/goal-research/GR-V17-DEV-kb_calculation/analysis/calculation.json"
+            ],
+            "summary": "Validated R=25.0",
+            "validation_passed": true,
+            "attempts": 1,
+            "attempt_records": [
+              {
+                "attempt": 1,
+                "code": "import json\nimport math\np = 17.0\nq = 8.0\nresult = p + q\nif not math.isfinite(result):\n    raise ValueError('non-finite result')\nwith open('calculation.json', 'w', encoding='utf-8') as handle:\n    json.dump({'value': result}, handle, allow_nan=False)\n",
+                "validation_passed": true
+              }
+            ],
+            "fingerprint": "",
+            "contract_id": null,
+            "required_output_ids": [
+              "OUT_RESULT"
+            ],
+            "produced_output_ids": [
+              "OUT_RESULT"
+            ],
+            "used_input_ids": [
+              "USERF1",
+              "USERF2"
+            ],
+            "used_formula_id": null,
+            "output_manifest": {
+              "OUT_RESULT": {
+                "name": "R",
+                "value": 25.0,
+                "unit": "Pa",
+                "unit_origin": "inferred",
+                "semantic_type": "numeric",
+                "source_fact_ids": [
+                  "USERF1",
+                  "USERF2"
+                ],
+                "required": true
+              }
+            },
+            "contract_validation_passed": true
+          }
+        ],
+        "artifacts": [],
+        "deliverable_status": {},
+        "deliverable_errors": {},
+        "python_calls_total": 1,
+        "python_attempts_total": 1,
+        "python_failures": 0,
+        "python_call_budget_exhausted": false,
+        "timing": {
+          "planning_seconds": 0.003109,
+          "retrieval_seconds": 0.0,
+          "llm_generation_seconds": 0.000178,
+          "python_seconds": 0.181823,
+          "verification_seconds": 0.000798,
+          "evaluation_seconds": 3.9e-05,
+          "synthesis_seconds": 0.000139,
+          "retrieve_action_seconds": 0.000445,
+          "calculate_action_seconds": 0.182398,
+          "verify_action_seconds": 0.000795,
+          "synthesize_action_seconds": 2.5e-05,
+          "elapsed_seconds": 0.196274,
+          "total_seconds": 0.196274
+        },
+        "telemetry": {
+          "python_authorization_source": "autonomous_execution_mode",
+          "claim_support_checked": false,
+          "required_claim_count": 0,
+          "supported_claim_count": 0,
+          "partially_supported_claim_count": 0,
+          "answerability_status": "NOT_CHECKED",
+          "extractive_fallback_attempted": false,
+          "extractive_fallback_used": false,
+          "extractive_fallback_failure_reason": null,
+          "refusal_generated": false,
+          "refusal_reason": null,
+          "relevant_evidence_present": false,
+          "final_answer_kind": "calculation",
+          "operands_expected": 2,
+          "operands_bound": 2,
+          "operand_validation_passed": true,
+          "formula_selected": true,
+          "formula_ready": true,
+          "calculation_ready": true,
+          "calculation_executed": true,
+          "calculation_validated": true,
+          "intent_route": "kb_formula_calc",
+          "intent": {
+            "selected_intent": "kb_formula_calc",
+            "intent_reason": "explicit_source_required_calculation",
+            "premise_cue_detected": false,
+            "formula_origin": "kb_referenced"
+          },
+          "source_requirement": "kb_formula",
+          "fact_extraction": {
+            "deterministic_fact_count": 2,
+            "fallback_fact_count": 0,
+            "rejected_fact_count": 0,
+            "fact_rejection_reasons": [],
+            "normalized_units": {
+              "USERF1": {
+                "raw": "Pa",
+                "canonical": "Pa"
+              },
+              "USERF2": {
+                "raw": "Pa",
+                "canonical": "Pa"
+              }
+            }
+          },
+          "calculation": {
+            "requested_operation_family": "",
+            "direct_calc_ready": false,
+            "missing_operands": [],
+            "selected_input_fact_ids": [
+              "USERF1",
+              "USERF2"
+            ]
+          },
+          "formula": {
+            "candidates_found": 1,
+            "selected_formula_id": "FORMULA1",
+            "selection_scores": {
+              "total": 10,
+              "lhs": 6,
+              "variable_overlap": 4,
+              "context": 0,
+              "heading": 0
+            },
+            "ambiguity_reason": "unique_structural_match",
+            "candidate_scores": {
+              "FORMULA1": 10
+            }
+          },
+          "transition": {
+            "formula_ready": true,
+            "calculation_ready": false,
+            "blocking_reason": null
+          },
+          "source_conflict_count": 0,
+          "dimension_inference": [],
+          "fallback_attempted": false,
+          "fallback_used": false,
+          "fallback_failure_reason": null,
+          "python_needed": false,
+          "python_calls": 1,
+          "python_attempts": 1,
+          "python_success_rate": 1.0,
+          "calculation_count": 1,
+          "generated_chart_count": 0,
+          "goal_coverage_per_iteration": [],
+          "iterations_to_success": 4,
+          "total_research_seconds": 0.196274,
+          "python_seconds": 0.181823
+        },
+        "validation": {
+          "engineering_validation_passed": true,
+          "engineering_contradiction_count": 0,
+          "unsupported_engineering_claim_count": 0,
+          "citation_semantic_passed": true,
+          "unsupported_citation_claim_count": 0,
+          "unsupported_numeric_claim_count": 0,
+          "criteria_frozen": true
+        },
+        "cancel_requested": false,
+        "error": null
+      }
+    },
+    {
+      "case": "underdetermined",
+      "passed": true,
+      "seconds": 1.7385855996981263,
+      "question": "이 정보만으로 잔여 수명을 정확한 값으로 알려줘.",
+      "sources": [
+        "Remaining lifetime requires the measured wear depth and a calibrated wear rate."
+      ],
+      "result": {
+        "run_id": "GR-V17-DEV-underdetermined",
+        "topic": "이 정보만으로 잔여 수명을 정확한 값으로 알려줘.",
+        "goal": "이 정보만으로 잔여 수명을 정확한 값으로 알려줘.",
+        "expected_result": null,
+        "run_status": "completed",
+        "status": "achieved",
+        "stop_reason": "goal_achieved",
+        "final_answer": "현재 정보만으로 정확한 값을 결정할 수 없습니다. 근거가 명시한 필요한 정보: \"Remaining lifetime requires the measured wear depth and a calibrated wear rate.\" [KB1]",
+        "clarification_question": null,
+        "required_inputs": [],
+        "final_limitations": [],
+        "goal_coverage": 1.0,
+        "goal_coverage_percent": 100.0,
+        "criteria_source": "inferred_from_request",
+        "criteria_hash": "afca53ed51ab8e3f00271fe95b7d30c5002c8e7ef667edf8623132947d9ee1eb",
+        "criteria": [
+          {
+            "criterion_id": "C1",
+            "status": "met",
+            "reason": "관련 원문 관계와 인용 연결을 검증했습니다.",
+            "supporting_evidence": [
+              "KB1"
+            ]
+          }
+        ],
+        "frozen_criteria": [
+          {
+            "criterion_id": "C1",
+            "description": "이 정보만으로 잔여 수명을 정확한 값으로 알려줘",
+            "required": true
+          }
+        ],
+        "expected_result_status": "not_provided",
+        "iterations_completed": 3,
+        "current_iteration": 3,
+        "max_iterations": 6,
+        "current_stage": "finalize",
+        "current_action": "stop",
+        "action_history": [
+          {
+            "iteration": 1,
+            "action_id": "ACT-1",
+            "action_type": "retrieve",
+            "target_criteria": [
+              "C1"
+            ],
+            "status": "completed",
+            "reason_code": "source_evidence_needed",
+            "started_at": "2026-10-11T22:58:42.482386Z",
+            "finished_at": "2026-10-11T22:58:42.482386Z",
+            "new_evidence_count": 1,
+            "evidence_added": [
+              "KB1"
+            ],
+            "computation_ids": [],
+            "coverage_before": 0.0,
+            "coverage_after": 0.0,
+            "failure_reason": null,
+            "details": {
+              "new_evidence_count": 1,
+              "retrieval_mode": "hybrid",
+              "query": "이 정보만으로 잔여 수명을 정확한 값으로 알려줘.\nMissing: 이 정보만으로 잔여 수명을 정확한 값으로 알려줘",
+              "cache_hit": false
+            }
+          },
+          {
+            "iteration": 2,
+            "action_id": "ACT-2",
+            "action_type": "verify",
+            "target_criteria": [
+              "C1"
+            ],
+            "status": "completed",
+            "reason_code": "verify_current_support",
+            "started_at": "2026-10-11T22:58:42.483382Z",
+            "finished_at": "2026-10-11T22:58:44.217776Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 0.0,
+            "coverage_after": 1.0,
+            "failure_reason": null,
+            "details": {
+              "engineering_validation_passed": true,
+              "goal_achieved": true
+            }
+          },
+          {
+            "iteration": 3,
+            "action_id": "ACT-3",
+            "action_type": "synthesize",
+            "target_criteria": [],
+            "status": "completed",
+            "reason_code": "goal_achieved",
+            "started_at": "2026-10-11T22:58:44.218309Z",
+            "finished_at": "2026-10-11T22:58:44.218817Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 1.0,
+            "coverage_after": 1.0,
+            "failure_reason": null,
+            "details": {}
+          },
+          {
+            "iteration": 3,
+            "action_id": "ACT-STOP-3",
+            "action_type": "stop",
+            "target_criteria": [],
+            "status": "completed",
+            "reason_code": "goal_achieved",
+            "started_at": "2026-10-11T22:58:44.218877Z",
+            "finished_at": "2026-10-11T22:58:44.218877Z",
+            "new_evidence_count": 0,
+            "evidence_added": [],
+            "computation_ids": [],
+            "coverage_before": 1.0,
+            "coverage_after": 1.0,
+            "failure_reason": null,
+            "details": {}
+          }
+        ],
+        "state_history": [
+          {
+            "iteration": 1,
+            "criteria": {
+              "C1": "unmet"
+            },
+            "evidence_ids": [
+              "KB1"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 0.0,
+            "goal_achieved": false,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          },
+          {
+            "iteration": 2,
+            "criteria": {
+              "C1": "met"
+            },
+            "evidence_ids": [
+              "KB1"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 1.0,
+            "goal_achieved": true,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          },
+          {
+            "iteration": 3,
+            "criteria": {
+              "C1": "met"
+            },
+            "evidence_ids": [
+              "KB1"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 1.0,
+            "goal_achieved": true,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          },
+          {
+            "iteration": 3,
+            "criteria": {
+              "C1": "met"
+            },
+            "evidence_ids": [
+              "KB1"
+            ],
+            "computation_ids": [],
+            "known_fact_ids": [],
+            "generated_artifacts": [],
+            "unresolved_information": [],
+            "coverage": 1.0,
+            "goal_achieved": true,
+            "blocked_reasons": [],
+            "source_complete": null,
+            "formula_ready": false
+          }
+        ],
+        "iterations": [],
+        "internal_sources": [
+          {
+            "evidence_id": "KB1",
+            "document": "synthetic-device-manual.txt",
+            "page": 1,
+            "chunk_id": "fixture-1",
+            "score": 1.0,
+            "excerpt": "Remaining lifetime requires the measured wear depth and a calibrated wear rate."
+          }
+        ],
+        "web_sources": [],
+        "figures": [],
+        "computations": [],
+        "artifacts": [],
+        "deliverable_status": {},
+        "deliverable_errors": {},
+        "python_calls_total": 0,
+        "python_attempts_total": 0,
+        "python_failures": 0,
+        "python_call_budget_exhausted": false,
+        "timing": {
+          "planning_seconds": 0.001877,
+          "retrieval_seconds": 0.0,
+          "llm_generation_seconds": 0.936217,
+          "python_seconds": 0.0,
+          "verification_seconds": 1.73438,
+          "evaluation_seconds": 0.936188,
+          "synthesis_seconds": 2.9e-05,
+          "retrieve_action_seconds": 0.000463,
+          "verify_action_seconds": 1.734376,
+          "synthesize_action_seconds": 2.7e-05,
+          "elapsed_seconds": 1.738185,
+          "total_seconds": 1.738185
+        },
+        "telemetry": {
+          "python_authorization_source": "autonomous_execution_mode",
+          "claim_support_checked": true,
+          "required_claim_count": 1,
+          "supported_claim_count": 1,
+          "partially_supported_claim_count": 0,
+          "answerability_status": "ANSWERABLE",
+          "extractive_fallback_attempted": true,
+          "extractive_fallback_used": true,
+          "extractive_fallback_failure_reason": null,
+          "refusal_generated": false,
+          "refusal_reason": null,
+          "relevant_evidence_present": true,
+          "final_answer_kind": "underdetermined",
+          "operands_expected": 0,
+          "operands_bound": 0,
+          "operand_validation_passed": false,
+          "formula_selected": false,
+          "formula_ready": false,
+          "calculation_ready": false,
+          "calculation_executed": false,
+          "calculation_validated": false,
+          "intent_route": "knowledge_qa",
+          "intent": {
+            "selected_intent": "knowledge_qa",
+            "intent_reason": "check_source_answerability_before_numeric_routing",
+            "premise_cue_detected": false,
+            "formula_origin": "unknown"
+          },
+          "source_requirement": "none",
+          "fact_extraction": {
+            "deterministic_fact_count": 0,
+            "fallback_fact_count": 0,
+            "rejected_fact_count": 0,
+            "fact_rejection_reasons": [],
+            "normalized_units": {}
+          },
+          "calculation": {
+            "requested_operation_family": "",
+            "direct_calc_ready": false,
+            "missing_operands": [],
+            "selected_input_fact_ids": []
+          },
+          "formula": {
+            "candidates_found": 0,
+            "selected_formula_id": null
+          },
+          "transition": {
+            "formula_ready": false,
+            "calculation_ready": false,
+            "blocking_reason": null
+          },
+          "source_conflict_count": 0,
+          "support_fingerprint": "1327e21c3a5bbe45b02f5652ec81238ecac2a7a2e5114c0457c2007750442920",
+          "support_underdetermined": true,
+          "claim_language": "ko",
+          "evidence_language": [
+            "en"
+          ],
+          "support_candidate_count": 1,
+          "semantic_support_checked": true,
+          "semantic_support_model": "qwen3:8b",
+          "exact_span_validation_passed": true,
+          "semantic_support_decisions": [
+            {
+              "claim_id": "CLAIM1",
+              "status": "SUPPORTED",
+              "span_ids": [
+                "SPAN1"
+              ],
+              "evidence_conflict": false
+            }
+          ],
+          "claim_count": 1,
+          "partial_claim_count": 0,
+          "contradicted_claim_count": 0,
+          "required_claims": [
+            {
+              "claim_id": "CLAIM1",
+              "description": "이 정보만으로 잔여 수명을 정확한 값으로 알려줘",
+              "required": true,
+              "support_status": "SUPPORTED",
+              "supporting_evidence_ids": [
+                "KB1"
+              ],
+              "supporting_spans": [
+                "Remaining lifetime requires the measured wear depth and a calibrated wear rate."
+              ]
+            }
+          ],
+          "fallback_attempted": true,
+          "fallback_used": true,
+          "fallback_failure_reason": null,
+          "python_needed": false,
+          "python_calls": 0,
+          "python_attempts": 0,
+          "python_success_rate": 0.0,
+          "calculation_count": 0,
+          "generated_chart_count": 0,
+          "goal_coverage_per_iteration": [],
+          "iterations_to_success": 3,
+          "total_research_seconds": 1.738185,
+          "python_seconds": 0.0
+        },
+        "validation": {
+          "engineering_validation_passed": true,
+          "engineering_contradiction_count": 0,
+          "unsupported_engineering_claim_count": 0,
+          "citation_semantic_passed": true,
+          "unsupported_citation_claim_count": 0,
+          "unsupported_numeric_claim_count": 0,
+          "criteria_frozen": true
+        },
+        "cancel_requested": false,
+        "error": null
+      }
+    }
+  ]
+}

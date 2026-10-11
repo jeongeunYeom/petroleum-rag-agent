@@ -1,0 +1,43 @@
+{
+  "scope": "fresh synthetic development regression, NOT final evaluation",
+  "branch": "feature/agent-reliability-v17",
+  "base_sha": "57af58c44816c3734ea3d5a7aa4e1f08407798ba",
+  "backend_pytest": {"passed": 1412, "warnings": 6, "seconds": 73.32},
+  "fresh_v17_tests": 48,
+  "frontend_tests_passed": 9,
+  "frontend_build": "passed",
+  "final_local_smoke": "development/v17/local_smoke_05.json",
+  "local_smoke_passed": 9,
+  "local_smoke_total": 9,
+  "local_smoke_fallback_used": 6,
+  "local_smoke_unnecessary_refusals": 0,
+  "local_smoke_validated_calculations": 3,
+  "local_model": "qwen3:8b",
+  "smoke_policy": {
+    "execution": "real GoalExecutionAgent and bounded Python sandbox",
+    "semantic_support": "real local qwen3:8b",
+    "retrieval": "fresh in-memory synthetic sources; not production Chroma retrieval",
+    "evaluator": "intentionally rejecting controlled evaluator",
+    "synthesis": "controlled refusal to exercise grounded fallback",
+    "previous_development_runs": "local_smoke_01 through 04 retained, including failures",
+    "private_chain_of_thought": "not requested or stored"
+  },
+  "integrity": {
+    "sealed_evaluation_files_modified": false,
+    "sealed_evaluation_rerun": false,
+    "v16_individual_questions_answers_gold_spans_raw_used_for_tuning": false,
+    "external_model_api_used": false,
+    "chroma_opened_by_development_smoke": false,
+    "chroma_sqlite_sha256_before_and_after": "1b389044d7efec1273a5d4d52a999d4831188e08a808d4a956a72ba816659fea",
+    "main_merged": false,
+    "final_benchmark_performed": false
+  },
+  "limitations": [
+    "Synthetic development results do not estimate unseen engineering QA accuracy.",
+    "Semantic support depends on a fallible local model; exact spans and engineering checks constrain but do not prove entailment.",
+    "Evidence selection is bounded to 24 retrieved records, eight spans per record and at most 32 spans/16000 source characters per semantic check.",
+    "A corrected false premise retains CONTRADICTED support and is not labeled unconditionally achieved.",
+    "Extractive answers retain the source language inside quotations.",
+    "Compound units support bounded literal algebra, not automatic unit-system conversion."
+  ]
+}

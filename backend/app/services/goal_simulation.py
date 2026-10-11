@@ -26,6 +26,7 @@ from app.services.calculation_requirements import normalize_symbol, symbol_names
 from app.services.user_fact_registry import UserFactRegistry, validate_original_operands
 from app.services.direct_operation_v3 import OPERATIONS as V3_OPERATIONS, build as build_v3_operation
 from app.tools.python_tools import PythonTools
+from app.services.compound_units import combine_units
 
 
 def user_formula_bindings(equation: str, facts: UserFactRegistry) -> tuple[dict[str, object], list[str]]:
@@ -68,7 +69,15 @@ def direct_operation_operands(text: str, facts: UserFactRegistry,
             for right in names:
                 if left == right:
                     continue
-                a, b = (re.escape(name).replace("_", r"[ _]+") for name in (left, right))
+                def aliases(name):
+                    row = next(row for row in facts.records if row.name == name)
+                    labels = [name.replace("_", " ")]
+                    prefix = row.source_span.split(row.raw_value_text, 1)[0].strip()
+                    prefix = re.sub(r"(?:은|는|이|가|[:=])\s*$", "", prefix).strip()
+                    if prefix:
+                        labels.append(prefix)
+                    return "(?:" + "|".join(re.escape(v).replace(r"\ ", r"[ _]+") for v in labels) + ")"
+                a, b = aliases(left), aliases(right)
                 separator = (r"\s*(?:/|divided\s+by|to)\s*" if operation in {"ratio", "divide"} else
                              r"\s*(?:-|minus)\s*")
                 english_or_symbol = re.search(
@@ -209,33 +218,7 @@ def _arithmetic_value(node: ast.AST, values: dict[str, float]) -> float:
 
 def _combine_formula_units(left: str, right: str, *, divide: bool) -> str:
     """Cancel only identical literal unit factors; never infer a conversion."""
-    def factors(unit: str) -> tuple[list[str], list[str]]:
-        parts = unit.split("/")
-        def expand(parts):
-            result = []
-            for part in parts:
-                if part.casefold() in {"", "1", "dimensionless"}:
-                    continue
-                power = re.fullmatch(r"(.+)\^([0-8])", part)
-                result.extend([power[1]] * int(power[2]) if power else [part])
-            return result
-        numerator = expand(parts[0].split("*"))
-        denominator = expand([factor for part in parts[1:] for factor in part.split("*")])
-        return numerator, denominator
-
-    left_num, left_den = factors(left)
-    right_num, right_den = factors(right)
-    numerator = left_num + (right_den if divide else right_num)
-    denominator = left_den + (right_num if divide else right_den)
-    if len(numerator) + len(denominator) > 64:
-        raise ValueError("formula unit expansion exceeds safe bounds")
-    for factor in numerator[:]:
-        counterpart = next((item for item in denominator if item.casefold() == factor.casefold()), None)
-        if counterpart is not None:
-            numerator.remove(factor)
-            denominator.remove(counterpart)
-    top = "*".join(numerator) or ("1" if denominator else "")
-    return top + ("/" + "/".join(denominator) if denominator else "")
+    return combine_units(left, right, divide=divide)
 
 
 def _formula_output_unit(node: ast.AST, units: dict[str, str]) -> str:
@@ -295,6 +278,13 @@ async def run_user_formula_calculation(settings: Settings, request: GoalResearch
         raise ValueError("formula exponent exceeds safe bounds")
     units = {name: fact.unit for name, fact in variables.items()}
     output_unit = _formula_output_unit(tree.body, units)
+    explicit_dimensionless = bool(re.search(
+        rf"(?<![A-Za-z0-9_]){re.escape(lhs)}(?![A-Za-z0-9_])\s*(?:(?:is|as|은|는|이|가)\s*)?(?:dimensionless|무차원)|"
+        rf"(?:dimensionless|무차원)\s+{re.escape(lhs)}\b", original_text or request.topic, re.I))
+    if explicit_dimensionless:
+        if output_unit:
+            raise ValueError("declared dimensionless output conflicts with input units")
+        output_unit = "dimensionless"
     values = {name: fact.value for name, fact in variables.items()}
     try:
         expected = _arithmetic_value(tree.body, values)
@@ -335,6 +325,7 @@ async def run_user_formula_calculation(settings: Settings, request: GoalResearch
         raise ValueError("user formula result failed independent validation")
     input_ids = [fact.fact_id for fact in variables.values()]
     manifest = {"OUT_RESULT": {"name": lhs, "value": actual, "unit": output_unit or None,
+                               "unit_origin": "user_declared" if explicit_dimensionless else "inferred",
                                "semantic_type": "numeric", "source_fact_ids": input_ids,
                                "required": True}}
     return ComputationRecord(

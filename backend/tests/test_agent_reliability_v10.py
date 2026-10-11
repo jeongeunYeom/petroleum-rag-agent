@@ -378,7 +378,8 @@ def test_extractive_fallback_keeps_only_relevant_literal_source_span():
     ocr += "wettability forces of the fluid-rock system. Figure 3 has axes."
     extracted = GoalExecutionAgent._extractive_source_answer(req, [{
         "evidence_id": "KB3", "source_type": "knowledge_base", "text": ocr}])
-    assert "function of saturation" in extracted and "\n" not in extracted
+    # Exact citation spans preserve source whitespace, including OCR line breaks.
+    assert ocr.split(" Figure 3")[0] in extracted
 
 
 def test_fixed_bulk_pore_volume_premise_uses_actual_definition_span():

@@ -94,7 +94,7 @@ def user_equation(text: str) -> str | None:
 
 def formula_origin(text: str) -> FormulaOrigin:
     # An explicit source request outranks a coincidentally quoted equation.
-    if _KB_ORIGIN.search(text):
+    if _KB_ORIGIN.search(text) or re.search(r"\b(?:internal\s+(?:textbook|handbook|material|source)|handbook)\b|내부\s*(?:교본|문헌)|핸드북", text, re.I):
         return FormulaOrigin.KB_REFERENCED
     if _USER_ORIGIN.search(text):
         return FormulaOrigin.USER_DEFINED
@@ -107,6 +107,9 @@ def explicitly_underdetermined(text: str) -> bool:
     text = re.sub(r"\b(?:no|without)\s+(?:retrieval|web|python|tools?|search)\b", "", text, flags=re.I)
     return bool(re.search(r"\b(?:exact|optimal|precise|specific)\b|정확한|최적", text, re.I)
                 and re.search(r"\b(?:no|without|not\s+(?:provided|known|available)|unavailable|unknown|missing|unspecified)\b|"
+                              r"with\s+only\s+this\s+information|from\s+this\s+fact\s+alone|"
+                              r"based\s+only\s+on\s+(?:the\s+)?provided\s+information|"
+                              r"(?:이|주어진|현재)\s*(?:정보|사실)만으로|"
                               r"없(?:다|는|고|음|어)|미제공|모르|주어지지|제공되지", text, re.I))
 
 
@@ -120,6 +123,9 @@ def classify_goal_intent(request: GoalResearchRequest, *, has_user_facts: bool,
     if explicitly_underdetermined(text):
         return GoalIntent(GoalIntentKind.KNOWLEDGE_QA, SourceRequirement.NONE,
                           reason="check_source_answerability_before_numeric_routing")
+    if origin == FormulaOrigin.KB_REFERENCED and _EXPLICIT_CALC.search(text) and not equation:
+        return GoalIntent(GoalIntentKind.KB_FORMULA_CALC, SourceRequirement.KB_FORMULA,
+                          reason="explicit_source_required_calculation", formula_origin=origin)
     if equation and sweep and origin != FormulaOrigin.KB_REFERENCED:
         return GoalIntent(GoalIntentKind.USER_FORMULA_SIMULATION, SourceRequirement.USER_FORMULA,
                           equation, "literal_formula_and_sweep", formula_origin=origin)

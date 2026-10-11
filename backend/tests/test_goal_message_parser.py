@@ -69,8 +69,10 @@ def test_unsupported_equation_request_preserves_no_formula_or_result():
     assert request.expected_result is None and request.simulation_spec is None
     assert request.success_criteria == [] and request.use_internal and not request.use_external
     assert [(item.name, item.value) for item in UserFactRegistry.from_topic(request.topic).records] == [("Xq", 31)]
-    assert "검증된 계산" in GoalExecutionAgent._explicit_numeric_criteria(
-        request, UserFactRegistry.from_topic(request.topic), None)[0].description
+    descriptions = [item.description for item in GoalExecutionAgent._explicit_numeric_criteria(
+        request, UserFactRegistry.from_topic(request.topic), None)]
+    assert any("출처" in description for description in descriptions)
+    assert any("계산" in description and "검증" in description for description in descriptions)
     state = GoalExecutionState.from_criteria("GR-TEST", request.goal or "", [GoalCriterion(criterion_id="C1", description="관계식 근거 확인")])
     approved = request.model_copy(update={"allow_python_execution": True, "python_execution_approved": True})
     assert GoalActionPlanner.select(approved, state, user_fact_ids=["USERF1"], formula_ready=False,

@@ -6,15 +6,17 @@ import math
 import re
 
 from pydantic import BaseModel, Field
+from app.services.compound_units import UNIT as COMPOUND_UNIT
 
 
 NUMBER = r"[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d*)?(?:[eE][-+]?\d+)?|[-+]?\.\d+(?:[eE][-+]?\d+)?|[-+]?\d+\s*/\s*\d+"
-UNIT = (r"(?:USD/m|MMscf/d|psi/ft|kg/m(?:\^?3|³)|mg/L|mD[·*\-]ft|m(?:\^?3|³)/(?:day|hr|hour|s|d|h)|"
+LEGACY_UNIT = (r"(?:USD/m|MMscf/d|psi/ft|kg/m(?:\^?3|³)|mg/L|mD[·*\-]ft|m(?:\^?3|³)/(?:day|hr|hour|s|d|h)|"
         r"\$/m(?:\^?3|³)|m(?:\^?3|³)|ft(?:\^?3|³)|mm(?:\^?2|²|⁻¹)|"
         r"m(?:\^?2|²)|psi/(?:day|d)|psi(?:⁻¹|\^-?1)?|stb/(?:day|h|d)|"
         r"bbl/d|lbf/ft|lb/ft|gpm|kWh|kW|hp|ppg|acres?|feet|inch|in|ft|mD|md|"
         r"psia|psig|kPa|Pa|bbl|stb|days?|seconds?|secs?|hours?|hr|h|d|s|"
         r"mg|kg|kJ|lbf|cP|°C|USD|달러|시간|분|min|m/s|m/h|mm|m|L|%|dimensionless)")
+UNIT = rf"(?:{COMPOUND_UNIT}|{LEGACY_UNIT}(?![A-Za-z0-9_/*^·²³⁻]))"
 ASSIGNMENT = re.compile(
     rf"(?P<label>[A-Za-z][A-Za-z0-9 _/\-]{{0,48}}?)\s*[:=]\s*(?P<value>{NUMBER})\s*(?P<unit>{UNIT})?(?=$|[,;\s]|\.(?!\d)|[가-힣])",
     re.IGNORECASE,
@@ -39,10 +41,14 @@ KOREAN_RATE = re.compile(
     rf"(?:은|는|이|가)\s*(?P<value>{NUMBER})\s*(?P<unit>stb/d|bbl/d|m\^?3/d)", re.I,
 )
 NATURAL_FACT = re.compile(
-    rf"(?P<label>[A-Za-z_][A-Za-z0-9_]*|[가-힣]{{2,12}}(?:\s+[A-Za-z_][A-Za-z0-9_]*)?)"
+    rf"(?P<label>[A-Za-z_][A-Za-z0-9_]*|[가-힣]{{1,12}}(?:\s+(?:전|후|초기|최종|투입|회수|입구|출구|시작|종료|값|[A-Za-z_][A-Za-z0-9_]*)){{0,2}})"
     rf"\s*(?:은|는|이|가|을|를|에서|에는|:|\s+of|\s+is)?\s*"
     rf"(?P<value>{NUMBER})\s*(?P<unit>{UNIT})(?![A-Za-z0-9/])", re.I,
 )
+ROLE_FACT = re.compile(
+    rf"(?P<label>(?:[가-힣]{{1,12}}\s+)?(?:변경\s*전|변경\s*후|초기|최종|투입|회수|입구|출구|시작|종료|전|후)"
+    rf"(?:\s+[가-힣]{{1,12}})?)\s*(?:은|는|이|가|[:=])?\s*"
+    rf"(?P<value>{NUMBER})\s*(?P<unit>{UNIT})", re.I)
 ENGLISH_IS_VALUE = re.compile(rf"\b(?P<label>[A-Za-z][A-Za-z0-9_]*)\s+(?:is|was)\s+"
                               rf"(?P<value>[-+]?\d+(?:\.\d+)?)(?:\s*(?P<unit>{UNIT}))?(?=$|[.,;\s])", re.I)
 DIMENSIONLESS_NAMED = re.compile(
@@ -104,10 +110,12 @@ def numeric_lists(text: str):
 
 def normalize_unit(raw: str) -> str:
     """Canonical spelling only; no unverified dimensional conversion."""
-    value = raw.strip().replace("³", "3").replace("²", "2").replace("^", "").replace("·", "*")
+    value = raw.strip().replace("³", "3").replace("²", "2").replace("·", "*")
+    value = re.sub(r"\b(m|ft|mm)\^([23])\b", r"\1\2", value)
     value = value.replace("⁻¹", "-1")
-    if value.endswith("-1"):
-        return "1/" + value[:-2]
+    inverse = re.fullmatch(r"([A-Za-z]+)\^?-1", value)
+    if inverse:
+        return "1/" + inverse[1]
     aliases = {"시간": "h", "hours": "h", "hour": "h", "hr": "h", "days": "d", "day": "d",
                "seconds": "s", "second": "s", "secs": "s", "sec": "s", "inch": "in",
                "feet": "ft", "분": "min", "달러": "USD", "md": "mD", "md*ft": "mD*ft",
@@ -148,7 +156,7 @@ def _natural_name(label: str) -> str:
                "압력": "pressure", "거리": "distance", "시간": "time", "비중": "SG",
                "길이": "length", "면적": "area", "에너지": "energy", "힘": "force",
                "초기 값": "initial", "초기값": "initial", "전체": "total", "총량": "total"}
-    return aliases.get(original, aliases.get(value, _name(label if len(label) <= 2 and label.isupper() else label.casefold())))
+    return aliases.get(original, aliases.get(value, _name(label if len(label) <= 2 and label.isupper() else value)))
 
 
 def _number(raw: str) -> float | None:
@@ -163,7 +171,7 @@ def _number(raw: str) -> float | None:
 
 
 def _name(value: str) -> str:
-    return re.sub(r"[^A-Za-z0-9]+", "_", value.strip()).strip("_")
+    return re.sub(r"[^A-Za-z0-9가-힣]+", "_", value.strip()).strip("_")
 
 
 class UserFactRecord(BaseModel):
@@ -232,6 +240,10 @@ class UserFactRegistry(BaseModel):
                 continue
             if raw_unit and raw_unit not in quote:
                 self.rejection_reasons.append("unit_not_literal")
+                rejected += 1
+                continue
+            if raw_unit and not re.fullmatch(UNIT, raw_unit, re.I):
+                self.rejection_reasons.append("unit_not_supported")
                 rejected += 1
                 continue
             try:
@@ -491,6 +503,12 @@ class UserFactRegistry(BaseModel):
                 ordinal = ("첫", "둘째", "셋째", "넷째", "다섯째", "여섯째", "일곱째", "여덟째", "아홉째", "열째").index(found["ordinal"]) + 1
                 add(f"segment_{ordinal}", found["value"], found["unit"],
                     found.group(0), None, offset + found.start())
+            for found in ROLE_FACT.finditer(text):
+                if any(start < found.end() and found.start() < end for start, end in protected_spans):
+                    continue
+                add(_natural_name(found["label"]), found["value"], found["unit"],
+                    found.group(), None, offset + found.start())
+                protected_spans.append(found.span())
             for found in NATURAL_FACT.finditer(text):
                 if any(start < found.end() and found.start() < end for start, end in protected_spans):
                     continue

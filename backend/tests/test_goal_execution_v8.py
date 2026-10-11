@@ -428,11 +428,18 @@ async def synthetic_synthesis(*_args):
 
 
 def test_autonomous_research_only_uses_no_python_without_client_flags():
+    class SupportOllama:
+        async def chat_structured(self, messages, schema, **_kwargs):
+            payload = json.loads(messages[-1]["content"])
+            return json.dumps({"claims": [{"claim_id": c["claim_id"], "status": "SUPPORTED",
+                "span_ids": [payload["source_spans"][0]["span_id"]], "evidence_conflict": False}
+                for c in payload["claims"]]}) if "source_spans" in payload else "{}"
+
     req = GoalResearchRequest(topic="API gravity and crude oil types",
                               goal="Explain the relation between API gravity and heavy or light crude",
                               success_criteria=[GoalCriterion(criterion_id="C1", description="Explain the relation")],
                               execution_mode="autonomous_goal_execution")
-    agent = GoalExecutionAgent(StaticResearch("Higher API gravity indicates lighter crude."), object(),
+    agent = GoalExecutionAgent(StaticResearch("Higher API gravity indicates lighter crude."), SupportOllama(),
                                evaluator=PassingEvaluator(), synthesizer=synthetic_synthesis)
     result = asyncio.run(agent.run("GR-TEST-RESEARCH", req))
     assert result.status == GoalStatus.ACHIEVED
@@ -892,7 +899,12 @@ def test_citation_semantics_checks_uncited_limitations_as_claims():
 
 def test_research_goal_can_finish_after_unsupported_line_is_pruned():
     class JudgingOllama:
-        async def chat_structured(self, *_args, **_kwargs):
+        async def chat_structured(self, messages, schema, **_kwargs):
+            payload = json.loads(messages[-1]["content"])
+            if "source_spans" in payload:
+                return json.dumps({"claims": [{"claim_id": c["claim_id"], "status": "SUPPORTED",
+                    "span_ids": [payload["source_spans"][0]["span_id"]], "evidence_conflict": False}
+                    for c in payload["claims"]]})
             return json.dumps({"claims": [
                 {"index": 0, "supported": True, "source_ids": ["KB1"]},
                 {"index": 1, "supported": False, "source_ids": []},
@@ -911,6 +923,7 @@ def test_research_goal_can_finish_after_unsupported_line_is_pruned():
     result = asyncio.run(agent.run("GR-PRUNE", req))
     assert result.status == GoalStatus.ACHIEVED
     assert result.validation["citation_semantic_passed"] is True
-    assert result.validation["unsupported_citation_claim_count"] == 1
+    assert result.validation["unsupported_citation_claim_count"] == 0  # Final answer is rebuilt from exact support.
+    assert result.telemetry["exact_span_validation_passed"] is True
     assert "Unresolved" not in result.final_answer
     assert result.final_answer.endswith("[KB1]")
