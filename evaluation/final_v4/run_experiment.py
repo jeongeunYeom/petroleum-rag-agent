@@ -174,7 +174,7 @@ def call_openai(system: str, turns: list[dict]) -> dict:
     return {"answer": answer.strip(), "model_id": payload.get("model"),
             "input_tokens": payload.get("usage", {}).get("input_tokens"),
             "output_tokens": payload.get("usage", {}).get("output_tokens"),
-            "response_id": payload.get("id"), "provider_payload": payload}
+            "response_id": payload.get("id")}
 
 
 def run_baseline(task: dict, provider: str, same_evidence: bool) -> dict:
