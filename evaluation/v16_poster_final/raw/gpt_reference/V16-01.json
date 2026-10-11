@@ -1,0 +1,43 @@
+{
+  "task_id": "V16-01",
+  "system": "gpt_reference",
+  "question": "시추 가스 분석용 thermal conductivity detector(TCD)는 기체 조성 차이를 어떻게 전기 신호로 바꾸며, reference cell은 어떤 역할을 하나요?",
+  "attempt": 1,
+  "answer": "시추 가스 분석용 **TCD(thermal conductivity detector)**는 **기체마다 열전도도가 다르다**는 점을 이용해, 그 차이를 **저항 변화 → 전압 변화**로 바꿔 전기 신호로 만듭니다.\n\n### 동작 원리\n1. **가열된 필라멘트(또는 열선)**에 전류를 흘려 일정 온도로 유지합니다.\n2. 가스가 필라멘트 주변을 지나가면, 그 가스의 **열전도도**에 따라 필라멘트에서 열이 빠져나가는 정도가 달라집니다.\n   - 열전도도가 큰 기체: 열을 더 잘 빼앗아 감 → 필라멘트 온도 낮아짐 → 저항 감소\n   - 열전도도가 작은 기체: 열이 덜 빠져나감 → 필라멘트 온도 높아짐 → 저항 증가\n3. 필라멘트의 **저항 변화**를 브리지 회로(보통 Wheatstone bridge)로 측정해 **전압 신호**로 변환합니다.\n4. 이 전압 변화가 곧 **가스 조성 변화에 대한 신호**가 됩니다.\n\n### Reference cell의 역할\n**Reference cell**은 **기준 가스(보통 carrier gas 또는 조성이 일정한 가스)**가 흐르는 쪽입니다.  \n역할은 다음과 같습니다.\n\n- **기준점 제공**: 분석 대상 가스가 들어있는 측정 셀과 비교할 기준을 만듭니다.\n- **공통 변동 상쇄**: 온도 변화, 압력 변화, 유량 변화 같은 외란이 두 셀에 비슷하게 작용하면, 그 영향이 서로 상쇄되어 **순수한 조성 차이만** 더 잘 검출됩니다.\n- **브리지 균형 유지**: 분석 가스가 없을 때는 측정 셀과 reference cell의 열손실이 비슷해 브리지가 균형 상태가 됩니다. 분석 가스가 들어오면 균형이 깨지며 신호가 발생합니다.\n\n### 한 줄 요약\n- **TCD**: 기체의 **열전도도 차이**를 필라멘트 **저항 변화**로 바꾸고, 이를 **전압 신호**로 읽는다.\n- **Reference cell**: 기준 가스를 사용해 **환경 변화는 상쇄하고 조성 차이만 측정**하게 해준다.\n\n원하시면 제가 **Wheatstone bridge 회로 관점**에서 더 그림처럼 설명해드릴게요.",
+  "response": {
+    "id": "chatcmpl-EXvByZDvdkflqshH57tPmWLi0HMCk",
+    "object": "chat.completion",
+    "created": 1791753378,
+    "model": "gpt-5.4-mini-2026-03-17",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "시추 가스 분석용 **TCD(thermal conductivity detector)**는 **기체마다 열전도도가 다르다**는 점을 이용해, 그 차이를 **저항 변화 → 전압 변화**로 바꿔 전기 신호로 만듭니다.\n\n### 동작 원리\n1. **가열된 필라멘트(또는 열선)**에 전류를 흘려 일정 온도로 유지합니다.\n2. 가스가 필라멘트 주변을 지나가면, 그 가스의 **열전도도**에 따라 필라멘트에서 열이 빠져나가는 정도가 달라집니다.\n   - 열전도도가 큰 기체: 열을 더 잘 빼앗아 감 → 필라멘트 온도 낮아짐 → 저항 감소\n   - 열전도도가 작은 기체: 열이 덜 빠져나감 → 필라멘트 온도 높아짐 → 저항 증가\n3. 필라멘트의 **저항 변화**를 브리지 회로(보통 Wheatstone bridge)로 측정해 **전압 신호**로 변환합니다.\n4. 이 전압 변화가 곧 **가스 조성 변화에 대한 신호**가 됩니다.\n\n### Reference cell의 역할\n**Reference cell**은 **기준 가스(보통 carrier gas 또는 조성이 일정한 가스)**가 흐르는 쪽입니다.  \n역할은 다음과 같습니다.\n\n- **기준점 제공**: 분석 대상 가스가 들어있는 측정 셀과 비교할 기준을 만듭니다.\n- **공통 변동 상쇄**: 온도 변화, 압력 변화, 유량 변화 같은 외란이 두 셀에 비슷하게 작용하면, 그 영향이 서로 상쇄되어 **순수한 조성 차이만** 더 잘 검출됩니다.\n- **브리지 균형 유지**: 분석 가스가 없을 때는 측정 셀과 reference cell의 열손실이 비슷해 브리지가 균형 상태가 됩니다. 분석 가스가 들어오면 균형이 깨지며 신호가 발생합니다.\n\n### 한 줄 요약\n- **TCD**: 기체의 **열전도도 차이**를 필라멘트 **저항 변화**로 바꾸고, 이를 **전압 신호**로 읽는다.\n- **Reference cell**: 기준 가스를 사용해 **환경 변화는 상쇄하고 조성 차이만 측정**하게 해준다.\n\n원하시면 제가 **Wheatstone bridge 회로 관점**에서 더 그림처럼 설명해드릴게요.",
+          "refusal": null,
+          "annotations": []
+        },
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 68,
+      "completion_tokens": 572,
+      "total_tokens": 640,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "audio_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "audio_tokens": 0,
+        "accepted_prediction_tokens": 0,
+        "rejected_prediction_tokens": 0
+      }
+    },
+    "service_tier": "default",
+    "system_fingerprint": null
+  },
+  "latency_seconds": 5.857754
+}

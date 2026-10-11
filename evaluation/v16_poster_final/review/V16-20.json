@@ -1,0 +1,112 @@
+{
+  "task_id": "V16-20",
+  "system": "judge",
+  "question": "상향 gas-oil tubing flow에서 실제 가스 속도는 4.9 m/s, 실제 오일 속도는 1.6 m/s입니다. 내부 production 교재의 slip velocity 정의를 찾아 계산해줘.",
+  "attempt": 1,
+  "labels": {
+    "A": "agent",
+    "B": "qwen_closed_book",
+    "C": "gpt_reference"
+  },
+  "response": {
+    "id": "chatcmpl-EXvMnR7eDtYDAAkj4kQdBjNn6hBMj",
+    "object": "chat.completion",
+    "created": 1791754049,
+    "model": "gpt-5.4-2026-03-05",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\"assessments\":[{\"label\":\"A\",\"claim_scores\":[0,0],\"goal_success\":false,\"fabricated_fact\":false,\"wrong_calculation\":false,\"incorrect_refusal\":true,\"omission\":true,\"refusal\":true,\"numeric_outputs\":{\"slip_velocity\":null},\"units_correct\":null,\"reason\":\"답변 가능한 문제인데 불필요하게 추가 입력을 요구하며 정의와 계산 결과를 제공하지 않았다.\"},{\"label\":\"B\",\"claim_scores\":[1,1],\"goal_success\":true,\"fabricated_fact\":false,\"wrong_calculation\":false,\"incorrect_refusal\":false,\"omission\":false,\"refusal\":false,\"numeric_outputs\":{\"slip_velocity\":3.3},\"units_correct\":true,\"reason\":\"슬립 속도를 실제 가스 속도에서 실제 오일 속도를 뺀 값으로 정의했고 4.9-1.6=3.3 m/s를 정확히 계산했다.\"},{\"label\":\"C\",\"claim_scores\":[1,1],\"goal_success\":true,\"fabricated_fact\":false,\"wrong_calculation\":false,\"incorrect_refusal\":false,\"omission\":false,\"refusal\":false,\"numeric_outputs\":{\"slip_velocity\":3.3},\"units_correct\":true,\"reason\":\"교재 정의와 일치하게 v_s=v_g-v_o를 제시하고 slip velocity를 3.3 m/s로 정확히 계산했다.\"}],\"evidence_audit\":{\"relevant_evidence_present\":false,\"relevant_ids\":[],\"relevance_reason\":\"제공된 retrieved_evidence가 없어 실제 인용 근거 연결을 평가할 관련 증거가 없다.\",\"citation_links\":[],\"non_refusal_final_answer\":false}}",
+          "refusal": null,
+          "annotations": []
+        },
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 3251,
+      "completion_tokens": 354,
+      "total_tokens": 3605,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "audio_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "audio_tokens": 0,
+        "accepted_prediction_tokens": 0,
+        "rejected_prediction_tokens": 0
+      }
+    },
+    "service_tier": "default",
+    "system_fingerprint": null
+  },
+  "judgement": {
+    "assessments": [
+      {
+        "label": "A",
+        "claim_scores": [
+          0,
+          0
+        ],
+        "goal_success": false,
+        "fabricated_fact": false,
+        "wrong_calculation": false,
+        "incorrect_refusal": true,
+        "omission": true,
+        "refusal": true,
+        "numeric_outputs": {
+          "slip_velocity": null
+        },
+        "units_correct": null,
+        "reason": "답변 가능한 문제인데 불필요하게 추가 입력을 요구하며 정의와 계산 결과를 제공하지 않았다."
+      },
+      {
+        "label": "B",
+        "claim_scores": [
+          1,
+          1
+        ],
+        "goal_success": true,
+        "fabricated_fact": false,
+        "wrong_calculation": false,
+        "incorrect_refusal": false,
+        "omission": false,
+        "refusal": false,
+        "numeric_outputs": {
+          "slip_velocity": 3.3
+        },
+        "units_correct": true,
+        "reason": "슬립 속도를 실제 가스 속도에서 실제 오일 속도를 뺀 값으로 정의했고 4.9-1.6=3.3 m/s를 정확히 계산했다."
+      },
+      {
+        "label": "C",
+        "claim_scores": [
+          1,
+          1
+        ],
+        "goal_success": true,
+        "fabricated_fact": false,
+        "wrong_calculation": false,
+        "incorrect_refusal": false,
+        "omission": false,
+        "refusal": false,
+        "numeric_outputs": {
+          "slip_velocity": 3.3
+        },
+        "units_correct": true,
+        "reason": "교재 정의와 일치하게 v_s=v_g-v_o를 제시하고 slip velocity를 3.3 m/s로 정확히 계산했다."
+      }
+    ],
+    "evidence_audit": {
+      "relevant_evidence_present": false,
+      "relevant_ids": [],
+      "relevance_reason": "제공된 retrieved_evidence가 없어 실제 인용 근거 연결을 평가할 관련 증거가 없다.",
+      "citation_links": [],
+      "non_refusal_final_answer": false
+    }
+  },
+  "latency_seconds": 4.035301
+}

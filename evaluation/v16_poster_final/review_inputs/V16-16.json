@@ -1,0 +1,49 @@
+{
+  "labels": {
+    "A": "agent",
+    "B": "qwen_closed_book",
+    "C": "gpt_reference"
+  },
+  "payload": {
+    "frozen_policy": "# Frozen v16 independent poster pilot policy\n\nPrimary comparison: qwen3:8b closed-book versus the same model inside Petroleum RAG Agent. GPT-5.4 mini is an external reference, not an ablation of RAG. This convenience sample of 24 tasks is a small independent pilot, not a population-level generalization claim.\n\n## Isolation and execution\n\nProduct commit 57af58c44816c3734ea3d5a7aa4e1f08407798ba is fixed. Only evaluation files may change. Existing KB remains 12 documents/18,976 chunks. No ingestion, tuning, reranker or prompt edits. Web disabled. Agent uses the unchanged production from-message parser and GoalExecutionAgent, production six-iteration bound, local qwen3:8b and hybrid retrieval. Agent tools retain production safety checks. Each system receives exactly benchmark.question. No gold enters system prompts. No user clarification replies are supplied in this single-turn pilot; a specific justified clarification can succeed on the two unanswerable tasks.\n\nClosed-book system instruction: \"Answer the user's question accurately and concisely. Do not assume access to private documents or external tools.\"\nQwen direct Ollama chat: think=false, stream=false, temperature=0, num_ctx=8192, num_predict=1024, keep_alive=30m, no seed override. These match the production generation limits. GPT reference: gpt-5.4-mini-2026-03-17, reasoning_effort=none, temperature=0, max_completion_tokens=1024, no tools. Judge: gpt-5.4-2026-03-05, reasoning_effort=none, temperature=0, max_completion_tokens=8000, JSON response, no tools and no fallback. Model availability is checked with GET before freeze; no generative preflight. HTTP transport retries=0. Each task/system request has a durable exclusive attempt marker. Exceptions are retained, not retried. Production internal bounded actions/repair are part of the product, not harness retries.\n\n## Authoring and duplicate screening\n\nAll 24 initial cases and gold were authored from current read-only Chroma spans and independent synthetic arithmetic before accessing historical tasks. Then all local evaluation JSON and backend test strings, plus benchmark/question/task files in historical evaluation Git branches, were screened. Exact normalized comparison and character 3–5-gram TF-IDF cosine (flag >=0.55) are reproducible lexical checks. Bilingual semantic/concept review compares engineering relation AND requested inference, irrespective of lexical score. It is an AI-assisted author review, not a human review or embedding-based similarity test. Generic arithmetic operations necessarily recur and do not alone constitute duplicate tasks. Three independently authored concepts overlapping history were replaced before freeze. Gold/source fields are excluded from response generation. No model inference was used for screening.\n\n## Common scoring\n\nSingle-reviewer AI-assisted semantic adjudication, one triple per task with anonymous shuffled labels (seed 16161012). Source language/style/citations can reveal system characteristics, so blinding is partial. Judge receives frozen required claims, gold, verified source spans, all three answers and any actual retrieved evidence, but no model names or internal success flags. No revision or retry of reviewer calls. Structured claims are scored 1 (full), 0.5 (partial), 0 (missing/wrong). Claim Coverage is the per-task claim mean then macro mean across tasks.\n\nGoal Success requires all essential claims and explicit user requests, no material factual errors, and correct numeric results/units when applicable. Citation is NOT required for closed-book success. Agent citations are a separate supplementary metric, not an extra common-scoring success requirement. Internal achieved is not external Goal Success. Explicit refusal alone cannot satisfy false-premise tasks: reject AND correct. For unanswerable tasks: state non-identifiability, name the specific required inputs in frozen claims, invent no requested value. Generic refusal fails.\n\nHallucination-free means no materially false/unsupported factual claim: fabricated_fact OR wrong_calculation makes it false. incorrect_refusal and omission alone do NOT make it false. A method proposal or acknowledged uncertainty is not fabrication. Reasonable factual explanations beyond gold are not unsupported solely because absent from the excerpts; the reviewer must identify a concrete material error or unsupported assertion. All four flags retained separately. Unnecessary refusal: answerable task with complete input or available KB support, yet declines/does not provide substantive requested answer. Stopped/waiting status alone is not refusal. Denominator=22 answerable tasks, with overall /24 also reported.\n\nNumeric Accuracy denominator=10: all requested numeric outputs within task absolute tolerance 0.01, plus correct/equivalent units. Ratio may be fraction or equivalent percentage after conversion. Numeric values are extracted by reviewer per frozen output key and checked deterministically; missing/wrong units fail. Numbers elsewhere in prose do not count. KB formula accuracy is not substituted for numeric accuracy.\n\nCitation Semantic Support denominator=actual cited claim–evidence links, judged against original run.internal_sources/figures, with supported/partial/unsupported plus short reason; partial counts 0.5. Citation-bearing responses also reported /24. Relevant evidence means at least one actual retrieved span materially supports a required claim, not merely same document/topic. Relevant-evidence-but-failed counts external failure; transition rate is substantive non-refusal answer / relevant-evidence tasks. Fallback success requires used=true AND external Goal Success.\n\nNumeric pipeline reports observed telemetry with absent fields explicitly unknown, never inferred true from a final number. Correct route means direct CALCULATE/ANALYZE for supplied operands, supplied-formula CALCULATE/SIMULATE, or KB RETRIEVE before CALCULATE; flags/status do not substitute for real actions. Pipeline stage counts are not guaranteed nested if telemetry varies.\n\n## Statistics, cost, integrity\n\nAgent minus Qwen paired percentile bootstrap: 10,000 resamples, NumPy seed 16161012. Four metrics: Goal Success, Coverage, Hallucination-free over 24; Numeric Accuracy over ten numeric tasks. Report percentage-point differences and 95% CI. Categories Knowledge=6, Reasoning=4, Calculation=10, Safety=4. Missing infrastructure response prevents FINALIZED and is not silently excluded or presented as a complete scientific comparison.\n\nWall latency covers each invocation including parse and tool work, excluding shared initial dependency loading. Report startup separately; cold first retrieval may still include embedding loading. Agent stage times overlap and are not summed. API costs estimated from actual input/output/cached token counts: GPT mini $0.75/$4.50/$0.075 per million input/output/cached; judge GPT-5.4 $2.50/$15.00/$0.25. Sources: https://developers.openai.com/api/docs/models/gpt-5.4-mini and https://developers.openai.com/api/docs/models/gpt-5.4 . Local inference; hardware/electricity cost not estimated.\n\nFreeze benchmark/policy/manifest/duplicate-check commit before all response generation. Freeze receipt records commit afterward. SHA256 all persistent DB files before/after, plus logical content fingerprint. Verify product tree and main unchanged, exact prompts, 24 responses per system, 24 complete triple judgements, no retries and no tuning. Any failed required check sets FINALIZED=false. Never merge main. Never alter old evaluation files.\n",
+    "task": {
+      "id": "V16-16",
+      "question": "약품 구매비의 가상 모델 C = a*m + b를 사용해줘. a=4.7 USD/kg, m=38 kg, b=26 USD일 때 총 비용 C를 구해줘. 다른 상관식은 필요 없어.",
+      "category": "user_formula",
+      "answerable": true,
+      "required_claims": [
+        "C=204.6 USD."
+      ],
+      "sources": [],
+      "source_document": [],
+      "source_page": [],
+      "supporting_span": [],
+      "numeric_gold": {
+        "C": 204.6
+      },
+      "unit": "USD",
+      "tolerance": 0.01,
+      "formula": "C=a*m+b",
+      "required_variables": {
+        "a": 4.7,
+        "m": 38,
+        "b": 26
+      }
+    },
+    "candidates": [
+      {
+        "label": "A",
+        "answer": "계산을 계속하려면 a 값이(가) 필요합니다. 필요한 값을 알려주세요.",
+        "retrieved_evidence": []
+      },
+      {
+        "label": "B",
+        "answer": "주어진 공식 $ C = a \\cdot m + b $에 따라 계산하면:\n\n$$\nC = 4.7 \\times 38 + 26\n$$\n\n$$\nC = 178.6 + 26 = 204.6 \\, \\text{USD}\n$$\n\n따라서 총 비용 $ C $는 **204.6 USD**입니다."
+      },
+      {
+        "label": "C",
+        "answer": "주어진 식은\n\n\\[\nC = a m + b\n\\]\n\n입니다. 값을 대입하면:\n\n\\[\nC = 4.7 \\times 38 + 26\n\\]\n\n\\[\nC = 178.6 + 26 = 204.6\n\\]\n\n따라서 총 비용은 **204.6 USD** 입니다."
+      }
+    ]
+  }
+}

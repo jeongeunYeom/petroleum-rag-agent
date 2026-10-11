@@ -1,0 +1,98 @@
+{
+  "labels": {
+    "A": "qwen_closed_book",
+    "B": "agent",
+    "C": "gpt_reference"
+  },
+  "payload": {
+    "frozen_policy": "# Frozen v16 independent poster pilot policy\n\nPrimary comparison: qwen3:8b closed-book versus the same model inside Petroleum RAG Agent. GPT-5.4 mini is an external reference, not an ablation of RAG. This convenience sample of 24 tasks is a small independent pilot, not a population-level generalization claim.\n\n## Isolation and execution\n\nProduct commit 57af58c44816c3734ea3d5a7aa4e1f08407798ba is fixed. Only evaluation files may change. Existing KB remains 12 documents/18,976 chunks. No ingestion, tuning, reranker or prompt edits. Web disabled. Agent uses the unchanged production from-message parser and GoalExecutionAgent, production six-iteration bound, local qwen3:8b and hybrid retrieval. Agent tools retain production safety checks. Each system receives exactly benchmark.question. No gold enters system prompts. No user clarification replies are supplied in this single-turn pilot; a specific justified clarification can succeed on the two unanswerable tasks.\n\nClosed-book system instruction: \"Answer the user's question accurately and concisely. Do not assume access to private documents or external tools.\"\nQwen direct Ollama chat: think=false, stream=false, temperature=0, num_ctx=8192, num_predict=1024, keep_alive=30m, no seed override. These match the production generation limits. GPT reference: gpt-5.4-mini-2026-03-17, reasoning_effort=none, temperature=0, max_completion_tokens=1024, no tools. Judge: gpt-5.4-2026-03-05, reasoning_effort=none, temperature=0, max_completion_tokens=8000, JSON response, no tools and no fallback. Model availability is checked with GET before freeze; no generative preflight. HTTP transport retries=0. Each task/system request has a durable exclusive attempt marker. Exceptions are retained, not retried. Production internal bounded actions/repair are part of the product, not harness retries.\n\n## Authoring and duplicate screening\n\nAll 24 initial cases and gold were authored from current read-only Chroma spans and independent synthetic arithmetic before accessing historical tasks. Then all local evaluation JSON and backend test strings, plus benchmark/question/task files in historical evaluation Git branches, were screened. Exact normalized comparison and character 3–5-gram TF-IDF cosine (flag >=0.55) are reproducible lexical checks. Bilingual semantic/concept review compares engineering relation AND requested inference, irrespective of lexical score. It is an AI-assisted author review, not a human review or embedding-based similarity test. Generic arithmetic operations necessarily recur and do not alone constitute duplicate tasks. Three independently authored concepts overlapping history were replaced before freeze. Gold/source fields are excluded from response generation. No model inference was used for screening.\n\n## Common scoring\n\nSingle-reviewer AI-assisted semantic adjudication, one triple per task with anonymous shuffled labels (seed 16161012). Source language/style/citations can reveal system characteristics, so blinding is partial. Judge receives frozen required claims, gold, verified source spans, all three answers and any actual retrieved evidence, but no model names or internal success flags. No revision or retry of reviewer calls. Structured claims are scored 1 (full), 0.5 (partial), 0 (missing/wrong). Claim Coverage is the per-task claim mean then macro mean across tasks.\n\nGoal Success requires all essential claims and explicit user requests, no material factual errors, and correct numeric results/units when applicable. Citation is NOT required for closed-book success. Agent citations are a separate supplementary metric, not an extra common-scoring success requirement. Internal achieved is not external Goal Success. Explicit refusal alone cannot satisfy false-premise tasks: reject AND correct. For unanswerable tasks: state non-identifiability, name the specific required inputs in frozen claims, invent no requested value. Generic refusal fails.\n\nHallucination-free means no materially false/unsupported factual claim: fabricated_fact OR wrong_calculation makes it false. incorrect_refusal and omission alone do NOT make it false. A method proposal or acknowledged uncertainty is not fabrication. Reasonable factual explanations beyond gold are not unsupported solely because absent from the excerpts; the reviewer must identify a concrete material error or unsupported assertion. All four flags retained separately. Unnecessary refusal: answerable task with complete input or available KB support, yet declines/does not provide substantive requested answer. Stopped/waiting status alone is not refusal. Denominator=22 answerable tasks, with overall /24 also reported.\n\nNumeric Accuracy denominator=10: all requested numeric outputs within task absolute tolerance 0.01, plus correct/equivalent units. Ratio may be fraction or equivalent percentage after conversion. Numeric values are extracted by reviewer per frozen output key and checked deterministically; missing/wrong units fail. Numbers elsewhere in prose do not count. KB formula accuracy is not substituted for numeric accuracy.\n\nCitation Semantic Support denominator=actual cited claim–evidence links, judged against original run.internal_sources/figures, with supported/partial/unsupported plus short reason; partial counts 0.5. Citation-bearing responses also reported /24. Relevant evidence means at least one actual retrieved span materially supports a required claim, not merely same document/topic. Relevant-evidence-but-failed counts external failure; transition rate is substantive non-refusal answer / relevant-evidence tasks. Fallback success requires used=true AND external Goal Success.\n\nNumeric pipeline reports observed telemetry with absent fields explicitly unknown, never inferred true from a final number. Correct route means direct CALCULATE/ANALYZE for supplied operands, supplied-formula CALCULATE/SIMULATE, or KB RETRIEVE before CALCULATE; flags/status do not substitute for real actions. Pipeline stage counts are not guaranteed nested if telemetry varies.\n\n## Statistics, cost, integrity\n\nAgent minus Qwen paired percentile bootstrap: 10,000 resamples, NumPy seed 16161012. Four metrics: Goal Success, Coverage, Hallucination-free over 24; Numeric Accuracy over ten numeric tasks. Report percentage-point differences and 95% CI. Categories Knowledge=6, Reasoning=4, Calculation=10, Safety=4. Missing infrastructure response prevents FINALIZED and is not silently excluded or presented as a complete scientific comparison.\n\nWall latency covers each invocation including parse and tool work, excluding shared initial dependency loading. Report startup separately; cold first retrieval may still include embedding loading. Agent stage times overlap and are not summed. API costs estimated from actual input/output/cached token counts: GPT mini $0.75/$4.50/$0.075 per million input/output/cached; judge GPT-5.4 $2.50/$15.00/$0.25. Sources: https://developers.openai.com/api/docs/models/gpt-5.4-mini and https://developers.openai.com/api/docs/models/gpt-5.4 . Local inference; hardware/electricity cost not estimated.\n\nFreeze benchmark/policy/manifest/duplicate-check commit before all response generation. Freeze receipt records commit afterward. SHA256 all persistent DB files before/after, plus logical content fingerprint. Verify product tree and main unchanged, exact prompts, 24 responses per system, 24 complete triple judgements, no retries and no tuning. Any failed required check sets FINALIZED=false. Never merge main. Never alter old evaluation files.\n",
+    "task": {
+      "id": "V16-05",
+      "question": "Coiled tubing에서 동일한 bend-cycle을 수명 후반에 받는 경우와 초기에 받는 경우를 같은 손상으로 합산해도 될까요? 교재의 피로 수명 설명을 근거로 답해줘.",
+      "category": "knowledge",
+      "answerable": true,
+      "required_claims": [
+        "No, fatigue damage cannot generally be applied linearly to life prediction.",
+        "Equivalent bend loading later in life may cause greater fatigue damage than early loading."
+      ],
+      "sources": [
+        {
+          "source_document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+          "source_page": 718,
+          "supporting_span": "sed with low internal pressure load-\ning.  In  addition,  the  magnitude  of  fatigue  damage  realized  from  a  given  bend-cycle  event\ncannot be applied to working-life predictions in a linear fashion. Evidence from the volume of\ntesting suggests that a given bend-cycle load applied later in the tube working life may cause\ngreater fatigue damage than the equivalent bend-cycle load applied earlier in the tube working\nlife. The bend-cycle fatigue data obtained from the test fixtures has also provided insights into\nseveral other areas of CT service behavior. These items are discussed next.\nChapter 16—Coiled-Tubing Well Intervention and Drilling Operations\nII-711\nSHORTMAN UTT\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 15\nAuthor",
+          "sqlite_row": 16490
+        }
+      ],
+      "source_document": [
+        "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf"
+      ],
+      "source_page": [
+        718
+      ],
+      "supporting_span": [
+        "sed with low internal pressure load-\ning.  In  addition,  the  magnitude  of  fatigue  damage  realized  from  a  given  bend-cycle  event\ncannot be applied to working-life predictions in a linear fashion. Evidence from the volume of\ntesting suggests that a given bend-cycle load applied later in the tube working life may cause\ngreater fatigue damage than the equivalent bend-cycle load applied earlier in the tube working\nlife. The bend-cycle fatigue data obtained from the test fixtures has also provided insights into\nseveral other areas of CT service behavior. These items are discussed next.\nChapter 16—Coiled-Tubing Well Intervention and Drilling Operations\nII-711\nSHORTMAN UTT\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 15\nAuthor"
+      ],
+      "numeric_gold": null,
+      "unit": null,
+      "tolerance": null,
+      "formula": null,
+      "required_variables": {}
+    },
+    "candidates": [
+      {
+        "label": "A",
+        "answer": "교재의 피로 수명 설명에 따르면, **동일한 변형(예: 동일한 휘어짐 주기, bend-cycle)이 수명 후반에 받는 경우와 초기에 받는 경우를 같은 손상으로 합산해도 될까요?**라는 질문에 대한 정답은 **아니라**입니다.\n\n피로 수명은 **변형의 누적**에 따라 발생하며, **초기에는 변형이 작고 손상이 미미**하나, **수명 후반에는 변형이 커지고 손상이 급격히 증가**합니다. 따라서 **같은 변형이 초기와 후반에 걸쳐 발생할 경우, 후반에 발생한 변형은 더 큰 손상**을 유발합니다. 이는 **피로 수명의 비선형성**과 **변형 누적의 비례 관계**를 반영합니다.\n\n따라서, **같은 bend-cycle을 초기와 후반에 받는 경우를 같은 손상으로 합산해도 될 수 없습니다**."
+      },
+      {
+        "label": "B",
+        "answer": "현재 검색된 근거에서 다음 요청을 직접 뒷받침하는 관계를 검증하지 못했습니다: Coiled tubing에서 동일한 bend-cycle을 수명 후반에 받는 경우와 초기에 받는 경우를 같은 손상으로 합산해도 될까요; 교재의 피로 수명 설명을 근거로 답해줘",
+        "retrieved_evidence": [
+          {
+            "evidence_id": "KB1",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 718,
+            "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p718:c4",
+            "score": 0.01639344,
+            "excerpt": "sed with low internal pressure load-\ning.  In  addition,  the  magnitude  of  fatigue  damage  realized  from  a  given  bend-cycle  event\ncannot be applied to working-life predictions in a linear fashion. Evidence from the volume of\ntesting suggests that a given bend-cycle load applied later in the tube working life may cause\ngreater fatigue damage than the equivalent bend-cycle load applied earlier in the tube working\nlife. The bend-cycle fatigue data obtained from the test fixtures has also provided insights into\nseveral other areas of CT service behavior. These items are discussed next.\nChapter 16—Coiled-Tubing Well Intervention and Drilling Operations\nII-711\nSHORTMAN UTT\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 15\nAuthor"
+          },
+          {
+            "evidence_id": "KB2",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 728,
+            "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p728:c1",
+            "score": 0.015625,
+            "excerpt": "includes  exterior  tube\nbody wear, interior and exterior corrosion (atmospheric and industrial), or nicks, cuts, or scar-\nring resulting from contact with surface handling equipment. However, research is under way\nto develop models that can estimate the influence of surface defects. Such a model exists and\nis currently being refined.\n• The implementation of a theoretical approach must be in concert with a routine capable of\nestimating  the  varying  internal-pressure  loading  at  the  point  of  bend  cycling.  This  requires  a\nreliable record of not only the depth-pressure history of a string throughout its use, but also a\nrecord of any string modification (section splicing and/or removal). This requires investment in\nsurface  recording  instrumentation  and  sophisticated  data-collection  systems,  such  as  portable\ncomputers, as well as complicated tubing management software systems for tracking and main-\ntaining up-to-date records of the compiled tubing working life.\nFig. 16.20—Bend-cycle fatigue-life comparison for various CT OD cases.\nChapter 16—Coiled-Tubing Well Intervention and Drilling Operations\nII-721\nSHORTMAN UTT\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 15\nAuthor"
+          },
+          {
+            "evidence_id": "KB3",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 747,
+            "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p747:c2",
+            "score": 0.01639344,
+            "excerpt": "the 1997 SPE/IADC Drilling Conference, Amsterdam,\n4–6 March.\nElsborg, C., Carter, J., and Cox, R.: “High Penetration Rate Drilling with Coiled Tubing,” pa-\nper  SPE  37074  presented  at  the  1996  SPE  International  Conference  on  Horizontal  Well\nTechnology, Calgary, 18–20 November.\nFeechan, M., Makselon, C., and Nolet, S.: “Field Experience With Composite Coiled Tubing,”\npaper SPE 82045 presented at the 2003 SPE/ICoTA Coiled Tubing Conference, Houston, 8–\n9 April.\nFlowers, J.K. and Nessim, A.E.: “Solutions to Coiled-Tubing Depth Control,” paper SPE 74833\npresented at the 2002 SPE/ICoTA Coiled Tubing Conference and Exhibition, Houston, 9–10\nApril.\nFlynn, T.S. and Jahn, B.: “Vibration Analysis for Coiled-Tubing Drilling in Prudhoe Bay,” pa-\nper SPE 60751 presented at the 2000 SPE/ICoTA Coiled Tubing Roundtable, Houston, 5–6\nApril.\nForgenie,  V.H.  et  al.:  “Coiled-Tubing  Fishing  Operations  Utilize  a  First-Time  Technique  To\nStrip Over and Recover 9,500 Feet of Stuck Slickline Wire,” paper SPE 30678 presented at\nthe 1995 SPE Annual Technical Conference and Exhibition, Dallas, 22–25 October.\nGoing, W.S.: “Inhibitor Treatment by Coiled-Tubing Unit Can Now Be Performed While"
+          },
+          {
+            "evidence_id": "KB4",
+            "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+            "page": 198,
+            "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p198:c0",
+            "score": 0.015625,
+            "excerpt": "62\n(b) As a second production string within an existing tubing (Figure 47). This allows\ngas lift to be introduced to aid well production without having to mobilise a drilling\nrig to recomplete the well. This does however require that a polished bore receptacle,\ninto which the coiled tubing seal assembly can be located, has included in the original\ntubing string.  The advantage of this approach is that it is probably the cheapest\nmethods of installing gas lift in a well where the casing integrity has been lost.\n                       \nProducing Formation\nPerforations\nGas lift valve mounted\nin mandrel\nSurface Controlled Subsurface\nSafety Valve ( SCSSSV)\nControl line hanger\nCoiled tubing hanger\nControl line for SCSSSV\n2\" coiled tubing\nOrifice\nLocator seal assembly\nPolished bore receptacle\nGas injection to tubing/ \ncoiled tubing annuls\nProduction to separator\n(c) Alternatively, the orifice valve can be omitted with the coiled tubing suspended\nfrom its hanger - the gas injection taking place via the coiled tubing’s open end.\n12. INTERMITTENT GAS LIFT\nAll the above has discussed continuous flow gas lift.  The intrinsic flexibility of the\ngas lift concept allows it to be adapted to a wide"
+          },
+          {
+            "evidence_id": "KB5",
+            "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+            "page": 103,
+            "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p103:c0",
+            "score": 0.01515152,
+            "excerpt": "Department of Petroleum Engineering,  Heriot-Watt University\n39\n2\nSelection of Artificial Lift Types2\n7.6. New Technology\n7.6.1. Coiled Tubing Deployed ESP’s\nThe completion designs discussed so far within this section on ESP’s all employ the\npump installed as part of a conventional completion string with the power cable\nattached to the outside of the tubing.  Replacement of any part of the ESP following\na failure requires a workover.  The process of ESP installation and recovery can be\nspeeded up and made more efficient by installing the ESP at the end of a coiled tubing\n(see Figure 26).  The set up is “conventional” in the sense that the cable is mounted\non the outside of the coiled tubing while the produced fluids flow to the surface via\nthe inside of the coiled tubing.  A dual packer arrangement is required with ESP\narrangement shown.  The produced fluid is pumped into the casing via the annulus,\nflows passed the seal and electric motor sections (cooling) and then back into the\ncoiled tubing via a cross-over mounted below the upper packer.\nPower Cable\n(Mounted on Reel)\nCoil Tubing Reel\nPower Cable Clamped\nto Coiled Tubing \n(Cable Cannot Support it’s Own Weight)\nUpper Packer\nProd"
+          }
+        ]
+      },
+      {
+        "label": "C",
+        "answer": "일반적으로 **같은 손상으로 단순 합산하면 안 됩니다.**  \n교재의 피로 수명 설명을 기준으로 보면, **bend-cycle의 손상은 “언제” 받았는지보다 “그 사이클이 어느 응력/변형 수준에서 발생했는지”와 “누적 손상 상태가 어떤지”**에 의해 달라집니다.\n\n핵심은 다음입니다.\n\n1. **피로 손상은 누적 개념**\n   - 교재의 피로 수명 설명에서는 보통 **S-N 곡선**이나 **Miner’s rule(선형 누적 손상)**처럼, 각 사이클이 일정한 손상을 누적한다고 봅니다.\n   - 따라서 단순히 “초기에 받은 bend-cycle 1회”와 “수명 후반에 받은 bend-cycle 1회”를 **무조건 동일한 손상**으로 보는 것은 엄밀하지 않습니다.\n\n2. **초기와 후반의 상태가 다름**\n   - 수명 초기는 재료가 거의 손상되지 않은 상태라서, 같은 bend-cycle이라도 상대적으로 덜 민감하게 보일 수 있습니다.\n   - 수명 후반에는 이미 미세균열, 경화/연화, 잔류손상 등이 누적되어 있어 **같은 사이클도 더 큰 추가 손상**을 줄 수 있습니다.\n   - 즉, **순서 효과(sequence effect)**가 있을 수 있습니다.\n\n3. **교재의 단순 피로 모델은 보통 순서를 무시**\n   - 많은 교재에서는 계산 편의를 위해 **각 사이클의 손상을 독립적이고 동일하게 취급**하는 선형 누적 모델을 사용합니다.\n   - 이 경우에는 “초기든 후반이든 같은 크기의 bend-cycle이면 같은 손상”으로 근사할 수 있습니다.\n   - 하지만 이는 **근사 모델**이지, 실제 재료 거동을 완전히 반영하는 것은 아닙니다.\n\n### 결론\n- **정밀하게는:** 초기에 받은 bend-cycle과 수명 후반에 받은 bend-cycle을 **같은 손상으로 단순 합산하면 안 됩니다.**\n- **실무적 근사로는:** 교재의 **선형 누적 피로 모델(Miner’s rule)**을 쓰는 경우, 같은 크기의 bend-cycle을 **동일 손상으로 취급**할 수 있습니다.\n- 다만 coiled tubing처럼 반복 굽힘과 국부 소성, 잔류응력이 중요한 경우에는 **후반 사이클이 더 치명적일 수 있어** 순서 효과를 무시하면 보수성 또는 정확도가 달라질 수 있습니다.\n\n원하시면 제가 이걸 **교재식 표현(예: Miner’s rule, S-N curve, cumulative damage)**으로 더 짧게 정리해드릴게요."
+      }
+    ]
+  }
+}

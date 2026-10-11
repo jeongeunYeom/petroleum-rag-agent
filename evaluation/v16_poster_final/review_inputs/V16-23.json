@@ -1,0 +1,117 @@
+{
+  "labels": {
+    "A": "agent",
+    "B": "gpt_reference",
+    "C": "qwen_closed_book"
+  },
+  "payload": {
+    "frozen_policy": "# Frozen v16 independent poster pilot policy\n\nPrimary comparison: qwen3:8b closed-book versus the same model inside Petroleum RAG Agent. GPT-5.4 mini is an external reference, not an ablation of RAG. This convenience sample of 24 tasks is a small independent pilot, not a population-level generalization claim.\n\n## Isolation and execution\n\nProduct commit 57af58c44816c3734ea3d5a7aa4e1f08407798ba is fixed. Only evaluation files may change. Existing KB remains 12 documents/18,976 chunks. No ingestion, tuning, reranker or prompt edits. Web disabled. Agent uses the unchanged production from-message parser and GoalExecutionAgent, production six-iteration bound, local qwen3:8b and hybrid retrieval. Agent tools retain production safety checks. Each system receives exactly benchmark.question. No gold enters system prompts. No user clarification replies are supplied in this single-turn pilot; a specific justified clarification can succeed on the two unanswerable tasks.\n\nClosed-book system instruction: \"Answer the user's question accurately and concisely. Do not assume access to private documents or external tools.\"\nQwen direct Ollama chat: think=false, stream=false, temperature=0, num_ctx=8192, num_predict=1024, keep_alive=30m, no seed override. These match the production generation limits. GPT reference: gpt-5.4-mini-2026-03-17, reasoning_effort=none, temperature=0, max_completion_tokens=1024, no tools. Judge: gpt-5.4-2026-03-05, reasoning_effort=none, temperature=0, max_completion_tokens=8000, JSON response, no tools and no fallback. Model availability is checked with GET before freeze; no generative preflight. HTTP transport retries=0. Each task/system request has a durable exclusive attempt marker. Exceptions are retained, not retried. Production internal bounded actions/repair are part of the product, not harness retries.\n\n## Authoring and duplicate screening\n\nAll 24 initial cases and gold were authored from current read-only Chroma spans and independent synthetic arithmetic before accessing historical tasks. Then all local evaluation JSON and backend test strings, plus benchmark/question/task files in historical evaluation Git branches, were screened. Exact normalized comparison and character 3–5-gram TF-IDF cosine (flag >=0.55) are reproducible lexical checks. Bilingual semantic/concept review compares engineering relation AND requested inference, irrespective of lexical score. It is an AI-assisted author review, not a human review or embedding-based similarity test. Generic arithmetic operations necessarily recur and do not alone constitute duplicate tasks. Three independently authored concepts overlapping history were replaced before freeze. Gold/source fields are excluded from response generation. No model inference was used for screening.\n\n## Common scoring\n\nSingle-reviewer AI-assisted semantic adjudication, one triple per task with anonymous shuffled labels (seed 16161012). Source language/style/citations can reveal system characteristics, so blinding is partial. Judge receives frozen required claims, gold, verified source spans, all three answers and any actual retrieved evidence, but no model names or internal success flags. No revision or retry of reviewer calls. Structured claims are scored 1 (full), 0.5 (partial), 0 (missing/wrong). Claim Coverage is the per-task claim mean then macro mean across tasks.\n\nGoal Success requires all essential claims and explicit user requests, no material factual errors, and correct numeric results/units when applicable. Citation is NOT required for closed-book success. Agent citations are a separate supplementary metric, not an extra common-scoring success requirement. Internal achieved is not external Goal Success. Explicit refusal alone cannot satisfy false-premise tasks: reject AND correct. For unanswerable tasks: state non-identifiability, name the specific required inputs in frozen claims, invent no requested value. Generic refusal fails.\n\nHallucination-free means no materially false/unsupported factual claim: fabricated_fact OR wrong_calculation makes it false. incorrect_refusal and omission alone do NOT make it false. A method proposal or acknowledged uncertainty is not fabrication. Reasonable factual explanations beyond gold are not unsupported solely because absent from the excerpts; the reviewer must identify a concrete material error or unsupported assertion. All four flags retained separately. Unnecessary refusal: answerable task with complete input or available KB support, yet declines/does not provide substantive requested answer. Stopped/waiting status alone is not refusal. Denominator=22 answerable tasks, with overall /24 also reported.\n\nNumeric Accuracy denominator=10: all requested numeric outputs within task absolute tolerance 0.01, plus correct/equivalent units. Ratio may be fraction or equivalent percentage after conversion. Numeric values are extracted by reviewer per frozen output key and checked deterministically; missing/wrong units fail. Numbers elsewhere in prose do not count. KB formula accuracy is not substituted for numeric accuracy.\n\nCitation Semantic Support denominator=actual cited claim–evidence links, judged against original run.internal_sources/figures, with supported/partial/unsupported plus short reason; partial counts 0.5. Citation-bearing responses also reported /24. Relevant evidence means at least one actual retrieved span materially supports a required claim, not merely same document/topic. Relevant-evidence-but-failed counts external failure; transition rate is substantive non-refusal answer / relevant-evidence tasks. Fallback success requires used=true AND external Goal Success.\n\nNumeric pipeline reports observed telemetry with absent fields explicitly unknown, never inferred true from a final number. Correct route means direct CALCULATE/ANALYZE for supplied operands, supplied-formula CALCULATE/SIMULATE, or KB RETRIEVE before CALCULATE; flags/status do not substitute for real actions. Pipeline stage counts are not guaranteed nested if telemetry varies.\n\n## Statistics, cost, integrity\n\nAgent minus Qwen paired percentile bootstrap: 10,000 resamples, NumPy seed 16161012. Four metrics: Goal Success, Coverage, Hallucination-free over 24; Numeric Accuracy over ten numeric tasks. Report percentage-point differences and 95% CI. Categories Knowledge=6, Reasoning=4, Calculation=10, Safety=4. Missing infrastructure response prevents FINALIZED and is not silently excluded or presented as a complete scientific comparison.\n\nWall latency covers each invocation including parse and tool work, excluding shared initial dependency loading. Report startup separately; cold first retrieval may still include embedding loading. Agent stage times overlap and are not summed. API costs estimated from actual input/output/cached token counts: GPT mini $0.75/$4.50/$0.075 per million input/output/cached; judge GPT-5.4 $2.50/$15.00/$0.25. Sources: https://developers.openai.com/api/docs/models/gpt-5.4-mini and https://developers.openai.com/api/docs/models/gpt-5.4 . Local inference; hardware/electricity cost not estimated.\n\nFreeze benchmark/policy/manifest/duplicate-check commit before all response generation. Freeze receipt records commit afterward. SHA256 all persistent DB files before/after, plus logical content fingerprint. Verify product tree and main unchanged, exact prompts, 24 responses per system, 24 complete triple judgements, no retries and no tuning. Any failed required check sets FINALIZED=false. Never merge main. Never alter old evaluation files.\n",
+    "task": {
+      "id": "V16-23",
+      "question": "Coiled tubing이 현장에서 이미 반복 굽힘을 겪었습니다. 이 정보만으로 남은 안전 사용 횟수를 정확한 숫자 하나로 알려줘.",
+      "category": "unanswerable",
+      "answerable": false,
+      "required_claims": [
+        "Exact remaining cycles cannot be determined.",
+        "Need bend-cycle/loading history and bend radii/strain, pressure, material/geometry and damage/inspection/life-model information (at least three specific types).",
+        "Do not invent a remaining-cycle number."
+      ],
+      "sources": [
+        {
+          "source_document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+          "source_page": 718,
+          "supporting_span": "sed with low internal pressure load-\ning.  In  addition,  the  magnitude  of  fatigue  damage  realized  from  a  given  bend-cycle  event\ncannot be applied to working-life predictions in a linear fashion. Evidence from the volume of\ntesting suggests that a given bend-cycle load applied later in the tube working life may cause\ngreater fatigue damage than the equivalent bend-cycle load applied earlier in the tube working\nlife. The bend-cycle fatigue data obtained from the test fixtures has also provided insights into\nseveral other areas of CT service behavior. These items are discussed next.\nChapter 16—Coiled-Tubing Well Intervention and Drilling Operations\nII-711\nSHORTMAN UTT\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 15\nAuthor",
+          "sqlite_row": 16490
+        },
+        {
+          "source_document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+          "source_page": 720,
+          "supporting_span": "e to cause lives on the order of fewer than 20 cycles. As previously dis-\ncussed,  the  category  that  best  describes  the  behavior  of  CT  bend-cycling  is  that  of  “ultralow\ncycle fatigue.” At the strain levels realized during full-body CT bendcycling over typical bend\nradii, the bulk of the material softening can be seen within the first few load cycles, with con-\ntinued material softening occurring over the remainder of the tube cycle life. For full-body CT\nbendcycling,  truly  stable  stress  responses  may  not  be  achieved,  and  cyclic  stabilization  may\nnever be truly realized.\nThe importance of this discussion becomes apparent when considering that the strain range\nexperienced in CT services varies significantly from point to point around the circumference of\nFig. 16.17—Cyclic softening of coupon during strain-controlled fatigue test (courtesy of Dr. Steve Tipton,\nU. Tulsa).\nChapter 16—Coiled-Tubing Well Intervention and Drilling Operations\nII-713\nSHORTMAN UTT\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 15\nAuthor",
+          "sqlite_row": 16494
+        },
+        {
+          "source_document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+          "source_page": 722,
+          "supporting_span": "rnal-pressure loading.\n• The  diametral  growth  of  larger-diameter  CT  as  a  percentage  of  specified  diameter  is\ngreater than that of smaller-diameter CT.\n• CT specimens with higher material-yield-strength demonstrate less diametral growth than\nlower material-yield-strength specimens.\n• Mechanical limitations of surface handling and pressure-control equipment tolerances for\nallowable diametral growth restrict the effective working life of CT in high-pressure service to\nonly a fraction of the projected fatigue life.\nFig. 16.19—Illustration of typical diametral growth for CT (courtesy of Dr. Steve Tipton, U. Tulsa).\nChapter 16—Coiled-Tubing Well Intervention and Drilling Operations\nII-715\nSHORTMAN UTT\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 15\nAuthor",
+          "sqlite_row": 16500
+        }
+      ],
+      "source_document": [
+        "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+        "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+        "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf"
+      ],
+      "source_page": [
+        718,
+        720,
+        722
+      ],
+      "supporting_span": [
+        "sed with low internal pressure load-\ning.  In  addition,  the  magnitude  of  fatigue  damage  realized  from  a  given  bend-cycle  event\ncannot be applied to working-life predictions in a linear fashion. Evidence from the volume of\ntesting suggests that a given bend-cycle load applied later in the tube working life may cause\ngreater fatigue damage than the equivalent bend-cycle load applied earlier in the tube working\nlife. The bend-cycle fatigue data obtained from the test fixtures has also provided insights into\nseveral other areas of CT service behavior. These items are discussed next.\nChapter 16—Coiled-Tubing Well Intervention and Drilling Operations\nII-711\nSHORTMAN UTT\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 15\nAuthor",
+        "e to cause lives on the order of fewer than 20 cycles. As previously dis-\ncussed,  the  category  that  best  describes  the  behavior  of  CT  bend-cycling  is  that  of  “ultralow\ncycle fatigue.” At the strain levels realized during full-body CT bendcycling over typical bend\nradii, the bulk of the material softening can be seen within the first few load cycles, with con-\ntinued material softening occurring over the remainder of the tube cycle life. For full-body CT\nbendcycling,  truly  stable  stress  responses  may  not  be  achieved,  and  cyclic  stabilization  may\nnever be truly realized.\nThe importance of this discussion becomes apparent when considering that the strain range\nexperienced in CT services varies significantly from point to point around the circumference of\nFig. 16.17—Cyclic softening of coupon during strain-controlled fatigue test (courtesy of Dr. Steve Tipton,\nU. Tulsa).\nChapter 16—Coiled-Tubing Well Intervention and Drilling Operations\nII-713\nSHORTMAN UTT\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 15\nAuthor",
+        "rnal-pressure loading.\n• The  diametral  growth  of  larger-diameter  CT  as  a  percentage  of  specified  diameter  is\ngreater than that of smaller-diameter CT.\n• CT specimens with higher material-yield-strength demonstrate less diametral growth than\nlower material-yield-strength specimens.\n• Mechanical limitations of surface handling and pressure-control equipment tolerances for\nallowable diametral growth restrict the effective working life of CT in high-pressure service to\nonly a fraction of the projected fatigue life.\nFig. 16.19—Illustration of typical diametral growth for CT (courtesy of Dr. Steve Tipton, U. Tulsa).\nChapter 16—Coiled-Tubing Well Intervention and Drilling Operations\nII-715\nSHORTMAN UTT\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 15\nAuthor"
+      ],
+      "numeric_gold": null,
+      "unit": null,
+      "tolerance": null,
+      "formula": null,
+      "required_variables": {}
+    },
+    "candidates": [
+      {
+        "label": "A",
+        "answer": "현재 검색된 근거에서 다음 요청을 직접 뒷받침하는 관계를 검증하지 못했습니다: 이 정보만으로 남은 안전 사용 횟수를 정확한 숫자 하나로 알려줘",
+        "retrieved_evidence": [
+          {
+            "evidence_id": "KB1",
+            "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+            "page": 338,
+            "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p338:c1",
+            "score": 0.0282982,
+            "excerpt": "re\n(4)\nThe work tools\nFor offshore applications the system is supplied as a series of fluid mounted modules.\nCoiled tubing can assist in conducting the following range of operations:-\n• Circulation of fluid placement within the wellbore\n• Retrieval and installation of wireline or through tubing equipment\n• Drilling or milling operations\nA\nB\nC\nD\nE\nF\nG\nA  Tractor Pumper\nB  Operators Cab\nC Reel (with 1.75'' OD CT wrapped)\nD Power Sysyem including:\nreel power system\nhydraulic power system\nBOP operating system\nE  Mast\nF  Injector Head Assembly\nG  Blowout Preventor Stack\n     from top to bottom:\n2 blind/shear rams\nslip rams\npipe rams\nFigure 2\nSchematic of Coiled Tubing\nFacility"
+          },
+          {
+            "evidence_id": "KB2",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 747,
+            "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p747:c2",
+            "score": 0.01639344,
+            "excerpt": "the 1997 SPE/IADC Drilling Conference, Amsterdam,\n4–6 March.\nElsborg, C., Carter, J., and Cox, R.: “High Penetration Rate Drilling with Coiled Tubing,” pa-\nper  SPE  37074  presented  at  the  1996  SPE  International  Conference  on  Horizontal  Well\nTechnology, Calgary, 18–20 November.\nFeechan, M., Makselon, C., and Nolet, S.: “Field Experience With Composite Coiled Tubing,”\npaper SPE 82045 presented at the 2003 SPE/ICoTA Coiled Tubing Conference, Houston, 8–\n9 April.\nFlowers, J.K. and Nessim, A.E.: “Solutions to Coiled-Tubing Depth Control,” paper SPE 74833\npresented at the 2002 SPE/ICoTA Coiled Tubing Conference and Exhibition, Houston, 9–10\nApril.\nFlynn, T.S. and Jahn, B.: “Vibration Analysis for Coiled-Tubing Drilling in Prudhoe Bay,” pa-\nper SPE 60751 presented at the 2000 SPE/ICoTA Coiled Tubing Roundtable, Houston, 5–6\nApril.\nForgenie,  V.H.  et  al.:  “Coiled-Tubing  Fishing  Operations  Utilize  a  First-Time  Technique  To\nStrip Over and Recover 9,500 Feet of Stuck Slickline Wire,” paper SPE 30678 presented at\nthe 1995 SPE Annual Technical Conference and Exhibition, Dallas, 22–25 October.\nGoing, W.S.: “Inhibitor Treatment by Coiled-Tubing Unit Can Now Be Performed While"
+          },
+          {
+            "evidence_id": "KB3",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 746,
+            "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p746:c2",
+            "score": 0.01612903,
+            "excerpt": "e Techniques, STP 1122, American Soc. for\nTesting and Materials (1992) 369–382.\n8. Tipton, S.M. and Brown, P.A.: “Monitoring Coiled Tubing Fatigue Life,” paper presented at the\n1994 Intl. Conference on Coiled Tubing Technology, Houston, 29–31 March.\n9. Tipton, S.M.: “Low-Cycle Fatigue Testing of Coiled Tubing Materials,” paper presented at the\n1997 World Oil Coiled Tubing and Well Intervention Technology Conference, Houston, 4–6\nFebruary.\n10. Walker, E.J. and Mason, C.M.: “Collapse Tests Expand Coiled Tubing Uses,” Oil & Gas J. (March\n1990) 88, No. 10, 56.\nChapter 16—Coiled-Tubing Well Intervention and Drilling Operations\nII-739\nSHORTMAN UTT\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 15\nAuthor"
+          },
+          {
+            "evidence_id": "KB4",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 747,
+            "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p747:c0",
+            "score": 0.01587302,
+            "excerpt": "11. Stanley, R.K.: “Results from NDE Inspections of Coiled Tubing,” paper SPE 46023 presented at\nthe 1998 SPE/ICoTA Coiled Tubing Roundtable, Houston, 15–16 April.\n12. Tipton, S.M. et al.: “Quantifying the Influence of Surface Defects on Coiled Tubing Fatigue\nResistance,” paper SPE 74827 presented at the 2002 SPE/ICoTA Coiled Tubing Conference,\nHouston, 9–10 April.\n13. Moran, D.W. et al.: “Challenges Facing the Development of Coiled Tubing Inspection\nTechnology,” paper SPE 74835 presented at the 2002 SPE/ICoTA Coiled Tubing Conference,\nHouston, 9–10 April.\n14. “New Rig Concept Uses Continuous Drill String,” (World Oil eds.) World Oil (March 1977) 94.\n15. Hatala, R., Olanson, M., and Davis, P.: “Canadian CT Horizontal Drilling Technology and\nApplications,” Cdn. CT Horizontal Drill. Tech. & Applications (1994)\n16. “Coiled Tubing Technology: Changing Well-Servicing Techniques and Economics,” Morgan\nStanley U.S. Investment Research (2 February 1994) 6.\nGeneral References\nBrown, A.D.F., Merrett, S.J., and Putnam, J.S.: “Coiled-Tubing Milling/Underreaming of Bari-\num  Sulphate  Scale  and  Scale  Control  in  the  Forties  Field,”  paper  SPE  23106  presented  at\nthe 1991 SPE Offshore E"
+          },
+          {
+            "evidence_id": "KB5",
+            "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+            "page": 198,
+            "chunk_id": "7c0fa83ba94d5bed50820611aa2c07c283856d9a626cd800329cf952ee17b39e:p198:c0",
+            "score": 0.015625,
+            "excerpt": "62\n(b) As a second production string within an existing tubing (Figure 47). This allows\ngas lift to be introduced to aid well production without having to mobilise a drilling\nrig to recomplete the well. This does however require that a polished bore receptacle,\ninto which the coiled tubing seal assembly can be located, has included in the original\ntubing string.  The advantage of this approach is that it is probably the cheapest\nmethods of installing gas lift in a well where the casing integrity has been lost.\n                       \nProducing Formation\nPerforations\nGas lift valve mounted\nin mandrel\nSurface Controlled Subsurface\nSafety Valve ( SCSSSV)\nControl line hanger\nCoiled tubing hanger\nControl line for SCSSSV\n2\" coiled tubing\nOrifice\nLocator seal assembly\nPolished bore receptacle\nGas injection to tubing/ \ncoiled tubing annuls\nProduction to separator\n(c) Alternatively, the orifice valve can be omitted with the coiled tubing suspended\nfrom its hanger - the gas injection taking place via the coiled tubing’s open end.\n12. INTERMITTENT GAS LIFT\nAll the above has discussed continuous flow gas lift.  The intrinsic flexibility of the\ngas lift concept allows it to be adapted to a wide"
+          }
+        ]
+      },
+      {
+        "label": "B",
+        "answer": "정확한 숫자 하나로는 **알 수 없습니다**.\n\nCoiled tubing의 남은 안전 사용 횟수는 단순히 “이미 반복 굽힘을 겪었다”는 정보만으로는 결정할 수 없고, 최소한 아래 정보가 필요합니다:\n\n- 튜빙의 **재질/규격**\n- **외경, 두께**\n- 누적 **굽힘 반경**\n- **사이클 수**\n- **내압/외압**\n- **온도**\n- **부식/마모/손상 상태**\n- 제조사 기준 또는 **피로 수명 모델**\n\n즉, 현재 정보만으로는 **정확한 남은 횟수 1개를 신뢰성 있게 산출할 수 없습니다**.  \n원하시면 제가 **현장용 추정 방법**이나 **필요 데이터 목록**을 바로 정리해드릴게요."
+      },
+      {
+        "label": "C",
+        "answer": "Coiled tubing의 남은 안전 사용 횟수를 정확한 숫자로 알려드릴 수 없습니다. 이는 코일드 튜브의 재질, 직경, 두께, 사용 환경, 반복 굽힘의 강도 및 주기, 유지보수 이력 등 다양한 요소에 따라 달라집니다. 정확한 평가를 위해서는 엔지니어링 분석이나 제조사의 안전 기준을 참고해야 합니다."
+      }
+    ]
+  }
+}

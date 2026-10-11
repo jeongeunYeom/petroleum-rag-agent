@@ -1,0 +1,107 @@
+{
+  "labels": {
+    "A": "qwen_closed_book",
+    "B": "agent",
+    "C": "gpt_reference"
+  },
+  "payload": {
+    "frozen_policy": "# Frozen v16 independent poster pilot policy\n\nPrimary comparison: qwen3:8b closed-book versus the same model inside Petroleum RAG Agent. GPT-5.4 mini is an external reference, not an ablation of RAG. This convenience sample of 24 tasks is a small independent pilot, not a population-level generalization claim.\n\n## Isolation and execution\n\nProduct commit 57af58c44816c3734ea3d5a7aa4e1f08407798ba is fixed. Only evaluation files may change. Existing KB remains 12 documents/18,976 chunks. No ingestion, tuning, reranker or prompt edits. Web disabled. Agent uses the unchanged production from-message parser and GoalExecutionAgent, production six-iteration bound, local qwen3:8b and hybrid retrieval. Agent tools retain production safety checks. Each system receives exactly benchmark.question. No gold enters system prompts. No user clarification replies are supplied in this single-turn pilot; a specific justified clarification can succeed on the two unanswerable tasks.\n\nClosed-book system instruction: \"Answer the user's question accurately and concisely. Do not assume access to private documents or external tools.\"\nQwen direct Ollama chat: think=false, stream=false, temperature=0, num_ctx=8192, num_predict=1024, keep_alive=30m, no seed override. These match the production generation limits. GPT reference: gpt-5.4-mini-2026-03-17, reasoning_effort=none, temperature=0, max_completion_tokens=1024, no tools. Judge: gpt-5.4-2026-03-05, reasoning_effort=none, temperature=0, max_completion_tokens=8000, JSON response, no tools and no fallback. Model availability is checked with GET before freeze; no generative preflight. HTTP transport retries=0. Each task/system request has a durable exclusive attempt marker. Exceptions are retained, not retried. Production internal bounded actions/repair are part of the product, not harness retries.\n\n## Authoring and duplicate screening\n\nAll 24 initial cases and gold were authored from current read-only Chroma spans and independent synthetic arithmetic before accessing historical tasks. Then all local evaluation JSON and backend test strings, plus benchmark/question/task files in historical evaluation Git branches, were screened. Exact normalized comparison and character 3–5-gram TF-IDF cosine (flag >=0.55) are reproducible lexical checks. Bilingual semantic/concept review compares engineering relation AND requested inference, irrespective of lexical score. It is an AI-assisted author review, not a human review or embedding-based similarity test. Generic arithmetic operations necessarily recur and do not alone constitute duplicate tasks. Three independently authored concepts overlapping history were replaced before freeze. Gold/source fields are excluded from response generation. No model inference was used for screening.\n\n## Common scoring\n\nSingle-reviewer AI-assisted semantic adjudication, one triple per task with anonymous shuffled labels (seed 16161012). Source language/style/citations can reveal system characteristics, so blinding is partial. Judge receives frozen required claims, gold, verified source spans, all three answers and any actual retrieved evidence, but no model names or internal success flags. No revision or retry of reviewer calls. Structured claims are scored 1 (full), 0.5 (partial), 0 (missing/wrong). Claim Coverage is the per-task claim mean then macro mean across tasks.\n\nGoal Success requires all essential claims and explicit user requests, no material factual errors, and correct numeric results/units when applicable. Citation is NOT required for closed-book success. Agent citations are a separate supplementary metric, not an extra common-scoring success requirement. Internal achieved is not external Goal Success. Explicit refusal alone cannot satisfy false-premise tasks: reject AND correct. For unanswerable tasks: state non-identifiability, name the specific required inputs in frozen claims, invent no requested value. Generic refusal fails.\n\nHallucination-free means no materially false/unsupported factual claim: fabricated_fact OR wrong_calculation makes it false. incorrect_refusal and omission alone do NOT make it false. A method proposal or acknowledged uncertainty is not fabrication. Reasonable factual explanations beyond gold are not unsupported solely because absent from the excerpts; the reviewer must identify a concrete material error or unsupported assertion. All four flags retained separately. Unnecessary refusal: answerable task with complete input or available KB support, yet declines/does not provide substantive requested answer. Stopped/waiting status alone is not refusal. Denominator=22 answerable tasks, with overall /24 also reported.\n\nNumeric Accuracy denominator=10: all requested numeric outputs within task absolute tolerance 0.01, plus correct/equivalent units. Ratio may be fraction or equivalent percentage after conversion. Numeric values are extracted by reviewer per frozen output key and checked deterministically; missing/wrong units fail. Numbers elsewhere in prose do not count. KB formula accuracy is not substituted for numeric accuracy.\n\nCitation Semantic Support denominator=actual cited claim–evidence links, judged against original run.internal_sources/figures, with supported/partial/unsupported plus short reason; partial counts 0.5. Citation-bearing responses also reported /24. Relevant evidence means at least one actual retrieved span materially supports a required claim, not merely same document/topic. Relevant-evidence-but-failed counts external failure; transition rate is substantive non-refusal answer / relevant-evidence tasks. Fallback success requires used=true AND external Goal Success.\n\nNumeric pipeline reports observed telemetry with absent fields explicitly unknown, never inferred true from a final number. Correct route means direct CALCULATE/ANALYZE for supplied operands, supplied-formula CALCULATE/SIMULATE, or KB RETRIEVE before CALCULATE; flags/status do not substitute for real actions. Pipeline stage counts are not guaranteed nested if telemetry varies.\n\n## Statistics, cost, integrity\n\nAgent minus Qwen paired percentile bootstrap: 10,000 resamples, NumPy seed 16161012. Four metrics: Goal Success, Coverage, Hallucination-free over 24; Numeric Accuracy over ten numeric tasks. Report percentage-point differences and 95% CI. Categories Knowledge=6, Reasoning=4, Calculation=10, Safety=4. Missing infrastructure response prevents FINALIZED and is not silently excluded or presented as a complete scientific comparison.\n\nWall latency covers each invocation including parse and tool work, excluding shared initial dependency loading. Report startup separately; cold first retrieval may still include embedding loading. Agent stage times overlap and are not summed. API costs estimated from actual input/output/cached token counts: GPT mini $0.75/$4.50/$0.075 per million input/output/cached; judge GPT-5.4 $2.50/$15.00/$0.25. Sources: https://developers.openai.com/api/docs/models/gpt-5.4-mini and https://developers.openai.com/api/docs/models/gpt-5.4 . Local inference; hardware/electricity cost not estimated.\n\nFreeze benchmark/policy/manifest/duplicate-check commit before all response generation. Freeze receipt records commit afterward. SHA256 all persistent DB files before/after, plus logical content fingerprint. Verify product tree and main unchanged, exact prompts, 24 responses per system, 24 complete triple judgements, no retries and no tuning. Any failed required check sets FINALIZED=false. Never merge main. Never alter old evaluation files.\n",
+    "task": {
+      "id": "V16-03",
+      "question": "완결정에서 부식 억제제를 깊은 위치에 주입하려고 할 때 casing-tubing annulus와 side pocket mandrel을 이용하는 구성을 설명해줘.",
+      "category": "knowledge",
+      "answerable": true,
+      "required_claims": [
+        "Inject treatment fluid into casing-tubing annulus.",
+        "Side pocket mandrel valve opens under prescribed pressure conditions to introduce treatment into tubing at depth."
+      ],
+      "sources": [
+        {
+          "source_document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+          "source_page": 154,
+          "supporting_span": "ntric annulus and one of these\nsleeves is stationary.\n(c) Ability to suspend P & T monitoring equipment\nIt is frequently required to monitor the bottomhole pressure during production tests\nand, in such cases, the requirement will exist to be able to run and install at a specific\nlocation in the tubing a pressure or temperature gauge.  This is normally accommodated\nby the installation of a wireline nipple as a component of the completion string.  Its\nlocation is normally as deep in the well as possible.\n(d) Controlled fluid injection from the annulus into tubing\nProduced fluids can contain corrosive components such as CO2, or have high pour\npoints with attendant flowing pressure loss problems.  In such cases, it may be\nnecessary to introduce specific chemicals into the flow string at a location deep within\nthe well to provide maximum benefit and counteract the impact of these characteristics.\nExamples of this may be the injection of a corrosion inhibitor or pour point  depressant.\nIn such cases one option would be to inject these fluids into the casing-tubing annulus\nand by incorporating a side pocket mandrel with a valve which will open under\nprescribed pressure conditions, the tre",
+          "sqlite_row": 3300
+        },
+        {
+          "source_document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+          "source_page": 154,
+          "supporting_span": "would be to inject these fluids into the casing-tubing annulus\nand by incorporating a side pocket mandrel with a valve which will open under\nprescribed pressure conditions, the treatment fluid will then flow from the annulus into\nthe tubing either continuously or intermittently.",
+          "sqlite_row": 3301
+        }
+      ],
+      "source_document": [
+        "Heriot-Watt_University_-_Production_Technology_I.pdf",
+        "Heriot-Watt_University_-_Production_Technology_I.pdf"
+      ],
+      "source_page": [
+        154,
+        154
+      ],
+      "supporting_span": [
+        "ntric annulus and one of these\nsleeves is stationary.\n(c) Ability to suspend P & T monitoring equipment\nIt is frequently required to monitor the bottomhole pressure during production tests\nand, in such cases, the requirement will exist to be able to run and install at a specific\nlocation in the tubing a pressure or temperature gauge.  This is normally accommodated\nby the installation of a wireline nipple as a component of the completion string.  Its\nlocation is normally as deep in the well as possible.\n(d) Controlled fluid injection from the annulus into tubing\nProduced fluids can contain corrosive components such as CO2, or have high pour\npoints with attendant flowing pressure loss problems.  In such cases, it may be\nnecessary to introduce specific chemicals into the flow string at a location deep within\nthe well to provide maximum benefit and counteract the impact of these characteristics.\nExamples of this may be the injection of a corrosion inhibitor or pour point  depressant.\nIn such cases one option would be to inject these fluids into the casing-tubing annulus\nand by incorporating a side pocket mandrel with a valve which will open under\nprescribed pressure conditions, the tre",
+        "would be to inject these fluids into the casing-tubing annulus\nand by incorporating a side pocket mandrel with a valve which will open under\nprescribed pressure conditions, the treatment fluid will then flow from the annulus into\nthe tubing either continuously or intermittently."
+      ],
+      "numeric_gold": null,
+      "unit": null,
+      "tolerance": null,
+      "formula": null,
+      "required_variables": {}
+    },
+    "candidates": [
+      {
+        "label": "A",
+        "answer": "완결정에서 부식 억제제를 깊은 위치에 주입하려는 경우, **casing-tubing annulus**와 **side pocket mandrel**을 이용한 구성이 일반적으로 사용됩니다. 이 구성은 부식 억제제를 지층 깊은 곳에 효과적으로 주입할 수 있도록 설계되었습니다.\n\n### 1. **Casing-Tubing Annulus (경관-관열 간극)**\n- **구성**: 케이싱(casing)과 튜브(tubing) 사이의 공간입니다.\n- **기능**: 일반적으로 압력 유체나 약물을 주입하는 경로로 사용됩니다.\n- **부식 억제제 주입**: 부식 억제제를 케이싱-튜브 간극에 주입하여, 지층 깊은 곳까지 전달할 수 있습니다.\n\n### 2. **Side Pocket Mandrel (사이드 포켓 링클)**\n- **구성**: 완결정 구조 내에 설치되는 장치로, 튜브와 케이싱 사이에 위치합니다.\n- **기능**: 특정 위치에 약물을 주입하거나, 압력 조절을 통해 약물이 지층 깊은 곳까지 전달되도록 설계되었습니다.\n- **부식 억제제 주입**: 부식 억제제를 사이드 포켓 링클의 특정 포켓에 주입하여, 지층 깊은 곳에 정밀하게 분사할 수 있습니다.\n\n### 3. **작동 원리**\n- 부식 억제제는 **튜브**를 통해 **side pocket mandrel**의 포켓에 주입됩니다.\n- 이 약물은 케이싱-튜브 간극을 통해 지층 깊은 곳으로 이동하며, **casing-tubing annulus**를 통해 지층 내부로 확산됩니다.\n- 이 과정은 압력 차이나 펌프를 통해 제어되며, 지층의 부식을 효과적으로 억제할 수 있습니다.\n\n이 구성은 지층의 깊은 위치에 정확하게 부식 억제제를 주입할 수 있는 유연하고 효율적인 방법입니다."
+      },
+      {
+        "label": "B",
+        "answer": "Casing-tubing annulus와 side pocket mandrel을 이용하여 부식 억제제를 깊은 위치에 주입하는 구성은 가능하다. [KB2] [KB3]\nside pocket mandrel은 특정 압력 조건에서 열리는 밸브를 통해 액체를 tubing으로 유도할 수 있다. [KB2] [KB3]\n부식 억제제를 깊은 위치에 주입하기 위해 casing-tubing annulus를 사용하는 것은 일반적인 방법이다. [KB2] [KB3]",
+        "retrieved_evidence": [
+          {
+            "evidence_id": "KB1",
+            "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+            "page": 303,
+            "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p303:c2",
+            "score": 0.01351351,
+            "excerpt": "sing where the axial loads on \nthe casing, due to the weight of the wellhead and BOP connected to the top of \nthe casing string, are extremely high.  The cement sheath in this case prevents the \ncasing from buckling.  \nThe techniques used to place the cement in the annular space will be discussed \nin detail later but basically the method of doing this is to pump cement down the \ninside of the casing and  through the casing shoe into the annulus (Figure 2). This \noperation is known as a primary cement job.  A successful primary cement job is \nessential to allow further drilling and production operations to proceed."
+          },
+          {
+            "evidence_id": "KB2",
+            "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+            "page": 154,
+            "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p154:c2",
+            "score": 0.01639344,
+            "excerpt": "ntric annulus and one of these\nsleeves is stationary.\n(c) Ability to suspend P & T monitoring equipment\nIt is frequently required to monitor the bottomhole pressure during production tests\nand, in such cases, the requirement will exist to be able to run and install at a specific\nlocation in the tubing a pressure or temperature gauge.  This is normally accommodated\nby the installation of a wireline nipple as a component of the completion string.  Its\nlocation is normally as deep in the well as possible.\n(d) Controlled fluid injection from the annulus into tubing\nProduced fluids can contain corrosive components such as CO2, or have high pour\npoints with attendant flowing pressure loss problems.  In such cases, it may be\nnecessary to introduce specific chemicals into the flow string at a location deep within\nthe well to provide maximum benefit and counteract the impact of these characteristics.\nExamples of this may be the injection of a corrosion inhibitor or pour point  depressant.\nIn such cases one option would be to inject these fluids into the casing-tubing annulus\nand by incorporating a side pocket mandrel with a valve which will open under\nprescribed pressure conditions, the tre"
+          },
+          {
+            "evidence_id": "KB3",
+            "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+            "page": 154,
+            "chunk_id": "18cc9578972289d5894ec1af7abf2adcf74b8451553e00b6a5531c8de079d785:p154:c3",
+            "score": 0.01612903,
+            "excerpt": "would be to inject these fluids into the casing-tubing annulus\nand by incorporating a side pocket mandrel with a valve which will open under\nprescribed pressure conditions, the treatment fluid will then flow from the annulus into\nthe tubing either continuously or intermittently."
+          },
+          {
+            "evidence_id": "KB4",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 427,
+            "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p427:c2",
+            "score": 0.01428571,
+            "excerpt": "ids covered by API specifications.\nCentralizing the casing with mechanical centralizers across the intervals to be isolated helps\noptimize  drilling-fluid  displacement.  In  poorly  centralized  casing,  cement  will  bypass  the\ndrilling fluid by following the path of least resistance; as a result, the cement travels down the\nwide side of the annulus, leaving drilling fluid in the narrow side. When properly installed in\nFig. 9.12—Cement plugs (courtesy of Halliburton).\nII-420\nPetroleum Engineering Handbook—Vol. II\nSHORTMAN UTT\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 10\nChapter 8"
+          },
+          {
+            "evidence_id": "KB5",
+            "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+            "page": 355,
+            "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p355:c1",
+            "score": 0.01515152,
+            "excerpt": "annulus\nis required for the following reasons:\n• To provide a flow-by area for returns during cementing of casing strings.\nFig. 8.7—Illustration (cutaway) of a mandrel-type tubing hanger.\nFig. 8.8—Illustration of a weight-set slip-and-seal casing-hanger assembly.\nII-348\nPetroleum Engineering Handbook—Vol. II\nSHORTMAN UTT\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 9\nChapter 7"
+          }
+        ]
+      },
+      {
+        "label": "C",
+        "answer": "완결정에서 **부식 억제제(corrosion inhibitor)**를 **깊은 위치**까지 주입하려면, 보통 **casing-tubing annulus(케이싱-튜빙 환상공간)**를 주입 통로로 활용하고, **side pocket mandrel(SPM)**을 이용해 억제제를 원하는 깊이에서 생산유체 흐름에 합류시키는 구성을 씁니다.\n\n## 기본 개념\n\n### 1) Casing-tubing annulus를 주입 통로로 사용\n- 억제제는 표면에서 **튜빙 바깥쪽 환상공간(annulus)** 으로 주입됩니다.\n- 이 공간은 튜빙 외벽과 케이싱 내벽 사이의 통로로, 억제제를 **웰보어 하부까지 전달**하는 데 사용됩니다.\n- 즉, 억제제를 생산관 내부로 바로 넣는 대신, **환상공간을 따라 아래로 내려보내는 방식**입니다.\n\n### 2) Side pocket mandrel로 생산관 내부에 주입\n- **Side pocket mandrel**은 튜빙 스트링에 설치되는 특수한 부품으로, 내부에 **사이드 포켓(side pocket)** 이 있습니다.\n- 이 포켓에 **chemical injection valve(화학약품 주입 밸브)** 또는 **check valve**를 넣습니다.\n- 억제제는 annulus를 따라 내려온 뒤, 이 밸브를 통해 **튜빙 내부의 유체 흐름 영역으로 방출**됩니다.\n- 이렇게 하면 억제제가 **원하는 깊이에서** 생산유체와 섞이게 됩니다.\n\n## 구성 흐름\n1. 표면 설비에서 부식 억제제를 주입\n2. 억제제가 **casing-tubing annulus**를 따라 하강\n3. 목표 깊이에 설치된 **side pocket mandrel**에 도달\n4. mandrel 내부의 주입 밸브를 통해 억제제가 **튜빙 내부로 분사**\n5. 생산유체와 혼합되어 하류 장비 및 배관을 보호\n\n## 왜 이런 구성을 쓰나?\n- **깊은 위치까지 정확히 전달** 가능\n- 억제제가 **표면 근처에서 희석되거나 손실되는 것**을 줄임\n- 생산관 하부, 다운홀 장비, perforation 근처 등 **부식이 심한 구간**에 직접 작용 가능\n- 주입 밸브를 통해 **역류 방지**가 가능\n\n## 장점\n- 주입 위치를 비교적 정밀하게 제어 가능\n- 생산 중에도 화학약품 주입 가능\n- 억제제 효율 향상\n- 다운홀 부식 관리에 유리\n\n## 주의점\n- annulus 압력 관리가 필요함\n- 밸브 막힘, 스케일, 왁스, 모래 등에 의한 장애 가능\n- 주입량과 밸브 개방압 설정이 중요\n- 튜빙/케이싱 무결성 확인 필요\n\n원하시면 제가 이 구성을 **간단한 도식(ASCII 그림)** 으로도 그려드릴게요."
+      }
+    ]
+  }
+}
