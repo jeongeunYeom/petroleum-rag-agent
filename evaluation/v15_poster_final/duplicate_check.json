@@ -1,0 +1,1475 @@
+{
+  "method": "Post-authoring exact normalized text, word/bigram and character TF-IDF cosine, semantic latent semantic analysis (192-dimensional TF-IDF SVD), plus manual concept review. No generative or embedding-model call before freeze.",
+  "limitations": "LSA is weaker than multilingual neural semantic embeddings. Low similarity is not proof of independence; concept review is also required. Shared mathematical operators alone are not duplicates.",
+  "lexical_threshold": 0.55,
+  "semantic_threshold": 0.8,
+  "git_blob_count": 2232,
+  "local_files_scanned": 531,
+  "prior_unique_texts": 3635,
+  "corpus_sha256": "b109f83ba236ce0f6a52021feab5b566e75f3b7a7174cc331abff66461618537",
+  "results": [
+    {
+      "id": "P01",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.30369,
+          "question": "Explain capillary pressure using an internal reference.",
+          "references": [
+            "git:500c9060caa0e29475a27e29636301b2f391b269:backend/tests/test_agent_reliability_v10.py",
+            "backend\\tests\\test_agent_reliability_v10.py"
+          ]
+        },
+        {
+          "score": 0.2463,
+          "question": "Gas liberation in a production separator depends on separator pressure.",
+          "references": [
+            "git:1cd683416f27c093af8fb3e7793a52c33567c10e:backend/tests/test_agent_reliability_v11_1.py",
+            "backend\\tests\\test_agent_reliability_v11_1.py"
+          ]
+        },
+        {
+          "score": 0.23795,
+          "question": "Explain API gravity using internal evidence",
+          "references": [
+            "git:e73a56faaa6f2b1b5a33a218943d1cedf12ae183:backend/tests/test_goal_message_parser.py",
+            "git:f093f6c8b6aee8503490af2b4ddf534c430b8185:backend/tests/test_goal_message_parser.py",
+            "backend\\tests\\test_goal_message_parser.py"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.59498,
+          "question": "The coalescer separates entrained liquid droplets from the gas stream.",
+          "references": [
+            "git:c728f7ce59a3a46d23ad54875015fb706fcc6f21:backend/tests/test_agent_reliability_v15_dev.py",
+            "backend\\tests\\test_agent_reliability_v15_dev.py"
+          ]
+        },
+        {
+          "score": 0.55064,
+          "question": "only the gas is allowed to dissolve in the oil and water",
+          "references": [
+            "git:5e8d7dc2a330301c6967bbbdb19be7c914a8558c:evaluation/final_v4/build_benchmark.py"
+          ]
+        },
+        {
+          "score": 0.53373,
+          "question": "If produced gas-liquid ratio is high and selecting artificial lift, what caution does the production text raise about pumping versus gas lift?",
+          "references": [
+            "git:6261e4c03a4bcaf6970afcdcb7eb4ca332365ec5:evaluation/unseen_v13_v2/benchmark.json",
+            "git:c55053e9b7988a4b237739d82a7a1b3895954fa7:evaluation/unseen_v13_v2/raw/agent/CR03.json",
+            "git:c55053e9b7988a4b237739d82a7a1b3895954fa7:evaluation/unseen_v13_v2/raw/agent/CR03.json"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "Gas anchor free-gas separation and disposal, distinct from coalescer or gas-lift selection."
+      }
+    },
+    {
+      "id": "P02",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.3,
+          "question": "Lost circulation reduces drilling-fluid returns to the surface.",
+          "references": [
+            "git:1cd683416f27c093af8fb3e7793a52c33567c10e:backend/tests/test_agent_reliability_v11_1.py",
+            "backend\\tests\\test_agent_reliability_v11_1.py"
+          ]
+        },
+        {
+          "score": 0.26721,
+          "question": "drilling lost circulation formation fluid entering borehole because mud pressure\ndrilling lost circulation formation fluid relationship definition",
+          "references": [
+            "git:95a664b687710c9adf402e95ac6a2d90e0b634f0:evaluation/unseen_v13_v2/raw/agent/FP02.json"
+          ]
+        },
+        {
+          "score": 0.26001,
+          "question": "drilling 시멘트 channeling lost circulation 같은 현상이라고 불러도 되나 발생\ndrilling drilling 시멘트 channeling lost circulation",
+          "references": [
+            "git:f2c693a385e36d41a3704f3a17e5edb5c7ada4d4:evaluation/unseen_v13_v2/raw/agent/TC02.json"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.56269,
+          "question": "Lost circulation is formation fluid entering the borehole because mud pressure is too low, correct? Please confirm from the drilling material.",
+          "references": [
+            "git:6261e4c03a4bcaf6970afcdcb7eb4ca332365ec5:evaluation/unseen_v13_v2/benchmark.json",
+            "git:95a664b687710c9adf402e95ac6a2d90e0b634f0:evaluation/unseen_v13_v2/raw/agent/FP02.json",
+            "git:95a664b687710c9adf402e95ac6a2d90e0b634f0:evaluation/unseen_v13_v2/raw/agent/FP02.json"
+          ]
+        },
+        {
+          "score": 0.50013,
+          "question": "drilling 자료의 정의에 따르면 lost returns 지층으로 무엇이 빠져나가는 현상인가\ndrilling drilling 자료의 정의에 따르면",
+          "references": [
+            "git:fb0d862b5f247dabb66470f1da01f0620c3f30c7:evaluation/unseen_v13_v2/raw/agent/SF02.json"
+          ]
+        },
+        {
+          "score": 0.49438,
+          "question": "drilling can mixing mud cement slurry leave poor bond around\ndrilling drilling can mixing mud",
+          "references": [
+            "git:057d045d0d624a299add7bec96eaa3d6d9364407:evaluation/unseen_v12/raw/agent/CE01.json"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "Static gel and mechanical solids removal, distinct from lost circulation/mud-pressure questions."
+      }
+    },
+    {
+      "id": "P03",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.25523,
+          "question": "The legend distinguishes measured RFT from simulated SIMUL",
+          "references": [
+            "git:5e8d7dc2a330301c6967bbbdb19be7c914a8558c:evaluation/final_v4/build_benchmark.py"
+          ]
+        },
+        {
+          "score": 0.22669,
+          "question": "Distinguish wellbore storage from radial flow using pressure derivative evidence.",
+          "references": [
+            "git:caea51a1dd03dfe6e0f8affd21b65ffae5198c1d:evaluation/dev/goal_research_smoke_v0.json",
+            "evaluation\\dev\\goal_research_smoke_v0.json"
+          ]
+        },
+        {
+          "score": 0.20568,
+          "question": "drilling can mixing mud cement slurry leave poor bond around\ndrilling drilling can mixing mud",
+          "references": [
+            "git:057d045d0d624a299add7bec96eaa3d6d9364407:evaluation/unseen_v12/raw/agent/CE01.json"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.4779,
+          "question": "While planning a new drilling interval, should mud weight simply be maximized to avoid influx? State the two pressure constraints from the training material.",
+          "references": [
+            "git:89ea8a91ee582fe594956b357307f15773fac8dd:evaluation/unseen_v12/raw/agent/CR01.json",
+            "git:89ea8a91ee582fe594956b357307f15773fac8dd:evaluation/unseen_v12/raw/agent/CR01.json",
+            "git:89ea8a91ee582fe594956b357307f15773fac8dd:evaluation/unseen_v12/raw/agent/CR01.json"
+          ]
+        },
+        {
+          "score": 0.44027,
+          "question": "casing cement occupies the annulus",
+          "references": [
+            "git:1cd683416f27c093af8fb3e7793a52c33567c10e:backend/tests/test_agent_reliability_v11_1.py",
+            "backend\\tests\\test_agent_reliability_v11_1.py"
+          ]
+        },
+        {
+          "score": 0.43644,
+          "question": "The internal source is correct. [KB1]",
+          "references": [
+            "git:05d43779fcbbb3346f3668dae337d82a5eddd90b:backend/tests/test_research_agent.py",
+            "git:eb717d32b661fbb3c18646ecf33c813d21236b17:backend/tests/test_research_agent.py",
+            "git:5b814edcb68e32414e86cca7560aba8d1161ea63:backend/tests/test_research_agent.py"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "Remedial squeeze objectives, distinct from mud/cement contamination and primary cement location."
+      }
+    },
+    {
+      "id": "P04",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.28003,
+          "question": "If produced gas-liquid ratio is high and selecting artificial lift, what caution does the production text raise about pumping versus gas lift?",
+          "references": [
+            "git:6261e4c03a4bcaf6970afcdcb7eb4ca332365ec5:evaluation/unseen_v13_v2/benchmark.json",
+            "git:c55053e9b7988a4b237739d82a7a1b3895954fa7:evaluation/unseen_v13_v2/raw/agent/CR03.json",
+            "git:c55053e9b7988a4b237739d82a7a1b3895954fa7:evaluation/unseen_v13_v2/raw/agent/CR03.json"
+          ]
+        },
+        {
+          "score": 0.20901,
+          "question": "Why is gas lift fundamentally different from pump-based artificial lift, and where does lift gas enter the produced stream?",
+          "references": [
+            "git:6261e4c03a4bcaf6970afcdcb7eb4ca332365ec5:evaluation/unseen_v13_v2/benchmark.json",
+            "git:0fb5161b3273d588382aa462909ab1dded333135:evaluation/unseen_v13_v2/raw/agent/MS03.json",
+            "git:0fb5161b3273d588382aa462909ab1dded333135:evaluation/unseen_v13_v2/raw/agent/MS03.json"
+          ]
+        },
+        {
+          "score": 0.20773,
+          "question": "production produced gas-liquid ratio high selecting artificial lift caution text\nproduction production produced gas-liquid ratio high",
+          "references": [
+            "git:c55053e9b7988a4b237739d82a7a1b3895954fa7:evaluation/unseen_v13_v2/raw/agent/CR03.json"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.75432,
+          "question": "Why is gas lift fundamentally different from pump-based artificial lift, and where does lift gas enter the produced stream?",
+          "references": [
+            "git:6261e4c03a4bcaf6970afcdcb7eb4ca332365ec5:evaluation/unseen_v13_v2/benchmark.json",
+            "git:0fb5161b3273d588382aa462909ab1dded333135:evaluation/unseen_v13_v2/raw/agent/MS03.json",
+            "git:0fb5161b3273d588382aa462909ab1dded333135:evaluation/unseen_v13_v2/raw/agent/MS03.json"
+          ]
+        },
+        {
+          "score": 0.72091,
+          "question": "If produced gas-liquid ratio is high and selecting artificial lift, what caution does the production text raise about pumping versus gas lift?",
+          "references": [
+            "git:6261e4c03a4bcaf6970afcdcb7eb4ca332365ec5:evaluation/unseen_v13_v2/benchmark.json",
+            "git:c55053e9b7988a4b237739d82a7a1b3895954fa7:evaluation/unseen_v13_v2/raw/agent/CR03.json",
+            "git:c55053e9b7988a4b237739d82a7a1b3895954fa7:evaluation/unseen_v13_v2/raw/agent/CR03.json"
+          ]
+        },
+        {
+          "score": 0.68428,
+          "question": "gas lift fundamentally different pump-based artificial where enter produced stream\ngas lift fundamentally different",
+          "references": [
+            "git:0fb5161b3273d588382aa462909ab1dded333135:evaluation/unseen_v13_v2/raw/agent/MS03.json"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "PCP elastomer chemistry/decompression, distinct from broad lift selection/gas-lift mechanism."
+      }
+    },
+    {
+      "id": "P05",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.29089,
+          "question": "Explain the relation between API gravity and crude weight",
+          "references": [
+            "git:fb602d71c286fdfccb789a02cbe4e31fd1510185:backend/tests/test_goal_execution_v8.py",
+            "backend\\tests\\test_goal_execution_v8.py"
+          ]
+        },
+        {
+          "score": 0.28462,
+          "question": "Explain the relation between API gravity and heavy or light crude",
+          "references": [
+            "git:fb602d71c286fdfccb789a02cbe4e31fd1510185:backend/tests/test_goal_execution_v8.py",
+            "git:5bb985929d1fd070ab4a4b61fabf12b9a8bfe4c5:backend/tests/test_goal_execution_v8.py",
+            "git:8fb935f9d0e32a0574d0532f258499160f2c0d5a:backend/tests/test_goal_execution_v8.py"
+          ]
+        },
+        {
+          "score": 0.25009,
+          "question": "don't check for circular relationships between files",
+          "references": [
+            "evaluation\\final_v1\\node_modules\\pnpm\\dist\\node_modules\\node-gyp\\gyp\\pylib\\gyp\\__init__.py"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.49013,
+          "question": "Explain what interpretation changed between the two plots and which conclusions remain conditional rather than directly measured.",
+          "references": [
+            "git:c3f29d14e7d57452ad084673287c1200367e07bb:evaluation/agentic_heldout_v1.json",
+            "git:40d60ed98d9463f950f86e97bef452d977c04ef6:evaluation/review/agentic_heldout_v1_blind_review.json",
+            "git:40d60ed98d9463f950f86e97bef452d977c04ef6:evaluation/review/agentic_heldout_v1_blind_review.json"
+          ]
+        },
+        {
+          "score": 0.47426,
+          "question": "Resolves rel_path against base_path and returns the result.\n    TODO: what is this really used for?\n    If rel_path begins with '$' it is returned unchanged.\n    Otherwise it is resolved against base_path if relative, then normalized.\n    ",
+          "references": [
+            "evaluation\\final_v1\\node_modules\\pnpm\\dist\\node_modules\\node-gyp\\gyp\\pylib\\gyp\\generator\\cmake.py"
+          ]
+        },
+        {
+          "score": 0.45749,
+          "question": "Consume the next token and return it.",
+          "references": [
+            "evaluation\\final_v1\\node_modules\\pnpm\\dist\\node_modules\\node-gyp\\gyp\\pylib\\packaging\\_tokenizer.py"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "NPSH inequality and consequence, not prior general system-property claim."
+      }
+    },
+    {
+      "id": "P06",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.2214,
+          "question": "drilling mud hydrostatic pressure exceeds pore can mudcake appear permeable\ndrilling drilling mud hydrostatic pressure exceeds",
+          "references": [
+            "git:ee925c172e432a2b05b66fa05b13a234bebe6658:evaluation/unseen_v13_v2/raw/agent/CE01.json"
+          ]
+        },
+        {
+          "score": 0.21795,
+          "question": "drilling can mixing mud cement slurry leave poor bond around\ndrilling drilling can mixing mud",
+          "references": [
+            "git:057d045d0d624a299add7bec96eaa3d6d9364407:evaluation/unseen_v12/raw/agent/CE01.json"
+          ]
+        },
+        {
+          "score": 0.21018,
+          "question": "drilling safest rule mud hydrostatic pressure may exceed fracture long\ndrilling safest rule mud relationship definition",
+          "references": [
+            "git:d76d9a8d698991397ff321e4fe26ac6cc6db7561:evaluation/unseen_v12/raw/agent/FP01.json"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.6349,
+          "question": "Why can mixing drilling mud with a cement slurry leave a poor bond around casing?",
+          "references": [
+            "git:057d045d0d624a299add7bec96eaa3d6d9364407:evaluation/unseen_v12/raw/agent/CE01.json",
+            "git:057d045d0d624a299add7bec96eaa3d6d9364407:evaluation/unseen_v12/raw/agent/CE01.json",
+            "git:057d045d0d624a299add7bec96eaa3d6d9364407:evaluation/unseen_v12/raw/agent/CE01.json"
+          ]
+        },
+        {
+          "score": 0.63321,
+          "question": "drilling can mixing mud cement slurry leave poor bond around\ndrilling drilling can mixing mud",
+          "references": [
+            "git:057d045d0d624a299add7bec96eaa3d6d9364407:evaluation/unseen_v12/raw/agent/CE01.json"
+          ]
+        },
+        {
+          "score": 0.58598,
+          "question": "An oil-water contact angle below 90 degrees indicates a water-wet surface",
+          "references": [
+            "git:5e8d7dc2a330301c6967bbbdb19be7c914a8558c:evaluation/final_v4/build_benchmark.py"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "Oil-mud water/solids viscosity, not cement contamination or mud hydrostatics."
+      }
+    },
+    {
+      "id": "P07",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.32517,
+          "question": "capillary pressure just drop between two points single oil phase\ncapillary pressure just drop relationship definition",
+          "references": [
+            "git:ee6c1e56573d8bba29fc5e9278e3d7c96c6db0ca:evaluation/unseen_v13_v2/raw/agent/FP01.json"
+          ]
+        },
+        {
+          "score": 0.27857,
+          "question": "Explain capillary pressure using an internal reference.",
+          "references": [
+            "git:500c9060caa0e29475a27e29636301b2f391b269:backend/tests/test_agent_reliability_v10.py",
+            "backend\\tests\\test_agent_reliability_v10.py"
+          ]
+        },
+        {
+          "score": 0.24715,
+          "question": "Explain relative permeability and water saturation.",
+          "references": [
+            "git:500c9060caa0e29475a27e29636301b2f391b269:backend/tests/test_agent_reliability_v10.py",
+            "git:c728f7ce59a3a46d23ad54875015fb706fcc6f21:backend/tests/test_agent_reliability_v15_dev.py",
+            "git:c728f7ce59a3a46d23ad54875015fb706fcc6f21:backend/tests/test_agent_reliability_v15_dev.py"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.64486,
+          "question": "유체 상의 압력차와 FWL 정의를 함께 사용해, oil-water contact와 capillary pressure=0인 깊이를 혼동하면 왜 안 되는지 설명해줘.",
+          "references": [
+            "git:32b0dab6165da93de0181217d0e87e3b206c7f88:evaluation/final_benchmark_v1.json",
+            "git:6260f063a6cf28606182f40c6ed3f0e09a141464:evaluation/final_v1/raw/agent/L24.json",
+            "git:6260f063a6cf28606182f40c6ed3f0e09a141464:evaluation/final_v1/raw/agent/L24.json"
+          ]
+        },
+        {
+          "score": 0.63794,
+          "question": "Explain how wettability affects capillary pressure.",
+          "references": [
+            "git:5e718627dd7a67e900bc016cbd6d4ad2e9ebffc3:backend/tests/test_agent_reliability_v13_dev.py",
+            "git:5e718627dd7a67e900bc016cbd6d4ad2e9ebffc3:backend/tests/test_agent_reliability_v13_dev.py",
+            "git:bae472bb0c519d2b041e32653e984e81c5a38667:evaluation/dev/agent_reliability_v13_dev.json"
+          ]
+        },
+        {
+          "score": 0.61685,
+          "question": "Capillary pressure varies with pore geometry and wettability.",
+          "references": [
+            "git:5e718627dd7a67e900bc016cbd6d4ad2e9ebffc3:backend/tests/test_agent_reliability_v13_dev.py",
+            "backend\\tests\\test_agent_reliability_v13_dev.py"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "Pore-size and retained-water comparison, not capillary-pressure definition/FWL relation."
+      }
+    },
+    {
+      "id": "P08",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.36574,
+          "question": "펌프 total hydraulic horsepower 1050 hp 중 순환계에서 bit 외 손실이 320 hp다. 내부 bit-horsepower 식을 확인해 bit hydraulic horsepower를 구해줘.",
+          "references": [
+            "git:3eabd71dfbc797db6cd872672ec70a63d42188ee:evaluation/final_benchmark_v4.json",
+            "git:5e8d7dc2a330301c6967bbbdb19be7c914a8558c:evaluation/final_v4/build_benchmark.py",
+            "git:2cb85abc98ec652db519453ecb89d4f8ab2d6c51:evaluation/final_v4/raw/agent/K02.json"
+          ]
+        },
+        {
+          "score": 0.36076,
+          "question": "Bit hydraulic horsepower equals total pump hydraulic horsepower less system loss",
+          "references": [
+            "git:5e8d7dc2a330301c6967bbbdb19be7c914a8558c:evaluation/final_v4/build_benchmark.py"
+          ]
+        },
+        {
+          "score": 0.23481,
+          "question": "Use the handbook pump power equation to calculate brake horsepower PB when hydraulic horsepower PH=48 hp and pump efficiency e=0.8 dimensionless. Identify the equation source.\nMissing: Provide a validated result from a sourced equation and supplied inputs\nequation formula variables units Use the handbook pump power equation to calculate brake horsepower PB when hydraulic PH hp and",
+          "references": [
+            "git:39d7ff220a8ed30706f198223eedc106e464d2ad:evaluation/poster_final/raw/agent/P20.json"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.50753,
+          "question": "Ninja syntax does not allow newlines",
+          "references": [
+            "evaluation\\final_v1\\node_modules\\pnpm\\dist\\node_modules\\node-gyp\\gyp\\pylib\\gyp\\ninja_syntax.py"
+          ]
+        },
+        {
+          "score": 0.48357,
+          "question": "%s does not evaluate to a dictionary.",
+          "references": [
+            "evaluation\\final_v1\\node_modules\\pnpm\\dist\\node_modules\\node-gyp\\gyp\\pylib\\gyp\\input.py"
+          ]
+        },
+        {
+          "score": 0.43202,
+          "question": "Return a comment string for the object.\n\n        Most objects just use their name as the comment, but PBXProject uses\n        different values.\n\n        The returned comment is not escaped and does not have any comment marker\n        strings applied to it.\n        ",
+          "references": [
+            "evaluation\\final_v1\\node_modules\\pnpm\\dist\\node_modules\\node-gyp\\gyp\\pylib\\gyp\\xcodeproj_file.py"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "Bit balling/WOB/hydraulic trade-offs, not old hydraulic-power subtraction calculation."
+      }
+    },
+    {
+      "id": "P09",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.28124,
+          "question": "Mud density has no effect on hydrostatic pressure",
+          "references": [
+            "git:1cd683416f27c093af8fb3e7793a52c33567c10e:backend/tests/test_agent_reliability_v11_1.py",
+            "backend\\tests\\test_agent_reliability_v11_1.py"
+          ]
+        },
+        {
+          "score": 0.22238,
+          "question": "mud weight sets hydrostatic pressure",
+          "references": [
+            "git:1cd683416f27c093af8fb3e7793a52c33567c10e:backend/tests/test_agent_reliability_v11_1.py",
+            "backend\\tests\\test_agent_reliability_v11_1.py"
+          ]
+        },
+        {
+          "score": 0.21962,
+          "question": "Mud-column hydrostatic pressure depends on mud density.",
+          "references": [
+            "git:1cd683416f27c093af8fb3e7793a52c33567c10e:backend/tests/test_agent_reliability_v11_1.py",
+            "backend\\tests\\test_agent_reliability_v11_1.py"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.52944,
+          "question": "When mud hydrostatic pressure exceeds pore pressure, why can a mudcake appear on a permeable borehole wall?",
+          "references": [
+            "git:6261e4c03a4bcaf6970afcdcb7eb4ca332365ec5:evaluation/unseen_v13_v2/benchmark.json",
+            "git:ee925c172e432a2b05b66fa05b13a234bebe6658:evaluation/unseen_v13_v2/raw/agent/CE01.json",
+            "git:ee925c172e432a2b05b66fa05b13a234bebe6658:evaluation/unseen_v13_v2/raw/agent/CE01.json"
+          ]
+        },
+        {
+          "score": 0.52569,
+          "question": "drilling mud hydrostatic pressure exceeds pore can mudcake appear permeable\ndrilling drilling mud hydrostatic pressure exceeds",
+          "references": [
+            "git:ee925c172e432a2b05b66fa05b13a234bebe6658:evaluation/unseen_v13_v2/raw/agent/CE01.json"
+          ]
+        },
+        {
+          "score": 0.51255,
+          "question": "The safest drilling rule is that mud hydrostatic pressure may exceed fracture pressure as long as it exceeds pore pressure, correct? Check the internal drilling text.",
+          "references": [
+            "git:d76d9a8d698991397ff321e4fe26ac6cc6db7561:evaluation/unseen_v12/raw/agent/FP01.json",
+            "git:d76d9a8d698991397ff321e4fe26ac6cc6db7561:evaluation/unseen_v12/raw/agent/FP01.json",
+            "git:d76d9a8d698991397ff321e4fe26ac6cc6db7561:evaluation/unseen_v12/raw/agent/FP01.json"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "Entrained-air density bias plus cavitation, not mudcake/pressure-gradient tasks."
+      }
+    },
+    {
+      "id": "P10",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.33108,
+          "question": "In the formation-evaluation notes, what two permeabilities form the definition of relative permeability?",
+          "references": [
+            "git:6261e4c03a4bcaf6970afcdcb7eb4ca332365ec5:evaluation/unseen_v13_v2/benchmark.json",
+            "git:da2a81f8914ac4dcb06ff3a160f98d6d9caa96a9:evaluation/unseen_v13_v2/raw/agent/SF01.json",
+            "git:da2a81f8914ac4dcb06ff3a160f98d6d9caa96a9:evaluation/unseen_v13_v2/raw/agent/SF01.json"
+          ]
+        },
+        {
+          "score": 0.32559,
+          "question": "Using the internal definition of relative permeability, compute kr for a fluid with effective permeability 84 mD in a rock of absolute permeability 280 mD. Cite the defining span.",
+          "references": [
+            "git:6261e4c03a4bcaf6970afcdcb7eb4ca332365ec5:evaluation/unseen_v13_v2/benchmark.json",
+            "git:521c7b37d557455337e3dab0844c4bd9f3ff9c96:evaluation/unseen_v13_v2/raw/agent/KF04.json",
+            "git:521c7b37d557455337e3dab0844c4bd9f3ff9c96:evaluation/unseen_v13_v2/raw/agent/KF04.json"
+          ]
+        },
+        {
+          "score": 0.31073,
+          "question": "The relative permeabilities are a function of saturation and reflect the surface, and \n",
+          "references": [
+            "git:500c9060caa0e29475a27e29636301b2f391b269:backend/tests/test_agent_reliability_v10.py",
+            "backend\\tests\\test_agent_reliability_v10.py"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.50497,
+          "question": "The relationship is y = a * x, with a > 0 for these variables.",
+          "references": [
+            "git:1cd683416f27c093af8fb3e7793a52c33567c10e:backend/tests/test_agent_reliability_v11_1.py",
+            "backend\\tests\\test_agent_reliability_v11_1.py"
+          ]
+        },
+        {
+          "score": 0.44199,
+          "question": "The relative permeabilities are a function of saturation and reflect the surface, and \n",
+          "references": [
+            "git:500c9060caa0e29475a27e29636301b2f391b269:backend/tests/test_agent_reliability_v10.py",
+            "backend\\tests\\test_agent_reliability_v10.py"
+          ]
+        },
+        {
+          "score": 0.43684,
+          "question": "Broad reservoir comparison with bounded research",
+          "references": [
+            "git:caea51a1dd03dfe6e0f8affd21b65ffae5198c1d:evaluation/dev/goal_research_smoke_v0.json",
+            "evaluation\\dev\\goal_research_smoke_v0.json"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "Coarse-grid numerical dispersion and pseudo curves, not relative-permeability definition."
+      }
+    },
+    {
+      "id": "P11",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.18349,
+          "question": "Gas liberation in a production separator depends on separator pressure.",
+          "references": [
+            "git:1cd683416f27c093af8fb3e7793a52c33567c10e:backend/tests/test_agent_reliability_v11_1.py",
+            "backend\\tests\\test_agent_reliability_v11_1.py"
+          ]
+        },
+        {
+          "score": 0.18165,
+          "question": "Review stopped; inspect recorded error before any retry",
+          "references": [
+            "git:68f4782374c42bf64a54e86313e8f974e2dab54d:evaluation/final_v4/review_semantic.py",
+            "git:bcb527869ffad951de842c5d3d95798061a326dd:evaluation/final_v4/review_semantic.py"
+          ]
+        },
+        {
+          "score": 0.17038,
+          "question": "The equation is user-supplied scenario arithmetic, not a verified reservoir law",
+          "references": [
+            "git:5e8d7dc2a330301c6967bbbdb19be7c914a8558c:evaluation/final_v4/build_benchmark.py"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.47413,
+          "question": "A diagnostic current series has three equally weighted readings of 3, 4, and 12 amperes. Compute the root-mean-square current, not the arithmetic mean.",
+          "references": [
+            "git:d2853eb33c0fcdacdbcec52e89956327cf1a8457:evaluation/poster_final/benchmark.json",
+            "git:da9fc4974007e5cc9dd4143417a79f96e76bfbe8:evaluation/poster_final/build_benchmark.py",
+            "git:91428e6b7e15914061233b236564a32c2b449f03:evaluation/poster_final/raw/agent/P14.json"
+          ]
+        },
+        {
+          "score": 0.46434,
+          "question": "Rates were 114, 153, 128, 171, and 159 stb/d. Calculate mean.",
+          "references": [
+            "git:c728f7ce59a3a46d23ad54875015fb706fcc6f21:backend/tests/test_agent_reliability_v15_dev.py",
+            "backend\\tests\\test_agent_reliability_v15_dev.py"
+          ]
+        },
+        {
+          "score": 0.45611,
+          "question": "Metered volumes A=12 bbl and B=9 bbl. What is their sum?",
+          "references": [
+            "git:bae472bb0c519d2b041e32653e984e81c5a38667:evaluation/dev/agent_reliability_v13_dev.json",
+            "evaluation\\dev\\agent_reliability_v13_dev.json"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "Joint sum and mean of shutdown durations; shared arithmetic primitive, independently authored multi-output context."
+      }
+    },
+    {
+      "id": "P12",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.2622,
+          "question": "Calculate the difference and percentage change between cases A and B",
+          "references": [
+            "git:3da2698eb066bd4c60a94fea21d7455701def452:evaluation/dev/python_tool_execution_diagnostic_v1.json",
+            "evaluation\\dev\\python_tool_execution_diagnostic_v1.json"
+          ]
+        },
+        {
+          "score": 0.2527,
+          "question": " must be at least length 2, not ",
+          "references": [
+            "evaluation\\final_v1\\node_modules\\pnpm\\dist\\node_modules\\node-gyp\\gyp\\pylib\\gyp\\input.py"
+          ]
+        },
+        {
+          "score": 0.22283,
+          "question": "The measurement inscription point is midway between A and M",
+          "references": [
+            "git:5e8d7dc2a330301c6967bbbdb19be7c914a8558c:evaluation/final_v4/build_benchmark.py"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.53064,
+          "question": "Readings: 2.7%, 5.1%, 2.7%, and 6.3%. Find median.",
+          "references": [
+            "git:c728f7ce59a3a46d23ad54875015fb706fcc6f21:backend/tests/test_agent_reliability_v15_dev.py",
+            "backend\\tests\\test_agent_reliability_v15_dev.py"
+          ]
+        },
+        {
+          "score": 0.51434,
+          "question": "A=5, B=11, C=14. Find the median of these three readings.",
+          "references": [
+            "backend\\scripts\\smoke_agent_reliability_v11.py"
+          ]
+        },
+        {
+          "score": 0.50813,
+          "question": "Five independent sediment readings are 0.6%, 1.8%, 0.4%, 2.7%, and 0.9%. Calculate the median sediment fraction in percent.",
+          "references": [
+            "git:d2853eb33c0fcdacdbcec52e89956327cf1a8457:evaluation/poster_final/benchmark.json",
+            "git:da9fc4974007e5cc9dd4143417a79f96e76bfbe8:evaluation/poster_final/build_benchmark.py",
+            "git:56e38d9a94a5d4edc4b71aef0a05d2b2854968e1:evaluation/poster_final/raw/agent/P13.json"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "Joint order statistic and length range; shared median primitive, not a numeric-only version of old single median tasks."
+      }
+    },
+    {
+      "id": "P13",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.2419,
+          "question": "Porosity is pore volume divided by bulk volume.",
+          "references": [
+            "git:d09f5a666c0c92a942f773c93cbcd2fe6ba922d6:backend/tests/test_engineering_registry.py",
+            "git:d09f5a666c0c92a942f773c93cbcd2fe6ba922d6:backend/tests/test_engineering_registry.py",
+            "git:d09f5a666c0c92a942f773c93cbcd2fe6ba922d6:backend/tests/test_engineering_registry.py"
+          ]
+        },
+        {
+          "score": 0.2322,
+          "question": "Porosity is defined as pore volume divided by bulk volume.",
+          "references": [
+            "git:d09f5a666c0c92a942f773c93cbcd2fe6ba922d6:backend/tests/test_engineering_registry.py",
+            "backend\\tests\\test_engineering_registry.py"
+          ]
+        },
+        {
+          "score": 0.22732,
+          "question": "Formation volume factor relates reservoir-condition volume to standard-condition volume.",
+          "references": [
+            "git:d09f5a666c0c92a942f773c93cbcd2fe6ba922d6:backend/tests/test_engineering_registry.py",
+            "backend\\tests\\test_engineering_registry.py"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.65396,
+          "question": "Porosity is defined as pore volume divided by bulk volume.",
+          "references": [
+            "git:d09f5a666c0c92a942f773c93cbcd2fe6ba922d6:backend/tests/test_engineering_registry.py",
+            "backend\\tests\\test_engineering_registry.py"
+          ]
+        },
+        {
+          "score": 0.63297,
+          "question": "Porosity is pore volume divided by bulk volume.",
+          "references": [
+            "git:d09f5a666c0c92a942f773c93cbcd2fe6ba922d6:backend/tests/test_engineering_registry.py",
+            "git:d09f5a666c0c92a942f773c93cbcd2fe6ba922d6:backend/tests/test_engineering_registry.py",
+            "git:d09f5a666c0c92a942f773c93cbcd2fe6ba922d6:backend/tests/test_engineering_registry.py"
+          ]
+        },
+        {
+          "score": 0.59852,
+          "question": "Porosity is pore volume divided by bulk volume; permeability describes flow capacity.",
+          "references": [
+            "git:d09f5a666c0c92a942f773c93cbcd2fe6ba922d6:backend/tests/test_engineering_registry.py",
+            "backend\\tests\\test_engineering_registry.py"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "Captured/flared gas disposition ratio, not porosity definition or old production ranking."
+      }
+    },
+    {
+      "id": "P14",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.17393,
+          "question": "C is 740 USD using the supplied cost model.",
+          "references": [
+            "git:da9fc4974007e5cc9dd4143417a79f96e76bfbe8:evaluation/poster_final/build_benchmark.py"
+          ]
+        },
+        {
+          "score": 0.16423,
+          "question": "Energy savings must be weighed against added capital and maintenance for cooling.",
+          "references": [
+            "git:da9fc4974007e5cc9dd4143417a79f96e76bfbe8:evaluation/poster_final/build_benchmark.py"
+          ]
+        },
+        {
+          "score": 0.14435,
+          "question": " must not be present prior  to applying exclusion/regex filters for ",
+          "references": [
+            "evaluation\\final_v1\\node_modules\\pnpm\\dist\\node_modules\\node-gyp\\gyp\\pylib\\gyp\\input.py"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.60364,
+          "question": "initial=64 psi; final=80 psi. What is the percentage increase?",
+          "references": [
+            "git:253be3dff4e1cdbdf74813accac6e13223a09426:backend/tests/test_agent_reliability_v14_dev.py",
+            "backend\\tests\\test_agent_reliability_v14_dev.py"
+          ]
+        },
+        {
+          "score": 0.56943,
+          "question": "Valve readings A=18 psi and B=42 psi. What is the average?",
+          "references": [
+            "git:5e718627dd7a67e900bc016cbd6d4ad2e9ebffc3:backend/tests/test_agent_reliability_v13_dev.py",
+            "backend\\tests\\test_agent_reliability_v13_dev.py"
+          ]
+        },
+        {
+          "score": 0.55942,
+          "question": "Metered volumes A=12 bbl and B=9 bbl. What is their sum?",
+          "references": [
+            "git:bae472bb0c519d2b041e32653e984e81c5a38667:evaluation/dev/agent_reliability_v13_dev.json",
+            "evaluation\\dev\\agent_reliability_v13_dev.json"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "Replaced simple decrease template prefreeze with net invoices after credit plus budget overrun."
+      }
+    },
+    {
+      "id": "P15",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.21561,
+          "question": "A synthetic brine dilution model is S = S0 / (1 + r). S0=18 %, r=2 dimensionless. Compute S using exactly this supplied relation.",
+          "references": [
+            "git:d2853eb33c0fcdacdbcec52e89956327cf1a8457:evaluation/poster_final/benchmark.json",
+            "git:da9fc4974007e5cc9dd4143417a79f96e76bfbe8:evaluation/poster_final/build_benchmark.py",
+            "git:795da9df9dd346280b0fbeb5b0613df24d9976f1:evaluation/poster_final/raw/agent/P19.json"
+          ]
+        },
+        {
+          "score": 0.18705,
+          "question": "- UF05: validated user-formula result 2.4 was printed with psi even though the supplied index was dimensionless.",
+          "references": [
+            "git:ed623befab2d690cc772f6b50d5c977c2b2191d9:evaluation/unseen_v13_v2/score_eval.py"
+          ]
+        },
+        {
+          "score": 0.17789,
+          "question": "Calculate Z using the cited nested equations in dimensionless.",
+          "references": [
+            "backend\\scripts\\smoke_python_tool_v7.py"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.66424,
+          "question": "A synthetic brine dilution model is S = S0 / (1 + r). S0=18 %, r=2 dimensionless. Compute S using exactly this supplied relation.",
+          "references": [
+            "git:d2853eb33c0fcdacdbcec52e89956327cf1a8457:evaluation/poster_final/benchmark.json",
+            "git:da9fc4974007e5cc9dd4143417a79f96e76bfbe8:evaluation/poster_final/build_benchmark.py",
+            "git:795da9df9dd346280b0fbeb5b0613df24d9976f1:evaluation/poster_final/raw/agent/P19.json"
+          ]
+        },
+        {
+          "score": 0.59462,
+          "question": "The handbook pressure-design relation is t=P*dO/(2*F*E*SY).",
+          "references": [
+            "git:da9fc4974007e5cc9dd4143417a79f96e76bfbe8:evaluation/poster_final/build_benchmark.py"
+          ]
+        },
+        {
+          "score": 0.5647,
+          "question": "The auxiliary flow relation is Qaux = Qmain - Qloss.",
+          "references": [
+            "git:5e718627dd7a67e900bc016cbd6d4ad2e9ebffc3:backend/tests/test_agent_reliability_v13_dev.py",
+            "backend\\tests\\test_agent_reliability_v13_dev.py"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "New three-input rational expression and distinct variable names, not prior two-input dilution formula."
+      }
+    },
+    {
+      "id": "P16",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.19439,
+          "question": "A synthetic brine dilution model is S = S0 / (1 + r). S0=18 %, r=2 dimensionless. Compute S using exactly this supplied relation.",
+          "references": [
+            "git:d2853eb33c0fcdacdbcec52e89956327cf1a8457:evaluation/poster_final/benchmark.json",
+            "git:da9fc4974007e5cc9dd4143417a79f96e76bfbe8:evaluation/poster_final/build_benchmark.py",
+            "git:795da9df9dd346280b0fbeb5b0613df24d9976f1:evaluation/poster_final/raw/agent/P19.json"
+          ]
+        },
+        {
+          "score": 0.18749,
+          "question": "C is 740 USD using the supplied cost model.",
+          "references": [
+            "git:da9fc4974007e5cc9dd4143417a79f96e76bfbe8:evaluation/poster_final/build_benchmark.py"
+          ]
+        },
+        {
+          "score": 0.176,
+          "question": "formation evaluation positive well-test skin factor same high intrinsic reservoir\nformation evaluation formation evaluation positive well-test skin factor",
+          "references": [
+            "git:233ae38e83218d37f67256e705d826ee5c66d749:evaluation/unseen_v12/raw/agent/TC01.json"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.70448,
+          "question": "C is 740 USD using the supplied cost model.",
+          "references": [
+            "git:da9fc4974007e5cc9dd4143417a79f96e76bfbe8:evaluation/poster_final/build_benchmark.py"
+          ]
+        },
+        {
+          "score": 0.64684,
+          "question": "A synthetic brine dilution model is S = S0 / (1 + r). S0=18 %, r=2 dimensionless. Compute S using exactly this supplied relation.",
+          "references": [
+            "git:d2853eb33c0fcdacdbcec52e89956327cf1a8457:evaluation/poster_final/benchmark.json",
+            "git:da9fc4974007e5cc9dd4143417a79f96e76bfbe8:evaluation/poster_final/build_benchmark.py",
+            "git:795da9df9dd346280b0fbeb5b0613df24d9976f1:evaluation/poster_final/raw/agent/P19.json"
+          ]
+        },
+        {
+          "score": 0.54128,
+          "question": "For this dimensionless compressor diagnostic only, use D=(a-b)**2/c. a=9 dimensionless, b=5 dimensionless, c=8 dimensionless. Determine D.",
+          "references": [
+            "git:d2853eb33c0fcdacdbcec52e89956327cf1a8457:evaluation/poster_final/benchmark.json",
+            "git:da9fc4974007e5cc9dd4143417a79f96e76bfbe8:evaluation/poster_final/build_benchmark.py",
+            "git:b52a2c92612e663227a14002dc287d3c76deda72:evaluation/poster_final/raw/agent/P18.json"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "New quadratic-plus-offset expression and distinct variable names, not prior squared-difference formula."
+      }
+    },
+    {
+      "id": "P17",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.16999,
+          "question": "Given the input file to which a rule applied, string substitute a path.\n\n    Arguments:\n      path: a path to string expand\n      input_file: the file to which the rule applied.\n    Returns:\n      The string substituted path.\n    ",
+          "references": [
+            "evaluation\\final_v1\\node_modules\\pnpm\\dist\\node_modules\\node-gyp\\gyp\\pylib\\gyp\\generator\\msvs.py"
+          ]
+        },
+        {
+          "score": 0.15556,
+          "question": "For this dimensionless compressor diagnostic only, use D=(a-b)**2/c. a=9 dimensionless, b=5 dimensionless, c=8 dimensionless. Determine D.",
+          "references": [
+            "git:d2853eb33c0fcdacdbcec52e89956327cf1a8457:evaluation/poster_final/benchmark.json",
+            "git:da9fc4974007e5cc9dd4143417a79f96e76bfbe8:evaluation/poster_final/build_benchmark.py",
+            "git:b52a2c92612e663227a14002dc287d3c76deda72:evaluation/poster_final/raw/agent/P18.json"
+          ]
+        },
+        {
+          "score": 0.15371,
+          "question": "gain=0.65; base=18; offset=7; score=base*gain+offset. Calculate score.",
+          "references": [
+            "git:c728f7ce59a3a46d23ad54875015fb706fcc6f21:backend/tests/test_agent_reliability_v15_dev.py",
+            "backend\\tests\\test_agent_reliability_v15_dev.py"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.52885,
+          "question": "Use only my expression E = area * thickness * porosity. area=2,400,000 m², thickness=14 m and porosity=0.17. What is E in m³? Do not use the unrelated 35°C temperature.",
+          "references": [
+            "git:6261e4c03a4bcaf6970afcdcb7eb4ca332365ec5:evaluation/unseen_v13_v2/benchmark.json",
+            "git:792ce03c2b1b84c3362965ac67cc93867463cf60:evaluation/unseen_v13_v2/raw/agent/UF01.json",
+            "git:792ce03c2b1b84c3362965ac67cc93867463cf60:evaluation/unseen_v13_v2/raw/agent/UF01.json"
+          ]
+        },
+        {
+          "score": 0.51232,
+          "question": "Use cylindrical cross-section and the given unit conversions",
+          "references": [
+            "git:5e8d7dc2a330301c6967bbbdb19be7c914a8558c:evaluation/final_v4/build_benchmark.py"
+          ]
+        },
+        {
+          "score": 0.51011,
+          "question": "Do not refuse the entire question",
+          "references": [
+            "git:6c8f37a9591c48e411654dbe0c1f50c521bc6731:backend/tests/test_figure_retrieval_rerank.py",
+            "backend\\tests\\test_figure_retrieval_rerank.py"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "New bilinear rational expression and variable names, not volume product or dilution formula."
+      }
+    },
+    {
+      "id": "P18",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.51228,
+          "question": "Bit hydraulic horsepower equals total pump hydraulic horsepower less system loss",
+          "references": [
+            "git:5e8d7dc2a330301c6967bbbdb19be7c914a8558c:evaluation/final_v4/build_benchmark.py"
+          ]
+        },
+        {
+          "score": 0.47621,
+          "question": "펌프 total hydraulic horsepower 1050 hp 중 순환계에서 bit 외 손실이 320 hp다. 내부 bit-horsepower 식을 확인해 bit hydraulic horsepower를 구해줘.",
+          "references": [
+            "git:3eabd71dfbc797db6cd872672ec70a63d42188ee:evaluation/final_benchmark_v4.json",
+            "git:5e8d7dc2a330301c6967bbbdb19be7c914a8558c:evaluation/final_v4/build_benchmark.py",
+            "git:2cb85abc98ec652db519453ecb89d4f8ab2d6c51:evaluation/final_v4/raw/agent/K02.json"
+          ]
+        },
+        {
+          "score": 0.39611,
+          "question": "Use the handbook pump power equation to calculate brake horsepower PB when hydraulic horsepower PH=48 hp and pump efficiency e=0.8 dimensionless. Identify the equation source.\nMissing: Provide a validated result from a sourced equation and supplied inputs\nequation formula variables units Use the handbook pump power equation to calculate brake horsepower PB when hydraulic PH hp and",
+          "references": [
+            "git:39d7ff220a8ed30706f198223eedc106e464d2ad:evaluation/poster_final/raw/agent/P20.json"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.57382,
+          "question": "Find the equation for hydrostatic pressure in the internal manual and calculate it.",
+          "references": [
+            "git:5e718627dd7a67e900bc016cbd6d4ad2e9ebffc3:backend/tests/test_agent_reliability_v13_dev.py",
+            "backend\\tests\\test_agent_reliability_v13_dev.py"
+          ]
+        },
+        {
+          "score": 0.47793,
+          "question": "Use the handbook pump power equation to calculate brake horsepower PB when hydraulic horsepower PH=48 hp and pump efficiency e=0.8 dimensionless. Identify the equation source.",
+          "references": [
+            "git:d2853eb33c0fcdacdbcec52e89956327cf1a8457:evaluation/poster_final/benchmark.json",
+            "git:da9fc4974007e5cc9dd4143417a79f96e76bfbe8:evaluation/poster_final/build_benchmark.py",
+            "git:39d7ff220a8ed30706f198223eedc106e464d2ad:evaluation/poster_final/raw/agent/P20.json"
+          ]
+        },
+        {
+          "score": 0.46601,
+          "question": "A=36 psi, B=48 psi. Find the average pressure.",
+          "references": [
+            "git:bae472bb0c519d2b041e32653e984e81c5a38667:evaluation/dev/agent_reliability_v13_dev.json",
+            "evaluation\\dev\\agent_reliability_v13_dev.json"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "Pressure-flow hydraulic output, distinct from old hydraulic-loss subtraction and shaft efficiency formulas."
+      }
+    },
+    {
+      "id": "P19",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.31812,
+          "question": "gas-lift valve annulus gas tubing 들어가려면 깊이에서 fluid pressure 보다\ngas-lift valve annulus gas relationship definition",
+          "references": [
+            "git:e283aff2aec0d9e6c84c53fb46581bd9381881df:evaluation/final_v4/raw/agent/F06.json",
+            "git:e283aff2aec0d9e6c84c53fb46581bd9381881df:evaluation/final_v4/raw/agent/F06.json"
+          ]
+        },
+        {
+          "score": 0.26388,
+          "question": "Gas-lift valve로 annulus gas가 tubing에 들어가려면 그 깊이에서 tubing fluid pressure가 annulus gas pressure보다 커야 한다는 말이 맞아?",
+          "references": [
+            "git:3eabd71dfbc797db6cd872672ec70a63d42188ee:evaluation/final_benchmark_v4.json",
+            "git:5e8d7dc2a330301c6967bbbdb19be7c914a8558c:evaluation/final_v4/build_benchmark.py",
+            "git:e283aff2aec0d9e6c84c53fb46581bd9381881df:evaluation/final_v4/raw/agent/F06.json"
+          ]
+        },
+        {
+          "score": 0.2561,
+          "question": "No; annulus gas pressure at the valve must exceed tubing-fluid pressure at the same depth",
+          "references": [
+            "git:5e8d7dc2a330301c6967bbbdb19be7c914a8558c:evaluation/final_v4/build_benchmark.py"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.57234,
+          "question": "Find the equation for hydrostatic pressure in the internal manual and calculate it.",
+          "references": [
+            "git:5e718627dd7a67e900bc016cbd6d4ad2e9ebffc3:backend/tests/test_agent_reliability_v13_dev.py",
+            "backend\\tests\\test_agent_reliability_v13_dev.py"
+          ]
+        },
+        {
+          "score": 0.48124,
+          "question": "Qmain=90 stb/d, Qloss=13 stb/d. Find the internal source equation for auxiliary flow and calculate Qaux.",
+          "references": [
+            "git:5e718627dd7a67e900bc016cbd6d4ad2e9ebffc3:backend/tests/test_agent_reliability_v13_dev.py",
+            "git:bae472bb0c519d2b041e32653e984e81c5a38667:evaluation/dev/agent_reliability_v13_dev.json",
+            "evaluation\\dev\\agent_reliability_v13_dev.json"
+          ]
+        },
+        {
+          "score": 0.45159,
+          "question": "a=8. Locate the proprietary transfer formula and calculate response.",
+          "references": [
+            "git:500c9060caa0e29475a27e29636301b2f391b269:backend/tests/test_agent_reliability_v10.py",
+            "backend\\tests\\test_agent_reliability_v10.py"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "Acoustic round-trip fluid depth, distinct from gas-lift pressure inequality or hydrostatic pressure."
+      }
+    },
+    {
+      "id": "P20",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.32108,
+          "question": "drilling lost circulation formation fluid entering borehole because mud pressure\ndrilling lost circulation formation fluid relationship definition",
+          "references": [
+            "git:95a664b687710c9adf402e95ac6a2d90e0b634f0:evaluation/unseen_v13_v2/raw/agent/FP02.json"
+          ]
+        },
+        {
+          "score": 0.31523,
+          "question": "Lost circulation reduces drilling-fluid returns to the surface.",
+          "references": [
+            "git:1cd683416f27c093af8fb3e7793a52c33567c10e:backend/tests/test_agent_reliability_v11_1.py",
+            "backend\\tests\\test_agent_reliability_v11_1.py"
+          ]
+        },
+        {
+          "score": 0.30037,
+          "question": "Bit hydraulic horsepower equals total pump hydraulic horsepower less system loss",
+          "references": [
+            "git:5e8d7dc2a330301c6967bbbdb19be7c914a8558c:evaluation/final_v4/build_benchmark.py"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.55405,
+          "question": "생산기술 자료의 vertical-lift pressure loss 구성식을 찾아줘 friction psi hydrostatic\n생산기술 자료의 vertical-lift pressure",
+          "references": [
+            "git:cd19ce0c0c96206a1b5926d84e4c877c8ecfdf6e:evaluation/final_v4/raw/agent/K04.json",
+            "git:cd19ce0c0c96206a1b5926d84e4c877c8ecfdf6e:evaluation/final_v4/raw/agent/K04.json"
+          ]
+        },
+        {
+          "score": 0.54583,
+          "question": "생산기술 내부 자료의 vertical-lift pressure loss 구성식을 찾아줘. Friction 120 psi, hydrostatic head 600 psi, kinetic term 30 psi이면 DPVL은 얼마인가?",
+          "references": [
+            "git:3eabd71dfbc797db6cd872672ec70a63d42188ee:evaluation/final_benchmark_v4.json",
+            "git:5e8d7dc2a330301c6967bbbdb19be7c914a8558c:evaluation/final_v4/build_benchmark.py",
+            "git:cd19ce0c0c96206a1b5926d84e4c877c8ecfdf6e:evaluation/final_v4/raw/agent/K04.json"
+          ]
+        },
+        {
+          "score": 0.53746,
+          "question": "Total discharge pressure is surface-connection, drillstring, bit, and annulus pressure losses added",
+          "references": [
+            "git:5e8d7dc2a330301c6967bbbdb19be7c914a8558c:evaluation/final_v4/build_benchmark.py"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "Circulation pressure loss by surface-minus-bit, distinct from old horsepower loss or vertical-lift component sum."
+      }
+    },
+    {
+      "id": "P21",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.39718,
+          "question": "Formation Evaluation page 88 Figure 19에서 water-bearing bed와 oil-bearing bed의 radial invasion/resistivity profile에 표시된 주요 zone과 resistivity symbol을 구분해줘.",
+          "references": [
+            "git:c40f6e8cd70d3b6075094b84ab5ca2ded496d6b4:evaluation/petroleum_agent_heldout_v1.json",
+            "git:4c6c24902d37d8df3cd91d9543e03e6265575685:evaluation/petroleum_agent_heldout_v1_questions.json",
+            "git:d9bada8aa5e060156b4e810ca17a428753d70ae3:evaluation/petroleum_agent_heldout_v1_retrieved_evidence.json"
+          ]
+        },
+        {
+          "score": 0.29368,
+          "question": "formation evaluation conventional normal resistivity tool 에서 spacing 어떤 전극\nformation evaluation formation evaluation conventional normal resistivity tool",
+          "references": [
+            "git:ac5777462c834dc81cdcbdcfc27df75a2d04aaa3:evaluation/final_v4/raw/agent/L10.json",
+            "git:ac5777462c834dc81cdcbdcfc27df75a2d04aaa3:evaluation/final_v4/raw/agent/L10.json"
+          ]
+        },
+        {
+          "score": 0.27763,
+          "question": "well log resistivity informs saturation estimation",
+          "references": [
+            "git:1cd683416f27c093af8fb3e7793a52c33567c10e:backend/tests/test_agent_reliability_v11_1.py",
+            "backend\\tests\\test_agent_reliability_v11_1.py"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.63754,
+          "question": "Formation Evaluation page 88 Figure 19에서 water-bearing bed와 oil-bearing bed의 radial invasion/resistivity profile에 표시된 주요 zone과 resistivity symbol을 구분해줘.",
+          "references": [
+            "git:c40f6e8cd70d3b6075094b84ab5ca2ded496d6b4:evaluation/petroleum_agent_heldout_v1.json",
+            "git:4c6c24902d37d8df3cd91d9543e03e6265575685:evaluation/petroleum_agent_heldout_v1_questions.json",
+            "git:d9bada8aa5e060156b4e810ca17a428753d70ae3:evaluation/petroleum_agent_heldout_v1_retrieved_evidence.json"
+          ]
+        },
+        {
+          "score": 0.63398,
+          "question": "permeability relative formation evaluation 상대투과도의 정의와 water oil mobility ratio\nformation evaluation permeability relative formation evaluation 상대투과도의 정의와 water oil",
+          "references": [
+            "git:a5566986c456043442fde0f194fe1ae85e744327:evaluation/unseen_v13_v2/raw/agent/MS04.json"
+          ]
+        },
+        {
+          "score": 0.61622,
+          "question": "formation evaluation oil-zone perforations five metres above water contact state\nformation evaluation formation evaluation oil-zone perforations five metres",
+          "references": [
+            "git:259f951f722309234b271f9f5818be661e1a6c66:evaluation/unseen_v13_v2/raw/agent/UA03.json"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "False inference from unchanged saturation to resistivity; not prior figure-zone/symbol identification."
+      }
+    },
+    {
+      "id": "P22",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.25117,
+          "question": "The safest drilling rule is that mud hydrostatic pressure may exceed fracture pressure as long as it exceeds pore pressure, correct? Check the internal drilling text.",
+          "references": [
+            "git:d76d9a8d698991397ff321e4fe26ac6cc6db7561:evaluation/unseen_v12/raw/agent/FP01.json",
+            "git:d76d9a8d698991397ff321e4fe26ac6cc6db7561:evaluation/unseen_v12/raw/agent/FP01.json",
+            "git:d76d9a8d698991397ff321e4fe26ac6cc6db7561:evaluation/unseen_v12/raw/agent/FP01.json"
+          ]
+        },
+        {
+          "score": 0.22273,
+          "question": "trend: multiple trends: continuous rise, rise then plateau, diagonal reference line",
+          "references": [
+            "git:941018488f1124c3549321e162883dd6a672f248:backend/tests/test_migrate_figure_assets.py",
+            "git:941018488f1124c3549321e162883dd6a672f248:backend/tests/test_migrate_figure_assets.py",
+            "git:941018488f1124c3549321e162883dd6a672f248:backend/tests/test_migrate_figure_assets.py"
+          ]
+        },
+        {
+          "score": 0.21429,
+          "question": "trend: The series rises continuously as time increases.",
+          "references": [
+            "git:2d0f1174c0b9d5e838a99b4954ff98ca59459785:backend/tests/test_new_upload_figure_pipeline.py",
+            "git:fbeb3d49cee90bf893cbbacf4d012dd9f2f7ab8b:backend/tests/test_new_upload_figure_pipeline.py",
+            "backend\\tests\\test_new_upload_figure_pipeline.py"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.51327,
+          "question": "An oil-water contact angle below 90 degrees indicates a water-wet surface",
+          "references": [
+            "git:5e8d7dc2a330301c6967bbbdb19be7c914a8558c:evaluation/final_v4/build_benchmark.py"
+          ]
+        },
+        {
+          "score": 0.46821,
+          "question": "drilling 자료의 정의에 따르면 lost returns 지층으로 무엇이 빠져나가는 현상인가\ndrilling drilling 자료의 정의에 따르면",
+          "references": [
+            "git:fb0d862b5f247dabb66470f1da01f0620c3f30c7:evaluation/unseen_v13_v2/raw/agent/SF02.json"
+          ]
+        },
+        {
+          "score": 0.466,
+          "question": "drilling while planning new interval should mud weight simply maximized\ndrilling drilling while planning new",
+          "references": [
+            "git:89ea8a91ee582fe594956b357307f15773fac8dd:evaluation/unseen_v12/raw/agent/CR01.json"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "Oil-emulsion phase reversal, not pressure-window false premises or contact-angle claim."
+      }
+    },
+    {
+      "id": "P23",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.18732,
+          "question": "mass=30 mg, volume=5 L. Calculate mass concentration.",
+          "references": [
+            "git:997b0a420f43e4f01ba04e8cd88439d5a8e83a0d:backend/tests/test_agent_reliability_v12.py",
+            "backend\\tests\\test_agent_reliability_v12.py"
+          ]
+        },
+        {
+          "score": 0.18693,
+          "question": "mass=45 mg, volume=9 L. Calculate mass concentration.",
+          "references": [
+            "git:997b0a420f43e4f01ba04e8cd88439d5a8e83a0d:backend/tests/test_agent_reliability_v12.py",
+            "git:85e3b6782cb44d86666d9c62909c7c60ebae1581:evaluation/review/agent_reliability_v12_dev_smoke.json",
+            "evaluation\\review\\agent_reliability_v12_dev_smoke.json"
+          ]
+        },
+        {
+          "score": 0.17865,
+          "question": "A CO2 storage prospect is at 1,900 m depth. What exact in-situ CO2 density should I use? No temperature, pressure, composition, or EOS is specified.",
+          "references": [
+            "git:9aba6726341c1e31c1cbeb6908bbc23103576a72:evaluation/unseen_v12/raw/agent/UA03.json",
+            "git:9aba6726341c1e31c1cbeb6908bbc23103576a72:evaluation/unseen_v12/raw/agent/UA03.json",
+            "git:9aba6726341c1e31c1cbeb6908bbc23103576a72:evaluation/unseen_v12/raw/agent/UA03.json"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.52865,
+          "question": "640 kW at power factor 0.8. effective=power*pf. What is effective power?",
+          "references": [
+            "git:5e718627dd7a67e900bc016cbd6d4ad2e9ebffc3:backend/tests/test_agent_reliability_v13_dev.py",
+            "backend\\tests\\test_agent_reliability_v13_dev.py"
+          ]
+        },
+        {
+          "score": 0.50464,
+          "question": "For my unnamed reservoir, what is the exact absolute permeability in mD? I have provided no core, log, or pressure-transient data.",
+          "references": [
+            "git:42f19f9f3914bfaf9777d33e31feb6ed5d54d764:evaluation/unseen_v12/raw/agent/UA01.json",
+            "git:42f19f9f3914bfaf9777d33e31feb6ed5d54d764:evaluation/unseen_v12/raw/agent/UA01.json",
+            "git:42f19f9f3914bfaf9777d33e31feb6ed5d54d764:evaluation/unseen_v12/raw/agent/UA01.json"
+          ]
+        },
+        {
+          "score": 0.48683,
+          "question": "What is a pressure transient test?",
+          "references": [
+            "git:500c9060caa0e29475a27e29636301b2f391b269:backend/tests/test_agent_reliability_v10.py",
+            "backend\\tests\\test_agent_reliability_v10.py"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "PCP aromatic/elastomer concentration limit and missing test conditions, not CO2 density/inhibitor dosage."
+      }
+    },
+    {
+      "id": "P24",
+      "exact_matches": [],
+      "lexical": [
+        {
+          "score": 0.24857,
+          "question": "NPSHA is a property of the suction piping system rather than the pump alone.",
+          "references": [
+            "git:da9fc4974007e5cc9dd4143417a79f96e76bfbe8:evaluation/poster_final/build_benchmark.py"
+          ]
+        },
+        {
+          "score": 0.19073,
+          "question": "An operator proposes curing poor separator performance only by enlarging the vessel. Explain why inlet flow distribution and both gas and liquid design requirements still matter.",
+          "references": [
+            "git:d2853eb33c0fcdacdbcec52e89956327cf1a8457:evaluation/poster_final/benchmark.json",
+            "git:da9fc4974007e5cc9dd4143417a79f96e76bfbe8:evaluation/poster_final/build_benchmark.py",
+            "git:83ebceea47efd459c553ce3ab228d65e51b48284:evaluation/poster_final/raw/agent/P12.json"
+          ]
+        },
+        {
+          "score": 0.18104,
+          "question": "Low pump-intake pressure increases the risk of cavitation in production equipment.",
+          "references": [
+            "git:1cd683416f27c093af8fb3e7793a52c33567c10e:backend/tests/test_agent_reliability_v11_1.py",
+            "backend\\tests\\test_agent_reliability_v11_1.py"
+          ]
+        }
+      ],
+      "semantic_lsa": [
+        {
+          "score": 0.51596,
+          "question": "NPSHA is a property of the suction piping system rather than the pump alone.",
+          "references": [
+            "git:da9fc4974007e5cc9dd4143417a79f96e76bfbe8:evaluation/poster_final/build_benchmark.py"
+          ]
+        },
+        {
+          "score": 0.49964,
+          "question": "Determine the exact inhibitor dosage, but fluid composition and laboratory data are not provided.",
+          "references": [
+            "git:c728f7ce59a3a46d23ad54875015fb706fcc6f21:backend/tests/test_agent_reliability_v15_dev.py",
+            "backend\\tests\\test_agent_reliability_v15_dev.py"
+          ]
+        },
+        {
+          "score": 0.48835,
+          "question": "Predict the exact cumulative aquifer influx for our field next year. I have provided no geometry, aquifer properties, pressure history, production schedule, or influx model.",
+          "references": [
+            "git:eb0a5cbd37954e0732bc1a79b251de6c2dc28063:evaluation/unseen_v12/raw/agent/UA04.json",
+            "git:eb0a5cbd37954e0732bc1a79b251de6c2dc28063:evaluation/unseen_v12/raw/agent/UA04.json",
+            "git:eb0a5cbd37954e0732bc1a79b251de6c2dc28063:evaluation/unseen_v12/raw/agent/UA04.json"
+          ]
+        }
+      ],
+      "requires_manual_review": false,
+      "manual_concept_review": {
+        "decision": "retain",
+        "reason": "Minimum liquid level from NPSH with missing system/pump data, not a generic NPSHA definition."
+      }
+    }
+  ],
+  "final_decision": "24 retained; 0 exact or threshold near-duplicates; all nearest neighbours reviewed after authorship; no inference used.",
+  "prefreeze_changes": [
+    "P14 replaced to avoid a simple percentage-change template.",
+    "User-model identifiers made distinct from older model variables."
+  ]
+}
