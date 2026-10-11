@@ -74,6 +74,8 @@ class SimulationSpec(BaseModel):
     expression: str
     output_name: str = "result"
     output_unit: str | None = None
+    source_equation: str | None = None
+    fixed_fact_ids: dict[str, str] = Field(default_factory=dict)
     objective: Literal["max", "min"] = "max"
     max_cases: int = Field(default=100, ge=1, le=100)
 
@@ -147,6 +149,7 @@ class GoalExecutionState(BaseModel):
     goal_achieved: bool = False
     blocked_reasons: list[str] = Field(default_factory=list)
     source_complete: bool | None = None
+    formula_ready: bool = False
     no_progress_count: int = 0
     verified: bool = False
     synthesized: bool = False
@@ -183,6 +186,7 @@ class GoalExecutionState(BaseModel):
             "pending_verifications": sorted(self.pending_verifications),
             "blocked": sorted(self.blocked_reasons),
             "source_complete": self.source_complete,
+            "formula_ready": self.formula_ready,
             "verified": self.verified,
             "analyzed": self.analyzed,
         }
@@ -201,4 +205,5 @@ class GoalExecutionState(BaseModel):
             "goal_achieved": self.goal_achieved,
             "blocked_reasons": self.blocked_reasons.copy(),
             "source_complete": self.source_complete,
+            "formula_ready": self.formula_ready,
         }

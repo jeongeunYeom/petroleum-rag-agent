@@ -9,7 +9,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from app.models.goal_research_schemas import GoalCriterion, GoalResearchRequest
-from app.services.goal_intent import asks_for_api_gravity_calculation
+from app.services.goal_intent import asks_for_api_gravity_calculation, user_equation
 from app.services.user_fact_registry import UserFactRegistry
 from app.services.user_fact_registry import UNIT
 
@@ -26,7 +26,7 @@ class RequestedOutput(BaseModel):
 
 
 class CalculationRequestIR(BaseModel):
-    schema_version: int = 1
+    schema_version: int = 2
     request_id: str = "CRI-1"
     computation_class: Literal["generic_arithmetic", "generic_statistics", "specialist_formula", "mixed"]
     requested_operation_types: list[str] = Field(default_factory=list)
@@ -39,6 +39,15 @@ class CalculationRequestIR(BaseModel):
     target_concepts: list[str] = Field(default_factory=list)
     requested_units: dict[str, str] = Field(default_factory=dict)
     evidence_requirements: list[str] = Field(default_factory=list)
+    operation_family: str = ""
+    operands: list[str] = Field(default_factory=list)
+    series: list[str] = Field(default_factory=list)
+    weights: list[str] = Field(default_factory=list)
+    time_points: list[str] = Field(default_factory=list)
+    piecewise_segments: list[str] = Field(default_factory=list)
+    requires_domain_formula: bool = False
+    requires_user_formula: bool = False
+    requires_external_evidence: bool = False
 
 
 OPERATIONS = {
@@ -53,6 +62,7 @@ OPERATIONS = {
     "std_unspecified": r"\b(?:standard deviation|std)\b|표준편차",
     "rms": r"\brms\b|root[- ]mean[- ]square|제곱평균제곱근",
     "variance_population": r"\bpopulation variance\b|모분산",
+    "variance": r"\bvariance\b|분산",
     "coefficient_of_variation": r"\b(?:coefficient of variation|cv)\b|변동계수",
     "range": r"\brange\b|범위",
     "sum": r"\b(?:sum|total)\b|합계|총합",
@@ -64,6 +74,16 @@ OPERATIONS = {
     "difference": r"\b(?:difference|subtract)\b|차이|차감",
     "normalize_by_max": r"\bnormaliz\w*\s+by\s+(?:the\s+)?max\w*|최대값\s*정규화",
     "linear_regression": r"\b(?:linear regression|least[- ]squares line)\b|선형회귀",
+    "weighted_average": r"\bweighted\s+(?:average|mean)\b|가중\s*평균",
+    "combined_rate": r"\b(?:combined|overall)\s+(?:rate|speed)\b|전체\s*(?:평균\s*)?속도|총\s*거리.{0,20}총\s*시간",
+    "interpolation": r"\binterpolat\w*\b|보간",
+    "trapezoid": r"\btrapezoid\w*\b|사다리꼴\s*(?:적분|면적)",
+    "geometric_mean": r"\bgeometric\s+mean\b|기하\s*평균",
+    "repeated_percent": r"\b(?:repeated|successive)\s+percent\b|%\s*(?:증가|감소|increase|decrease).{0,25}(?:번|회|times?)|반복\s*(?:증가|감소)",
+    "elapsed_time": r"\belapsed\s+time\b|경과\s*시간|걸린\s*시간",
+    "allocation": r"\b(?:proportional\s+allocation|allocate\s+by\s+weight)\b|비례\s*(?:할당|배분)",
+    "piecewise_cost": r"\bpiecewise\s+(?:cost|price)\b|구간별\s*(?:비용|요금)|추가.{0,20}(?:단가|요금)",
+    "percent_conversion": r"\b(?:percent\s+to\s+fraction|fraction\s+to\s+percent)\b|퍼센트.{0,12}소수|소수.{0,12}퍼센트",
 }
 AGGREGATES = {"mean", "median", "std_population", "std_sample", "std_unspecified", "rms",
               "variance_population", "coefficient_of_variation", "range", "sum", "maximum", "minimum"}
@@ -72,6 +92,8 @@ GENERIC = set(OPERATIONS)
 
 def validate_ir(ir: CalculationRequestIR) -> list[str]:
     errors: list[str] = []
+    if ir.requires_domain_formula and ir.requires_user_formula:
+        errors.append("conflicting_formula_source_requirements")
     scenarios = [item.scenario_id for item in ir.scenarios]
     if len(scenarios) != len(set(scenarios)):
         errors.append("duplicate_scenario")
@@ -122,11 +144,20 @@ def parse_request_ir(request: GoalResearchRequest, criteria: list[GoalCriterion]
             specialist_relation_required=True, target_concepts=["API_gravity", "API"],
             requested_units={"API_gravity": "dimensionless"},
             evidence_requirements=["formula", "numeric_facts"],
+            operation_family="specialist_formula", requires_domain_formula=True,
+            requires_external_evidence=bool(request.use_external),
         )
     goal = " ".join([request.goal or request.topic, *(item.description for item in criteria if item.required)])
+    literal_user_formula = user_equation(f"{request.topic} {request.goal or ''}")
     found = [name for name, pattern in OPERATIONS.items() if re.search(pattern, goal, re.I)]
     if "std_population" in found or "std_sample" in found:
         found = [name for name in found if name != "std_unspecified"]
+    if "variance_population" in found:
+        found = [name for name in found if name != "variance"]
+    if "weighted_average" in found:
+        found = [name for name in found if name != "mean"]
+    if "geometric_mean" in found:
+        found = [name for name in found if name != "mean"]
     scenarios = _scenarios(request.topic, goal)
     target_match = re.search(r"\b(?:calculate|compute|estimate|derive|report)\s+(?:the\s+)?([A-Za-z][A-Za-z0-9_]*)(?:\s+(?:for|in|per|using|then)\b|\s*[,.;]|$)", goal, re.I)
     target = target_match.group(1) if target_match else "result"
@@ -179,13 +210,23 @@ def parse_request_ir(request: GoalResearchRequest, criteria: list[GoalCriterion]
     computation_class = ("mixed" if specialist and found else "specialist_formula" if specialist else
                          "generic_statistics" if any(name in AGGREGATES | {"ranking", "linear_regression"} for name in found)
                          else "generic_arithmetic")
+    parsed_facts = UserFactRegistry.from_topic(request.topic).records
     return CalculationRequestIR(computation_class=computation_class, requested_operation_types=found,
         scenarios=[RequestedScenario(scenario_id=value) for value in scenarios], requested_outputs=outputs,
         requested_aggregates=aggregates, requested_ranking=ranked,
         requested_extrema=[name for name in ("maximum", "minimum") if name in found],
         specialist_relation_required=specialist, target_concepts=list(dict.fromkeys(concepts)),
         requested_units={item.semantic_name: item.unit for item in outputs if item.unit},
-        evidence_requirements=["formula", "numeric_facts"] if specialist else ["numeric_facts"])
+        evidence_requirements=(["user_formula", "numeric_facts"] if literal_user_formula else
+                               ["formula", "numeric_facts"] if specialist else ["numeric_facts"]),
+        operation_family=("specialist_formula" if specialist else "generic_statistics" if aggregates else "generic_arithmetic"),
+        operands=[row.fact_id for row in parsed_facts],
+        series=[row.fact_id for row in parsed_facts if row.name.startswith("day_")],
+        weights=[row.fact_id for row in parsed_facts if row.name.endswith("_weight")],
+        time_points=[row.fact_id for row in parsed_facts if row.name in {"start_time", "end_time"}],
+        requires_domain_formula=specialist and not bool(literal_user_formula),
+        requires_user_formula=bool(literal_user_formula),
+        requires_external_evidence=bool(request.use_external))
 
 
 async def resolve_request_ir(request: GoalResearchRequest, criteria: list[GoalCriterion], ollama: object) -> CalculationRequestIR | None:

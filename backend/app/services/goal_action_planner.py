@@ -12,7 +12,7 @@ from app.services.goal_intent import (GoalIntent, GoalIntentKind, SourceRequirem
 
 CALC_WORDS = re.compile(r"\b(?:calculat\w*|comput\w*|derive|mean|average|sum|rank\w*|compare\s+numeric|difference|ratio)\b|계산|산출|평균|합계|총합|비율|차이|순위|그래프", re.I)
 ANALYZE_WORDS = re.compile(r"\b(?:rank\w*|best|worst|maximum|minimum|optim\w*|sensitiv\w*|compare|plot|graph|chart)\b|순위|최적|최대|최소|최댓|최솟|민감도|그래프|도표", re.I)
-SIMULATE_WORDS = re.compile(r"\b(?:simulat\w*|sweep|parameter\s+range|vary\w*)\b|시뮬레이션|매개변수\s*변화|범위\s*탐색|범위로\s*계산|바꿔가며|바꾸면서|변화시키(?:며|면서|고|면|기|다|는|ㄴ)?|간격으로", re.I)
+SIMULATE_WORDS = re.compile(r"\b(?:sweep|parameter\s+range|vary\w*|sensitiv\w*|optim\w*)\b|매개변수\s*변화|범위\s*탐색|범위로\s*계산|바꿔가며|바꾸면서|변화시키(?:며|면서|고|면|기|다|는|ㄴ)?|간격으로|부터.{0,30}까지", re.I)
 ENGINEERING_TERMS = {
     "공극률": "porosity", "공극 부피": "pore volume", "공극부피": "pore volume",
     "벌크 부피": "bulk volume", "벌크부피": "bulk volume",
@@ -20,6 +20,8 @@ ENGINEERING_TERMS = {
     "포화도": "saturation", "이수압": "mud hydrostatic pressure",
     "지층압": "formation pressure", "방사 유동": "radial flow",
     "압력 도함수": "pressure derivative", "모세관압": "capillary pressure",
+    "모세관 진입압": "capillary entry pressure", "밀봉 성능": "seal capacity",
+    "저류층 밀봉": "reservoir seal",
 }
 
 
@@ -69,6 +71,18 @@ class GoalActionPlanner:
         if state.goal_achieved:
             return action(GoalActionType.STOP if state.synthesized else GoalActionType.SYNTHESIZE,
                           "goal_achieved")
+        if (intent is not None and intent.kind == GoalIntentKind.PREMISE_CHECK and state.verified
+                and "premise_relation_not_supported_by_retrieved_evidence" in state.unresolved_information
+                and counts[GoalActionType.RETRIEVE] < request.max_retrieval_actions):
+            return action(GoalActionType.RETRIEVE, "premise_evidence_retry",
+                          GoalActionPlanner.query(request, state, intent))
+        if (intent is not None and intent.kind == GoalIntentKind.KB_FORMULA_CALC
+                and formula_ready and formula_inputs_ready and numeric_inputs_ready
+                and permission and not state.computation_ids and not wants_simulation
+                and python_calls_used < request.max_python_calls):
+            if last and last.action_type == GoalActionType.CALCULATE and last.status != "completed":
+                return action(GoalActionType.STOP, "calculation_blocked")
+            return action(GoalActionType.CALCULATE, "formula_ready")
         if state.no_progress_count >= request.no_progress_patience:
             return action(GoalActionType.STOP, "no_progress")
         if intent is not None:

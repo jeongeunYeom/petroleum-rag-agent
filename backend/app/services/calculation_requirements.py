@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass, field
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -45,31 +46,75 @@ def scenario_fact_match(name: str, scenario: str) -> bool:
     return normalized.startswith(key) and len(normalized) > len(key)
 
 
-def select_formula_candidate(evidence: list[dict[str, Any]], intent: str,
-                             fact_names: list[str]) -> FormulaSourceRecord | None:
-    """Accept only one clearly relevant parsed source formula; ties remain unresolved."""
-    tokens = {normalize_symbol(token) for token in re.findall(r"[A-Za-z][A-Za-z0-9_]*", intent)}
+@dataclass(frozen=True)
+class FormulaSelectionRecord:
+    formula_id: str | None
+    score: int
+    lhs_score: int
+    variable_overlap_score: int
+    context_score: int
+    heading_score: int
+    ambiguity_margin: int
+    selection_reason: str
+    candidates_found: int
+    candidate_scores: dict[str, int] = field(default_factory=dict)
+
+
+def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
+                            fact_names: list[str]) -> tuple[FormulaSourceRecord | None, FormulaSelectionRecord]:
+    """Rank literal source spans; weak or conflicting matches remain unresolved."""
+    tokens = {normalize_symbol(token) for token in re.findall(r"[A-Za-z][A-Za-z0-9_]*|[가-힣]{2,}", intent)}
     if re.search(r"API도", intent, re.I):
         tokens.add("api")
     facts = {normalize_symbol(name) for name in fact_names}
-    ranked: list[tuple[int, FormulaSourceRecord]] = []
+    stopwords = {"from", "with", "calculate", "compute", "equation", "formula", "the", "for", "and",
+                 "using", "find", "given", "what", "식으로", "계산해줘", "내부", "자료에서"}
+    context_tokens = {token for token in tokens if len(token) > 2 and token not in stopwords}
+    source_by_id = {str(row.get("evidence_id")): str(row.get("text") or "") for row in evidence}
+    ranked: list[tuple[int, int, int, int, int, FormulaSourceRecord]] = []
     for record in FormulaSourceRegistry.from_evidence(evidence).records:
         if not record.expression_candidate:
             continue
         lhs = normalize_symbol(record.expression_candidate.split("=", 1)[0])
-        if re.fullmatch(UNIT, lhs, re.I):
-            continue
         variables = expression_variables(record.expression_candidate) or set()
+        if not variables:
+            # A worked numeric example is not a reusable relation to bind.
+            continue
         overlap = sum(any(name == normalize_symbol(variable) or name.endswith(normalize_symbol(variable))
                           for name in facts) for variable in variables)
-        if facts and not overlap:
-            continue
-        score = (4 if lhs in tokens else 0) + overlap + (1 if variables else 0)
+        source_text = source_by_id.get(record.source_id, "")
+        line_start = source_text.rfind("\n", 0, record.span_start) + 1
+        line_end = source_text.find("\n", record.span_end)
+        line_end = len(source_text) if line_end < 0 else line_end
+        nearby = source_text[line_start:line_end]
+        heading = [source_text[line_start:record.span_start]]
+        heading_tokens = {normalize_symbol(word) for line in heading for word in
+                          re.findall(r"[A-Za-z][A-Za-z0-9_]*|[가-힣]{2,}", line)}
+        nearby_tokens = {normalize_symbol(word) for word in
+                         re.findall(r"[A-Za-z][A-Za-z0-9_]*|[가-힣]{2,}", nearby)}
+        lhs_score = 6 if lhs in tokens else 0
+        variable_score = 2 * overlap
+        heading_score = min(4, len(context_tokens & heading_tokens))
+        context_score = min(4, len(context_tokens & nearby_tokens))
+        score = lhs_score + variable_score + heading_score + context_score
         if score >= 2:
-            ranked.append((score, record))
-    ranked.sort(key=lambda pair: pair[0], reverse=True)
-    return ranked[0][1] if ranked and (len(ranked) == 1 or ranked[0][0] > ranked[1][0] or
-                                     ranked[0][1].normalized_span == ranked[1][1].normalized_span) else None
+            ranked.append((score, lhs_score, variable_score, context_score, heading_score, record))
+    ranked.sort(key=lambda row: row[0], reverse=True)
+    if not ranked:
+        return None, FormulaSelectionRecord(None, 0, 0, 0, 0, 0, 0, "no_relevant_literal_formula", 0)
+    top = ranked[0]
+    runner = next((row for row in ranked[1:] if row[5].equation_ast != top[5].equation_ast), None)
+    margin = top[0] - runner[0] if runner else top[0]
+    selected = top[5] if top[0] >= 2 and (runner is None or margin >= 2) else None
+    reason = "unique_contextual_match" if selected else "ambiguous_literal_formulas"
+    return selected, FormulaSelectionRecord(selected.formula_id if selected else None, *top[:5],
+                                            margin, reason, len(ranked),
+                                            {row[5].formula_id: row[0] for row in ranked})
+
+
+def select_formula_candidate(evidence: list[dict[str, Any]], intent: str,
+                             fact_names: list[str]) -> FormulaSourceRecord | None:
+    return rank_formula_candidates(evidence, intent, fact_names)[0]
 
 
 class FormulaVariableRequirement(BaseModel):

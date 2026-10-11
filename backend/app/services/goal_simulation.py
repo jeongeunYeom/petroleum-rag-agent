@@ -10,6 +10,7 @@ import keyword
 import math
 import operator
 import re
+import statistics
 from dataclasses import replace
 from pathlib import Path
 
@@ -48,7 +49,7 @@ def direct_operation_operands(text: str, facts: UserFactRegistry,
     names = [row.name for row in facts.records]
     selected: dict[str, tuple[str, str]] = {}
     missing = []
-    for operation in ("ratio", "difference"):
+    for operation in ("ratio", "difference", "divide", "subtract"):
         if operation not in operations:
             continue
         candidates = []
@@ -57,13 +58,13 @@ def direct_operation_operands(text: str, facts: UserFactRegistry,
                 if left == right:
                     continue
                 a, b = re.escape(left), re.escape(right)
-                separator = (r"\s*(?:/|divided\s+by|to)\s*" if operation == "ratio" else
+                separator = (r"\s*(?:/|divided\s+by|to)\s*" if operation in {"ratio", "divide"} else
                              r"\s*(?:-|minus)\s*")
                 english_or_symbol = re.search(
                     rf"(?<![A-Za-z0-9_]){a}{separator}{b}(?![A-Za-z0-9_])", text, re.I)
                 korean = (re.search(rf"(?<![A-Za-z0-9_]){a}(?:를|을)?\s*{b}(?:로|으로)\s*나눈|"
                                      rf"(?<![A-Za-z0-9_]){a}\s*대\s*{b}(?![A-Za-z0-9_])", text)
-                          if operation == "ratio" else
+                          if operation in {"ratio", "divide"} else
                           re.search(rf"(?<![A-Za-z0-9_]){a}에서\s*{b}(?:를|을)?\s*뺀", text))
                 if english_or_symbol or korean:
                     candidates.append((left, right))
@@ -71,8 +72,101 @@ def direct_operation_operands(text: str, facts: UserFactRegistry,
         if len(candidates) == 1:
             selected[operation] = candidates[0]
         else:
-            missing.append("비율의 분자/분모 순서" if operation == "ratio" else "차이를 낼 값의 순서")
+            missing.append("비율의 분자/분모 순서" if operation in {"ratio", "divide"} else "차이를 낼 값의 순서")
     return selected, missing
+
+
+def _special_direct(operation: str, text: str, values: dict[str, float],
+                    units: dict[str, str]) -> tuple[str, dict[str, float], dict[str, str | None]]:
+    """Build bounded code from named user facts; calculate an independent expected result."""
+    if operation == "weighted_average":
+        weights = {key[:-7]: value for key, value in values.items() if key.endswith("_weight")}
+        if not weights or any(key not in values for key in weights):
+            raise ValueError("weighted average needs paired values and weights")
+        pairs = {key: (values[key], weight) for key, weight in weights.items()}
+        if sum(weights.values()) <= 0 or any(weight < 0 for weight in weights.values()):
+            raise ValueError("invalid nonpositive weights")
+        code = f"pairs = {pairs!r}\nresult['weighted_average'] = sum(x*w for x,w in pairs.values()) / sum(w for x,w in pairs.values())\n"
+        expected = {"weighted_average": math.fsum(value * weight for value, weight in pairs.values()) / math.fsum(weights.values())}
+        return code, expected, {"weighted_average": units[next(iter(weights))]}
+    if operation == "combined_rate":
+        distances = [value for key, value in values.items() if key.endswith("_distance") or units[key] in {"m", "km"}]
+        times = [value for key, value in values.items() if key.endswith("_time") or units[key] in {"h", "min"}]
+        if not distances or len(distances) != len(times) or sum(times) <= 0:
+            raise ValueError("combined rate needs matching positive total distance and time")
+        if len({units[key] for key in values if key.endswith("_distance") or units[key] in {"m", "km"}}) != 1 or len({units[key] for key in values if key.endswith("_time") or units[key] in {"h", "min"}}) != 1:
+            raise ValueError("combined rate has incompatible units")
+        distance_unit = next((units[key] for key in values if key.endswith("_distance") or units[key] in {"m", "km"}), "")
+        time_unit = next((units[key] for key in values if key.endswith("_time") or units[key] in {"h", "min"}), "")
+        code = f"distances = {distances!r}\ntimes = {times!r}\nresult['combined_rate'] = sum(distances) / sum(times)\n"
+        return code, {"combined_rate": math.fsum(distances) / math.fsum(times)}, {"combined_rate": f"{distance_unit}/{time_unit}"}
+    if operation in {"interpolation", "trapezoid"}:
+        points = sorted((float(key[4:]) if key.startswith("day_") else
+                         float(key[6:].replace("n", "-").replace("p", ".")), value)
+                        for key, value in values.items()
+                        if re.fullmatch(r"day_\d+|point_[np\d]+", key))
+        if len(points) < 2 or len({x for x, _ in points}) != len(points):
+            raise ValueError("integration/interpolation needs at least two distinct points")
+        if operation == "trapezoid":
+            code = f"points = {points!r}\nresult['trapezoid'] = sum((points[i+1][0]-points[i][0])*(points[i+1][1]+points[i][1])/2 for i in range(len(points)-1))\n"
+            expected = sum((right_x-left_x)*(left_y+right_y)/2 for (left_x,left_y),(right_x,right_y) in zip(points, points[1:]))
+            return code, {"trapezoid": expected}, {"trapezoid": None}
+        target = values.get("target_day", values.get("target_x"))
+        if target is None or target < points[0][0] or target > points[-1][0]:
+            raise ValueError("interpolation target must be within supplied points")
+        pair = next(((a,b) for a,b in zip(points, points[1:]) if a[0] <= target <= b[0]), None)
+        if pair is None:
+            raise ValueError("interpolation bracket unavailable")
+        (x0,y0),(x1,y1) = pair
+        code = (f"x0,y0,x1,y1,target = {x0!r},{y0!r},{x1!r},{y1!r},{target!r}\n"
+                "result['interpolation'] = y0 + (target-x0)*(y1-y0)/(x1-x0)\n")
+        return code, {"interpolation": y0 + (target-x0)*(y1-y0)/(x1-x0)}, {"interpolation": None}
+    if operation == "repeated_percent":
+        if not {"initial", "change_percent", "repeat_count"} <= set(values):
+            raise ValueError("repeated percent needs initial value, rate and count")
+        count = values["repeat_count"]
+        if count < 1 or count > 100 or int(count) != count:
+            raise ValueError("invalid repeat count")
+        sign = -1 if re.search(r"감소|decreas", text, re.I) else 1 if re.search(r"증가|increas", text, re.I) else 0
+        if not sign:
+            raise ValueError("increase/decrease direction missing")
+        factor = 1 + sign * values["change_percent"] / 100
+        if factor < 0:
+            raise ValueError("invalid percent change")
+        code = f"result['repeated_percent'] = values['initial'] * ({factor!r} ** int(values['repeat_count']))\n"
+        return code, {"repeated_percent": values["initial"] * factor ** int(count)}, {"repeated_percent": units["initial"] or None}
+    if operation == "allocation":
+        weights = {key[:-7]: value for key, value in values.items() if key.endswith("_weight")}
+        if "total" not in values or not weights or sum(weights.values()) <= 0 or any(value < 0 for value in weights.values()):
+            raise ValueError("allocation needs total and positive weights")
+        code = f"weights = {weights!r}\nresult.update({{'allocation_'+k: values['total']*w/sum(weights.values()) for k,w in weights.items()}})\n"
+        expected = {"allocation_"+key: values["total"]*weight/sum(weights.values()) for key,weight in weights.items()}
+        return code, expected, {key: units["total"] or None for key in expected}
+    if operation == "piecewise_cost":
+        tiers = sorted({int(match.group(1)) for key in values if (match := re.fullmatch(r"tier_(\d+)_(?:volume|price)", key))})
+        if not tiers or any(f"tier_{index}_volume" not in values or f"tier_{index}_price" not in values for index in tiers):
+            raise ValueError("piecewise cost needs each tier volume and price")
+        pairs = [(values[f"tier_{index}_volume"], values[f"tier_{index}_price"]) for index in tiers]
+        code = f"tiers = {pairs!r}\nresult['piecewise_cost'] = sum(volume*price for volume,price in tiers)\n"
+        return code, {"piecewise_cost": math.fsum(volume*price for volume,price in pairs)}, {"piecewise_cost": "USD"}
+    raise ValueError("unsupported direct operation")
+
+
+def direct_readiness(text: str, facts: UserFactRegistry, operations: list[str]) -> list[str]:
+    """Check special primitive operands before selecting Python; never search KB for them."""
+    special = {"weighted_average", "combined_rate", "interpolation", "trapezoid",
+               "repeated_percent", "allocation", "piecewise_cost"}
+    chosen = set(operations) & special
+    if not chosen:
+        return []
+    if len(operations) != 1:
+        return ["요청한 직접 계산의 연산 구분"]
+    try:
+        _special_direct(operations[0], text, {row.name: row.value for row in facts.records},
+                        {row.name: row.unit for row in facts.records})
+    except ValueError as exc:
+        return [str(exc)]
+    return []
 
 
 def _arithmetic_value(node: ast.AST, values: dict[str, float]) -> float:
@@ -186,13 +280,19 @@ async def run_direct_arithmetic(settings: Settings, request: GoalResearchRequest
                                 operations: list[str], calc_id: str,
                                 operand_orders: dict[str, tuple[str, str]] | None = None) -> ComputationRecord:
     """Execute explicit generic arithmetic from user facts without retrieval or an LLM plan."""
-    allowed = {"mean", "sum", "ranking", "maximum", "minimum", "range", "ratio", "difference"}
+    allowed = {"mean", "sum", "ranking", "maximum", "minimum", "range", "ratio", "difference",
+               "median", "std_population", "std_sample", "variance_population", "variance",
+               "geometric_mean", "add", "multiply", "divide", "subtract", "elapsed_time",
+               "percent_conversion", "weighted_average", "combined_rate", "interpolation",
+               "trapezoid", "repeated_percent", "allocation", "piecewise_cost"}
     selected = list(dict.fromkeys(operations))
     operand_orders = operand_orders or {}
-    if (not selected or set(selected) - allowed or len(facts.records) < 2
-            or len(facts.records) > 30):
+    special = {"weighted_average", "combined_rate", "interpolation", "trapezoid",
+               "repeated_percent", "allocation", "piecewise_cost"}
+    if (not selected or set(selected) - allowed or len(facts.records) < (1 if selected == ["percent_conversion"] else 2)
+            or len(facts.records) > 30 or (set(selected) & special and len(selected) != 1)):
         raise ValueError("direct arithmetic inputs or operations are unsupported")
-    if any(name not in operand_orders for name in set(selected) & {"ratio", "difference"}):
+    if any(name not in operand_orders for name in set(selected) & {"ratio", "difference", "divide", "subtract"}):
         raise ValueError("direct arithmetic operand order missing")
     if not (request.allow_python_execution and request.python_execution_approved):
         raise PermissionError("Python calculation requires approval")
@@ -200,7 +300,7 @@ async def run_direct_arithmetic(settings: Settings, request: GoalResearchRequest
     if len(set(names)) != len(names):
         raise ValueError("ambiguous duplicate user input names")
     units = {row.unit.casefold() for row in facts.records}
-    if len(units) != 1:
+    if len(units) != 1 and not (set(selected) <= {"elapsed_time"} or set(selected) & special):
         raise ValueError("incompatible direct arithmetic units")
     workspace = settings.agent_workspace_dir.resolve()
     analysis_dir = (workspace / "results" / "goal-research" / run_id / "analysis").resolve()
@@ -211,19 +311,47 @@ async def run_direct_arithmetic(settings: Settings, request: GoalResearchRequest
     permissions.require_tool_level(AgentPermissionLevel.APPROVED_EXECUTION, AgentToolName.RUN_PYTHON)
     python = PythonTools(scoped, permissions)
     values = {row.name: row.value for row in facts.records}
+    special_code = ""
+    special_expected: dict[str, float] = {}
+    special_units: dict[str, str | None] = {}
+    if set(selected) & special:
+        special_code, special_expected, special_units = _special_direct(
+            selected[0], request.goal or request.topic, values, {row.name: row.unit for row in facts.records})
+    if "elapsed_time" in selected and not {"start_time", "end_time"} <= set(values):
+        raise ValueError("elapsed time needs explicit start and end")
+    if "geometric_mean" in selected and any(value <= 0 for value in values.values()):
+        raise ValueError("geometric mean requires positive inputs")
     if any(name not in values for pair in operand_orders.values() for name in pair):
         raise ValueError("direct arithmetic operand is not a supplied fact")
-    if "ratio" in selected and values[operand_orders["ratio"][1]] == 0:
+    if any(operation in selected and values[operand_orders[operation][1]] == 0
+           for operation in ("ratio", "divide")):
         raise ValueError("ratio denominator is zero")
     display_names = ({name: name.removesuffix("_rate") for name in values}
                      if all(name.endswith("_rate") for name in values) else
                      {name: name for name in values})
     code = (
-        "import json\nimport math\n" + f"values = {values!r}\n" +
+        "import json\nimport math\nimport statistics\n" + f"values = {values!r}\n" +
         f"labels = {display_names!r}\n" +
         "numbers = list(values.values())\nresult = {}\n" +
         ("result['mean'] = sum(numbers) / len(numbers)\n" if "mean" in selected else "") +
+        ("result['median'] = statistics.median(numbers)\n" if "median" in selected else "") +
+        ("result['std_population'] = statistics.pstdev(numbers)\n" if "std_population" in selected else "") +
+        ("result['std_sample'] = statistics.stdev(numbers)\n" if "std_sample" in selected else "") +
+        ("result['variance_population'] = statistics.pvariance(numbers)\n" if "variance_population" in selected else "") +
+        ("result['variance'] = statistics.pvariance(numbers)\n" if "variance" in selected else "") +
+        ("result['geometric_mean'] = statistics.geometric_mean(numbers)\n" if "geometric_mean" in selected else "") +
         ("result['sum'] = sum(numbers)\n" if "sum" in selected else "") +
+        ("result['add'] = sum(numbers)\n" if "add" in selected else "") +
+        ("result['multiply'] = math.prod(numbers)\n" if "multiply" in selected else "") +
+        (f"result['divide'] = values[{operand_orders['divide'][0]!r}] / values[{operand_orders['divide'][1]!r}]\n"
+         if "divide" in selected else "") +
+        (f"result['subtract'] = values[{operand_orders['subtract'][0]!r}] - values[{operand_orders['subtract'][1]!r}]\n"
+         if "subtract" in selected else "") +
+        ("result['elapsed_time'] = (values['end_time'] - values['start_time']) % 1440\n" if "elapsed_time" in selected else "") +
+        ("result['percent_conversion'] = numbers[0] / 100 if "
+         + repr(bool(facts.records[0].unit == "%")) + " else numbers[0] * 100\n"
+         if "percent_conversion" in selected else "") +
+        special_code +
         ("result['ranking'] = [labels[key] for key in sorted(values, key=lambda key: (-values[key], key))]\n"
          if "ranking" in selected else "") +
         ("result['maximum'] = max(numbers)\n" if "maximum" in selected else "") +
@@ -253,8 +381,35 @@ async def run_direct_arithmetic(settings: Settings, request: GoalResearchRequest
     expected = {}
     if "mean" in selected:
         expected["mean"] = sum(numbers) / len(numbers)
+    if "median" in selected:
+        expected["median"] = __import__("statistics").median(numbers)
+    if "std_population" in selected:
+        expected["std_population"] = __import__("statistics").pstdev(numbers)
+    if "std_sample" in selected:
+        expected["std_sample"] = __import__("statistics").stdev(numbers)
+    if "variance_population" in selected:
+        expected["variance_population"] = __import__("statistics").pvariance(numbers)
+    if "variance" in selected:
+        expected["variance"] = __import__("statistics").pvariance(numbers)
+    if "geometric_mean" in selected:
+        expected["geometric_mean"] = math.exp(sum(math.log(value) for value in numbers) / len(numbers))
     if "sum" in selected:
         expected["sum"] = sum(numbers)
+    if "add" in selected:
+        expected["add"] = sum(numbers)
+    if "multiply" in selected:
+        expected["multiply"] = math.prod(numbers)
+    if "divide" in selected:
+        left, right = operand_orders["divide"]
+        expected["divide"] = values[left] / values[right]
+    if "subtract" in selected:
+        left, right = operand_orders["subtract"]
+        expected["subtract"] = values[left] - values[right]
+    if "elapsed_time" in selected:
+        expected["elapsed_time"] = (values["end_time"] - values["start_time"]) % 1440
+    if "percent_conversion" in selected:
+        expected["percent_conversion"] = numbers[0] / 100 if facts.records[0].unit == "%" else numbers[0] * 100
+    expected.update(special_expected)
     if "ranking" in selected:
         expected["ranking"] = [display_names[key] for key in sorted(values, key=lambda key: (-values[key], key))]
     if "maximum" in selected:
@@ -277,7 +432,12 @@ async def run_direct_arithmetic(settings: Settings, request: GoalResearchRequest
     input_ids = [row.fact_id for row in facts.records]
     manifest = {f"OUT_{name}": {
         "name": name, "value": value,
-        "unit": None if isinstance(value, list) or name == "ratio" else facts.records[0].unit or None,
+        "unit": (special_units[name] if name in special_units else
+                 "%" if name == "percent_conversion" and facts.records[0].unit != "%" else
+                 None if isinstance(value, list) or name in {"ratio", "divide", "percent_conversion"} else
+                 "min" if name == "elapsed_time" else
+                 f"({facts.records[0].unit})^2" if name in {"variance", "variance_population"} and facts.records[0].unit else
+                 facts.records[0].unit or None),
         "semantic_type": "ranking" if isinstance(value, list) else "numeric",
         "source_fact_ids": input_ids, "required": True,
     } for name, value in output.items()}
@@ -306,8 +466,7 @@ def validate_expression(spec: SimulationSpec) -> None:
     if (not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,40}", spec.parameter.name) or
             keyword.iskeyword(spec.parameter.name)):
         raise ValueError("invalid simulation parameter name")
-    if (not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,40}", spec.output_name) or
-            keyword.iskeyword(spec.output_name)):
+    if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,40}", spec.output_name):
         raise ValueError("invalid simulation output name")
     if len(spec.expression) > 200 or any(abs(value) > 1e9 for value in (
         spec.parameter.start, spec.parameter.stop, spec.parameter.step

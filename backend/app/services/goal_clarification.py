@@ -49,28 +49,70 @@ def _requested_parameter(text: str, formula_variables: set[str]) -> str | None:
 
 
 def parse_user_simulation_spec(text: str) -> SimulationSpec | None:
-    """Accept one explicit, bounded single-parameter equation supplied by the user."""
+    """Accept one literal user equation with a bounded sweep and uniquely bound fixed inputs."""
     interval = _ENGLISH_RANGE.search(text) or _NAMED_RANGE.search(text)
-    step = _STEP.search(text) or _ENGLISH_STEP.search(text)
+    step = _ENGLISH_STEP.search(text) or _STEP.search(text)
     if not interval or not step:
         return None
     parameter = interval["name"]
     candidates = [match.group("equation").rstrip(" .\t") for match in EQUATION.finditer(text)]
-    candidates = [value for value in candidates if expression_variables(value) == {parameter}]
+    candidates = [value for value in candidates if parameter in (expression_variables(value) or set())]
     if len({normalize_formula(value) for value in candidates}) != 1:
         return None
     formula = candidates[0]
     try:
+        variables = (expression_variables(formula) or set()) - {parameter}
+        facts = UserFactRegistry.from_topic(text).records
+        bindings = {}
+        for variable in variables:
+            matches = {(fact.value, fact.canonical_unit, fact.fact_id) for fact in facts
+                       if normalize_symbol(fact.name) == normalize_symbol(variable)}
+            if len(matches) != 1:
+                return None
+            value, _, fact_id = next(iter(matches))
+            bindings[variable] = (value, fact_id)
+        tree = ast.parse(formula.split("=", 1)[1].strip(), mode="eval")
+
+        class Bind(ast.NodeTransformer):
+            def visit_Name(self, node: ast.Name) -> ast.AST:
+                return (ast.copy_location(ast.Constant(value=bindings[node.id][0]), node)
+                        if node.id in bindings else node)
+
+        expression = ast.unparse(Bind().visit(tree))
         spec = SimulationSpec(
             parameter=SimulationParameter(name=parameter, start=float(interval["start"]),
                                           stop=float(interval["stop"]), step=float(step["step"])),
-            output_name=formula.split("=", 1)[0].strip(), expression=formula.split("=", 1)[1].strip(),
+            output_name=formula.split("=", 1)[0].strip(), expression=expression,
+            source_equation=formula, fixed_fact_ids={key: value[1] for key, value in bindings.items()},
             objective="min" if re.search(r"최소|\bminimi[sz]e\b", text, re.I) else "max",
         )
         validate_expression(spec)
         return spec
     except ValueError:
         return None
+
+
+def user_simulation_missing(text: str, equation: str | None, users: UserFactRegistry) -> list[str]:
+    """Name only literal missing sweep inputs; never infer a model or a numeric value."""
+    interval = _ENGLISH_RANGE.search(text) or _NAMED_RANGE.search(text)
+    step = _ENGLISH_STEP.search(text) or _STEP.search(text)
+    missing = []
+    if not interval:
+        missing.append("변화시킬 변수와 시작·종료 값")
+    if not step:
+        missing.append("변수 변화 간격")
+    if not equation:
+        missing.append("사용자가 제공한 관계식")
+    if interval and equation:
+        parameter = normalize_symbol(interval["name"])
+        for variable in sorted(expression_variables(equation) or set()):
+            if normalize_symbol(variable) == parameter:
+                continue
+            matches = {fact.value for fact in users.records
+                       if normalize_symbol(fact.name) == normalize_symbol(variable)}
+            if len(matches) != 1:
+                missing.append(f"{variable} 값" if not matches else f"{variable} 값 확인")
+    return missing
 
 
 def _formula_for_goal(text: str, evidence: list[dict[str, Any]], user_source_id: str):
@@ -110,7 +152,7 @@ def simulation_readiness(text: str, evidence: list[dict[str, Any]],
     found_range = _RANGE.search(text)
     if not found_range:
         missing.append("변화시킬 변수와 시작·종료 값")
-    found_step = _STEP.search(text)
+    found_step = _ENGLISH_STEP.search(text) or _STEP.search(text)
     if not found_step:
         missing.append("변수 변화 간격")
     if formula is None:
