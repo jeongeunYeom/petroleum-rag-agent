@@ -8,6 +8,8 @@ from app.core.config import Settings
 from app.models.goal_research_schemas import GoalRunStatus, GoalStatus
 from app.services.formula_dependency import resolve_formula_dependencies
 from app.services.formula_source_registry import FormulaSourceRegistry
+from app.services.formula_source_registry import source_contains_equation
+from app.services.calculation_requirements import symbol_names
 from app.services.goal_execution_agent import GoalExecutionAgent
 from app.services.user_fact_registry import UserFactRegistry
 from test_agent_reliability_v19_dev import (PassingEvaluator, SyntheticResearch,
@@ -147,3 +149,92 @@ def test_explicit_source_values_bind_only_to_literal_evidence_facts(tmp_path, mo
     assert result.status == GoalStatus.ACHIEVED
     assert result.computations[0].output_manifest["OUT_RESULT"]["value"] == 4
     assert set(result.computations[0].input_fact_ids) == {"EFACT1", "EFACT2"}
+
+
+POROSITY_LAYOUT_SOURCE = (
+    "Formation factor is obtained from measured porosity.\n"
+    "F = a/fm\n"
+    "where m is the cementation factor and a is a constant."
+)
+
+
+def test_sourced_porosity_layout_keeps_raw_span_and_rejects_tampering():
+    evidence = [{"evidence_id": "KB1", "source_type": "knowledge_base",
+                 "text": POROSITY_LAYOUT_SOURCE}]
+    record = FormulaSourceRegistry.from_evidence(evidence).records[0]
+    assert record.raw_span == "F = a/fm"
+    assert record.expression_candidate == "F = a/phi**m"
+    assert record.required_variables == ["a", "m", "phi"]
+    assert source_contains_equation(record, POROSITY_LAYOUT_SOURCE)
+    assert not source_contains_equation(record.model_copy(update={"expression_candidate": "F=a/phi**(m+1)"}),
+                                        POROSITY_LAYOUT_SOURCE)
+    assert not source_contains_equation(record, "F = a/fm", record.expression_candidate)
+    assert {"phi", "porosity"} <= symbol_names("φ")
+    assert {"phi", "porosity"} <= symbol_names("phi")
+
+
+def test_unrelated_fm_is_never_rewritten():
+    for source in ("F=a/fm. fm is the measured frequency multiplier.",
+                   "Formation factor is obtained from measured porosity.\nF=a/fm\n"
+                   "where fm is the flow multiplier and m is the cementation factor and a is a constant.",
+                   "F=a/fm. m is the cementation factor and a is a constant."):
+        record = FormulaSourceRegistry.from_evidence([{
+            "evidence_id": "KB1", "source_type": "knowledge_base", "text": source,
+        }]).records[0]
+        assert record.expression_candidate.replace(" ", "") == "F=a/fm"
+        assert record.required_variables == ["a", "fm"]
+
+
+@pytest.mark.parametrize("porosity_symbol", ["phi", "porosity", "φ"])
+def test_porosity_layout_full_agent_calculates_without_fm_clarification(
+        tmp_path, monkeypatch, porosity_symbol):
+    result, _, _ = run_case(tmp_path, monkeypatch,
+        f"{porosity_symbol}=0.22, a=1, m=2. Find the internal formation factor equation and calculate F.",
+        POROSITY_LAYOUT_SOURCE)
+    assert result.status == GoalStatus.ACHIEVED
+    assert actions(result)[:5] == ["retrieve", "calculate", "verify", "synthesize", "stop"], [
+        (row["action_type"], row.get("status"), row.get("details", {}).get("error"),
+         row.get("details", {}).get("blocked_stage")) for row in result.action_history]
+    assert not result.clarification_question
+    assert "fm" not in " ".join(result.required_inputs).casefold()
+    calc = result.computations[0]
+    assert calc.validation_passed
+    assert calc.output_manifest["OUT_RESULT"]["value"] == pytest.approx(20.66115702479339)
+    assert calc.output_manifest["OUT_RESULT"]["unit"] == "dimensionless"
+    assert calc.source_formula == "F = a/phi**m"
+    assert calc.formula_source_ids == ["KB1"]
+
+
+def test_literal_greek_phi_equation_uses_safe_alias():
+    text = "Formation factor F=a/φ. Porosity φ is measured."
+    record = FormulaSourceRegistry.from_evidence([{
+        "evidence_id": "KB1", "source_type": "knowledge_base", "text": text,
+    }]).records[0]
+    assert record.raw_span == "F=a/φ"
+    assert record.expression_candidate == "F=a/phi"
+    assert source_contains_equation(record, text)
+
+
+def test_layout_with_pdf_equation_caption_keeps_the_exact_anchor():
+    text = ("F is the formation resistivity factor.\n"
+            "F is usually obtained from the measured porosity of the formation.\n"
+            "F  = a/fm\tEquation 2 Formation Resistivity Factor\n"
+            "where\nm is the cementation factor,\na is a constant.")
+    record = next(row for row in FormulaSourceRegistry.from_evidence([{
+        "evidence_id": "KB1", "source_type": "knowledge_base", "text": text,
+    }]).records if "fm" in row.raw_span)
+    assert record.raw_span == "F  = a/fm"
+    assert record.expression_candidate == "F  = a/phi**m"
+    assert source_contains_equation(record, text)
+
+
+def test_validated_formation_factor_feeds_downstream_formula(tmp_path, monkeypatch):
+    result, _, _ = run_case(tmp_path, monkeypatch,
+        "phi=0.22, a=1, m=2, V=3 kg. Find the internal Q equation and calculate Q.",
+        "Q=F*V. V (kg).\n" + POROSITY_LAYOUT_SOURCE)
+    assert result.status == GoalStatus.ACHIEVED
+    assert [calc.output_manifest["OUT_RESULT"]["name"] for calc in result.computations] == ["F", "Q"]
+    assert result.computations[0].output_manifest["OUT_RESULT"]["value"] == pytest.approx(20.66115702479339)
+    assert result.computations[1].output_manifest["OUT_RESULT"]["value"] == pytest.approx(61.98347107438016)
+    assert result.computations[1].validation_passed
+    assert any(value.startswith("CALC1:") for value in result.computations[1].input_fact_ids)

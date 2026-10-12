@@ -18,7 +18,7 @@ LEGACY_UNIT = (r"(?:USD/m|MMscf/d|psi/ft|kg/m(?:\^?3|³)|mg/L|mD[·*\-]ft|m(?:\^
         r"mg|kg|kJ|lbf|cP|°C|USD|달러|시간|분|min|m/s|m/h|mm|m|L|%|dimensionless)")
 UNIT = rf"(?:{COMPOUND_UNIT}|{LEGACY_UNIT}(?![A-Za-z0-9_/*^·²³⁻]))"
 ASSIGNMENT = re.compile(
-    rf"(?P<label>[A-Za-z][A-Za-z0-9 _/\-]{{0,48}}?)\s*[:=]\s*(?P<value>{NUMBER})\s*(?P<unit>{UNIT})?(?=$|[,;\s]|\.(?!\d)|[가-힣])",
+    rf"(?P<label>φ|[A-Za-z][A-Za-z0-9 _/\-]{{0,48}}?)\s*[:=]\s*(?P<value>{NUMBER})\s*(?P<unit>{UNIT})?(?=$|[,;\s]|\.(?!\d)|[가-힣])",
     re.IGNORECASE,
 )
 TUPLE_HEADER = re.compile(r"\((?P<header>[^()]+)\)\s*:")
@@ -186,7 +186,7 @@ def _number(raw: str) -> float | None:
 
 
 def _name(value: str) -> str:
-    return re.sub(r"[^A-Za-z0-9가-힣]+", "_", value.strip()).strip("_")
+    return re.sub(r"[^A-Za-z0-9가-힣]+", "_", value.strip().replace("φ", "phi")).strip("_")
 
 
 class UserFactRecord(BaseModel):
@@ -628,6 +628,8 @@ def validate_original_operands(text: str, facts: UserFactRegistry, *, list_opera
     for fact in facts.records:
         # Exact name anchors have precedence over heuristic aliases; last explicit correction wins.
         name = re.escape(fact.name).replace("_", r"[ _]+")
+        if fact.name.casefold() == "phi":
+            name = r"(?:phi|φ)"
         assignments = list(re.finditer(rf"(?<![\w:]){name}\s*[:=]\s*(?P<value>{NUMBER})\s*(?P<unit>{UNIT})?(?=$|[,;\s]|\.(?!\d)|[가-힣])", text, re.I))
         if assignments:
             last = assignments[-1]

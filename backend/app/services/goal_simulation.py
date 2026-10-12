@@ -256,6 +256,12 @@ def _formula_output_unit(node: ast.AST, units: dict[str, str]) -> str:
     if isinstance(node.op, ast.Div):
         return _combine_formula_units(left, right, divide=True)
     if isinstance(node.op, ast.Pow):
+        if isinstance(node.right, ast.Name):
+            if left or right:
+                raise ValueError("unsupported dimensional exponent")
+            return ""
+        if not isinstance(node.right, ast.Constant) or type(node.right.value) not in {int, float}:
+            raise ValueError("unsupported formula exponent")
         exponent = node.right.value
         if right or int(exponent) != exponent:
             if left or right:
@@ -306,8 +312,13 @@ async def run_user_formula_calculation(settings: Settings, request: GoalResearch
     ) for node in ast.walk(tree)):
         raise ValueError("unsafe user formula")
     if any(isinstance(node, ast.BinOp) and isinstance(node.op, ast.Pow) and
-           (not isinstance(node.right, ast.Constant) or type(node.right.value) not in {int, float}
-            or abs(node.right.value) > 8) for node in ast.walk(tree)):
+           (not isinstance(node.right, (ast.Constant, ast.Name)) or
+            (isinstance(node.right, ast.Constant) and
+             (type(node.right.value) not in {int, float} or abs(node.right.value) > 8)) or
+            (isinstance(node.right, ast.Name) and
+             (node.right.id not in variables or
+              variables[node.right.id].unit not in {"", "dimensionless"} or
+              abs(variables[node.right.id].value) > 8))) for node in ast.walk(tree)):
         raise ValueError("formula exponent exceeds safe bounds")
     units = {name: fact.unit for name, fact in variables.items()}
     output_unit = _formula_output_unit(tree.body, units)

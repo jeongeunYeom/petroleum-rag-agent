@@ -242,7 +242,7 @@ def calculation_readiness(formula: FormulaSourceRecord | None, evidence: list[di
     from app.services.calculation_requirements import (infer_dimensionless, source_variable_unit,
                                                        symbol_names, unit_compatibility_score)
     source_text = str(source.get("text") or "")
-    local_text = source_text[max(0, formula.span_start - 180):formula.span_end + 180]
+    local_text = source_text[max(0, formula.span_start - 240):formula.span_end + 240]
     for variable in sorted(expression_variables(formula.expression_candidate or "") or set()):
         facts = [fact for fact in [*users.records, *derived_facts]
                  if normalize_symbol(fact.name) in symbol_names(variable)]
@@ -254,7 +254,7 @@ def calculation_readiness(formula: FormulaSourceRecord | None, evidence: list[di
         explicit = [fact for fact in facts if getattr(fact, "extraction_method", "") == "explicit_assignment"]
         if explicit:
             facts = explicit
-        inferred = infer_dimensionless(variable, source_text,
+        inferred = infer_dimensionless(variable, local_text,
                                        facts[0].source_span if len(facts) == 1 and hasattr(facts[0], "source_span") else "")
         if len(facts) != 1:
             suffix = "값" if inferred else "값과 단위"

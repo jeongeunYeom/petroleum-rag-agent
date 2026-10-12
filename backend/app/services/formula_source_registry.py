@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 
 EQUATION = re.compile(
     r"(?P<equation>\b[A-Za-z][A-Za-z0-9_₀-₉]*\s*=\s*"
-    r"(?:(?!\.\s+[A-Za-z]|,\s*[A-Za-z][A-Za-z0-9_₀-₉]*\s*=)[A-Za-z0-9_₀-₉+\-*/().×÷−· \t])+)"
+    r"(?:(?!\.\s+[A-Za-z]|,\s*[A-Za-z][A-Za-z0-9_₀-₉]*\s*=)[A-Za-z0-9_₀-₉φ+\-*/().×÷−· \t])+)"
 )
 EXPLICIT_DEFINITION = re.compile(
     r"\b(?P<lhs>[A-Za-z][A-Za-z0-9_]*)\s+"
@@ -21,6 +21,7 @@ EXPLICIT_DEFINITION = re.compile(
     r"(?:(?P<difference_a>[A-Za-z][A-Za-z0-9_]*)\s+minus\s+"
     r"(?P<difference_b>[A-Za-z][A-Za-z0-9_]*)))\b", re.I)
 TRANSLATION = str.maketrans({"×": "*", "÷": "/", "−": "-", "–": "-", "·": "*",
+                            "φ": "phi",
                             "₀": "0", "₁": "1", "₂": "2", "₃": "3", "₄": "4", "₅": "5",
                             "₆": "6", "₇": "7", "₈": "8", "₉": "9"})
 ALLOWED = (ast.Expression, ast.BinOp, ast.UnaryOp, ast.Name, ast.Constant,
@@ -59,9 +60,45 @@ def source_contains_equation(record: "FormulaSourceRecord", text: str,
     """A locator or neighboring chunk never substitutes for this exact source span."""
     if text[record.span_start:record.span_end] != record.raw_span:
         return False
+    # Recreate the candidate from the literal span and its local source context.
+    # A record whose executable formula was changed after extraction is not evidence.
+    expected = _source_expression(record.raw_span, text, record.span_start, record.span_end)
     return bool(record.expression_candidate and record.equation_ast
+                and equation_ast(expected) == record.equation_ast
                 and record.equation_ast == equation_ast(record.expression_candidate)
                 and record.equation_ast == equation_ast(formula or record.expression_candidate))
+
+
+def porosity_exponent_layout_context(local: str) -> bool:
+    """Require an explicit porosity relation and cementation exponent beside the span."""
+    porosity_relation = (
+        re.search(r"\bformation(?:\s+resistivity)?\s+factor\b.{0,180}\b(?:measured\s+)?porosity\b",
+                  local, re.I | re.S)
+        or re.search(r"\bF\s+is\s+(?:usually\s+)?obtained\s+from\s+(?:the\s+)?"
+                     r"measured\s+porosity\b", local, re.I))
+    cementation = re.search(
+        r"\bm\s+(?:is\s+(?:the\s+)?)?cementation\s+(?:factor|exponent)\b|"
+        r"\bcementation\s+(?:factor|exponent)\s*(?:\(\s*)?(?:is\s+)?m\b", local, re.I)
+    fm_defined = re.search(
+        r"\bfm\s*(?:is|denotes|means|=)\b|\b(?:variable|parameter)\s+fm\b", local, re.I)
+    return bool(porosity_relation and cementation and not fm_defined)
+
+
+def _source_expression(raw: str, text: str, start: int, end: int) -> str:
+    """Interpret one documented porosity-exponent PDF layout, not arbitrary `fm`."""
+    if definition := EXPLICIT_DEFINITION.fullmatch(raw):
+        numerator = definition.group("ratio_a") or definition.group("difference_a")
+        denominator = definition.group("ratio_b") or definition.group("difference_b")
+        operator = "/" if definition.group("ratio_a") else "-"
+        return f"{definition['lhs']} = {numerator} {operator} {denominator}"
+    candidate = raw.translate(TRANSLATION)
+    if not re.search(r"(?<![A-Za-z0-9_])fm(?![A-Za-z0-9_])", candidate, re.I):
+        return candidate
+    local = text[max(0, start - 240):min(len(text), end + 240)]
+    if not (porosity_exponent_layout_context(local)
+            and re.fullmatch(r"\s*F\s*=\s*a\s*/\s*fm\s*", candidate, re.I)):
+        return candidate
+    return re.sub(r"(?<![A-Za-z0-9_])fm(?![A-Za-z0-9_])", "phi**m", candidate, count=1, flags=re.I)
 
 
 class FormulaSourceRecord(BaseModel):
@@ -111,16 +148,17 @@ class FormulaSourceRegistry(BaseModel):
                 ))
             for match in EQUATION.finditer(text):
                 raw = match.group("equation").rstrip(" .\t")
-                candidate = raw.translate(TRANSLATION)
+                candidate = _source_expression(raw, text, match.start(), match.start() + len(raw))
                 variables = expression_variables(candidate)
                 if variables is None:
                     # OCR/excerpts often continue with prose after a valid equation.
                     # Keep the longest parseable prefix, never a paraphrased equation.
                     for boundary in reversed([item.start() for item in re.finditer(r"\s+", raw)]):
                         prefix = raw[:boundary].rstrip(" .\t")
-                        parsed = expression_variables(prefix.translate(TRANSLATION))
+                        normalized_prefix = _source_expression(prefix, text, match.start(), match.start() + len(prefix))
+                        parsed = expression_variables(normalized_prefix)
                         if parsed:
-                            raw, candidate, variables = prefix, prefix.translate(TRANSLATION), parsed
+                            raw, candidate, variables = prefix, normalized_prefix, parsed
                             break
                 rhs = raw.split("=", 1)[1]
                 if variables is None and not (re.search(r"[+\-*/×÷−·]", rhs) and re.search(r"[A-Za-z_]", rhs)):

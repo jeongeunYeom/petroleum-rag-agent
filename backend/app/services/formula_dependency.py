@@ -9,7 +9,7 @@ from typing import Any
 from app.services.calculation_requirements import (normalize_symbol, source_variable_unit,
                                                    symbol_names, unit_compatibility_score)
 from app.services.formula_source_registry import (FormulaSourceRecord, FormulaSourceRegistry,
-                                                  expression_variables, source_contains_equation)
+                                                  expression_variables, normalize_formula, source_contains_equation)
 from app.services.goal_execution_state import DerivedFact
 from app.services.user_fact_registry import UserFactRegistry
 
@@ -92,7 +92,7 @@ def resolve_formula_dependencies(target: FormulaSourceRecord, evidence: list[dic
         if key in active:
             plan.block_reason = "formula_dependency_cycle"
             return
-        if (row.source_id, row.normalized_span) in completed_keys:
+        if (row.source_id, normalize_formula(row.expression_candidate or "")) in completed_keys:
             return
         plan.depth = max(plan.depth, depth)
         plan.formula_ids.append(row.formula_id)

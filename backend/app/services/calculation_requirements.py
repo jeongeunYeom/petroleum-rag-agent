@@ -9,13 +9,16 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from app.services.evidence_fact_registry import EvidenceFactRegistry
-from app.services.formula_source_registry import FormulaSourceRegistry, FormulaSourceRecord, expression_variables
+from app.services.formula_source_registry import (FormulaSourceRegistry, FormulaSourceRecord,
+                                                  expression_variables, porosity_exponent_layout_context)
 from app.services.goal_tool_planner import InputFact, PythonAnalysisPlan
 from app.services.user_fact_registry import UNIT, normalize_unit
 from app.services.compound_units import unit_factors
 
 
 ALIASES: dict[str, tuple[str, ...]] = {
+    "phi": ("porosity", "φ"),
+    "porosity": ("phi", "φ"),
     "q": ("rate", "flow_rate", "production_rate"),
     "pr": ("reservoir_pressure", "initial_reservoir_pressure"),
     "pwf": ("flowing_pressure", "bottomhole_flowing_pressure"),
@@ -44,11 +47,11 @@ SUBSCRIPTS = str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789")
 
 
 def normalize_symbol(name: str) -> str:
-    return re.sub(r"[^a-z0-9]", "", name.translate(SUBSCRIPTS).casefold())
+    return re.sub(r"[^a-z0-9]", "", name.translate(SUBSCRIPTS).replace("φ", "phi").casefold())
 
 
 def symbol_names(variable: str) -> set[str]:
-    return {normalize_symbol(value) for value in (variable, *ALIASES.get(variable.casefold(), ()))}
+    return {normalize_symbol(value) for value in (variable, *ALIASES.get(normalize_symbol(variable), ()))}
 
 
 def infer_dimensionless(variable: str, source_text: str, user_label: str = "") -> dict[str, Any] | None:
@@ -57,6 +60,11 @@ def infer_dimensionless(variable: str, source_text: str, user_label: str = "") -
     if name in {"sg", "phi", "porosity", "fraction", "ratio", "sw", "saturation"}:
         return {"variable": variable, "dimension": "dimensionless", "source": "known_semantic_role",
                 "confidence": .95}
+    if (name in {"f", "a", "m"}
+            and porosity_exponent_layout_context(source_text)
+            and re.search(r"\bF\s*=\s*a\s*/\s*fm\b", source_text, re.I)):
+        return {"variable": variable, "dimension": "dimensionless", "source": "sourced_formation_factor_relation",
+                "confidence": .9}
     if re.search(r"fraction|ratio|saturation|dimensionless|공극률|포화도|비율|무차원", user_label, re.I):
         return {"variable": variable, "dimension": "dimensionless", "source": "user_label",
                 "confidence": .9}

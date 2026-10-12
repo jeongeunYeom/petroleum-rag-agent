@@ -1756,6 +1756,16 @@ class GoalExecutionAgent(GoalResearchAgent):
                     computation.analysis_id = f"KB-FORMULA-{computation.computation_id}"
                     computation.formula_evidence_ids = [selected_formula.source_id]
                     computation.source_evidence_ids = [selected_formula.source_id]
+                    source_text = next((str(row.get("text") or "") for row in evidence_rows
+                                        if row.get("evidence_id") == selected_formula.source_id), "")
+                    local_text = source_text[max(0, selected_formula.span_start - 240):
+                                             selected_formula.span_end + 240]
+                    if (not computation.output_manifest["OUT_RESULT"].get("unit")
+                            and selected_formula.lhs
+                            and infer_dimensionless(selected_formula.lhs, local_text)):
+                        computation.output_manifest["OUT_RESULT"]["unit"] = "dimensionless"
+                        computation.output_manifest["OUT_RESULT"]["unit_origin"] = "source_definition"
+                        computation.units[selected_formula.lhs] = "dimensionless"
                     if asks_for_api_gravity_calculation(request) and selected_formula.expression_candidate.split("=", 1)[0].strip().casefold() == "api":
                         output = computation.output_manifest.pop("OUT_RESULT")
                         output["name"] = "API_gravity"
