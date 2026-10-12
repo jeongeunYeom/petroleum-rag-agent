@@ -11,7 +11,7 @@ from app.services.goal_intent import (GoalIntent, GoalIntentKind, SourceRequirem
 
 
 CALC_WORDS = re.compile(r"\b(?:calculat\w*|comput\w*|derive|mean|average|sum|rank\w*|compare\s+numeric|difference|ratio)\b|계산|산출|평균|합계|총합|비율|차이|순위|그래프", re.I)
-ANALYZE_WORDS = re.compile(r"\b(?:rank\w*|best|worst|maximum|minimum|optim\w*|sensitiv\w*|compare|plot|graph|chart)\b|순위|최적|최대|최소|최댓|최솟|민감도|그래프|도표", re.I)
+ANALYZE_WORDS = re.compile(r"\b(?:rank\w*|best|worst|maximum|minimum|optim\w*|sensitiv\w*|compare|plot|graph|chart)\b|순위|정렬|(?:큰|작은)\s*순서|내림차순|오름차순|최적|최대|최소|최댓|최솟|민감도|그래프|도표", re.I)
 SIMULATE_WORDS = re.compile(r"\b(?:sweep|parameter\s+range|vary\w*|sensitiv\w*|optim\w*)\b|매개변수\s*변화|범위\s*탐색|범위로\s*계산|바꿔가며|바꾸면서|변화시키(?:며|면서|고|면|기|다|는|ㄴ)?|간격으로|부터.{0,30}까지", re.I)
 ENGINEERING_TERMS = {
     "공극률": "porosity", "공극 부피": "pore volume", "공극부피": "pore volume",

@@ -22,7 +22,7 @@ from app.models.research_schemas import EvidenceCounts, InternalEvidence, Resear
 from app.services.formula_source_registry import FormulaSourceRegistry, equation_ast, expression_variables, normalize_formula, source_contains_equation
 from app.services.formula_dependency import resolve_formula_dependencies
 from app.services.formula_units import formula_output_unit
-from app.services.calculation_requirements import infer_dimensionless, normalize_symbol, rank_formula_candidates, select_formula_candidate
+from app.services.calculation_requirements import infer_dimensionless, normalize_symbol, rank_formula_candidates, requested_semantic_target, select_formula_candidate, source_variable_unit
 from app.services.calculation_request_ir import OPERATIONS, parse_request_ir, validate_ir
 from app.services.goal_clarification import (calculation_missing, calculation_readiness, clarification_question,
                                              parse_user_simulation_spec, simulation_readiness,
@@ -269,6 +269,11 @@ class GoalExecutionAgent(GoalResearchAgent):
         text = f"{request.topic} {request.goal or ''}"
         if asks_for_api_gravity_calculation(request):
             return "API_gravity"
+        semantic_target = requested_semantic_target(text)
+        if semantic_target == "hydrostatic_pressure":
+            return "P"
+        if semantic_target == "ecd":
+            return "ECD"
         equation = user_equation(text)
         if equation:
             return equation.split("=", 1)[0].strip()
@@ -377,6 +382,9 @@ class GoalExecutionAgent(GoalResearchAgent):
     def _safe_unavailable_answer(candidate: str, state: GoalExecutionState,
                                  reason: str = "", formula: Any = None,
                                  korean: bool = False) -> str:
+        if "internal_calculation_error" in state.blocked_reasons:
+            return ("계산 과정에서 입력값을 처리하지 못했습니다. 결과를 추측하지 않습니다." if korean else
+                    "The calculation could not process the supplied inputs. No result was guessed.")
         if reason == "missing_validated_formula":
             return ("요청한 계산을 뒷받침할 출처 있는 관계식과 검증된 계산 결과를 함께 확보하지 못했습니다. 값을 추측하지 않습니다."
                     if korean else "A sourced equation and validated calculation result were not both available. No value was guessed.")
@@ -1370,6 +1378,11 @@ class GoalExecutionAgent(GoalResearchAgent):
         }.items():
             result.telemetry.setdefault(key, value)
         result.telemetry["intent_route"] = intent.kind.value
+        result.telemetry["requested_semantic_target"] = requested_semantic_target(
+            f"{request.topic} {request.goal or ''}")
+        grouped = [item for item in users.records if item.extraction_method == "grouped_assignment"]
+        result.telemetry["group_unit_propagation_used"] = bool(grouped)
+        result.telemetry["group_unit_propagation_unit"] = grouped[0].unit if grouped else None
         result.telemetry["intent"] = {"selected_intent": intent.kind.value, "intent_reason": intent.reason,
                                       "premise_cue_detected": intent.premise_cue_detected,
                                       "formula_origin": intent.formula_origin.value}
@@ -1525,6 +1538,11 @@ class GoalExecutionAgent(GoalResearchAgent):
                                              "candidate_scores": formula_selection.candidate_scores}
                                             if formula_selection else {"candidates_found": 0,
                                                                        "selected_formula_id": None})
+            result.telemetry["selected_formula_semantic_target"] = (
+                "ecd" if selected_formula and normalize_symbol(selected_formula.lhs or "") == "ecd" else
+                "hydrostatic_pressure" if selected_formula and
+                normalize_symbol(selected_formula.lhs or "") in {"p", "ph", "pressure", "hydrostaticpressure"}
+                and result.telemetry["requested_semantic_target"] == "hydrostatic_pressure" else None)
             if selected_formula and selected_formula.expression_candidate:
                 source_text = next((str(row.get("text") or "") for row in evidence_rows
                                     if row.get("evidence_id") == selected_formula.source_id), "")
@@ -1779,10 +1797,13 @@ class GoalExecutionAgent(GoalResearchAgent):
                                     getattr(self.research_agent, "vector_store", None) is not None)
                     query_plan = (plan_query(request.topic or request.goal or query,
                                              premise=intent.kind == GoalIntentKind.PREMISE_CHECK,
-                                             refined=action.reason_code == "premise_evidence_retry")
+                                             refined=action.reason_code in {"premise_evidence_retry", "missing_claim_support"})
                                   if qa_retrieval else None)
                     if query_plan:
                         query = query_plan.search_text
+                        if action.reason_code == "missing_claim_support":
+                            result.telemetry["retrieval_refinement_used"] = True
+                            result.telemetry["retrieval_refinement_query"] = query
                     cache_key = (query, request.use_internal, request.use_external, request.model)
                     cached = retrieval_cache.get(cache_key)
                     response = cached.model_copy(deep=True) if cached else await self.research_agent.research(ResearchRequest(
@@ -1910,11 +1931,19 @@ class GoalExecutionAgent(GoalResearchAgent):
                       not user_formula_bindings(selected_formula.expression_candidate, formula_users)[1]):
                     # Literal source equation + uniquely bound user facts are sufficient for
                     # a bounded, independently checked calculation; no second LLM plan is needed.
+                    source_text = next((str(row.get("text") or "") for row in evidence_rows
+                                        if row.get("evidence_id") == selected_formula.source_id), "")
                     python_started = time.perf_counter()
                     computation = await run_user_formula_calculation(
                         get_settings(), request, run_id, selected_formula.expression_candidate,
                         formula_users, f"CALC{len(result.computations) + 1}", selected_formula.source_id,
-                        original_text=user_text, validated_derived_ids=trusted_derived)
+                        original_text=user_text, validated_derived_ids=trusted_derived,
+                        sourced_output_unit=(source_variable_unit(source_text, selected_formula.lhs)
+                            if selected_formula.lhs and all(
+                                source_variable_unit(source_text, name) == fact.unit
+                                for name, fact in user_formula_bindings(
+                                    selected_formula.expression_candidate, formula_users)[0].items())
+                            else None))
                     self._add_time(result, "python_seconds", time.perf_counter() - python_started)
                     computation.analysis_id = f"KB-FORMULA-{computation.computation_id}"
                     computation.formula_evidence_ids = [selected_formula.source_id]
@@ -1923,8 +1952,6 @@ class GoalExecutionAgent(GoalResearchAgent):
                         computation.raw_formula_span = selected_formula.raw_span
                         computation.source_equation = selected_formula.source_equation
                         computation.formula_derivation = selected_formula.formula_derivation
-                    source_text = next((str(row.get("text") or "") for row in evidence_rows
-                                        if row.get("evidence_id") == selected_formula.source_id), "")
                     local_text = source_text[max(0, selected_formula.span_start - 240):
                                              selected_formula.span_end + 240]
                     if (not computation.output_manifest["OUT_RESULT"].get("unit")
@@ -2351,8 +2378,9 @@ class GoalExecutionAgent(GoalResearchAgent):
                     state.synthesized = True
             except (ValueError, RuntimeError, OSError, PermissionError, TypeError) as exc:
                 status, failure = "failed", type(exc).__name__
-                state.blocked_reasons = [failure]
-                state.unresolved_information = [failure]
+                state.blocked_reasons = ["internal_calculation_error"]
+                state.unresolved_information = []
+                result.telemetry["internal_calculation_error_type"] = failure
                 details = {"error_type": type(exc).__name__,
                            "failure_stage": self._calculation_failure_stage(str(exc), resumed=bool(resume_state))
                            if action.action_type in {GoalActionType.CALCULATE, GoalActionType.SIMULATE} else None}

@@ -24,6 +24,7 @@ DOMAINS = {
                               r"reservoir pore volume|compressibility|저류층\s*공학|물질\s*수지|매장량|대수층", "reservoir engineering"),
 }
 TERMS = {
+    "방향 측정기": "directional survey instrument", "방향 측정": "directional survey",
     "저류층 시뮬레이션": "reservoir simulation", "수치 격자": "numerical grid discretization",
     "격자 블록": "grid block", "격자 크기": "grid size", "수치 해상도": "numerical resolution",
     "격자": "grid", "전달률": "transmissibility", "셀 간": "between cells",
@@ -42,6 +43,11 @@ TERMS = {
     "물 유입": "water influx", "압력 유지": "pressure support",
     "저류층 압력": "reservoir pressure", "압력": "pressure",
 }
+DOMAIN_ALIASES = (
+    (re.compile(r"\bmonel\b", re.I),
+     ("Monel drill collar", "non-magnetic drill collar", "nonmagnetic drill collar",
+      "directional survey", "magnetic survey", "survey instrument", "magnetic interference")),
+)
 STOP = {"explain", "describe", "confirm", "evidence", "source", "sources", "find", "show",
         "internal", "textbook", "chapter", "using", "what", "when", "why", "how", "does",
         "the", "and", "for", "from", "with", "that", "this", "there", "are", "was",
@@ -78,10 +84,11 @@ def plan_query(question: str, *, premise: bool = False, refined: bool = False) -
     """Use only user terms and fixed domain synonyms; never inject an answer."""
     cleaned = PREMISE_NOISE.sub(" ", question) if premise else question
     translations = [english for korean, english in TERMS.items() if korean in cleaned]
+    aliases = [term for cue, terms in DOMAIN_ALIASES if cue.search(cleaned) for term in terms]
     domain = domain_hint(cleaned)
     if domain:
         translations.append(DOMAINS[domain][1])
-    english = _tokens(" ".join(translations))
+    english = _tokens(" ".join([*translations, *aliases]))
     original = _tokens(cleaned)
     # Korean clauses are kept as-is for retrieval, while fixed translations make
     # bilingual document titles and technical paragraphs reachable.
@@ -95,6 +102,8 @@ def plan_query(question: str, *, premise: bool = False, refined: bool = False) -
         secondary = (domain_words + " " + secondary).strip()
     if refined:
         secondary = (secondary + " " + ("relationship" if premise else "chapter concepts")).strip()
+        if aliases:
+            secondary = " ".join(aliases)[:220]
     queries = tuple(dict.fromkeys(value[:220] for value in (core, secondary) if value))
     if not queries:
         queries = (core[:220],)

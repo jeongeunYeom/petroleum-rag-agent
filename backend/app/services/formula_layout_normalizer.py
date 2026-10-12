@@ -103,6 +103,19 @@ def normalize_extracted_equation(raw_span: str, local_context: str,
     cue = bool(re.search(r"\b(?:equation|formula|relation|where|denominator|fraction|quotient)\b", context, re.I))
     units = known_units or _source_units(context)
 
+    # PDF extraction often prints a literal multiplication sign as a spaced
+    # letter x. Interpret only a bounded numeric-coefficient product chain;
+    # leave equations with a genuine variable x untouched.
+    coefficient_product = re.fullmatch(
+        rf"\s*({SYMBOL})\s*=\s*(\d+(?:\.\d+)?(?:[ \t]+x[ \t]+{SYMBOL}){{1,6}})\s*",
+        raw, re.I)
+    if coefficient_product:
+        candidate = f"{coefficient_product[1].translate(SUBSCRIPT_TRANSLATION)} = " + re.sub(
+            r"[ \t]+x[ \t]+", "*", coefficient_product[2].translate(SUBSCRIPT_TRANSLATION), flags=re.I)
+        if _safe_equation(candidate):
+            return LayoutNormalizationResult(raw_span, candidate,
+                                             ("spaced_multiplication_x",), candidate_count=1)
+
     if match := STACKED_POWER_FRACTION.fullmatch(raw):
         base, power = match["base"].translate(SUBSCRIPT_TRANSLATION), match["power"].translate(SUBSCRIPT_TRANSLATION)
         numerator, denominator = _product(match["numerator"]), _product(match["denominator"])

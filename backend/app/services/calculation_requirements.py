@@ -50,6 +50,19 @@ def normalize_symbol(name: str) -> str:
     return re.sub(r"[^a-z0-9]", "", name.translate(SUBSCRIPTS).replace("φ", "phi").casefold())
 
 
+def requested_semantic_target(text: str) -> str | None:
+    """Distinguish a requested pressure output from related drilling quantities."""
+    if re.search(r"\bECD\b|equivalent\s+circulating\s+density|등가\s*순환\s*밀도", text, re.I):
+        return "ecd"
+    if re.search(r"hydrostatic\s+(?:pressure|head)|mud\s+hydrostatic|정수압(?:력)?|이수압", text, re.I):
+        return "hydrostatic_pressure"
+    if (re.search(r"mud\s+weight|mud\s+density|이수\s*밀도", text, re.I)
+            and re.search(r"\bTVD\b|true\s+vertical\s+depth|수직\s*깊이", text, re.I)
+            and re.search(r"pressure|압력", text, re.I)):
+        return "hydrostatic_pressure"
+    return None
+
+
 def symbol_names(variable: str) -> set[str]:
     return {normalize_symbol(value) for value in (variable, *ALIASES.get(normalize_symbol(variable), ()))}
 
@@ -149,7 +162,12 @@ def source_variable_unit(source_text: str, variable: str) -> str | None:
     """Read only an explicit unit adjacent to a source variable definition."""
     match = re.search(rf"\b{re.escape(variable)}\s*(?:\((?P<round>{UNIT})\)|\[(?P<square>{UNIT})\])",
                       source_text, re.I)
-    return (match.group("round") or match.group("square")) if match else None
+    if match:
+        return match.group("round") or match.group("square")
+    definition = re.search(
+        rf"\b{re.escape(variable)}\s*=\s*[A-Za-z][^.;]{{0,140}}?\((?P<unit>{UNIT})\)",
+        source_text, re.I)
+    return definition.group("unit") if definition else None
 
 
 def unit_compatibility_score(source_unit: str, fact_unit: str) -> int:
@@ -209,6 +227,7 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
                                    "values", "input", "units", "source", "sourced", "relation",
                                    "please", "expression", "number", "without", "known", "needed"}
     source_by_id = {str(row.get("evidence_id")): str(row.get("text") or "") for row in evidence}
+    semantic_target = requested_semantic_target(intent)
     requested_terms = _requested_term_count(intent)
     excludes_reduced = bool(re.search(r"축약식\s*말고|두\s*성분.{0,12}혼동하지\s*마|"
                                       r"not\s+(?:the\s+)?(?:two[- ]term|reduced\s+form)|simplified\s+form\s*말고|"
@@ -237,6 +256,12 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
         descriptor_tokens = context_tokens - generic_context - facts - {lhs} - {
             normalize_symbol(variable) for variable in variables}
         local_context = source_text[max(0, record.span_start - 180):record.span_end + 180]
+        if semantic_target == "hydrostatic_pressure":
+            if (lhs not in {"p", "ph", "pressure", "hydrostaticpressure", "mudhydrostaticpressure"}
+                    or not re.search(r"hydrostatic|정수압|이수압", local_context, re.I)):
+                continue
+        elif semantic_target == "ecd" and lhs != "ecd":
+            continue
         local_tokens = {normalize_symbol(word) for word in
                         re.findall(r"[A-Za-z][A-Za-z0-9_]*|[가-힣]{2,}", local_context)}
         raw_lhs = record.expression_candidate.split("=", 1)[0].strip()

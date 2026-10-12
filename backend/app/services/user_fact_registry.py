@@ -16,7 +16,8 @@ LEGACY_UNIT = (r"(?:USD/m|MMscf/d|psi/ft|kg/m(?:\^?3|³)|mg/L|mD[·*\-]ft|m(?:\^
         r"bbl/d|lbf/ft|lb/ft|gpm|kWh|kW|hp|ppg|acres?|feet|inch|in|ft|mD|md|"
         r"psia|psig|kPa|Pa|bbl|stb|days?|seconds?|secs?|hours?|hr|h|d|s|"
         r"mg|kg|kJ|lbf|cP|°C|USD|달러|시간|분|min|m/s|m/h|mm|m|L|%|dimensionless)")
-UNIT = rf"(?:{COMPOUND_UNIT}|{LEGACY_UNIT}(?![A-Za-z0-9_/*^·²³⁻]))"
+RESISTIVITY_UNIT = r"(?:Ω\s*[·\-]?\s*m|ohm(?:\s*[·\-]?\s*m|[\s-]+met(?:er|re)))"
+UNIT = rf"(?:{RESISTIVITY_UNIT}(?![A-Za-z0-9_/*^·²³⁻])|{COMPOUND_UNIT}|{LEGACY_UNIT}(?![A-Za-z0-9_/*^·²³⁻]))"
 ASSIGNMENT = re.compile(
     rf"(?P<label>φ|[A-Za-z][A-Za-z0-9 _/\-]{{0,48}}?)\s*[:=]\s*(?P<value>{NUMBER})\s*(?P<unit>{UNIT})?(?=$|[,;\s]|\.(?!\d)|[가-힣])",
     re.IGNORECASE,
@@ -110,6 +111,8 @@ def numeric_lists(text: str):
 
 def normalize_unit(raw: str) -> str:
     """Canonical spelling only; no unverified dimensional conversion."""
+    if re.fullmatch(RESISTIVITY_UNIT, raw.strip(), re.I):
+        return "ohm-m"
     value = raw.strip().replace("³", "3").replace("²", "2").replace("·", "*")
     value = re.sub(r"\b(m|ft|mm)\^([23])\b", r"\1\2", value)
     value = value.replace("⁻¹", "-1")
@@ -488,7 +491,8 @@ class UserFactRegistry(BaseModel):
                     continue
                 for (column, unit), raw in zip(header, values):
                     add(f"{row.group('label')}_{column}", raw, unit, row.group(0), header_text, offset + row.start())
-            for found in ASSIGNMENT.finditer(text):
+            assignment_matches = list(ASSIGNMENT.finditer(text))
+            for found in assignment_matches:
                 if any(start < found.end() and found.start() < end for start, end in protected_spans):
                     continue
                 if any(start <= found.start() < end for start, end in tuple_spans):
@@ -517,6 +521,38 @@ class UserFactRegistry(BaseModel):
                 if records and records[-1].topic_start == offset + found.start():
                     records[-1].extraction_method = "explicit_assignment"
                 protected_spans.append(found.span())
+            # A trailing unit can scope a comma-separated, homogeneous series of
+            # assignments. Preserve each literal span and the exact group context.
+            group: list[re.Match[str]] = []
+            def propagate_group(items: list[re.Match[str]]) -> None:
+                if len(items) < 2 or not items[-1]["unit"] or any(item["unit"] for item in items[:-1]):
+                    return
+                labels = [item["label"].strip() for item in items]
+                singles = all(re.fullmatch(r"[A-Za-z]", label) for label in labels)
+                numbered = [re.fullmatch(r"([A-Za-z_]+)(\d+)", label) for label in labels]
+                if not (singles or all(numbered) and len({item[1].casefold() for item in numbered}) == 1):
+                    return
+                context = text[items[0].start():items[-1].end()]
+                unit = items[-1]["unit"]
+                canonical = normalize_unit(unit)
+                for item in items[:-1]:
+                    row = next((row for row in records if row.topic_start == offset + item.start()
+                                and row.name == _name(item["label"].strip())), None)
+                    if row is None or row.unit:
+                        return
+                    row.unit = row.canonical_unit = canonical
+                    row.raw_unit = unit
+                    row.context_span = context
+                    row.unit_span = (offset + items[-1].start("unit"), offset + items[-1].end("unit"))
+                    row.semantic_role = operand_role(row.name) or semantic_role(row.name, canonical)
+                    row.dimension = semantic_role(row.name, canonical)
+                    row.extraction_method = "grouped_assignment"
+            for found in assignment_matches:
+                if group and not re.fullmatch(r"\s*,\s*", text[group[-1].end():found.start()]):
+                    propagate_group(group)
+                    group = []
+                group.append(found)
+            propagate_group(group)
             for found in KOREAN_SG.finditer(text):
                 add("SG", found.group("value"), "", found.group(0), None, offset + found.start())
             for found in KOREAN_NAMED_SG.finditer(text):
@@ -667,7 +703,16 @@ def validate_original_operands(text: str, facts: UserFactRegistry, *, list_opera
         if fact.name.casefold() == "phi":
             name = r"(?:phi|φ)"
         assignments = list(re.finditer(rf"(?<![\w:]){name}\s*[:=]\s*(?P<value>{NUMBER})\s*(?P<unit>{UNIT})?(?=$|[,;\s]|\.(?!\d)|[가-힣])", text, re.I))
-        if assignments:
+        if fact.extraction_method == "grouped_assignment":
+            context = fact.context_span or ""
+            members = list(ASSIGNMENT.finditer(context))
+            if (context not in text or len(members) < 2 or not members[-1]["unit"]
+                    or normalize_unit(members[-1]["unit"]) != fact.unit
+                    or not any(_name(item["label"].strip()) == fact.name and
+                               _number(item["value"]) == fact.value and not item["unit"]
+                               for item in members)):
+                raise ValueError(f"operand_source_mismatch: {fact.name}")
+        elif assignments:
             last = assignments[-1]
             if _number(last["value"]) != fact.value or normalize_unit(last["unit"] or "") != fact.unit:
                 raise ValueError(f"operand_source_mismatch: {fact.name}")

@@ -23,7 +23,7 @@ from app.services.goal_execution_state import SimulationSpec
 from app.services.formula_source_registry import normalize_formula
 from app.services.formula_source_registry import expression_variables
 from app.services.calculation_requirements import normalize_symbol, symbol_names
-from app.services.user_fact_registry import UserFactRegistry, validate_original_operands
+from app.services.user_fact_registry import UNIT, UserFactRegistry, normalize_unit, validate_original_operands
 from app.services.direct_operation_v3 import OPERATIONS as V3_OPERATIONS, build as build_v3_operation
 from app.tools.python_tools import PythonTools
 from app.services.formula_units import formula_output_unit as _formula_output_unit
@@ -247,7 +247,8 @@ def formula_input_readiness(equation: str, facts: UserFactRegistry) -> tuple[dic
 async def run_user_formula_calculation(settings: Settings, request: GoalResearchRequest,
                                        run_id: str, equation: str, facts: UserFactRegistry,
                                        calc_id: str, source_id: str, *, original_text: str | None = None,
-                                       validated_derived_ids: set[str] | None = None) -> ComputationRecord:
+                                       validated_derived_ids: set[str] | None = None,
+                                       sourced_output_unit: str | None = None) -> ComputationRecord:
     if not (request.allow_python_execution and request.python_execution_approved):
         raise PermissionError("Python calculation requires approval")
     variables, missing = user_formula_bindings(equation, facts)
@@ -280,6 +281,10 @@ async def run_user_formula_calculation(settings: Settings, request: GoalResearch
     units = {name: fact.unit for name, fact in variables.items()}
     output_unit = _formula_output_unit(tree.body, units,
                                        {name: fact.value for name, fact in variables.items()})
+    if sourced_output_unit:
+        if source_id == "USER_REQUEST" or not re.fullmatch(UNIT, sourced_output_unit, re.I):
+            raise ValueError("unverified source output unit")
+        output_unit = normalize_unit(sourced_output_unit)
     explicit_dimensionless = bool(re.search(
         rf"(?<![A-Za-z0-9_]){re.escape(lhs)}(?![A-Za-z0-9_])\s*(?:(?:is|as|은|는|이|가)\s*)?(?:dimensionless|무차원)|"
         rf"(?:dimensionless|무차원)\s+{re.escape(lhs)}\b", original_text or request.topic, re.I))
@@ -330,7 +335,8 @@ async def run_user_formula_calculation(settings: Settings, request: GoalResearch
         raise ValueError("user formula result failed independent validation")
     input_ids = [fact.fact_id for fact in variables.values()]
     manifest = {"OUT_RESULT": {"name": lhs, "value": actual, "unit": output_unit or None,
-                               "unit_origin": "user_declared" if explicit_dimensionless else "inferred",
+                               "unit_origin": "source_definition" if sourced_output_unit else
+                               "user_declared" if explicit_dimensionless else "inferred",
                                "semantic_type": "numeric", "source_fact_ids": input_ids,
                                "required": True}}
     return ComputationRecord(
