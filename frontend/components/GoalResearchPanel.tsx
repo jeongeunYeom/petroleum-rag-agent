@@ -174,26 +174,31 @@ export function GoalResearchPanel() {
               성공 조건 — 한 줄에 하나, 비우면 자동 생성
               <textarea value={criteria} onChange={(event) => setCriteria(event.target.value)} className="mt-1 min-h-24 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
             </label>
-            <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 md:col-span-2">
-              <label><input type="checkbox" checked={autonomous} onChange={(event) => setAutonomous(event.target.checked)} className="mr-1" />목표 지향 자율 실행</label>
-              <label><input type="checkbox" checked={useInternal} onChange={(event) => setUseInternal(event.target.checked)} className="mr-1" />내부 문서</label>
-              <label><input type="checkbox" checked={useExternal} onChange={(event) => setUseExternal(event.target.checked)} className="mr-1" />웹 사용</label>
-              <div className="flex items-center gap-1">
-                <label htmlFor="goal-max-iterations" className="mr-1">최대 반복</label>
-                <button type="button" aria-label="반복 횟수 감소" disabled={maxIterations <= 1} onClick={() => setIterations(maxIterations - 1)} className="rounded border border-slate-200 px-2 py-0.5 disabled:opacity-40">−</button>
-                <input id="goal-max-iterations" type="text" inputMode="numeric" pattern="[0-9]*" value={iterationDraft} onChange={(event) => setIterationDraft(event.target.value)} onBlur={commitIterations} onKeyDown={(event) => { if (event.key === "ArrowUp" || event.key === "ArrowDown") { event.preventDefault(); setIterations(clampIterations(iterationDraft, maxIterations) + (event.key === "ArrowUp" ? 1 : -1)); } }} className="w-14 rounded border border-slate-200 px-1 py-0.5 text-center" />
-                <button type="button" aria-label="반복 횟수 증가" disabled={maxIterations >= 8} onClick={() => setIterations(maxIterations + 1)} className="rounded border border-slate-200 px-2 py-0.5 disabled:opacity-40">+</button>
+            <div className="min-w-0 space-y-3 rounded-2xl border border-slate-200 bg-white p-4 text-xs text-slate-600 md:col-span-2">
+              <h3 className="text-sm font-semibold text-slate-800">연구 설정</h3>
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                <label className="inline-flex cursor-pointer items-center gap-2 whitespace-nowrap"><input type="checkbox" checked={autonomous} onChange={(event) => setAutonomous(event.target.checked)} className="accent-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500" />자율 실행</label>
+                <label className="inline-flex cursor-pointer items-center gap-2 whitespace-nowrap"><input type="checkbox" checked={useInternal} onChange={(event) => setUseInternal(event.target.checked)} className="accent-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500" />내부 문서</label>
+                <label className="inline-flex cursor-pointer items-center gap-2 whitespace-nowrap"><input type="checkbox" checked={useExternal} onChange={(event) => setUseExternal(event.target.checked)} className="accent-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500" />웹 검색</label>
               </div>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <label htmlFor="goal-max-iterations" className="font-medium text-slate-700">최대 반복</label>
+                <div className="inline-flex shrink-0 items-center gap-1">
+                  <button type="button" aria-label="반복 횟수 감소" disabled={maxIterations <= 1} onClick={() => setIterations(maxIterations - 1)} className="h-8 w-8 rounded-lg border border-slate-200 text-sm focus-visible:ring-2 focus-visible:ring-violet-500 disabled:opacity-40">−</button>
+                  <input id="goal-max-iterations" type="text" inputMode="numeric" pattern="[0-9]*" value={iterationDraft} onChange={(event) => setIterationDraft(event.target.value)} onBlur={commitIterations} onKeyDown={(event) => { if (event.key === "ArrowUp" || event.key === "ArrowDown") { event.preventDefault(); setIterations(clampIterations(iterationDraft, maxIterations) + (event.key === "ArrowUp" ? 1 : -1)); } }} className="h-8 w-10 rounded-lg border border-slate-200 px-1 text-center focus-visible:ring-2 focus-visible:ring-violet-500" />
+                  <button type="button" aria-label="반복 횟수 증가" disabled={maxIterations >= 8} onClick={() => setIterations(maxIterations + 1)} className="h-8 w-8 rounded-lg border border-slate-200 text-sm focus-visible:ring-2 focus-visible:ring-violet-500 disabled:opacity-40">+</button>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                <span className="font-medium text-slate-700">내보내기</span>
+                <label className="inline-flex cursor-pointer items-center gap-2 whitespace-nowrap"><input type="checkbox" checked={docx} onChange={(event) => setDocx(event.target.checked)} className="accent-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500" />DOCX 보고서</label>
+                <label className="inline-flex cursor-pointer items-center gap-2 whitespace-nowrap"><input type="checkbox" checked={pptx} onChange={(event) => setPptx(event.target.checked)} className="accent-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500" />PPTX 발표자료</label>
+              </div>
+              <p className="text-xs leading-relaxed text-slate-500"><span aria-hidden="true" className="mr-1 text-violet-600">ⓘ</span>계산·시뮬레이션은 제한된 로컬 Python 환경에서 수행됩니다.</p>
+              <button disabled={!topic.trim() || (!useInternal && !useExternal) || activeRun || busy} className="w-full rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-violet-700 focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:opacity-40">
+                연구 시작
+              </button>
             </div>
-            <div className="md:col-span-2 space-y-2 text-xs text-slate-600">
-              {autonomous && <p className="rounded-lg bg-violet-50 p-2 text-violet-700">필요한 경우 Agent가 제한된 로컬 Python 환경에서 계산·시뮬레이션을 자동 수행합니다. 인터넷과 허용된 작업공간 밖 접근은 차단됩니다.</p>}
-              <p className="font-semibold">최종 산출물</p>
-              <label className="mr-4"><input type="checkbox" checked={docx} onChange={(event) => setDocx(event.target.checked)} className="mr-1" />DOCX 연구보고서</label>
-              <label><input type="checkbox" checked={pptx} onChange={(event) => setPptx(event.target.checked)} className="mr-1" />PPTX 발표자료</label>
-            </div>
-            <button disabled={!topic.trim() || (!useInternal && !useExternal) || activeRun || busy} className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-40">
-              연구 시작
-            </button>
           </form>
 
           {error && <p className="mt-3 rounded-lg bg-red-50 p-3 text-xs text-red-700">{error}</p>}
