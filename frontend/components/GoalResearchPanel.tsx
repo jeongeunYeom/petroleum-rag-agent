@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
 import { MarkdownMath } from "@/components/MarkdownMath";
 import {
@@ -9,8 +9,11 @@ import {
   goalArtifactUrl,
   GoalCriterion,
   GoalResearchRun,
+  resumeGoalResearch,
   startGoalResearch,
 } from "@/lib/goalResearchApi";
+import { ACTION_LABEL, actionIterationLabel, clarificationDetails, criterionText, currentActionLabel,
+  hypothesisLabel, isBusyExecution, isStaleRun, resumeExistingRun, runStatusLabel } from "@/lib/goalResearchPresentation";
 import {
   clampIterations, displayAnswer, displayValue, evidenceCounts, formatNumber,
   outputLabel, simulationTable,
@@ -19,14 +22,6 @@ import {
 
 const TERMINAL = new Set(["completed", "stopped", "failed", "canceled"]);
 const STATUS_ICON = { met: "✓", partial: "△", unmet: "✗", blocked: "□" } as const;
-const ACTION_LABEL: Record<string, string> = {
-  retrieve: "근거 검색", calculate: "Python 계산", simulate: "수치 시뮬레이션",
-  analyze: "결과 분석", verify: "근거 검증", synthesize: "답변 정리", stop: "종료",
-};
-const RUN_LABEL: Record<string, string> = {
-  planned: "대기 중", running: "실행 중", completed: "완료", stopped: "중단됨",
-  failed: "실패", canceled: "취소됨",
-};
 const GOAL_LABEL: Record<string, string> = {
   pending: "진행 중", achieved: "목표 달성", not_supported: "근거 부족",
   insufficient_evidence: "근거 부족", stopped: "진행 중단", failed: "실패", canceled: "취소됨",
@@ -37,11 +32,6 @@ const STOP_LABEL: Record<string, string> = {
   goal_conflicts_with_evidence: "근거와 목표 충돌", canceled: "사용자 취소",
   error: "오류로 종료", calculation_blocked: "계산 진행 불가",
   simulation_blocked: "시뮬레이션 진행 불가",
-};
-const EXPECTED_LABEL: Record<string, string> = {
-  supported: "가설 지지", partially_supported: "가설 일부 지지",
-  contradicted: "가설 반박", insufficient_evidence: "가설 판단 근거 부족",
-  not_provided: "가설 미제공",
 };
 const CRITERION_LABEL = { met: "충족", partial: "일부 충족", unmet: "미충족", blocked: "진행 불가" } as const;
 
@@ -62,8 +52,8 @@ export function GoalResearchPanel() {
   const [goal, setGoal] = useState("");
   const [expected, setExpected] = useState("");
   const [criteria, setCriteria] = useState("");
-  const [maxIterations, setMaxIterations] = useState(4);
-  const [iterationDraft, setIterationDraft] = useState("4");
+  const [maxIterations, setMaxIterations] = useState(6);
+  const [iterationDraft, setIterationDraft] = useState("6");
   const [autonomous, setAutonomous] = useState(true);
   const [useInternal, setUseInternal] = useState(true);
   const [useExternal, setUseExternal] = useState(false);
@@ -71,8 +61,20 @@ export function GoalResearchPanel() {
   const [pptx, setPptx] = useState(false);
   const [run, setRun] = useState<GoalResearchRun | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const busy = Boolean(run && (!TERMINAL.has(run.run_status) ||
-    Object.values(run.deliverable_status || {}).some((status) => status === "pending" || status === "running")));
+  const [reply, setReply] = useState("");
+  const [resuming, setResuming] = useState(false);
+  const resumeLock = useRef(false);
+  const [lastProgressAt, setLastProgressAt] = useState(Date.now());
+  const [now, setNow] = useState(Date.now());
+  const activeRun = Boolean(run && !TERMINAL.has(run.run_status));
+  const busy = isBusyExecution(run);
+  const progressKey = run && [run.run_id, run.run_status, run.current_iteration, run.current_stage,
+    run.action_history?.length || 0, run.internal_sources.length, run.computations.length].join(":");
+  useEffect(() => { setLastProgressAt(Date.now()); }, [progressKey]);
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 5000);
+    return () => window.clearInterval(timer);
+  }, []);
   const simulations = run?.computations.flatMap((computation) => {
     const table = simulationTable(computation);
     return table ? [{ computation, table }] : [];
@@ -91,7 +93,7 @@ export function GoalResearchPanel() {
   }
 
   function resetResearch() {
-    if (busy) return;
+    if (activeRun || busy) return;
     setTopic("");
     setGoal("");
     setExpected("");
@@ -101,7 +103,8 @@ export function GoalResearchPanel() {
   }
 
   useEffect(() => {
-    if (!run || (TERMINAL.has(run.run_status) && !Object.values(run.deliverable_status || {}).some((status) => status === "pending" || status === "running"))) return;
+    if (!run || run.run_status === "waiting_for_user_input" ||
+        (TERMINAL.has(run.run_status) && !Object.values(run.deliverable_status || {}).some((status) => status === "pending" || status === "running"))) return;
     const timer = window.setInterval(async () => {
       try {
         const next = await getGoalResearch(run.run_id);
@@ -131,6 +134,23 @@ export function GoalResearchPanel() {
       }));
     } catch (value) {
       setError(value instanceof Error ? value.message : "Goal Research를 시작하지 못했습니다.");
+    }
+  }
+
+  async function submitReply(event: FormEvent) {
+    event.preventDefault();
+    if (!run || run.run_status !== "waiting_for_user_input" || !reply.trim() || resumeLock.current) return;
+    resumeLock.current = true;
+    setResuming(true);
+    setError(null);
+    try {
+      setRun(await resumeExistingRun(run, reply, resumeGoalResearch));
+      setReply("");
+    } catch (value) {
+      setError(value instanceof Error ? value.message : "연구를 이어가지 못했습니다.");
+    } finally {
+      resumeLock.current = false;
+      setResuming(false);
     }
   }
 
@@ -171,7 +191,7 @@ export function GoalResearchPanel() {
               <label className="mr-4"><input type="checkbox" checked={docx} onChange={(event) => setDocx(event.target.checked)} className="mr-1" />DOCX 연구보고서</label>
               <label><input type="checkbox" checked={pptx} onChange={(event) => setPptx(event.target.checked)} className="mr-1" />PPTX 발표자료</label>
             </div>
-            <button disabled={!topic.trim() || (!useInternal && !useExternal) || busy} className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-40">
+            <button disabled={!topic.trim() || (!useInternal && !useExternal) || activeRun || busy} className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-40">
               연구 시작
             </button>
           </form>
@@ -180,21 +200,40 @@ export function GoalResearchPanel() {
           {run && (
             <div className="mt-5 space-y-4 text-sm">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-violet-100 px-3 py-1 font-bold text-violet-700">{RUN_LABEL[run.run_status]}</span>
+                <span className="rounded-full bg-violet-100 px-3 py-1 font-bold text-violet-700">{runStatusLabel(run.run_status)}</span>
                 <span>반복 {run.current_iteration}/{run.max_iterations}</span>
                 <span>목표 달성률 {run.goal_coverage_percent.toFixed(0)}%</span>
-                <span>현재 작업: {ACTION_LABEL[run.current_action || ""] || ACTION_LABEL[run.current_stage] || "준비 중"}</span>
+                <span>현재 작업: {currentActionLabel(run)}</span>
                 {!TERMINAL.has(run.run_status) && (
                   <button type="button" onClick={async () => setRun(await cancelGoalResearch(run.run_id))} className="ml-auto rounded-lg border border-red-200 px-3 py-1 text-xs text-red-600">중단</button>
                 )}
                 {TERMINAL.has(run.run_status) && <button type="button" onClick={resetResearch} disabled={busy} className="ml-auto rounded-lg border border-violet-200 px-3 py-1 text-xs font-semibold text-violet-700 disabled:opacity-40">새 연구</button>}
               </div>
+              {isStaleRun(run, lastProgressAt, now) &&
+                <p className="rounded-lg bg-amber-50 p-3 text-xs text-amber-800">진행 상태가 오랫동안 갱신되지 않았습니다.</p>}
+              {run.run_status === "waiting_for_user_input" &&
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm" role="status">
+                  <strong className="text-amber-900">추가 입력 필요</strong>
+                  <p className="mt-2 whitespace-pre-wrap text-slate-700">{clarificationDetails(run).question}</p>
+                  {!!clarificationDetails(run).requiredInputs.length && <ul className="mt-2 list-inside list-disc text-xs text-slate-700">
+                    {clarificationDetails(run).requiredInputs.map((item) => <li key={item}>{item}</li>)}
+                  </ul>}
+                  <form onSubmit={submitReply} className="mt-3 space-y-2">
+                    <label className="block text-xs font-semibold text-slate-700" htmlFor="goal-clarification-reply">필요한 값을 입력해 주세요</label>
+                    <textarea id="goal-clarification-reply" value={reply} onChange={(event) => setReply(event.target.value)}
+                      className="min-h-20 w-full rounded-lg border border-amber-200 bg-white p-2 text-sm" />
+                    <button type="submit" disabled={!reply.trim() || resuming}
+                      className="rounded-lg bg-violet-600 px-4 py-2 text-xs font-bold text-white disabled:opacity-40">{resuming ? "연결 중…" : "계속하기"}</button>
+                  </form>
+                </div>}
               <div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full bg-violet-600" style={{ width: `${run.goal_coverage_percent}%` }} /></div>
               <div className="grid gap-2 sm:grid-cols-2">
                 {run.criteria.map((item) => (
                   <div key={item.criterion_id} className="rounded-xl bg-slate-50 p-3 text-xs">
                     <strong>{STATUS_ICON[item.status]} {item.criterion_id} · {CRITERION_LABEL[item.status]}</strong>
-                    <p className="mt-1 text-slate-500">{displayAnswer(item.reason, run.computations)}</p>
+                    <p className="mt-1 text-slate-700">{criterionText(run, item.criterion_id, item.reason).description}</p>
+                    {criterionText(run, item.criterion_id, item.reason).detail &&
+                      <p className="mt-1 text-slate-500">{displayAnswer(criterionText(run, item.criterion_id, item.reason).detail || "", run.computations)}</p>}
                   </div>
                 ))}
               </div>
@@ -204,7 +243,7 @@ export function GoalResearchPanel() {
                   <ol className="mt-2 space-y-1">
                     {run.action_history.map((item, index) => (
                       <li key={index}>
-                        {index + 1}. {ACTION_LABEL[item.action_type] || item.action_type} · {item.status === "completed" ? "완료" : "진행 불가"}
+                        {actionIterationLabel(item)} · {item.status === "completed" ? "완료" : "진행 불가"}
                         {item.evidence_added.length > 0 ? ` · 근거 +${item.evidence_added.length}` : ""}
                         {item.computation_ids.length > 0 ? ` · 검증된 계산 +${item.computation_ids.length}` : ""}
                       </li>
@@ -214,7 +253,7 @@ export function GoalResearchPanel() {
               )}
               {run.iterations.map((item) => (
                 <details key={item.iteration} className="rounded-xl border border-slate-200 p-3">
-                  <summary className="cursor-pointer font-semibold">반복 {item.iteration} · 목표 달성률 {(item.goal_coverage * 100).toFixed(0)}% · 근거 +{item.evidence_added.length}</summary>
+                  <summary className="cursor-pointer font-semibold">반복 {item.iteration} · {run.action_history?.filter((action) => action.iteration === item.iteration).map((action) => ACTION_LABEL[action.action_type] || action.action_type).join(" / ") || "진행"} · 목표 달성률 {(item.goal_coverage * 100).toFixed(0)}%</summary>
                   <p className="mt-2 whitespace-pre-wrap text-xs text-slate-500">검색어: {item.research_query}</p>
                   {item.gap_analysis.length > 0 && <p className="mt-2 text-xs text-amber-700">남은 문제: {item.gap_analysis.join(" · ")}</p>}
                   {item.python_requested && <p className="mt-2 text-xs text-slate-600">Python 계산: {item.python_executed ? "실행됨" : "미실행"} · {item.python_decision_reason} · {item.computation_ids.join(", ") || "검증된 계산 없음"}</p>}
@@ -225,7 +264,12 @@ export function GoalResearchPanel() {
               {TERMINAL.has(run.run_status) && (
                 <div className="rounded-xl border border-violet-100 bg-violet-50/40 p-4">
                   <p className="text-sm font-bold text-violet-700">{GOAL_LABEL[run.status] || "연구 종료"}</p>
-                  <p className="mt-1 text-xs text-slate-600">목표 달성률 {run.goal_coverage_percent.toFixed(0)}% · {run.iterations_completed}회 반복 · {STOP_LABEL[run.stop_reason || ""] || "종료"} · {EXPECTED_LABEL[run.expected_result_status] || "가설 상태 확인 필요"}</p>
+                  <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-700">
+                    <span className="rounded-full bg-white px-2 py-1">달성률 {run.goal_coverage_percent.toFixed(0)}%</span>
+                    <span className="rounded-full bg-white px-2 py-1">반복 {run.iterations_completed}회</span>
+                    <span className="rounded-full bg-white px-2 py-1">{STOP_LABEL[run.stop_reason || ""] || "종료"}</span>
+                    {hypothesisLabel(run) && <span className="rounded-full bg-white px-2 py-1">{hypothesisLabel(run)}</span>}
+                  </div>
                   {simulations.length === 0 && <div className="mt-3"><MarkdownMath content={displayAnswer(run.final_answer || "최종 답변이 없습니다.", run.computations)} /></div>}
                   {simulations.map(({ computation, table }) => {
                     const manifest = computation.output_manifest;
@@ -249,7 +293,7 @@ export function GoalResearchPanel() {
                     <p className="mt-2 text-slate-500">근거: {item.input_facts.filter((fact) => item.source_input_ids.includes(fact.evidence_id || fact.canonical_fact_id || "")).map((fact) => `사용자 입력 ${fact.name} = ${formatNumber(fact.value)}${fact.unit && fact.unit !== "dimensionless" ? ` ${fact.unit}` : ""}`).join(" · ") || `사용자 입력 ${new Set(item.source_input_ids).size}건`}{run.internal_sources.filter((source) => [...item.source_evidence_ids, ...item.formula_evidence_ids].includes(source.evidence_id)).map((source) => ` · ${source.document}${source.page ? ` p.${source.page}` : ""}`)}</p>
                   </section>)}
                   <p className="mt-3 text-xs text-slate-500">근거: 내부 문서 {run.internal_sources.length} · 웹 {run.web_sources.length} · Figure {run.figures.length} · 사용자 입력 {evidenceCounts(run).userInputs} · 검증된 계산 {evidenceCounts(run).calculations}</p>
-                  {Object.keys(run.deliverable_status || {}).length > 0 && <div className="mt-3 text-xs"><strong>최종 산출물</strong>{Object.entries(run.deliverable_status).map(([kind, status]) => <p key={kind}>{kind.toUpperCase()}: {RUN_LABEL[status] || status} {run.deliverable_errors?.[kind] || ""}</p>)}{run.artifacts.map((artifact) => <a key={artifact.artifact_id} className="mr-4 text-violet-700 underline" href={goalArtifactUrl(run.run_id, artifact.artifact_id)} download>{artifact.artifact_type.toUpperCase()} 다운로드</a>)}</div>}
+                  {Object.keys(run.deliverable_status || {}).length > 0 && <div className="mt-3 text-xs"><strong>최종 산출물</strong>{Object.entries(run.deliverable_status).map(([kind, status]) => <p key={kind}>{kind.toUpperCase()}: {runStatusLabel(status)} {run.deliverable_errors?.[kind] || ""}</p>)}{run.artifacts.map((artifact) => <a key={artifact.artifact_id} className="mr-4 text-violet-700 underline" href={goalArtifactUrl(run.run_id, artifact.artifact_id)} download>{artifact.artifact_type.toUpperCase()} 다운로드</a>)}</div>}
                 </div>
               )}
             </div>

@@ -283,13 +283,19 @@ def formula_input_readiness(equation: str, facts: UserFactRegistry) -> tuple[dic
 
 async def run_user_formula_calculation(settings: Settings, request: GoalResearchRequest,
                                        run_id: str, equation: str, facts: UserFactRegistry,
-                                       calc_id: str, source_id: str, *, original_text: str | None = None) -> ComputationRecord:
+                                       calc_id: str, source_id: str, *, original_text: str | None = None,
+                                       validated_derived_ids: set[str] | None = None) -> ComputationRecord:
     if not (request.allow_python_execution and request.python_execution_approved):
         raise PermissionError("Python calculation requires approval")
     variables, missing = user_formula_bindings(equation, facts)
     if missing:
         raise ValueError("missing user formula inputs: " + ", ".join(missing))
-    validate_original_operands(original_text or request.topic, UserFactRegistry(records=list(variables.values())))
+    trusted = validated_derived_ids or set()
+    if any(fact.extraction_method in {"validated_calculation", "source_fact"} and fact.fact_id not in trusted
+           for fact in variables.values()):
+        raise ValueError("unvalidated derived formula input")
+    validate_original_operands(original_text or request.topic, UserFactRegistry(records=[
+        fact for fact in variables.values() if fact.fact_id not in trusted]))
     lhs, rhs = [part.strip() for part in equation.split("=", 1)]
     if len(rhs) > 200 or len(variables) > 12:
         raise ValueError("user formula exceeds safe bounds")
@@ -367,7 +373,9 @@ async def run_user_formula_calculation(settings: Settings, request: GoalResearch
         units={**units, lhs: output_unit}, execution_hash=hashlib.sha256(code.encode()).hexdigest(),
         output={"OUT_RESULT": actual}, formula=equation,
         input_facts=[{"name": name, "value": fact.value, "unit": fact.unit,
-                      "evidence_id": fact.fact_id, "source_type": "user_fact"}
+                      "evidence_id": fact.fact_id,
+                      "source_type": ("calculation" if fact.extraction_method == "validated_calculation" else
+                                      fact.semantic_role if fact.extraction_method == "source_fact" else "user_fact")}
                      for name, fact in variables.items()],
         code_record=str(execution.get("code_record") or ""),
         output_files=[(Path("results") / "goal-research" / run_id / "analysis" / "calculation.json").as_posix()],

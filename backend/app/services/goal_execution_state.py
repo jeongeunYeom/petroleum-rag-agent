@@ -49,6 +49,10 @@ class DerivedFact(BaseModel):
     value: float
     unit: str | None = None
     underlying_provenance_ids: list[str] = Field(default_factory=list)
+    source_formula_id: str | None = None
+    formula_source_ids: list[str] = Field(default_factory=list)
+    input_fact_ids: list[str] = Field(default_factory=list)
+    validation_passed: bool = True
 
 
 class SimulationParameter(BaseModel):

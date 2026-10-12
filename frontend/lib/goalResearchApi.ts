@@ -89,6 +89,7 @@ export type GoalResearchRun = {
   current_stage: string;
   current_action?: string | null;
   action_history?: {
+    iteration: number;
     action_type: string;
     status: string;
     reason_code: string;

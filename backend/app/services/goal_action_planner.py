@@ -47,6 +47,7 @@ class GoalActionPlanner:
         source_context: list[str] | None = None,
         direct_ready: bool = False,
         resumed_with_new_input: bool = False,
+        pending_formula_calculation: bool = False,
     ) -> GoalAction:
         text = " ".join(filter(None, (request.topic, request.goal)))
         wants_simulation = bool(SIMULATE_WORDS.search(text) or simulation_spec)
@@ -85,7 +86,7 @@ class GoalActionPlanner:
                           GoalActionPlanner.query(request, state, intent))
         if (intent is not None and intent.kind == GoalIntentKind.KB_FORMULA_CALC
                 and source_ready and formula_inputs_ready and numeric_inputs_ready
-                and permission and not state.computation_ids and not wants_simulation
+                and permission and (not state.computation_ids or pending_formula_calculation) and not wants_simulation
                 and python_calls_used < request.max_python_calls):
             if (last and last.action_type == GoalActionType.CALCULATE and last.status != "completed"
                     and not resumed_with_new_input):

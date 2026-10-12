@@ -35,7 +35,10 @@ def record(case_id, result, passed):
             "resume_readiness_recomputed": result.telemetry.get("resume_readiness_recomputed", False),
             "resume_block_cleared": result.telemetry.get("resume_block_cleared", False),
             "clarification_suppressed_existing_input": result.telemetry.get(
-                "clarification_suppressed_existing_input", False)}
+                "clarification_suppressed_existing_input", False),
+            "dependency_depth": result.telemetry.get("formula_dependency_depth", 0),
+            "dependency_success": result.telemetry.get("formula_dependency_resolution_success", False),
+            "dependency_computation_ids": result.telemetry.get("formula_dependency_computation_ids", [])}
 
 
 def main():
@@ -108,6 +111,39 @@ def main():
                 row = record(case_id, resumed, passed)
                 row["initial_status"] = first.run_status.value
                 cases.append(row)
+
+            chain_text = "A=2 ft; B=12 kg; C=3 kg. Find the internal Q equation and calculate Q."
+            chain_source = "Q=X*A. X=B/C. A (ft); B (kg); C (kg)."
+            chained, _, _ = execute(root / "CHAIN-A", patch, chain_text, [[(40, chain_source)]])
+            chain_actions = actions(chained)
+            cases.append(record("CHAIN-A", chained,
+                chained.status == GoalStatus.ACHIEVED and
+                chain_actions[:5] == ["retrieve", "calculate", "calculate", "verify", "synthesize"] and
+                len(chained.computations) == 2 and
+                chained.computations[-1].output_manifest["OUT_RESULT"]["value"] == 8 and
+                chained.telemetry["formula_dependency_resolution_success"]))
+
+            chain_resume_text = "A=2 ft; B=12 kg. Find the internal Q equation and calculate Q."
+            path = root / "CHAIN-RESUME"
+            patch.setattr("app.services.goal_execution_agent.get_settings",
+                lambda: Settings(data_dir=path / "data", agent_workspace_dir=path / "workspace"))
+            agent = GoalExecutionAgent(SyntheticResearch([[(41, chain_source)]]), object(),
+                                      evaluator=PassingEvaluator())
+            req = request(chain_resume_text)
+            first = asyncio.run(agent.run("CHAIN-RESUME", req))
+            checkpoint = dict(first.resume_checkpoint)
+            checkpoint["user_replies"] = ["C=3 kg"]
+            resumed = asyncio.run(agent.run(first.run_id, req,
+                                            resume_state=checkpoint, resume_result=first))
+            resume_actions = actions(resumed)
+            row = record("CHAIN-RESUME", resumed,
+                first.run_status == GoalRunStatus.WAITING_FOR_USER_INPUT and
+                first.run_id == resumed.run_id and resumed.status == GoalStatus.ACHIEVED and
+                resume_actions[:5] == ["retrieve", "calculate", "calculate", "verify", "synthesize"] and
+                len(resumed.computations) == 2 and not resumed.clarification_question)
+            row["initial_status"] = first.run_status.value
+            row["required_inputs"] = first.required_inputs
+            cases.append(row)
 
     summary = {"cases": len(cases), "passed": sum(row["passed"] for row in cases),
                "formula_recovery_attempts": sum(row["formula_recovery_attempt_count"] for row in cases),

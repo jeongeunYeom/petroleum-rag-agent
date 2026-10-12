@@ -19,7 +19,8 @@ from app.models.goal_research_schemas import (
 )
 from app.models.research_schemas import EvidenceCounts, InternalEvidence, ResearchRequest, ResearchResponse, ResearchTiming
 from app.services.formula_source_registry import FormulaSourceRegistry, equation_ast, expression_variables, normalize_formula, source_contains_equation
-from app.services.calculation_requirements import infer_dimensionless, rank_formula_candidates, select_formula_candidate
+from app.services.formula_dependency import resolve_formula_dependencies
+from app.services.calculation_requirements import infer_dimensionless, normalize_symbol, rank_formula_candidates, select_formula_candidate
 from app.services.calculation_request_ir import OPERATIONS, parse_request_ir, validate_ir
 from app.services.goal_clarification import (calculation_missing, calculation_readiness, clarification_question,
                                              parse_user_simulation_spec, simulation_readiness,
@@ -49,7 +50,7 @@ from app.services.goal_simulation import (direct_operation_operands, direct_read
                                           run_direct_arithmetic, run_parameter_sweep,
                                           run_user_formula_calculation,
                                           user_formula_bindings, formula_input_readiness)
-from app.services.user_fact_registry import NUMBER, UserFactRegistry
+from app.services.user_fact_registry import NUMBER, UserFactRecord, UserFactRegistry, normalize_unit
 from app.services.source_answerability import (evaluate_claim_support, grounded_answer, SupportStatus,
                                                RequiredClaim, ClaimSupport, atomic_claims, semantic_claim_support)
 
@@ -369,8 +370,17 @@ class GoalExecutionAgent(GoalResearchAgent):
     @staticmethod
     def _evidence(accumulator: EvidenceAccumulator, users: UserFactRegistry,
                   computations: list[Any], simulation_spec: SimulationSpec | None,
-                  simulation_source_id: str, user_equation: str | None = None) -> list[dict[str, Any]]:
+                  simulation_source_id: str, user_equation: str | None = None,
+                  include_evidence_facts: bool = False) -> list[dict[str, Any]]:
         evidence = accumulator.records() + users.evidence()
+        if include_evidence_facts or any(fact_id.startswith("EFACT") for computation in computations
+                                         for fact_id in computation.input_fact_ids):
+            for fact in EvidenceFactRegistry.from_evidence(accumulator.records()).records:
+                evidence.append({"evidence_id": fact.fact_id, "source_type": fact.source_type,
+                                 "parent_source_id": fact.source_id, "name": fact.name,
+                                 "value": fact.value, "unit": normalize_unit(fact.unit),
+                                 "source_span": fact.source_span, "span_start": fact.span_start,
+                                 "span_end": fact.span_end, "text": fact.source_span})
         if simulation_spec or user_equation:
             evidence.append({"evidence_id": simulation_source_id, "source_type": "user_fact",
                              "locator": "request.goal",
@@ -393,10 +403,16 @@ class GoalExecutionAgent(GoalResearchAgent):
                 "output_files": computation.output_files,
                 "output_manifest": computation.output_manifest,
             })
+            for fact in GoalExecutionAgent._derived(computation):
+                evidence.append({"evidence_id": fact.fact_id, "source_type": "calculation",
+                                 "parent_calc_id": fact.parent_calc_id, "output_id": fact.output_id,
+                                 "name": fact.name, "value": fact.value, "unit": fact.unit or "",
+                                 "validation_passed": True,
+                                 "text": f"{fact.name}={fact.value} {fact.unit or ''}"})
         return evidence
 
     @staticmethod
-    def _derived(computation: Any) -> list[DerivedFact]:
+    def _derived(computation: Any, source_formula_id: str | None = None) -> list[DerivedFact]:
         if not computation.validation_passed:
             return []
         parents = list(dict.fromkeys(computation.source_evidence_ids + computation.source_input_ids +
@@ -404,9 +420,52 @@ class GoalExecutionAgent(GoalResearchAgent):
         return [DerivedFact(fact_id=f"{computation.computation_id}:{output_id}",
                             parent_calc_id=computation.computation_id, output_id=output_id,
                             name=str(row.get("name") or output_id), value=float(row["value"]),
-                            unit=row.get("unit"), underlying_provenance_ids=parents)
+                            unit=row.get("unit"), underlying_provenance_ids=parents,
+                            source_formula_id=source_formula_id,
+                            formula_source_ids=computation.formula_source_ids,
+                            input_fact_ids=computation.input_fact_ids, validation_passed=True)
                 for output_id, row in computation.output_manifest.items()
                 if isinstance(row.get("value"), (int, float))]
+
+    @staticmethod
+    def _formula_inputs(users: UserFactRegistry, derived: list[DerivedFact],
+                        computations: list[Any], evidence: list[dict[str, Any]] | None = None,
+                        request_text: str = "") -> tuple[UserFactRegistry, set[str]]:
+        """Expose only validated CALC outputs to the existing deterministic binder."""
+        parents = {item.computation_id: item for item in computations
+                   if item.validation_passed and item.contract_validation_passed}
+        rows = list(users.records)
+        trusted: set[str] = set()
+        if re.search(r"\b(?:use|using)\s+(?:the\s+)?(?:source|document|table|given)\s+(?:values|data)\b|"
+                     r"(?:자료|문서|표)의?\s*(?:값|수치)", request_text, re.I):
+            source_facts = EvidenceFactRegistry.from_evidence(evidence or []).records
+            counts = {normalize_symbol(fact.name): sum(normalize_symbol(item.name) == normalize_symbol(fact.name)
+                                                       for item in source_facts) for fact in source_facts}
+            for fact in source_facts:
+                if counts[normalize_symbol(fact.name)] != 1 or any(
+                        normalize_symbol(row.name) == normalize_symbol(fact.name) for row in rows):
+                    continue
+                rows.append(UserFactRecord(fact_id=fact.fact_id, name=fact.name, value=fact.value,
+                                           unit=normalize_unit(fact.unit), raw_unit=fact.unit,
+                                           canonical_unit=normalize_unit(fact.unit), raw_value_text=fact.raw_value_text,
+                                           source_span=fact.source_span, topic_start=0, topic_end=0,
+                                           semantic_role=fact.source_type,
+                                           extraction_method="source_fact"))
+                trusted.add(fact.fact_id)
+        for fact in derived:
+            parent = parents.get(fact.parent_calc_id)
+            output = parent.output_manifest.get(fact.output_id) if parent else None
+            if (not fact.validation_passed or not output or output.get("value") != fact.value
+                    or output.get("name") != fact.name or output.get("unit") != fact.unit):
+                continue
+            rows.append(UserFactRecord(fact_id=fact.fact_id, name=fact.name, value=fact.value,
+                                       unit=fact.unit or "", raw_unit=fact.unit or "",
+                                       canonical_unit=fact.unit or "", raw_value_text=str(fact.value),
+                                       source_span=f"validated {fact.parent_calc_id}:{fact.output_id}",
+                                       topic_start=0, topic_end=0,
+                                       extraction_method="validated_calculation"))
+            trusted.add(fact.fact_id)
+        return UserFactRegistry(records=rows), trusted
 
     @staticmethod
     def _provenance_complete(computation: Any, evidence: list[dict[str, Any]],
@@ -433,6 +492,19 @@ class GoalExecutionAgent(GoalResearchAgent):
             source = sources.get(str(fact.get("evidence_id")), {})
             if source.get("source_type") == "user_fact" and "value" in source:
                 if fact.get("value") != source["value"] or str(fact.get("unit") or "") != str(source.get("unit") or ""):
+                    return False
+            if fact.get("source_type") == "calculation":
+                if (source.get("source_type") != "calculation" or not source.get("validation_passed")
+                        or fact.get("value") != source.get("value")
+                        or str(fact.get("unit") or "") != str(source.get("unit") or "")):
+                    return False
+            if fact.get("source_type") in {"knowledge_base", "figure", "web"}:
+                parent = sources.get(str(source.get("parent_source_id")), {})
+                start, end = source.get("span_start"), source.get("span_end")
+                if (source.get("source_type") != fact.get("source_type") or not isinstance(start, int)
+                        or not isinstance(end, int) or str(parent.get("text") or "")[start:end] != source.get("source_span")
+                        or fact.get("value") != source.get("value")
+                        or str(fact.get("unit") or "") != str(source.get("unit") or "")):
                     return False
         if computation.formula_source_ids == ["USER_REQUEST"]:
             return bool(re.search(r"평균|합계|비율|차이|순위|최대|최소|범위|중앙값|표준편차|분산|기하\s*평균|가중\s*평균|"
@@ -1211,6 +1283,13 @@ class GoalExecutionAgent(GoalResearchAgent):
             "partial_grounded_answer_used": False, "clarification_guard_checked": False,
             "clarification_suppressed_existing_input": False,
             "resume_readiness_recomputed": False, "resume_block_cleared": False,
+            "formula_dependency_resolution_attempted": False,
+            "formula_dependency_resolution_success": False,
+            "formula_dependency_depth": 0, "formula_dependency_formula_ids": [],
+            "formula_dependency_computation_ids": [], "formula_dependency_derived_fact_ids": [],
+            "formula_dependency_cycle_detected": False,
+            "formula_dependency_block_reason": None,
+            "clarification_avoided_by_dependency_resolution": False,
         }.items():
             result.telemetry.setdefault(key, value)
         result.telemetry["intent_route"] = intent.kind.value
@@ -1291,7 +1370,42 @@ class GoalExecutionAgent(GoalResearchAgent):
                 [item.name for item in users.records],
                 {item.name: item.unit for item in users.records if item.unit},
             ) if formula_available and requires_sourced_formula else (None, None)
-            formula_missing = calculation_readiness(selected_formula, evidence_rows, users, state.derived_facts) if selected_formula else []
+            pinned = result.telemetry.get("formula_dependency_target")
+            if pinned:
+                pinned_formula = next((row for row in FormulaSourceRegistry.from_evidence(evidence_rows).records
+                    if row.source_id == pinned.get("source_id") and row.equation_ast == pinned.get("equation_ast")
+                    and source_contains_equation(row, next((str(item.get("text") or "") for item in evidence_rows
+                        if item.get("evidence_id") == row.source_id), ""))), None)
+                if pinned_formula:
+                    selected_formula = pinned_formula
+            target_formula = selected_formula
+            formula_users, trusted_derived = self._formula_inputs(users, state.derived_facts,
+                                                                  result.computations, evidence_rows, user_text)
+            dependency_plan = (resolve_formula_dependencies(target_formula, evidence_rows, formula_users,
+                                                             [], result.computations)
+                               if target_formula and intent.kind == GoalIntentKind.KB_FORMULA_CALC
+                               and not SIMULATE_WORDS.search(f"{request.topic} {request.goal or ''}") else None)
+            if dependency_plan:
+                if len(dependency_plan.formula_ids) > 1 and not pinned and not dependency_plan.block_reason:
+                    result.telemetry["formula_dependency_target"] = {
+                        "source_id": target_formula.source_id, "equation_ast": target_formula.equation_ast}
+                result.telemetry["formula_dependency_resolution_attempted"] = True
+                result.telemetry["formula_dependency_depth"] = max(
+                    result.telemetry["formula_dependency_depth"], dependency_plan.depth)
+                result.telemetry["formula_dependency_formula_ids"] = list(dict.fromkeys(
+                    result.telemetry["formula_dependency_formula_ids"] + dependency_plan.formula_ids))
+                result.telemetry["formula_dependency_cycle_detected"] |= (
+                    dependency_plan.block_reason == "formula_dependency_cycle")
+                if dependency_plan.block_reason:
+                    result.telemetry["formula_dependency_block_reason"] = dependency_plan.block_reason
+                if dependency_plan.next_formula:
+                    selected_formula = dependency_plan.next_formula
+                    if selected_formula.formula_id != target_formula.formula_id:
+                        result.telemetry["clarification_avoided_by_dependency_resolution"] = True
+            formula_missing = (calculation_readiness(selected_formula, evidence_rows, formula_users, [])
+                               if selected_formula else [])
+            if dependency_plan and dependency_plan.missing_inputs:
+                formula_missing = [f"{name} 값과 단위" for name in dependency_plan.missing_inputs]
             state.formula_ready = bool(selected_formula and not formula_missing)
             result.telemetry["formula"] = ({"candidates_found": formula_selection.candidates_found,
                                              "selected_formula_id": formula_selection.formula_id,
@@ -1331,7 +1445,8 @@ class GoalExecutionAgent(GoalResearchAgent):
                 missing_simulation = readiness.missing
             selection_started = time.perf_counter()
             equation = intent.user_equation or (selected_formula.expression_candidate if selected_formula else None)
-            bindings, missing_bindings = formula_input_readiness(equation, users) if equation else ({}, [])
+            bindings, missing_bindings = formula_input_readiness(
+                equation, formula_users if requires_sourced_formula else users) if equation else ({}, [])
             formula_source = next((row for row in evidence_rows if selected_formula and
                                    row.get("evidence_id") == selected_formula.source_id), None)
             formula_source_verified = bool(formula_source and selected_formula and source_contains_equation(
@@ -1352,19 +1467,39 @@ class GoalExecutionAgent(GoalResearchAgent):
                     state.unresolved_information.clear()
                     result.telemetry["resume_block_cleared"] = bool(previous_missing)
                     result.telemetry["clarification_suppressed_existing_input"] = bool(previous_missing)
-            action = self.action_planner.select(request, state, user_fact_ids=[r.fact_id for r in users.records],
+            action = self.action_planner.select(request, state, user_fact_ids=[r.fact_id for r in
+                                                (formula_users if requires_sourced_formula else users).records],
                                                 evidence_fact_ids=evidence_fact_ids,
                                                 formula_ready=selected_formula is not None,
                                                 formula_id=selected_formula.formula_id if selected_formula else None,
                                                 python_calls_used=result.python_calls_total,
                                                 simulation_spec=simulation_spec,
                                                 formula_inputs_ready=not (formula_missing or user_formula_missing or direct_missing or missing_bindings),
+                                                pending_formula_calculation=bool(dependency_plan and dependency_plan.next_formula),
                                                 intent=intent, formula_source_verified=formula_source_verified,
                                                 fact_names=[item.name for item in users.records],
                                                 fact_units={item.name: item.unit for item in users.records if item.unit},
                                                 source_context=[item.document for item in accumulator.internal[:2]],
                                                 direct_ready=bool(direct_fast and direct_users.records and not direct_missing),
                                                 resumed_with_new_input=resumed_with_new_input)
+            if dependency_plan and dependency_plan.block_reason:
+                action = action.model_copy(update={"action_type": GoalActionType.STOP,
+                    "reason_code": dependency_plan.block_reason, "formula_id": None})
+            elif dependency_plan and dependency_plan.missing_inputs:
+                recovery_count = sum(item.reason_code == "dependency_formula_recovery"
+                                     for item in state.completed_actions)
+                if (len(dependency_plan.formula_ids) == 1 and len(dependency_plan.missing_inputs) == 1
+                        and recovery_count == 0
+                        and request.use_internal and sum(item.action_type == GoalActionType.RETRIEVE
+                        for item in state.completed_actions) < request.max_retrieval_actions):
+                    query = (GoalActionPlanner.formula_recovery_query(request, intent,
+                             dependency_plan.missing_inputs, {}, [], 1))
+                    action = action.model_copy(update={"action_type": GoalActionType.RETRIEVE,
+                        "reason_code": "dependency_formula_recovery", "query": query,
+                        "formula_id": None})
+                else:
+                    action = action.model_copy(update={"action_type": GoalActionType.STOP,
+                        "reason_code": "calculation_blocked", "formula_id": None})
             result.telemetry["transition"] = {"formula_ready": state.formula_ready if requires_sourced_formula else bool(equation),
                                                "calculation_ready": action.reason_code in {"formula_ready", "calculation_ready"},
                                                "blocking_reason": action.reason_code if action.action_type == GoalActionType.STOP else None}
@@ -1372,8 +1507,10 @@ class GoalExecutionAgent(GoalResearchAgent):
             result.telemetry.update({
                 "operands_expected": len(expression_variables(equation) or []) if equation else len(direct_users.records) + len(direct_missing),
                 "operands_bound": len(bindings) if equation else len(direct_users.records),
-                "operand_validation_passed": not (missing_bindings or formula_missing or direct_missing) and bool(users.records),
-                "operands_complete": not (missing_bindings or formula_missing or direct_missing) and bool(users.records),
+                "operand_validation_passed": not (missing_bindings or formula_missing or direct_missing) and bool(
+                    formula_users.records if requires_sourced_formula else users.records),
+                "operands_complete": not (missing_bindings or formula_missing or direct_missing) and bool(
+                    formula_users.records if requires_sourced_formula else users.records),
                 "formula_selected": bool(equation) or (intent.kind == GoalIntentKind.DIRECT_CALC and bool(direct_operations)),
                 "formula_ready": state.formula_ready if requires_sourced_formula else bool(equation and not missing_bindings) or direct_fast,
                 "calculation_ready": ready or bool(state.computation_ids),
@@ -1399,11 +1536,13 @@ class GoalExecutionAgent(GoalResearchAgent):
                 needs_clarification = action.reason_code in {"simulation_spec_missing", "calculation_blocked"} or (
                     action.reason_code == "retrieve_no_progress" and bool(missing_simulation)) or (
                     action.reason_code == "no_progress" and (bool(missing_simulation) or calculation_stalled))
+                if dependency_plan and dependency_plan.block_reason:
+                    needs_clarification = False
                 if needs_clarification and clarification_attempts < 3:
                     result.telemetry["clarification_guard_checked"] = True
                     missing = (missing_simulation or user_simulation_missing_inputs if missing_simulation or user_simulation_missing_inputs else
                                user_formula_missing or direct_missing or formula_missing or missing_bindings or
-                               (calculation_missing(selected_formula, evidence_rows, users, state.derived_facts)
+                               (calculation_missing(selected_formula, evidence_rows, formula_users, [])
                                 if requires_sourced_formula else []))
                     if missing:
                         return self._pause(result, state, accumulator, seen_actions, research_validation,
@@ -1418,6 +1557,10 @@ class GoalExecutionAgent(GoalResearchAgent):
                     "formula_source_unavailable": GoalStopReason.INSUFFICIENT_EVIDENCE,
                     "retrieve_no_progress": GoalStopReason.NO_PROGRESS,
                     "python_call_budget_exhausted": GoalStopReason.CALCULATION_BLOCKED,
+                    "formula_dependency_cycle": GoalStopReason.CALCULATION_BLOCKED,
+                    "formula_dependency_depth_exceeded": GoalStopReason.CALCULATION_BLOCKED,
+                    "formula_dependency_ambiguous": GoalStopReason.CALCULATION_BLOCKED,
+                    "formula_dependency_source_unverified": GoalStopReason.CALCULATION_BLOCKED,
                 }.get(action.reason_code, GoalStopReason.INSUFFICIENT_EVIDENCE)
                 self._record_stop(result, state, action.reason_code)
                 if intent.kind in {GoalIntentKind.DIRECT_CALC, GoalIntentKind.USER_FORMULA_CALC,
@@ -1601,13 +1744,14 @@ class GoalExecutionAgent(GoalResearchAgent):
                 elif (action.action_type == GoalActionType.CALCULATE and
                       intent.kind == GoalIntentKind.KB_FORMULA_CALC and selected_formula and
                       selected_formula.expression_candidate and not formula_missing and
-                      not user_formula_bindings(selected_formula.expression_candidate, users)[1]):
+                      not user_formula_bindings(selected_formula.expression_candidate, formula_users)[1]):
                     # Literal source equation + uniquely bound user facts are sufficient for
                     # a bounded, independently checked calculation; no second LLM plan is needed.
                     python_started = time.perf_counter()
                     computation = await run_user_formula_calculation(
                         get_settings(), request, run_id, selected_formula.expression_candidate,
-                        users, f"CALC{len(result.computations) + 1}", selected_formula.source_id, original_text=user_text)
+                        formula_users, f"CALC{len(result.computations) + 1}", selected_formula.source_id,
+                        original_text=user_text, validated_derived_ids=trusted_derived)
                     self._add_time(result, "python_seconds", time.perf_counter() - python_started)
                     computation.analysis_id = f"KB-FORMULA-{computation.computation_id}"
                     computation.formula_evidence_ids = [selected_formula.source_id]
@@ -1622,8 +1766,10 @@ class GoalExecutionAgent(GoalResearchAgent):
                         computation.produced_output_ids = ["OUT_default_API_gravity"]
                         computation.units["API_gravity"] = "°API"
                     if not self._provenance_complete(
-                            computation, self._evidence(accumulator, users, [], simulation_spec,
-                                                        simulation_source_id),
+                            computation, self._evidence(accumulator, users, result.computations, simulation_spec,
+                                                        simulation_source_id, include_evidence_facts=any(
+                                                            fact.extraction_method == "source_fact"
+                                                            for fact in formula_users.records)),
                             f"{user_text}\n{request.goal or ''}"):
                         raise ValueError("sourced formula provenance incomplete")
                     result.computations.append(computation)
@@ -1631,11 +1777,21 @@ class GoalExecutionAgent(GoalResearchAgent):
                     result.python_attempts_total += 1
                     calc_ids.append(computation.computation_id)
                     state.computation_ids.append(computation.computation_id)
-                    state.derived_facts.extend(self._derived(computation))
+                    new_derived = self._derived(computation, selected_formula.formula_id)
+                    state.derived_facts.extend(new_derived)
+                    if dependency_plan and target_formula and selected_formula.formula_id != target_formula.formula_id:
+                        result.telemetry["formula_dependency_computation_ids"].append(computation.computation_id)
+                        result.telemetry["formula_dependency_derived_fact_ids"].extend(
+                            fact.fact_id for fact in new_derived)
+                    elif result.telemetry["formula_dependency_computation_ids"]:
+                        result.telemetry["formula_dependency_resolution_success"] = True
                     state.source_complete = True
                     state.pending_verifications = state.computation_ids.copy()
                     details = {"subprocess_reached": True, "source_requirement": SourceRequirement.KB_FORMULA.value,
-                               "formula_source_ids": computation.formula_source_ids}
+                               "formula_source_ids": computation.formula_source_ids,
+                               "formula_id": selected_formula.formula_id,
+                               "output_variable": selected_formula.lhs,
+                               "dependency_level": dependency_plan.depth if dependency_plan else 0}
                 elif action.action_type == GoalActionType.CALCULATE:
                     focused = selected_formula
                     if not (request.allow_python_execution and request.python_execution_approved):

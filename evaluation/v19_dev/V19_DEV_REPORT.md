@@ -10,7 +10,7 @@ This is a **synthetic development smoke and regression check**, not an independe
 - Backend suite: `python -m pytest -q` → **1,469 passed**, 6 pre-existing deprecation warnings
 - Fresh v19 tests: `python -m pytest -q tests/test_agent_reliability_v19_dev.py` → **19 passed**
 - Development smoke: `python scripts/run_v19_dev_smoke.py` → **9/9 passed**
-- Frontend: unchanged; frontend tests/build were not required or run for this backend-only patch.
+- Frontend: unchanged in the original backend-only patch; the follow-up below adds a UI change and its own verification.
 
 ## Changes and observed development results
 
@@ -47,3 +47,27 @@ This is a **synthetic development smoke and regression check**, not an independe
 - Recovery remains constrained by a user's `max_retrieval_actions` and `max_iterations`. A short iteration budget can expire before retrieval, calculation, verification, and synthesis all complete; the patch does not silently raise user-configured limits.
 - Results use controlled synthetic evidence and LLM-boundary stubs. They do not establish production-KB or unseen-benchmark performance; a separate independent evaluation would be required.
 - Sealed v18 benchmark inspected: **NO**. Sealed v18 benchmark rerun: **NO**. Main modified/merged: **NO**. New final benchmark started: **NO**.
+
+## Follow-up: formula dependency chaining
+
+The follow-up remains a synthetic development check, not a new benchmark. A bounded DFS (maximum three dependency edges) follows only literal, exact-span-verified formulas whose LHS matches an unresolved variable by normalized symbol or an existing safe alias. It detects cycles and depth overflow, refuses materially ambiguous competing formulas, and never uses a same-page reference as an equation. A single unresolved intermediate may trigger one bounded formula-recovery retrieval; a known dependency with a missing base input asks for the base input instead. Sourced evidence numbers are bound only when the user explicitly requests source values and the exact numeric/unit span is uniquely anchored.
+
+Each actual equation executes as a separate bounded Python CALCULATE action. Only validated CALC outputs enter the next binding. The derived fact records parent computation, output ID/name/value/unit, formula ID, source evidence IDs, input fact IDs, and validation status. Before accepting the parent CALC, its recorded input is checked against the previously validated output, and formula-source and unit validation remain mandatory. Completed formulas are not executed again; a pinned target formula prevents a mid-chain ranking change from replacing the requested goal with an intermediate.
+
+Fresh synthetic dependency tests cover: ready dependency → target, two-level chain, cycle, missing base input, missing literal equation, tampered formula locator, ambiguous competing equations, depth overflow, bounded recovery, explicit source-value provenance, and same-run base-input resume. The chain smoke trace is **RETRIEVE → CALCULATE X → CALCULATE Q → VERIFY → SYNTHESIZE → STOP**. The resume smoke first reaches `WAITING_FOR_USER_INPUT` for `C` only, then the reply `C=3 kg` resumes the same run and follows the same two-CALCULATE trace. The synthetic smoke is **11/11 PASS**, including both new chain cases.
+
+## Follow-up: clarification UI and presentation
+
+`GoalResearchPanel` now distinguishes `waiting_for_user_input` from active execution: it displays the exact clarification question and required inputs, with a reply field wired to the existing resume endpoint and the same run ID. A synchronous submission lock and disabled button prevent duplicate replies; an API error leaves the waiting run intact. Polling resumes when the returned run becomes active. The drawer stays mounted, so closing and reopening does not discard the question or run. A 45-second no-progress warning is informational only; it does not cancel or fail the run. The panel defaults to six iterations so a retrieve/two-calculate/verify/synthesize chain has room, while the user may still set 1–8.
+
+Presentation hides “가설 미제공” when no expected result exists, shows the frozen criterion description ahead of any non-generic reason, and labels actions with the actual recorded iteration—including separate iterations for two CALCULATE actions. Frontend tests cover these cases and the resume contract.
+
+## Follow-up verification and limits
+
+- Fresh dependency tests: **11/11 PASS**; combined v19 targeted tests: **30/30 PASS**.
+- Full backend suite: **1,480 passed**, 6 deprecation warnings.
+- An earlier full-suite attempt had one timing-sensitive failure in the unchanged web-fetch concurrency test; that test passed alone, and the final full-suite rerun passed all 1,480 tests.
+- Development smoke: **11/11 PASS** (synthetic in-memory evidence only).
+- Frontend tests: **20/20 PASS**; `pnpm build`: **PASS**.
+- No production ChromaDB write, model/retrieval architecture change, sealed v18 inspection, final benchmark, or main merge.
+- Recovery is intentionally conservative: when several unknown base variables remain or multiple source equations are materially tied, the agent asks or stops instead of inventing a binding. The user's iteration and Python-call budgets still cap how far a valid chain can run. No real-production-KB dependency claim is made from this synthetic smoke.
