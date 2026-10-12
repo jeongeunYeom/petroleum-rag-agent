@@ -199,6 +199,14 @@ class GoalResearchService:
                     "docx_success": result.deliverable_status.get("docx") == "completed",
                     "pptx_success": result.deliverable_status.get("pptx") == "completed",
                 })
+                if any(value != "completed" for value in result.deliverable_status.values()):
+                    result.run_status = GoalRunStatus.STOPPED
+                    result.status = GoalStatus.STOPPED
+                    result.stop_reason = GoalStopReason.DELIVERABLE_FAILED
+                    notice = ("요청한 파일 중 생성하지 못한 항목이 있습니다."
+                              if re.search(r"[가-힣]", request.topic) else
+                              "Some requested files could not be generated.")
+                    result.final_answer = f"{result.final_answer}\n\n{notice}".strip()
                 result.current_stage = "finalize"
             elif result.run_status in {GoalRunStatus.COMPLETED, GoalRunStatus.STOPPED,
                                        GoalRunStatus.FAILED, GoalRunStatus.CANCELED} and request.deliverables:
@@ -246,6 +254,25 @@ class GoalResearchService:
         checkpoint: dict | None = None,
     ) -> None:
         path = self._path(run_id)
+        if request.entrypoint == "unified_chat":
+            response.telemetry.update({
+                "entrypoint": "unified_chat",
+                "conversation_context_used": bool(request.context_user_messages),
+                "conversation_context_message_count": request.context_message_count,
+                "hidden_iteration_ceiling": request.max_iterations,
+                "actual_iterations_used": response.iterations_completed,
+                "actions_executed": [item.get("action_type") for item in response.action_history
+                                     if item.get("action_type") != "stop"],
+                "adaptive_stop_reason": (response.stop_reason.value if response.stop_reason else
+                                         "waiting_for_user_input" if response.run_status == GoalRunStatus.WAITING_FOR_USER_INPUT
+                                         else None),
+                "target_completed": response.status == GoalStatus.ACHIEVED and all(
+                    value == "completed" for value in response.deliverable_status.values()),
+                "clarification_turns": max(
+                    int(response.telemetry.get("clarification_turns", 0)),
+                    len((checkpoint or response.resume_checkpoint or {}).get("user_replies", [])),
+                ),
+            })
         if request.deliverables and not response.deliverable_status and response.run_status not in {
             GoalRunStatus.FAILED, GoalRunStatus.CANCELED,
         }:

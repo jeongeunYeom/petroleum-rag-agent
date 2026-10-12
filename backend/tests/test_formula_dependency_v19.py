@@ -78,6 +78,17 @@ def test_missing_base_input_not_intermediate(tmp_path, monkeypatch):
     assert not result.computations
 
 
+def test_worked_constant_examples_are_not_dependency_producers():
+    evidence = [{"evidence_id": "KB1", "source_type": "knowledge_base", "document": "guide.pdf",
+                 "text": "API = (141.5 / SG) - 131.5. Sg = 141.5 / (131.5 + 38). SG = 0.835."}]
+    target = next(row for row in FormulaSourceRegistry.from_evidence(evidence).records
+                  if row.expression_candidate and row.expression_candidate.startswith("API ="))
+    plan = resolve_formula_dependencies(target, evidence, UserFactRegistry(), [], [])
+    assert plan.block_reason is None
+    assert plan.missing_inputs == ["SG"]
+    assert plan.next_formula is None
+
+
 def test_unverified_dependency_span_cannot_be_used():
     evidence = [{"evidence_id": "KB1", "source_type": "knowledge_base",
                  "text": "Q=X*A. A (ft)."},

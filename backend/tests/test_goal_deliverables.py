@@ -123,7 +123,7 @@ def test_deliverables_start_only_after_research_finishes(tmp_path: Path):
     assert response.telemetry["docx_success"] and response.telemetry["pptx_success"]
 
 
-def test_failed_docx_does_not_change_research_or_block_pptx(tmp_path: Path):
+def test_failed_docx_does_not_block_pptx_but_prevents_overall_achievement(tmp_path: Path):
     settings = Settings(data_dir=tmp_path / "data", agent_workspace_dir=tmp_path / "workspace")
 
     class Controller:
@@ -145,9 +145,11 @@ def test_failed_docx_does_not_change_research_or_block_pptx(tmp_path: Path):
     deadline = time.monotonic() + 5
     while time.monotonic() < deadline:
         response = service.get(started.run_id)
-        if response.deliverable_status.get("pptx") == "completed":
+        if (response.deliverable_status.get("pptx") == "completed"
+                and response.stop_reason == GoalStopReason.DELIVERABLE_FAILED):
             break
         time.sleep(0.02)
-    assert response.status == GoalStatus.ACHIEVED
+    assert response.status == GoalStatus.STOPPED
+    assert response.stop_reason == GoalStopReason.DELIVERABLE_FAILED
     assert response.deliverable_status == {"docx": "failed", "pptx": "completed"}
     assert len(response.artifacts) == 1

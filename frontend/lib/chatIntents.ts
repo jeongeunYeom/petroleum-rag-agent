@@ -14,6 +14,23 @@ export function goalStageLabel(stage: string): string {
     case "waiting_for_user_input": return "추가 정보 필요";
     case "resume": return "계산을 계속하는 중";
     case "deliverables": return "산출물 작성 중";
-    default: return "연구 진행 중";
+    default: return "요청을 분석하고 있습니다";
   }
+}
+
+export function boundedChatContext(messages: { role: "user" | "assistant"; content: string }[]) {
+  const selected: { role: "user" | "assistant"; content: string }[] = [];
+  let remaining = 2400;
+  for (const message of messages.slice(-6).reverse()) {
+    const content = message.content.trim();
+    if (!content || content.length > 1000 || content.length > remaining) continue;
+    selected.unshift({ role: message.role, content });
+    remaining -= content.length;
+  }
+  return selected;
+}
+
+export function pendingGoalRun<T extends { role: string; goalRun?: { run_id: string; run_status: string } }>(messages: T[]) {
+  const latest = [...messages].reverse().find((item) => item.role === "assistant" && item.goalRun)?.goalRun;
+  return latest?.run_status === "waiting_for_user_input" ? latest : null;
 }

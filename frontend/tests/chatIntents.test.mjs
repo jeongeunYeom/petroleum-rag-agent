@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { goalStageLabel, wantsFigureReview } from "../lib/chatIntents.ts";
+import { boundedChatContext, goalStageLabel, pendingGoalRun, wantsFigureReview } from "../lib/chatIntents.ts";
 
 test("figure review opens only on an explicit viewer request", () => {
   assert.equal(wantsFigureReview("방금 추가한 문서의 Figure 보여줘"), true);
@@ -21,4 +21,16 @@ test("agent progress is phrased for users", () => {
   assert.equal(goalStageLabel("waiting_for_user_input"), "추가 정보 필요");
   assert.equal(goalStageLabel("verify"), "결과 검증 중");
   assert.equal(goalStageLabel("synthesize"), "답변 작성 중");
+});
+
+test("chat context is bounded and clarification resumes the latest run", () => {
+  const messages = [
+    { role: "user", content: "SG=0.918일 때 API도를 계산해줘" },
+    { role: "assistant", content: "이전 답변".repeat(500), goalRun: { run_id: "old", run_status: "completed" } },
+    { role: "assistant", content: "TVD가 필요합니다", goalRun: { run_id: "waiting", run_status: "waiting_for_user_input" } },
+  ];
+  assert.deepEqual(boundedChatContext(messages).map((item) => item.content),
+    ["SG=0.918일 때 API도를 계산해줘", "TVD가 필요합니다"]);
+  assert.equal(pendingGoalRun(messages)?.run_id, "waiting");
+  assert.equal(pendingGoalRun([...messages, { role: "assistant", content: "완료", goalRun: { run_id: "new", run_status: "completed" } }]), null);
 });

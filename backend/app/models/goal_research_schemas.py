@@ -53,6 +53,7 @@ class GoalStopReason(str, Enum):
     ERROR = "error"
     CALCULATION_BLOCKED = "calculation_blocked"
     SIMULATION_BLOCKED = "simulation_blocked"
+    DELIVERABLE_FAILED = "deliverable_failed"
 
 
 class GoalCriterion(BaseModel):
@@ -72,6 +73,11 @@ class GoalCriterion(BaseModel):
 class GoalResearchRequest(BaseModel):
     topic: str = Field(min_length=1, max_length=2000)
     goal: str | None = Field(default=None, max_length=2000)
+    entrypoint: Literal["structured", "unified_chat"] = "structured"
+    current_message: str | None = Field(default=None, max_length=2000)
+    context_user_messages: list[str] = Field(default_factory=list, max_length=6)
+    context_message_count: int = Field(default=0, ge=0, le=6)
+    contextual_fact_name: str | None = Field(default=None, max_length=50)
     expected_result: str | None = Field(default=None, max_length=2000)
     success_criteria: list[GoalCriterion] = Field(default_factory=list, max_length=20)
     use_internal: bool = True
@@ -112,6 +118,9 @@ class GoalResearchRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_sources_and_criteria(self) -> "GoalResearchRequest":
+        if any(len(message) > 1000 for message in self.context_user_messages) or sum(
+                len(message) for message in self.context_user_messages) > 2400:
+            raise ValueError("conversation context is too long")
         if not self.use_internal and not self.use_external:
             raise ValueError("at least one evidence source must be enabled")
         ids = [item.criterion_id for item in self.success_criteria]

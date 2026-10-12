@@ -8,7 +8,7 @@ from app.services.goal_execution_agent import GoalExecutionAgent
 from app.services.goal_execution_state import GoalExecutionState, GoalActionType
 from app.services.goal_message_parser import GoalMessageRequest, parse_goal_message
 from app.services.goal_planner import GoalPlanner
-from app.services.user_fact_registry import UserFactRegistry
+from app.services.user_fact_registry import UserFactRegistry, validate_original_operands
 from app.models.goal_research_schemas import CriterionStatus, GoalCriterion
 from app.services.goal_evaluator import GoalEvaluator
 
@@ -116,3 +116,97 @@ def test_evaluator_uses_only_known_evidence_ids_mentioned_in_its_reason():
     )
     assert evaluated[0].status == CriterionStatus.MET
     assert evaluated[0].supporting_evidence == ["KB2"]
+
+
+def test_unified_chat_bounded_context_and_user_fact_correction():
+    from app.services.goal_message_parser import ContextMessage
+
+    prior = "SG=0.918인 원유의 API gravity를 교재 식으로 계산해줘."
+    request = parse_goal_message(GoalMessageRequest(
+        message="그럼 0.85면?", context_messages=[
+            ContextMessage(role="user", content=prior),
+            ContextMessage(role="assistant", content="SG=9.99; API=999 [KB999]"),
+        ]))
+    assert request.entrypoint == "unified_chat"
+    assert request.max_iterations == 8
+    assert request.context_user_messages == [prior]
+    assert request.context_message_count == 2
+    assert request.contextual_fact_name == "SG"
+    assert "KB999" not in request.topic
+    facts = UserFactRegistry.from_messages(request.context_user_messages)
+    assert facts.apply_contextual_correction(request.current_message, request.contextual_fact_name)
+    assert [(fact.name, fact.value, fact.source_span) for fact in facts.records] == [
+        ("SG", .85, "그럼 0.85면?")]
+    validate_original_operands(f"{prior}\n{request.current_message}", facts)
+
+
+def test_unified_chat_named_correction_and_ambiguous_value_are_safe():
+    from app.services.goal_message_parser import ContextMessage
+
+    prior = "phi=0.22, Sw=0.35, Rw=2 ohm*m일 때 Rt를 계산해줘."
+    context = [ContextMessage(role="user", content=prior)]
+    request = parse_goal_message(GoalMessageRequest(message="Sw만 0.40으로 바꾸면?", context_messages=context))
+    assert request.contextual_fact_name == "Sw"
+    facts = UserFactRegistry.from_messages(request.context_user_messages)
+    assert facts.apply_contextual_correction(request.current_message, "Sw")
+    assert next(item.value for item in facts.records if item.name == "Sw") == .40
+    with pytest.raises(ValueError, match="변수명"):
+        parse_goal_message(GoalMessageRequest(message="그럼 0.40이면?", context_messages=context))
+
+
+def test_followup_uses_latest_user_goal_not_unrelated_older_numbers():
+    from app.services.goal_message_parser import ContextMessage
+
+    context = [ContextMessage(role="user", content="A=8 kg의 평균은?"),
+               ContextMessage(role="assistant", content="8 kg"),
+               ContextMessage(role="user", content="SG=0.918인 원유의 API도를 계산해줘.")]
+    request = parse_goal_message(GoalMessageRequest(message="그럼 0.85면?", context_messages=context))
+    assert request.context_user_messages == ["SG=0.918인 원유의 API도를 계산해줘."]
+    assert "A=8" not in request.topic
+    explicit = parse_goal_message(GoalMessageRequest(message="SG=0.85", context_messages=context))
+    assert explicit.context_user_messages == request.context_user_messages
+    assert explicit.contextual_fact_name is None
+
+
+def test_followup_after_clarification_keeps_original_goal_and_latest_user_fact():
+    from app.services.goal_message_parser import ContextMessage
+
+    goal = "SG를 교재 식으로 API gravity로 계산해줘."
+    context = [ContextMessage(role="user", content=goal),
+               ContextMessage(role="assistant", content="SG 값을 알려주세요."),
+               ContextMessage(role="user", content="SG=0.918")]
+    request = parse_goal_message(GoalMessageRequest(message="그럼 0.85면?", context_messages=context))
+    assert request.context_user_messages == [goal, "SG=0.918"]
+    assert request.contextual_fact_name == "SG"
+    assert request.goal.startswith(goal)
+
+
+def test_unified_chat_web_policy_and_context_bounds():
+    from app.services.goal_message_parser import ContextMessage
+
+    assert parse_goal_message(GoalMessageRequest(message="최신 OPEC 자료를 웹에서 확인해줘")).use_external
+    assert not parse_goal_message(GoalMessageRequest(message="웹 검색 없이 내부 자료로 설명해줘")).use_external
+    with pytest.raises(ValueError):
+        GoalMessageRequest(message="다시?", context_messages=[
+            ContextMessage(role="user", content="x" * 500) for _ in range(6)])
+
+
+def test_arithmetic_relation_outranks_clipped_pdf_alias_without_input_value():
+    from app.services.calculation_requirements import rank_formula_candidates
+
+    evidence = [{"evidence_id": "KB1", "source_type": "knowledge_base", "document": "guide.pdf",
+                 "text": "API = (141.5 / SG) - 131.5. SG = specific gravity."}]
+    selected, selection = rank_formula_candidates(evidence, "Find SG-API equation and calculate API gravity", [])
+    assert selected is not None
+    assert selected.expression_candidate.startswith("API =")
+    assert selection.selection_reason == "unique_structural_match"
+
+
+def test_clipped_prose_definition_is_not_a_dependency_formula():
+    from app.services.formula_source_registry import FormulaSourceRegistry
+
+    evidence = [{"evidence_id": "KB1", "source_type": "knowledge_base",
+                 "text": "API = (141.5 / SG) - 131.5. SG = specific gravity."}]
+    records = FormulaSourceRegistry.from_evidence(evidence).records
+    assert any(record.expression_candidate.startswith("API =") for record in records)
+    assert all(record.expression_candidate != "SG = specific" for record in records)

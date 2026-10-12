@@ -229,6 +229,15 @@ class FormulaSourceRegistry(BaseModel):
                     # Never promote the middle row of a stacked equation to n=F.
                     continue
                 raw = match.group("equation").rstrip(" .\t")
+                # A PDF definition can be clipped by the equation regex at a
+                # prose word boundary (e.g. "SG = specific gravity"). A bare
+                # symbol followed by another noun is not an executable span.
+                rhs_literal = raw.split("=", 1)[1].strip()
+                tail = text[match.start() + len(raw):]
+                if (re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", rhs_literal)
+                        and re.match(r"[ \t]+(?!where\b|and\b|or\b|if\b|with\b|for\b|in\b|at\b|is\b)"
+                                     r"[A-Za-z][A-Za-z-]*", tail, re.I)):
+                    continue
                 candidate = _source_expression(raw, text, match.start(), match.start() + len(raw))
                 variables = expression_variables(candidate)
                 if variables is None:
@@ -245,6 +254,10 @@ class FormulaSourceRegistry(BaseModel):
                 if variables is None and not (re.search(r"[+\-*/×÷−·]", rhs) and re.search(r"[A-Za-z_]", rhs)):
                     continue
                 start, end = match.start(), match.start() + len(raw)
+                if (candidate and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", candidate.split("=", 1)[1].strip())
+                        and re.match(r"[ \t]+(?!where\b|and\b|or\b|if\b|with\b|for\b|in\b|at\b|is\b)"
+                                     r"[A-Za-z][A-Za-z-]*", text[end:], re.I)):
+                    continue
                 layout = normalize_extracted_equation(
                     raw, text[max(0, start - 350):min(len(text), end + 350)])
                 if layout.transformations or layout.is_ambiguous:

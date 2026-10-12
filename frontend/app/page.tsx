@@ -5,7 +5,6 @@ import {
   API_BASE,
   analyzeImage,
   askComparison,
-  askResearch,
   ChatCompareResponse,
   ChatResponse,
   createUploadJob,
@@ -16,10 +15,10 @@ import {
 import { DocumentInfoPanel } from "@/components/DocumentInfoPanel";
 import { SystemStatusPanel } from "@/components/SystemStatusPanel";
 import { MarkdownMath } from "@/components/MarkdownMath";
-import { GoalResearchPanel } from "@/components/GoalResearchPanel";
+import { AgentProcessSummary } from "@/components/AgentProcessSummary";
 import { getGoalResearch, goalArtifactUrl, GoalResearchRun, resumeGoalResearch, startGoalResearchFromMessage } from "@/lib/goalResearchApi";
 import { displayAnswer } from "@/lib/goalResultPresentation";
-import { goalStageLabel, wantsFigureReview } from "@/lib/chatIntents";
+import { boundedChatContext, goalStageLabel, pendingGoalRun, wantsFigureReview } from "@/lib/chatIntents";
 import { AppIconRail, MobileModeTabs } from "@/components/AppNavigation";
 import {
   type AgentTask,
@@ -232,7 +231,7 @@ async function waitForGoalRun(runId: string, onProgress: (run: GoalResearchRun) 
         (["completed", "stopped"].includes(run.run_status) && !deliverablesBusy)) return run;
     await new Promise((resolve) => window.setTimeout(resolve, 500));
   }
-  throw new Error(`연구 실행 시간 초과 · 실행 ID ${runId}`);
+  throw new Error(`요청 처리 시간 초과 · 실행 ID ${runId}`);
 }
 
 export default function Home() {
@@ -252,42 +251,6 @@ export default function Home() {
   const [selectedFigure, setSelectedFigure] = useState<FigureReference | null>(null);
   const [answerMode, setAnswerMode] = useState<AnswerMode>("qwen3:8b");
   const [agentBusyTaskId, setAgentBusyTaskId] = useState<string | null>(null);
-  const [goalDrawerOpen, setGoalDrawerOpen] = useState(false);
-  const goalDrawerRef = useRef<HTMLElement>(null);
-  const goalDrawerCloseRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (!goalDrawerOpen) return;
-    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    goalDrawerCloseRef.current?.focus();
-    function handleDrawerKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setGoalDrawerOpen(false);
-      } else if (event.key === "Tab") {
-        const focusable = goalDrawerRef.current?.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])',
-        );
-        if (!focusable?.length) return;
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-        if (!goalDrawerRef.current?.contains(document.activeElement)) {
-          event.preventDefault();
-          first.focus();
-        } else if (event.shiftKey && document.activeElement === first) {
-          event.preventDefault();
-          last.focus();
-        } else if (!event.shiftKey && document.activeElement === last) {
-          event.preventDefault();
-          first.focus();
-        }
-      }
-    }
-    window.addEventListener("keydown", handleDrawerKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleDrawerKeyDown);
-      previousFocus?.focus();
-    };
-  }, [goalDrawerOpen]);
 
   useEffect(() => {
     if (!selectedFigure) {
@@ -539,37 +502,34 @@ export default function Home() {
       }]);
       return;
     }
-    const latestRun = [...messages].reverse().find((item) => item.role === "assistant" && item.goalRun)?.goalRun;
-    const pendingRun = latestRun?.run_status === "waiting_for_user_input" ? latestRun : null;
+    const pendingRun = pendingGoalRun(messages);
     setBusy(true);
-    setStatus(
-      pendingRun ? "확인했습니다. 계산을 계속합니다." : answerMode === "compare"
-        ? "RAG 비교 답변과 Agent 작업 계획을 함께 실행 중..."
-        : "연구 목표를 분석하고 필요한 근거와 도구를 실행 중...",
-    );
+    setStatus(answerMode === "compare" && !pendingRun ? "모델 비교 진단 중..." : null);
 
     if (pendingRun || answerMode !== "compare") {
+      const assistantId = crypto.randomUUID();
+      setMessages((previous) => [...previous, {
+        id: assistantId, role: "assistant",
+        content: pendingRun ? "확인했습니다. 작업을 이어가고 있습니다." : "요청을 분석하고 있습니다.",
+      }]);
+      const updateAssistant = (run: GoalResearchRun) => setMessages((previous) => previous.map((item) =>
+        item.id === assistantId ? { ...item, goalRun: run,
+          content: run.run_status === "waiting_for_user_input"
+            ? run.clarification_question || "계산을 계속하려면 추가 정보가 필요합니다."
+            : ["completed", "stopped", "failed", "canceled"].includes(run.run_status)
+              ? displayAnswer(run.final_answer || run.error || "근거가 충분하지 않아 결론을 보류했습니다.", run.computations)
+              : goalStageLabel(run.current_stage) } : item));
       try {
-        const context = [...messages].reverse().find((item) => item.role === "user" &&
-          !/이\s*(?:주제|내용)|앞서|위의|this topic|same topic/i.test(item.content))?.content;
         const started = pendingRun
           ? await resumeGoalResearch(pendingRun.run_id, submittedQuestion)
-          : await startGoalResearchFromMessage(submittedQuestion, answerMode === "compare" ? "qwen3:8b" : answerMode, context);
-        const completed = await waitForGoalRun(started.run_id, (current) =>
-          setStatus(goalStageLabel(current.current_stage)));
-        setMessages((previous) => [...previous, {
-          id: crypto.randomUUID(), role: "assistant",
-          content: completed.run_status === "waiting_for_user_input"
-            ? completed.clarification_question || "계산을 계속하려면 추가 정보가 필요합니다."
-            : displayAnswer(completed.final_answer || completed.error || "근거가 충분하지 않아 결론을 보류했습니다.", completed.computations),
-          goalRun: completed,
-        }]);
-        setStatus(completed.run_status === "waiting_for_user_input" ? "추가 정보 필요" :
-          completed.status === "achieved" ? "목표 달성 · 근거와 계산 검증 완료" : "연구 종료 · 남은 조건을 확인하세요.");
+          : await startGoalResearchFromMessage(submittedQuestion, answerMode, boundedChatContext(messages));
+        updateAssistant(started);
+        const completed = await waitForGoalRun(started.run_id, updateAssistant);
+        updateAssistant(completed);
       } catch (error) {
-        const message = error instanceof Error ? error.message : "목표 연구를 시작하지 못했습니다.";
-        setMessages((previous) => [...previous, { id: crypto.randomUUID(), role: "assistant", content: `오류: ${message}` }]);
-        setStatus(message);
+        const message = error instanceof Error ? error.message : "요청을 처리하지 못했습니다.";
+        setMessages((previous) => previous.map((item) => item.id === assistantId
+          ? { ...item, goalRun: undefined, content: `오류: ${message}` } : item));
       } finally {
         setBusy(false);
       }
@@ -601,63 +561,11 @@ export default function Home() {
       }));
 
     try {
-      let assistantMessage: ChatMessage;
-      let sourceCount = 0;
-
-      if (answerMode === "compare") {
-        const result = (await askComparison(
-          submittedQuestion,
-          ["qwen3:8b", "gemma4:latest"],
-        )) as ChatCompareResponseWithFigures;
-
-        sourceCount = result.sources?.length ?? 0;
-        assistantMessage = {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: "",
-          comparison: result,
-        };
-      } else {
-        const research = await askResearch(
-          submittedQuestion,
-          answerMode,
-        );
-        const result: ChatResponseWithFigures = {
-          answer: research.answer,
-          sources: research.internal_sources.map((source) => ({
-            document: source.document,
-            page: source.page,
-            chunk_id: source.chunk_id,
-            score: source.score,
-            excerpt: source.excerpt,
-          })),
-          model: research.model,
-          elapsed_seconds: research.timing.elapsed_seconds,
-          query_type: research.routing_mode,
-          figures: research.figures.flatMap((figure) =>
-            figure.filename && figure.url
-              ? [{
-                  document: figure.document,
-                  page: figure.page,
-                  figure_number: figure.figure_number,
-                  title: figure.title,
-                  filename: figure.filename,
-                  url: figure.url,
-                }]
-              : [],
-          ),
-          webSources: research.web_sources,
-          routingMode: research.routing_mode,
-        };
-
-        sourceCount = result.sources.length + research.web_sources.length;
-        assistantMessage = {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: result.answer,
-          response: result,
-        };
-      }
+      const result = (await askComparison(submittedQuestion, ["qwen3:8b", "gemma4:latest"])) as ChatCompareResponseWithFigures;
+      const assistantMessage: ChatMessage = {
+        id: crypto.randomUUID(), role: "assistant", content: "", comparison: result,
+      };
+      const sourceCount = result.sources?.length ?? 0;
 
       const agentOutcome = await agentPromise;
       assistantMessage.agentTask = agentOutcome.task;
@@ -902,7 +810,7 @@ export default function Home() {
                 disabled={busy} className="mt-1 w-full rounded-lg border border-slate-200 bg-white p-2 text-xs">
                 <option value="qwen3:8b">Qwen3 8B</option>
                 <option value="gemma4:latest">Gemma4</option>
-                <option value="compare">Qwen3 vs Gemma4</option>
+                <option value="compare">모델 비교 (진단)</option>
               </select>
             </details>
           </div>
@@ -914,8 +822,8 @@ export default function Home() {
         <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 md:px-6">
           <div className="flex items-center gap-3">
             <div>
-              <h2 className="text-sm font-bold">Petroleum Research Agent v8</h2>
-              <p className="hidden text-xs text-slate-500 sm:block">한 문장으로 근거 검색 · 계산 · 검증</p>
+              <h2 className="text-sm font-bold">Petroleum Research Agent</h2>
+              <p className="hidden text-xs text-slate-500 sm:block">질문 하나로 검색 · 계산 · 검증</p>
             </div>
           </div>
           <div className="flex items-center gap-2 text-slate-500">
@@ -1102,19 +1010,12 @@ export default function Home() {
                     )}
 
                     {message.goalRun && (
-                      <section className="mt-4 rounded-2xl border border-violet-100 bg-violet-50/50 p-4 text-xs leading-5">
-                        <p className="font-bold text-violet-800">{message.goalRun.run_status === "waiting_for_user_input" ? "추가 정보가 필요합니다" :
-                          message.goalRun.status === "achieved" ? "목표 달성" : "검증된 정보 부족"}</p>
-                        {message.goalRun.run_status !== "waiting_for_user_input" && <>
-                        {message.goalRun.criteria.map((item) => <p key={item.criterion_id} className="mt-2 text-slate-700">
-                          {item.status === "met" ? "✓" : "△"} {message.goalRun!.frozen_criteria.find((criterion) => criterion.criterion_id === item.criterion_id)?.description || "성공 조건"}: {displayAnswer(item.reason, message.goalRun!.computations)}
-                        </p>)}
-                        <p className="mt-2 text-slate-500">근거: 내부 문서 {message.goalRun.internal_sources.length} · 웹 {message.goalRun.web_sources.length} · 검증 계산 {message.goalRun.computations.filter((item) => item.validation_passed).length}</p>
+                      <section className="text-xs leading-5">
+                        <AgentProcessSummary run={message.goalRun} />
                         {message.goalRun.artifacts.map((artifact) => <a key={artifact.artifact_id} className="mr-4 text-violet-700 underline" href={goalArtifactUrl(message.goalRun!.run_id, artifact.artifact_id)} download>
                           {artifact.artifact_type.toUpperCase()} 다운로드
                         </a>)}
                         {Object.entries(message.goalRun.deliverable_errors || {}).map(([kind, issue]) => <p key={kind} className="text-red-600">{kind.toUpperCase()}: {issue}</p>)}
-                        </>}
                       </section>
                     )}
 
@@ -1289,22 +1190,10 @@ export default function Home() {
         </div>
 
         <form onSubmit={onAsk} className="shrink-0 border-t border-slate-200 bg-white px-4 py-4">
-          <div className="mx-auto mb-2 flex max-w-4xl justify-end">
-            <button
-              type="button"
-              aria-haspopup="dialog"
-              aria-controls="goal-research-drawer"
-              aria-expanded={goalDrawerOpen}
-              onClick={() => setGoalDrawerOpen(true)}
-              className="rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700 transition hover:bg-violet-100"
-            >
-              🎯 목표 연구
-            </button>
-          </div>
           <div className="mx-auto flex max-w-4xl items-end gap-2 rounded-3xl border border-slate-200 bg-white px-4 py-3 shadow-lg shadow-slate-200/70">
             <textarea
               className="max-h-56 min-h-24 flex-1 resize-y bg-transparent py-2 text-sm outline-none placeholder:text-slate-400"
-              placeholder="연구 주제와 원하는 결과를 자연어로 입력하세요. 예: 비중 0.918인 원유의 API도를 교재 근거로 계산해줘."
+              placeholder="질문이나 원하는 결과를 자연어로 입력하세요. 예: 비중 0.918인 원유의 API도를 교재 근거로 계산해줘."
               value={question}
               onChange={(event) => setQuestion(event.target.value)}
               onKeyDown={(event) => {
@@ -1322,45 +1211,9 @@ export default function Home() {
               ↑
             </button>
           </div>
-          <p className="mt-2 text-center text-[11px] text-slate-400">목표 연구에 필요한 제한된 로컬 계산은 자동 실행됩니다. 파일 변경은 별도 승인이 필요합니다.</p>
+          <p className="mt-2 text-center text-[11px] text-slate-400">필요한 제한된 로컬 계산은 자동 실행됩니다. 파일 변경은 별도 승인이 필요합니다.</p>
         </form>
       </section>
-
-      <div
-        aria-hidden="true"
-        onClick={() => setGoalDrawerOpen(false)}
-        className={`fixed inset-0 z-[60] bg-slate-950/40 transition-opacity duration-200 ${goalDrawerOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
-      />
-      <aside
-        id="goal-research-drawer"
-        ref={goalDrawerRef}
-        role="dialog"
-        aria-modal={goalDrawerOpen}
-        aria-hidden={!goalDrawerOpen}
-        aria-labelledby="goal-research-title"
-        inert={!goalDrawerOpen}
-        className={`fixed inset-y-0 right-0 z-[61] flex h-screen w-full max-w-[600px] flex-col bg-white shadow-2xl transition-transform duration-200 ${goalDrawerOpen ? "translate-x-0" : "translate-x-full"}`}
-      >
-        <header className="flex shrink-0 items-center justify-between border-b border-slate-200 px-5 py-4">
-          <div>
-            <h2 id="goal-research-title" className="text-base font-bold text-slate-900">목표 연구</h2>
-            <p className="mt-0.5 text-xs text-slate-500">목표별 검색 · 계산 · 검증</p>
-          </div>
-          <button
-            ref={goalDrawerCloseRef}
-            type="button"
-            aria-label="목표 연구 닫기"
-            onClick={() => setGoalDrawerOpen(false)}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-          >
-            ×
-          </button>
-        </header>
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <GoalResearchPanel />
-        </div>
-      </aside>
-
 
       {selectedFigure && (
         <div

@@ -136,11 +136,14 @@ export function startGoalResearch(input: GoalResearchInput): Promise<GoalResearc
   });
 }
 
-export function startGoalResearchFromMessage(message: string, model: string, contextMessage?: string): Promise<GoalResearchRun> {
+export function startGoalResearchFromMessage(
+  message: string, model: string,
+  contextMessages: { role: "user" | "assistant"; content: string }[] = [],
+): Promise<GoalResearchRun> {
   return requestJson("/research/goal-runs/from-message", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message, model, context_message: contextMessage }),
+    body: JSON.stringify({ message, model, context_messages: contextMessages }),
   });
 }
 

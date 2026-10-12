@@ -256,12 +256,16 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
                      and normalize_symbol(variable) not in tokens for variable in variables)
                  if facts else 0)
         negative = 6 if excludes_reduced and terms == 2 else 0
+        # A bare symbol alias (often a clipped PDF definition such as
+        # "SG = specific gravity") must not tie an explicit arithmetic
+        # relation for a requested calculation output.
+        alias_penalty = 2 if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", record.rhs or "") else 0
         structure = 4 if term_match else 0
         unit_score = sum(unit_compatibility_score(hint, units[normalize_symbol(variable)])
                          for variable in variables
                          if (hint := source_variable_unit(local_context, variable))
                          and normalize_symbol(variable) in units)
-        score = lhs_score + variable_score + heading_score + context_score + structure + unit_score - negative
+        score = lhs_score + variable_score + heading_score + context_score + structure + unit_score - negative - alias_penalty
         details = {"lhs_match": bool(lhs_score), "required_variable_match": overlap,
                    "unit_score": unit_score,
                    "extra_variable_penalty": extra, "term_count_match": term_match,

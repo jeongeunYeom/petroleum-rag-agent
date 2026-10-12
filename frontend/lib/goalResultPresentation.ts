@@ -63,6 +63,23 @@ export function displayValue(output: Output, computation: Computation): string {
   return `${formatNumber(output.value)}${unit ? ` ${unit}` : ""}`;
 }
 
+const PROCESS_LABELS: Record<string, string> = {
+  retrieve: "내부 문서 검색", calculate: "Python 계산", simulate: "시뮬레이션",
+  analyze: "결과 분석", verify: "결과 검증", synthesize: "답변 정리", stop: "종료",
+};
+
+export function processSteps(run: GoalResearchRun): string[] {
+  return (run.action_history || []).filter((action) => action.status === "completed")
+    .map((action) => {
+      const computation = run.computations.find((item) =>
+        item.validation_passed && action.computation_ids.includes(item.computation_id));
+      const output = computation && Object.values(computation.output_manifest).find((item) =>
+        typeof item.value === "number");
+      const value = computation && output ? ` · ${output.name} = ${displayValue(output, computation)}` : "";
+      return `${PROCESS_LABELS[action.action_type] || action.action_type}${value}`;
+    });
+}
+
 export function simulationTable(computation: Computation) {
   if (!computation.validation_passed) return null;
   const manifest = computation.output_manifest;

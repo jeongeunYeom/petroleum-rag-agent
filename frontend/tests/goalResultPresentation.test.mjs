@@ -3,7 +3,7 @@ import test from "node:test";
 
 import {
   clampIterations, displayAnswer, displayUnit, displayValue, evidenceCounts,
-  formatNumber, simulationTable,
+  formatNumber, processSteps, simulationTable,
 } from "../lib/goalResultPresentation.ts";
 
 const computation = (manifest, unit = "stb/d") => ({
@@ -46,6 +46,15 @@ test("numeric noise is display-only and repeated USERF citations are grouped", (
   assert.equal(displayAnswer("default_API_gravity: 22.639433551198238 dimensionless [CALC1] [USERF1] [USERF2] [KB1]", [calc]),
     "API Gravity: 22.64 °API [CALC1] [KB1]");
   assert.equal(output.value, raw);
+});
+
+test("compact process is based only on completed real actions and validated outputs", () => {
+  const calc = computation({ OUT_F: { name: "F", value: 20.661157, unit: "dimensionless" } });
+  assert.deepEqual(processSteps({ computations: [calc], action_history: [
+    { action_type: "retrieve", status: "completed", computation_ids: [] },
+    { action_type: "calculate", status: "completed", computation_ids: ["CALC1"] },
+    { action_type: "verify", status: "running", computation_ids: [] },
+  ] }), ["내부 문서 검색", "Python 계산 · F = 20.66"]);
 });
 
 test("simulation table and evidence counts come from validated manifests", () => {

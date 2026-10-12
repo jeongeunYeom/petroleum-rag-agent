@@ -34,7 +34,8 @@ def resolve_formula_dependencies(target: FormulaSourceRecord, evidence: list[dic
         plan.block_reason = "formula_dependency_source_unverified"
         return plan
     records = [row for row in FormulaSourceRegistry.from_evidence(evidence).records
-               if row.expression_candidate and source_contains_equation(row, sources.get(row.source_id, ""))]
+               if row.expression_candidate and expression_variables(row.expression_candidate)
+               and source_contains_equation(row, sources.get(row.source_id, ""))]
     completed_keys = {(source, row.normalized_formula) for row in completed
                       if row.validation_passed and row.contract_validation_passed
                       for source in row.formula_source_ids}

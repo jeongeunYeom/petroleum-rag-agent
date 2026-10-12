@@ -214,6 +214,29 @@ class UserFactRegistry(BaseModel):
     records: list[UserFactRecord] = Field(default_factory=list)
     rejection_reasons: list[str] = Field(default_factory=list)
 
+    def apply_contextual_correction(self, message: str, name: str) -> bool:
+        """Apply a single literal value to one previously named user fact.
+
+        The source span remains the user's actual follow-up, not a synthesized
+        assignment, and no assistant text participates in binding.
+        """
+        numbers = list(re.finditer(NUMBER, message))
+        matches = [index for index, row in enumerate(self.records) if row.name == name]
+        if len(numbers) != 1 or len(matches) != 1:
+            return False
+        value = _number(numbers[0].group())
+        if value is None:
+            return False
+        old = self.records[matches[0]]
+        self.records[matches[0]] = old.model_copy(update={
+            "value": value, "raw_value_text": numbers[0].group(),
+            "source_span": message.strip(), "context_span": message.strip(),
+            "topic_start": numbers[0].start(), "topic_end": numbers[0].end(),
+            "value_span": numbers[0].span(), "unit_span": None,
+            "extraction_method": "contextual_correction",
+        })
+        return True
+
     def named_operands(self, text: str, operations: list[str]) -> "UserFactRegistry":
         """Exclude unrelated facts only when an aggregate names its exact operands."""
         if operations and set(operations) <= {"difference", "subtract", "ratio", "divide"}:
@@ -302,21 +325,24 @@ class UserFactRegistry(BaseModel):
     @classmethod
     def from_messages(cls, messages: list[str]) -> "UserFactRegistry":
         """Merge follow-up facts without reassigning the original USERF IDs."""
-        merged: list[UserFactRecord] = []
+        registry = cls()
         for message in messages:
-            previous = len(merged)
-            for item in cls.from_topic(message).records:
-                existing = [index for index, row in enumerate(merged[:previous]) if row.name == item.name]
-                old = existing[0] if len(existing) == 1 else None
-                if old is not None:
-                    if merged[old].value == item.value and merged[old].canonical_unit == item.canonical_unit:
-                        continue
-                    # A later explicit correction replaces the value but keeps its stable ID.
-                    item = item.model_copy(update={"fact_id": merged[old].fact_id})
-                    merged[old] = item
-                else:
-                    merged.append(item.model_copy(update={"fact_id": f"USERF{len(merged) + 1}"}))
-        return cls(records=merged)
+            registry.merge_message(message)
+        return registry
+
+    def merge_message(self, message: str) -> None:
+        previous = len(self.records)
+        for item in self.from_topic(message).records:
+            existing = [index for index, row in enumerate(self.records[:previous]) if row.name == item.name]
+            old = existing[0] if len(existing) == 1 else None
+            if old is not None:
+                if self.records[old].value == item.value and self.records[old].canonical_unit == item.canonical_unit:
+                    continue
+                # A later explicit correction replaces the value but keeps its stable ID.
+                item = item.model_copy(update={"fact_id": self.records[old].fact_id})
+                self.records[old] = item
+            else:
+                self.records.append(item.model_copy(update={"fact_id": f"USERF{len(self.records) + 1}"}))
 
     @classmethod
     def from_topic(cls, topic: str) -> "UserFactRegistry":
@@ -626,6 +652,16 @@ def validate_original_operands(text: str, facts: UserFactRegistry, *, list_opera
                            or expected_names.get(row.value_span) != row.name for row in facts.records)):
                 raise ValueError(f"operand_extraction_error: expected {len(expected)} operands, bound {len(actual)}; values/positions must match")
     for fact in facts.records:
+        if fact.extraction_method == "contextual_correction":
+            # A follow-up may replace one previously named USER fact without
+            # repeating its name. The new number must still be literal in the
+            # later user message; the old assignment is not the current value.
+            occurrences = list(re.finditer(re.escape(fact.source_span), text))
+            values = list(re.finditer(NUMBER, fact.source_span))
+            if (len(occurrences) != 1 or len(values) != 1 or
+                    _number(values[0].group()) != fact.value):
+                raise ValueError(f"operand_source_mismatch: {fact.name}")
+            continue
         # Exact name anchors have precedence over heuristic aliases; last explicit correction wins.
         name = re.escape(fact.name).replace("_", r"[ _]+")
         if fact.name.casefold() == "phi":

@@ -1198,8 +1198,14 @@ class GoalExecutionAgent(GoalResearchAgent):
         started = time.perf_counter()
         planning_started = time.perf_counter()
         korean = prefers_korean(request)
-        user_text = request.topic + "\n" + "\n".join((resume_state or {}).get("user_replies", []))
-        users = UserFactRegistry.from_messages([request.topic, *((resume_state or {}).get("user_replies", []))])
+        user_messages = [*request.context_user_messages, request.current_message or request.topic]
+        users = UserFactRegistry.from_messages(
+            request.context_user_messages if request.contextual_fact_name else user_messages)
+        if request.contextual_fact_name and request.current_message:
+            users.apply_contextual_correction(request.current_message, request.contextual_fact_name)
+        for reply in (resume_state or {}).get("user_replies", []):
+            users.merge_message(reply)
+        user_text = "\n".join([*user_messages, *((resume_state or {}).get("user_replies", []))])
         simulation_spec = self._simulation_spec(request) or parse_user_simulation_spec(user_text)
         intent = classify_goal_intent(request, has_user_facts=bool(users.records),
                                       has_simulation_spec=simulation_spec is not None)
