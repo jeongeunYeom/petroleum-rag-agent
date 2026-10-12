@@ -1,4 +1,4 @@
-import type { Computation, GoalResearchRun } from "./goalResearchApi";
+import type { Computation, CriterionEvaluation, GoalCriterion, GoalResearchRun } from "./goalResearchApi";
 
 type Output = Computation["output_manifest"][string];
 
@@ -8,6 +8,51 @@ const LABELS: Record<string, string> = {
   worst_parameter: "최저 조건", worst_result: "최저 결과", mean_result: "평균 결과",
   range_result: "결과 범위", coefficient_of_variation: "변동계수",
 };
+
+const ACTION_LABELS: Record<string, string> = {
+  retrieve: "근거 검색", calculate: "Python 계산", simulate: "수치 시뮬레이션",
+  analyze: "결과 분석", verify: "근거 검증", synthesize: "답변 정리", stop: "종료",
+};
+const HYPOTHESIS_LABELS: Record<string, string> = {
+  supported: "가설 지지", partially_supported: "가설 일부 지지",
+  contradicted: "가설 반박", insufficient_evidence: "가설 판단 근거 부족",
+};
+const GENERIC_CRITERION_REASONS = new Set([
+  "현재 입력과 검증된 계산 결과로 조건을 충족했습니다",
+  "조건을 충족했습니다",
+  "검증된 결과로 충족했습니다",
+]);
+type ActionHistoryItem = NonNullable<GoalResearchRun["action_history"]>[number];
+
+export function actionLabel(actionType: string, fallback = actionType): string {
+  return ACTION_LABELS[actionType] || fallback;
+}
+
+export function actionProgressText(item: ActionHistoryItem): string {
+  return `Iteration ${item.iteration} · ${actionLabel(item.action_type)} · ${item.status === "completed" ? "완료" : "진행 불가"}`
+    + (item.evidence_added.length ? ` · 근거 +${item.evidence_added.length}` : "")
+    + (item.computation_ids.length ? ` · 검증된 계산 +${item.computation_ids.length}` : "");
+}
+
+export function iterationActionSummary(history: ActionHistoryItem[] | undefined, iteration: number): string {
+  return (history || []).filter((item) => item.iteration === iteration)
+    .map((item) => actionLabel(item.action_type)).join(" / ");
+}
+
+export function hypothesisStatusLabel(run: Pick<GoalResearchRun, "expected_result" | "expected_result_status">): string | null {
+  if (!run.expected_result?.trim()) return null;
+  return HYPOTHESIS_LABELS[run.expected_result_status] || "가설 상태 확인 필요";
+}
+
+export function criterionPresentation(item: CriterionEvaluation, frozen: GoalCriterion[]) {
+  const description = frozen.find((criterion) => criterion.criterion_id === item.criterion_id)?.description?.trim() || "";
+  const reason = item.reason?.trim() || "";
+  const specificReason = GENERIC_CRITERION_REASONS.has(reason.replace(/[.!。]$/, "")) ? "" : reason;
+  return {
+    description: description || specificReason || "성공 조건",
+    detail: description && specificReason && specificReason !== description ? specificReason : null,
+  };
+}
 
 export function clampIterations(value: string, fallback: number): number {
   if (!value.trim()) return fallback;
