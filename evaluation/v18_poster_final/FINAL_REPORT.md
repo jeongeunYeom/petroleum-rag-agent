@@ -10,7 +10,7 @@ Frozen products: v17 `3c5f0fd1da77ac46cb8447ed13f9b8ad9b30d7c3`, v18 `740206d6de
 | --- | ---: | ---: | ---: |
 | Goal Success | 25.0% | 25.0% | +0.0 pp [+0.0, +0.0] |
 | Claim Coverage | 39.9% | 39.9% | +0.0 pp [+0.0, +0.0] |
-| Hallucination-free | 100.0% | 100.0% | +0.0 pp [+0.0, +0.0] |
+| Hallucination-free | 95.8% | 95.8% | +0.0 pp [+0.0, +0.0] |
 | Numerical Accuracy | 30.0% | 30.0% | +0.0 pp [+0.0, +0.0] |
 
 ## B. Same base model
@@ -19,17 +19,17 @@ Frozen products: v17 `3c5f0fd1da77ac46cb8447ed13f9b8ad9b30d7c3`, v18 `740206d6de
 | --- | ---: | ---: | ---: |
 | Goal Success | 37.5% | 25.0% | -12.5 pp [-33.3, +8.3] |
 | Claim Coverage | 63.2% | 39.9% | -23.3 pp [-45.8, +0.0] |
-| Hallucination-free | 54.2% | 100.0% | +45.8 pp [+25.0, +66.7] |
+| Hallucination-free | 45.8% | 95.8% | +50.0 pp [+29.2, +70.8] |
 | Numerical Accuracy | 90.0% | 30.0% | -60.0 pp [-90.0, -30.0] |
 
 ## C. Reference
 
 | System | Goal Success | Claim Coverage | Hallucination-free | Numerical Accuracy | Median latency |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| qwen3:8b (Closed-book) | 37.5% | 63.2% | 54.2% | 90.0% | 1.20s |
-| Petroleum RAG Agent v17 | 25.0% | 39.9% | 100.0% | 30.0% | 23.26s |
-| Petroleum RAG Agent v18 | 25.0% | 39.9% | 100.0% | 30.0% | 14.40s |
-| GPT-5.4 mini (Closed-book reference) | 54.2% | 77.4% | 79.2% | 100.0% | 2.08s |
+| qwen3:8b (Closed-book) | 37.5% | 63.2% | 45.8% | 90.0% | 1.20s |
+| Petroleum RAG Agent v17 | 25.0% | 39.9% | 95.8% | 30.0% | 23.26s |
+| Petroleum RAG Agent v18 | 25.0% | 39.9% | 95.8% | 30.0% | 14.40s |
+| GPT-5.4 mini (Closed-book reference) | 54.2% | 77.4% | 66.7% | 100.0% | 2.08s |
 
 ## Poster-safe diagnostic callouts
 
@@ -94,4 +94,4 @@ GPT reference: {'model': 'gpt-5.4-mini-2026-03-17', 'calls': 24, 'input_tokens':
 
 ## Limitations
 
-Only 24 primary tasks and 10 numeric tasks; paired bootstrap intervals remain wide. The semantic adjudication is one AI reviewer, not human review. Retrieved-evidence relevance and citation support are reviewer labels; deterministic numeric checks and raw traces are separate. Some frozen domain labels for arithmetic tasks are broad legacy metadata labels and are not used in scoring. No post-result tuning was performed.
+Only 24 primary tasks and 10 numeric tasks; paired bootstrap intervals remain wide. The semantic adjudication is one AI reviewer, not human review. Retrieved-evidence relevance and citation support are reviewer labels; deterministic numeric checks and raw traces are separate. Seven reviewer records had material-error labels inconsistent with their hallucination-free flag; derived scoring follows the frozen error-label policy. Some frozen domain labels for arithmetic tasks are broad legacy metadata labels and are not used in scoring. No post-result tuning was performed.

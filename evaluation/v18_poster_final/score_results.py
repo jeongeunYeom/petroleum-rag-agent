@@ -205,7 +205,15 @@ def main() -> None:
                         goal = goal and diag["formula_source_verified"] and diag["formula_source_correct"]
             if diag and task["category"] in SOURCE_CATEGORIES:
                 goal = goal and verdict.get("citation_semantic_support") is True
-            hallucination_free = bool(verdict["hallucination_free"])
+            material_error_labels = {
+                "fabricated_fact", "unsupported_claim", "wrong_calculation",
+                "wrong_unit", "wrong_formula", "wrong_formula_provenance",
+            }
+            # Reconcile contradictory reviewer fields using the frozen hallucination policy.
+            # A material error label cannot coexist with hallucination_free=True.
+            hallucination_free = bool(verdict["hallucination_free"]) and not bool(
+                material_error_labels.intersection(verdict.get("error_labels", []))
+            )
             if scored["numeric"] and numeric["numeric_value_correct"] is False and verdict.get("final_numeric_outputs"):
                 hallucination_free = False
             waiting_for_supplied_input = bool(
