@@ -252,6 +252,42 @@ export default function Home() {
   const [selectedFigure, setSelectedFigure] = useState<FigureReference | null>(null);
   const [answerMode, setAnswerMode] = useState<AnswerMode>("qwen3:8b");
   const [agentBusyTaskId, setAgentBusyTaskId] = useState<string | null>(null);
+  const [goalDrawerOpen, setGoalDrawerOpen] = useState(false);
+  const goalDrawerRef = useRef<HTMLElement>(null);
+  const goalDrawerCloseRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!goalDrawerOpen) return;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    goalDrawerCloseRef.current?.focus();
+    function handleDrawerKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setGoalDrawerOpen(false);
+      } else if (event.key === "Tab") {
+        const focusable = goalDrawerRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])',
+        );
+        if (!focusable?.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (!goalDrawerRef.current?.contains(document.activeElement)) {
+          event.preventDefault();
+          first.focus();
+        } else if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    }
+    window.addEventListener("keydown", handleDrawerKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleDrawerKeyDown);
+      previousFocus?.focus();
+    };
+  }, [goalDrawerOpen]);
 
   useEffect(() => {
     if (!selectedFigure) {
@@ -868,7 +904,6 @@ export default function Home() {
                 <option value="gemma4:latest">Gemma4</option>
                 <option value="compare">Qwen3 vs Gemma4</option>
               </select>
-              <GoalResearchPanel defaultOpen />
             </details>
           </div>
         </div>
@@ -1254,6 +1289,18 @@ export default function Home() {
         </div>
 
         <form onSubmit={onAsk} className="shrink-0 border-t border-slate-200 bg-white px-4 py-4">
+          <div className="mx-auto mb-2 flex max-w-4xl justify-end">
+            <button
+              type="button"
+              aria-haspopup="dialog"
+              aria-controls="goal-research-drawer"
+              aria-expanded={goalDrawerOpen}
+              onClick={() => setGoalDrawerOpen(true)}
+              className="rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700 transition hover:bg-violet-100"
+            >
+              🎯 목표 연구
+            </button>
+          </div>
           <div className="mx-auto flex max-w-4xl items-end gap-2 rounded-3xl border border-slate-200 bg-white px-4 py-3 shadow-lg shadow-slate-200/70">
             <textarea
               className="max-h-56 min-h-24 flex-1 resize-y bg-transparent py-2 text-sm outline-none placeholder:text-slate-400"
@@ -1278,6 +1325,41 @@ export default function Home() {
           <p className="mt-2 text-center text-[11px] text-slate-400">목표 연구에 필요한 제한된 로컬 계산은 자동 실행됩니다. 파일 변경은 별도 승인이 필요합니다.</p>
         </form>
       </section>
+
+      <div
+        aria-hidden="true"
+        onClick={() => setGoalDrawerOpen(false)}
+        className={`fixed inset-0 z-[60] bg-slate-950/40 transition-opacity duration-200 ${goalDrawerOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+      />
+      <aside
+        id="goal-research-drawer"
+        ref={goalDrawerRef}
+        role="dialog"
+        aria-modal={goalDrawerOpen}
+        aria-hidden={!goalDrawerOpen}
+        aria-labelledby="goal-research-title"
+        inert={!goalDrawerOpen}
+        className={`fixed inset-y-0 right-0 z-[61] flex h-screen w-full max-w-[600px] flex-col bg-white shadow-2xl transition-transform duration-200 ${goalDrawerOpen ? "translate-x-0" : "translate-x-full"}`}
+      >
+        <header className="flex shrink-0 items-center justify-between border-b border-slate-200 px-5 py-4">
+          <div>
+            <h2 id="goal-research-title" className="text-base font-bold text-slate-900">목표 연구</h2>
+            <p className="mt-0.5 text-xs text-slate-500">목표별 검색 · 계산 · 검증</p>
+          </div>
+          <button
+            ref={goalDrawerCloseRef}
+            type="button"
+            aria-label="목표 연구 닫기"
+            onClick={() => setGoalDrawerOpen(false)}
+            className="flex h-9 w-9 items-center justify-center rounded-full text-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+          >
+            ×
+          </button>
+        </header>
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <GoalResearchPanel />
+        </div>
+      </aside>
 
 
       {selectedFigure && (

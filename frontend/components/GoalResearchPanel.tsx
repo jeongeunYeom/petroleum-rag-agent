@@ -57,8 +57,7 @@ function parseCriteria(value: string): GoalCriterion[] {
     }));
 }
 
-export function GoalResearchPanel({ defaultOpen = false }: { defaultOpen?: boolean }) {
-  const [open, setOpen] = useState(defaultOpen);
+export function GoalResearchPanel() {
   const [topic, setTopic] = useState("");
   const [goal, setGoal] = useState("");
   const [expected, setExpected] = useState("");
@@ -136,21 +135,8 @@ export function GoalResearchPanel({ defaultOpen = false }: { defaultOpen?: boole
   }
 
   return (
-    <section className="rounded-2xl border border-violet-200 bg-white shadow-sm">
-      <button
-        type="button"
-        onClick={() => setOpen((value) => !value)}
-        className="flex w-full items-center justify-between px-5 py-4 text-left"
-      >
-        <span>
-          <strong className="text-sm text-slate-900">목표 연구</strong>
-          <span className="ml-2 text-xs text-slate-500">목표별 검색 · 계산 · 검증</span>
-        </span>
-        <span className="text-violet-600">{open ? "−" : "+"}</span>
-      </button>
-
-      {open && (
-        <div className="border-t border-violet-100 p-5">
+    <section className="bg-white" aria-label="목표 연구 설정 및 실행 결과">
+        <div className="p-5">
           <form onSubmit={submit} noValidate className="grid gap-3 md:grid-cols-2">
             <label className="md:col-span-2 text-xs font-semibold text-slate-600">
               연구 주제
@@ -269,7 +255,6 @@ export function GoalResearchPanel({ defaultOpen = false }: { defaultOpen?: boole
             </div>
           )}
         </div>
-      )}
     </section>
   );
 }
