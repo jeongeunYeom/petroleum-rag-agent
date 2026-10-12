@@ -3,7 +3,7 @@ import re
 
 
 ATOM = (r"(?:dimensionless|MMscf|seconds?|minutes?|hours?|days?|acres?|"
-        r"psia|psig|psi|kPa|Pa|stb|bbl|lbf|lb|kg|mg|g|USD|EUR|\$|"
+        r"psia|psig|psi|kPa|Pa|stb|bbl|lbf|lbmol|lb|kg|mg|g|kmol|mol|USD|EUR|\$|"
         r"kWh|kW|kJ|hp|ppg|gpm|cP|mD|md|ft|feet|inch|in|mm|km|cm|"
         r"m|L|hr|min|secs?|h|d|s|°C|달러|시간|분|%)"
         r"(?:[23²³]|⁻¹)?")

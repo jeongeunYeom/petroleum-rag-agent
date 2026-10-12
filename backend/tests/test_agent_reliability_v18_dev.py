@@ -247,3 +247,53 @@ def test_irrelevant_numbers_do_not_become_operands(tmp_path, monkeypatch, messag
     assert result.status == GoalStatus.ACHIEVED
     assert any(row["value"] == pytest.approx(expected) for row in
                result.computations[0].output_manifest.values())
+
+
+@pytest.mark.parametrize("unit,expected", [
+    ("g/mol", {"g": 1, "mol": -1}),
+    ("kg/kmol", {"kg": 1, "kmol": -1}),
+    ("lb/lbmol", {"lb": 1, "lbmol": -1}),
+])
+def test_molecular_weight_units_are_bounded(unit, expected):
+    assert unit_factors(unit) == expected
+    with pytest.raises(ValueError):
+        unit_factors(unit + "/")
+
+
+def test_molecular_weight_assignments_keep_both_source_spans():
+    facts = UserFactRegistry.from_topic("M=24.6 g/mol, M_air=29.0 g/mol")
+    assert [(row.name, row.value, row.unit, row.extraction_method) for row in facts.records] == [
+        ("M", 24.6, "g/mol", "explicit_assignment"),
+        ("M_air", 29.0, "g/mol", "explicit_assignment"),
+    ]
+    assert all("g/mol" in row.source_span for row in facts.records)
+
+
+def test_molecular_weight_resume_uses_same_run_and_finishes(tmp_path, monkeypatch):
+    settings = Settings(data_dir=tmp_path / "data", agent_workspace_dir=tmp_path / "workspace")
+    monkeypatch.setattr("app.services.goal_execution_agent.get_settings", lambda: settings)
+    sources = SyntheticSources("The synthetic molecular weight ratio relation is R = M / M_air.")
+    request = parse_goal_message(GoalMessageRequest(
+        message="Find the internal molecular weight ratio relation and calculate R for my sample."))
+    agent = GoalExecutionAgent(sources, SyntheticSupport(),
+                               evaluator=RejectingEvaluator(), synthesizer=unavailable)
+    paused = asyncio.run(agent.run("GR-V18-MOLAR-RESUME", request))
+    assert paused.run_status == GoalRunStatus.WAITING_FOR_USER_INPUT
+    assert paused.python_calls_total == 0
+    assert "M" in paused.clarification_question and "M_air" in paused.clarification_question
+    checkpoint = {**paused.resume_checkpoint,
+                  "user_replies": ["M=21.6 g/mol, M_air=30.0 g/mol"]}
+    resumed = asyncio.run(agent.run(paused.run_id, request, resume_state=checkpoint,
+                                    resume_result=paused))
+    assert resumed.run_id == paused.run_id
+    assert resumed.status == GoalStatus.ACHIEVED
+    assert resumed.run_status != GoalRunStatus.WAITING_FOR_USER_INPUT
+    assert resumed.clarification_question is None
+    actions = [row["action_type"] for row in resumed.action_history]
+    assert actions.index("retrieve") < actions.index("calculate") < actions.index("verify")
+    assert sources.calls == 1
+    calc = resumed.computations[0]
+    assert calc.validation_passed and calc.formula_source_ids == ["KB1"]
+    assert calc.output_manifest["OUT_RESULT"]["value"] == pytest.approx(.72)
+    assert calc.output_manifest["OUT_RESULT"]["unit"] == "dimensionless"
+    assert "dimensionless" in resumed.final_answer and "[CALC1]" in resumed.final_answer

@@ -312,6 +312,9 @@ async def run_user_formula_calculation(settings: Settings, request: GoalResearch
         if output_unit:
             raise ValueError("declared dimensionless output conflicts with input units")
         output_unit = "dimensionless"
+    elif (not output_unit and variables and all(fact.unit for fact in variables.values())
+          and any(fact.unit != "dimensionless" for fact in variables.values())):
+        output_unit = "dimensionless"
     values = {name: fact.value for name, fact in variables.items()}
     try:
         expected = _arithmetic_value(tree.body, values)
