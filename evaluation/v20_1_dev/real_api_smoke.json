@@ -1,0 +1,852 @@
+{
+  "api_url": "http://127.0.0.1:8001/api",
+  "model": "qwen3:8b",
+  "retrieval_mode": "hybrid",
+  "traces": [
+    {
+      "case": "B",
+      "prompt": "비중(SG)이 0.918인 원유의 API gravity를 내부 교재의 관계식을 이용해 계산하고, 사용한 식과 출처를 검증해줘.",
+      "run_id": "GR-20261012-155258-361C05",
+      "run_status": "completed",
+      "goal_status": "achieved",
+      "stop_reason": "goal_achieved",
+      "actions": [
+        "retrieve",
+        "calculate",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "action_details": [
+        {
+          "type": "retrieve",
+          "details": {
+            "new_evidence_count": 5,
+            "retrieval_mode": "hybrid",
+            "query": "비중(SG)이 0.918인 원유의 API gravity를 내부 교재의 관계식을 이용해 계산하고, 사용한 식과 출처를 검증해줘.\nMissing: 교재의 비중-API도 변환 관계식을 근거와 함께 제시; 제공된 비중으로 API도를 계산하고 검증된 결과를 제시\nspecific gravity SG API gravity conversion equation\nequation formula variables units SG API",
+            "cache_hit": false
+          }
+        },
+        {
+          "type": "calculate",
+          "details": {
+            "subprocess_reached": true,
+            "source_requirement": "kb_formula",
+            "formula_source_ids": [
+              "KB1"
+            ],
+            "formula_id": "FORMULA1",
+            "output_variable": "API",
+            "dependency_level": 0
+          }
+        },
+        {
+          "type": "verify",
+          "details": {
+            "engineering_validation_passed": true,
+            "goal_achieved": true
+          }
+        },
+        {
+          "type": "synthesize",
+          "details": {}
+        },
+        {
+          "type": "stop",
+          "details": {}
+        }
+      ],
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 90
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 89
+        },
+        {
+          "id": "KB3",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+          "page": 342
+        },
+        {
+          "id": "KB4",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+          "page": 362
+        },
+        {
+          "id": "KB5",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+          "page": 312
+        }
+      ],
+      "outputs": [
+        {
+          "calc_id": "CALC1",
+          "name": "API_gravity",
+          "value": 22.639433551198238,
+          "unit": "°API",
+          "unit_origin": "inferred",
+          "semantic_type": "numeric",
+          "source_fact_ids": [
+            "USERF1"
+          ],
+          "required": true,
+          "formula_source_ids": [
+            "KB1"
+          ],
+          "validation_passed": true
+        }
+      ],
+      "required_inputs": [],
+      "clarification_question": null,
+      "final_answer": "근거 자료의 비중–API도 관계식: API = (141.5 / SG) -131.5 [KB1]\n\n검증된 API도 22.64 °API [CALC1] [USERF1] [KB1]",
+      "telemetry": {
+        "conversation_context_used": false,
+        "required_target_outputs": [
+          "API_gravity"
+        ],
+        "target_output_satisfied": true,
+        "formula_source_verified": true,
+        "formula_dependency_target": {
+          "source_id": "KB1",
+          "equation_ast": "api=Expression(body=BinOp(left=BinOp(left=Constant(value=141.5), op=Div(), right=Name(id='SG', ctx=Load())), op=Sub(), right=Constant(value=131.5)))",
+          "formula_id": "FORMULA1",
+          "lhs": "API"
+        },
+        "formula_dependency_resolution_success": false,
+        "requested_semantic_target": null,
+        "selected_formula_semantic_target": null,
+        "group_unit_propagation_used": false,
+        "group_unit_propagation_unit": null,
+        "retrieval_refinement_used": null,
+        "retrieval_refinement_query": null,
+        "internal_calculation_error_type": null,
+        "calculation_failure_stage": null
+      }
+    },
+    {
+      "case": "C",
+      "prompt": "그럼 0.85면?",
+      "run_id": "GR-20261012-155320-D40F5D",
+      "run_status": "completed",
+      "goal_status": "achieved",
+      "stop_reason": "goal_achieved",
+      "actions": [
+        "retrieve",
+        "calculate",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "action_details": [
+        {
+          "type": "retrieve",
+          "details": {
+            "new_evidence_count": 5,
+            "retrieval_mode": "hybrid",
+            "query": "비중(SG)이 0.918인 원유의 API gravity를 내부 교재의 관계식을 이용해 계산하고, 사용한 식과 출처를 검증해줘.\n그럼 0.85면?\nMissing: 교재의 비중-API도 변환 관계식을 근거와 함께 제시; 제공된 비중으로 API도를 계산하고 검증된 결과를 제시\nspecific gravity SG API gravity conversion equation\nequation formula variables units SG API",
+            "cache_hit": false
+          }
+        },
+        {
+          "type": "calculate",
+          "details": {
+            "subprocess_reached": true,
+            "source_requirement": "kb_formula",
+            "formula_source_ids": [
+              "KB1"
+            ],
+            "formula_id": "FORMULA1",
+            "output_variable": "API",
+            "dependency_level": 0
+          }
+        },
+        {
+          "type": "verify",
+          "details": {
+            "engineering_validation_passed": true,
+            "goal_achieved": true
+          }
+        },
+        {
+          "type": "synthesize",
+          "details": {}
+        },
+        {
+          "type": "stop",
+          "details": {}
+        }
+      ],
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 90
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 89
+        },
+        {
+          "id": "KB3",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+          "page": 342
+        },
+        {
+          "id": "KB4",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+          "page": 362
+        },
+        {
+          "id": "KB5",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+          "page": 312
+        }
+      ],
+      "outputs": [
+        {
+          "calc_id": "CALC1",
+          "name": "API_gravity",
+          "value": 34.970588235294116,
+          "unit": "°API",
+          "unit_origin": "inferred",
+          "semantic_type": "numeric",
+          "source_fact_ids": [
+            "USERF1"
+          ],
+          "required": true,
+          "formula_source_ids": [
+            "KB1"
+          ],
+          "validation_passed": true
+        }
+      ],
+      "required_inputs": [],
+      "clarification_question": null,
+      "final_answer": "근거 자료의 비중–API도 관계식: API = (141.5 / SG) -131.5 [KB1]\n\n검증된 API도 34.97 °API [CALC1] [USERF1] [KB1]",
+      "telemetry": {
+        "conversation_context_used": true,
+        "required_target_outputs": [
+          "API_gravity"
+        ],
+        "target_output_satisfied": true,
+        "formula_source_verified": true,
+        "formula_dependency_target": {
+          "source_id": "KB1",
+          "equation_ast": "api=Expression(body=BinOp(left=BinOp(left=Constant(value=141.5), op=Div(), right=Name(id='SG', ctx=Load())), op=Sub(), right=Constant(value=131.5)))",
+          "formula_id": "FORMULA1",
+          "lhs": "API"
+        },
+        "formula_dependency_resolution_success": false,
+        "requested_semantic_target": null,
+        "selected_formula_semantic_target": null,
+        "group_unit_propagation_used": false,
+        "group_unit_propagation_unit": null,
+        "retrieval_refinement_used": null,
+        "retrieval_refinement_query": null,
+        "internal_calculation_error_type": null,
+        "calculation_failure_stage": null
+      }
+    },
+    {
+      "case": "D",
+      "prompt": "내부 Formation Evaluation 자료에서 공극률, 물 포화도, 물의 비저항과 지층의 진비저항 사이의 관계를 찾아서, φ=0.22, Sw=0.35, Rw=0.08 Ω·m, a=1, m=2, n=2일 때 Rt를 계산하고 근거와 계산 결과를 검증해줘.",
+      "run_id": "GR-20261012-155347-5F860A",
+      "run_status": "completed",
+      "goal_status": "achieved",
+      "stop_reason": "goal_achieved",
+      "actions": [
+        "retrieve",
+        "calculate",
+        "calculate",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "action_details": [
+        {
+          "type": "retrieve",
+          "details": {
+            "new_evidence_count": 5,
+            "retrieval_mode": "hybrid",
+            "query": "내부 Formation Evaluation 자료에서 공극률, 물 포화도, 물의 비저항과 지층의 진비저항 사이의 관계를 찾아서, φ=0.22, Sw=0.35, Rw=0.08 Ω·m, a=1, m=2, n=2일 때 Rt를 계산하고 근거와 계산 결과를 검증해줘.\nMissing: 요청한 Rt 관계식의 실제 출처를 검증; 제공된 입력으로 Rt를 계산하고 검증된 결과와 단위를 제시\nequation formula variables units Formation Evaluation Sw Rw m a n\nporosity saturation",
+            "cache_hit": false
+          }
+        },
+        {
+          "type": "calculate",
+          "details": {
+            "subprocess_reached": true,
+            "source_requirement": "kb_formula",
+            "formula_source_ids": [
+              "KB2"
+            ],
+            "formula_id": "FORMULA5",
+            "output_variable": "F",
+            "dependency_level": 1
+          }
+        },
+        {
+          "type": "calculate",
+          "details": {
+            "subprocess_reached": true,
+            "source_requirement": "kb_formula",
+            "formula_source_ids": [
+              "KB2"
+            ],
+            "formula_id": "FORMULA4",
+            "output_variable": "Rt",
+            "dependency_level": 0
+          }
+        },
+        {
+          "type": "verify",
+          "details": {
+            "engineering_validation_passed": true,
+            "goal_achieved": true
+          }
+        },
+        {
+          "type": "synthesize",
+          "details": {}
+        },
+        {
+          "type": "stop",
+          "details": {}
+        }
+      ],
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 154
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 164
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 166
+        },
+        {
+          "id": "KB4",
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 167
+        },
+        {
+          "id": "KB5",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 154
+        }
+      ],
+      "outputs": [
+        {
+          "calc_id": "CALC1",
+          "name": "F",
+          "value": 20.66115702479339,
+          "unit": "dimensionless",
+          "unit_origin": "source_definition",
+          "semantic_type": "numeric",
+          "source_fact_ids": [
+            "USERF4",
+            "USERF5",
+            "USERF1"
+          ],
+          "required": true,
+          "formula_source_ids": [
+            "KB2"
+          ],
+          "validation_passed": true
+        },
+        {
+          "calc_id": "CALC2",
+          "name": "Rt",
+          "value": 13.49300050598752,
+          "unit": "ohm-m",
+          "unit_origin": "inferred",
+          "semantic_type": "numeric",
+          "source_fact_ids": [
+            "CALC1:OUT_RESULT",
+            "USERF3",
+            "USERF2",
+            "USERF6"
+          ],
+          "required": true,
+          "formula_source_ids": [
+            "KB2"
+          ],
+          "validation_passed": true
+        }
+      ],
+      "required_inputs": [],
+      "clarification_question": null,
+      "final_answer": "F: 20.66115702479339 dimensionless [CALC1] [USERF4] [USERF5] [USERF1] [KB2]\nRt: 13.49300050598752 ohm-m [CALC2] [CALC1:OUT_RESULT] [USERF3] [USERF2] [USERF6] [KB2]",
+      "telemetry": {
+        "conversation_context_used": false,
+        "required_target_outputs": [
+          "Rt"
+        ],
+        "target_output_satisfied": true,
+        "formula_source_verified": true,
+        "formula_dependency_target": {
+          "source_id": "KB2",
+          "equation_ast": "rt=Expression(body=BinOp(left=BinOp(left=Name(id='F', ctx=Load()), op=Mult(), right=Name(id='Rw', ctx=Load())), op=Div(), right=BinOp(left=Name(id='Sw', ctx=Load()), op=Pow(), right=Name(id='n', ctx=Load()))))",
+          "formula_id": "FORMULA4",
+          "lhs": "Rt"
+        },
+        "formula_dependency_resolution_success": true,
+        "requested_semantic_target": null,
+        "selected_formula_semantic_target": null,
+        "group_unit_propagation_used": false,
+        "group_unit_propagation_unit": null,
+        "retrieval_refinement_used": null,
+        "retrieval_refinement_query": null,
+        "internal_calculation_error_type": null,
+        "calculation_failure_stage": null
+      }
+    },
+    {
+      "case": "E",
+      "prompt": "내부 Drilling Engineering 자료에서 mud weight와 TVD를 이용한 hydrostatic pressure 관계식을 찾아서, MW=10.1 ppg일 때 압력을 계산하고 검증해줘.",
+      "run_id": "GR-20261012-155410-8C0A4A",
+      "run_status": "waiting_for_user_input",
+      "goal_status": "pending",
+      "stop_reason": null,
+      "actions": [
+        "retrieve",
+        "retrieve"
+      ],
+      "action_details": [
+        {
+          "type": "retrieve",
+          "details": {
+            "new_evidence_count": 5,
+            "retrieval_mode": "hybrid",
+            "query": "내부 Drilling Engineering 자료에서 mud weight와 TVD를 이용한 hydrostatic pressure 관계식을 찾아서, MW=10.1 ppg일 때 압력을 계산하고 검증해줘.\nMissing: 요청한 P 관계식의 실제 출처를 검증; 제공된 입력으로 P를 계산하고 검증된 결과와 단위를 제시\nequation formula variables units Drilling Engineering mud hydrostatic pressure MW",
+            "cache_hit": false
+          }
+        },
+        {
+          "type": "retrieve",
+          "details": {
+            "new_evidence_count": 1,
+            "retrieval_mode": "hybrid",
+            "query": "내부 Drilling Engineering 자료에서 mud weight와 TVD를 이용한 hydrostatic pressure 관계식을 찾아서, MW=10.1 ppg일 때 압력을 계산하고 검증해줘. 내부 Drilling Engineering 자료에서 mud weight와 TVD를 이용한 hydrostatic pressure 관계식을 찾아서, MW=10.1 ppg일 때 압력을 계산하고 검증해줘.\nTVD\nequation formula relation definition variables units",
+            "cache_hit": false
+          }
+        }
+      ],
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 360
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 75
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+          "page": 417
+        },
+        {
+          "id": "KB4",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 192
+        },
+        {
+          "id": "KB5",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+          "page": 225
+        },
+        {
+          "id": "KB6",
+          "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+          "page": 418
+        }
+      ],
+      "outputs": [],
+      "required_inputs": [
+        "TVD 값과 단위"
+      ],
+      "clarification_question": "계산을 계속하려면 TVD 값과 단위이(가) 필요합니다. 값과 단위를 한 번에 알려주세요.",
+      "final_answer": "",
+      "telemetry": {
+        "conversation_context_used": false,
+        "required_target_outputs": [
+          "P"
+        ],
+        "target_output_satisfied": false,
+        "formula_source_verified": true,
+        "formula_dependency_target": {
+          "source_id": "KB1",
+          "equation_ast": "p=Expression(body=BinOp(left=BinOp(left=Constant(value=0.052), op=Mult(), right=Name(id='MW', ctx=Load())), op=Mult(), right=Name(id='TVD', ctx=Load())))",
+          "formula_id": "FORMULA1",
+          "lhs": "P"
+        },
+        "formula_dependency_resolution_success": false,
+        "requested_semantic_target": "hydrostatic_pressure",
+        "selected_formula_semantic_target": "hydrostatic_pressure",
+        "group_unit_propagation_used": false,
+        "group_unit_propagation_unit": null,
+        "retrieval_refinement_used": null,
+        "retrieval_refinement_query": null,
+        "internal_calculation_error_type": null,
+        "calculation_failure_stage": null
+      }
+    },
+    {
+      "case": "E_reply",
+      "prompt": "TVD는 8000 ft야.",
+      "run_id": "GR-20261012-155410-8C0A4A",
+      "run_status": "completed",
+      "goal_status": "achieved",
+      "stop_reason": "goal_achieved",
+      "actions": [
+        "retrieve",
+        "retrieve",
+        "calculate",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "action_details": [
+        {
+          "type": "retrieve",
+          "details": {
+            "new_evidence_count": 5,
+            "retrieval_mode": "hybrid",
+            "query": "내부 Drilling Engineering 자료에서 mud weight와 TVD를 이용한 hydrostatic pressure 관계식을 찾아서, MW=10.1 ppg일 때 압력을 계산하고 검증해줘.\nMissing: 요청한 P 관계식의 실제 출처를 검증; 제공된 입력으로 P를 계산하고 검증된 결과와 단위를 제시\nequation formula variables units Drilling Engineering mud hydrostatic pressure MW",
+            "cache_hit": false
+          }
+        },
+        {
+          "type": "retrieve",
+          "details": {
+            "new_evidence_count": 1,
+            "retrieval_mode": "hybrid",
+            "query": "내부 Drilling Engineering 자료에서 mud weight와 TVD를 이용한 hydrostatic pressure 관계식을 찾아서, MW=10.1 ppg일 때 압력을 계산하고 검증해줘. 내부 Drilling Engineering 자료에서 mud weight와 TVD를 이용한 hydrostatic pressure 관계식을 찾아서, MW=10.1 ppg일 때 압력을 계산하고 검증해줘.\nTVD\nequation formula relation definition variables units",
+            "cache_hit": false
+          }
+        },
+        {
+          "type": "calculate",
+          "details": {
+            "subprocess_reached": true,
+            "source_requirement": "kb_formula",
+            "formula_source_ids": [
+              "KB1"
+            ],
+            "formula_id": "FORMULA1",
+            "output_variable": "P",
+            "dependency_level": 0
+          }
+        },
+        {
+          "type": "verify",
+          "details": {
+            "engineering_validation_passed": true,
+            "goal_achieved": true
+          }
+        },
+        {
+          "type": "synthesize",
+          "details": {}
+        },
+        {
+          "type": "stop",
+          "details": {}
+        }
+      ],
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 360
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 75
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+          "page": 417
+        },
+        {
+          "id": "KB4",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 192
+        },
+        {
+          "id": "KB5",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+          "page": 225
+        },
+        {
+          "id": "KB6",
+          "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+          "page": 418
+        }
+      ],
+      "outputs": [
+        {
+          "calc_id": "CALC1",
+          "name": "P",
+          "value": 4201.6,
+          "unit": "psi",
+          "unit_origin": "source_definition",
+          "semantic_type": "numeric",
+          "source_fact_ids": [
+            "USERF1",
+            "USERF2"
+          ],
+          "required": true,
+          "formula_source_ids": [
+            "KB1"
+          ],
+          "validation_passed": true
+        }
+      ],
+      "required_inputs": [],
+      "clarification_question": null,
+      "final_answer": "P: 4201.6 psi [CALC1] [USERF1] [USERF2] [KB1]",
+      "telemetry": {
+        "conversation_context_used": false,
+        "required_target_outputs": [
+          "P"
+        ],
+        "target_output_satisfied": true,
+        "formula_source_verified": true,
+        "formula_dependency_target": {
+          "source_id": "KB1",
+          "equation_ast": "p=Expression(body=BinOp(left=BinOp(left=Constant(value=0.052), op=Mult(), right=Name(id='MW', ctx=Load())), op=Mult(), right=Name(id='TVD', ctx=Load())))",
+          "formula_id": "FORMULA1",
+          "lhs": "P"
+        },
+        "formula_dependency_resolution_success": false,
+        "requested_semantic_target": "hydrostatic_pressure",
+        "selected_formula_semantic_target": "hydrostatic_pressure",
+        "group_unit_propagation_used": false,
+        "group_unit_propagation_unit": null,
+        "retrieval_refinement_used": null,
+        "retrieval_refinement_query": null,
+        "internal_calculation_error_type": null,
+        "calculation_failure_stage": null
+      }
+    },
+    {
+      "case": "F",
+      "prompt": "A=187, B=234, C=163 stb/d의 평균을 구하고 큰 순서대로 정렬해줘.",
+      "run_id": "GR-20261012-155440-805883",
+      "run_status": "completed",
+      "goal_status": "achieved",
+      "stop_reason": "goal_achieved",
+      "actions": [
+        "calculate",
+        "analyze",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "action_details": [
+        {
+          "type": "calculate",
+          "details": {
+            "subprocess_reached": true,
+            "source_requirement": "none",
+            "operations": [
+              "mean",
+              "ranking"
+            ]
+          }
+        },
+        {
+          "type": "analyze",
+          "details": {
+            "derived_fact_ids_used": [
+              "CALC1:OUT_mean"
+            ],
+            "validated_list_outputs": [
+              "OUT_ranking"
+            ],
+            "case_mean": null,
+            "case_range": null
+          }
+        },
+        {
+          "type": "verify",
+          "details": {
+            "engineering_validation_passed": true,
+            "goal_achieved": true
+          }
+        },
+        {
+          "type": "synthesize",
+          "details": {}
+        },
+        {
+          "type": "stop",
+          "details": {}
+        }
+      ],
+      "sources": [],
+      "outputs": [
+        {
+          "calc_id": "CALC1",
+          "name": "mean",
+          "value": 194.66666666666666,
+          "unit": "stb/d",
+          "semantic_type": "numeric",
+          "source_fact_ids": [
+            "USERF1",
+            "USERF2",
+            "USERF3"
+          ],
+          "required": true,
+          "formula_source_ids": [
+            "USER_REQUEST"
+          ],
+          "validation_passed": true
+        },
+        {
+          "calc_id": "CALC1",
+          "name": "ranking",
+          "value": [
+            "B",
+            "A",
+            "C"
+          ],
+          "unit": null,
+          "semantic_type": "ranking",
+          "source_fact_ids": [
+            "USERF1",
+            "USERF2",
+            "USERF3"
+          ],
+          "required": true,
+          "formula_source_ids": [
+            "USER_REQUEST"
+          ],
+          "validation_passed": true
+        }
+      ],
+      "required_inputs": [],
+      "clarification_question": null,
+      "final_answer": "평균 mean: 194.66666666666666 stb/d [CALC1] [USERF1] [USERF2] [USERF3]\n\n순위 ranking: B > A > C; 최고 top: B [CALC1] [USERF1] [USERF2] [USERF3]",
+      "telemetry": {
+        "conversation_context_used": false,
+        "required_target_outputs": [
+          "mean",
+          "ranking"
+        ],
+        "target_output_satisfied": true,
+        "formula_source_verified": false,
+        "formula_dependency_target": null,
+        "formula_dependency_resolution_success": false,
+        "requested_semantic_target": null,
+        "selected_formula_semantic_target": null,
+        "group_unit_propagation_used": true,
+        "group_unit_propagation_unit": "stb/d",
+        "retrieval_refinement_used": null,
+        "retrieval_refinement_query": null,
+        "internal_calculation_error_type": null,
+        "calculation_failure_stage": null
+      }
+    },
+    {
+      "case": "A",
+      "prompt": "방향 측정기 근처에 Monel drill collar를 사용하는 이유를 내부 자료에 근거해 설명해줘.",
+      "run_id": "GR-20261012-155445-16B6F3",
+      "run_status": "completed",
+      "goal_status": "achieved",
+      "stop_reason": "goal_achieved",
+      "actions": [
+        "retrieve",
+        "verify",
+        "stop"
+      ],
+      "action_details": [
+        {
+          "type": "retrieve",
+          "details": {
+            "new_evidence_count": 5,
+            "retrieval_mode": "hybrid",
+            "query": "directional survey instrument monel drill collar non-magnetic nonmagnetic magnetic interference\ndirectional survey instrument monel drill collar non-magnetic 방향 측정기 근처에",
+            "cache_hit": false,
+            "relevance_confidence": "HIGH"
+          }
+        },
+        {
+          "type": "verify",
+          "details": {
+            "exact_spans_checked": true
+          }
+        },
+        {
+          "type": "stop",
+          "details": {}
+        }
+      ],
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 494
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 494
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 96
+        },
+        {
+          "id": "KB4",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+          "page": 284
+        },
+        {
+          "id": "KB5",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+          "page": 279
+        }
+      ],
+      "outputs": [],
+      "required_inputs": [],
+      "clarification_question": null,
+      "final_answer": "근거 자료에 명시된 내용: \"These collars are made from Monel and the Earths magnetic field is undisturbed \nby their presence.\" [KB1]\n\"Their purpose is to \nisolate directional survey instruments from magnetic distortion due to the steel \ndrillstring.\" [KB3]\n\"The normal approach\nfor magnetic survey tools is to place the survey sensor within sufficient quantity of nonmagnet-\nic  drill  collars  in  the  BHA.\" [KB4]",
+      "telemetry": {
+        "conversation_context_used": false,
+        "required_target_outputs": [],
+        "target_output_satisfied": false,
+        "formula_source_verified": false,
+        "formula_dependency_target": null,
+        "formula_dependency_resolution_success": false,
+        "requested_semantic_target": null,
+        "selected_formula_semantic_target": null,
+        "group_unit_propagation_used": false,
+        "group_unit_propagation_unit": null,
+        "retrieval_refinement_used": null,
+        "retrieval_refinement_query": null,
+        "internal_calculation_error_type": null,
+        "calculation_failure_stage": null
+      }
+    }
+  ]
+}
