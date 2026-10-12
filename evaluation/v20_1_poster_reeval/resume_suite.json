@@ -1,0 +1,37 @@
+{
+  "suite_id": "v18_poster_final_resume_diagnostic_3",
+  "included_in_primary_24": false,
+  "product": "740206d6de8e3be6cb4b21792b2c3429c65fcd6a",
+  "tasks": [
+    {
+      "task_id": "V18R-01",
+      "domain": "reservoir_engineering",
+      "turn_1": "내부 교재에서 pore volume과 bulk volume 및 공극률의 관계를 찾아 적용해줘. 공극률은 0.18인데 bulk volume은 아직 없어. 필요한 값이 있으면 질문해줘.",
+      "turn_2": "bulk volume은 250000 m3야.",
+      "expected_missing_inputs": ["bulk volume"],
+      "expected_result": {"value": 45000, "unit": "m3"},
+      "source_document": "Heriot-Watt University - Reservoir Engineering.pdf",
+      "source_page": 336,
+      "source_span": "the pore volume = A*dx*φ"
+    },
+    {
+      "task_id": "V18R-02",
+      "domain": "drilling",
+      "turn_1": "Use the internal drilling text's maximum bottomhole-pressure relation for a leak-off test. Mud density is 11.2 ppg and shoe TVD is 6200 ft; the surface leak-off pressure is not available yet. Ask for what you need before computing.",
+      "turn_2": "Surface leak-off pressure = 640 psi.",
+      "expected_missing_inputs": ["surface leak-off pressure"],
+      "expected_result": {"value": 4250.88, "unit": "psi"},
+      "source_document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+      "source_page": 192,
+      "source_span": "hydrostatic pressure of colom of mud + leak off pressure at surface"
+    },
+    {
+      "task_id": "V18R-03",
+      "domain": "surface_facilities",
+      "turn_1": "Use my complete relation energy_kWh = power_kW * hours. Power is 18 kW, but I haven't provided operating hours. Ask for the missing duration and then calculate the energy.",
+      "turn_2": "Operating hours = 3.5 h.",
+      "expected_missing_inputs": ["operating hours"],
+      "expected_result": {"value": 63, "unit": "kWh"}
+    }
+  ]
+}
