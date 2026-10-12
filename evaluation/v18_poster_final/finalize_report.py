@@ -219,6 +219,13 @@ def main() -> None:
     for system in SYSTEMS:
         m = systems[system]
         reference.append(f"| {LABELS[system]} | {pct(m['goal_success'])} | {pct(m['claim_coverage'])} | {pct(m['hallucination_free'])} | {pct(m['numerical_accuracy'])} | {m['latency_median_seconds']:.2f}s |")
+    latency_lines = ["| System | Mean | Median | P95 |", "| --- | ---: | ---: | ---: |"]
+    for system in SYSTEMS:
+        m = systems[system]
+        latency_lines.append(
+            f"| {LABELS[system]} | {m['latency_mean_seconds']:.2f}s | "
+            f"{m['latency_median_seconds']:.2f}s | {m['latency_p95_seconds']:.2f}s |"
+        )
     tables = "# Poster results tables\n\n## A. Version effect\n\n" + "\n".join(version) + "\n\n## B. Same base model\n\n" + "\n".join(same_base) + "\n\n## C. Reference\n\n" + "\n".join(reference) + "\n"
     (ROOT / "POSTER_RESULTS_TABLE.md").write_text(tables, encoding="utf-8")
 
@@ -326,6 +333,7 @@ def main() -> None:
         + "\n".join(multi_lines) + "\n\n"
         + "### V18 unsuccessful tasks\n\n" + "\n".join(failure_lines) + "\n\n"
         + "## Latency and cost\n\n"
+        + "\n".join(latency_lines) + "\n\n"
         + "Stage means (seconds; stages may overlap and are not summed into total): "
         + json.dumps(stages, ensure_ascii=False) + "\n\n"
         + f"GPT reference: {costs['gpt_reference']}. Judge: {costs['judge']}. "
@@ -341,6 +349,7 @@ def main() -> None:
         + "Only 24 primary tasks and 10 numeric tasks; paired bootstrap intervals remain wide. "
         + "The semantic adjudication is one AI reviewer, not human review. "
         + "Retrieved-evidence relevance and citation support are reviewer labels; deterministic numeric checks and raw traces are separate. "
+        + "V17 and V18 were run sequentially; latency differences may reflect cache/order effects and are not a causal speed claim. "
         + "Seven reviewer records had material-error labels inconsistent with their hallucination-free flag; derived scoring follows the frozen error-label policy. "
         + "Some frozen domain labels for arithmetic tasks are broad legacy metadata labels and are not used in scoring. "
         + "No post-result tuning was performed.\n"

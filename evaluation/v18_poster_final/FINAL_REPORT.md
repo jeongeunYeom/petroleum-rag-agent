@@ -78,6 +78,13 @@ Knowledge n=6; Reasoning n=4; Calculation n=10; Safety n=4. See `poster_category
 
 ## Latency and cost
 
+| System | Mean | Median | P95 |
+| --- | ---: | ---: | ---: |
+| qwen3:8b (Closed-book) | 2.89s | 1.20s | 7.17s |
+| Petroleum RAG Agent v17 | 21.40s | 23.26s | 46.34s |
+| Petroleum RAG Agent v18 | 17.17s | 14.40s | 31.08s |
+| GPT-5.4 mini (Closed-book reference) | 2.57s | 2.08s | 5.54s |
+
 Stage means (seconds; stages may overlap and are not summed into total): {"v17_agent": {"planning_seconds": 0.5050670416666666, "retrieval_seconds": 6.566613416666667, "llm_generation_seconds": 11.928687083333335, "python_seconds": 0.01734933333333333, "verification_seconds": 11.985643083333335, "calculation_seconds": 0.0, "synthesis_seconds": 3.028771375}, "v18_agent": {"planning_seconds": 0.5149883333333333, "retrieval_seconds": 6.696895708333333, "llm_generation_seconds": 4.9551079583333335, "python_seconds": 0.016590625, "verification_seconds": 6.217005708333333, "calculation_seconds": 0.0, "synthesis_seconds": 1.173611125}}
 
 GPT reference: {'model': 'gpt-5.4-mini-2026-03-17', 'calls': 24, 'input_tokens': 1760, 'output_tokens': 5904, 'cached_tokens': 0, 'estimated_list_price_usd': 0.02789, 'pricing_source': 'https://developers.openai.com/api/docs/models/gpt-5.4-mini'}. Judge: {'model': 'gpt-5.4-2026-03-05', 'calls': 24, 'input_tokens': 73146, 'output_tokens': 10450, 'cached_tokens': 0, 'estimated_list_price_usd': 0.33962, 'pricing_source': 'https://developers.openai.com/api/docs/models/gpt-5.4'}. Local inference; hardware/electricity cost not estimated. List-price sources: [mini](https://developers.openai.com/api/docs/models/gpt-5.4-mini) and [judge](https://developers.openai.com/api/docs/models/gpt-5.4).
@@ -94,4 +101,4 @@ GPT reference: {'model': 'gpt-5.4-mini-2026-03-17', 'calls': 24, 'input_tokens':
 
 ## Limitations
 
-Only 24 primary tasks and 10 numeric tasks; paired bootstrap intervals remain wide. The semantic adjudication is one AI reviewer, not human review. Retrieved-evidence relevance and citation support are reviewer labels; deterministic numeric checks and raw traces are separate. Seven reviewer records had material-error labels inconsistent with their hallucination-free flag; derived scoring follows the frozen error-label policy. Some frozen domain labels for arithmetic tasks are broad legacy metadata labels and are not used in scoring. No post-result tuning was performed.
+Only 24 primary tasks and 10 numeric tasks; paired bootstrap intervals remain wide. The semantic adjudication is one AI reviewer, not human review. Retrieved-evidence relevance and citation support are reviewer labels; deterministic numeric checks and raw traces are separate. V17 and V18 were run sequentially; latency differences may reflect cache/order effects and are not a causal speed claim. Seven reviewer records had material-error labels inconsistent with their hallucination-free flag; derived scoring follows the frozen error-label policy. Some frozen domain labels for arithmetic tasks are broad legacy metadata labels and are not used in scoring. No post-result tuning was performed.
