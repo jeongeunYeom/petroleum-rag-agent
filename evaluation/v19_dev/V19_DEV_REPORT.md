@@ -71,3 +71,25 @@ Presentation hides “가설 미제공” when no expected result exists, shows 
 - Frontend tests: **20/20 PASS**; `pnpm build`: **PASS**.
 - No production ChromaDB write, model/retrieval architecture change, sealed v18 inspection, final benchmark, or main merge.
 - Recovery is intentionally conservative: when several unknown base variables remain or multiple source equations are materially tied, the agent asks or stops instead of inventing a binding. The user's iteration and Python-call budgets still cap how far a valid chain can run. No real-production-KB dependency claim is made from this synthetic smoke.
+
+## Generic PDF equation layout normalization
+
+This follow-up replaces the `STACKED_SATURATION` primary path with a bounded, source-anchored layout normalizer. It considers short equation blocks with a split exponent, a stacked numerator/denominator, or separated symbol tokens. Each accepted record retains its exact `raw_span`, character offsets, source/document/page, normalized executable expression, transformation labels, and the original source equation. Algebraic target isolation is recorded separately as `algebraic_isolation`; the isolated expression is not represented as literal PDF text. Provenance re-runs the normalizer against the exact stored span and local context, then compares equation ASTs. Conflicting literal equations and ambiguous layouts do not yield executable records.
+
+The generic normalizer is deliberately not arbitrary OCR: it uses short bounded blocks, nearby definitions/captions or explicit unit evidence, safe arithmetic ASTs, and candidate uniqueness. An uncaptioned `Q = A B` / `C` block remains ambiguous and triggers zero Python calls. The pre-existing `F = a/fm` interpretation remains a narrowly source-context-verified compatibility rule; no global `fm` rewrite was added.
+
+## Dimensional unit propagation
+
+The existing bounded operand-unit grammar now feeds one arithmetic-AST unit propagator for `Name`, numeric constants, unary signs, `+`, `-`, `*`, `/`, and bounded powers. Addition/subtraction require identical literal unit factors; multiplication/division combine and cancel factors. A unit-bearing base raised to a symbolic exponent requires a validated dimensionless numeric scalar; expansion remains capped at 64 total powers. No unit scale conversion or variable-name-based output-unit guess occurs. The result is written to the validated output manifest, then inherited by the derived fact and final answer.
+
+Dimensionless inference no longer treats a nearby sentence about saturation, ratio, or fraction as evidence that a different physical variable is dimensionless. Exponent position in a verified source equation can establish an exponent's dimensionless role without an Archie-specific `n` rule.
+
+## Non-Archie layout regression tests
+
+Fresh synthetic checks cover `Q = k A` / `mu L`, `P` / `2 = X`, `Y = A B / C`, `Y = A (B+C)`, an equation caption on the following line, narrow `P_wf`/`Pwf` and Unicode-subscript aliases, an ambiguous stacked block with zero Python calls, ordinary prose with no equation, and unit evidence that rejects the wrong two-dimensional layout. Bounded isolation checks cover addition, subtraction, multiplication, and both division positions; ambiguous power inversion is rejected. Unit tests cover `ohm-m`, `ft/s`, `psi`, `bbl/day`, `ft/ft` cancellation, `ft^2`, incompatible addition, and a dimensional or unbound symbolic exponent.
+
+## Production-shaped Archie regression
+
+A synthetic source shaped like the observed PDF extraction retains `Sw\nn = F Rw\nRt` and `F = a/fm`. With `phi=0.22`, `Sw=0.35`, `Rw=0.08 ohm-m`, `a=1`, `m=2`, `n=2`, the checked trace is **RETRIEVE → CALCULATE F → CALCULATE Rt → VERIFY → SYNTHESIZE → STOP**, with achieved status. CALC1 is approximately **20.661157 dimensionless**; CALC2 is approximately **13.4930005 ohm-m**; the final answer includes the resistivity unit. Both formulas retain exact source-span provenance, and the second CALC binds the validated first CALC output. The regression uses in-memory synthetic evidence and a stubbed evaluation boundary, not a new production-KB or independent benchmark run.
+
+Follow-up checks: targeted v19 tests **63 passed**; full backend suite **1,513 passed** (6 deprecation warnings); v19 synthetic smoke **11/11 passed**; frontend tests **20/20 passed** and `pnpm build` **PASS**. No sealed v18 benchmark was opened, no final benchmark was run, and the production ChromaDB and retrieval architecture were not modified.

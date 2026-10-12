@@ -8,14 +8,15 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from app.services.formula_layout_normalizer import (
+    STACKED_FRACTION, STACKED_POWER, STACKED_POWER_FRACTION,
+    isolate_equation, normalize_extracted_equation,
+)
+
 
 EQUATION = re.compile(
-    r"(?P<equation>\b[A-Za-z][A-Za-z0-9_₀-₉]*\s*=\s*"
-    r"(?:(?!\.\s+[A-Za-z]|,\s*[A-Za-z][A-Za-z0-9_₀-₉]*\s*=)[A-Za-z0-9_₀-₉φ+\-*/().×÷−· \t])+)"
-)
-STACKED_SATURATION = re.compile(
-    r"(?P<equation>\bSw[ \t]*(?:\r?\n[ \t]*){1,3}n[ \t]*=[ \t]*F[ \t]+Rw"
-    r"[ \t]*(?:\r?\n[ \t]*){1,3}Rt\b)", re.I
+    r"(?P<equation>\b[A-Za-z][A-Za-z0-9_₀-₉ₓₒₐ]*\s*=\s*"
+    r"(?:(?!\.\s+[A-Za-z]|,\s*[A-Za-z][A-Za-z0-9_₀-₉ₓₒₐ]*\s*=)[A-Za-z0-9_₀-₉ₓₒₐφ+\-*/().×÷−· \t])+)"
 )
 EXPLICIT_DEFINITION = re.compile(
     r"\b(?P<lhs>[A-Za-z][A-Za-z0-9_]*)\s+"
@@ -25,7 +26,7 @@ EXPLICIT_DEFINITION = re.compile(
     r"(?:(?P<difference_a>[A-Za-z][A-Za-z0-9_]*)\s+minus\s+"
     r"(?P<difference_b>[A-Za-z][A-Za-z0-9_]*)))\b", re.I)
 TRANSLATION = str.maketrans({"×": "*", "÷": "/", "−": "-", "–": "-", "·": "*",
-                            "φ": "phi",
+                            "φ": "phi", "ₓ": "x", "ₒ": "o", "ₐ": "a",
                             "₀": "0", "₁": "1", "₂": "2", "₃": "3", "₄": "4", "₅": "5",
                             "₆": "6", "₇": "7", "₈": "8", "₉": "9"})
 ALLOWED = (ast.Expression, ast.BinOp, ast.UnaryOp, ast.Name, ast.Constant,
@@ -64,13 +65,17 @@ def source_contains_equation(record: "FormulaSourceRecord", text: str,
     """A locator or neighboring chunk never substitutes for this exact source span."""
     if text[record.span_start:record.span_end] != record.raw_span:
         return False
-    if record.source_equation or record.formula_derivation:
-        source_equation = _stacked_saturation_equation(
-            record.raw_span, text, record.span_start, record.span_end)
-        derived = _isolate_denominator(source_equation, "Rt") if source_equation else None
-        return bool(source_equation and record.source_equation == source_equation
-                    and record.formula_derivation == "denominator_isolation"
-                    and derived and record.equation_ast == equation_ast(derived)
+    if record.layout_transformations:
+        local = text[max(0, record.span_start - 350):min(len(text), record.span_end + 350)]
+        layout = normalize_extracted_equation(record.raw_span, local)
+        source_equation = layout.normalized_expression
+        expected = (isolate_equation(source_equation, record.target_variable)
+                    if source_equation and record.formula_derivation == "algebraic_isolation"
+                    and record.target_variable else source_equation)
+        return bool(source_equation and source_equation == record.source_equation
+                    and list(layout.transformations) == record.layout_transformations
+                    and expected == record.normalized_expression
+                    and expected and record.equation_ast == equation_ast(expected)
                     and record.equation_ast == equation_ast(record.expression_candidate or "")
                     and record.equation_ast == equation_ast(formula or record.expression_candidate or ""))
     # Recreate the candidate from the literal span and its local source context.
@@ -80,47 +85,6 @@ def source_contains_equation(record: "FormulaSourceRecord", text: str,
                 and equation_ast(expected) == record.equation_ast
                 and record.equation_ast == equation_ast(record.expression_candidate)
                 and record.equation_ast == equation_ast(formula or record.expression_candidate))
-
-
-def _stacked_saturation_equation(raw: str, text: str, start: int, end: int) -> str | None:
-    """Reconstruct only the ordered, captioned Archie stack in its own source window."""
-    if not STACKED_SATURATION.fullmatch(raw):
-        return None
-    before = text[max(0, start - 350):start]
-    after = text[end:min(len(text), end + 350)]
-    local = before + raw + after
-    archie_caption = bool(re.search(r"Archie.{0,100}water\s+saturation\s+equation", local, re.I | re.S))
-    definitions = all(re.search(pattern, local, re.I | re.S) for pattern in (
-        r"\bSw\b.{0,45}\bwater\s+saturation\b",
-        r"\bRw\b.{0,45}\bformation\s+water\s+resistivity\b",
-        r"\bRt\b.{0,45}\btrue\s+formation\s+resistivity\b",
-        r"\bF\b.{0,45}\bformation\s+resistivity\s+factor\b",
-    ))
-    competing = re.search(r"\b(?:Sw|Rt)\s*(?:(?:\*\*|\^)\s*n\s*)?=\s*[A-Za-z0-9_(]",
-                          before + after, re.I)
-    if not (archie_caption or definitions) or competing:
-        return None
-    return "Sw**n = (F*Rw)/Rt"
-
-
-def _isolate_denominator(source_equation: str, target: str) -> str | None:
-    """Single-occurrence isolation: left = numerator / target."""
-    try:
-        lhs, rhs = (ast.parse(part.strip(), mode="eval").body
-                    for part in source_equation.split("=", 1))
-    except (SyntaxError, ValueError):
-        return None
-    if not isinstance(rhs, ast.BinOp) or not isinstance(rhs.op, ast.Div):
-        return None
-    if not isinstance(rhs.right, ast.Name) or rhs.right.id != target:
-        return None
-    if any(not isinstance(node, ALLOWED) for tree in (lhs, rhs)
-           for node in ast.walk(tree)):
-        return None
-    if any(isinstance(node, ast.Name) and node.id == target
-           for tree in (lhs, rhs.left) for node in ast.walk(tree)):
-        return None
-    return f"{target} = ({ast.unparse(rhs.left)})/({ast.unparse(lhs)})"
 
 
 def porosity_exponent_layout_context(local: str) -> bool:
@@ -139,16 +103,19 @@ def porosity_exponent_layout_context(local: str) -> bool:
 
 
 def _source_expression(raw: str, text: str, start: int, end: int) -> str:
-    """Interpret one documented porosity-exponent PDF layout, not arbitrary `fm`."""
+    """Interpret only source-verifiable layout artifacts, never arbitrary `fm`."""
     if definition := EXPLICIT_DEFINITION.fullmatch(raw):
         numerator = definition.group("ratio_a") or definition.group("difference_a")
         denominator = definition.group("ratio_b") or definition.group("difference_b")
         operator = "/" if definition.group("ratio_a") else "-"
         return f"{definition['lhs']} = {numerator} {operator} {denominator}"
     candidate = raw.translate(TRANSLATION)
+    local = text[max(0, start - 350):min(len(text), end + 350)]
+    layout = normalize_extracted_equation(raw, local)
+    if layout.normalized_expression:
+        return layout.normalized_expression
     if not re.search(r"(?<![A-Za-z0-9_])fm(?![A-Za-z0-9_])", candidate, re.I):
         return candidate
-    local = text[max(0, start - 240):min(len(text), end + 240)]
     if not (porosity_exponent_layout_context(local)
             and re.fullmatch(r"\s*F\s*=\s*a\s*/\s*fm\s*", candidate, re.I)):
         return candidate
@@ -165,8 +132,11 @@ class FormulaSourceRecord(BaseModel):
     span_start: int
     span_end: int
     expression_candidate: str | None = None
+    normalized_expression: str | None = None
     source_equation: str | None = None
     formula_derivation: str | None = None
+    target_variable: str | None = None
+    layout_transformations: list[str] = Field(default_factory=list)
     equation_ast: str | None = None
     lhs: str | None = None
     rhs: str | None = None
@@ -178,35 +148,62 @@ class FormulaSourceRecord(BaseModel):
 
 class FormulaSourceRegistry(BaseModel):
     records: list[FormulaSourceRecord] = Field(default_factory=list)
+    layout_events: list[dict[str, Any]] = Field(default_factory=list)
 
     @classmethod
     def from_evidence(cls, evidence: list[dict[str, Any]]) -> "FormulaSourceRegistry":
         records: list[FormulaSourceRecord] = []
+        layout_events: list[dict[str, Any]] = []
         for source in evidence:
             if source.get("source_type") not in {"knowledge_base", "figure", "web"}:
                 continue
             text = str(source.get("text") or "")
-            stacked_spans = []
-            for stacked in STACKED_SATURATION.finditer(text):
-                start, end = stacked.span("equation")
-                raw = stacked.group("equation")
-                stacked_spans.append((start, end))
-                source_equation = _stacked_saturation_equation(raw, text, start, end)
-                candidate = _isolate_denominator(source_equation, "Rt") if source_equation else None
-                if not candidate:
-                    continue
-                records.append(FormulaSourceRecord(
-                    formula_id=f"FORMULA{len(records) + 1}", source_id=str(source["evidence_id"]),
-                    source_type=str(source["source_type"]), raw_span=raw,
-                    normalized_span=normalize_formula(raw), locator=source.get("locator"),
-                    span_start=start, span_end=end, expression_candidate=candidate,
-                    source_equation=source_equation, formula_derivation="denominator_isolation",
-                    equation_ast=equation_ast(candidate), lhs="Rt",
-                    rhs=candidate.split("=", 1)[1].strip(),
-                    required_variables=sorted(expression_variables(candidate) or []),
-                    source_document=source.get("document"), source_page=source.get("page"),
-                    context=text[max(0, start-180):start].strip(),
-                ))
+            stacked_spans: list[tuple[int, int]] = []
+            for pattern in (STACKED_POWER_FRACTION, STACKED_FRACTION, STACKED_POWER):
+                for match in pattern.finditer(text):
+                    start, end = match.span("block")
+                    if any(a < end and start < b for a, b in stacked_spans):
+                        continue
+                    raw = match["block"]
+                    if re.match(r"(?i)(?:equation|eq\.?|figure|table|where)\b", raw.splitlines()[-1].strip()):
+                        # A caption following a one-line equation is not its denominator.
+                        continue
+                    stacked_spans.append((start, end))
+                    local = text[max(0, start - 350):min(len(text), end + 350)]
+                    layout = normalize_extracted_equation(raw, local)
+                    layout_events.append({"source_id": source["evidence_id"],
+                                          "candidate_count": layout.candidate_count,
+                                          "transformations": list(layout.transformations),
+                                          "ambiguous": layout.is_ambiguous,
+                                          "reason": layout.reason})
+                    relation = layout.normalized_expression
+                    if not relation:
+                        continue
+                    left, right = (ast.parse(part.strip(), mode="eval").body
+                                   for part in relation.split("=", 1))
+                    targets = ([left.id] if isinstance(left, ast.Name) else
+                               [right.right.id] if isinstance(right, ast.BinOp)
+                               and isinstance(right.op, ast.Div) and isinstance(right.right, ast.Name) else
+                               [right.id] if isinstance(right, ast.Name) else [])
+                    for target in targets:
+                        candidate = relation if isinstance(left, ast.Name) else isolate_equation(relation, target)
+                        variables = expression_variables(candidate or "")
+                        if variables is None:
+                            continue
+                        records.append(FormulaSourceRecord(
+                            formula_id=f"FORMULA{len(records) + 1}", source_id=str(source["evidence_id"]),
+                            source_type=str(source["source_type"]), raw_span=raw,
+                            normalized_span=normalize_formula(raw), locator=source.get("locator"),
+                            span_start=start, span_end=end, expression_candidate=candidate,
+                            normalized_expression=candidate,
+                            source_equation=relation,
+                            formula_derivation="algebraic_isolation" if not isinstance(left, ast.Name) else None,
+                            target_variable=target, layout_transformations=list(layout.transformations),
+                            equation_ast=equation_ast(candidate), lhs=target,
+                            rhs=candidate.split("=", 1)[1].strip(), required_variables=sorted(variables),
+                            source_document=source.get("document"), source_page=source.get("page"),
+                            context=text[max(0, start - 180):start].strip(),
+                        ))
             for definition in EXPLICIT_DEFINITION.finditer(text):
                 numerator = definition.group("ratio_a") or definition.group("difference_a")
                 denominator = definition.group("ratio_b") or definition.group("difference_b")
@@ -247,15 +244,27 @@ class FormulaSourceRegistry(BaseModel):
                 if variables is None and not (re.search(r"[+\-*/×÷−·]", rhs) and re.search(r"[A-Za-z_]", rhs)):
                     continue
                 start, end = match.start(), match.start() + len(raw)
+                layout = normalize_extracted_equation(
+                    raw, text[max(0, start - 350):min(len(text), end + 350)])
+                if layout.transformations or layout.is_ambiguous:
+                    layout_events.append({"source_id": source["evidence_id"],
+                                          "candidate_count": layout.candidate_count,
+                                          "transformations": list(layout.transformations),
+                                          "ambiguous": layout.is_ambiguous,
+                                          "reason": layout.reason})
                 records.append(FormulaSourceRecord(
                     formula_id=f"FORMULA{len(records) + 1}", source_id=str(source["evidence_id"]),
                     source_type=str(source["source_type"]), raw_span=raw,
                     normalized_span=normalize_formula(raw), locator=source.get("locator"),
                     span_start=start, span_end=end, expression_candidate=candidate if variables is not None else None,
+                    normalized_expression=candidate if variables is not None and layout.transformations else None,
+                    source_equation=layout.normalized_expression if layout.transformations else None,
+                    target_variable=candidate.split("=", 1)[0].strip() if layout.transformations else None,
+                    layout_transformations=list(layout.transformations),
                     equation_ast=equation_ast(candidate) if variables is not None else None,
                     lhs=candidate.split("=", 1)[0].strip(), rhs=candidate.split("=", 1)[1].strip(),
                     required_variables=sorted(variables or []),
                     source_document=source.get("document"), source_page=source.get("page"),
                     context=str(source.get("heading") or text[max(0, start-180):start]).strip(),
                 ))
-        return cls(records=records)
+        return cls(records=records, layout_events=layout_events)

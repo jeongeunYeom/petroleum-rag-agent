@@ -82,3 +82,14 @@ def combine_units(left: str, right: str, *, divide: bool) -> str:
     top = [atom for atom, power in sorted(factors.items()) for _ in range(max(0, power))]
     bottom = [atom for atom, power in sorted(factors.items()) for _ in range(max(0, -power))]
     return ("*".join(top) or ("1" if bottom else "")) + ("/" + "/".join(bottom) if bottom else "")
+
+
+def format_unit_factors(factors: dict[str, int]) -> str:
+    """Render the bounded factor map without losing denominator grouping."""
+    def term(atom: str, power: int) -> str:
+        return atom if power == 1 else f"{atom}^{power}"
+
+    top = [term(atom, power) for atom, power in factors.items() if power > 0]
+    bottom = [term(atom, -power) for atom, power in factors.items() if power < 0]
+    return ("*".join(top) or ("1" if bottom else "")) + (
+        "/" + "/".join(bottom) if bottom else "")

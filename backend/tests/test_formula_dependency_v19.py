@@ -265,7 +265,7 @@ def test_stacked_archie_span_reconstructs_without_false_n_equals_f():
     target = next(row for row in records if row.lhs == "Rt")
     assert target.raw_span == "Sw\nn  =  F Rw\nRt"
     assert target.source_equation == "Sw**n = (F*Rw)/Rt"
-    assert target.formula_derivation == "denominator_isolation"
+    assert target.formula_derivation == "algebraic_isolation"
     assert target.expression_candidate == "Rt = (F * Rw)/(Sw ** n)"
     assert source_contains_equation(target, ARCHIE_STACK_SOURCE)
     assert not source_contains_equation(
@@ -309,9 +309,17 @@ def test_stacked_archie_full_agent_chain(tmp_path, monkeypatch):
     target = result.computations[1]
     assert target.output_manifest["OUT_RESULT"]["value"] == pytest.approx(13.493000, rel=1e-4)
     assert target.output_manifest["OUT_RESULT"]["unit"] == "ohm-m"
+    assert GoalExecutionAgent._derived(target)[0].unit == "ohm-m"
+    assert "13.49" in result.final_answer and "ohm-m" in result.final_answer
+    assert result.telemetry["formula_layout_normalization_used"]
+    assert "stacked_fraction" in result.telemetry["formula_layout_transformations"]
+    assert result.telemetry["unit_propagation_success"]
+    assert result.telemetry["unit_propagation_result"] == "ohm-m"
+    assert result.telemetry["unit_propagation_inputs"]["Rw"] == "ohm-m"
+    assert result.telemetry["unit_propagation_inputs"]["F"] == "dimensionless"
     assert target.raw_formula_span == "Sw\nn  =  F Rw\nRt"
     assert target.source_equation == "Sw**n = (F*Rw)/Rt"
-    assert target.formula_derivation == "denominator_isolation"
+    assert target.formula_derivation == "algebraic_isolation"
     assert any(value.startswith("CALC1:") for value in target.input_fact_ids)
 
 

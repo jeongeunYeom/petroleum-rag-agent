@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import ast
 import re
 import time
 import json
@@ -20,6 +21,7 @@ from app.models.goal_research_schemas import (
 from app.models.research_schemas import EvidenceCounts, InternalEvidence, ResearchRequest, ResearchResponse, ResearchTiming
 from app.services.formula_source_registry import FormulaSourceRegistry, equation_ast, expression_variables, normalize_formula, source_contains_equation
 from app.services.formula_dependency import resolve_formula_dependencies
+from app.services.formula_units import formula_output_unit
 from app.services.calculation_requirements import infer_dimensionless, normalize_symbol, rank_formula_candidates, select_formula_candidate
 from app.services.calculation_request_ir import OPERATIONS, parse_request_ir, validate_ir
 from app.services.goal_clarification import (calculation_missing, calculation_readiness, clarification_question,
@@ -1295,6 +1297,17 @@ class GoalExecutionAgent(GoalResearchAgent):
             "formula_dependency_cycle_detected": False,
             "formula_dependency_block_reason": None,
             "clarification_avoided_by_dependency_resolution": False,
+            "formula_layout_normalization_attempted": False,
+            "formula_layout_normalization_used": False,
+            "formula_layout_transformations": [],
+            "formula_layout_candidate_count": 0,
+            "formula_layout_ambiguous": False,
+            "formula_layout_rejection_reason": None,
+            "unit_propagation_attempted": False,
+            "unit_propagation_success": False,
+            "unit_propagation_inputs": {},
+            "unit_propagation_result": None,
+            "unit_propagation_failure_reason": None,
         }.items():
             result.telemetry.setdefault(key, value)
         result.telemetry["intent_route"] = intent.kind.value
@@ -1367,8 +1380,21 @@ class GoalExecutionAgent(GoalResearchAgent):
                                     GoalStopReason.CANCELED, latest_candidate, started)
             state.iteration = iteration - 1
             evidence_rows = accumulator.records()
-            formula_available = any(item.expression_candidate for item in
-                                    FormulaSourceRegistry.from_evidence(evidence_rows).records)
+            layout_registry = FormulaSourceRegistry.from_evidence(evidence_rows)
+            formula_available = any(item.expression_candidate for item in layout_registry.records)
+            layout_events = layout_registry.layout_events
+            result.telemetry["formula_layout_normalization_attempted"] = bool(layout_events)
+            result.telemetry["formula_layout_normalization_used"] = any(
+                item.layout_transformations for item in layout_registry.records)
+            result.telemetry["formula_layout_transformations"] = list(dict.fromkeys(
+                transformation for item in layout_registry.records
+                for transformation in item.layout_transformations))
+            result.telemetry["formula_layout_candidate_count"] = sum(
+                int(event["candidate_count"]) for event in layout_events)
+            result.telemetry["formula_layout_ambiguous"] = any(
+                event["ambiguous"] for event in layout_events)
+            result.telemetry["formula_layout_rejection_reason"] = next(
+                (event["reason"] for event in layout_events if event["reason"]), None)
             evidence_fact_ids = [item.fact_id for item in EvidenceFactRegistry.from_evidence(evidence_rows).records]
             selected_formula, formula_selection = rank_formula_candidates(
                 evidence_rows, f"{request.goal or ''} {request.topic}",
@@ -1452,6 +1478,25 @@ class GoalExecutionAgent(GoalResearchAgent):
             equation = intent.user_equation or (selected_formula.expression_candidate if selected_formula else None)
             bindings, missing_bindings = formula_input_readiness(
                 equation, formula_users if requires_sourced_formula else users) if equation else ({}, [])
+            if equation and intent.kind in {GoalIntentKind.KB_FORMULA_CALC,
+                                            GoalIntentKind.USER_FORMULA_CALC}:
+                result.telemetry["unit_propagation_attempted"] = True
+                result.telemetry["unit_propagation_inputs"] = {
+                    name: fact.unit for name, fact in bindings.items()}
+                if missing_bindings:
+                    result.telemetry["unit_propagation_failure_reason"] = "; ".join(missing_bindings)
+                else:
+                    try:
+                        output_unit = formula_output_unit(
+                            ast.parse(equation.split("=", 1)[1].strip(), mode="eval").body,
+                            {name: fact.unit for name, fact in bindings.items()},
+                            {name: fact.value for name, fact in bindings.items()})
+                    except (ValueError, SyntaxError, KeyError, TypeError) as exc:
+                        result.telemetry["unit_propagation_failure_reason"] = str(exc)
+                    else:
+                        result.telemetry["unit_propagation_success"] = True
+                        result.telemetry["unit_propagation_result"] = output_unit or "dimensionless"
+                        result.telemetry["unit_propagation_failure_reason"] = None
             formula_source = next((row for row in evidence_rows if selected_formula and
                                    row.get("evidence_id") == selected_formula.source_id), None)
             formula_source_verified = bool(formula_source and selected_formula and source_contains_equation(

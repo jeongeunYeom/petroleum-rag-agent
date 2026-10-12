@@ -43,7 +43,7 @@ ALIASES: dict[str, tuple[str, ...]] = {
     "klf": ("lateral_fracture_permeability",),
     "pf": ("power_factor",),
 }
-SUBSCRIPTS = str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789")
+SUBSCRIPTS = str.maketrans("₀₁₂₃₄₅₆₇₈₉ₓₒₐ", "0123456789xoa")
 
 
 def normalize_symbol(name: str) -> str:
@@ -65,12 +65,16 @@ def infer_dimensionless(variable: str, source_text: str, user_label: str = "") -
             and re.search(r"\bF\s*=\s*a\s*/\s*fm\b", source_text, re.I)):
         return {"variable": variable, "dimension": "dimensionless", "source": "sourced_formation_factor_relation",
                 "confidence": .9}
-    if re.search(r"fraction|ratio|saturation|dimensionless|공극률|포화도|비율|무차원", user_label, re.I):
+    if (re.search(rf"\b{re.escape(variable)}\b", user_label, re.I)
+            and re.search(r"\b(?:fraction|ratio|saturation|dimensionless)\b|공극률|포화도|비율|무차원",
+                          user_label, re.I)):
         return {"variable": variable, "dimension": "dimensionless", "source": "user_label",
                 "confidence": .9}
-    local = re.search(rf"\b{re.escape(variable)}\b.{{0,55}}?\b(?:fraction|ratio|saturation|dimensionless)\b|"
-                      rf"\b(?:fraction|ratio|saturation|dimensionless)\b.{{0,55}}?\b{re.escape(variable)}\b",
-                      source_text, re.I | re.S)
+    local = re.search(rf"\b{re.escape(variable)}\b\s+(?:is|means|denotes|represents)\s+"
+                      rf"[^.\n]{{0,55}}?\b(?:fraction|ratio|saturation|dimensionless)\b|"
+                      rf"\b{re.escape(variable)}\b\s*\(\s*dimensionless\s*\)|"
+                      rf"\bdimensionless\s+\b{re.escape(variable)}\b",
+                      source_text, re.I)
     if local:
         return {"variable": variable, "dimension": "dimensionless", "source": "source_definition",
                 "confidence": .85}

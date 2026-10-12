@@ -243,6 +243,13 @@ def calculation_readiness(formula: FormulaSourceRecord | None, evidence: list[di
                                                        symbol_names, unit_compatibility_score)
     source_text = str(source.get("text") or "")
     local_text = source_text[max(0, formula.span_start - 240):formula.span_end + 240]
+    rhs = (formula.expression_candidate or "").split("=", 1)[-1].strip()
+    try:
+        exponent_names = {node.right.id for node in ast.walk(ast.parse(rhs, mode="eval"))
+                          if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Pow)
+                          and isinstance(node.right, ast.Name)}
+    except SyntaxError:
+        exponent_names = set()
     for variable in sorted(expression_variables(formula.expression_candidate or "") or set()):
         facts = [fact for fact in [*users.records, *derived_facts]
                  if normalize_symbol(fact.name) in symbol_names(variable)]
@@ -256,7 +263,7 @@ def calculation_readiness(formula: FormulaSourceRecord | None, evidence: list[di
             facts = explicit
         inferred = infer_dimensionless(variable, local_text,
                                        facts[0].source_span if len(facts) == 1 and hasattr(facts[0], "source_span") else "")
-        if variable == "n" and formula.source_equation == "Sw**n = (F*Rw)/Rt":
+        if variable in exponent_names:
             inferred = {"source": "verified_exponent", "dimension": "dimensionless"}
         if len(facts) != 1:
             suffix = "값" if inferred else "값과 단위"

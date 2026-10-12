@@ -26,7 +26,7 @@ from app.services.calculation_requirements import normalize_symbol, symbol_names
 from app.services.user_fact_registry import UserFactRegistry, validate_original_operands
 from app.services.direct_operation_v3 import OPERATIONS as V3_OPERATIONS, build as build_v3_operation
 from app.tools.python_tools import PythonTools
-from app.services.compound_units import combine_units
+from app.services.formula_units import formula_output_unit as _formula_output_unit
 
 
 def user_formula_bindings(equation: str, facts: UserFactRegistry) -> tuple[dict[str, object], list[str]]:
@@ -230,50 +230,6 @@ def _arithmetic_value(node: ast.AST, values: dict[str, float]) -> float:
     raise ValueError("unsupported user formula expression")
 
 
-def _combine_formula_units(left: str, right: str, *, divide: bool) -> str:
-    """Cancel only identical literal unit factors; never infer a conversion."""
-    return combine_units(left, right, divide=divide)
-
-
-def _formula_output_unit(node: ast.AST, units: dict[str, str]) -> str:
-    """Infer simple dimensions from the same bounded AST used for numeric validation."""
-    if isinstance(node, ast.Constant):
-        return ""
-    if isinstance(node, ast.Name):
-        return _combine_formula_units(units[node.id], "", divide=False)
-    if isinstance(node, ast.UnaryOp):
-        return _formula_output_unit(node.operand, units)
-    if not isinstance(node, ast.BinOp):
-        raise ValueError("unsupported user formula expression")
-    left = _formula_output_unit(node.left, units)
-    right = _formula_output_unit(node.right, units)
-    if isinstance(node.op, (ast.Add, ast.Sub)):
-        if left.casefold() != right.casefold():
-            raise ValueError("incompatible user formula units")
-        return left
-    if isinstance(node.op, ast.Mult):
-        return _combine_formula_units(left, right, divide=False)
-    if isinstance(node.op, ast.Div):
-        return _combine_formula_units(left, right, divide=True)
-    if isinstance(node.op, ast.Pow):
-        if isinstance(node.right, ast.Name):
-            if left or right:
-                raise ValueError("unsupported dimensional exponent")
-            return ""
-        if not isinstance(node.right, ast.Constant) or type(node.right.value) not in {int, float}:
-            raise ValueError("unsupported formula exponent")
-        exponent = node.right.value
-        if right or int(exponent) != exponent:
-            if left or right:
-                raise ValueError("unsupported dimensional exponent")
-            return ""
-        result = ""
-        for _ in range(abs(int(exponent))):
-            result = _combine_formula_units(result, left, divide=exponent < 0)
-        return result
-    raise ValueError("unsupported user formula expression")
-
-
 def formula_input_readiness(equation: str, facts: UserFactRegistry) -> tuple[dict[str, object], list[str]]:
     """Check bindings and unit algebra before a Python action is selected."""
     bound, missing = user_formula_bindings(equation, facts)
@@ -281,7 +237,8 @@ def formula_input_readiness(equation: str, facts: UserFactRegistry) -> tuple[dic
         return bound, missing
     try:
         _formula_output_unit(ast.parse(equation.split("=", 1)[1].strip(), mode="eval").body,
-                             {name: fact.unit for name, fact in bound.items()})
+                             {name: fact.unit for name, fact in bound.items()},
+                             {name: fact.value for name, fact in bound.items()})
     except (ValueError, SyntaxError, KeyError, IndexError, TypeError) as exc:
         return bound, [f"계산식 입력 단위 호환성: {exc}"]
     return bound, []
@@ -321,7 +278,8 @@ async def run_user_formula_calculation(settings: Settings, request: GoalResearch
               abs(variables[node.right.id].value) > 8))) for node in ast.walk(tree)):
         raise ValueError("formula exponent exceeds safe bounds")
     units = {name: fact.unit for name, fact in variables.items()}
-    output_unit = _formula_output_unit(tree.body, units)
+    output_unit = _formula_output_unit(tree.body, units,
+                                       {name: fact.value for name, fact in variables.items()})
     explicit_dimensionless = bool(re.search(
         rf"(?<![A-Za-z0-9_]){re.escape(lhs)}(?![A-Za-z0-9_])\s*(?:(?:is|as|은|는|이|가)\s*)?(?:dimensionless|무차원)|"
         rf"(?:dimensionless|무차원)\s+{re.escape(lhs)}\b", original_text or request.topic, re.I))
