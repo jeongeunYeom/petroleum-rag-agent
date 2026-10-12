@@ -1,0 +1,414 @@
+{
+  "environment": {
+    "browser": "Microsoft Edge 154.0.4258.53",
+    "viewport": "1440x1000 @1.5x",
+    "app_url": "http://127.0.0.1:3000",
+    "api_url": "http://127.0.0.1:8001/api"
+  },
+  "ui_integration": {
+    "one_chat_input": true,
+    "goal_research_button_absent": true,
+    "goal_research_drawer_absent": true,
+    "maximum_iteration_selector_absent": true,
+    "unified_header": true,
+    "pass": true,
+    "screenshot": "screenshots/00_unified_chat_home.png"
+  },
+  "scenarios": [
+    {
+      "scenario_id": "A",
+      "prompt": "방향 측정기 근처에 Monel drill collar를 사용하는 이유를 내부 자료에 근거해 설명해줘.",
+      "run_id": "GR-20261012-150830-78EF44",
+      "pass": false,
+      "run_status": "stopped",
+      "goal_status": "stopped",
+      "stop_reason": "no_progress",
+      "actual_iterations": 3,
+      "actions": [
+        "retrieve",
+        "verify",
+        "retrieve",
+        "stop"
+      ],
+      "internal_sources": 1,
+      "web_sources": 0,
+      "validated_calculations": 0,
+      "calculation_outputs": [],
+      "final_target": null,
+      "final_value": null,
+      "final_unit": null,
+      "clarification_turns": 0,
+      "conversation_context_used": false,
+      "source_refs": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 475
+        }
+      ],
+      "screenshot_paths": [
+        "screenshots/01_monel_final.png"
+      ],
+      "notes": [
+        "FAIL: stopped with no_progress after retrieve/verify/retrieve; only Drilling Engineering p.475 stabilizer evidence was retained and the requested Monel explanation was not supported."
+      ],
+      "browser_errors": []
+    },
+    {
+      "scenario_id": "B",
+      "prompt": "비중(SG)이 0.918인 원유의 API gravity를 내부 교재의 관계식을 이용해 계산하고, 사용한 식과 출처를 검증해줘.",
+      "run_id": "GR-20261012-150847-47F989",
+      "pass": true,
+      "run_status": "completed",
+      "goal_status": "achieved",
+      "stop_reason": "goal_achieved",
+      "actual_iterations": 4,
+      "actions": [
+        "retrieve",
+        "calculate",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "internal_sources": 5,
+      "web_sources": 0,
+      "validated_calculations": 1,
+      "calculation_outputs": [
+        {
+          "calculation_id": "CALC1",
+          "key": "OUT_default_API_gravity",
+          "name": "API_gravity",
+          "value": 22.639433551198238,
+          "unit": "°API"
+        }
+      ],
+      "final_target": "API_gravity",
+      "final_value": 22.639433551198238,
+      "final_unit": "°API",
+      "clarification_turns": 0,
+      "conversation_context_used": false,
+      "source_refs": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 90
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 89
+        },
+        {
+          "id": "KB3",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+          "page": 342
+        },
+        {
+          "id": "KB4",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+          "page": 362
+        },
+        {
+          "id": "KB5",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+          "page": 312
+        }
+      ],
+      "screenshot_paths": [
+        "screenshots/02_api_gravity_final.png"
+      ],
+      "notes": [
+        "API output=22.639433551198238; p.90 source=true"
+      ],
+      "browser_errors": []
+    },
+    {
+      "scenario_id": "C",
+      "prompt": "그럼 0.85면?",
+      "run_id": "GR-20261012-150911-F82118",
+      "pass": true,
+      "run_status": "completed",
+      "goal_status": "achieved",
+      "stop_reason": "goal_achieved",
+      "actual_iterations": 4,
+      "actions": [
+        "retrieve",
+        "calculate",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "internal_sources": 5,
+      "web_sources": 0,
+      "validated_calculations": 1,
+      "calculation_outputs": [
+        {
+          "calculation_id": "CALC1",
+          "key": "OUT_default_API_gravity",
+          "name": "API_gravity",
+          "value": 34.970588235294116,
+          "unit": "°API"
+        }
+      ],
+      "final_target": "API_gravity",
+      "final_value": 34.970588235294116,
+      "final_unit": "°API",
+      "clarification_turns": 0,
+      "conversation_context_used": true,
+      "source_refs": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 90
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 89
+        },
+        {
+          "id": "KB3",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+          "page": 342
+        },
+        {
+          "id": "KB4",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_III.pdf",
+          "page": 362
+        },
+        {
+          "id": "KB5",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+          "page": 312
+        }
+      ],
+      "screenshot_paths": [
+        "screenshots/03_api_followup_final.png"
+      ],
+      "notes": [
+        "Context used=true; SG corrected=true; API=34.970588235294116"
+      ],
+      "browser_errors": []
+    },
+    {
+      "scenario_id": "D",
+      "prompt": "내부 Formation Evaluation 자료에서 공극률, 물 포화도, 물의 비저항과 지층의 진비저항 사이의 관계를 찾아서, φ=0.22, Sw=0.35, Rw=0.08 Ω·m, a=1, m=2, n=2일 때 Rt를 계산하고 근거와 계산 결과를 검증해줘.",
+      "run_id": "GR-20261012-150940-A6223B",
+      "pass": false,
+      "run_status": "waiting_for_user_input",
+      "goal_status": "pending",
+      "stop_reason": null,
+      "actual_iterations": 2,
+      "actions": [
+        "retrieve",
+        "calculate"
+      ],
+      "internal_sources": 5,
+      "web_sources": 0,
+      "validated_calculations": 1,
+      "calculation_outputs": [
+        {
+          "calculation_id": "CALC1",
+          "key": "OUT_RESULT",
+          "name": "F",
+          "value": 20.66115702479339,
+          "unit": "dimensionless"
+        }
+      ],
+      "final_target": "Rt",
+      "final_value": null,
+      "final_unit": null,
+      "clarification_turns": 0,
+      "conversation_context_used": false,
+      "source_refs": [
+        {
+          "id": "KB1",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 154
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 164
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 166
+        },
+        {
+          "id": "KB4",
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 167
+        },
+        {
+          "id": "KB5",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 154
+        }
+      ],
+      "screenshot_paths": [
+        "screenshots/04_archie_final.png"
+      ],
+      "notes": [
+        "FAIL: validated F=20.66115702479339 but Rt is absent; user supplied Rw=0.08 Ω·m, while normalized Rw unit was empty and the Agent asked for Rw unit."
+      ],
+      "browser_errors": []
+    },
+    {
+      "scenario_id": "E_wait",
+      "prompt": "내부 Drilling Engineering 자료에서 mud weight와 TVD를 이용한 hydrostatic pressure 관계식을 찾아서, MW=10.1 ppg일 때 압력을 계산하고 검증해줘.",
+      "run_id": "GR-20261012-150957-4FBB2B",
+      "pass": false,
+      "run_status": "waiting_for_user_input",
+      "goal_status": "pending",
+      "stop_reason": null,
+      "actual_iterations": 2,
+      "actions": [
+        "retrieve",
+        "retrieve"
+      ],
+      "internal_sources": 6,
+      "web_sources": 0,
+      "validated_calculations": 0,
+      "calculation_outputs": [],
+      "final_target": "pressure",
+      "final_value": null,
+      "final_unit": null,
+      "clarification_turns": 0,
+      "conversation_context_used": false,
+      "source_refs": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 360
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 75
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+          "page": 417
+        },
+        {
+          "id": "KB4",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 192
+        },
+        {
+          "id": "KB5",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+          "page": 225
+        },
+        {
+          "id": "KB6",
+          "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+          "page": 417
+        }
+      ],
+      "screenshot_paths": [
+        "screenshots/05_clarification_waiting.png"
+      ],
+      "notes": [
+        "FAIL: the Agent asked for Pd, not the genuinely missing TVD; telemetry selected ECD as target for a hydrostatic pressure request. Question: 계산을 계속하려면 Pd 값과 단위이(가) 필요합니다. 값과 단위를 한 번에 알려주세요."
+      ],
+      "browser_errors": []
+    },
+    {
+      "scenario_id": "E_resume",
+      "prompt": "TVD는 8000 ft야.",
+      "run_id": "GR-20261012-150957-4FBB2B",
+      "pass": false,
+      "run_status": "waiting_for_user_input",
+      "goal_status": "pending",
+      "stop_reason": null,
+      "actual_iterations": 2,
+      "actions": [
+        "retrieve",
+        "retrieve"
+      ],
+      "internal_sources": 6,
+      "web_sources": 0,
+      "validated_calculations": 0,
+      "calculation_outputs": [],
+      "final_target": "pressure",
+      "final_value": null,
+      "final_unit": null,
+      "clarification_turns": 1,
+      "conversation_context_used": false,
+      "source_refs": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 360
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 75
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+          "page": 417
+        },
+        {
+          "id": "KB4",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 192
+        },
+        {
+          "id": "KB5",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+          "page": 225
+        },
+        {
+          "id": "KB6",
+          "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+          "page": 417
+        }
+      ],
+      "screenshot_paths": [
+        "screenshots/06_clarification_resumed.png"
+      ],
+      "notes": [
+        "FAIL: TVD=8000 ft was sent through the resume endpoint with the same run_id, but the run remained waiting for Pd; validated calculations=0."
+      ],
+      "browser_errors": []
+    },
+    {
+      "scenario_id": "F",
+      "prompt": "A=187, B=234, C=163 stb/d의 평균을 구하고 큰 순서대로 정렬해줘.",
+      "run_id": "GR-20261012-151024-E2A338",
+      "pass": false,
+      "run_status": "stopped",
+      "goal_status": "stopped",
+      "stop_reason": "calculation_blocked",
+      "actual_iterations": 1,
+      "actions": [
+        "calculate",
+        "stop"
+      ],
+      "internal_sources": 0,
+      "web_sources": 0,
+      "validated_calculations": 0,
+      "calculation_outputs": [],
+      "final_target": null,
+      "final_value": null,
+      "final_unit": null,
+      "clarification_turns": 0,
+      "conversation_context_used": false,
+      "source_refs": [],
+      "screenshot_paths": [
+        "screenshots/07_direct_calculation_final.png"
+      ],
+      "notes": [
+        "FAIL: CALCULATE was selected without KB retrieval, but no Python call or validated calculation occurred; calculation_blocked exposed ValueError as a missing input in the final answer."
+      ],
+      "browser_errors": []
+    }
+  ]
+}
