@@ -12,6 +12,7 @@ from app.services.evidence_fact_registry import EvidenceFactRegistry
 from app.services.formula_source_registry import FormulaSourceRegistry, FormulaSourceRecord, expression_variables
 from app.services.goal_tool_planner import InputFact, PythonAnalysisPlan
 from app.services.user_fact_registry import UNIT, normalize_unit
+from app.services.compound_units import unit_factors
 
 
 ALIASES: dict[str, tuple[str, ...]] = {
@@ -109,6 +110,43 @@ class FormulaSelectionRecord:
     same_sentence_match: bool = False
     same_paragraph_match: bool = False
     equation_number: str | None = None
+    unit_score: int = 0
+
+
+def _unit_signature(unit: str) -> dict[str, int] | None:
+    """A ranking hint only; this never authorizes a unit conversion."""
+    families = {"g": "mass", "kg": "mass", "mg": "mass", "lb": "mass",
+                "mol": "amount", "kmol": "amount", "lbmol": "amount",
+                "m": "length", "cm": "length", "mm": "length", "km": "length",
+                "ft": "length", "feet": "length", "in": "length", "inch": "length",
+                "psi": "pressure", "psia": "pressure", "psig": "pressure",
+                "Pa": "pressure", "kPa": "pressure",
+                "s": "time", "min": "time", "h": "time", "d": "time"}
+    try:
+        factors = unit_factors(normalize_unit(unit))
+    except ValueError:
+        return None
+    signature: dict[str, int] = {}
+    for atom, power in factors.items():
+        key = families.get(atom, atom)
+        signature[key] = signature.get(key, 0) + power
+    return {key: power for key, power in signature.items() if power}
+
+
+def source_variable_unit(source_text: str, variable: str) -> str | None:
+    """Read only an explicit unit adjacent to a source variable definition."""
+    match = re.search(rf"\b{re.escape(variable)}\s*(?:\((?P<round>{UNIT})\)|\[(?P<square>{UNIT})\])",
+                      source_text, re.I)
+    return (match.group("round") or match.group("square")) if match else None
+
+
+def unit_compatibility_score(source_unit: str, fact_unit: str) -> int:
+    if normalize_unit(source_unit) == normalize_unit(fact_unit):
+        return 4
+    expected, supplied = _unit_signature(source_unit), _unit_signature(fact_unit)
+    if expected is None or supplied is None:
+        return 0
+    return 2 if expected == supplied else -5
 
 
 def _requested_term_count(text: str) -> int | None:
@@ -136,7 +174,8 @@ def _additive_terms(formula: str) -> int:
 
 
 def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
-                            fact_names: list[str]) -> tuple[FormulaSourceRecord | None, FormulaSelectionRecord]:
+                            fact_names: list[str], fact_units: dict[str, str] | None = None
+                            ) -> tuple[FormulaSourceRecord | None, FormulaSelectionRecord]:
     """Rank literal source spans; weak or conflicting matches remain unresolved."""
     # Unrelated commentary is not an extra model-name constraint. Keep every actual
     # request/assignment clause, including negative constraints, for disambiguation.
@@ -150,6 +189,7 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
     if re.search(r"API도", intent, re.I):
         tokens.add("api")
     facts = {normalize_symbol(name) for name in fact_names}
+    units = {normalize_symbol(name): unit for name, unit in (fact_units or {}).items() if unit}
     stopwords = {"from", "with", "calculate", "compute", "equation", "formula", "the", "for", "and",
                  "using", "find", "given", "what", "식으로", "계산해줘", "내부", "자료에서"}
     context_tokens = {token for token in tokens if len(token) > 2 and token not in stopwords}
@@ -205,15 +245,20 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
                  if facts else 0)
         negative = 6 if excludes_reduced and terms == 2 else 0
         structure = 4 if term_match else 0
-        score = lhs_score + variable_score + heading_score + context_score + structure - negative
+        unit_score = sum(unit_compatibility_score(hint, units[normalize_symbol(variable)])
+                         for variable in variables
+                         if (hint := source_variable_unit(local_context, variable))
+                         and normalize_symbol(variable) in units)
+        score = lhs_score + variable_score + heading_score + context_score + structure + unit_score - negative
         details = {"lhs_match": bool(lhs_score), "required_variable_match": overlap,
+                   "unit_score": unit_score,
                    "extra_variable_penalty": extra, "term_count_match": term_match,
                    "requested_structure_match": term_match, "negative_constraint_penalty": negative,
                    "nearby_definition_match": bool(context_score),
                    "same_sentence_match": bool(context_score), "same_paragraph_match": bool(heading_score),
                    "equation_number": (re.search(r"\((\d{1,3})\)\s*$", source_text[:record.span_start]) or [None, None])[1]}
         if score >= 2:
-            key = (score, lhs_score, overlap, -extra, int(term_match), -negative,
+            key = (score, lhs_score, overlap, unit_score, -extra, int(term_match), -negative,
                    context_score, heading_score)
             ranked.append((key, record, details))
     ranked.sort(key=lambda row: row[0], reverse=True)
@@ -233,7 +278,7 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
     reason = "unique_structural_match" if selected else "ambiguous_literal_formulas"
     return selected, FormulaSelectionRecord(
         selected.formula_id if selected else None, top[0][0], top[0][1], top[0][2] * 2,
-        top[0][6], top[0][7], margin, reason, len(ranked),
+        top[0][7], top[0][8], margin, reason, len(ranked),
         {row[1].formula_id: row[0][0] for row in ranked}, **top[2])
 
 

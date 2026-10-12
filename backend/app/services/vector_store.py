@@ -296,6 +296,32 @@ class VectorStore:
                 parts.append(body)
         return "\n".join(parts)[:6000]
 
+    def get_local_chunks(self, document: str, page: int, chunk_id: str,
+                         limit: int = 6) -> list[dict[str, Any]]:
+        """Read a bounded neighborhood of original indexed chunks, without reindexing."""
+        if not document or page < 1:
+            return []
+        origin = self.collection.get(ids=[chunk_id], include=["metadatas"])
+        origin_metadata = (origin.get("metadatas") or [{}])[0] or {}
+        origin_index = int(origin_metadata.get("chunk_index") or 0)
+        rows: list[dict[str, Any]] = []
+        for nearby_page in (page, page - 1, page + 1):
+            if nearby_page < 1:
+                continue
+            data = self.collection.get(
+                where={"$and": [{"document": document}, {"page": nearby_page}]},
+                include=["documents", "metadatas"],
+            )
+            for row_id, body, metadata in zip(data.get("ids") or [],
+                                               data.get("documents") or [],
+                                               data.get("metadatas") or []):
+                if row_id != chunk_id and body and metadata:
+                    rows.append({"id": row_id, "text": body, "metadata": metadata})
+        rows.sort(key=lambda row: (abs(int(row["metadata"].get("page") or page) - page),
+                                   abs(int(row["metadata"].get("chunk_index") or 0) -
+                                       origin_index)))
+        return rows[:max(0, min(limit, 8))]
+
     def search(
         self,
         question: str,

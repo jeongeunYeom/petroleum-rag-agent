@@ -239,8 +239,10 @@ def calculation_readiness(formula: FormulaSourceRecord | None, evidence: list[di
     if source is None or not source_contains_equation(formula, str(source.get("text") or "")):
         return ["실제 식이 포함된 근거 구간"]
     missing = []
-    from app.services.calculation_requirements import infer_dimensionless, symbol_names
+    from app.services.calculation_requirements import (infer_dimensionless, source_variable_unit,
+                                                       symbol_names, unit_compatibility_score)
     source_text = str(source.get("text") or "")
+    local_text = source_text[max(0, formula.span_start - 180):formula.span_end + 180]
     for variable in sorted(expression_variables(formula.expression_candidate or "") or set()):
         facts = [fact for fact in [*users.records, *derived_facts]
                  if normalize_symbol(fact.name) in symbol_names(variable)]
@@ -259,4 +261,9 @@ def calculation_readiness(formula: FormulaSourceRecord | None, evidence: list[di
             missing.append(f"{variable} {suffix}" if not facts else f"{variable} 값 확인")
         elif not facts[0].unit and not inferred:
             missing.append(f"{variable} 단위")
+        elif facts[0].unit and (expected_unit := source_variable_unit(local_text, variable)):
+            # Compatible dimensions with different scales still need an explicit
+            # conversion; a ranking hint is not permission to change the value.
+            if unit_compatibility_score(expected_unit, facts[0].unit) != 4:
+                missing.append(f"{variable} 단위 확인 ({expected_unit})")
     return missing

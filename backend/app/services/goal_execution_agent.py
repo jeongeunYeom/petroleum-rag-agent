@@ -17,7 +17,7 @@ from app.models.goal_research_schemas import (
     CriterionEvaluation, CriterionStatus, ExpectedResultStatus, GoalCriterion, GoalResearchRequest,
     GoalResearchResponse, GoalRunStatus, GoalStatus, GoalStopReason,
 )
-from app.models.research_schemas import EvidenceCounts, ResearchRequest, ResearchResponse, ResearchTiming
+from app.models.research_schemas import EvidenceCounts, InternalEvidence, ResearchRequest, ResearchResponse, ResearchTiming
 from app.services.formula_source_registry import FormulaSourceRegistry, equation_ast, expression_variables, normalize_formula, source_contains_equation
 from app.services.calculation_requirements import infer_dimensionless, rank_formula_candidates, select_formula_candidate
 from app.services.calculation_request_ir import OPERATIONS, parse_request_ir, validate_ir
@@ -630,6 +630,30 @@ class GoalExecutionAgent(GoalResearchAgent):
             support = await semantic_claim_support(request, evidence, criteria, self.ollama,
                                                     getattr(store, "embed", None))
             result.telemetry.update(support_fingerprint=key, support_underdetermined=support.underdetermined)
+        # A model's generic UNSUPPORTED verdict cannot erase a literal, relation-
+        # checked source span. Only recover exact source quotes that the existing
+        # engineering validator also accepts; never infer a missing relation.
+        recovered = 0
+        if not result.telemetry.get("source_conflict_count", 0):
+            literal = evaluate_claim_support(request, evidence, criteria)
+            validator = EngineeringValidator()
+            by_description = {c.description.casefold(): c for c in literal.claims}
+            for claim in support.claims:
+                candidate = by_description.get(claim.description.casefold())
+                if (claim.support_status != SupportStatus.UNSUPPORTED or candidate is None or
+                        candidate.support_status not in {SupportStatus.SUPPORTED, SupportStatus.PARTIALLY_SUPPORTED}):
+                    continue
+                valid = [(sid, span) for sid, span in zip(candidate.supporting_evidence_ids,
+                                                         candidate.supporting_spans)
+                         if any(row.get("evidence_id") == sid and span in str(row.get("text") or "")
+                                for row in evidence)
+                         and validator.validate_claim(span, span, query=request.topic).passed]
+                if valid:
+                    claim.support_status = candidate.support_status
+                    claim.supporting_evidence_ids = [sid for sid, _ in valid]
+                    claim.supporting_spans = [span for _, span in valid]
+                    recovered += 1
+        result.telemetry["deterministic_literal_support_recovered"] = recovered
         result.telemetry.update(support.telemetry())
         if not attempt:
             return None, support
@@ -675,8 +699,31 @@ class GoalExecutionAgent(GoalResearchAgent):
                     status=CriterionStatus.MET if support.all_required_supported else CriterionStatus.PARTIAL,
                     reason=reason, supporting_evidence=ids) for c in criteria]
 
+    def _expand_formula_neighbors(self, sources: list[InternalEvidence],
+                                  accumulator: EvidenceAccumulator) -> list[str]:
+        """One bounded read of original indexed neighbors; every returned span keeps its chunk ID."""
+        store = getattr(self.research_agent, "vector_store", None)
+        getter = getattr(store, "get_local_chunks", None)
+        if not callable(getter):
+            return []
+        neighbors: list[InternalEvidence] = []
+        for source in sources[:2]:
+            if source.page is None:
+                continue
+            for row in getter(source.document, source.page, source.chunk_id, limit=6):
+                metadata = row.get("metadata") or {}
+                if (metadata.get("document") != source.document or
+                        abs(int(metadata.get("page") or -100) - source.page) > 1):
+                    continue
+                neighbors.append(InternalEvidence(
+                    evidence_id="", document=source.document, page=int(metadata["page"]),
+                    chunk_id=str(row["id"]), score=source.score,
+                    excerpt=str(row.get("text") or "")))
+        return accumulator.add_internal(neighbors[:8])
+
     async def _pre_stop_answer(self, request, intent, criteria, accumulator, result, state, started,
                                verified=None):
+        result.telemetry["pre_stop_guard_checked"] = True
         if intent.kind not in {GoalIntentKind.KNOWLEDGE_QA, GoalIntentKind.FIGURE_QA, GoalIntentKind.PREMISE_CHECK}:
             return None
         if intent.kind == GoalIntentKind.PREMISE_CHECK:
@@ -701,6 +748,8 @@ class GoalExecutionAgent(GoalResearchAgent):
                                await self._answerability_gate(request, criteria, accumulator.records(), result))
         if not answer:
             return None
+        result.telemetry["pre_stop_guard_prevented_refusal"] = True
+        result.telemetry["partial_grounded_answer_used"] = not support.all_required_supported
         achieved = support.all_required_supported
         result.criteria = self._support_evaluation(criteria, support, prefers_korean(request))
         result.goal_coverage = sum(c.support_status == SupportStatus.SUPPORTED for c in support.claims) / max(1, len(support.claims))
@@ -1075,6 +1124,10 @@ class GoalExecutionAgent(GoalResearchAgent):
             criteria = [item.model_copy(deep=True) for item in result.frozen_criteria]
             criteria_hash = result.criteria_hash
             state = GoalExecutionState.model_validate(resume_state["state"])
+            # A corrected assignment may retain its USERF ID; readiness, not ID
+            # novelty, decides whether a prior blocked calculation may resume.
+            resumed_with_new_input = bool(resume_state.get("user_replies"))
+            previous_missing = state.unresolved_information.copy()
             state.known_facts = list(dict.fromkeys(state.known_facts + [item.fact_id for item in users.records]))
             state.no_progress_count = 0
             accumulator = EvidenceAccumulator.restore(result.internal_sources, result.web_sources, result.figures)
@@ -1088,6 +1141,8 @@ class GoalExecutionAgent(GoalResearchAgent):
             result.required_inputs = []
             result.resume_checkpoint = {}
         else:
+            resumed_with_new_input = False
+            previous_missing = []
             criteria = [item.model_copy(deep=True) for item in request.success_criteria]
             source = "user" if criteria else "inferred"
             premise_criteria = False
@@ -1148,6 +1203,14 @@ class GoalExecutionAgent(GoalResearchAgent):
             "route_forced_by_deterministic_readiness": False,
             "deterministic_calc_finalizer_used": False, "grounded_fast_path_used": False,
             "clarification_generated": False, "clarification_reasons": [],
+            "formula_recovery_attempted": False, "formula_recovery_attempt_count": 0,
+            "formula_recovery_success": False, "formula_local_expansion_used": False,
+            "formula_local_expansion_attempted": False, "formula_local_expansion_success": False,
+            "operands_complete": False, "forced_calculate_transition": False,
+            "pre_stop_guard_checked": False, "pre_stop_guard_prevented_refusal": False,
+            "partial_grounded_answer_used": False, "clarification_guard_checked": False,
+            "clarification_suppressed_existing_input": False,
+            "resume_readiness_recomputed": False, "resume_block_cleared": False,
         }.items():
             result.telemetry.setdefault(key, value)
         result.telemetry["intent_route"] = intent.kind.value
@@ -1226,6 +1289,7 @@ class GoalExecutionAgent(GoalResearchAgent):
             selected_formula, formula_selection = rank_formula_candidates(
                 evidence_rows, f"{request.goal or ''} {request.topic}",
                 [item.name for item in users.records],
+                {item.name: item.unit for item in users.records if item.unit},
             ) if formula_available and requires_sourced_formula else (None, None)
             formula_missing = calculation_readiness(selected_formula, evidence_rows, users, state.derived_facts) if selected_formula else []
             state.formula_ready = bool(selected_formula and not formula_missing)
@@ -1235,7 +1299,8 @@ class GoalExecutionAgent(GoalResearchAgent):
                                                                   "lhs": formula_selection.lhs_score,
                                                                   "variable_overlap": formula_selection.variable_overlap_score,
                                                                   "context": formula_selection.context_score,
-                                                                  "heading": formula_selection.heading_score},
+                                                                  "heading": formula_selection.heading_score,
+                                                                  "unit": formula_selection.unit_score},
                                              "ambiguity_reason": formula_selection.selection_reason,
                                              "candidate_scores": formula_selection.candidate_scores}
                                             if formula_selection else {"candidates_found": 0,
@@ -1271,6 +1336,22 @@ class GoalExecutionAgent(GoalResearchAgent):
                                    row.get("evidence_id") == selected_formula.source_id), None)
             formula_source_verified = bool(formula_source and selected_formula and source_contains_equation(
                 selected_formula, str(formula_source.get("text") or "")))
+            if state.formula_ready and formula_source_verified:
+                if result.telemetry["formula_recovery_attempt_count"]:
+                    result.telemetry["formula_recovery_success"] = True
+                if selected_formula.source_id in result.telemetry.get("formula_local_expansion_evidence_ids", []):
+                    result.telemetry["formula_local_expansion_success"] = True
+            if resume_state:
+                result.telemetry["resume_readiness_recomputed"] = True
+                still_missing = (formula_missing if requires_sourced_formula else
+                                 direct_missing if intent.kind == GoalIntentKind.DIRECT_CALC else
+                                 user_formula_missing or missing_bindings)
+                if (resumed_with_new_input and not still_missing and
+                        (not requires_sourced_formula or formula_source_verified)):
+                    state.blocked_reasons.clear()
+                    state.unresolved_information.clear()
+                    result.telemetry["resume_block_cleared"] = bool(previous_missing)
+                    result.telemetry["clarification_suppressed_existing_input"] = bool(previous_missing)
             action = self.action_planner.select(request, state, user_fact_ids=[r.fact_id for r in users.records],
                                                 evidence_fact_ids=evidence_fact_ids,
                                                 formula_ready=selected_formula is not None,
@@ -1278,7 +1359,12 @@ class GoalExecutionAgent(GoalResearchAgent):
                                                 python_calls_used=result.python_calls_total,
                                                 simulation_spec=simulation_spec,
                                                 formula_inputs_ready=not (formula_missing or user_formula_missing or direct_missing or missing_bindings),
-                                                intent=intent)
+                                                intent=intent, formula_source_verified=formula_source_verified,
+                                                fact_names=[item.name for item in users.records],
+                                                fact_units={item.name: item.unit for item in users.records if item.unit},
+                                                source_context=[item.document for item in accumulator.internal[:2]],
+                                                direct_ready=bool(direct_fast and direct_users.records and not direct_missing),
+                                                resumed_with_new_input=resumed_with_new_input)
             result.telemetry["transition"] = {"formula_ready": state.formula_ready if requires_sourced_formula else bool(equation),
                                                "calculation_ready": action.reason_code in {"formula_ready", "calculation_ready"},
                                                "blocking_reason": action.reason_code if action.action_type == GoalActionType.STOP else None}
@@ -1287,6 +1373,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                 "operands_expected": len(expression_variables(equation) or []) if equation else len(direct_users.records) + len(direct_missing),
                 "operands_bound": len(bindings) if equation else len(direct_users.records),
                 "operand_validation_passed": not (missing_bindings or formula_missing or direct_missing) and bool(users.records),
+                "operands_complete": not (missing_bindings or formula_missing or direct_missing) and bool(users.records),
                 "formula_selected": bool(equation) or (intent.kind == GoalIntentKind.DIRECT_CALC and bool(direct_operations)),
                 "formula_ready": state.formula_ready if requires_sourced_formula else bool(equation and not missing_bindings) or direct_fast,
                 "calculation_ready": ready or bool(state.computation_ids),
@@ -1298,6 +1385,9 @@ class GoalExecutionAgent(GoalResearchAgent):
                     "route_forced_by_deterministic_readiness", False) or ready and intent.kind in {
                     GoalIntentKind.DIRECT_CALC, GoalIntentKind.USER_FORMULA_CALC,
                     GoalIntentKind.USER_FORMULA_SIMULATION, GoalIntentKind.KB_FORMULA_CALC},
+                "forced_calculate_transition": result.telemetry["forced_calculate_transition"] or (
+                    action.action_type == GoalActionType.CALCULATE and
+                    action.reason_code in {"formula_ready", "calculation_ready"}),
             })
             self._add_time(result, "planning_seconds", time.perf_counter() - selection_started)
             if action.action_type == GoalActionType.STOP:
@@ -1310,6 +1400,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                     action.reason_code == "retrieve_no_progress" and bool(missing_simulation)) or (
                     action.reason_code == "no_progress" and (bool(missing_simulation) or calculation_stalled))
                 if needs_clarification and clarification_attempts < 3:
+                    result.telemetry["clarification_guard_checked"] = True
                     missing = (missing_simulation or user_simulation_missing_inputs if missing_simulation or user_simulation_missing_inputs else
                                user_formula_missing or direct_missing or formula_missing or missing_bindings or
                                (calculation_missing(selected_formula, evidence_rows, users, state.derived_facts)
@@ -1357,6 +1448,9 @@ class GoalExecutionAgent(GoalResearchAgent):
                                                                   reason="missing_validated_formula" if autonomous_python and requires_sourced_formula and not state.computation_ids else "",
                                                                   korean=korean), started)
             seen_actions.add(signature)
+            if action.reason_code == "formula_recovery":
+                result.telemetry["formula_recovery_attempted"] = True
+                result.telemetry["formula_recovery_attempt_count"] += 1
             before = state.fingerprint()
             action_started = datetime.now(timezone.utc)
             action_clock = time.perf_counter()
@@ -1426,6 +1520,20 @@ class GoalExecutionAgent(GoalResearchAgent):
                         result.telemetry["retrieval_rerank"] = rerank_debug
                         result.telemetry.setdefault("retrieval_rerank_history", []).append(rerank_debug)
                     added = accumulator.add(response)
+                    if (requires_sourced_formula and not result.telemetry["formula_local_expansion_attempted"]
+                            and response.internal_sources and not rank_formula_candidates(
+                                accumulator.records(), f"{request.goal or ''} {request.topic}",
+                                [item.name for item in users.records],
+                                {item.name: item.unit for item in users.records if item.unit})[0]):
+                        result.telemetry["formula_local_expansion_attempted"] = True
+                        try:
+                            neighbor_ids = self._expand_formula_neighbors(response.internal_sources, accumulator)
+                        except (ValueError, OSError, RuntimeError, TypeError, AttributeError):
+                            neighbor_ids = []
+                        if neighbor_ids:
+                            added.extend(neighbor_ids)
+                            result.telemetry["formula_local_expansion_used"] = True
+                            result.telemetry["formula_local_expansion_evidence_ids"] = neighbor_ids
                     state.evidence_ids.extend(added)
                     state.known_facts = list(dict.fromkeys(
                         state.known_facts + [item.fact_id for item in
@@ -1935,14 +2043,18 @@ class GoalExecutionAgent(GoalResearchAgent):
                                 "variable_binding_missing", "simulation_input_missing"} and
                     any(item.action_type == GoalActionType.RETRIEVE for item in state.completed_actions) and
                     clarification_attempts < 3):
+                result.telemetry["clarification_guard_checked"] = True
                 missing = [f"{value.split(':')[-1]} 값과 단위" for value in
                            [*details["missing_variables"], *details["unit_mismatch_variables"]]]
-                missing = missing or calculation_missing(selected_formula, accumulator.records(),
-                                                         users, state.derived_facts)
-                return self._pause(result, state, accumulator, seen_actions, research_validation,
-                                   latest_candidate, missing or ["필수 입력값과 단위"], korean,
-                                   clarification_attempts + 1,
-                                   list((resume_state or {}).get("user_replies", [])), started)
+                current = (calculation_readiness(selected_formula, accumulator.records(), users, state.derived_facts)
+                           if requires_sourced_formula and selected_formula else
+                           user_formula_missing or direct_missing or missing_bindings)
+                missing = current or (missing if not users.records else [])
+                if missing:
+                    return self._pause(result, state, accumulator, seen_actions, research_validation,
+                                       latest_candidate, missing, korean, clarification_attempts + 1,
+                                       list((resume_state or {}).get("user_replies", [])), started)
+                result.telemetry["clarification_suppressed_existing_input"] = True
             if state.synthesized and state.goal_achieved:
                 self._record_stop(result, state, "goal_achieved")
                 return self._finish(result, GoalRunStatus.COMPLETED, GoalStatus.ACHIEVED,

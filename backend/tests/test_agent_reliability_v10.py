@@ -272,8 +272,10 @@ def test_identical_formula_retrieval_query_is_not_reissued():
                                                     "python_execution_approved": True}),
                                       state, user_fact_ids=["USERF1"], evidence_fact_ids=[],
                                       formula_ready=False, simulation_spec=None, intent=intent)
-    assert action.action_type == GoalActionType.STOP
-    assert action.reason_code == "formula_source_unavailable"
+    # v19 recovery uses a distinct, bounded query rather than repeating the original.
+    assert action.action_type == GoalActionType.RETRIEVE
+    assert action.reason_code == "formula_recovery"
+    assert action.query != query
 
 
 class NoResearch:

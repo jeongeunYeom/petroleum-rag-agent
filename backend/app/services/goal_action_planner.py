@@ -41,6 +41,12 @@ class GoalActionPlanner:
         simulation_spec: SimulationSpec | None,
         formula_inputs_ready: bool = True,
         intent: GoalIntent | None = None,
+        formula_source_verified: bool | None = None,
+        fact_names: list[str] | None = None,
+        fact_units: dict[str, str] | None = None,
+        source_context: list[str] | None = None,
+        direct_ready: bool = False,
+        resumed_with_new_input: bool = False,
     ) -> GoalAction:
         text = " ".join(filter(None, (request.topic, request.goal)))
         wants_simulation = bool(SIMULATE_WORDS.search(text) or simulation_spec)
@@ -50,6 +56,7 @@ class GoalActionPlanner:
                           or asks_for_api_gravity_calculation(request))
         permission = request.allow_python_execution and request.python_execution_approved
         numeric_inputs_ready = bool(user_fact_ids or (evidence_fact_ids and not specialist))
+        source_ready = formula_ready and formula_source_verified is not False
         required = [item.criterion_id for item in state.criteria if item.required and item.status.value != "met"]
         counts = {kind: sum(item.action_type == kind for item in state.completed_actions)
                   for kind in GoalActionType}
@@ -77,12 +84,31 @@ class GoalActionPlanner:
             return action(GoalActionType.RETRIEVE, "premise_evidence_retry",
                           GoalActionPlanner.query(request, state, intent))
         if (intent is not None and intent.kind == GoalIntentKind.KB_FORMULA_CALC
-                and formula_ready and formula_inputs_ready and numeric_inputs_ready
+                and source_ready and formula_inputs_ready and numeric_inputs_ready
                 and permission and not state.computation_ids and not wants_simulation
                 and python_calls_used < request.max_python_calls):
-            if last and last.action_type == GoalActionType.CALCULATE and last.status != "completed":
+            if (last and last.action_type == GoalActionType.CALCULATE and last.status != "completed"
+                    and not resumed_with_new_input):
                 return action(GoalActionType.STOP, "calculation_blocked")
             return action(GoalActionType.CALCULATE, "formula_ready")
+        if (intent is not None and intent.kind in {GoalIntentKind.DIRECT_CALC, GoalIntentKind.USER_FORMULA_CALC}
+                and (direct_ready if intent.kind == GoalIntentKind.DIRECT_CALC
+                     else bool(intent.user_equation) and formula_inputs_ready and numeric_inputs_ready)
+                and permission and not state.computation_ids and python_calls_used < request.max_python_calls):
+            if (last and last.action_type == GoalActionType.CALCULATE and last.status != "completed"
+                    and not resumed_with_new_input):
+                return action(GoalActionType.STOP, "calculation_blocked")
+            return action(GoalActionType.CALCULATE, "calculation_ready")
+        if (intent is not None and intent.kind == GoalIntentKind.KB_FORMULA_CALC
+                and not source_ready and not wants_simulation and request.use_internal
+                and counts[GoalActionType.RETRIEVE] > 0):
+            attempts = sum(item.reason_code == "formula_recovery" for item in state.completed_actions)
+            if attempts < 2 and counts[GoalActionType.RETRIEVE] < request.max_retrieval_actions:
+                return action(GoalActionType.RETRIEVE, "formula_recovery",
+                              GoalActionPlanner.formula_recovery_query(
+                                  request, intent, fact_names or [], fact_units or {},
+                                  source_context or [], attempts + 1))
+            return action(GoalActionType.STOP, "formula_source_unavailable")
         if state.no_progress_count >= request.no_progress_patience:
             return action(GoalActionType.STOP, "no_progress")
         if intent is not None:
@@ -125,7 +151,7 @@ class GoalActionPlanner:
                     return action(GoalActionType.RETRIEVE, "simulation_formula_missing",
                                   GoalActionPlanner.query(request, state, intent))
                 return action(GoalActionType.STOP, "simulation_spec_missing")
-            if intent.kind == GoalIntentKind.KB_FORMULA_CALC and not formula_ready:
+            if intent.kind == GoalIntentKind.KB_FORMULA_CALC and not source_ready:
                 next_query = GoalActionPlanner.query(request, state, intent)
                 if (not wants_simulation and last and last.action_type == GoalActionType.RETRIEVE
                         and last.details.get("query") == next_query):
@@ -206,6 +232,22 @@ class GoalActionPlanner:
                 return action(GoalActionType.STOP, "verification_budget_exhausted")
             return action(GoalActionType.VERIFY, "verify_current_support")
         return action(GoalActionType.STOP, "insufficient_evidence")
+
+    @staticmethod
+    def formula_recovery_query(request: GoalResearchRequest, intent: GoalIntent,
+                               fact_names: list[str], fact_units: dict[str, str],
+                               source_context: list[str], attempt: int) -> str:
+        """Search for the requested relation, without proposing an equation."""
+        text = " ".join(filter(None, (request.goal, request.topic)))
+        translated = [english for korean, english in ENGINEERING_TERMS.items() if korean in text]
+        names = " ".join(dict.fromkeys(fact_names))
+        units = " ".join(dict.fromkeys(unit for unit in fact_units.values() if unit))
+        documents = " ".join(dict.fromkeys(source_context[:2]))
+        qualifiers = ("equation formula relation definition variables units" if attempt == 1 else
+                      "governing equation calculation model source expression variable definitions")
+        return "\n".join(part for part in (
+            text, names, units, " ".join(translated), documents, qualifiers,
+        ) if part)[:4000]
 
     @staticmethod
     def query(request: GoalResearchRequest, state: GoalExecutionState,
