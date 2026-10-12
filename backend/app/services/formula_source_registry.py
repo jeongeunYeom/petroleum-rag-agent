@@ -172,6 +172,7 @@ class FormulaSourceRegistry(BaseModel):
                     local = text[max(0, start - 350):min(len(text), end + 350)]
                     layout = normalize_extracted_equation(raw, local)
                     layout_events.append({"source_id": source["evidence_id"],
+                                          "span_start": start, "span_end": end,
                                           "candidate_count": layout.candidate_count,
                                           "transformations": list(layout.transformations),
                                           "ambiguous": layout.is_ambiguous,
@@ -248,6 +249,7 @@ class FormulaSourceRegistry(BaseModel):
                     raw, text[max(0, start - 350):min(len(text), end + 350)])
                 if layout.transformations or layout.is_ambiguous:
                     layout_events.append({"source_id": source["evidence_id"],
+                                          "span_start": start, "span_end": end,
                                           "candidate_count": layout.candidate_count,
                                           "transformations": list(layout.transformations),
                                           "ambiguous": layout.is_ambiguous,

@@ -217,9 +217,10 @@ class GoalExecutionAgent(GoalResearchAgent):
                     descriptions.append(phrase)
         elif (classify_goal_intent(request, has_user_facts=bool(users.records)).kind == GoalIntentKind.KB_FORMULA_CALC
               and not re.search(r"\b(?:explain|why|interpret)\b|설명|해석|이유", goal, re.I)):
-            descriptions = (["요청한 관계식의 실제 출처를 검증", "제공된 입력으로 계산하고 검증된 결과와 단위를 제시"]
-                            if prefers_korean(request) else
-                            ["Verify the requested relation's formula source", "Calculate and present the validated result and unit"])
+            target = GoalExecutionAgent._requested_target(request) or "요청한 결과"
+            descriptions = ([f"요청한 {target} 관계식의 실제 출처를 검증", f"제공된 입력으로 {target}를 계산하고 검증된 결과와 단위를 제시"]
+                             if prefers_korean(request) else
+                             [f"Verify the requested {target} relation's formula source", f"Calculate and present the validated {target} result and unit"])
         elif users.records and re.search(r"공식|수식|관계식|\b(?:formula|equation|correlation)\b", goal, re.I) and re.search(
                 r"계산|구해|\b(?:calculat\w*|comput\w*)\b", goal, re.I):
             descriptions.append("출처 있는 관계식과 제공된 입력으로 검증된 계산 결과를 제시" if prefers_korean(request)
@@ -262,6 +263,51 @@ class GoalExecutionAgent(GoalResearchAgent):
                                 else "Explain the requested relationship with identifiable evidence")
         return [GoalCriterion(criterion_id=f"C{index}", description=description)
                 for index, description in enumerate(descriptions, 1)]
+
+    @staticmethod
+    def _requested_target(request: GoalResearchRequest) -> str | None:
+        text = f"{request.topic} {request.goal or ''}"
+        if asks_for_api_gravity_calculation(request):
+            return "API_gravity"
+        equation = user_equation(text)
+        if equation:
+            return equation.split("=", 1)[0].strip()
+        matches = list(re.finditer(
+            r"\b(?:calculate|compute|determine|solve)\s+(?:the\s+)?([A-Za-z][A-Za-z0-9_]*)"
+            r"(?=\s*(?:[.,;?]|$|\b(?:using|from|with|by|via|equation|formula|value|result)\b))|"
+            r"\b([A-Za-z][A-Za-z0-9_]*)\s*(?:값|을|를|의)?\s*(?:계산|구해|구하)", text, re.I))
+        return (matches[-1].group(1) or matches[-1].group(2)) if matches else None
+
+    @staticmethod
+    def _target_calculations(computations: list[Any], required: list[str],
+                             pinned: dict[str, Any] | None, evidence: list[dict[str, Any]],
+                             request_text: str) -> list[Any]:
+        if not required:
+            return []
+        names = {normalize_symbol(name) for name in required}
+        matches = []
+        for calc in computations:
+            outputs = {normalize_symbol(str(row.get("name") or "")) for row in calc.output_manifest.values()}
+            if not names <= outputs or not GoalExecutionAgent._provenance_complete(calc, evidence, request_text):
+                continue
+            if pinned and (pinned["source_id"] not in calc.formula_source_ids or
+                           pinned["equation_ast"] != equation_ast(calc.source_formula or calc.formula or "")):
+                continue
+            matches.append(calc)
+        return matches
+
+    @staticmethod
+    def _guard_target_evaluation(evaluation: Any, criteria: list[GoalCriterion],
+                                 target_satisfied: bool) -> Any:
+        if target_satisfied:
+            return evaluation
+        required_ids = {item.criterion_id for item in criteria if item.required}
+        updates = [item.model_copy(update={"status": CriterionStatus.PARTIAL})
+                   if item.criterion_id in required_ids and item.status == CriterionStatus.MET else item
+                   for item in evaluation.criteria]
+        return replace(evaluation, criteria=updates,
+                       coverage=GoalEvaluator.coverage(criteria, updates), achieved=False,
+                       gaps=[*evaluation.gaps, "Validated requested target output required"])
 
     @staticmethod
     def _premise_criteria(request: GoalResearchRequest) -> list[GoalCriterion]:
@@ -1308,6 +1354,13 @@ class GoalExecutionAgent(GoalResearchAgent):
             "unit_propagation_inputs": {},
             "unit_propagation_result": None,
             "unit_propagation_failure_reason": None,
+            "required_target_outputs": [], "target_output_satisfied": False,
+            "target_output_computation_ids": [], "target_formula_id": None,
+            "target_formula_source_verified": False, "target_calculation_ready": False,
+            "target_completion_guard_checked": False,
+            "target_completion_guard_blocked_success": False,
+            "target_formula_layout_ambiguous": False,
+            "target_unit_propagation_result": None,
         }.items():
             result.telemetry.setdefault(key, value)
         result.telemetry["intent_route"] = intent.kind.value
@@ -1366,6 +1419,12 @@ class GoalExecutionAgent(GoalResearchAgent):
                                            "direct_calc_ready": bool(direct_fast and users.records and not direct_missing),
                                            "missing_operands": direct_missing,
                                            "selected_input_fact_ids": [item.fact_id for item in direct_users.records]}
+        if intent.kind in {GoalIntentKind.DIRECT_CALC, GoalIntentKind.USER_FORMULA_CALC,
+                           GoalIntentKind.KB_FORMULA_CALC} and not result.telemetry["required_target_outputs"]:
+            requested_target = self._requested_target(request)
+            result.telemetry["required_target_outputs"] = (direct_operations
+                if intent.kind == GoalIntentKind.DIRECT_CALC else
+                [requested_target] if requested_target else [])
         for stage in ("planning_seconds", "retrieval_seconds", "llm_generation_seconds",
                       "python_seconds", "verification_seconds", "evaluation_seconds",
                       "synthesis_seconds"):
@@ -1409,6 +1468,19 @@ class GoalExecutionAgent(GoalResearchAgent):
                         if item.get("evidence_id") == row.source_id), ""))), None)
                 if pinned_formula:
                     selected_formula = pinned_formula
+            elif (intent.kind == GoalIntentKind.KB_FORMULA_CALC and selected_formula
+                  and (not result.telemetry["required_target_outputs"] or
+                       normalize_symbol(selected_formula.lhs or "") in {
+                           normalize_symbol(name) for name in result.telemetry["required_target_outputs"]} or
+                       (result.telemetry["required_target_outputs"] == ["API_gravity"] and
+                        normalize_symbol(selected_formula.lhs or "") == "api"))):
+                pinned = {"source_id": selected_formula.source_id,
+                          "equation_ast": selected_formula.equation_ast,
+                          "formula_id": selected_formula.formula_id,
+                          "lhs": selected_formula.lhs}
+                result.telemetry["formula_dependency_target"] = pinned
+                if not result.telemetry["required_target_outputs"]:
+                    result.telemetry["required_target_outputs"] = [selected_formula.lhs]
             target_formula = selected_formula
             formula_users, trusted_derived = self._formula_inputs(users, state.derived_facts,
                                                                   result.computations, evidence_rows, user_text)
@@ -1417,9 +1489,6 @@ class GoalExecutionAgent(GoalResearchAgent):
                                if target_formula and intent.kind == GoalIntentKind.KB_FORMULA_CALC
                                and not SIMULATE_WORDS.search(f"{request.topic} {request.goal or ''}") else None)
             if dependency_plan:
-                if len(dependency_plan.formula_ids) > 1 and not pinned and not dependency_plan.block_reason:
-                    result.telemetry["formula_dependency_target"] = {
-                        "source_id": target_formula.source_id, "equation_ast": target_formula.equation_ast}
                 result.telemetry["formula_dependency_resolution_attempted"] = True
                 result.telemetry["formula_dependency_depth"] = max(
                     result.telemetry["formula_dependency_depth"], dependency_plan.depth)
@@ -1501,6 +1570,43 @@ class GoalExecutionAgent(GoalResearchAgent):
                                    row.get("evidence_id") == selected_formula.source_id), None)
             formula_source_verified = bool(formula_source and selected_formula and source_contains_equation(
                 selected_formula, str(formula_source.get("text") or "")))
+            pinned = result.telemetry.get("formula_dependency_target")
+            target_record = target_formula if pinned and target_formula and (
+                target_formula.source_id, target_formula.equation_ast) == (
+                    pinned["source_id"], pinned["equation_ast"]) else None
+            target_source = next((row for row in evidence_rows if target_record and
+                                  row.get("evidence_id") == target_record.source_id), None)
+            target_layout_ambiguous = bool(target_record and any(
+                event["ambiguous"] and event["source_id"] == target_record.source_id and
+                event.get("span_start") == target_record.span_start and
+                event.get("span_end") == target_record.span_end for event in layout_events))
+            target_source_verified = bool(target_record and target_source and not target_layout_ambiguous and
+                source_contains_equation(target_record, str(target_source.get("text") or "")))
+            if selected_formula and target_layout_ambiguous and selected_formula.formula_id == target_record.formula_id:
+                formula_source_verified = False
+            target_matches = self._target_calculations(
+                result.computations, result.telemetry["required_target_outputs"], pinned,
+                self._evidence(accumulator, users, result.computations, simulation_spec,
+                               simulation_source_id, intent.user_equation, include_evidence_facts=True),
+                user_text)
+            target_satisfied = bool(target_matches)
+            target_ready = bool(target_record and selected_formula and
+                selected_formula.formula_id == target_record.formula_id and target_source_verified and
+                not formula_missing and not missing_bindings and
+                request.allow_python_execution and request.python_execution_approved and
+                result.python_calls_total < request.max_python_calls)
+            result.telemetry.update({
+                "target_output_satisfied": target_satisfied,
+                "target_output_computation_ids": [calc.computation_id for calc in target_matches],
+                "target_formula_id": target_record.formula_id if target_record else None,
+                "target_formula_source_verified": target_source_verified,
+                "target_calculation_ready": target_ready and not target_satisfied,
+                "target_formula_layout_ambiguous": target_layout_ambiguous,
+                "target_unit_propagation_result": next((str(row.get("unit") or "dimensionless")
+                    for calc in target_matches for row in calc.output_manifest.values()
+                    if normalize_symbol(str(row.get("name") or "")) in {
+                        normalize_symbol(name) for name in result.telemetry["required_target_outputs"]}), None),
+            })
             if state.formula_ready and formula_source_verified:
                 if result.telemetry["formula_recovery_attempt_count"]:
                     result.telemetry["formula_recovery_success"] = True
@@ -1525,7 +1631,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                                                 python_calls_used=result.python_calls_total,
                                                 simulation_spec=simulation_spec,
                                                 formula_inputs_ready=not (formula_missing or user_formula_missing or direct_missing or missing_bindings),
-                                                pending_formula_calculation=bool(dependency_plan and dependency_plan.next_formula),
+                                                target_output_satisfied=target_satisfied,
                                                 intent=intent, formula_source_verified=formula_source_verified,
                                                 fact_names=[item.name for item in users.records],
                                                 fact_units={item.name: item.unit for item in users.records if item.unit},
@@ -1563,7 +1669,8 @@ class GoalExecutionAgent(GoalResearchAgent):
                     formula_users.records if requires_sourced_formula else users.records),
                 "formula_selected": bool(equation) or (intent.kind == GoalIntentKind.DIRECT_CALC and bool(direct_operations)),
                 "formula_ready": state.formula_ready if requires_sourced_formula else bool(equation and not missing_bindings) or direct_fast,
-                "calculation_ready": ready or bool(state.computation_ids),
+                "calculation_ready": result.telemetry["calculation_ready"] or ready,
+                "any_validated_calculation_exists": bool(state.computation_ids),
                 "formula_variables_expected": sorted(expression_variables(equation) or []) if equation else [],
                 "formula_variables_bound": sorted(bindings),
                 "formula_variables_missing": list(dict.fromkeys([*formula_missing, *missing_bindings])),
@@ -1847,8 +1954,6 @@ class GoalExecutionAgent(GoalResearchAgent):
                         result.telemetry["formula_dependency_computation_ids"].append(computation.computation_id)
                         result.telemetry["formula_dependency_derived_fact_ids"].extend(
                             fact.fact_id for fact in new_derived)
-                    elif result.telemetry["formula_dependency_computation_ids"]:
-                        result.telemetry["formula_dependency_resolution_success"] = True
                     state.source_complete = True
                     state.pending_verifications = state.computation_ids.copy()
                     details = {"subprocess_reached": True, "source_requirement": SourceRequirement.KB_FORMULA.value,
@@ -2035,6 +2140,10 @@ class GoalExecutionAgent(GoalResearchAgent):
                                    "case_range": max(values) - min(values) if values else None}
                         state.analyzed = True
                 elif action.action_type == GoalActionType.VERIFY:
+                    if (intent.kind in {GoalIntentKind.DIRECT_CALC, GoalIntentKind.USER_FORMULA_CALC,
+                                        GoalIntentKind.KB_FORMULA_CALC} and not simulation_spec and
+                            not result.telemetry["target_output_satisfied"]):
+                        raise ValueError("target_output_missing")
                     evidence = self._evidence(accumulator, users, result.computations,
                                               simulation_spec, simulation_source_id, intent.user_equation)
                     if (intent.kind in {GoalIntentKind.KNOWLEDGE_QA, GoalIntentKind.FIGURE_QA}
@@ -2178,8 +2287,15 @@ class GoalExecutionAgent(GoalResearchAgent):
                     elif intent.kind in {GoalIntentKind.DIRECT_CALC, GoalIntentKind.USER_FORMULA_CALC,
                                          GoalIntentKind.KB_FORMULA_CALC}:
                         evaluation = self._deterministic_calculation_criteria(
-                            evaluation, criteria, latest_candidate, result.computations, evidence,
+                            evaluation, criteria, latest_candidate,
+                            [calc for calc in result.computations if calc.computation_id in
+                             result.telemetry["target_output_computation_ids"]], evidence,
                             intent.source_requirement, korean)
+                        result.telemetry["target_completion_guard_checked"] = True
+                        if not result.telemetry["target_output_satisfied"]:
+                            result.telemetry["target_completion_guard_blocked_success"] |= evaluation.achieved
+                        evaluation = self._guard_target_evaluation(
+                            evaluation, criteria, result.telemetry["target_output_satisfied"])
                     citation_semantic_passed = bool(latest_candidate.strip()) and (
                         intent.kind not in {GoalIntentKind.PREMISE_CHECK, GoalIntentKind.KNOWLEDGE_QA, GoalIntentKind.FIGURE_QA} or
                         any(f'[{row["evidence_id"]}]' in latest_candidate for row in evidence
@@ -2205,7 +2321,10 @@ class GoalExecutionAgent(GoalResearchAgent):
                         GoalIntentKind.USER_FORMULA_SIMULATION, GoalIntentKind.KB_FORMULA_CALC,
                     }
                     state.goal_achieved = bool(evaluation.achieved and
-                                               (not requires_computation or state.computation_ids))
+                        (not requires_computation or (state.computation_ids and
+                         (simulation or intent.kind not in {GoalIntentKind.DIRECT_CALC, GoalIntentKind.USER_FORMULA_CALC,
+                                                             GoalIntentKind.KB_FORMULA_CALC} or
+                          result.telemetry["target_output_satisfied"]))))
                     state.verified = True
                     state.pending_verifications.clear()
                     result.criteria = evaluation.criteria
@@ -2233,6 +2352,27 @@ class GoalExecutionAgent(GoalResearchAgent):
                            if action.action_type in {GoalActionType.CALCULATE, GoalActionType.SIMULATE} else None}
                 if details["failure_stage"]:
                     result.telemetry["calculation_failure_stage"] = details["failure_stage"]
+
+            if calc_ids and intent.kind in {GoalIntentKind.DIRECT_CALC, GoalIntentKind.USER_FORMULA_CALC,
+                                            GoalIntentKind.KB_FORMULA_CALC}:
+                result.telemetry["any_validated_calculation_exists"] = True
+                target_matches = self._target_calculations(
+                    result.computations, result.telemetry["required_target_outputs"],
+                    result.telemetry.get("formula_dependency_target"),
+                    self._evidence(accumulator, users, result.computations, simulation_spec,
+                                   simulation_source_id, intent.user_equation, include_evidence_facts=True),
+                    user_text)
+                result.telemetry["target_output_computation_ids"] = [row.computation_id for row in target_matches]
+                result.telemetry["target_output_satisfied"] = bool(target_matches)
+                result.telemetry["formula_dependency_resolution_success"] = bool(
+                    target_matches and result.telemetry["formula_dependency_computation_ids"])
+                if target_matches:
+                    required_names = {normalize_symbol(name) for name in result.telemetry["required_target_outputs"]}
+                    result.telemetry["target_unit_propagation_result"] = next((
+                        str(output.get("unit") or "dimensionless") for calc in target_matches
+                        for output in calc.output_manifest.values()
+                        if normalize_symbol(str(output.get("name") or "")) in required_names), None)
+                    result.telemetry["target_calculation_ready"] = False
 
             self._add_time(result, f"{action.action_type.value}_action_seconds",
                            time.perf_counter() - action_clock)

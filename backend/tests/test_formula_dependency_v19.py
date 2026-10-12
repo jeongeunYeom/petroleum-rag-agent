@@ -13,19 +13,23 @@ from app.services.formula_source_registry import source_contains_equation
 from app.services.calculation_requirements import symbol_names
 from app.services.compound_units import unit_factors
 from app.services.goal_execution_agent import GoalExecutionAgent
+from app.services.goal_research_agent import EvidenceAccumulator
+from app.services.goal_action_planner import GoalActionPlanner
+from app.services.goal_execution_state import GoalActionType, GoalExecutionState
 from app.services.goal_evaluator import GoalEvaluator
+from app.services.goal_intent import classify_goal_intent
 from app.services.user_fact_registry import UserFactRegistry
 from test_agent_reliability_v19_dev import (PassingEvaluator, SyntheticResearch,
                                             actions, no_synthesis, request)
 
 
-def run_case(tmp_path, monkeypatch, text, source):
+def run_case(tmp_path, monkeypatch, text, source, on_progress=None):
     monkeypatch.setattr("app.services.goal_execution_agent.get_settings",
         lambda: Settings(data_dir=tmp_path / "data", agent_workspace_dir=tmp_path / "workspace"))
     research = SyntheticResearch([[(3, source)]])
     agent = GoalExecutionAgent(research, object(), evaluator=PassingEvaluator(), synthesizer=no_synthesis)
     req = request(text)
-    return asyncio.run(agent.run("dependency-synthetic", req)), agent, req
+    return asyncio.run(agent.run("dependency-synthetic", req, on_progress=on_progress)), agent, req
 
 
 def test_dependency_then_target_and_provenance(tmp_path, monkeypatch):
@@ -294,12 +298,27 @@ def test_resistivity_unit_stays_bounded():
 
 
 def test_stacked_archie_full_agent_chain(tmp_path, monkeypatch):
+    progress = []
+    def capture(row):
+        progress.append((len(row.computations), row.telemetry.get("target_output_satisfied"),
+                         list(row.telemetry.get("target_output_computation_ids", [])),
+                         row.telemetry.get("target_calculation_ready")))
     result, _, _ = run_case(tmp_path, monkeypatch,
         "phi=0.22, Sw=0.35, Rw=0.08 ohm-m, a=1, m=2, n=2. "
         "Find the internal Archie equation and calculate Rt.",
-        ARCHIE_STACK_SOURCE)
+        ARCHIE_STACK_SOURCE, on_progress=capture)
     assert result.status == GoalStatus.ACHIEVED
     assert actions(result) == ["retrieve", "calculate", "calculate", "verify", "synthesize", "stop"]
+    assert (1, False, [], True) in progress
+    assert (2, True, ["CALC2"], False) in progress
+    assert result.state_history[1]["goal_achieved"] is False
+    assert result.telemetry["required_target_outputs"] == ["Rt"]
+    assert result.telemetry["target_output_satisfied"]
+    assert result.telemetry["target_output_computation_ids"] == ["CALC2"]
+    assert result.telemetry["target_formula_source_verified"]
+    assert result.telemetry["target_completion_guard_checked"]
+    assert result.telemetry["target_unit_propagation_result"] == "ohm-m"
+    assert result.telemetry["formula_dependency_resolution_success"]
     assert not result.clarification_question
     assert "fm" not in " ".join(result.required_inputs).casefold()
     assert [calc.output_manifest["OUT_RESULT"]["name"] for calc in result.computations] == ["F", "Rt"]
@@ -321,6 +340,92 @@ def test_stacked_archie_full_agent_chain(tmp_path, monkeypatch):
     assert target.source_equation == "Sw**n = (F*Rw)/Rt"
     assert target.formula_derivation == "algebraic_isolation"
     assert any(value.startswith("CALC1:") for value in target.input_fact_ids)
+
+
+def test_intermediate_output_cannot_promote_a_false_success(tmp_path, monkeypatch):
+    result, _, req = run_case(tmp_path, monkeypatch,
+        "A=2 ft; B=12 kg; C=3 kg. Find the internal Z equation and calculate Z.",
+        "Z=Y*A. Y=B/C. A (ft); B (kg); C (kg).")
+    assert result.status == GoalStatus.ACHIEVED
+    assert [row["name"] for calc in result.computations for row in calc.output_manifest.values()] == ["Y", "Z"]
+    assert result.state_history[1]["goal_achieved"] is False
+    evaluator = asyncio.run(PassingEvaluator().evaluate(
+        req, req.success_criteria, "Y is computed", [], {}, computations=result.computations[:1]))
+    assert evaluator.achieved and evaluator.coverage == 1
+    guarded = GoalExecutionAgent._guard_target_evaluation(evaluator, req.success_criteria, False)
+    assert not guarded.achieved and guarded.coverage < 1
+    assert all(item.status.value != "met" for item in guarded.criteria)
+    assert result.telemetry["required_target_outputs"] == ["Z"]
+    assert result.telemetry["target_output_computation_ids"] == ["CALC2"]
+
+
+def test_iteration_budget_after_dependency_is_not_goal_success(tmp_path, monkeypatch):
+    monkeypatch.setattr("app.services.goal_execution_agent.get_settings",
+        lambda: Settings(data_dir=tmp_path / "data", agent_workspace_dir=tmp_path / "workspace"))
+    agent = GoalExecutionAgent(SyntheticResearch([[(3, "Z=Y*A. Y=B/C. A (ft); B (kg); C (kg).")]]),
+                               object(), evaluator=PassingEvaluator(), synthesizer=no_synthesis)
+    req = request("A=2 ft; B=12 kg; C=3 kg. Find the internal Z equation and calculate Z.",
+                  max_iterations=2)
+    result = asyncio.run(agent.run("dependency-budget", req))
+    assert [row["name"] for calc in result.computations for row in calc.output_manifest.values()] == ["Y"]
+    assert actions(result) == ["retrieve", "calculate", "stop"]
+    assert result.status != GoalStatus.ACHIEVED
+    assert not result.telemetry["target_output_satisfied"]
+    assert not result.telemetry["formula_dependency_resolution_success"]
+
+
+def test_ready_target_takes_priority_over_verify_after_intermediate_calc():
+    req = request("A=2 ft; B=12 kg; C=3 kg. Find the internal Z equation and calculate Z.")
+    req.allow_python_execution = req.python_execution_approved = True
+    state = GoalExecutionState.from_criteria("target-priority", req.goal or req.topic, req.success_criteria)
+    state.computation_ids = ["CALC1"]
+    selected = GoalActionPlanner.select(
+        req, state, user_fact_ids=["USERF1", "CALC1:OUT_RESULT"], evidence_fact_ids=[],
+        formula_ready=True, formula_id="FORMULA_TARGET", simulation_spec=None,
+        formula_inputs_ready=True, formula_source_verified=True,
+        target_output_satisfied=False,
+        intent=classify_goal_intent(req, has_user_facts=True))
+    assert selected.action_type == GoalActionType.CALCULATE
+    assert selected.formula_id == "FORMULA_TARGET"
+
+
+def test_target_requires_pinned_equation_and_source(tmp_path, monkeypatch):
+    text = "A=2 ft; B=12 kg; C=3 kg. Find the internal Z equation and calculate Z."
+    result, _, req = run_case(tmp_path, monkeypatch, text,
+        "Z=Y*A. Y=B/C. A (ft); B (kg); C (kg).")
+    evidence = GoalExecutionAgent._evidence(
+        EvidenceAccumulator.restore(result.internal_sources, [], []),
+        UserFactRegistry.from_topic(text), result.computations, None, "USERF4")
+    target = result.telemetry["formula_dependency_target"]
+    assert [row.computation_id for row in GoalExecutionAgent._target_calculations(
+        result.computations, ["Z"], target, evidence, req.topic)] == ["CALC2"]
+    assert not GoalExecutionAgent._target_calculations(
+        result.computations, ["Z"], {**target, "equation_ast": "different"}, evidence, req.topic)
+    assert not GoalExecutionAgent._target_calculations(
+        result.computations, ["Z"], {**target, "source_id": "KB999"}, evidence, req.topic)
+
+
+@pytest.mark.parametrize("text,target", [
+    ("Find the internal equation and calculate Rt.", "Rt"),
+    ("내부 관계식으로 Rt를 계산해줘.", "Rt"),
+    ("비중 0.918의 API gravity를 내부 교재 식으로 계산해줘.", "API_gravity"),
+])
+def test_calculation_criteria_name_requested_target(text, target):
+    req = request(text)
+    assert GoalExecutionAgent._requested_target(req) == target
+    criteria = GoalExecutionAgent._explicit_numeric_criteria(req, UserFactRegistry.from_topic(text), None)
+    display_target = "API" if target == "API_gravity" else target
+    assert criteria and all(display_target in item.description for item in criteria)
+
+
+def test_unrelated_layout_ambiguity_does_not_block_verified_target(tmp_path, monkeypatch):
+    result, _, _ = run_case(tmp_path, monkeypatch,
+        "A=2 ft; B=3 ft. Find the internal Q equation and calculate Q.",
+        "Q=A+B. A (ft); B (ft).\nV = A B\nC")
+    assert result.status == GoalStatus.ACHIEVED
+    assert result.telemetry["formula_layout_ambiguous"]
+    assert not result.telemetry["target_formula_layout_ambiguous"]
+    assert result.telemetry["target_formula_source_verified"]
 
 
 def test_evaluator_prompt_tolerates_evidence_without_locator():

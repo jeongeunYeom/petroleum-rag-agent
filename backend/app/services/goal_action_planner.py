@@ -47,7 +47,7 @@ class GoalActionPlanner:
         source_context: list[str] | None = None,
         direct_ready: bool = False,
         resumed_with_new_input: bool = False,
-        pending_formula_calculation: bool = False,
+        target_output_satisfied: bool = False,
     ) -> GoalAction:
         text = " ".join(filter(None, (request.topic, request.goal)))
         wants_simulation = bool(SIMULATE_WORDS.search(text) or simulation_spec)
@@ -86,7 +86,7 @@ class GoalActionPlanner:
                           GoalActionPlanner.query(request, state, intent))
         if (intent is not None and intent.kind == GoalIntentKind.KB_FORMULA_CALC
                 and source_ready and formula_inputs_ready and numeric_inputs_ready
-                and permission and (not state.computation_ids or pending_formula_calculation) and not wants_simulation
+                and permission and not target_output_satisfied and not wants_simulation
                 and python_calls_used < request.max_python_calls):
             if (last and last.action_type == GoalActionType.CALCULATE and last.status != "completed"
                     and not resumed_with_new_input):
@@ -131,6 +131,10 @@ class GoalActionPlanner:
                     return action(GoalActionType.RETRIEVE, "missing_claim_support",
                                   GoalActionPlanner.query(request, state, intent))
                 return action(GoalActionType.STOP, "insufficient_evidence")
+            if (intent.kind in {GoalIntentKind.KB_FORMULA_CALC, GoalIntentKind.USER_FORMULA_CALC,
+                                GoalIntentKind.DIRECT_CALC} and state.computation_ids
+                    and not wants_simulation and not target_output_satisfied):
+                return action(GoalActionType.STOP, "calculation_blocked")
             if state.computation_ids:
                 if wants_analysis and not state.analyzed:
                     return action(GoalActionType.ANALYZE, "derived_outputs_need_analysis")
