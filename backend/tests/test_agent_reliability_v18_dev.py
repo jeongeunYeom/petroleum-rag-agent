@@ -297,3 +297,39 @@ def test_molecular_weight_resume_uses_same_run_and_finishes(tmp_path, monkeypatc
     assert calc.output_manifest["OUT_RESULT"]["value"] == pytest.approx(.72)
     assert calc.output_manifest["OUT_RESULT"]["unit"] == "dimensionless"
     assert "dimensionless" in resumed.final_answer and "[CALC1]" in resumed.final_answer
+
+
+@pytest.mark.parametrize("message", [
+    "비중(SG)이 0.918인 원유의 API도를 교재 식으로 계산해줘.",
+    "비중 (SG) = 0.918인 원유의 API gravity를 내부 관계식으로 계산해줘.",
+])
+def test_parenthesized_input_symbol_is_bound_before_formula_ranking(message):
+    facts = UserFactRegistry.from_topic(message)
+    assert [(fact.name, fact.value) for fact in facts.records] == [("SG", 0.918)]
+    assert "(SG)" in facts.records[0].source_span
+
+
+@pytest.mark.parametrize("message,formula,expected", [
+    ("비중(SG)이 0.918인 원유의 API gravity를 내부 교재의 식으로 계산해줘.",
+     "API = (141.5 / SG) - 131.5", 22.6394335512),
+    ("비중(SG)이 0.918인 샘플의 blend_index를 내부 교재의 식으로 계산해줘.",
+     "blend_index = 100 * SG", 91.8),
+])
+def test_parenthesized_input_reaches_sourced_calculation_among_decoys(
+        tmp_path, monkeypatch, message, formula, expected):
+    result, sources = execute(
+        tmp_path, monkeypatch, message,
+        passages=["The conversion relation is " + formula + ".",
+                  "SG = specific gravity of liquid, relative to water."],
+    )
+    assert result.status == GoalStatus.ACHIEVED, (result.action_history, result.telemetry)
+    assert [row["action_type"] for row in result.action_history][:3] == [
+        "retrieve", "calculate", "verify"]
+    assert sources.calls == 1
+    assert result.telemetry["formula_source_verified"]
+    assert result.telemetry["formula_ready"] and result.telemetry["calculation_ready"]
+    calc = result.computations[0]
+    assert calc.validation_passed and calc.formula_source_ids == ["KB1"]
+    assert calc.bound_variables == {"SG": "USERF1"}
+    assert next(iter(calc.output_manifest.values()))["value"] == pytest.approx(expected)
+    assert "[KB1]" in result.final_answer
