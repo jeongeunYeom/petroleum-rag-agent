@@ -51,9 +51,10 @@ def validate_calc_claim(claim: str, citations: list[str], output_ids: list[str],
     known_units.update({"psi", "md", "ft", "stb/d/psi", "psi/ft", "percent", "percentage_point", "%", "kpa", "pa"})
     local_units = []
     for match in number_matches:
-        following = re.match(r"\s*([A-Za-z%][A-Za-z0-9_/%^.-]*)", numeric_claim[match.end():])
-        observed_unit = following.group(1).rstrip(".,;").casefold() if following else ""
-        if observed_unit and observed_unit in known_units:
+        following = numeric_claim[match.end():].lstrip().casefold()
+        observed_unit = next((unit for unit in sorted(known_units, key=len, reverse=True)
+                              if re.match(rf"{re.escape(unit)}(?=$|[\s,.;\]\)])", following)), "")
+        if observed_unit:
             local_units.append((float(match.group().replace(",", "")), observed_unit))
     resolved_ids: list[str] = []
     for value in output_ids:

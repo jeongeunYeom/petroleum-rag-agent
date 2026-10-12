@@ -146,6 +146,21 @@ def semantic_role(name: str, unit: str) -> str:
     return "parameter" if not unit else "measurement"
 
 
+def operand_role(name: str) -> str | None:
+    """Keep order-bearing labels separate from physical dimensions."""
+    label = name.casefold().replace("_", " ")
+    roles = (
+        ("initial", r"\b(?:initial|before|starting|start)\b|초기|변경\s*전|투입\s*전"),
+        ("final", r"\b(?:final|after|ending|end)\b|최종|변경\s*후|종료"),
+        ("inlet", r"\b(?:inlet|input)\b|입구|유입"),
+        ("outlet", r"\b(?:outlet|output)\b|출구|유출"),
+        ("produced", r"\b(?:produced|recovered)\b|생산|회수"),
+        ("injected", r"\b(?:injected|introduced)\b|주입|투입"),
+    )
+    found = [role for role, pattern in roles if re.search(pattern, label, re.I)]
+    return found[0] if len(found) == 1 else None
+
+
 def _natural_name(label: str) -> str:
     original = label.strip().casefold()
     value = re.sub(r"(?:은|는|이|가|을|를|에서|에는)$", "", original).strip()
@@ -277,7 +292,7 @@ class UserFactRegistry(BaseModel):
                 fact_id=f"USERF{len(self.records) + 1}", name=name, value=value,
                 unit=canonical, raw_unit=raw_unit, canonical_unit=canonical,
                 raw_value_text=value_match.group(), source_span=quote,
-                topic_start=start, topic_end=start + len(quote), semantic_role=semantic_role(name, canonical),
+                topic_start=start, topic_end=start + len(quote), semantic_role=operand_role(name) or semantic_role(name, canonical),
                 dimension=semantic_role(name, canonical), value_span=(start + value_match.start(), start + value_match.end()),
                 unit_span=(start + unit_match.start(), start + unit_match.end()) if unit_match else None,
                 confidence=.7, extraction_method="literal_fallback"))
@@ -334,7 +349,7 @@ class UserFactRegistry(BaseModel):
                 unit=canonical, raw_unit=unit, canonical_unit=canonical,
                 raw_value_text=raw, source_span=span,
                 context_span=context, topic_start=start, topic_end=start + len(span),
-                semantic_role=role, entity_id=entity, dimension=role,
+                semantic_role=operand_role(normalized_name) or role, entity_id=entity, dimension=role,
                 value_span=(start + value_start, start + value_start + len(raw)) if value_start >= 0 else None,
                 unit_span=(start + unit_start, start + unit_start + len(unit)) if unit_start >= 0 else None,
             ))

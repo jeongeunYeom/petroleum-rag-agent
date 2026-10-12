@@ -188,7 +188,7 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
         local_tokens = {normalize_symbol(word) for word in
                         re.findall(r"[A-Za-z][A-Za-z0-9_]*|[가-힣]{2,}", local_context)}
         raw_lhs = record.expression_candidate.split("=", 1)[0].strip()
-        explicit_symbol_binding = (raw_lhs.isupper() and len(lhs) >= 3 and lhs in tokens
+        explicit_symbol_binding = ((raw_lhs.isupper() or "_" in raw_lhs) and len(lhs) >= 3 and lhs in tokens
                                    and overlap == len(variables))
         if (len(descriptor_tokens) >= 2 and not (descriptor_tokens & local_tokens)
                 and not explicit_symbol_binding):

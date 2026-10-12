@@ -108,6 +108,7 @@ def explicitly_underdetermined(text: str) -> bool:
     return bool(re.search(r"\b(?:exact|optimal|precise|specific)\b|정확한|최적", text, re.I)
                 and re.search(r"\b(?:no|without|not\s+(?:provided|known|available)|unavailable|unknown|missing|unspecified)\b|"
                               r"with\s+only\s+this\s+information|from\s+this\s+fact\s+alone|"
+                              r"from\s+(?:this|the)\s+information\s+alone|"
                               r"based\s+only\s+on\s+(?:the\s+)?provided\s+information|"
                               r"(?:이|주어진|현재)\s*(?:정보|사실)만으로|"
                               r"없(?:다|는|고|음|어)|미제공|모르|주어지지|제공되지", text, re.I))

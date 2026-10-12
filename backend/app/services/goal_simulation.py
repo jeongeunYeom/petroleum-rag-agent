@@ -40,6 +40,11 @@ def user_formula_bindings(equation: str, facts: UserFactRegistry) -> tuple[dict[
         explicit = [fact for fact in facts.records if fact.extraction_method == "explicit_assignment"
                     and re.search(rf"(?<![A-Za-z0-9_]){re.escape(variable)}\s*[:=]", fact.source_span)]
         matches = explicit or [fact for fact in facts.records if normalize_symbol(fact.name) in symbol_names(variable)]
+        if not matches:
+            # Only a unique, explicitly labelled role may bind a symbolic operand.
+            # A shared physical unit is never enough to choose between observations.
+            matches = [fact for fact in facts.records if fact.semantic_role == variable.casefold()
+                       and fact.semantic_role in {"initial", "final", "inlet", "outlet", "produced", "injected"}]
         exact = [fact for fact in matches if fact.name == variable]
         if not exact:
             exact = [fact for fact in matches if normalize_symbol(fact.name) == normalize_symbol(variable)]
@@ -72,6 +77,15 @@ def direct_operation_operands(text: str, facts: UserFactRegistry,
                 def aliases(name):
                     row = next(row for row in facts.records if row.name == name)
                     labels = [name.replace("_", " ")]
+                    if row.semantic_role in {"initial", "final", "inlet", "outlet", "produced", "injected"}:
+                        labels.append(row.semantic_role)
+                        labels.extend({
+                            "initial": ("before", "start", "초기", "변경 전"),
+                            "final": ("after", "end", "최종", "변경 후"),
+                            "inlet": ("input", "입구"), "outlet": ("output", "출구"),
+                            "produced": ("recovered", "회수", "생산"),
+                            "injected": ("introduced", "주입", "투입"),
+                        }[row.semantic_role])
                     prefix = row.source_span.split(row.raw_value_text, 1)[0].strip()
                     prefix = re.sub(r"(?:은|는|이|가|[:=])\s*$", "", prefix).strip()
                     if prefix:
@@ -252,6 +266,19 @@ def _formula_output_unit(node: ast.AST, units: dict[str, str]) -> str:
             result = _combine_formula_units(result, left, divide=exponent < 0)
         return result
     raise ValueError("unsupported user formula expression")
+
+
+def formula_input_readiness(equation: str, facts: UserFactRegistry) -> tuple[dict[str, object], list[str]]:
+    """Check bindings and unit algebra before a Python action is selected."""
+    bound, missing = user_formula_bindings(equation, facts)
+    if missing:
+        return bound, missing
+    try:
+        _formula_output_unit(ast.parse(equation.split("=", 1)[1].strip(), mode="eval").body,
+                             {name: fact.unit for name, fact in bound.items()})
+    except (ValueError, SyntaxError, KeyError, IndexError, TypeError) as exc:
+        return bound, [f"계산식 입력 단위 호환성: {exc}"]
+    return bound, []
 
 
 async def run_user_formula_calculation(settings: Settings, request: GoalResearchRequest,

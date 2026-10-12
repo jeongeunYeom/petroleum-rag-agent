@@ -13,6 +13,13 @@ EQUATION = re.compile(
     r"(?P<equation>\b[A-Za-z][A-Za-z0-9_₀-₉]*\s*=\s*"
     r"(?:(?!\.\s+[A-Za-z]|,\s*[A-Za-z][A-Za-z0-9_₀-₉]*\s*=)[A-Za-z0-9_₀-₉+\-*/().×÷−· \t])+)"
 )
+EXPLICIT_DEFINITION = re.compile(
+    r"\b(?P<lhs>[A-Za-z][A-Za-z0-9_]*)\s+"
+    r"(?:is|equals|is\s+defined\s+as)\s+(?:the\s+)?"
+    r"(?:(?:ratio\s+of\s+(?P<ratio_a>[A-Za-z][A-Za-z0-9_]*)\s+to\s+"
+    r"(?P<ratio_b>[A-Za-z][A-Za-z0-9_]*))|"
+    r"(?:(?P<difference_a>[A-Za-z][A-Za-z0-9_]*)\s+minus\s+"
+    r"(?P<difference_b>[A-Za-z][A-Za-z0-9_]*)))\b", re.I)
 TRANSLATION = str.maketrans({"×": "*", "÷": "/", "−": "-", "–": "-", "·": "*",
                             "₀": "0", "₁": "1", "₂": "2", "₃": "3", "₄": "4", "₅": "5",
                             "₆": "6", "₇": "7", "₈": "8", "₉": "9"})
@@ -86,6 +93,22 @@ class FormulaSourceRegistry(BaseModel):
             if source.get("source_type") not in {"knowledge_base", "figure", "web"}:
                 continue
             text = str(source.get("text") or "")
+            for definition in EXPLICIT_DEFINITION.finditer(text):
+                numerator = definition.group("ratio_a") or definition.group("difference_a")
+                denominator = definition.group("ratio_b") or definition.group("difference_b")
+                operator = "/" if definition.group("ratio_a") else "-"
+                candidate = f"{definition['lhs']} = {numerator} {operator} {denominator}"
+                records.append(FormulaSourceRecord(
+                    formula_id=f"FORMULA{len(records) + 1}", source_id=str(source["evidence_id"]),
+                    source_type=str(source["source_type"]), raw_span=definition.group(),
+                    normalized_span=normalize_formula(candidate), locator=source.get("locator"),
+                    span_start=definition.start(), span_end=definition.end(),
+                    expression_candidate=candidate, equation_ast=equation_ast(candidate),
+                    lhs=definition["lhs"], rhs=candidate.split("=", 1)[1].strip(),
+                    required_variables=sorted(expression_variables(candidate) or []),
+                    source_document=source.get("document"), source_page=source.get("page"),
+                    context=str(source.get("heading") or text[max(0, definition.start()-180):definition.start()]).strip(),
+                ))
             for match in EQUATION.finditer(text):
                 raw = match.group("equation").rstrip(" .\t")
                 candidate = raw.translate(TRANSLATION)

@@ -212,6 +212,8 @@ def clarification_question(missing: list[str], korean: bool) -> str:
     if korean:
         return ("계산을 계속하려면 " + ", ".join(items) + "이(가) 필요합니다. " +
                 ("값과 단위를 한 번에 알려주세요." if needs_units else "필요한 값을 알려주세요."))
+    items = [item.replace("값과 단위", "value and unit").replace("값 확인", "unambiguous value")
+             .replace("값", "value").replace("단위", "unit") for item in items]
     return ("To continue, please provide: " + ", ".join(items) + ". " +
             ("Include units where applicable." if needs_units else ""))
 

@@ -48,7 +48,7 @@ from app.services.goal_tool_planner import (
 from app.services.goal_simulation import (direct_operation_operands, direct_readiness,
                                           run_direct_arithmetic, run_parameter_sweep,
                                           run_user_formula_calculation,
-                                          user_formula_bindings)
+                                          user_formula_bindings, formula_input_readiness)
 from app.services.user_fact_registry import NUMBER, UserFactRegistry
 from app.services.source_answerability import (evaluate_claim_support, grounded_answer, SupportStatus,
                                                RequiredClaim, ClaimSupport, atomic_claims, semantic_claim_support)
@@ -675,7 +675,8 @@ class GoalExecutionAgent(GoalResearchAgent):
                     status=CriterionStatus.MET if support.all_required_supported else CriterionStatus.PARTIAL,
                     reason=reason, supporting_evidence=ids) for c in criteria]
 
-    async def _pre_stop_answer(self, request, intent, criteria, accumulator, result, state, started):
+    async def _pre_stop_answer(self, request, intent, criteria, accumulator, result, state, started,
+                               verified=None):
         if intent.kind not in {GoalIntentKind.KNOWLEDGE_QA, GoalIntentKind.FIGURE_QA, GoalIntentKind.PREMISE_CHECK}:
             return None
         if intent.kind == GoalIntentKind.PREMISE_CHECK:
@@ -696,7 +697,8 @@ class GoalExecutionAgent(GoalResearchAgent):
             result.telemetry.update({"extractive_fallback_used": True, "extractive_fallback_failure_reason": None,
                                      "final_answer_kind": "extractive_grounded"})
         else:
-            answer, support = await self._answerability_gate(request, criteria, accumulator.records(), result)
+            answer, support = (verified if verified is not None else
+                               await self._answerability_gate(request, criteria, accumulator.records(), result))
         if not answer:
             return None
         achieved = support.all_required_supported
@@ -798,7 +800,8 @@ class GoalExecutionAgent(GoalResearchAgent):
         result.current_stage = "waiting_for_user_input"
         result.current_action = None
         result.telemetry.update({"final_answer_kind": "clarification", "refusal_generated": False,
-                                 "refusal_reason": None})
+                                 "refusal_reason": None, "clarification_generated": True,
+                                 "clarification_reasons": list(dict.fromkeys(missing))})
         result.required_inputs = list(dict.fromkeys(missing))
         result.clarification_question = clarification_question(result.required_inputs, korean)
         result.final_answer = ""
@@ -1140,6 +1143,11 @@ class GoalExecutionAgent(GoalResearchAgent):
             "operands_expected": 0, "operands_bound": 0, "operand_validation_passed": False,
             "formula_selected": False, "formula_ready": False, "calculation_ready": False,
             "calculation_executed": False, "calculation_validated": False,
+            "formula_variables_expected": [], "formula_variables_bound": [],
+            "formula_variables_missing": [], "formula_source_verified": False,
+            "route_forced_by_deterministic_readiness": False,
+            "deterministic_calc_finalizer_used": False, "grounded_fast_path_used": False,
+            "clarification_generated": False, "clarification_reasons": [],
         }.items():
             result.telemetry.setdefault(key, value)
         result.telemetry["intent_route"] = intent.kind.value
@@ -1238,7 +1246,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                 result.telemetry["dimension_inference"] = [inference for variable in
                     sorted(expression_variables(selected_formula.expression_candidate) or ())
                     if (inference := infer_dimensionless(variable, source_text))]
-            user_formula_missing = (user_formula_bindings(intent.user_equation, users)[1]
+            user_formula_missing = (formula_input_readiness(intent.user_equation, users)[1]
                                     if intent.kind == GoalIntentKind.USER_FORMULA_CALC and intent.user_equation else [])
             user_simulation_missing_inputs = (user_simulation_missing(user_text, intent.user_equation, users)
                                               if intent.kind == GoalIntentKind.USER_FORMULA_SIMULATION and not simulation_spec
@@ -1257,19 +1265,23 @@ class GoalExecutionAgent(GoalResearchAgent):
                 simulation_inputs = readiness.input_ids
                 missing_simulation = readiness.missing
             selection_started = time.perf_counter()
+            equation = intent.user_equation or (selected_formula.expression_candidate if selected_formula else None)
+            bindings, missing_bindings = formula_input_readiness(equation, users) if equation else ({}, [])
+            formula_source = next((row for row in evidence_rows if selected_formula and
+                                   row.get("evidence_id") == selected_formula.source_id), None)
+            formula_source_verified = bool(formula_source and selected_formula and source_contains_equation(
+                selected_formula, str(formula_source.get("text") or "")))
             action = self.action_planner.select(request, state, user_fact_ids=[r.fact_id for r in users.records],
                                                 evidence_fact_ids=evidence_fact_ids,
                                                 formula_ready=selected_formula is not None,
                                                 formula_id=selected_formula.formula_id if selected_formula else None,
                                                 python_calls_used=result.python_calls_total,
                                                 simulation_spec=simulation_spec,
-                                                formula_inputs_ready=not (formula_missing or user_formula_missing or direct_missing),
+                                                formula_inputs_ready=not (formula_missing or user_formula_missing or direct_missing or missing_bindings),
                                                 intent=intent)
-            result.telemetry["transition"] = {"formula_ready": bool(selected_formula),
+            result.telemetry["transition"] = {"formula_ready": state.formula_ready if requires_sourced_formula else bool(equation),
                                                "calculation_ready": action.reason_code in {"formula_ready", "calculation_ready"},
                                                "blocking_reason": action.reason_code if action.action_type == GoalActionType.STOP else None}
-            equation = intent.user_equation or (selected_formula.expression_candidate if selected_formula else None)
-            bindings, missing_bindings = user_formula_bindings(equation, users) if equation else ({}, [])
             ready = action.action_type in {GoalActionType.CALCULATE, GoalActionType.SIMULATE}
             result.telemetry.update({
                 "operands_expected": len(expression_variables(equation) or []) if equation else len(direct_users.records) + len(direct_missing),
@@ -1277,7 +1289,15 @@ class GoalExecutionAgent(GoalResearchAgent):
                 "operand_validation_passed": not (missing_bindings or formula_missing or direct_missing) and bool(users.records),
                 "formula_selected": bool(equation) or (intent.kind == GoalIntentKind.DIRECT_CALC and bool(direct_operations)),
                 "formula_ready": state.formula_ready if requires_sourced_formula else bool(equation and not missing_bindings) or direct_fast,
-                "calculation_ready": ready or result.telemetry["calculation_ready"],
+                "calculation_ready": ready or bool(state.computation_ids),
+                "formula_variables_expected": sorted(expression_variables(equation) or []) if equation else [],
+                "formula_variables_bound": sorted(bindings),
+                "formula_variables_missing": list(dict.fromkeys([*formula_missing, *missing_bindings])),
+                "formula_source_verified": formula_source_verified if requires_sourced_formula else bool(intent.user_equation),
+                "route_forced_by_deterministic_readiness": result.telemetry.get(
+                    "route_forced_by_deterministic_readiness", False) or ready and intent.kind in {
+                    GoalIntentKind.DIRECT_CALC, GoalIntentKind.USER_FORMULA_CALC,
+                    GoalIntentKind.USER_FORMULA_SIMULATION, GoalIntentKind.KB_FORMULA_CALC},
             })
             self._add_time(result, "planning_seconds", time.perf_counter() - selection_started)
             if action.action_type == GoalActionType.STOP:
@@ -1291,7 +1311,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                     action.reason_code == "no_progress" and (bool(missing_simulation) or calculation_stalled))
                 if needs_clarification and clarification_attempts < 3:
                     missing = (missing_simulation or user_simulation_missing_inputs if missing_simulation or user_simulation_missing_inputs else
-                               user_formula_missing or direct_missing or formula_missing or
+                               user_formula_missing or direct_missing or formula_missing or missing_bindings or
                                (calculation_missing(selected_formula, evidence_rows, users, state.derived_facts)
                                 if requires_sourced_formula else []))
                     if missing:
@@ -1561,7 +1581,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                         for original in accumulator.web
                         if item.url == original.url
                     })
-                    source_formulas = {(item.source_id, item.normalized_span)
+                    source_formulas = {(item.source_id, normalize_formula(item.expression_candidate or ""))
                                        for item in FormulaSourceRegistry.from_evidence(accumulator.records()).records}
                     for computation in subresult.computations:
                         computation.source_evidence_ids = [source_map.get(value, value)
@@ -1672,19 +1692,44 @@ class GoalExecutionAgent(GoalResearchAgent):
                     state.verified = False
                     state.pending_verifications = state.computation_ids.copy()
                 elif action.action_type == GoalActionType.ANALYZE:
-                    if not state.derived_facts:
+                    validated_lists = [output_id for calc in result.computations if calc.validation_passed
+                                       for output_id, row in calc.output_manifest.items()
+                                       if isinstance(row.get("value"), list)]
+                    if not state.derived_facts and not validated_lists:
                         status, failure = "blocked", "validated_derived_facts_missing"
                     else:
                         # Only validated calculation outputs enter a later analysis action.
                         values = [item.value for item in state.derived_facts
                                   if item.output_id.startswith("OUT_CASE_")]
                         details = {"derived_fact_ids_used": [item.fact_id for item in state.derived_facts],
+                                   "validated_list_outputs": validated_lists,
                                    "case_mean": sum(values) / len(values) if values else None,
                                    "case_range": max(values) - min(values) if values else None}
                         state.analyzed = True
                 elif action.action_type == GoalActionType.VERIFY:
                     evidence = self._evidence(accumulator, users, result.computations,
                                               simulation_spec, simulation_source_id, intent.user_equation)
+                    if (intent.kind in {GoalIntentKind.KNOWLEDGE_QA, GoalIntentKind.FIGURE_QA}
+                            and not result.telemetry.get("source_conflict_count", 0)):
+                        supported_answer, support = await self._answerability_gate(request, criteria, evidence, result)
+                        if supported_answer and support.all_required_supported and support.some_supported:
+                            grounded = await self._pre_stop_answer(
+                                request, intent, criteria, accumulator, result, state, started,
+                                verified=(supported_answer, support))
+                            if grounded is not None and grounded.status == GoalStatus.ACHIEVED:
+                                result.telemetry["grounded_fast_path_used"] = True
+                                verified = ActionRecord(
+                                    iteration=iteration, action_id=action.action_id,
+                                    action_type=GoalActionType.VERIFY,
+                                    target_criteria=action.target_criteria, status="completed",
+                                    reason_code="semantic_support_verified",
+                                    started_at=action_started, finished_at=datetime.now(timezone.utc),
+                                    coverage_before=coverage_before, coverage_after=1.0,
+                                    details={"exact_spans_checked": True})
+                                state.completed_actions.insert(-1, verified)
+                                grounded.action_history.insert(-1, verified.model_dump(mode="json"))
+                                grounded.iterations_completed = iteration
+                                return grounded
                     simulation = next((item for item in result.computations
                                        if item.validation_passed and item.analysis_id.startswith("SIM-")), None)
                     synthesis_started = time.perf_counter()
@@ -1713,14 +1758,16 @@ class GoalExecutionAgent(GoalResearchAgent):
                         result.telemetry["premise_supporting_source_ids"] = list(premise_assessment.supporting_source_ids)
                         result.telemetry["premise_relation_type"] = premise_assessment.relation_type
                         result.telemetry["premise_grounding_failure_reason"] = premise_assessment.failure_reason
+                    deterministic_answer = (self._simulation_answer(simulation, simulation_spec, evidence,
+                                                                     simulation_source_id, korean)
+                                            if simulation and simulation_spec else
+                                            self._api_gravity_answer(request, result.computations, evidence)
+                                            or self._simple_user_fact_answer(request, result.computations, evidence)
+                                            or self._user_formula_answer(request, result.computations, evidence)
+                                            or self._validated_calculation_answer(request, result.computations, evidence))
+                    result.telemetry["deterministic_calc_finalizer_used"] = bool(deterministic_answer)
                     latest_candidate = (premise_assessment.answer if intent.kind == GoalIntentKind.PREMISE_CHECK else
-                                        self._simulation_answer(simulation, simulation_spec, evidence,
-                                                                simulation_source_id, korean)
-                                        if simulation and simulation_spec else
-                                        self._api_gravity_answer(request, result.computations, evidence)
-                                        or self._simple_user_fact_answer(request, result.computations, evidence)
-                                        or self._user_formula_answer(request, result.computations, evidence)
-                                        or self._validated_calculation_answer(request, result.computations, evidence)
+                                        deterministic_answer
                                         or await self._synthesize(request, criteria, evidence, [],
                                                                   computations=result.computations))
                     synthesis_seconds = time.perf_counter() - synthesis_started
@@ -1736,7 +1783,8 @@ class GoalExecutionAgent(GoalResearchAgent):
                     if grounded_premise_answer:
                         latest_candidate = grounded_premise_answer
                     rejected_claims: list[str] = []
-                    if (not grounded_premise_answer and premise_assessment.method != "source_ratio"
+                    if (not grounded_premise_answer and not deterministic_answer
+                            and premise_assessment.method != "source_ratio"
                             and callable(getattr(self.ollama, "chat_structured", None))):
                         latest_candidate, rejected_claims = await ground_research_claims(
                             self.ollama, request, latest_candidate, evidence)
