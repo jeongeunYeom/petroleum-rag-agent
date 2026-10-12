@@ -324,6 +324,9 @@ class ComputationRecord(BaseModel):
     bound_variables: dict[str, str] = Field(default_factory=dict)
     normalized_formula: str | None = None
     source_formula: str | None = None
+    raw_formula_span: str | None = None
+    source_equation: str | None = None
+    formula_derivation: str | None = None
     units: dict[str, str] = Field(default_factory=dict)
     execution_hash: str | None = None
     output: dict[str, Any] = Field(default_factory=dict)

@@ -256,6 +256,8 @@ def calculation_readiness(formula: FormulaSourceRecord | None, evidence: list[di
             facts = explicit
         inferred = infer_dimensionless(variable, local_text,
                                        facts[0].source_span if len(facts) == 1 and hasattr(facts[0], "source_span") else "")
+        if variable == "n" and formula.source_equation == "Sw**n = (F*Rw)/Rt":
+            inferred = {"source": "verified_exponent", "dimension": "dimensionless"}
         if len(facts) != 1:
             suffix = "값" if inferred else "값과 단위"
             missing.append(f"{variable} {suffix}" if not facts else f"{variable} 값 확인")

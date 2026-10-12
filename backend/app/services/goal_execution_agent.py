@@ -522,6 +522,10 @@ class GoalExecutionAgent(GoalResearchAgent):
                     normalize_formula(str(sources[source_id].get("text") or "")))
                    if sources[source_id].get("source_type") == "user_fact" else
                    any(record.source_id == source_id and
+                       (not (record.formula_derivation or computation.formula_derivation) or
+                        (record.formula_derivation == computation.formula_derivation and
+                         record.source_equation == computation.source_equation and
+                         record.raw_span == computation.raw_formula_span)) and
                        source_contains_equation(record, str(sources[source_id].get("text") or ""),
                                                 computation.source_formula or computation.formula)
                        for record in records)
@@ -1756,6 +1760,10 @@ class GoalExecutionAgent(GoalResearchAgent):
                     computation.analysis_id = f"KB-FORMULA-{computation.computation_id}"
                     computation.formula_evidence_ids = [selected_formula.source_id]
                     computation.source_evidence_ids = [selected_formula.source_id]
+                    if selected_formula.formula_derivation:
+                        computation.raw_formula_span = selected_formula.raw_span
+                        computation.source_equation = selected_formula.source_equation
+                        computation.formula_derivation = selected_formula.formula_derivation
                     source_text = next((str(row.get("text") or "") for row in evidence_rows
                                         if row.get("evidence_id") == selected_formula.source_id), "")
                     local_text = source_text[max(0, selected_formula.span_start - 240):

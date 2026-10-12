@@ -10,6 +10,7 @@ from app.services.formula_dependency import resolve_formula_dependencies
 from app.services.formula_source_registry import FormulaSourceRegistry
 from app.services.formula_source_registry import source_contains_equation
 from app.services.calculation_requirements import symbol_names
+from app.services.compound_units import unit_factors
 from app.services.goal_execution_agent import GoalExecutionAgent
 from app.services.user_fact_registry import UserFactRegistry
 from test_agent_reliability_v19_dev import (PassingEvaluator, SyntheticResearch,
@@ -238,3 +239,75 @@ def test_validated_formation_factor_feeds_downstream_formula(tmp_path, monkeypat
     assert result.computations[1].output_manifest["OUT_RESULT"]["value"] == pytest.approx(61.98347107438016)
     assert result.computations[1].validation_passed
     assert any(value.startswith("CALC1:") for value in result.computations[1].input_fact_ids)
+
+
+ARCHIE_STACK_SOURCE = (
+    "Saturation Determination\n"
+    "All water saturation determinations are based on Archie's water saturation equation. "
+    "The equation is:\n\n"
+    "Sw\nn  =  F Rw\nRt\n\n"
+    "Equation 1 Archies water saturation equation\nwhere\n"
+    "Rw is the formation water resistivity,\n"
+    "Rt is the true formation resistivity,\n"
+    "F is the formation resistivity factor.\n"
+    "F is usually obtained from the measured porosity of the formation.\n"
+    "F = a/fm\nEquation 2 Formation Resistivity Factor\nwhere\n"
+    "m is the cementation factor,\na is a constant."
+)
+
+
+def test_stacked_archie_span_reconstructs_without_false_n_equals_f():
+    evidence = [{"evidence_id": "KB1", "source_type": "knowledge_base", "text": ARCHIE_STACK_SOURCE}]
+    records = FormulaSourceRegistry.from_evidence(evidence).records
+    assert not any(row.lhs == "n" for row in records)
+    target = next(row for row in records if row.lhs == "Rt")
+    assert target.raw_span == "Sw\nn  =  F Rw\nRt"
+    assert target.source_equation == "Sw**n = (F*Rw)/Rt"
+    assert target.formula_derivation == "denominator_isolation"
+    assert target.expression_candidate == "Rt = (F * Rw)/(Sw ** n)"
+    assert source_contains_equation(target, ARCHIE_STACK_SOURCE)
+    assert not source_contains_equation(
+        target.model_copy(update={"expression_candidate": "Rt=F*Rw*Sw**n"}), ARCHIE_STACK_SOURCE)
+    assert not source_contains_equation(
+        target.model_copy(update={"source_equation": "Sw**n = Rt/(F*Rw)"}), ARCHIE_STACK_SOURCE)
+
+
+def test_stacked_layout_without_context_or_with_conflict_is_not_rewritten():
+    random = "Sw\nn = F Rw\nRt\nSome unrelated observations."
+    conflicting = ARCHIE_STACK_SOURCE.replace(
+        "Equation 1 Archies water saturation equation",
+        "Sw**n = Rt/(F*Rw)\nEquation 1 Archies water saturation equation")
+    for text in (random, conflicting):
+        rows = FormulaSourceRegistry.from_evidence([{
+            "evidence_id": "KB1", "source_type": "knowledge_base", "text": text,
+        }]).records
+        assert not any(row.lhs == "Rt" and row.formula_derivation for row in rows)
+        assert not any(row.lhs == "n" for row in rows)
+
+
+def test_resistivity_unit_stays_bounded():
+    assert unit_factors("ohm-m") == {"ohm-m": 1}
+    with pytest.raises(ValueError):
+        unit_factors("ohm--m")
+
+
+def test_stacked_archie_full_agent_chain(tmp_path, monkeypatch):
+    result, _, _ = run_case(tmp_path, monkeypatch,
+        "phi=0.22, Sw=0.35, Rw=0.08 ohm-m, a=1, m=2, n=2. "
+        "Find the internal Archie equation and calculate Rt.",
+        ARCHIE_STACK_SOURCE)
+    assert result.status == GoalStatus.ACHIEVED
+    assert actions(result) == ["retrieve", "calculate", "calculate", "verify", "synthesize", "stop"]
+    assert not result.clarification_question
+    assert "fm" not in " ".join(result.required_inputs).casefold()
+    assert [calc.output_manifest["OUT_RESULT"]["name"] for calc in result.computations] == ["F", "Rt"]
+    assert all(calc.validation_passed and calc.formula_source_ids == ["KB1"]
+               for calc in result.computations)
+    assert result.computations[0].output_manifest["OUT_RESULT"]["value"] == pytest.approx(20.66115702479339)
+    target = result.computations[1]
+    assert target.output_manifest["OUT_RESULT"]["value"] == pytest.approx(13.493000, rel=1e-4)
+    assert target.output_manifest["OUT_RESULT"]["unit"] == "ohm-m"
+    assert target.raw_formula_span == "Sw\nn  =  F Rw\nRt"
+    assert target.source_equation == "Sw**n = (F*Rw)/Rt"
+    assert target.formula_derivation == "denominator_isolation"
+    assert any(value.startswith("CALC1:") for value in target.input_fact_ids)

@@ -3,7 +3,7 @@ import re
 
 
 ATOM = (r"(?:dimensionless|MMscf|seconds?|minutes?|hours?|days?|acres?|"
-        r"psia|psig|psi|kPa|Pa|stb|bbl|lbf|lbmol|lb|kg|mg|g|kmol|mol|USD|EUR|\$|"
+        r"psia|psig|psi|kPa|Pa|ohm-m|stb|bbl|lbf|lbmol|lb|kg|mg|g|kmol|mol|USD|EUR|\$|"
         r"kWh|kW|kJ|hp|ppg|gpm|cP|mD|md|ft|feet|inch|in|mm|km|cm|"
         r"m|L|hr|min|secs?|h|d|s|°C|달러|시간|분|%)"
         r"(?:[23²³]|⁻¹)?")
@@ -21,7 +21,7 @@ def unit_factors(text: str) -> dict[str, int]:
     if len(text) > 96 or text.count("(") > 4:
         raise ValueError("unit complexity limit")
     text = text.replace("·", "*").replace("³", "3").replace("²", "2").replace("⁻¹", "^-1")
-    tokens = re.findall(r"\^|[*/()]|[+-]?\d+|[^\W\d]\w*|[%°$]+[A-Za-z]*", text)
+    tokens = re.findall(r"ohm-m|\^|[*/()]|[+-]?\d+|[^\W\d]\w*|[%°$]+[A-Za-z]*", text)
     if len(tokens) > 32:
         raise ValueError("unit expansion exceeds safe bounds")
     if "".join(tokens) != text:

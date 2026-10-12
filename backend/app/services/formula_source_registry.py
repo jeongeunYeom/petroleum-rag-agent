@@ -13,6 +13,10 @@ EQUATION = re.compile(
     r"(?P<equation>\b[A-Za-z][A-Za-z0-9_₀-₉]*\s*=\s*"
     r"(?:(?!\.\s+[A-Za-z]|,\s*[A-Za-z][A-Za-z0-9_₀-₉]*\s*=)[A-Za-z0-9_₀-₉φ+\-*/().×÷−· \t])+)"
 )
+STACKED_SATURATION = re.compile(
+    r"(?P<equation>\bSw[ \t]*(?:\r?\n[ \t]*){1,3}n[ \t]*=[ \t]*F[ \t]+Rw"
+    r"[ \t]*(?:\r?\n[ \t]*){1,3}Rt\b)", re.I
+)
 EXPLICIT_DEFINITION = re.compile(
     r"\b(?P<lhs>[A-Za-z][A-Za-z0-9_]*)\s+"
     r"(?:is|equals|is\s+defined\s+as)\s+(?:the\s+)?"
@@ -60,6 +64,15 @@ def source_contains_equation(record: "FormulaSourceRecord", text: str,
     """A locator or neighboring chunk never substitutes for this exact source span."""
     if text[record.span_start:record.span_end] != record.raw_span:
         return False
+    if record.source_equation or record.formula_derivation:
+        source_equation = _stacked_saturation_equation(
+            record.raw_span, text, record.span_start, record.span_end)
+        derived = _isolate_denominator(source_equation, "Rt") if source_equation else None
+        return bool(source_equation and record.source_equation == source_equation
+                    and record.formula_derivation == "denominator_isolation"
+                    and derived and record.equation_ast == equation_ast(derived)
+                    and record.equation_ast == equation_ast(record.expression_candidate or "")
+                    and record.equation_ast == equation_ast(formula or record.expression_candidate or ""))
     # Recreate the candidate from the literal span and its local source context.
     # A record whose executable formula was changed after extraction is not evidence.
     expected = _source_expression(record.raw_span, text, record.span_start, record.span_end)
@@ -67,6 +80,47 @@ def source_contains_equation(record: "FormulaSourceRecord", text: str,
                 and equation_ast(expected) == record.equation_ast
                 and record.equation_ast == equation_ast(record.expression_candidate)
                 and record.equation_ast == equation_ast(formula or record.expression_candidate))
+
+
+def _stacked_saturation_equation(raw: str, text: str, start: int, end: int) -> str | None:
+    """Reconstruct only the ordered, captioned Archie stack in its own source window."""
+    if not STACKED_SATURATION.fullmatch(raw):
+        return None
+    before = text[max(0, start - 350):start]
+    after = text[end:min(len(text), end + 350)]
+    local = before + raw + after
+    archie_caption = bool(re.search(r"Archie.{0,100}water\s+saturation\s+equation", local, re.I | re.S))
+    definitions = all(re.search(pattern, local, re.I | re.S) for pattern in (
+        r"\bSw\b.{0,45}\bwater\s+saturation\b",
+        r"\bRw\b.{0,45}\bformation\s+water\s+resistivity\b",
+        r"\bRt\b.{0,45}\btrue\s+formation\s+resistivity\b",
+        r"\bF\b.{0,45}\bformation\s+resistivity\s+factor\b",
+    ))
+    competing = re.search(r"\b(?:Sw|Rt)\s*(?:(?:\*\*|\^)\s*n\s*)?=\s*[A-Za-z0-9_(]",
+                          before + after, re.I)
+    if not (archie_caption or definitions) or competing:
+        return None
+    return "Sw**n = (F*Rw)/Rt"
+
+
+def _isolate_denominator(source_equation: str, target: str) -> str | None:
+    """Single-occurrence isolation: left = numerator / target."""
+    try:
+        lhs, rhs = (ast.parse(part.strip(), mode="eval").body
+                    for part in source_equation.split("=", 1))
+    except (SyntaxError, ValueError):
+        return None
+    if not isinstance(rhs, ast.BinOp) or not isinstance(rhs.op, ast.Div):
+        return None
+    if not isinstance(rhs.right, ast.Name) or rhs.right.id != target:
+        return None
+    if any(not isinstance(node, ALLOWED) for tree in (lhs, rhs)
+           for node in ast.walk(tree)):
+        return None
+    if any(isinstance(node, ast.Name) and node.id == target
+           for tree in (lhs, rhs.left) for node in ast.walk(tree)):
+        return None
+    return f"{target} = ({ast.unparse(rhs.left)})/({ast.unparse(lhs)})"
 
 
 def porosity_exponent_layout_context(local: str) -> bool:
@@ -111,6 +165,8 @@ class FormulaSourceRecord(BaseModel):
     span_start: int
     span_end: int
     expression_candidate: str | None = None
+    source_equation: str | None = None
+    formula_derivation: str | None = None
     equation_ast: str | None = None
     lhs: str | None = None
     rhs: str | None = None
@@ -130,6 +186,27 @@ class FormulaSourceRegistry(BaseModel):
             if source.get("source_type") not in {"knowledge_base", "figure", "web"}:
                 continue
             text = str(source.get("text") or "")
+            stacked_spans = []
+            for stacked in STACKED_SATURATION.finditer(text):
+                start, end = stacked.span("equation")
+                raw = stacked.group("equation")
+                stacked_spans.append((start, end))
+                source_equation = _stacked_saturation_equation(raw, text, start, end)
+                candidate = _isolate_denominator(source_equation, "Rt") if source_equation else None
+                if not candidate:
+                    continue
+                records.append(FormulaSourceRecord(
+                    formula_id=f"FORMULA{len(records) + 1}", source_id=str(source["evidence_id"]),
+                    source_type=str(source["source_type"]), raw_span=raw,
+                    normalized_span=normalize_formula(raw), locator=source.get("locator"),
+                    span_start=start, span_end=end, expression_candidate=candidate,
+                    source_equation=source_equation, formula_derivation="denominator_isolation",
+                    equation_ast=equation_ast(candidate), lhs="Rt",
+                    rhs=candidate.split("=", 1)[1].strip(),
+                    required_variables=sorted(expression_variables(candidate) or []),
+                    source_document=source.get("document"), source_page=source.get("page"),
+                    context=text[max(0, start-180):start].strip(),
+                ))
             for definition in EXPLICIT_DEFINITION.finditer(text):
                 numerator = definition.group("ratio_a") or definition.group("difference_a")
                 denominator = definition.group("ratio_b") or definition.group("difference_b")
@@ -147,6 +224,12 @@ class FormulaSourceRegistry(BaseModel):
                     context=str(source.get("heading") or text[max(0, definition.start()-180):definition.start()]).strip(),
                 ))
             for match in EQUATION.finditer(text):
+                if match.start() and text[match.start() - 1] in "*^":
+                    # A superscript suffix is not a new LHS symbol.
+                    continue
+                if any(start < match.end() and match.start() < end for start, end in stacked_spans):
+                    # Never promote the middle row of a stacked equation to n=F.
+                    continue
                 raw = match.group("equation").rstrip(" .\t")
                 candidate = _source_expression(raw, text, match.start(), match.start() + len(raw))
                 variables = expression_variables(candidate)
