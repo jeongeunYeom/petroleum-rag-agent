@@ -405,6 +405,7 @@ class GoalExecutionAgent(GoalResearchAgent):
             })
             for fact in GoalExecutionAgent._derived(computation):
                 evidence.append({"evidence_id": fact.fact_id, "source_type": "calculation",
+                                 "locator": f"{fact.parent_calc_id}:{fact.output_id}",
                                  "parent_calc_id": fact.parent_calc_id, "output_id": fact.output_id,
                                  "name": fact.name, "value": fact.value, "unit": fact.unit or "",
                                  "validation_passed": True,

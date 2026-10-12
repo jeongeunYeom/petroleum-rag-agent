@@ -1,6 +1,7 @@
 """Fresh synthetic dependency graphs; no benchmark or production KB is loaded."""
 
 import asyncio
+import json
 
 import pytest
 
@@ -12,6 +13,7 @@ from app.services.formula_source_registry import source_contains_equation
 from app.services.calculation_requirements import symbol_names
 from app.services.compound_units import unit_factors
 from app.services.goal_execution_agent import GoalExecutionAgent
+from app.services.goal_evaluator import GoalEvaluator
 from app.services.user_fact_registry import UserFactRegistry
 from test_agent_reliability_v19_dev import (PassingEvaluator, SyntheticResearch,
                                             actions, no_synthesis, request)
@@ -311,3 +313,51 @@ def test_stacked_archie_full_agent_chain(tmp_path, monkeypatch):
     assert target.source_equation == "Sw**n = (F*Rw)/Rt"
     assert target.formula_derivation == "denominator_isolation"
     assert any(value.startswith("CALC1:") for value in target.input_fact_ids)
+
+
+def test_evaluator_prompt_tolerates_evidence_without_locator():
+    req = request("Find the sourced relation and calculate Rt.")
+    prompt = GoalEvaluator._prompt(req, req.success_criteria, "", [
+        {"evidence_id": "EFACT1", "source_type": "knowledge_base", "text": "Rw=0.08 ohm-m"},
+        {"evidence_id": "USERF1", "source_type": "user_fact", "text": "Sw=0.35"},
+    ])
+    rows = json.loads(prompt)["untrusted_evidence"]
+    assert [row["locator"] for row in rows] == [None, None]
+
+
+def test_stacked_archie_chain_verifies_with_derived_evidence(tmp_path, monkeypatch):
+    class StructuredEvaluatorModel:
+        def __init__(self):
+            self.evidence = []
+
+        async def chat_structured(self, messages, _schema, **_kwargs):
+            self.evidence = json.loads(messages[-1]["content"])["untrusted_evidence"]
+            return json.dumps({"criteria": [{"criterion_id": "C1", "status": "met",
+                                     "reason": "Validated sourced calculation",
+                                     "supporting_evidence": ["KB1", "CALC2"]}],
+                               "expected_result_status": "not_provided", "gaps": [],
+                               "next_research_need": None, "goal_conflicts_with_evidence": False})
+
+    monkeypatch.setattr("app.services.goal_execution_agent.get_settings",
+        lambda: Settings(data_dir=tmp_path / "data", agent_workspace_dir=tmp_path / "workspace"))
+    model = StructuredEvaluatorModel()
+    agent = GoalExecutionAgent(SyntheticResearch([[(3, ARCHIE_STACK_SOURCE)]]), object(),
+                               evaluator=GoalEvaluator(model), synthesizer=no_synthesis)
+    text = ("phi=0.22, Sw=0.35, Rw=0.08 ohm-m, a=1, m=2, n=2. "
+            "Find the internal Archie equation and calculate Rt.")
+    result = asyncio.run(agent.run("archie-verify-derived", request(text)))
+
+    assert result.status == GoalStatus.ACHIEVED
+    assert actions(result) == ["retrieve", "calculate", "calculate", "verify", "synthesize", "stop"]
+    assert len(result.computations) == 2
+    assert all(calc.validation_passed for calc in result.computations)
+    assert any(value.startswith("CALC1:") for value in result.computations[1].input_fact_ids)
+    assert result.computations[0].formula_source_ids == ["KB1"]
+    assert result.computations[1].formula_source_ids == ["KB1"]
+    assert result.computations[1].output_manifest["OUT_RESULT"]["value"] == pytest.approx(13.493, rel=1e-4)
+    assert "13.49" in result.final_answer and "ohm-m" in result.final_answer
+    assert "[CALC1]" in result.final_answer and "[CALC2]" in result.final_answer
+    assert {"CALC1", "CALC2"}.issubset({row["evidence_id"] for row in model.evidence})
+    assert any(row["evidence_id"] == "CALC1:OUT_RESULT" and
+               row["locator"] == "CALC1:OUT_RESULT" for row in model.evidence)
+    assert all("locator" in row for row in model.evidence)

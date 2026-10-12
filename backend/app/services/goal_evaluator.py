@@ -20,6 +20,7 @@ from app.services.goal_intent import prefers_korean
 
 
 EVIDENCE_ID_RE = re.compile(r"(?<![A-Za-z0-9])(?:KB|WEB|FIG|CALC|USERF?)\d+(?![A-Za-z0-9])")
+CITED_EVIDENCE_RE = re.compile(r"\[((?:KB|WEB|FIG|CALC|USERF?)\d+(?::[A-Za-z0-9_]+)?)\]")
 QUANTITATIVE_RE = re.compile(r"calculate|calculation|percent(?:age)? (?:change|difference)|plot|graph|chart|regression|계산|변화율|그래프|정량|회귀", re.IGNORECASE)
 CHART_RE = re.compile(r"plot|graph|chart|그래프|도표", re.IGNORECASE)
 REASON_NUMBER_RE = re.compile(r"(?<![A-Za-z0-9_.])[-+]?\d+(?:,\d{3})*(?:\.\d+)?(?:[eE][-+]?\d+)?(?![A-Za-z0-9_.])")
@@ -187,7 +188,7 @@ class GoalEvaluator:
             valid_computations,
         )
         for line in candidate_answer.splitlines():
-            cited = set(EVIDENCE_ID_RE.findall(line))
+            cited = set(CITED_EVIDENCE_RE.findall(line))
             for calc_id in cited & valid_computations.keys():
                 required_sources = set(valid_computations[calc_id].source_evidence_ids + valid_computations[calc_id].source_input_ids + valid_computations[calc_id].formula_evidence_ids)
                 if not required_sources.issubset(cited):
@@ -323,7 +324,7 @@ class GoalEvaluator:
             claim = line.strip().lstrip("-* ")
             if len(claim) < 10 or claim.startswith("#"):
                 continue
-            ids = EVIDENCE_ID_RE.findall(claim)
+            ids = CITED_EVIDENCE_RE.findall(claim)
             support = "\n".join(by_id[item] for item in ids if item in by_id)
             validation = self.engineering_validator.validate_claim(
                 claim,
@@ -355,7 +356,7 @@ class GoalEvaluator:
                                  for word in re.findall(r"[A-Za-z]+", value)}
                 allowed_words.update({"best", "worst", "top", "mean", "range", "case", "result", "parameter", "validated"})
                 claim_words = {word.casefold() for word in re.findall(r"[A-Za-z]+",
-                               EVIDENCE_ID_RE.sub("", claim))}
+                               CITED_EVIDENCE_RE.sub("", claim))}
                 direct_calc = not issues and claim_words <= allowed_words
                 if direct_calc and re.search(r"\b(?:ranking|rank|top)\b|순위|최고", claim, re.I):
                     for record in cited_calcs.values():
@@ -364,7 +365,7 @@ class GoalEvaluator:
                             if not (isinstance(order, list) and output.get("semantic_type") == "ranking"
                                     and order and all(isinstance(value, str) for value in order)):
                                 continue
-                            plain = EVIDENCE_ID_RE.sub("", claim)
+                            plain = CITED_EVIDENCE_RE.sub("", claim)
                             labels = re.findall(r"\b(?:" + "|".join(re.escape(value) for value in order) + r")\b",
                                                 plain, re.I)
                             if re.search(r"\b(?:ranking|rank)\b|순위", plain, re.I) and labels[:len(order)] != order:
@@ -493,7 +494,7 @@ class GoalEvaluator:
             {
                 "evidence_id": item["evidence_id"],
                 "source_type": item["source_type"],
-                "locator": item["locator"],
+                "locator": item.get("locator"),
                 "text": str(item["text"])[:1200],
             }
             for item in evidence
