@@ -40,6 +40,21 @@ class CriterionState(BaseModel):
     requires_verification: bool = True
 
 
+class RequiredGoal(BaseModel):
+    goal_id: str
+    goal_type: Literal["knowledge_relation", "knowledge_explanation", "numeric_calculation",
+                       "comparison", "ranking", "premise_check", "simulation", "list_output"]
+    semantic_target: str
+    source_text_span: str
+    required: bool = True
+    requested_unit: str | None = None
+    requires_evidence: bool = False
+    requires_calculation: bool = False
+    scenario_id: str | None = None
+    status: Literal["UNMET", "PARTIAL", "MET", "BLOCKED"] = "UNMET"
+    supporting_ids: list[str] = Field(default_factory=list)
+
+
 class DerivedFact(BaseModel):
     fact_id: str
     source_type: Literal["calculation"] = "calculation"
@@ -138,6 +153,7 @@ class GoalExecutionState(BaseModel):
     run_id: str
     goal: str
     criteria: list[CriterionState]
+    required_goals: list[RequiredGoal] = Field(default_factory=list)
     iteration: int = 0
     evidence_ids: list[str] = Field(default_factory=list)
     computation_ids: list[str] = Field(default_factory=list)

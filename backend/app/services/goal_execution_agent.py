@@ -57,6 +57,7 @@ from app.services.source_answerability import (evaluate_claim_support, grounded_
                                                RequiredClaim, ClaimSupport, atomic_claims, semantic_claim_support)
 from app.services.source_local_aliases import bind_source_aliases
 from app.services.sourced_conversion_units import sourced_conversion_units
+from app.services.required_goals import parse_required_goals, check_required_goals, repair_required_answer
 
 
 class _EvidenceSnapshot:
@@ -1322,6 +1323,8 @@ class GoalExecutionAgent(GoalResearchAgent):
                 else ExpectedResultStatus.NOT_PROVIDED,
             )
             state = GoalExecutionState.from_criteria(run_id, request.goal or request.topic, criteria)
+            state.required_goals = parse_required_goals(request, intent.kind.value,
+                                                        self._requested_target(request))
             state.known_facts = [item.fact_id for item in users.records]
             accumulator = EvidenceAccumulator()
             seen_actions: set[str] = set()
@@ -1380,6 +1383,10 @@ class GoalExecutionAgent(GoalResearchAgent):
         }.items():
             result.telemetry.setdefault(key, value)
         result.telemetry["intent_route"] = intent.kind.value
+        result.telemetry["required_goals"] = [goal.model_dump(mode="json") for goal in state.required_goals]
+        result.telemetry.setdefault("synthesis_missing_goal_ids", [])
+        result.telemetry.setdefault("synthesis_repair_attempted", False)
+        result.telemetry.setdefault("synthesis_repair_success", False)
         computation_classes = {
             GoalIntentKind.DIRECT_CALC: "direct_arithmetic",
             GoalIntentKind.USER_FORMULA_CALC: "user_formula",
@@ -2425,6 +2432,24 @@ class GoalExecutionAgent(GoalResearchAgent):
                             self.ollama, request, latest_candidate, evidence)
                     latest_candidate, rejected_numeric = self._filter_numeric_claims(
                         latest_candidate, evidence, result.computations)
+                    if len(state.required_goals) > 1:
+                        checked, proofs = check_required_goals(state.required_goals, request,
+                                                               latest_candidate, evidence, result.computations)
+                        missing = [goal.goal_id for goal in checked if goal.status != "MET"]
+                        result.telemetry["synthesis_missing_goal_ids"] = missing
+                        latest_candidate, repaired = repair_required_answer(latest_candidate, missing, proofs)
+                        if repaired:
+                            result.telemetry["synthesis_repair_attempted"] = True
+                            checked, _ = check_required_goals(state.required_goals, request,
+                                                              latest_candidate, evidence, result.computations)
+                            result.telemetry["synthesis_repair_success"] = all(
+                                goal.status == "MET" for goal in checked if goal.required)
+                        state.required_goals = checked
+                        result.telemetry["required_goals"] = [goal.model_dump(mode="json") for goal in checked]
+                        result.telemetry["required_goal_count"] = len(checked)
+                        result.telemetry["met_goal_count"] = sum(goal.status == "MET" for goal in checked)
+                        result.telemetry["required_goal_statuses"] = {
+                            goal.goal_id: goal.status for goal in checked}
                     if intent.kind == GoalIntentKind.PREMISE_CHECK:
                         result.telemetry["premise_candidate_retained"] = bool(latest_candidate)
                         result.telemetry["premise_numeric_rejections"] = rejected_numeric
@@ -2522,7 +2547,9 @@ class GoalExecutionAgent(GoalResearchAgent):
                         (not requires_computation or (state.computation_ids and
                          (simulation or intent.kind not in {GoalIntentKind.DIRECT_CALC, GoalIntentKind.USER_FORMULA_CALC,
                                                              GoalIntentKind.KB_FORMULA_CALC} or
-                          result.telemetry["target_output_satisfied"]))))
+                          result.telemetry["target_output_satisfied"]))) and
+                        (len(state.required_goals) <= 1 or
+                         all(goal.status == "MET" for goal in state.required_goals if goal.required)))
                     state.verified = True
                     state.pending_verifications.clear()
                     result.criteria = evaluation.criteria
