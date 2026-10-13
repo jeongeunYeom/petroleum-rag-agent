@@ -55,6 +55,8 @@ from app.services.goal_simulation import (direct_operation_operands, direct_read
 from app.services.user_fact_registry import NUMBER, UserFactRecord, UserFactRegistry, normalize_unit
 from app.services.source_answerability import (evaluate_claim_support, grounded_answer, SupportStatus,
                                                RequiredClaim, ClaimSupport, atomic_claims, semantic_claim_support)
+from app.services.source_local_aliases import bind_source_aliases
+from app.services.sourced_conversion_units import sourced_conversion_units
 
 
 class _EvidenceSnapshot:
@@ -1571,8 +1573,27 @@ class GoalExecutionAgent(GoalResearchAgent):
             target_formula = selected_formula
             formula_users, trusted_derived = self._formula_inputs(users, state.derived_facts,
                                                                   result.computations, evidence_rows, user_text)
+            source_alias_bindings = {}
+            if selected_formula and requires_sourced_formula:
+                if (not result.telemetry.get("formula_definition_expansion_attempted") and
+                        user_formula_bindings(selected_formula.expression_candidate or "", formula_users)[1]):
+                    origin = next((item for item in accumulator.internal
+                                   if item.evidence_id == selected_formula.source_id), None)
+                    if origin:
+                        result.telemetry["formula_definition_expansion_attempted"] = True
+                        added_definitions = self._expand_formula_neighbors([origin], accumulator)
+                        if added_definitions:
+                            state.evidence_ids.extend(added_definitions)
+                            evidence_rows = accumulator.records()
+                source_alias_bindings, used_aliases = bind_source_aliases(
+                    selected_formula, evidence_rows, formula_users)
+                result.telemetry["formula_source_local_aliases"] = [
+                    {"symbol": item.symbol, "source_id": item.source_id, "document": item.document,
+                     "page": item.page, "raw_span": item.raw_span, "confidence": item.confidence}
+                    for item in used_aliases]
             dependency_plan = (resolve_formula_dependencies(target_formula, evidence_rows, formula_users,
-                                                             [], result.computations)
+                                                             [], result.computations,
+                                                             source_aliases=source_alias_bindings)
                                if target_formula and intent.kind == GoalIntentKind.KB_FORMULA_CALC
                                and not SIMULATE_WORDS.search(f"{request.topic} {request.goal or ''}") else None)
             if dependency_plan:
@@ -1589,10 +1610,29 @@ class GoalExecutionAgent(GoalResearchAgent):
                     selected_formula = dependency_plan.next_formula
                     if selected_formula.formula_id != target_formula.formula_id:
                         result.telemetry["clarification_avoided_by_dependency_resolution"] = True
-            formula_missing = (calculation_readiness(selected_formula, evidence_rows, formula_users, [])
+            if selected_formula and selected_formula is not target_formula:
+                source_alias_bindings, used_aliases = bind_source_aliases(
+                    selected_formula, evidence_rows, formula_users)
+            source_constant_units, conversion_source_ids = (
+                sourced_conversion_units(selected_formula, evidence_rows)
+                if selected_formula else ({}, []))
+            result.telemetry["formula_layout_reconstructed"] = bool(
+                selected_formula and "wrapped_fraction" in selected_formula.layout_transformations)
+            result.telemetry["formula_layout_source_spans"] = (
+                [{"source_id": selected_formula.source_id,
+                  "raw_span": selected_formula.raw_span,
+                  "span_start": selected_formula.span_start,
+                  "span_end": selected_formula.span_end}] if
+                result.telemetry["formula_layout_reconstructed"] else [])
+            result.telemetry["formula_layout_confidence"] = (
+                1.0 if source_constant_units else 0.8 if
+                result.telemetry["formula_layout_reconstructed"] else None)
+            formula_missing = (calculation_readiness(selected_formula, evidence_rows, formula_users, [],
+                                                    source_alias_bindings)
                                if selected_formula else [])
             if dependency_plan and dependency_plan.missing_inputs:
-                formula_missing = [f"{name} 값과 단위" for name in dependency_plan.missing_inputs]
+                formula_missing = [f"{name} 값과 단위" for name in dependency_plan.missing_inputs
+                                   if name not in source_alias_bindings]
             state.formula_ready = bool(selected_formula and not formula_missing)
             result.telemetry["formula"] = ({"candidates_found": formula_selection.candidates_found,
                                              "selected_formula_id": formula_selection.formula_id,
@@ -1645,7 +1685,9 @@ class GoalExecutionAgent(GoalResearchAgent):
             selection_started = time.perf_counter()
             equation = intent.user_equation or (selected_formula.expression_candidate if selected_formula else None)
             bindings, missing_bindings = formula_input_readiness(
-                equation, formula_users if requires_sourced_formula else users) if equation else ({}, [])
+                equation, formula_users if requires_sourced_formula else users,
+                source_alias_bindings if requires_sourced_formula else None,
+                source_constant_units if requires_sourced_formula else None) if equation else ({}, [])
             if equation and intent.kind in {GoalIntentKind.KB_FORMULA_CALC,
                                             GoalIntentKind.USER_FORMULA_CALC}:
                 result.telemetry["unit_propagation_attempted"] = True
@@ -1658,7 +1700,8 @@ class GoalExecutionAgent(GoalResearchAgent):
                         output_unit = formula_output_unit(
                             ast.parse(equation.split("=", 1)[1].strip(), mode="eval").body,
                             {name: fact.unit for name, fact in bindings.items()},
-                            {name: fact.value for name, fact in bindings.items()})
+                            {name: fact.value for name, fact in bindings.items()},
+                            source_constant_units)
                     except (ValueError, SyntaxError, KeyError, TypeError) as exc:
                         result.telemetry["unit_propagation_failure_reason"] = str(exc)
                     else:
@@ -2044,7 +2087,8 @@ class GoalExecutionAgent(GoalResearchAgent):
                 elif (action.action_type == GoalActionType.CALCULATE and
                       intent.kind == GoalIntentKind.KB_FORMULA_CALC and selected_formula and
                       selected_formula.expression_candidate and not formula_missing and
-                      not user_formula_bindings(selected_formula.expression_candidate, formula_users)[1]):
+                      not user_formula_bindings(selected_formula.expression_candidate, formula_users,
+                                                source_alias_bindings)[1]):
                     # Literal source equation + uniquely bound user facts are sufficient for
                     # a bounded, independently checked calculation; no second LLM plan is needed.
                     source_text = next((str(row.get("text") or "") for row in evidence_rows
@@ -2054,17 +2098,22 @@ class GoalExecutionAgent(GoalResearchAgent):
                         get_settings(), request, run_id, selected_formula.expression_candidate,
                         formula_users, f"CALC{len(result.computations) + 1}", selected_formula.source_id,
                         original_text=user_text, validated_derived_ids=trusted_derived,
+                        source_aliases=source_alias_bindings,
+                        constant_units=source_constant_units,
                         sourced_output_unit=(source_variable_unit(source_text, selected_formula.lhs)
                             if selected_formula.lhs and all(
                                 source_variable_unit(source_text, name) == fact.unit
                                 for name, fact in user_formula_bindings(
-                                    selected_formula.expression_candidate, formula_users)[0].items())
+                                    selected_formula.expression_candidate, formula_users,
+                                    source_alias_bindings)[0].items())
                             else None))
                     self._add_time(result, "python_seconds", time.perf_counter() - python_started)
                     computation.analysis_id = f"KB-FORMULA-{computation.computation_id}"
                     computation.formula_evidence_ids = [selected_formula.source_id]
-                    computation.source_evidence_ids = [selected_formula.source_id]
-                    if selected_formula.formula_derivation:
+                    computation.source_evidence_ids = list(dict.fromkeys(
+                        [selected_formula.source_id, *conversion_source_ids,
+                         *(item.source_id for item in used_aliases)]))
+                    if selected_formula.formula_derivation or selected_formula.layout_transformations:
                         computation.raw_formula_span = selected_formula.raw_span
                         computation.source_equation = selected_formula.source_equation
                         computation.formula_derivation = selected_formula.formula_derivation

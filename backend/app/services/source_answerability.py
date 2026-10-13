@@ -7,27 +7,39 @@ from enum import Enum
 
 from app.services.goal_action_planner import ENGINEERING_TERMS
 from app.services.goal_intent import explicitly_underdetermined, prefers_korean
+from app.services.source_verification_text import verification_view
+from app.services.formula_source_registry import EQUATION, expression_variables
+from app.services.formula_layout_normalizer import normalize_extracted_equation
 
 
 STOP = set("what why how does do is are the a an of for to and in with from explain describe define purpose function definition please internal source sources evidence relationship relation provide about its determine exact optimal value needed inputs data missing not provided without no calculate find".split())
 STOP.update({"requested", "result", "supported", "answer", "validated"})
 STOP.update("state discuss tell me us please briefly according using cited material materials text explain explanation describe description identify give precise can be could would should when which required unavailable information engineering grounded citation citations correctly include whether between affects affect".split())
+STOP.update("relates relate relating relationship linked link links to using used source internal well fluid petroleum".split())
+STOP.update("relat control controls determine determines reduce reduces".split())
 RELATIONS = {
     "definition": r"\b(?:means|defined|refers|is|are)\b|정의|의미|이다|입니다",
     "function": r"\b(?:prevents?|reduces?|separates?|removes?|protects?|measures?|controls?|allows?|function|purpose)\b|방지|측정|제거|보호|분리|역할|기능",
     "dependency": r"\b(?:depends?|requires?|site[- ]specific|field\s+test|laboratory|cannot\s+be\s+determined)\b|의존|필요|현장|결정할\s*수\s*없",
-    "relation": r"\b(?:depends?|increases?|decreases?|affects?|related|ratio|varies|because|function\s+of)\b|관계|증가|감소|의존|때문",
+    "relation": r"\b(?:depends?|increases?|decreases?|affects?|controls?|reduces?|determines?|related|relating|describ(?:e[sd]?|ing)|ratio|varies|because|function\s+of|per\s+unit|in\s+terms\s+of|calculated\s+from|quantified\s+by)\b|관계|증가|감소|의존|때문",
 }
 
 
 def _terms(text):
-    for korean, english in ENGINEERING_TERMS.items():
+    for korean, english in sorted(ENGINEERING_TERMS.items(), key=lambda item: -len(item[0])):
         text = text.replace(korean, english)
-    text = re.sub(r"설명해(?:줘|주세요)|알려(?:줘|주세요)|무엇인가요|무엇|기능|역할|정의|의미|내부\s*자료|근거|필요한|입력|정확한|최적|구해줘", " ", text)
+    text = verification_view(text)
+    text = re.sub(r"설명해(?:줘|주세요)|알려(?:줘|주세요)|무엇인가요|무엇|기능|역할|정의|의미|"
+                  r"내부\s*자료|근거|필요한|입력|정확한|최적|구해줘|미치는|미쳐|영향|관계", " ", text)
     text = re.sub(r"\b([a-z]+)ies\b", r"\1y", text.casefold())
-    words = re.findall(r"[A-Za-z][A-Za-z_-]*|[가-힣]+", text)
-    return {re.sub(r"(?:에서|으로|에는|이란|의|은|는|을|를|가)$", "", w) for w in words
-            if w not in STOP and len(w) > 1}
+    text = re.sub(r"\b([a-z]{4,})(?:s|ed|ing)\b", r"\1", text)
+    words = re.findall(r"[A-Za-z][A-Za-z0-9]*|[가-힣]+", text)
+    terms = {stem for w in words if w not in STOP and len(w) > 1
+             if len(stem := re.sub(r"(?:에서|으로|에는|이란|의|은|는|을|를|가)$", "", w)) > 1}
+    phases = set(re.findall(r"relative\s+permeability\s+to\s+(oil|gas|water)", text, re.I))
+    if len(phases) >= 2:
+        terms.add("multiphase")
+    return terms
 
 
 class SupportStatus(str, Enum):
@@ -114,6 +126,50 @@ def _relation(question, underdetermined):
             else "definition" if re.search(r"define|definition|means|what\s+is|정의|의미", question, re.I) else "relation")
 
 
+def _literal_windows(raw: str):
+    """Short raw excerpts; a formula plus its adjacent definitions is one local window."""
+    seen = set()
+    for quote in re.split(r"(?<=[.!?])\s+|\n(?=[A-Z])", raw):
+        quote = quote.strip()
+        if 20 <= len(quote) <= 650 and quote not in seen:
+            seen.add(quote)
+            yield quote
+    for match in EQUATION.finditer(raw):
+        equation = match.group("equation").rstrip(" .\t")
+        if expression_variables(equation) is None and not normalize_extracted_equation(
+                equation, raw[max(0, match.start()-200):min(len(raw), match.end()+450)]).normalized_expression:
+            continue
+        start = max(0, raw.rfind("\n", 0, match.start()) + 1)
+        end = min(len(raw), match.end() + 430)
+        window = raw[start:end].strip()
+        if 20 <= len(window) <= 650 and window not in seen:
+            seen.add(window)
+            yield window
+
+
+def _equation_relation(window: str, terms: set[str]) -> bool:
+    """Require literal equation AND local definitions of its target concepts."""
+    for match in EQUATION.finditer(window):
+        equation = match.group("equation").rstrip(" .\t")
+        variables = expression_variables(equation)
+        if variables is None:
+            normalized = normalize_extracted_equation(equation, window).normalized_expression
+            variables = expression_variables(normalized or "")
+        if not variables:
+            continue
+        symbols = {equation.split("=", 1)[0].strip(), *variables}
+        definitions = []
+        for name in symbols:
+            matches = re.finditer(rf"(?im)^\s*{re.escape(name)}\s*[:=]\s*[A-Za-z][^\n]{{3,100}}", window)
+            definitions.append(next((item for item in matches
+                                     if expression_variables(item.group().strip()) is None), None))
+        if len([item for item in definitions if item]) < 2:
+            continue
+        if terms <= _terms(" ".join(item.group() for item in definitions if item)):
+            return True
+    return False
+
+
 def evaluate_claim_support(request, evidence, requirements=None):
     """Proof is a literal relation span, never a similarity score or an inferred fact."""
     underdetermined = explicitly_underdetermined(request.topic)
@@ -151,20 +207,22 @@ def evaluate_claim_support(request, evidence, requirements=None):
         if not terms:
             continue
         candidates = []
+        local_spans = []
         for row in evidence:
             if (row.get("source_type") not in {"knowledge_base", "figure", "web"}
                     or not re.fullmatch(r"(?:KB|WEB|FIG)\d+", str(row.get("evidence_id") or ""))):
                 continue
-            for quote in re.split(r"(?<=[.!?])\s+|\n(?=[A-Z])", str(row.get("text") or "")):
-                quote = quote.strip()
+            for quote in _literal_windows(str(row.get("text") or "")):
                 if not 20 <= len(quote) <= 650:
                     continue
                 if underdetermined and re.search(r"\b(?:not|never)\s+(?:depend|require)|필요하지\s*않|의존하지\s*않", quote, re.I):
                     continue
-                covers = terms <= _terms(quote)
-                predicate = re.search(RELATIONS[relation], quote, re.I)
+                view = verification_view(quote)
+                local_spans.append((row, quote, view, _terms(view)))
+                covers = terms <= _terms(view)
+                predicate = re.search(RELATIONS[relation], view, re.I)
                 # A concept mentioned in an unrelated clause is not the subject of this relation.
-                subject = _terms(quote[:predicate.start()]) if predicate else set()
+                subject = _terms(view[:predicate.start()]) if predicate else set()
                 if predicate and re.search(r"[가-힣]", predicate.group()):
                     # Korean predicates follow their objects; use the topic/subject particle.
                     topic = re.match(r"^(.+?(?:은|는|이|가))\s+", quote)
@@ -172,12 +230,54 @@ def evaluate_claim_support(request, evidence, requirements=None):
                 informative = not re.search(r"\b(?:mentioned|listed|discussed|catalogue|catalog|chapter)\b", quote, re.I)
                 if relation == "function" and re.search(r"\b(?:not|never)\b|않|아니", quote, re.I):
                     informative = False
-                if predicate and terms & subject and subject <= terms and informative:
+                if _equation_relation(quote, terms) and informative:
+                    candidates.append((False, len(quote), str(row["evidence_id"]), quote))
+                elif (predicate and informative and (
+                        (relation != "relation" and terms & subject and subject <= terms) or
+                        (relation == "relation" and len(terms & subject) >= 1 and
+                         len(terms & _terms(view[predicate.end():])) >= 1))):
                     # A direct relation about the requested subject can answer a portion,
                     # but omitted qualifiers/objects never count as complete support.
-                    partial = len(terms & _terms(quote)) >= 2 and len(terms & subject) >= 2
+                    partial = len(terms & _terms(view)) >= 2
                     if covers or partial:
                         candidates.append((not covers, len(quote), str(row["evidence_id"]), quote))
+        if not any(not item[0] for item in candidates):
+            # A relation/equation and its definition may be separated by a PDF
+            # line or adjacent chunk, but never joined across documents/pages.
+            for left_index, (left_row, left_raw, left_view, left_terms) in enumerate(local_spans):
+                for right_row, right_raw, right_view, right_terms in local_spans[left_index + 1:]:
+                    if (not left_row.get("document") or left_row.get("document") != right_row.get("document")
+                            or left_row.get("page") is None or left_row.get("page") != right_row.get("page")
+                            or left_raw == right_raw or _opposes(left_view, right_view)):
+                        continue
+                    if ("multiphase" in terms and
+                            re.search(r"\b(?:single[- ]phase|absolute\s+permeability)\b",
+                                      left_view + " " + right_view, re.I)):
+                        continue
+                    if (not terms <= left_terms | right_terms or
+                            len((left_terms & right_terms) & terms) < 1 or
+                            min(len(left_terms & terms), len(right_terms & terms)) < 1):
+                        continue
+                    relational = False
+                    for view, covered in ((left_view, left_terms), (right_view, right_terms)):
+                        if re.search(r"\b(?:mentioned|listed|discussed|catalogue|catalog|chapter)\b", view, re.I):
+                            continue
+                        predicate = re.search(RELATIONS[relation], view, re.I)
+                        if (predicate and len(covered & terms) >= max(2, len(terms) - 1)
+                                and len(_terms(view[:predicate.start()]) & terms) >= 1
+                                and len(_terms(view[predicate.end():]) & terms) >= 1):
+                            relational = True
+                            break
+                    if not relational:
+                        continue
+                    claim.support_status = SupportStatus.SUPPORTED
+                    claim.supporting_evidence_ids = [str(left_row["evidence_id"]), str(right_row["evidence_id"])]
+                    claim.supporting_spans = [left_raw, right_raw]
+                    break
+                if claim.support_status == SupportStatus.SUPPORTED:
+                    break
+        if claim.support_status == SupportStatus.SUPPORTED:
+            continue
         if not candidates:
             continue
         partial, _, source_id, quote = min(candidates)

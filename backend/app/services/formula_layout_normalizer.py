@@ -21,6 +21,20 @@ STACKED_FRACTION = re.compile(
 STACKED_POWER = re.compile(
     rf"(?m)^(?P<block>(?P<base>{SYMBOL})[ \t]*\r?\n[ \t]*(?P<power>{SYMBOL}|[0-8])"
     rf"[ \t]*=[ \t]*(?P<rhs>{SYMBOL}|[0-9.]+))[ \t]*$")
+WRAPPED_ADD_FRACTION = re.compile(
+    rf"(?m)^(?P<block>(?P<lhs>{SYMBOL})[ \t]*=[ \t]*(?P<base>{SYMBOL})"
+    rf"[ \t]*(?P<operator>[+\-])[ \t]*(?P<numerator>{SYMBOL})[ \t]*\r?\n"
+    rf"[ \t]*(?P<denominator>(?:\d+(?:\.\d+)?[ \t]*[x×*][ \t]*{SYMBOL}|"
+    rf"\([A-Za-z0-9_φ.+* /-]{{2,50}}\)))[ \t]*)(?=\r?\n|$)")
+WRAPPED_OPERATOR_FRACTION = re.compile(
+    rf"(?m)^(?P<block>(?P<lhs>{SYMBOL})[ \t]*=[ \t]*(?P<base>{SYMBOL})[ \t]*"
+    rf"(?P<operator>[+\-])[ \t]*\r?\n[ \t]*(?P<numerator>{SYMBOL})[ \t]*\r?\n"
+    rf"[ \t]*/[ \t]*\r?\n[ \t]*(?P<denominator>\([A-Za-z0-9_φ.+* /-]{{2,50}}\))"
+    rf"[ \t]*)(?=\r?\n|$)")
+WRAPPED_OPERATOR = re.compile(
+    rf"(?m)^(?P<block>(?P<lhs>{SYMBOL})[ \t]*=[ \t]*(?P<base>{SYMBOL})[ \t]*\r?\n"
+    rf"[ \t]*(?P<operator>[+\-*/])[ \t]*(?P<other>{SYMBOL}|\d+(?:\.\d+)?)[ \t]*)"
+    rf"(?=\r?\n|$)")
 IMPLICIT_PRODUCT = re.compile(rf"(?<!\w)({SYMBOL})[ \t]+({SYMBOL})(?!\w)")
 IMPLICIT_PAREN = re.compile(rf"({SYMBOL})[ \t]+(?=\()")
 SUBSCRIPT_TRANSLATION = str.maketrans({"φ": "phi", "ₓ": "x", "ₒ": "o", "ₐ": "a",
@@ -102,6 +116,43 @@ def normalize_extracted_equation(raw_span: str, local_context: str,
     known = {item.casefold() for item in (known_symbols or set())} | definitions
     cue = bool(re.search(r"\b(?:equation|formula|relation|where|denominator|fraction|quotient)\b", context, re.I))
     units = known_units or _source_units(context)
+
+    if match := WRAPPED_OPERATOR_FRACTION.fullmatch(raw):
+        if not re.search(r"\b(?:divided\s+by|denominator|fraction|quotient)\b", context, re.I):
+            return LayoutNormalizationResult(raw_span, None, reason="fraction_relation_not_sourced")
+        candidate = (f"{match['lhs']} = {match['base']} {match['operator']} "
+                     f"{match['numerator']}/{match['denominator']}")
+        if _safe_equation(candidate):
+            return LayoutNormalizationResult(raw_span, candidate,
+                                             ("wrapped_operator", "wrapped_fraction"), candidate_count=1)
+        return LayoutNormalizationResult(raw_span, None, reason="formula_layout_ambiguous")
+
+    if match := WRAPPED_OPERATOR.fullmatch(raw):
+        if not cue:
+            return LayoutNormalizationResult(raw_span, None, reason="continuation_not_sourced")
+        candidate = f"{match['lhs']} = {match['base']} {match['operator']} {match['other']}"
+        if _safe_equation(candidate):
+            return LayoutNormalizationResult(raw_span, candidate,
+                                             ("wrapped_operator",), candidate_count=1)
+        return LayoutNormalizationResult(raw_span, None, reason="formula_layout_ambiguous")
+
+    if match := WRAPPED_ADD_FRACTION.fullmatch(raw):
+        # The source must explicitly describe the pressure/fraction operation;
+        # a line break alone is not permission to attach an unrelated row.
+        if not re.search(r"\b(?:divided\s+by|denominator|fraction|quotient)\b", context, re.I):
+            return LayoutNormalizationResult(raw_span, None, reason="fraction_relation_not_sourced")
+        denominator = re.sub(r"(?<=\d)\s*[x×]\s*(?=[A-Za-zφ])", "*", match["denominator"])
+        denominator = denominator.translate(SUBSCRIPT_TRANSLATION)
+        candidate = f"{match['lhs']} = {match['base']} {match['operator']} " \
+                    f"{match['numerator']}/({denominator})"
+        source_units = _source_units(context)
+        if (not _safe_equation(candidate) or
+                (source_units.get(match["lhs"]) and source_units.get(match["base"]) and
+                 unit_factors(source_units[match["lhs"]]) != unit_factors(source_units[match["base"]]))):
+            return LayoutNormalizationResult(raw_span, None, reason="fraction_layout_or_units_invalid")
+        return LayoutNormalizationResult(raw_span, candidate, ("wrapped_fraction",),
+                                         tuple(sorted({match["lhs"], match["base"], match["numerator"]})),
+                                         candidate_count=1)
 
     # PDF extraction often prints a literal multiplication sign as a spaced
     # letter x. Interpret only a bounded numeric-coefficient product chain;

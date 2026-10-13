@@ -26,7 +26,8 @@ class DependencyPlan:
 
 def resolve_formula_dependencies(target: FormulaSourceRecord, evidence: list[dict[str, Any]],
                                  users: UserFactRegistry, derived: list[DerivedFact],
-                                 completed: list[Any], *, max_depth: int = 3) -> DependencyPlan:
+                                 completed: list[Any], *, max_depth: int = 3,
+                                 source_aliases: dict[str, object] | None = None) -> DependencyPlan:
     """Choose one executable equation, never an inferred or ambiguous dependency."""
     plan = DependencyPlan()
     sources = {str(row.get("evidence_id")): str(row.get("text") or "") for row in evidence}
@@ -41,7 +42,10 @@ def resolve_formula_dependencies(target: FormulaSourceRecord, evidence: list[dic
                       for source in row.formula_source_ids}
     facts = [*users.records, *derived]
 
-    def bound(variable: str) -> bool:
+    def bound(variable: str, row: FormulaSourceRecord | None = None) -> bool:
+        if row is not None and row.source_id == target.source_id and row.equation_ast == target.equation_ast:
+            if source_aliases and variable in source_aliases:
+                return True
         matches = [row for row in facts if normalize_symbol(row.name) in symbol_names(variable)]
         exact = [row for row in matches if normalize_symbol(row.name) == normalize_symbol(variable)]
         return len(exact or matches) == 1
@@ -99,7 +103,7 @@ def resolve_formula_dependencies(target: FormulaSourceRecord, evidence: list[dic
         plan.formula_ids.append(row.formula_id)
         active.add(key)
         for variable in sorted(expression_variables(row.expression_candidate or "") or set()):
-            if bound(variable):
+            if bound(variable, row):
                 continue
             producer = candidate(variable)
             if plan.block_reason:

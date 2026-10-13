@@ -9,10 +9,11 @@ from app.services.compound_units import format_unit_factors, unit_factors
 
 
 def formula_output_unit(node: ast.AST, units: dict[str, str],
-                        values: dict[str, float] | None = None) -> str:
+                        values: dict[str, float] | None = None,
+                        constant_units: dict[float, str] | None = None) -> str:
     def dimensions(item: ast.AST) -> dict[str, int]:
         if isinstance(item, ast.Constant) and type(item.value) in {int, float}:
-            return {}
+            return unit_factors((constant_units or {}).get(float(item.value), ""))
         if isinstance(item, ast.Name):
             return unit_factors(units[item.id])
         if isinstance(item, ast.UnaryOp) and isinstance(item.op, (ast.UAdd, ast.USub)):

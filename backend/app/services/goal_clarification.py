@@ -230,7 +230,8 @@ def calculation_missing(formula: FormulaSourceRecord | None, evidence: list[dict
 
 
 def calculation_readiness(formula: FormulaSourceRecord | None, evidence: list[dict[str, Any]],
-                          users: UserFactRegistry, derived_facts: list[DerivedFact]) -> list[str]:
+                          users: UserFactRegistry, derived_facts: list[DerivedFact],
+                          source_aliases: dict[str, object] | None = None) -> list[str]:
     """Block Python until every sourced equation variable has one usable binding."""
     if formula is None:
         return ["출처가 확인된 계산 관계식"]
@@ -253,6 +254,8 @@ def calculation_readiness(formula: FormulaSourceRecord | None, evidence: list[di
     for variable in sorted(expression_variables(formula.expression_candidate or "") or set()):
         facts = [fact for fact in [*users.records, *derived_facts]
                  if normalize_symbol(fact.name) in symbol_names(variable)]
+        if not facts and source_aliases and variable in source_aliases:
+            facts = [source_aliases[variable]]
         exact = [fact for fact in facts if fact.name == variable]
         if not exact:
             exact = [fact for fact in facts if normalize_symbol(fact.name) == normalize_symbol(variable)]

@@ -7,9 +7,12 @@ import re
 from typing import Any
 
 from pydantic import BaseModel, Field
+from app.services.compound_units import UNIT, unit_factors
+from app.services.formula_units import formula_output_unit
 
 from app.services.formula_layout_normalizer import (
-    STACKED_FRACTION, STACKED_POWER, STACKED_POWER_FRACTION,
+    STACKED_FRACTION, STACKED_POWER, STACKED_POWER_FRACTION, WRAPPED_ADD_FRACTION,
+    WRAPPED_OPERATOR_FRACTION, WRAPPED_OPERATOR,
     isolate_equation, normalize_extracted_equation,
 )
 
@@ -60,6 +63,26 @@ def equation_ast(formula: str) -> str | None:
     return f"{lhs.strip().casefold()}={ast.dump(ast.parse(rhs.strip(), mode='eval'), include_attributes=False)}"
 
 
+def _clipped_addition(text: str, equation: str) -> bool:
+    """Reject an additive fragment when the source itself declares incompatible units."""
+    try:
+        lhs, rhs = (part.strip() for part in equation.split("=", 1))
+        tree = ast.parse(rhs, mode="eval").body
+        if not isinstance(tree, ast.BinOp) or not isinstance(tree.op, (ast.Add, ast.Sub)):
+            return False
+        names = {lhs, *(node.id for node in ast.walk(tree) if isinstance(node, ast.Name))}
+        units = {}
+        for name in names:
+            found = re.search(rf"(?im)^\s*{re.escape(name)}\s*(?:=|:)\s*[A-Za-z][^\n]{{0,100}}?"
+                              rf"\((?P<unit>{UNIT})\)", text)
+            if not found:
+                return False
+            units[name] = found["unit"]
+        return unit_factors(formula_output_unit(tree, units)) != unit_factors(units[lhs])
+    except (SyntaxError, ValueError, KeyError):
+        return True
+
+
 def source_contains_equation(record: "FormulaSourceRecord", text: str,
                              formula: str | None = None) -> bool:
     """A locator or neighboring chunk never substitutes for this exact source span."""
@@ -82,6 +105,7 @@ def source_contains_equation(record: "FormulaSourceRecord", text: str,
     # A record whose executable formula was changed after extraction is not evidence.
     expected = _source_expression(record.raw_span, text, record.span_start, record.span_end)
     return bool(record.expression_candidate and record.equation_ast
+                and not _clipped_addition(text, expected)
                 and equation_ast(expected) == record.equation_ast
                 and record.equation_ast == equation_ast(record.expression_candidate)
                 and record.equation_ast == equation_ast(formula or record.expression_candidate))
@@ -159,7 +183,8 @@ class FormulaSourceRegistry(BaseModel):
                 continue
             text = str(source.get("text") or "")
             stacked_spans: list[tuple[int, int]] = []
-            for pattern in (STACKED_POWER_FRACTION, STACKED_FRACTION, STACKED_POWER):
+            for pattern in (STACKED_POWER_FRACTION, STACKED_FRACTION, STACKED_POWER,
+                            WRAPPED_ADD_FRACTION, WRAPPED_OPERATOR_FRACTION, WRAPPED_OPERATOR):
                 for match in pattern.finditer(text):
                     start, end = match.span("block")
                     if any(a < end and start < b for a, b in stacked_spans):
@@ -235,11 +260,16 @@ class FormulaSourceRegistry(BaseModel):
                 rhs_literal = raw.split("=", 1)[1].strip()
                 tail = text[match.start() + len(raw):]
                 if (re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", rhs_literal)
+                        and re.match(rf"\s*\({UNIT}\)", tail, re.I)):
+                    continue  # A variable definition with units is not an equation dependency.
+                if (re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", rhs_literal)
                         and re.match(r"[ \t]+(?!where\b|and\b|or\b|if\b|with\b|for\b|in\b|at\b|is\b)"
                                      r"[A-Za-z][A-Za-z-]*", tail, re.I)):
                     continue
                 candidate = _source_expression(raw, text, match.start(), match.start() + len(raw))
                 variables = expression_variables(candidate)
+                if variables is not None and _clipped_addition(text, candidate):
+                    continue
                 if variables is None:
                     # OCR/excerpts often continue with prose after a valid equation.
                     # Keep the longest parseable prefix, never a paraphrased equation.
@@ -254,6 +284,9 @@ class FormulaSourceRegistry(BaseModel):
                 if variables is None and not (re.search(r"[+\-*/×÷−·]", rhs) and re.search(r"[A-Za-z_]", rhs)):
                     continue
                 start, end = match.start(), match.start() + len(raw)
+                if (re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", candidate.split("=", 1)[1].strip())
+                        and re.match(rf"\s*\({UNIT}\)", text[end:], re.I)):
+                    continue
                 if (candidate and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", candidate.split("=", 1)[1].strip())
                         and re.match(r"[ \t]+(?!where\b|and\b|or\b|if\b|with\b|for\b|in\b|at\b|is\b)"
                                      r"[A-Za-z][A-Za-z-]*", text[end:], re.I)):

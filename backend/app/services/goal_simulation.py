@@ -29,7 +29,8 @@ from app.tools.python_tools import PythonTools
 from app.services.formula_units import formula_output_unit as _formula_output_unit
 
 
-def user_formula_bindings(equation: str, facts: UserFactRegistry) -> tuple[dict[str, object], list[str]]:
+def user_formula_bindings(equation: str, facts: UserFactRegistry,
+                          source_aliases: dict[str, object] | None = None) -> tuple[dict[str, object], list[str]]:
     """Bind each literal variable once; never borrow textbook example values."""
     variables = expression_variables(equation)
     if variables is None:
@@ -45,6 +46,8 @@ def user_formula_bindings(equation: str, facts: UserFactRegistry) -> tuple[dict[
             # A shared physical unit is never enough to choose between observations.
             matches = [fact for fact in facts.records if fact.semantic_role == variable.casefold()
                        and fact.semantic_role in {"initial", "final", "inlet", "outlet", "produced", "injected"}]
+        if not matches and source_aliases and variable in source_aliases:
+            matches = [source_aliases[variable]]
         exact = [fact for fact in matches if fact.name == variable]
         if not exact:
             exact = [fact for fact in matches if normalize_symbol(fact.name) == normalize_symbol(variable)]
@@ -262,15 +265,17 @@ def _arithmetic_value(node: ast.AST, values: dict[str, float]) -> float:
     raise ValueError("unsupported user formula expression")
 
 
-def formula_input_readiness(equation: str, facts: UserFactRegistry) -> tuple[dict[str, object], list[str]]:
+def formula_input_readiness(equation: str, facts: UserFactRegistry,
+                            source_aliases: dict[str, object] | None = None,
+                            constant_units: dict[float, str] | None = None) -> tuple[dict[str, object], list[str]]:
     """Check bindings and unit algebra before a Python action is selected."""
-    bound, missing = user_formula_bindings(equation, facts)
+    bound, missing = user_formula_bindings(equation, facts, source_aliases)
     if missing:
         return bound, missing
     try:
         _formula_output_unit(ast.parse(equation.split("=", 1)[1].strip(), mode="eval").body,
                              {name: fact.unit for name, fact in bound.items()},
-                             {name: fact.value for name, fact in bound.items()})
+                             {name: fact.value for name, fact in bound.items()}, constant_units)
     except (ValueError, SyntaxError, KeyError, IndexError, TypeError) as exc:
         return bound, [f"계산식 입력 단위 호환성: {exc}"]
     return bound, []
@@ -280,10 +285,12 @@ async def run_user_formula_calculation(settings: Settings, request: GoalResearch
                                        run_id: str, equation: str, facts: UserFactRegistry,
                                        calc_id: str, source_id: str, *, original_text: str | None = None,
                                        validated_derived_ids: set[str] | None = None,
-                                       sourced_output_unit: str | None = None) -> ComputationRecord:
+                                       sourced_output_unit: str | None = None,
+                                       source_aliases: dict[str, object] | None = None,
+                                       constant_units: dict[float, str] | None = None) -> ComputationRecord:
     if not (request.allow_python_execution and request.python_execution_approved):
         raise PermissionError("Python calculation requires approval")
-    variables, missing = user_formula_bindings(equation, facts)
+    variables, missing = user_formula_bindings(equation, facts, source_aliases)
     if missing:
         raise ValueError("missing user formula inputs: " + ", ".join(missing))
     trusted = validated_derived_ids or set()
@@ -312,7 +319,7 @@ async def run_user_formula_calculation(settings: Settings, request: GoalResearch
         raise ValueError("formula exponent exceeds safe bounds")
     units = {name: fact.unit for name, fact in variables.items()}
     output_unit = _formula_output_unit(tree.body, units,
-                                       {name: fact.value for name, fact in variables.items()})
+                                       {name: fact.value for name, fact in variables.items()}, constant_units)
     if sourced_output_unit:
         if source_id == "USER_REQUEST" or not re.fullmatch(UNIT, sourced_output_unit, re.I):
             raise ValueError("unverified source output unit")
