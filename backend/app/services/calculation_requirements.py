@@ -47,7 +47,10 @@ SUBSCRIPTS = str.maketrans("₀₁₂₃₄₅₆₇₈₉ₓₒₐ", "012345678
 
 
 def normalize_symbol(name: str) -> str:
-    return re.sub(r"[^a-z0-9]", "", name.translate(SUBSCRIPTS).replace("φ", "phi").casefold())
+    for symbol, alias in {"φ": "phi", "ρ": "rho", "Δ": "delta", "μ": "mu", "λ": "lambda",
+                          "−": "-", "×": "*"}.items():
+        name = name.replace(symbol, alias)
+    return re.sub(r"[^a-z0-9]", "", name.translate(SUBSCRIPTS).casefold())
 
 
 def requested_semantic_target(text: str) -> str | None:
@@ -73,6 +76,11 @@ def infer_dimensionless(variable: str, source_text: str, user_label: str = "") -
     if name in {"sg", "phi", "porosity", "fraction", "ratio", "sw", "saturation"}:
         return {"variable": variable, "dimension": "dimensionless", "source": "known_semantic_role",
                 "confidence": .95}
+    if re.search(rf"(?<![A-Za-z0-9]){re.escape(variable)}\s*(?:is|denotes|represents|means|[:=])\s*"
+                 r"(?:the\s+)?(?:residual\s+oil\s+|connate\s+water\s+|water\s+)?"
+                 r"(?:saturation|fraction|coefficient|ratio)\b", source_text, re.I):
+        return {"variable": variable, "dimension": "dimensionless",
+                "source": "source_local_definition", "confidence": .9}
     if (name in {"f", "a", "m"}
             and porosity_exponent_layout_context(source_text)
             and re.search(r"\bF\s*=\s*a\s*/\s*fm\b", source_text, re.I)):
@@ -156,14 +164,14 @@ def formula_target_contract(text: str, fact_names: list[str], requested_target: 
             target = "API"
         match = re.search(r"\b(?:calculate|compute|determine|derive|solve)\s+(?:the\s+)?"
                           r"([A-Za-z][A-Za-z0-9_]{0,30})"
-                          r"(?=\s+(?:using|from|for|with|by|via|in)\b|[.,;?]|$)", text, re.I)
+                          r"(?=\s+(?:using|from|for|with|by|via|in|when)\b|[.,;?]|$)", text, re.I)
         if match and not target:
             target = match.group(1)
         elif not target:
             match = re.search(r"\b([A-Za-z][A-Za-z0-9_]{0,30})\s*(?:값|을|를)?\s*"
                               r"(?:계산|구해|구하)", text, re.I)
             target = match.group(1) if match else None
-    if target and normalize_symbol(target) in {"the", "a", "value", "result", "formula", "equation",
+    if target and normalize_symbol(target) in {"the", "a", "it", "this", "that", "value", "result", "formula", "equation",
                                                 "pressure", "relation"}:
         target = None
     unit_match = re.search(rf"\b(?:in|단위(?:는|로)?)\s+(?P<unit>{UNIT})\b", text, re.I)
@@ -272,7 +280,8 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
                                       r"not\s+(?:the\s+)?(?:two[- ]term|reduced\s+form)|simplified\s+form\s*말고|"
                                       r"exclude\s+.{0,20}form|do\s+not\s+use", intent, re.I))
     ranked: list[tuple[tuple[int, ...], FormulaSourceRecord, dict[str, Any]]] = []
-    for record in FormulaSourceRegistry.from_evidence(evidence).records:
+    source_records = FormulaSourceRegistry.from_evidence(evidence).records
+    for record in source_records:
         if not record.expression_candidate:
             continue
         lhs = normalize_symbol(record.expression_candidate.split("=", 1)[0])
@@ -282,6 +291,22 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
             continue
         overlap = sum(any(name in symbol_names(variable) or name.endswith(normalize_symbol(variable))
                           for name in facts) for variable in variables)
+        if target_name and len(facts) >= 2 and not overlap:
+            # A matching LHS in an unrelated model is insufficient when the
+            # user supplied named inputs. Search further instead of asking for
+            # that other model's variables.
+            continue
+        has_unbound = any(not any(name in symbol_names(variable) for name in facts)
+                          for variable in variables)
+        merged_layout_candidate = any(len(normalize_symbol(variable)) > 1 and
+                                      any(name != normalize_symbol(variable) and
+                                          normalize_symbol(variable).endswith(name) for name in facts)
+                                      for variable in variables)
+        if (target_name and len(facts) >= 3 and overlap < len(facts) - 1
+                and not has_unbound and not merged_layout_candidate):
+            # A source-specific shortcut must not silently discard most of the
+            # explicit input symbols from a requested sourced calculation.
+            continue
         source_text = source_by_id.get(record.source_id, "")
         line_start = source_text.rfind("\n", 0, record.span_start) + 1
         line_end = source_text.find("\n", record.span_end)

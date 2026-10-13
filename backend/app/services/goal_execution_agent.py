@@ -58,6 +58,7 @@ from app.services.source_answerability import (evaluate_claim_support, grounded_
 from app.services.source_local_aliases import bind_source_aliases
 from app.services.sourced_conversion_units import sourced_conversion_units
 from app.services.required_goals import parse_required_goals, check_required_goals, repair_required_answer
+from app.services.task_actionability import assess_actionability, formula_contract
 
 
 class _EvidenceSnapshot:
@@ -281,10 +282,13 @@ class GoalExecutionAgent(GoalResearchAgent):
         if equation:
             return equation.split("=", 1)[0].strip()
         matches = list(re.finditer(
-            r"\b(?:calculate|compute|determine|solve)\s+(?:the\s+)?([A-Za-z][A-Za-z0-9_]*)"
+            r"\b(?:calculate|compute|determine|solve|find|derive|report)\s+(?:the\s+)?([A-Za-z][A-Za-z0-9_]*)"
             r"(?=\s*(?:[.,;?]|$|\b(?:using|from|with|by|via|equation|formula|value|result)\b))|"
             r"\b([A-Za-z][A-Za-z0-9_]*)\s*(?:값|을|를|의)?\s*(?:계산|구해|구하)", text, re.I))
-        return (matches[-1].group(1) or matches[-1].group(2)) if matches else None
+        targets = [match.group(1) or match.group(2) for match in matches]
+        targets = [item for item in targets if item.casefold() not in {
+            "it", "this", "that", "value", "result", "formula", "equation"}]
+        return targets[-1] if targets else None
 
     @staticmethod
     def _target_calculations(computations: list[Any], required: list[str],
@@ -1427,10 +1431,17 @@ class GoalExecutionAgent(GoalResearchAgent):
             "normalized_units": {item.fact_id: {"raw": item.raw_unit, "canonical": item.canonical_unit}
                                  for item in users.records if item.raw_unit},
         }
-        operation_text = " ".join([request.goal or request.topic, *[item.description for item in criteria]])
+        operation_text = (request.current_message if request.entrypoint == "unified_chat" and
+                          request.current_message else
+                          " ".join([request.goal or request.topic, *[item.description for item in criteria]]))
         direct_operations = [name for name, pattern in OPERATIONS.items()
                              if re.search(pattern, operation_text, re.I)] if intent.kind == GoalIntentKind.DIRECT_CALC else []
+        if "amount_per_time" in direct_operations and not {"amount", "duration"} <= {
+                row.name for row in users.records}:
+            direct_operations.remove("amount_per_time")
         for dominant, subsumed in (("weighted_average", "mean"), ("geometric_mean", "mean"),
+                                   ("amount_per_time", "unit_conversion"),
+                                   ("multi_difference", "difference"),
                                    ("cylinder_volume", "unit_conversion"),
                                    ("combined_rate", "sum"), ("allocation", "sum"),
                                    ("piecewise_cost", "sum"), ("repeated_percent", "percent_change"),
@@ -1451,7 +1462,8 @@ class GoalExecutionAgent(GoalResearchAgent):
             "mean", "sum", "ranking", "maximum", "minimum", "range", "ratio", "difference",
             "median", "std_population", "std_sample", "variance_population", "variance",
             "geometric_mean", "add", "multiply", "divide", "subtract", "elapsed_time", "percent_conversion",
-            "weighted_average", "combined_rate", "interpolation", "trapezoid", "repeated_percent",
+            "weighted_average", "combined_rate", "amount_per_time", "multi_difference",
+            "interpolation", "trapezoid", "repeated_percent",
             "allocation", "piecewise_cost", "unit_conversion", "finite_difference",
             "centered_difference", "linear_regression_slope", "percentage_decrease", "percentage_increase", "percent_change",
             "net_difference", "recovery_percent", "cylinder_volume", "power_times_duration",
@@ -1495,7 +1507,9 @@ class GoalExecutionAgent(GoalResearchAgent):
         if intent.kind in {GoalIntentKind.DIRECT_CALC, GoalIntentKind.USER_FORMULA_CALC,
                            GoalIntentKind.KB_FORMULA_CALC} and not result.telemetry["required_target_outputs"]:
             requested_target = self._requested_target(request)
-            result.telemetry["required_target_outputs"] = (direct_operations
+            direct_targets = (["drawdown", "recovery"] if direct_operations == ["multi_difference"]
+                              else direct_operations)
+            result.telemetry["required_target_outputs"] = (direct_targets
                 if intent.kind == GoalIntentKind.DIRECT_CALC else
                 [requested_target] if requested_target else [])
         for stage in ("planning_seconds", "retrieval_seconds", "llm_generation_seconds",
@@ -1555,7 +1569,18 @@ class GoalExecutionAgent(GoalResearchAgent):
                     pinned_missing = calculation_readiness(pinned_formula, evidence_rows, users, [])
                     candidate_missing = (calculation_readiness(selected_formula, evidence_rows, users, [])
                                          if same_literal else [])
-                    if same_literal and pinned_missing and not candidate_missing:
+                    better_layout = bool(same_literal and selected_formula.layout_transformations
+                                         and not pinned_formula.layout_transformations and
+                                         len(candidate_missing) <= len(pinned_missing))
+                    if same_literal and not better_layout and pinned_missing:
+                        known = {normalize_symbol(item.name) for item in users.records}
+                        new_overlap = len({normalize_symbol(name) for name in
+                            (expression_variables(selected_formula.expression_candidate) or set())} & known)
+                        old_overlap = len({normalize_symbol(name) for name in
+                            (expression_variables(pinned_formula.expression_candidate) or set())} & known)
+                        better_layout = bool(new_overlap > old_overlap and
+                                             len(candidate_missing) <= len(pinned_missing))
+                    if same_literal and (pinned_missing and not candidate_missing or better_layout):
                         pinned = {"source_id": selected_formula.source_id,
                                   "equation_ast": selected_formula.equation_ast,
                                   "formula_id": selected_formula.formula_id,
@@ -1582,16 +1607,41 @@ class GoalExecutionAgent(GoalResearchAgent):
                                                                   result.computations, evidence_rows, user_text)
             source_alias_bindings = {}
             if selected_formula and requires_sourced_formula:
-                if (not result.telemetry.get("formula_definition_expansion_attempted") and
+                expansion_sources = result.telemetry.setdefault("formula_definition_expansion_source_ids", [])
+                if (selected_formula.source_id not in expansion_sources and len(expansion_sources) < 3 and
                         user_formula_bindings(selected_formula.expression_candidate or "", formula_users)[1]):
                     origin = next((item for item in accumulator.internal
                                    if item.evidence_id == selected_formula.source_id), None)
                     if origin:
                         result.telemetry["formula_definition_expansion_attempted"] = True
+                        expansion_sources.append(selected_formula.source_id)
                         added_definitions = self._expand_formula_neighbors([origin], accumulator)
                         if added_definitions:
                             state.evidence_ids.extend(added_definitions)
                             evidence_rows = accumulator.records()
+                            # Neighbor chunks can contain the definition lost at
+                            # the initial chunk boundary. Reinterpret only the
+                            # exact same raw equation on the same document/page.
+                            known = {normalize_symbol(item.name) for item in formula_users.records}
+                            old_overlap = len({normalize_symbol(name) for name in
+                                (expression_variables(selected_formula.expression_candidate) or set())} & known)
+                            expanded = next((row for row in FormulaSourceRegistry.from_evidence(
+                                evidence_rows).records if
+                                row.raw_span.strip() == selected_formula.raw_span.strip() and
+                                row.source_document == selected_formula.source_document and
+                                row.source_page == selected_formula.source_page and
+                                normalize_symbol(row.lhs or "") ==
+                                normalize_symbol(selected_formula.lhs or "") and
+                                len({normalize_symbol(name) for name in
+                                     (expression_variables(row.expression_candidate) or set())} & known) > old_overlap and
+                                source_contains_equation(row, next((str(item.get("text") or "")
+                                    for item in evidence_rows if item.get("evidence_id") == row.source_id), ""))), None)
+                            if expanded:
+                                selected_formula = expanded
+                                result.telemetry["formula_dependency_target"] = {
+                                    "source_id": expanded.source_id, "equation_ast": expanded.equation_ast,
+                                    "formula_id": expanded.formula_id, "lhs": expanded.lhs}
+                                result.telemetry["formula_pin_upgraded_with_context"] = True
                 source_alias_bindings, used_aliases = bind_source_aliases(
                     selected_formula, evidence_rows, formula_users)
                 result.telemetry["formula_source_local_aliases"] = [
@@ -1638,8 +1688,11 @@ class GoalExecutionAgent(GoalResearchAgent):
                                                     source_alias_bindings)
                                if selected_formula else [])
             if dependency_plan and dependency_plan.missing_inputs:
+                selected_rhs = {normalize_symbol(name) for name in
+                                (expression_variables(selected_formula.expression_candidate) or set())}
                 formula_missing = [f"{name} 값과 단위" for name in dependency_plan.missing_inputs
-                                   if name not in source_alias_bindings]
+                                   if name not in source_alias_bindings and
+                                   (dependency_plan.depth > 0 or normalize_symbol(name) in selected_rhs)]
             state.formula_ready = bool(selected_formula and not formula_missing)
             result.telemetry["formula"] = ({"candidates_found": formula_selection.candidates_found,
                                              "selected_formula_id": formula_selection.formula_id,
@@ -1782,6 +1835,67 @@ class GoalExecutionAgent(GoalResearchAgent):
                     result.telemetry["clarification_suppressed_existing_input"] = bool(previous_missing)
                 result.telemetry["clarification_resolved"] = bool(previous_missing and not still_missing)
                 result.telemetry["remaining_missing_variables"] = list(still_missing)
+            # Readiness is computed from literal user facts and source-verified
+            # formula bindings, independently of a model-generated plan.
+            last_action = state.completed_actions[-1] if state.completed_actions else None
+            unchanged_failure = bool(last_action and last_action.action_type == GoalActionType.CALCULATE
+                                     and last_action.status != "completed" and not resumed_with_new_input)
+            already_executed_formula = bool(selected_formula and not resumed_with_new_input and any(
+                row.action_type == GoalActionType.CALCULATE and row.status == "completed"
+                and row.computation_ids and row.details.get("formula_id") == selected_formula.formula_id
+                for row in state.completed_actions))
+            execution_contract = formula_contract(
+                selected_formula, bindings, [*formula_missing, *missing_bindings],
+                source_verified=formula_source_verified,
+                dimension_valid=not bool(result.telemetry.get("unit_propagation_failure_reason")),
+                source_text=next((str(item.get("text") or "") for item in evidence_rows
+                                  if selected_formula and item.get("evidence_id") == selected_formula.source_id), ""),
+            ) if requires_sourced_formula else None
+            actionability = assess_actionability(
+                state, intent.kind,
+                direct_ready=bool(direct_fast and direct_users.records and not direct_missing
+                                  and not state.computation_ids),
+                user_formula_ready=bool(intent.user_equation and users.records and not missing_bindings
+                                        and not state.computation_ids),
+                kb_formula_ready=bool(execution_contract and execution_contract.executable
+                                      and state.formula_ready and not target_satisfied
+                                      and not already_executed_formula and not state.goal_achieved),
+                missing_user_inputs=(direct_missing if intent.kind == GoalIntentKind.DIRECT_CALC else
+                                     user_formula_missing or missing_bindings if intent.kind == GoalIntentKind.USER_FORMULA_CALC else
+                                     formula_missing or missing_bindings),
+                missing_source=[] if formula_source_verified or not requires_sourced_formula
+                else ["verified_formula_source"],
+                calculation_budget_available=bool(request.allow_python_execution and
+                                                  request.python_execution_approved and
+                                                  result.python_calls_total < request.max_python_calls),
+                unchanged_failed_calculation=unchanged_failure,
+            )
+            result.telemetry["actionability_state"] = {
+                "direct_calculation_ready": actionability.direct_calculation_ready,
+                "user_formula_ready": actionability.user_formula_ready,
+                "kb_formula_ready": actionability.kb_formula_ready,
+                "clarification_allowed": actionability.clarification_allowed,
+                "safe_stop_allowed": actionability.safe_stop_allowed,
+                "reasons": list(actionability.reasons),
+            }
+            result.telemetry["direct_execution_ready"] = actionability.direct_calculation_ready
+            result.telemetry["formula_execution_ready"] = actionability.kb_formula_ready
+            result.telemetry["formula_execution_blockers"] = list(dict.fromkeys(
+                [*formula_missing, *missing_bindings] + ([] if formula_source_verified else
+                ["source_not_verified"] if requires_sourced_formula else [])))
+            result.telemetry["formula_bound_variables"] = {name: fact.fact_id for name, fact in bindings.items()}
+            result.telemetry["bound_operand_ids"] = [fact.fact_id for fact in bindings.values()]
+            result.telemetry["binding_methods"] = {name: fact.extraction_method for name, fact in bindings.items()}
+            result.telemetry["remaining_required_goal_ids"] = list(actionability.remaining_required_goal_ids)
+            if execution_contract:
+                result.telemetry["formula_execution_contract"] = {
+                    "target_symbol": execution_contract.target_symbol,
+                    "normalized_equation": execution_contract.normalized_equation,
+                    "rhs_variables": [row.__dict__ for row in execution_contract.rhs_variables],
+                    "missing_variables": list(execution_contract.missing_variables),
+                    "ambiguous_variables": list(execution_contract.ambiguous_variables),
+                    "dimension_validation": execution_contract.dimension_validation,
+                }
             action = self.action_planner.select(request, state, user_fact_ids=[r.fact_id for r in
                                                 (formula_users if requires_sourced_formula else users).records],
                                                 evidence_fact_ids=evidence_fact_ids,
@@ -1797,6 +1911,15 @@ class GoalExecutionAgent(GoalResearchAgent):
                                                 source_context=[item.document for item in accumulator.internal[:2]],
                                                 direct_ready=bool(direct_fast and direct_users.records and not direct_missing),
                                                 resumed_with_new_input=resumed_with_new_input)
+            if (actionability.calculation_ready and not target_satisfied and
+                    action.action_type != GoalActionType.CALCULATE):
+                result.telemetry["stop_rejected_actionable_work"] = action.action_type == GoalActionType.STOP
+                result.telemetry["formula_execution_forced"] = actionability.kb_formula_ready
+                action = action.model_copy(update={
+                    "action_type": GoalActionType.CALCULATE,
+                    "reason_code": "v22_actionable_calculation",
+                    "formula_id": selected_formula.formula_id if actionability.kb_formula_ready and selected_formula else None,
+                })
             if dependency_plan and dependency_plan.block_reason:
                 action = action.model_copy(update={"action_type": GoalActionType.STOP,
                     "reason_code": dependency_plan.block_reason, "formula_id": None})
@@ -2120,9 +2243,12 @@ class GoalExecutionAgent(GoalResearchAgent):
                     computation.source_evidence_ids = list(dict.fromkeys(
                         [selected_formula.source_id, *conversion_source_ids,
                          *(item.source_id for item in used_aliases)]))
-                    if selected_formula.formula_derivation or selected_formula.layout_transformations:
+                    if (selected_formula.formula_derivation or selected_formula.layout_transformations or
+                            normalize_formula(selected_formula.raw_span) !=
+                            normalize_formula(selected_formula.expression_candidate or "")):
                         computation.raw_formula_span = selected_formula.raw_span
-                        computation.source_equation = selected_formula.source_equation
+                        computation.source_equation = (selected_formula.source_equation or
+                                                       selected_formula.expression_candidate)
                         computation.formula_derivation = selected_formula.formula_derivation
                     local_text = source_text[max(0, selected_formula.span_start - 240):
                                              selected_formula.span_end + 240]

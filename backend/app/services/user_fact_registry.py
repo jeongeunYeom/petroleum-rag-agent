@@ -14,12 +14,12 @@ LEGACY_UNIT = (r"(?:USD/m|MMscf/d|psi/ft|kg/m(?:\^?3|³)|mg/L|mD[·*\-]ft|m(?:\^
         r"\$/m(?:\^?3|³)|m(?:\^?3|³)|ft(?:\^?3|³)|mm(?:\^?2|²|⁻¹)|"
         r"m(?:\^?2|²)|psi/(?:day|d)|psi(?:⁻¹|\^-?1)?|stb/(?:day|h|d)|"
         r"bbl/d|lbf/ft|lb/ft|gpm|kWh|kW|hp|ppg|acres?|feet|inch|in|ft|mD|md|"
-        r"psia|psig|kPa|Pa|bbl|stb|days?|seconds?|secs?|hours?|hr|h|d|s|"
+        r"psia|psig|kPa|Pa|bbl|stb|scf|units?|days?|seconds?|secs?|hours?|hr|h|d|s|"
         r"mg|kg|kJ|lbf|cP|°C|USD|달러|시간|분|min|m/s|m/h|mm|m|L|%|dimensionless)")
 RESISTIVITY_UNIT = r"(?:Ω\s*[·\-]?\s*m|ohm(?:\s*[·\-]?\s*m|[\s-]+met(?:er|re)))"
 UNIT = rf"(?:{RESISTIVITY_UNIT}(?![A-Za-z0-9_/*^·²³⁻])|{COMPOUND_UNIT}|{LEGACY_UNIT}(?![A-Za-z0-9_/*^·²³⁻]))"
 ASSIGNMENT = re.compile(
-    rf"(?P<label>φ|[A-Za-z][A-Za-z0-9 _/\-]{{0,48}}?)\s*[:=]\s*(?P<value>{NUMBER})\s*(?P<unit>{UNIT})?(?=$|[,;\s]|\.(?!\d)|[가-힣])",
+    rf"(?P<label>[φρΔμλ]|[A-Za-zφρΔμλ][A-Za-z0-9φρΔμλ _/\-]{{0,48}}?)\s*[:=]\s*(?P<value>{NUMBER})\s*(?P<unit>{UNIT})?(?=$|[,;\s]|\.(?!\d)|[가-힣])",
     re.IGNORECASE,
 )
 TUPLE_HEADER = re.compile(r"\((?P<header>[^()]+)\)\s*:")
@@ -97,6 +97,28 @@ SERIES = re.compile(rf"(?P<label>[가-힣]{{2,12}}(?:\s+[가-힣]{{2,12}})?|[A-Z
                     rf"(?P<values>(?:{NUMBER})(?:\s*[,，]\s*(?:{NUMBER})){{2,12}})\s*(?P<unit>{UNIT})", re.I)
 SHARED_DURATION = re.compile(rf"(?:모두|각각|each|all)\s*(?P<value>{NUMBER})\s*"
                              rf"(?P<unit>시간|hours?|hr|h|days?|s|sec|seconds?)", re.I)
+WEIGHT_VALUE_PAIR = re.compile(
+    rf"(?P<weight>{NUMBER})\s*(?P<weight_unit>bbl|stb|m\^?3|units?|kg|L)\s*"
+    rf"(?:at|with|에서|에|일\s*때)\s*(?P<value>{NUMBER})\s*(?P<value_unit>{UNIT})?", re.I)
+TEMPORAL_PAIR = re.compile(
+    rf"(?:falls?|fell|drops?|dropped|declines?|declined|rises?|rose|increases?|increased|changes?|changed)\s+from\s+"
+    rf"(?P<initial>{NUMBER})\s*(?P<initial_unit>{UNIT})?\s+to\s+"
+    rf"(?P<final>{NUMBER})\s*(?P<final_unit>{UNIT})|"
+    rf"(?:begins?|starts?)\s+at\s+(?P<start>{NUMBER})\s*(?P<start_unit>{UNIT})?\s*"
+    rf"(?:and\s+)?ends?\s+at\s+(?P<end>{NUMBER})\s*(?P<end_unit>{UNIT})", re.I)
+TEMPORAL_TRIPLE = re.compile(
+    rf"(?:begins?|starts?)\s+at\s+(?P<start>{NUMBER})\s*(?P<unit>{UNIT})?\s*[,;]?\s*"
+    rf"(?:falls?|fell|drops?|dropped|declines?|declined)\s+to\s+(?P<trough>{NUMBER})\s*(?P<trough_unit>{UNIT})?\s*[,;]?\s*"
+    rf"(?:and\s+)?(?:recovers?|recovered|rises?|rose)\s+to\s+(?P<recovered>{NUMBER})\s*(?P<recovered_unit>{UNIT})", re.I)
+KOREAN_TEMPORAL_PAIR = re.compile(
+    rf"(?P<initial>{NUMBER})\s*(?P<initial_unit>{UNIT})?\s*에서\s*"
+    rf"(?P<final>{NUMBER})\s*(?P<final_unit>{UNIT})?\s*(?:로|으로)\s*"
+    rf"(?:감소|증가|변화)", re.I)
+AMOUNT_DURATION = re.compile(
+    rf"(?P<amount>{NUMBER})\s*(?P<amount_unit>bbl|stb|m\^?3|scf)\s*"
+    rf"(?:collected|received|produced|injected|gathered|in|over|during|을|를)?\s*"
+    rf"(?:in|over|during|동안|에)?\s*(?P<duration>{NUMBER})\s*"
+    rf"(?P<duration_unit>hours?|hr|h|days?|d|minutes?|min|시간|분)", re.I)
 
 # Comma-separated observations, not assignments, coordinates, or thousands separators.
 LIST_ITEM = rf"(?:{NUMBER})(?:\s*{UNIT}(?![A-Za-z0-9/]))?"
@@ -126,6 +148,7 @@ def normalize_unit(raw: str) -> str:
     if inverse:
         return "1/" + inverse[1]
     aliases = {"시간": "h", "hours": "h", "hour": "h", "hr": "h", "days": "d", "day": "d",
+               "minutes": "min", "minute": "min",
                "seconds": "s", "second": "s", "secs": "s", "sec": "s", "inch": "in",
                "feet": "ft", "분": "min", "달러": "USD", "md": "mD", "md*ft": "mD*ft",
                "md-ft": "mD*ft", "m3/day": "m3/d", "m3/hr": "m3/h", "stb/day": "stb/d",
@@ -195,7 +218,9 @@ def _number(raw: str) -> float | None:
 
 
 def _name(value: str) -> str:
-    return re.sub(r"[^A-Za-z0-9가-힣]+", "_", value.strip().replace("φ", "phi")).strip("_")
+    for symbol, alias in {"φ": "phi", "ρ": "rho", "Δ": "Delta", "μ": "mu", "λ": "lambda"}.items():
+        value = value.replace(symbol, alias)
+    return re.sub(r"[^A-Za-z0-9가-힣]+", "_", value.strip()).strip("_")
 
 
 class UserFactRecord(BaseModel):
@@ -217,6 +242,8 @@ class UserFactRecord(BaseModel):
     unit_span: tuple[int, int] | None = None
     confidence: float = 1.0
     extraction_method: str = "deterministic"
+    concept_name: str | None = None
+    literal_symbol_alias: str | None = None
 
 
 class UserFactRegistry(BaseModel):
@@ -392,7 +419,56 @@ class UserFactRegistry(BaseModel):
         for line in topic.splitlines(keepends=True):
             text = line.rstrip("\r\n")
             protected_spans: list[tuple[int, int]] = []
+            for index, found in enumerate(WEIGHT_VALUE_PAIR.finditer(text), 1):
+                prefix = f"pair_{index}"
+                add(prefix + "_weight", found["weight"], found["weight_unit"],
+                    text[found.start("weight"):found.end("weight_unit")], found.group(),
+                    offset + found.start("weight"))
+                add(prefix, found["value"], found["value_unit"] or "",
+                    text[found.start("value"):found.end("value_unit")], found.group(),
+                    offset + found.start("value"))
+                protected_spans.append(found.span())
+            for found in TEMPORAL_TRIPLE.finditer(text):
+                unit = found["recovered_unit"]
+                for name, value_key, unit_key in (("start", "start", "unit"),
+                                                  ("trough", "trough", "trough_unit"),
+                                                  ("recovered", "recovered", "recovered_unit")):
+                    add(name, found[value_key], found[unit_key] or unit,
+                        text[found.start(value_key):found.end(unit_key)] if found[unit_key]
+                        else found[value_key], found.group(), offset + found.start(value_key))
+                protected_spans.append(found.span())
+            for found in TEMPORAL_PAIR.finditer(text):
+                if any(start < found.end() and found.start() < end for start, end in protected_spans):
+                    continue
+                first, last, first_unit, last_unit = (("initial", "final", "initial_unit", "final_unit")
+                    if found["initial"] else ("start", "end", "start_unit", "end_unit"))
+                for name, value_key, unit_key in (("initial", first, first_unit),
+                                                  ("final", last, last_unit)):
+                    add(name, found[value_key], found[unit_key] or found[last_unit],
+                        text[found.start(value_key):found.end(unit_key)] if found[unit_key]
+                        else found[value_key], found.group(), offset + found.start(value_key))
+                protected_spans.append(found.span())
+            for found in KOREAN_TEMPORAL_PAIR.finditer(text):
+                if any(start < found.end() and found.start() < end for start, end in protected_spans):
+                    continue
+                unit = found["initial_unit"] or found["final_unit"] or ""
+                for name in ("initial", "final"):
+                    span = text[found.start(name):found.end(name + "_unit")] if found[name + "_unit"] else found[name]
+                    add(name, found[name], unit, span, found.group(), offset + found.start(name))
+                protected_spans.append(found.span())
+            for found in AMOUNT_DURATION.finditer(text):
+                if any(start < found.end() and found.start() < end for start, end in protected_spans):
+                    continue
+                add("amount", found["amount"], found["amount_unit"],
+                    text[found.start("amount"):found.end("amount_unit")], found.group(),
+                    offset + found.start("amount"))
+                add("duration", found["duration"], found["duration_unit"],
+                    text[found.start("duration"):found.end("duration_unit")], found.group(),
+                    offset + found.start("duration"))
+                protected_spans.append(found.span())
             for group, tokens in numeric_lists(text):
+                if any(start < group.end() and group.start() < end for start, end in protected_spans):
+                    continue
                 shared = tokens[-1]["unit"] or ""
                 context = text[max(0, group.start()-45):group.start()]
                 weight = bool(re.search(r"weights?\s*(?:are|were|[:=])?\s*$|가중치\s*(?:는|:|=)?\s*$", context, re.I))
@@ -508,8 +584,12 @@ class UserFactRegistry(BaseModel):
                 label = found.group("label").strip()
                 label = re.split(r"\b(?:has|have|with|where|given|and|at|using|use)\b", label, flags=re.I)[-1].strip()
                 tokens = label.split()
-                if (len(tokens) > 1 and re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", tokens[-1])
-                        and ("_" in tokens[-1] or len(tokens[-1]) == 1)):
+                if (len(tokens) > 1 and re.fullmatch(r"[A-Za-zφρΔμλ][A-Za-z0-9φρΔμλ_]*", tokens[-1])
+                        and ("_" in tokens[-1] or len(tokens[-1]) <= 3
+                             and (any(char.isupper() for char in tokens[-1]) or
+                                  any(char in "φρΔμλ" for char in tokens[-1]) or
+                                  tokens[-1].casefold() in {"phi", "sg", "sor", "swc"} or
+                                  tokens[-2].casefold() in {"for", "when", "where", "with", "using", "given"}))):
                     # A prose descriptor before a literal symbol is not part of its name.
                     label = tokens[-1]
                 if label.casefold().startswith("well "):
@@ -522,10 +602,15 @@ class UserFactRegistry(BaseModel):
                     # A following word may be an unsupported unit; do not erase it.
                     continue
                 prefix = f"Well_{well}_" if well and label.casefold() not in {"well", "layer"} else ""
-                normalized_label = label.casefold() if len(label) > 2 and label.istitle() else label
+                normalized_label = label.casefold() if len(label) > 3 and label.istitle() else label
                 add(prefix + normalized_label, found.group("value"), found.group("unit") or "", found.group(0), f"Well {well}" if well else None, offset + found.start())
                 if records and records[-1].topic_start == offset + found.start():
                     records[-1].extraction_method = "explicit_assignment"
+                    if label != found.group("label").strip():
+                        records[-1].concept_name = _name(found.group("label").strip()[:-len(label)].strip())
+                        records[-1].literal_symbol_alias = label
+                    elif any(char in "φρΔμλ" for char in label):
+                        records[-1].literal_symbol_alias = label
                 protected_spans.append(found.span())
             # A trailing unit can scope a comma-separated, homogeneous series of
             # assignments. Preserve each literal span and the exact group context.
@@ -679,6 +764,9 @@ def validate_original_operands(text: str, facts: UserFactRegistry, *, list_opera
         expected_positions = {}
         expected_names = {}
         for group, _ in numeric_lists(text):
+            if any(pair.start() < group.end() and group.start() < pair.end()
+                   for pair in WEIGHT_VALUE_PAIR.finditer(text)):
+                continue
             # Independently tokenize the original list; never trust registry length or values.
             # Keep thousands separators inside literals, and units with digits intact.
             matches = list(re.finditer(rf"(?:{NUMBER})(?:\s*{UNIT}(?![A-Za-z0-9/]))?", group.group(), re.I))
@@ -717,7 +805,7 @@ def validate_original_operands(text: str, facts: UserFactRegistry, *, list_opera
                 raise ValueError(f"operand_source_mismatch: {fact.name}")
             continue
         # Exact name anchors have precedence over heuristic aliases; last explicit correction wins.
-        name = re.escape(fact.name).replace("_", r"[ _]+")
+        name = re.escape(fact.literal_symbol_alias or fact.name).replace("_", r"[ _]+")
         if fact.name.casefold() == "phi":
             name = r"(?:phi|φ)"
         assignments = list(re.finditer(rf"(?<![\w:]){name}\s*[:=]\s*(?P<value>{NUMBER})\s*(?P<unit>{UNIT})?(?=$|[,;\s]|\.(?!\d)|[가-힣])", text, re.I))

@@ -18,8 +18,8 @@ from app.services.formula_layout_normalizer import (
 
 
 EQUATION = re.compile(
-    r"(?P<equation>\b[A-Za-z][A-Za-z0-9_₀-₉ₓₒₐ]*\s*=\s*"
-    r"(?:(?!\.\s+[A-Za-z]|,\s*[A-Za-z][A-Za-z0-9_₀-₉ₓₒₐ]*\s*=)[A-Za-z0-9_₀-₉ₓₒₐφ+\-*/().×÷−· \t])+)"
+    r"(?P<equation>\b[A-Za-zφρΔμλ][A-Za-z0-9_φρΔμλ₀-₉ₓₒₐ]*\s*=\s*"
+    r"(?:(?!\.\s+[A-Za-z]|,\s*[A-Za-z][A-Za-z0-9_₀-₉ₓₒₐ]*\s*=)[A-Za-z0-9_φρΔμλ₀-₉ₓₒₐ+\-*/().×÷−· \t])+)"
 )
 EXPLICIT_DEFINITION = re.compile(
     r"\b(?P<lhs>[A-Za-z][A-Za-z0-9_]*)\s+"
@@ -29,7 +29,8 @@ EXPLICIT_DEFINITION = re.compile(
     r"(?:(?P<difference_a>[A-Za-z][A-Za-z0-9_]*)\s+minus\s+"
     r"(?P<difference_b>[A-Za-z][A-Za-z0-9_]*)))\b", re.I)
 TRANSLATION = str.maketrans({"×": "*", "÷": "/", "−": "-", "–": "-", "·": "*",
-                            "φ": "phi", "ₓ": "x", "ₒ": "o", "ₐ": "a",
+                            "φ": "phi", "ρ": "rho", "Δ": "Delta", "μ": "mu", "λ": "lambda",
+                            "ₓ": "x", "ₒ": "o", "ₐ": "a",
                             "₀": "0", "₁": "1", "₂": "2", "₃": "3", "₄": "4", "₅": "5",
                             "₆": "6", "₇": "7", "₈": "8", "₉": "9"})
 ALLOWED = (ast.Expression, ast.BinOp, ast.UnaryOp, ast.Name, ast.Constant,
@@ -88,6 +89,8 @@ def source_contains_equation(record: "FormulaSourceRecord", text: str,
     """A locator or neighboring chunk never substitutes for this exact source span."""
     if text[record.span_start:record.span_end] != record.raw_span:
         return False
+    if _unconsumed_continuation(text, record.span_end):
+        return False
     if record.layout_transformations:
         local = text[max(0, record.span_start - 350):min(len(text), record.span_end + 350)]
         layout = normalize_extracted_equation(record.raw_span, local)
@@ -109,6 +112,17 @@ def source_contains_equation(record: "FormulaSourceRecord", text: str,
                 and equation_ast(expected) == record.equation_ast
                 and record.equation_ast == equation_ast(record.expression_candidate)
                 and record.equation_ast == equation_ast(formula or record.expression_candidate))
+
+
+def _unconsumed_continuation(text: str, end: int) -> bool:
+    """A short operator row immediately after a span belongs to that formula.
+
+    A prose sentence or a separately labeled equation is not attached. This
+    rejects a clipped prefix; the full layout block must be reconstructed first.
+    """
+    return bool(re.match(r"[ \t]*\r?\n[ \t]*[+\-*/×÷−][ \t]*"
+                         r"(?:[A-Za-zφρμλ][A-Za-z0-9_φρμλ]*|\d+(?:\.\d+)?)"
+                         r"(?=[ \t]*(?:\r?\n|$|[+\-*/×÷−]))", text[end:]))
 
 
 def porosity_exponent_layout_context(local: str) -> bool:
@@ -284,6 +298,8 @@ class FormulaSourceRegistry(BaseModel):
                 if variables is None and not (re.search(r"[+\-*/×÷−·]", rhs) and re.search(r"[A-Za-z_]", rhs)):
                     continue
                 start, end = match.start(), match.start() + len(raw)
+                if _unconsumed_continuation(text, end):
+                    continue
                 if (re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", candidate.split("=", 1)[1].strip())
                         and re.match(rf"\s*\({UNIT}\)", text[end:], re.I)):
                     continue

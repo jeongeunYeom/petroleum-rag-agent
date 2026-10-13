@@ -61,6 +61,8 @@ class CalculationRequestIR(BaseModel):
 
 OPERATIONS = {
     "unit_conversion": r"\b(?:convert|conversion|per hour|per day)\b|시간당|일당|단위\s*변환|으로\s*바꿔",
+    "amount_per_time": r"\b(?:give|report|express|convert|as|in|to)\s+(?:a\s+)?(?:bbl|stb|m3|m\^3|scf)\s*/\s*(?:day|d|hour|h)\b|\b(?:per\s+day|per\s+hour)\b|일당\s*(?:유량|생산량)|시간당\s*(?:유량|생산량)",
+    "multi_difference": r"\b(?:drawdown\s+and\s+recovery|pressure\s+drop\s+and\s+recovery)\b|압력\s*강하.{0,12}회복",
     "centered_difference": r"\b(?:centered|central)\s+(?:difference|derivative)\b|중심\s*(?:차분|미분)",
     "finite_difference": r"\bfinite\s+difference\b|\b(?:pressure|rate)\s+(?:change\s+)?rate\b|유한\s*차분|압력\s*변화율|변화\s*속도",
     "linear_regression_slope": r"\b(?:linear\s+regression\s+slope|least[- ]squares\s+slope)\b|선형\s*회귀\s*기울기",
@@ -68,7 +70,7 @@ OPERATIONS = {
     "power_times_duration": r"\b(?:energy\s+use|power\s*(?:times|×|\*)\s*time|power\s+consumption)\b|전력.{0,16}(?:시간|에너지)|소비\s*에너지",
     "concentration_mass_per_volume": r"\b(?:mass\s+concentration|concentration\s+from\s+mass)\b|질량\s*농도|농도를\s*계산",
     "weighted_average_by_duration": r"\b(?:time[- ]weighted|duration[- ]weighted)\s+(?:average|mean)\b|시간\s*가중\s*평균|가중\s*시간\s*평균",
-    "percentage_decrease": r"\bpercent(?:age)?\s+decrease\b|감소율|몇\s*퍼센트\s*감소",
+    "percentage_decrease": r"\bpercent(?:age)?\s+(?:decrease|decline)\b|감소율|몇\s*퍼센트\s*감소",
     "percentage_increase": r"\bpercent(?:age)?\s+increase\b|증가율",
     "recovery_percent": r"\b(?:recovery|recovered)\s+(?:rate|percent(?:age)?)\b|회수율",
     "net_difference": r"\bnet\s+(?:difference|change)\b|순\s*변화|순\s*차이",
@@ -89,7 +91,7 @@ OPERATIONS = {
     "sum": r"\b(?:sum|total)\b|합계|총합",
     "maximum": r"\b(?:maximum|max|highest|largest)\b|최댓값|최대",
     "minimum": r"\b(?:minimum|min|lowest|smallest)\b|최솟값|최소",
-    "ranking": r"\b(?:ranking|rank|order(?:ing)?)\b|순위|정렬",
+    "ranking": r"\b(?:ranking|rank|order(?:ing)?|highest\s+labeled\s+case|top\s+case)\b|순위|정렬",
     "percent_change": r"\b(?:percent(?:age)? change|percent(?:age)? difference)\b|변화율",
     "ratio": r"\bratio\b|비율",
     "difference": r"\b(?:difference|subtract|pressure\s+drop)\b|차이|차감|압력\s*강하량",
@@ -173,7 +175,13 @@ def parse_request_ir(request: GoalResearchRequest, criteria: list[GoalCriterion]
     if formula_origin(f"{request.topic} {request.goal or ''}") == FormulaOrigin.KB_REFERENCED:
         literal_user_formula = None
     found = [name for name, pattern in OPERATIONS.items() if re.search(pattern, goal, re.I)]
+    if "amount_per_time" in found:
+        facts = UserFactRegistry.from_topic(request.topic)
+        if not {"amount", "duration"} <= {row.name for row in facts.records}:
+            found.remove("amount_per_time")
     for dominant, subsumed in (("weighted_average_by_duration", "weighted_average"),
+                               ("amount_per_time", "unit_conversion"),
+                               ("multi_difference", "difference"),
                                ("cylinder_volume", "unit_conversion"),
                                ("weighted_average_by_duration", "mean"),
                                ("unit_conversion", "mean"),

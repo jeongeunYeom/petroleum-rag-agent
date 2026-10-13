@@ -32,6 +32,8 @@ FORMATION_SYMBOL_TERMS = {
     "rw": "formation water resistivity",
     "sw": "water saturation",
     "phi": "porosity",
+    "m": "cementation factor",
+    "a": "formation factor coefficient",
 }
 
 
@@ -261,6 +263,8 @@ class GoalActionPlanner:
                          if re.search(rf"(?<![A-Za-z0-9_]){re.escape(symbol)}(?![A-Za-z0-9_])", text, re.I)]
                         if re.search(r"지층\s*평가|formation evaluation|formation factor|"
                                      r"resistiv|\b(?:Sw|Rw|Rt)\b", text, re.I) else [])
+        if re.search(r"formation factor|formation resistivity factor", text, re.I):
+            symbol_terms.extend(["measured porosity", "cementation factor"])
         names = " ".join(dict.fromkeys(fact_names))
         units = " ".join(dict.fromkeys(unit for unit in fact_units.values() if unit))
         qualifiers = ("equation formula relation definition variables units" if attempt == 1 else
@@ -286,6 +290,12 @@ class GoalActionPlanner:
             symbols = list(dict.fromkeys(re.findall(r"\b[A-Za-z][A-Za-z0-9_]{0,20}\b",
                                                  f"{request.topic} {request.goal or ''}")))[:16]
             terms += "\nequation formula variables units " + " ".join(symbols)
+            if re.search(r"formation factor|formation evaluation|지층\s*계수", f"{request.topic} {request.goal or ''}", re.I):
+                terms += "\n" + " ".join(term for symbol, term in FORMATION_SYMBOL_TERMS.items()
+                    if re.search(rf"(?<![A-Za-z0-9_]){re.escape(symbol)}(?![A-Za-z0-9_])",
+                                 f"{request.topic} {request.goal or ''}", re.I))
+                if re.search(r"formation factor", f"{request.topic} {request.goal or ''}", re.I):
+                    terms += " measured porosity cementation factor"
         text = f"{request.topic} {request.goal or ''}"
         translated = list(dict.fromkeys(english for korean, english in sorted(ENGINEERING_TERMS.items(), key=lambda row: -len(row[0]))
                                         if korean in text))

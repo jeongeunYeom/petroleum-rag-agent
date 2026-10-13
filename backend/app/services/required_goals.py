@@ -30,6 +30,19 @@ def parse_required_goals(request: GoalResearchRequest, intent_kind: str,
                          numeric_target: str | None) -> list[RequiredGoal]:
     """Split only explicit output obligations, never bare noun conjunctions."""
     text = (request.current_message or request.goal or request.topic).strip()
+    if intent_kind == "direct_calc":
+        # A single arithmetic run can satisfy several explicit outputs. Freeze
+        # each requested output separately instead of treating the whole prompt
+        # as an output name that no CALC manifest can ever match.
+        from app.services.calculation_request_ir import parse_request_ir
+        outputs = parse_request_ir(request, []).requested_outputs
+        aggregate_names = {"mean", "sum", "ranking", "maximum", "minimum", "median", "range",
+                           "std_population", "std_sample", "variance", "variance_population"}
+        names = list(dict.fromkeys(item.semantic_name for item in outputs
+                                   if item.semantic_name in aggregate_names))
+        if len(names) >= 2:
+            return [_goal("numeric_calculation", name, text, index)
+                    for index, name in enumerate(names, 1)]
     # Values in an earlier sentence are context, not another requested output.
     clause = re.split(r"[.!?]\s*", text)[-1].strip() or text
     goals: list[RequiredGoal] = []
@@ -126,7 +139,9 @@ def check_required_goals(goals: list[RequiredGoal], request: GoalResearchRequest
                         if normalize_symbol(str(row.get("name") or "")) == target]
             ids = [calc.computation_id for calc, _ in matching]
             represented = any(f"[{calc.computation_id}]" in answer and
-                              str(row.get("value")) in answer and
+                              (str(row.get("value")) in answer or
+                               isinstance(row.get("value"), list) and
+                               " > ".join(str(value) for value in row["value"]) in answer) and
                               (not row.get("unit") or str(row["unit"]) in answer)
                               for calc, row in matching)
             status = "MET" if represented else "PARTIAL" if matching else "UNMET"

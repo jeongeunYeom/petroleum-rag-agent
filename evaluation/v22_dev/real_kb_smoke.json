@@ -1,0 +1,35 @@
+{
+  "status": "development_only_not_unseen",
+  "product_base_sha": "f5182b8ae2907452e1c53373055e66c5182c9b90",
+  "model": "qwen3:8b",
+  "retrieval_mode": "hybrid",
+  "web": false,
+  "cases": [
+    {"id": "D01", "category": "direct", "message": "Three production streams deliver A=126 stb/d, B=94 stb/d, and C=57 stb/d. Give the combined total rate."},
+    {"id": "D02", "category": "direct", "message": "An injection rate fell from 872 to 713 stb/d. Calculate its percentage decrease."},
+    {"id": "D03", "category": "direct", "message": "Gas 3120 scf and oil 104 stb were collected. Calculate the gas-to-oil ratio."},
+    {"id": "D04", "category": "direct", "message": "A tank received 648 bbl over 12 hours. Give bbl/day."},
+    {"id": "D05", "category": "direct", "message": "Pressure starts at 3330 psi, falls to 3070 psi, recovers to 3210 psi. Calculate drawdown and recovery."},
+    {"id": "D06", "category": "direct", "message": "Mix 65 bbl at 9.2 ppg, 95 bbl at 10.1 ppg, and 40 bbl at 10.9 ppg. Calculate weighted average density."},
+    {"id": "U01", "category": "user_formula", "message": "A=19 psi and B=8 psi. Using my equation R = A - B, calculate R."},
+    {"id": "U02", "category": "user_formula", "message": "x=7 dimensionless, y=3 dimensionless. My relation is Z = x * y + 2. Calculate Z."},
+    {"id": "U03", "category": "user_formula", "message": "P=6 kW, t=4 h. Use my equation E = P * t and compute E."},
+    {"id": "U04", "category": "user_formula", "message": "a=14 m, b=5 m. I define L = a + b. Calculate L using that equation."},
+    {"id": "K01", "category": "kb_formula", "message": "For crude oil with SG=0.876, locate the specific-gravity to API equation in the internal textbook and calculate API gravity."},
+    {"id": "K02", "category": "kb_formula", "message": "Using the internal Formation Evaluation relation for formation factor F, calculate F when phi=0.17, a=1, and m=2. Cite the literal equation."},
+    {"id": "K03", "category": "kb_formula", "message": "Find the internal Production Technology II equation defining P1 from PR and Pwfs. Calculate P1 for PR=2870 psi and Pwfs=2560 psi."},
+    {"id": "K04", "category": "kb_formula", "message": "Locate the internal Well Test Analysis relation for superficial velocity u from flow rate q and cross-sectional area A. Compute u for q=18 m3/s and A=6 m2 using that sourced relation."},
+    {"id": "K05", "category": "kb_formula", "message": "A second oil sample has SG=0.945. Retrieve the textbook API-gravity relation and calculate its API gravity with source provenance."},
+    {"id": "K06", "category": "kb_formula", "message": "From the internal Formation Evaluation formation-factor equation, compute F for phi=0.25, a=1 and m=2; verify the source span."},
+    {"id": "Q01", "category": "knowledge", "message": "From the internal drilling material, explain why a nonmagnetic drill collar is placed around magnetic survey instruments. Include a source citation."},
+    {"id": "Q02", "category": "knowledge", "message": "According to the internal reservoir engineering material, explain the distinction between free-water level and an observed oil-water contact. Cite the evidence."},
+    {"id": "M01", "category": "multi_goal", "message": "A=68 stb/d, B=135 stb/d, C=97 stb/d. Calculate both the total and the arithmetic mean, then rank the streams by rate."},
+    {"id": "M02", "category": "multi_goal", "message": "A=45 psi, B=71 psi, C=52 psi. Report both the average pressure and the highest labeled case."}
+  ],
+  "resume_probes": [
+    {"id": "R01", "message": "Find the internal API-gravity conversion relation and calculate API gravity for my oil sample; I will provide SG after you ask.", "reply": "SG=0.889"},
+    {"id": "R02", "message": "Use the internal Formation Evaluation equation to calculate formation factor F with a=1 and m=2. Ask me only if a necessary input remains.", "reply": "phi=0.21"},
+    {"id": "R03", "message": "Find the internal P1 = PR - Pwfs relation and calculate P1 when PR=3010 psi. I can supply any missing pressure.", "reply": "Pwfs=2740 psi"},
+    {"id": "R04", "message": "A=36 psi. Calculate the difference A-B, and ask only for an absent operand.", "reply": "B=14 psi"}
+  ]
+}

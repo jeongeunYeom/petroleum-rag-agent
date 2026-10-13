@@ -167,6 +167,30 @@ def normalize_extracted_equation(raw_span: str, local_context: str,
             return LayoutNormalizationResult(raw_span, candidate,
                                              ("spaced_multiplication_x",), candidate_count=1)
 
+    # A PDF may flatten a printed Greek superscript into a suffix (φ2).
+    # A nearby worked example must uniquely validate the exponent reading;
+    # the glyph and raw source span remain untouched for provenance.
+    exponent = re.fullmatch(
+        rf"\s*(?P<lhs>{SYMBOL})\s*=\s*(?P<numerator>\d+(?:\.\d+)?)\s*/\s*"
+        r"(?P<base>φ|phi)(?P<power>[2-5])\s*", raw, re.I)
+    if exponent:
+        example = re.search(
+            rf"\bfor\s+(?:the\s+)?(?:same\s+)?(?:porosity\s+as\s+before\s*\()?"
+            rf"(?P<base>φ|phi)\s*=\s*(?P<value>\d+(?:\.\d+)?)\s*(?P<pct>%)?"
+            rf".{{0,100}}?\b{re.escape(exponent['lhs'])}\s*=\s*(?P<result>\d+(?:\.\d+)?)\b",
+            local_context.split(raw_span, 1)[1][:160], re.I | re.S)
+        if example:
+            base_value = float(example['value']) / (100 if example['pct'] else 1)
+            expected = float(exponent['numerator']) / base_value ** int(exponent['power']) if base_value else float('inf')
+            observed = float(example['result'])
+            if observed > 0 and abs(expected - observed) <= max(1e-8, observed * 0.005):
+                candidate = (f"{exponent['lhs']} = {exponent['numerator']}/"
+                             f"(phi**{exponent['power']})")
+                if _safe_equation(candidate):
+                    return LayoutNormalizationResult(raw_span, candidate,
+                        ("worked_example_validated_exponent",),
+                        (exponent['lhs'], "phi"), candidate_count=1)
+
     if match := STACKED_POWER_FRACTION.fullmatch(raw):
         base, power = match["base"].translate(SUBSCRIPT_TRANSLATION), match["power"].translate(SUBSCRIPT_TRANSLATION)
         numerator, denominator = _product(match["numerator"]), _product(match["denominator"])

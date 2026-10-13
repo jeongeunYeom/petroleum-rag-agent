@@ -29,6 +29,16 @@ from app.tools.python_tools import PythonTools
 from app.services.formula_units import formula_output_unit as _formula_output_unit
 
 
+def _named_heterogeneous_ratio(text: str, left: str, right: str, units: dict[str, str]) -> bool:
+    """Only explicit fluid-volume ratios may use two unlike volume units."""
+    volume = {"scf", "stb", "bbl", "m3", "L", "ft3"}
+    concepts = {"gas", "oil", "water", "produced", "injected"}
+    return (left.casefold() in concepts and right.casefold() in concepts and
+            units[left] in volume and units[right] in volume and
+            bool(re.search(rf"\b{re.escape(left)}[-\s]+to[-\s]+{re.escape(right)}\s+ratio\b",
+                           text, re.I)))
+
+
 def user_formula_bindings(equation: str, facts: UserFactRegistry,
                           source_aliases: dict[str, object] | None = None) -> tuple[dict[str, object], list[str]]:
     """Bind each literal variable once; never borrow textbook example values."""
@@ -108,7 +118,7 @@ def direct_operation_operands(text: str, facts: UserFactRegistry,
                         labels.append(prefix)
                     return "(?:" + "|".join(re.escape(v).replace(r"\ ", r"[ _]+") for v in labels) + ")"
                 a, b = aliases(left), aliases(right)
-                separator = (r"\s*(?:/|divided\s+by|to)\s*" if operation in {"ratio", "divide"} else
+                separator = (r"(?:\s*/\s*|\s+divided\s+by\s+|[-\s]+to[-\s]+)" if operation in {"ratio", "divide"} else
                              r"\s*(?:-|minus)\s*")
                 english_or_symbol = re.search(
                     rf"(?<![A-Za-z0-9_]){a}{separator}{b}(?![A-Za-z0-9_])", text, re.I)
@@ -121,11 +131,23 @@ def direct_operation_operands(text: str, facts: UserFactRegistry,
         candidates = list(dict.fromkeys(candidates))
         if len(candidates) == 1:
             units = {row.name: row.unit for row in facts.records}
-            if units[candidates[0][0]] == units[candidates[0][1]]:
+            left, right = candidates[0]
+            if (units[left] == units[right] or operation in {"ratio", "divide"} and
+                    _named_heterogeneous_ratio(text, left, right, units)):
                 selected[operation] = candidates[0]
             else:
                 missing.append("단위가 호환되는 두 입력값")
         else:
+            # If the user spelled out A-B (or A/B), its order is known even
+            # when one operand has not yet been supplied. Ask for that value.
+            symbol = re.search(r"\b([A-Z][A-Za-z0-9_]{0,2})\s*"
+                               + (r"/" if operation in {"ratio", "divide"} else r"-")
+                               + r"\s*([A-Z][A-Za-z0-9_]{0,2})\b", text)
+            if symbol and symbol.group(1) != symbol.group(2):
+                absent = [name for name in symbol.groups() if name not in names]
+                if len(absent) == 1:
+                    missing.append(f"{absent[0]} 값")
+                    continue
             missing.append("비율의 분자/분모 순서" if operation in {"ratio", "divide"} else "차이를 낼 값의 순서")
     return selected, missing
 
@@ -150,6 +172,30 @@ def _special_direct(operation: str, text: str, values: dict[str, float],
     """Build bounded code from named user facts; calculate an independent expected result."""
     if operation in V3_OPERATIONS:
         return build_v3_operation(operation, text, values, units)
+    if operation == "multi_difference":
+        if not {"start", "trough", "recovered"} <= set(values):
+            raise ValueError("drawdown and recovery need explicit start, trough and recovered values")
+        if len({units[name] for name in ("start", "trough", "recovered")}) != 1:
+            raise ValueError("drawdown and recovery units differ")
+        expected = {"drawdown": values["start"] - values["trough"],
+                    "recovery": values["recovered"] - values["trough"]}
+        code = ("result['drawdown'] = values['start'] - values['trough']\n"
+                "result['recovery'] = values['recovered'] - values['trough']\n")
+        return code, expected, {name: units["start"] for name in expected}
+    if operation == "amount_per_time":
+        if not {"amount", "duration"} <= set(values) or values["duration"] <= 0:
+            raise ValueError("rate needs positive duration and supplied amount")
+        match = re.search(r"\b(?P<amount>bbl|stb|scf|m3|m\^3)\s*/\s*(?P<time>day|d|hour|h)\b", text, re.I)
+        if not match or normalize_unit(match["amount"]) != units["amount"]:
+            raise ValueError("requested rate unit must match the supplied amount unit")
+        seconds = {"s": 1, "min": 60, "h": 3600, "d": 86400}
+        target = "d" if match["time"].casefold() in {"day", "d"} else "h"
+        if units["duration"] not in seconds:
+            raise ValueError("unsupported duration unit")
+        scale = seconds[target] / seconds[units["duration"]]
+        expected = values["amount"] / values["duration"] * scale
+        code = f"result['amount_per_time'] = values['amount'] / values['duration'] * {scale!r}\n"
+        return code, {"amount_per_time": expected}, {"amount_per_time": f"{units['amount']}/{target}"}
     if operation == "weighted_average":
         weights = {key[:-7]: value for key, value in values.items() if key.endswith("_weight")}
         measured = {key for key in values if not key.endswith("_weight")}
@@ -164,6 +210,10 @@ def _special_direct(operation: str, text: str, values: dict[str, float],
         expected = {"weighted_average": math.fsum(value * weight for value, weight in pairs.values()) / math.fsum(weights.values())}
         return code, expected, {"weighted_average": units[next(iter(weights))]}
     if operation == "combined_rate":
+        rate_units = {unit for unit in units.values() if unit in {"stb/d", "bbl/d", "m3/d", "stb/h", "m3/h"}}
+        if len(rate_units) == 1 and len(rate_units) == len(set(units.values())) and len(values) >= 2:
+            code = "result['combined_rate'] = sum(values.values())\n"
+            return code, {"combined_rate": math.fsum(values.values())}, {"combined_rate": next(iter(rate_units))}
         distances = [value for key, value in values.items() if key.endswith("_distance") or units[key] in {"m", "km"}]
         times = [value for key, value in values.items() if key.endswith("_time") or units[key] in {"h", "min"}]
         if not distances or len(distances) != len(times) or sum(times) <= 0:
@@ -233,7 +283,7 @@ def direct_readiness(text: str, facts: UserFactRegistry, operations: list[str]) 
             "mean", "median", "sum", "minimum", "maximum", "weighted_average", "ranking", "range"}))
     except ValueError as exc:
         return [str(exc)]
-    special = {"weighted_average", "combined_rate", "interpolation", "trapezoid",
+    special = {"weighted_average", "combined_rate", "amount_per_time", "multi_difference", "interpolation", "trapezoid",
                "repeated_percent", "allocation", "piecewise_cost"} | V3_OPERATIONS
     chosen = set(operations) & special
     if not chosen:
@@ -409,14 +459,14 @@ async def run_direct_arithmetic(settings: Settings, request: GoalResearchRequest
     allowed = {"mean", "sum", "ranking", "maximum", "minimum", "range", "ratio", "difference",
                "median", "std_population", "std_sample", "variance_population", "variance",
                "geometric_mean", "add", "multiply", "divide", "subtract", "elapsed_time",
-               "percent_conversion", "weighted_average", "combined_rate", "interpolation",
+               "percent_conversion", "weighted_average", "combined_rate", "amount_per_time", "multi_difference", "interpolation",
                "trapezoid", "repeated_percent", "allocation", "piecewise_cost"} | V3_OPERATIONS
     selected = list(dict.fromkeys(operations))
     errors = direct_readiness(original_text or request.topic, facts, selected)
     if errors:
         raise ValueError("; ".join(errors))
     operand_orders = operand_orders or {}
-    special = {"weighted_average", "combined_rate", "interpolation", "trapezoid",
+    special = {"weighted_average", "combined_rate", "amount_per_time", "multi_difference", "interpolation", "trapezoid",
                "repeated_percent", "allocation", "piecewise_cost"} | V3_OPERATIONS
     if (not selected or set(selected) - allowed or len(facts.records) < (1 if selected in (["percent_conversion"], ["unit_conversion"]) else 2)
             or len(facts.records) > 30 or (set(selected) & special and len(selected) != 1)):
@@ -429,7 +479,11 @@ async def run_direct_arithmetic(settings: Settings, request: GoalResearchRequest
     if len(set(names)) != len(names):
         raise ValueError("ambiguous duplicate user input names")
     units = {row.unit.casefold() for row in facts.records}
-    if len(units) != 1 and not (set(selected) <= {"elapsed_time"} or set(selected) & special):
+    heterogeneous_ratio = bool(set(selected) <= {"ratio", "divide"} and operand_orders and all(
+        _named_heterogeneous_ratio(original_text or request.goal or request.topic, left, right,
+                                   {row.name: row.unit for row in facts.records})
+        for left, right in operand_orders.values()))
+    if len(units) != 1 and not (set(selected) <= {"elapsed_time"} or heterogeneous_ratio or set(selected) & special):
         raise ValueError("incompatible direct arithmetic units")
     workspace = settings.agent_workspace_dir.resolve()
     analysis_dir = (workspace / "results" / "goal-research" / run_id / "analysis").resolve()
@@ -445,7 +499,7 @@ async def run_direct_arithmetic(settings: Settings, request: GoalResearchRequest
     special_units: dict[str, str | None] = {}
     if set(selected) & special:
         special_code, special_expected, special_units = _special_direct(
-            selected[0], request.goal or request.topic, values, calculation_units)
+            selected[0], original_text or request.goal or request.topic, values, calculation_units)
     if "elapsed_time" in selected and not {"start_time", "end_time"} <= set(values):
         raise ValueError("elapsed time needs explicit start and end")
     if "geometric_mean" in selected and any(value <= 0 for value in values.values()):
@@ -563,6 +617,8 @@ async def run_direct_arithmetic(settings: Settings, request: GoalResearchRequest
         "name": name, "value": value,
         "unit": (special_units[name] if name in special_units else
                  "%" if name == "percent_conversion" and facts.records[0].unit != "%" else
+                 f"{calculation_units[operand_orders[name][0]]}/{calculation_units[operand_orders[name][1]]}"
+                 if name in {"ratio", "divide"} and calculation_units[operand_orders[name][0]] != calculation_units[operand_orders[name][1]] else
                  None if isinstance(value, list) or name in {"ratio", "divide", "percent_conversion"} else
                  "min" if name == "elapsed_time" else
                  f"({facts.records[0].unit})^2" if name in {"variance", "variance_population"} and facts.records[0].unit else
