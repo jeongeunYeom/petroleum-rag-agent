@@ -96,7 +96,11 @@ def main(stage: str) -> None:
             }
         scored = json.loads((HERE / "scored_rows.json").read_text(encoding="utf-8"))
         summary["judge_coverage"] = len(scored) == 36 * len(summary["attempts"])
-        summary["finalized"] = all(v["one_attempt_each"] and v["within_systemic_threshold"] for v in summary["attempts"].values()) and summary["judge_coverage"]
+        summary["finalized"] = (
+            all(v["one_attempt_each"] for v in summary["attempts"].values())
+            and all(summary["attempts"][system]["within_systemic_threshold"] for system in SYSTEMS)
+            and summary["judge_coverage"]
+        )
         write_json(HERE / "kb_snapshot_after.json", kb_snapshot())
         assert summary["kb_matches_before"] and all(v["one_attempt_each"] for v in summary["attempts"].values())
     write_json(HERE / f"integrity_{'pre' if stage == 'pre' else 'post'}.json", summary)
