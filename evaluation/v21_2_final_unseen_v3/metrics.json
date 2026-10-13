@@ -1,0 +1,237 @@
+{
+  "finalized": true,
+  "primary_denominator": 36,
+  "numeric_denominator": 16,
+  "systems": {
+    "qwen_closed_book": {
+      "n": 36,
+      "goal_success": 0.3333333333333333,
+      "claim_coverage": 0.6597222222222222,
+      "hallucination_free": 0.5833333333333334,
+      "numeric_accuracy": 0.6875,
+      "numeric_denominator": 16,
+      "technical_failures": 0,
+      "unnecessary_refusals": 1,
+      "mean_latency_seconds": 1.876305555555556,
+      "median_latency_seconds": 1.5234999999999999,
+      "p95_latency_seconds": 3.3165
+    },
+    "v21_2_agent": {
+      "n": 36,
+      "goal_success": 0.05555555555555555,
+      "claim_coverage": 0.1736111111111111,
+      "hallucination_free": 0.8333333333333334,
+      "numeric_accuracy": 0.0625,
+      "numeric_denominator": 16,
+      "technical_failures": 0,
+      "unnecessary_refusals": 23,
+      "mean_latency_seconds": 31.475333333333342,
+      "median_latency_seconds": 19.344,
+      "p95_latency_seconds": 70.30000000000001
+    },
+    "gpt_reference": {
+      "n": 36,
+      "goal_success": 0.5,
+      "claim_coverage": 0.7986111111111112,
+      "hallucination_free": 0.8611111111111112,
+      "numeric_accuracy": 0.9375,
+      "numeric_denominator": 16,
+      "technical_failures": 1,
+      "unnecessary_refusals": 2,
+      "mean_latency_seconds": 3.3502499999999995,
+      "median_latency_seconds": 2.5620000000000003,
+      "p95_latency_seconds": 7.23375
+    }
+  },
+  "paired_differences": {
+    "qwen_closed_book": {
+      "goal_success": {
+        "delta": -0.2777777777777778,
+        "ci95_low": -0.4166666666666667,
+        "ci95_high": -0.1388888888888889,
+        "n": 36,
+        "resamples": 10000,
+        "seed": 20261013
+      },
+      "claim_coverage": {
+        "delta": -0.4861111111111111,
+        "ci95_low": -0.6319444444444444,
+        "ci95_high": -0.3401041666666692,
+        "n": 36,
+        "resamples": 10000,
+        "seed": 20261013
+      },
+      "hallucination_free": {
+        "delta": 0.25,
+        "ci95_low": 0.05555555555555555,
+        "ci95_high": 0.4444444444444444,
+        "n": 36,
+        "resamples": 10000,
+        "seed": 20261013
+      },
+      "numeric_correct": {
+        "delta": -0.625,
+        "ci95_low": -0.875,
+        "ci95_high": -0.375,
+        "n": 16,
+        "resamples": 10000,
+        "seed": 20261013
+      }
+    },
+    "gpt_reference": {
+      "goal_success": {
+        "delta": -0.4444444444444444,
+        "ci95_low": -0.6111111111111112,
+        "ci95_high": -0.2777777777777778,
+        "n": 36,
+        "resamples": 10000,
+        "seed": 20261013
+      },
+      "claim_coverage": {
+        "delta": -0.625,
+        "ci95_low": -0.7731481481481481,
+        "ci95_high": -0.45601851851851855,
+        "n": 36,
+        "resamples": 10000,
+        "seed": 20261013
+      },
+      "hallucination_free": {
+        "delta": -0.027777777777777776,
+        "ci95_low": -0.2222222222222222,
+        "ci95_high": 0.1388888888888889,
+        "n": 36,
+        "resamples": 10000,
+        "seed": 20261013
+      },
+      "numeric_correct": {
+        "delta": -0.875,
+        "ci95_low": -1.0,
+        "ci95_high": -0.6875,
+        "n": 16,
+        "resamples": 10000,
+        "seed": 20261013
+      }
+    }
+  },
+  "agent_diagnostics": {
+    "calculation executed /16": "3/16",
+    "calculation validated /16": "3/16",
+    "numeric correct /16": "1/16",
+    "formula source retrieved /6": "5/6",
+    "correct formula span /6": "5/6",
+    "retrieve to calculate /6": "1/6",
+    "KB-formula numeric correct /6": "0/6",
+    "KB-formula provenance correct /6": "1/6",
+    "calculation provenance complete /16": "3/16",
+    "citation semantic support / source tasks": "3/26",
+    "cross-language Goal Success /12": "0/12",
+    "multi-goal Goal Success /6": "0/6",
+    "unnecessary refusals": 23,
+    "resume final completion /4": "0/4"
+  },
+  "category_goal_success": {
+    "false_premise": {
+      "qwen_closed_book": 0.6666666666666666,
+      "v21_2_agent": 0.0,
+      "gpt_reference": 0.6666666666666666
+    },
+    "unanswerable": {
+      "qwen_closed_book": 0.3333333333333333,
+      "v21_2_agent": 0.0,
+      "gpt_reference": 0.6666666666666666
+    },
+    "direct_calculation": {
+      "qwen_closed_book": 0.6666666666666666,
+      "v21_2_agent": 0.0,
+      "gpt_reference": 1.0
+    },
+    "multi_claim_reasoning": {
+      "qwen_closed_book": 0.0,
+      "v21_2_agent": 0.0,
+      "gpt_reference": 0.16666666666666666
+    },
+    "user_formula": {
+      "qwen_closed_book": 1.0,
+      "v21_2_agent": 0.25,
+      "gpt_reference": 1.0
+    },
+    "knowledge_qa": {
+      "qwen_closed_book": 0.125,
+      "v21_2_agent": 0.125,
+      "gpt_reference": 0.375
+    },
+    "kb_formula": {
+      "qwen_closed_book": 0.0,
+      "v21_2_agent": 0.0,
+      "gpt_reference": 0.0
+    }
+  },
+  "resume": {
+    "probes": [
+      {
+        "probe_id": "V212V3-R01",
+        "turn1_waiting_correctly": false,
+        "same_run_preserved": false,
+        "missing_input_bound": true,
+        "repeated_clarification": false,
+        "final_completion": false,
+        "validated_calculation": false,
+        "run_id": "GR-20261013-120504-22577F",
+        "turn1_status": "completed",
+        "turn2_status": null
+      },
+      {
+        "probe_id": "V212V3-R02",
+        "turn1_waiting_correctly": false,
+        "same_run_preserved": false,
+        "missing_input_bound": true,
+        "repeated_clarification": false,
+        "final_completion": false,
+        "validated_calculation": false,
+        "run_id": "GR-20261013-120522-CF1731",
+        "turn1_status": "completed",
+        "turn2_status": null
+      },
+      {
+        "probe_id": "V212V3-R03",
+        "turn1_waiting_correctly": true,
+        "same_run_preserved": true,
+        "missing_input_bound": true,
+        "repeated_clarification": false,
+        "final_completion": false,
+        "validated_calculation": false,
+        "run_id": "GR-20261013-120542-810EC0",
+        "turn1_status": "waiting_for_user_input",
+        "turn2_status": "waiting_for_user_input"
+      },
+      {
+        "probe_id": "V212V3-R04",
+        "turn1_waiting_correctly": false,
+        "same_run_preserved": false,
+        "missing_input_bound": true,
+        "repeated_clarification": false,
+        "final_completion": false,
+        "validated_calculation": false,
+        "run_id": "GR-20261013-120612-182919",
+        "turn1_status": "stopped",
+        "turn2_status": null
+      }
+    ],
+    "turn1_waiting_count": 1,
+    "same_run_count": 1,
+    "final_completion_count": 0
+  },
+  "integrity": {
+    "product_unchanged": true,
+    "benchmark_unchanged": true,
+    "rubric_unchanged": true,
+    "kb_unchanged": true,
+    "one_attempt_integrity": true,
+    "judge_coverage": true
+  },
+  "poster_safe_conclusions": [
+    "This estimate describes only the newly frozen 36-task V3 corpus; V2 is not an independent final benchmark.",
+    "Technical failures were retained as predeclared missing responses rather than repaired or excluded.",
+    "Qwen exceeded V21.2 on Goal Success on this corpus, with a paired 95% CI below zero."
+  ]
+}
