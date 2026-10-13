@@ -1,0 +1,1327 @@
+{
+  "primary_tasks": [
+    {
+      "task_id": "V212V3-001",
+      "category": "knowledge_qa",
+      "domain": "drilling_engineering",
+      "question_language": "ko",
+      "question": "시멘트 작업 뒤 층간 차단이 나쁜 주된 이유를 설명하고, 이를 줄일 수 있는 작업 두 가지를 내부 자료에 근거해 제시해줘.",
+      "answerable": true,
+      "multi_goal": true,
+      "required_goals": [
+        "Explain the dominant isolation failure mechanism",
+        "Give two supported mitigations"
+      ],
+      "required_claims": [
+        "Mud channels persist when annular mud is not displaced, especially with poor casing centralization",
+        "Centralizers and casing movement or mud conditioning improve displacement"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 329,
+          "exact_span": "The main cause for poor isolation after a cement job is the presence of mud channels \nin the cement sheath in the annulus.  These channels of gelled mud exist because \nthe mud in the annulus has not been displaced by the cement slurry.  This can occur \nfor many reasons.  The main reason for this is poor centralisation of the casing in \nthe borehole, during the cementing operation.  When mud is being displaced from \nthe annulus the cement will follow the least path of resistance.  If the pipe is not \nproperly centralised the highest resistance to flow occurs where the clearance is \nleast.  This is where mud channels are most likely to occur (Figure 18). \nIn addition, field tests have shown that for a good cement bond to develop the \nformation should be in contact with the cement slurry for a certain time period \nwhile the cement is being displaced.  The recommended contact time (pump past \ntime) is about 10 minutes for most cement jobs.  To improve mud displacement and \nobtain a good cement bond the following practices are recommended:\n• Use centralisers, especially at critical points in the casing string\n• Move the casing during the cement job. In general, rotation is preferred to \nreciprocation, since the latter may cause surging against the formation.  A specially \ndesigned swivel may be installed between the cementing head and the casing to \nallow rotation.  (Centralisers remain static and allow the casing to rotate within \nthem.)\n• Before doing the cement job, condition the mud (low PV, low YP) to ensure \ngood flow properties, so that it can be easily displaced.\n",
+          "sampled_candidate_order": 2
+        }
+      ],
+      "numeric_targets": [],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-002",
+      "category": "knowledge_qa",
+      "domain": "petrophysics",
+      "question_language": "ko",
+      "question": "자연 감마선 스펙트럼에서 K-40과 U/Th 계열의 방출 양상이 왜 다른지, 이를 원소 추정에 어떻게 활용하는지 설명해줘.",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Explain spectral distinction and interpretation"
+      ],
+      "required_claims": [
+        "K-40 emits a 1.46 MeV gamma ray directly",
+        "U-238 and Th-232 daughter chains emit multiple energies, and spectral populations can infer parent abundance under secular equilibrium"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [
+        {
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 54,
+          "exact_span": "Potassium 40 decays directly to stable argon 40 with the emission of a 1.46-MeV \ngamma ray.  However, uranium 238 and thorium 232 decay sequentially through a \nlong sequence of various daughter isotopes before arriving at stable lead isotopes. \nAs a result, gamma rays of many different energies are emitted and fairly complex \nenergy spectra are obtained, as Figure 1 shows.  The characteristic peaks in the \nthorium series at 2.62 MeV and the uranium series at 1.76 MeV are caused by the \ndecay of thallium 208 and bismuth 214, respectively.\nIt is generally assumed that formations are in secular equilibrium.  This means that \nthe daughter isotopes decay at the same rate as they are produced from the parent \nisotope.  This means that the relative proportions of parent and daughter elements in a \nparticular series remain fairly constant so, by looking at the gamma ray population in \na particular part of the spectrum it is possible to infer the Thorium population at any \nother point.  In this way, the amount of parent isotope present  can be determined.\nOnce the parent isotope population is known, the amount of nonradioactive isotope can \nalso be found.  The ratio of potassium 40 to total potassium is very stable and constant \non the earth while, apart from thorium 232, the thorium isotopes are very rare and so \ncan be neglected.  The relative proportions of the uranium isotopes depen",
+          "sampled_candidate_order": 5
+        }
+      ],
+      "numeric_targets": [],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-003",
+      "category": "knowledge_qa",
+      "domain": "reservoir_simulation",
+      "question_language": "en",
+      "question": "In a reservoir simulation study, why should the objective be framed as a decision rather than simply asking whether an intervention produces more oil?",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Explain decision-oriented simulation objective"
+      ],
+      "required_claims": [
+        "An intervention may yield more oil yet be uneconomic; the decision should reflect economics or an explicit strategic purpose"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+          "page": 87,
+          "exact_span": "Defining the objectives is a vitally important stage of any field simulation study.  The \ngeneral spirit which is suggested for approaching this (in Chaper 1) is to correctly \nformulate the question you are trying to ask in order to make a particular decision.  \nFor example,  the decision may be: “do I need to infill drill in this field in order to \nsignificantly (i.e. economically) improve reservoir performance?”.  This is like the \nschematic example in Chaper 1, Figure 8 where the question was not “will I get \nmore oil by ...”, since you could get more oil but at too great a cost - the decision \nmust be economically based.  Having said this, some reservoir decisions are made that \nmay not in themselves be economic; however, they may be strategic or may lead to \nsome knowledge or experience which will be economic in the future.  The important \nmatter in that you know what sort of decision you are trying to make.  \n3.  DATA INPUT AND OUTPUT\nWhen run, every reservoir simulator will require input data that defines the system \nto be modelled, and should generate output data that represents the results of the \ncalculations which have been performed.  Although different reservoir simulation \ncodes have different formats for entering data, they all have some basic components \nin common.  Most will read data from an input file.  The input file must theref",
+          "sampled_candidate_order": 21
+        }
+      ],
+      "numeric_targets": [],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-004",
+      "category": "knowledge_qa",
+      "domain": "well_testing",
+      "question_language": "en",
+      "question": "During an appraisal drillstem test, what is the purpose of the initial short flow and what does the first shut-in establish? Explain both using the internal material.",
+      "answerable": true,
+      "multi_goal": true,
+      "required_goals": [
+        "Explain initial short flow",
+        "Explain first shut-in"
+      ],
+      "required_claims": [
+        "The initial short flow relieves supercharging and establishes reservoir communication with negligible depletion",
+        "The first buildup establishes initial reservoir pressure after stabilization"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+          "page": 111,
+          "exact_span": "The objectives of testing exploration or appraisal wells can be summarised as:\n 1.  Determine the nature of the formation fluids\n 2.  Measure well productivity\n 3.  Measure reservoir temperature and pressure\n 4.  Obtain samples for laboratory PVT analysis\n 5.  Obtain information on reservoir description (permeability, heterogeneity )\n 6.  Estimate completion efficiency i.e. skin factor\nHowever it must be stressed that all these objectives must be subordinate to \nthe issue of safety.\n            \nInitial\nFlow\nInitial\nShutin\nAfterflow\nFinal\nShutin\nFinal Flow\nTime\nProd.\nRate\nInitial Res. Pressure\nDrawdown\nBuildup\nBHP\nTime\nA schematic of a typical drillstem test is shown in Figure 2 in which a dual flow \nperiod and dual shutin are present.  The purpose of the initial short flow period \n- typically only five minutes - is to relieve any supercharging (excess pressure \ndue to mud filtrate invasion in low permeability formations) present and establish \ncommunication with the reservoir.  The very short flow period ensures that \nnegligible depletion of the reservoir will occur even if a small compartment is being \ninvestigated. The well is then shutin for the first buildup to determine the initial \nreservoir pressure, denoted pi , and the duration of this first buildup is long enough \nfor the pressure to essentially stabilise so that no, or very little, extrapolation is \nrequired to fix pi .  The well is then flowed for a long period - the second drawdown \n- and shut-in for the second or final buildup.  As shown in Figure 2 the rate may \nbe brought up in steps;  this may be to investigate any sanding tendency of the \nFigure 2\nDual flow -  Dual  Shut - \nIn Test\n",
+          "sampled_candidate_order": 5
+        }
+      ],
+      "numeric_targets": [],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-005",
+      "category": "knowledge_qa",
+      "domain": "reservoir_engineering",
+      "question_language": "ko",
+      "question": "물질수지식을 저류층에 적용할 때 압력과 생산 속도에 관한 핵심 가정·한계는 무엇이야?",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "State material-balance pressure/rate limits"
+      ],
+      "required_claims": [
+        "The tank model uses a representative average pressure rather than spatial pressure gradients",
+        "Material balance has no time term and does not itself capture rate sensitivity"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 637,
+          "exact_span": "The MB equation is a tank model treating the reservoir as a large tank at which the \npressure is constant throughout the reservoir at a particular time. It clearly ignores \npressure changes which may arise across the reservoir. In the radial flow section it \nwas clear that there are large pressure variations around the producing and injection \nwells.\nIn order to apply the equation at a particular time an average pressure has to be se-\nlected being representative of the reservoir pressure at the particular time. All fluid \nproperties are evaluated at this pressure. In the next chapter we will discuss this \ntopic further.\nTemperature\nChanges in a reservoir generally take place at isothermal, constant temperature, condi-\ntions, unless major external temperatures are imposed thorough for example thermal \nrecovery processes and in some cases large cold water injection schemes.\nProduction Rate\nWhen things happen is not part of the MB equation as there is no term present in-\ncluding time, for this permeability would be required.  Rate sensitivity is therefore \nnot part of the equation and for those situations, for example in water drive, which \nare dependant on rate of production the material balance equation  requires the ap-\nplication of other equations.\nRepresentative PVT data\nThe PVT measurements should be made in an attempt to reflect the behaviour in the \nreservoir.  Although this may not be totally possible conditions as near to the real \nsituation are used, for example in the differential test to reflect below bubble point \nconditions.\nGood production data\nIt is important in the application of the MB equation to have reliable production data \nnot only oil and gas but also water.\n9. SIGNIFICANCE AND USAGE OF THE MATERIAL BALANCE      \nEQUATION\nThe material balance is ro",
+          "sampled_candidate_order": 7
+        }
+      ],
+      "numeric_targets": [],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-006",
+      "category": "knowledge_qa",
+      "domain": "production_technology",
+      "question_language": "ko",
+      "question": "다층 동시 생산에서 층별 유체를 섞으면 어떤 운영상 제약이 생기며, 분리 생산은 제어 측면에서 무엇을 가능하게 하나?",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Explain commingling limitation and segregated-control benefit"
+      ],
+      "required_claims": [
+        "Commingling can mix corrosive or sandy fluids and makes individual-zone control difficult",
+        "Segregated depletion allows independent zone production control and monitoring"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+          "page": 266,
+          "exact_span": "The mixing of produced fluids in the wellbore can be disadvantageous if one\nor more fluids have any of the following characteristics:\n(a)\nCorrosive or potentially corrosive materials e.g. acids, H2S, CO2.\n(b)\nProduced sand and a potential erosive effect.  The implementation of\nsand control procedures may be more complicated.\n(c)\nFluids having different Hydrocarbon compositions and hence economic\nvalue.\n(d)\nDifferent WOR and GOR as this would influence the vertical lift\nperformance of the total well system.\n(2)\nVariation in individual zone pressures and permeability can lead to a back\npressure effect on the less productive or lower pressure reservoirs.\n(3)\nThe use of co-mingling removes the capability for continuous control of the\nproduction process, i.e. closure of one individual zone cannot necessarily be\neffected unless a relative configuration is used.\n(4)\nInjection of fluids, e.g. stimulation fluids cannot easily be diverted into\nindividual layers without temporary isolation using sealants (diverters) or\nbridge plugs.\n(5)\nA change in the production characteristics of one zone e.g. water coning and a\nconsequent increase in WOR, will influence the total production from the well\nbut may be difficult to remedy without closing in the well.\n2.2 Segregated - Multiple Zone Depletion\n2.2.1 Advantages\n(1)\nThe production rate and duration of flow on each zone can be independently\ncontrolled.\n(2)\nChanges in the production characteristics of one zone will not influence the\nothers.\n(3)\nSome remedial work on individual zones can be accomplished without always\naffecting production on other zones, e.g. cement squeeze, reperforating,\nperforation washes.\n(4)\nStimulation on each zone can be applied.\n(5)\nContinuous monitoring of the depletion of each zone can be achieved, which\nassists in material balance or reservoir simulation studies for reservoir\nmanagement.\n",
+          "sampled_candidate_order": 5
+        }
+      ],
+      "numeric_targets": [],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-007",
+      "category": "knowledge_qa",
+      "domain": "production_technology",
+      "question_language": "en",
+      "question": "Why can tip-screenout fracturing help both sand control and near-wellbore damage bypass?",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Explain two TSO applications"
+      ],
+      "required_claims": [
+        "A TSO fracture can reduce flow velocity for sand control",
+        "A highly conductive fracture can bypass near-wellbore damage without requiring the damage type to be identified"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+          "page": 362,
+          "exact_span": "TSO fracturing is now a field proven technology for use in a number of areas.\n(1)\nSand control:  gravel packing and fracturing are combined into a single\noperation.  In addition, a number of successful field trials in which fracturing\nalone was used have been reported (successful sand control was attributed to the\nreduced flow velocities associated with the TSO fracture compared to a\nconventional perforated completion).\n(2)\nAlternative to matrix acidising:  using highly conductive fractures to bypass\nnear wellbore formation damage.  Successful matrix acidising often requires\nthat the source of formation damage be identified in order to select the optimum\nacid formulation {see chapter 5 (Acidising and other matrix treatments) section\n5.2}.  In contrast, TSO fracturing has the advantage that it is independent of the\ntype of formation damage. This type of treatment is generally called a \"skinfrac\".\nFigure 40(a) shows how the well productivity increases slowly once the highly\nconductive hydraulic fracture has penetrated the damage zone.\n(3)\nReserve increase in laminated sands:  well completion in formations consisting\nof finely laminated sands is problematic since there is a high chance that the\nperforation density will not be sufficient for the well will to make contact with\nall thehydrocarbon bearing zones (Figure 40b).  Production via a TSO fracture\nwill ensure that recovery is achieved from all the zones (Figure 40c).\nFigure 39\nTip screen out and\nconventional fracturing\ncompared\n",
+          "sampled_candidate_order": 1
+        }
+      ],
+      "numeric_targets": [],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-008",
+      "category": "knowledge_qa",
+      "domain": "reservoir_engineering",
+      "question_language": "en",
+      "question": "What is gained by combining compositional phase-volume predictions with a black-oil description instead of relying only on empirical correlations?",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Explain compositional/black-oil integration"
+      ],
+      "required_claims": [
+        "Compositional-derived phase volumes/properties can overcome limitations of a simple two-component black-oil model and avoid inappropriate empirical correlations"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 506,
+          "exact_span": "The example above illustrates the combination of the compositional based prediction \nof  phase volumes and associated properties and that based around the black-oil \nmodel, centred around parameters of oil formation volume factor and gas-oil  ratio. \nBy such a combination, the weaknesses of the simple two component black-oil \nmodel which is at the heart of describing oil field parameters, can be overcome by \nusing compositional derived values rather than using perhaps inappropriate empirical \ncorrelations and charts. \nDetermination of K valves\nIn the procedures developed, it has been assumed that values for K are",
+          "sampled_candidate_order": 2
+        }
+      ],
+      "numeric_targets": [],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-009",
+      "category": "multi_claim_reasoning",
+      "domain": "drilling_engineering",
+      "question_language": "en",
+      "question": "Compare the cost advantage of water-based mud with its main shale-related risk, and distinguish the roles of active clay solids and inert barite.",
+      "answerable": true,
+      "multi_goal": true,
+      "required_goals": [
+        "Compare cost and shale risk",
+        "Distinguish active and inert solids"
+      ],
+      "required_claims": [
+        "Water-based mud is relatively inexpensive because water is readily available",
+        "Water hydration of shale clays can destabilize the borehole",
+        "Clays are active solids while barite is inert"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 363,
+          "exact_span": "Water based muds are relatively inexpensive because of the ready supply of the fluid \nfrom which they are made - water. Water-based muds consist of a mixture of solids, \nliquids and chemicals.  Some solids (clays) react with the water and chemicals in the \nmud and are called active solids. The activity of these solids must be controlled in \norder to allow the mud to function properly.  The solids which do not react within \nthe mud are called inactive or inert solids (e.g. Barite).  The other inactive solids \nare generated by the drilling process.  Fresh water is used as the base for most of \nthese muds, but in offshore drilling operations salt water is more readily available.  \nFigure 2 shows the typical composition of  a water-based mud. \n                        \n0.0\n0.2\n0.4\n0.6\n0.8\n1.0\nClays   5%\n(Active solids)\nSand, limestone etc.   5%\n(Inactive low density solids)\nBarite 5-10 %\n(Inactive high density solids)\nWater   80%\n(Fresh or salt water)\n+\n+ \n+ \nFigure 2 Composition of typical water -based mud\n                        0.0\n0.2\n0.4\n0.6\n0.8\n1.0\nClays, sand, etc.   3%\nSalt   4%\nBarite   9%\nWater   30%\nOil 50-80%\n+ \n+ \n+ \n+ \nFigure 3 Composition of typical  oil-based mud\nThe main disadvantage of using water based muds is that the water in these muds \ncauses instability in shales.  Shale is composed primarily of clays and instability is \nlargely caused by hydration of the clays by mud containing water.  Shales are the most \ncommon rock types encountered while drilling for oil and gas and give rise to more \nproblems per meter drilled than any other type of formation. Estimates of worldwide, \nnonproductive costs associated with shale problems are put at $500 to $600 million \nannually (1997).  In addition, the inferior wellbore quality often encountered in shales \nmay make logging and completion operations difficult or impossible.  \nOver the years, ways have been sought to limit (or inhibit) interaction between \nWBMs and water-sensitive formations.  So, for example the late 1960s, studies of \nmud-shale reactions resulted in the introduction of a WBM that combines potassium \nchloride (KCl) with a polymer called partially-hydrolyzed polyacrylamide – KCI-\n",
+          "sampled_candidate_order": 17
+        }
+      ],
+      "numeric_targets": [],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-010",
+      "category": "multi_claim_reasoning",
+      "domain": "petrophysics",
+      "question_language": "ko",
+      "question": "담수 이수와 염수 이수에서 수층의 천부·심부 비저항 경향을 비교하고, 왜 비저항만으로 공극률을 확정하면 안 되는지 설명해줘.",
+      "answerable": true,
+      "multi_goal": true,
+      "required_goals": [
+        "Compare resistivity profiles",
+        "Explain porosity inference limitation"
+      ],
+      "required_claims": [
+        "In freshwater mud, flushed-zone resistivity is higher than formation water and readings decline toward undisturbed water zone",
+        "Salt-mud flushed zone is lower/similar resistivity to high-resistivity formation water",
+        "Porosity requires acoustic, density, or neutron logs with lithology/fluid/environmental effects considered"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [
+        {
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 43,
+          "exact_span": "When using freshwater mud, the resistivity of the mud filtrate is higher than that \nof the formation water and therefore in a water bearing zone the resistivity of the \nflushed zone is high and the resistivity readings decrease with movement out into \nthe undisturbed zone.  In a hydrocarbon bearing formation the resistivity of the zone \nbehind the flushed zone may be higher or lower than the flushed zone depending on \nthe water saturation and resistivity of the formation water.  The resistivity profiles and \nrelative readings which would be expected from the shallow (S), medium (M) and deep \n(D) reading resistivity logs for each of the above conditions are shown in Figure 5.\nD M S\nSalt\nFresh Mud\nFresh Mud\nSystem\nResistivity, R\nSalt Mud\nSystem\nResistivity, R\nWater\nZone\nR*\nS M D\nR*\nR0\nRw\nincreasing\nRt\nSo\nRx0\nRx0\nFigure 5  Resistivity profiles from shallow, medium and deep resistivity logs in fresh and \nsalt mud systems\nWhen using a salt water mud the flushed zone has a lower or similar resistivity than the \nundisturbed zone if the undisturbed zone contains high resistivity water.  The undisturbed \nzone will have higher resistivity if the formation contains hydrocarbons.\n6 DETERMINE THE POROSITY OF THE ZONES OF \t\t\nINTEREST\nRock porosity is generally determined from the measurements from one, or a \ncombination of, the following logs:\n• \nAcoustic log, \n• \nDensity log and/or \n• \nNeutron log.\nThe measurements of the neutron, density, and sonic logs depend not only on porosity \n(φ) but also on the formation lithology, on the fluid in the pores, and, in some instances, \non the geometry of the pore structure.  When the lithology and, therefore, the matrix \nparameters (tma, ρma, φma) are known, correct porosity values can be derived from any \none of these logs, appropriately corrected for environmental effects, in clean water-\nfilled formations.  This procedure is described in Chapter 5.\n",
+          "sampled_candidate_order": 8
+        }
+      ],
+      "numeric_targets": [],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-011",
+      "category": "multi_claim_reasoning",
+      "domain": "reservoir_simulation",
+      "question_language": "ko",
+      "question": "거친 격자에서 투과도 upscaling이 언제 부정확해지고, 단상 upscaling을 2상 유동에 그대로 쓰면 어떤 문제가 생기나?",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Explain two upscaling limitations"
+      ],
+      "required_claims": [
+        "Coarse-cell size near correlation length with large variance makes effective permeability upscaling inaccurate",
+        "Single-phase upscaling can misrepresent two-phase flow, especially with large scale-up factor or permeability variance"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+          "page": 264,
+          "exact_span": "The effective permeability of simple permeability models (layered or random)\nmay be calculated using averaging.\n•\nIn general, effective permeability should be calculated using a numerical\nsimulation, along with suitable boundary conditions.\n•\nPermeability upscaling is often inaccurate, particularly when the coarse cell size \nis comparable, or slightly larger than the correlation length of the permeability\ndistribution, and when the standard deviation is large.\n•\nUsually only single-phase upscaling is used in two-phase systems.  However, \nthis can give rise to errors, especially when the scale-up factor is large and when\nthe standard deviation of the permeability distribution is large.\n•\nSingle-phase upscaling for two-phase systems may be made more accurate by \nusing a non-uniform coarse grid, or by using the Well Drive Upscaling method, \nwhich increases the accuracy of single-phase upscaling by using the “correct” \nboundary conditions.\n•\nThe capillary equilibrium method is useful, particularly for small-scale models.\nIt is feasible, even for models with a relatively large number of grid cells.\n•\nTwo-phase dynamic upscaling methods should be able to reproduce two-phase\nfl ow on a coarse scale.  The Kyte and Berry (1975) method is an example of a \npressure averaging approach.\n•\nIn general, two-phase upscaling is diffi cult to apply.  It is more time consuming \nthan single-phase upscaling, and the results are not robust (negative or infi nite \nvalues may be obtained).\n•\nThe regions around wells should be treated as a special case, because the fl ow\nis radial.  The well index and the transmissibilities around the well block should \neb upscaled.\n•\nPermeability is actually a tensor quantity (4 terms in 2D, 9 terms in 3D).  Full \ntensors may be used to take account of cross-fl ow within a grid cell.  However, \nin general, only the diagonal terms are used (kxx, kyy\ny  and kzz, often referred to\nas kx, ky and kz).\n",
+          "sampled_candidate_order": 4
+        }
+      ],
+      "numeric_targets": [],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-012",
+      "category": "multi_claim_reasoning",
+      "domain": "well_testing",
+      "question_language": "ko",
+      "question": "WFT가 측정하는 sand-face pressure를 원래 지층압과 동일시해도 될까? 저투과성 암석에서 supercharging과 mudcake 저항의 영향을 구분해 설명해줘.",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Distinguish WFT measurement from undisturbed pressure"
+      ],
+      "required_claims": [
+        "WFT measures sand-face pressure, which can exceed undisturbed formation pressure under supercharging",
+        "Supercharging is appreciable mainly in low-permeability formations",
+        "Higher filter-cake resistance reduces filtrate loss and brings sand-face pressure closer to formation pressure"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+          "page": 358,
+          "exact_span": "In essence a WFT tool is able to isolate the probe from the mud column by means \nof the packer and hence detect the formation pressure immediately behind the filter \ncake.  However the sand-face pressure may not be synonymous with the undisturbed \nformation pressure some distance from the wellbore.  In open-hole conditions mud \nfiltrate loss is occurring and, in fact, the well may be considered to be under injection \nalbeit at a very low rate.  The pressure distribution in the wellbore region is illustrated \nin Figure 4 where the sand-face pressure, ps, is intermediate between the formation \npressure, pf, and the mud hydrostatic pressure, pm, existing in the well.  In most \ncircumstances ps is indistinguishable from pf but in low permeability formations \nthe excess pressure ps - pf due to mud filtrate injection may be appreciable.  The \npurpose of the filter cake is to minimise the mud fluid loss rate, q1 , and the higher \nthe resistance of the cake the closer ps is to pf i.e. nearly all the pressure differential \nbetween mud hydrostatic and formation appears over the cake.  It must be recognised, \nhowever, that a WFT device measures the sand-face pressure which is not identical to \nthe undisturbed formation pressure.  Indeed the biggest practical problem associated \nwith WFT surveys is the occurrence of this supercharging phenomenon and the most \nimportant aspect of quality control of the measurement is the assessment of the likely \ndegree of supercharging (if any) which may be present.  Again it should be emphasised \nthat this is a problem only in low permeability formations.\n                       \nMUD\nHYDROSTATIC\nPRESSURE\nSAND  FACE  PRESSURE  \nFORMATION\nPRESSURE\nMUD  CAKE\n3\n2\n1\n0\n30            60\nFILTRATION\nRATE\n2\n(cc/min/100cm )\nTIME (min)\nTEMPERATURE\n300 ºF\nDIFFERENTIAL\nPRESSURE\n500 psi\nRadial\nInjection\npm\ns\np\nfp\nFluid  Loss  Characteristics\nof  Typical  Water  Based  Mud\nFigure 4 \nSupercharching due to \nmud filtrate influx\n",
+          "sampled_candidate_order": 10
+        }
+      ],
+      "numeric_targets": [],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-013",
+      "category": "multi_claim_reasoning",
+      "domain": "reservoir_engineering",
+      "question_language": "en",
+      "question": "If a producing well is off-center in a bounded reservoir, why can boundary effects arrive unevenly, and how can an image well represent the nearest sealing boundary?",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Explain off-center boundary timing and image-well method"
+      ],
+      "required_claims": [
+        "An off-center well reaches some boundaries before others, so flow regimes coexist temporarily",
+        "An imaginary well at twice the real-well-to-boundary distance with matching rate history represents the barrier through superposition"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 382,
+          "exact_span": "Once the boundaries are detected, there is a definite limit to the volume of fluid \navailable and the pressure response changes to match that of, for example, semi \nsteady state or steady state flow. This assumes that the pressure perturbation reaches \nthe areal boundary at the same time, i.e. if the well was in the centre of a circular \nreservoir, the pressure perturbation would reach the external radius at all points \naround the circumference at the same time (assuming homogeneous conditions). If \nthe well was not at the centre then some parts of the boundary would be detected \nbefore all of the boundary was detected. This means that some of the reservoir fluid \nis still in unsteady flow whilst other parts are changing to a different flow regime. \nThis would appear to render the use of the line source solution invalid, however, the \neffect of the nearest boundary in an otherwise infinite acting reservoir has the same \neffect as the interaction of the pressure perturbations of two wells next to each other \nin an infinite acting reservoir. \nTherefore if an imaginary well is placed at a distance from the real well equal to \ntwice the distance to the boundary, and the flowrate histories are identical, then the \nprinciple of superposition can be used to couple the effect of the imaginary well \nto the real well in order to calculate the real well’s bottomhole flowing pressure. \nFigure 13 illustrates the problem and the effect of superposition. Figure 14 shows a \nsimplification of the model.\n                              \nReal Reservoir\nImposition of an Imaginary Well\nInfinite Acting Reservoir\nWell with pressure perturbations\nmoving out into the reservoir\nPressure perturbations hit a fault\nat the edge of the reservoir\nWell with pressure perturbations\nmoving out into the reservoir\nImaginary well mimics the \neffect of the fault\nInfinite Acting Reservoir\nFigure 13  The pressure effect of the barrier in the real reservoir can be represented by an \nimaginary well \n",
+          "sampled_candidate_order": 8
+        }
+      ],
+      "numeric_targets": [],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-014",
+      "category": "multi_claim_reasoning",
+      "domain": "production_technology",
+      "question_language": "en",
+      "question": "For wireline perforating, explain the separate risks from stray current and elevated temperature, and why gun length can require multiple trips.",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Explain perforating operational constraints"
+      ],
+      "required_claims": [
+        "Stray current can detonate an armed gun until it reaches a safe depth or is checked after retrieval",
+        "Explosives can detonate at high temperature and stability depends on exposure duration",
+        "Lubricator length or cable tensile capacity limits gun length, so a longer interval can require multiple trips"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+          "page": 304,
+          "exact_span": "The danger of stray  current detonating the gun exists from the time the gun is\narmed until it has been run to a safe depth downhole, say a minimum of 500ft.\nbelow the sea bed.  The shutdown safety procedure should also be observed in\nretrieving the gun until the gun has been checked to ensure that all the charges\nhave fired.\nIn the case of TCP, the above concerns of stray current will also apply to those guns\nwhich use an electrical detonation system.\nAs an attentive safety shutdown system are available which will isolate the gun in the\nevent of a stray detonation current source.\n4.4 Gun Length/Perforated Interval\nThe length of gun which can be used in the case of retrievable or semi expendable guns\nis limited by the lubricator length and in the care of larger gun diameters, the tensile\nstrength of the cable. Normally the gun will be between 15 - 40ft.  If the required\nperforated interval is larger than this,  then multiple trips with perforating guns will\nbe necessary.  In such cases\nThe lubricator provides the necessary well security. Perforating usually starts at the\nlowest interval in the zone or the interval with the lowest permeability and moves\nupwards on successive runs.\n4.5 Perforating Multiple Zones\nIf, for example, 3 intervals each 10ft. in length are required to be perforated it is\npossible to make up a single gun which comprises 3 sections and can be detonated with\na switch system.\nIf the zones are large, they will normally be perforated separately with individual guns.\n4.6 Temperature Effects\nExplosive charges can spontaneously  detonate if exposed to high temperature.  The\nRDX explosive will detonate at 340°F.  Other explosives are available which are more\nstable at temperatures in excess of 500°F.  However, the stability is also affected by\nthe duration of exposure.  In most wireline perforating operations,  the gun will never\nwarm up to bottom hole temperature because of the thermal lag and the fact that in a\nnewly completed well, the completion fluid will perhaps not have had time to warm\nup.  However, such benevolent effects cannot normally be relied upon and the\n",
+          "sampled_candidate_order": 1
+        }
+      ],
+      "numeric_targets": [],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-015",
+      "category": "direct_calculation",
+      "domain": "drilling_engineering",
+      "question_language": "en",
+      "question": "Three mud batches are 80 bbl at 10.1 ppg, 120 bbl at 10.7 ppg, and 100 bbl at 11.2 ppg. What is their volume-weighted average density?",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Calculate weighted mean density"
+      ],
+      "required_claims": [
+        "Volume-weighted density is about 10.71 ppg"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [],
+      "numeric_targets": [
+        {
+          "name": "weighted_density",
+          "expected_value": 10.706666666666667,
+          "expected_unit": "ppg",
+          "tolerance": 0.02,
+          "deterministic_expression": "(80*10.1+120*10.7+100*11.2)/(80+120+100)"
+        }
+      ],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": false
+    },
+    {
+      "task_id": "V212V3-016",
+      "category": "direct_calculation",
+      "domain": "production_technology",
+      "question_language": "en",
+      "question": "A well's oil rate changes from 820 to 697 stb/d. What is the percentage decline relative to the initial rate?",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Calculate rate decline"
+      ],
+      "required_claims": [
+        "The decline is 15%"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [],
+      "numeric_targets": [
+        {
+          "name": "decline",
+          "expected_value": 15.0,
+          "expected_unit": "%",
+          "tolerance": 0.2,
+          "deterministic_expression": "(820-697)/820*100"
+        }
+      ],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": false
+    },
+    {
+      "task_id": "V212V3-017",
+      "category": "direct_calculation",
+      "domain": "well_testing",
+      "question_language": "en",
+      "question": "A test begins at 3650 psi, falls to 3265 psi while flowing, then recovers to 3590 psi after shut-in. Compute the flowing drawdown and the shut-in recovery from flowing pressure separately.",
+      "answerable": true,
+      "multi_goal": true,
+      "required_goals": [
+        "Calculate drawdown",
+        "Calculate shut-in recovery"
+      ],
+      "required_claims": [
+        "Drawdown is 385 psi",
+        "Recovery is 325 psi"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [],
+      "numeric_targets": [
+        {
+          "name": "drawdown",
+          "expected_value": 385.0,
+          "expected_unit": "psi",
+          "tolerance": 1,
+          "deterministic_expression": "3650-3265"
+        },
+        {
+          "name": "recovery",
+          "expected_value": 325.0,
+          "expected_unit": "psi",
+          "tolerance": 1,
+          "deterministic_expression": "3590-3265"
+        }
+      ],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": false
+    },
+    {
+      "task_id": "V212V3-018",
+      "category": "direct_calculation",
+      "domain": "reservoir_engineering",
+      "question_language": "en",
+      "question": "A separator collects 960 bbl of water in 18 hours at a steady rate. What is the equivalent 24-hour water rate in bbl/day?",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Convert time-normalized water rate"
+      ],
+      "required_claims": [
+        "Equivalent rate is 1280 bbl/day"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [],
+      "numeric_targets": [
+        {
+          "name": "daily_rate",
+          "expected_value": 1280.0,
+          "expected_unit": "bbl/day",
+          "tolerance": 2,
+          "deterministic_expression": "960/18*24"
+        }
+      ],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": false
+    },
+    {
+      "task_id": "V212V3-019",
+      "category": "direct_calculation",
+      "domain": "production_technology",
+      "question_language": "en",
+      "question": "Gas production is 1.35 million scf/day while oil production is 4500 stb/day. Compute the produced gas-to-oil ratio in scf/stb.",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Calculate gas-to-oil ratio"
+      ],
+      "required_claims": [
+        "Gas-to-oil ratio is 300 scf/stb"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [],
+      "numeric_targets": [
+        {
+          "name": "gor",
+          "expected_value": 300.0,
+          "expected_unit": "scf/stb",
+          "tolerance": 1,
+          "deterministic_expression": "1350000/4500"
+        }
+      ],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": false
+    },
+    {
+      "task_id": "V212V3-020",
+      "category": "direct_calculation",
+      "domain": "reservoir_simulation",
+      "question_language": "en",
+      "question": "Three injectors deliver 1900, 2250, and 1650 m3/day. What is their combined daily injection rate?",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Sum injector rates"
+      ],
+      "required_claims": [
+        "Combined rate is 5800 m3/day"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [],
+      "numeric_targets": [
+        {
+          "name": "total_injection",
+          "expected_value": 5800.0,
+          "expected_unit": "m3/day",
+          "tolerance": 1,
+          "deterministic_expression": "1900+2250+1650"
+        }
+      ],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": false
+    },
+    {
+      "task_id": "V212V3-021",
+      "category": "user_formula",
+      "domain": "petrophysics",
+      "question_language": "en",
+      "question": "Use the supplied relation phi_eff = phi_total * (1 - Vsh). With phi_total = 0.29 and Vsh = 0.18, calculate effective porosity as a fraction.",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Calculate effective porosity from supplied formula"
+      ],
+      "required_claims": [
+        "Effective porosity is 0.2378"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [],
+      "numeric_targets": [
+        {
+          "name": "phi_eff",
+          "expected_value": 0.2378,
+          "expected_unit": "fraction",
+          "tolerance": 0.002,
+          "deterministic_expression": "0.29*(1-0.18)"
+        }
+      ],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": false
+    },
+    {
+      "task_id": "V212V3-022",
+      "category": "user_formula",
+      "domain": "drilling_engineering",
+      "question_language": "en",
+      "question": "For this hypothetical pump system only, use P_extra = C*q^2 with C = 0.012 psi/(gpm)^2 and q = 340 gpm. Calculate P_extra in psi.",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Calculate supplied pump relation"
+      ],
+      "required_claims": [
+        "P_extra is 1387.2 psi"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [],
+      "numeric_targets": [
+        {
+          "name": "P_extra",
+          "expected_value": 1387.2,
+          "expected_unit": "psi",
+          "tolerance": 2,
+          "deterministic_expression": "0.012*340**2"
+        }
+      ],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": false
+    },
+    {
+      "task_id": "V212V3-023",
+      "category": "user_formula",
+      "domain": "reservoir_simulation",
+      "question_language": "en",
+      "question": "Use only this supplied score model: R(s) = 120 + 40*s - 10*s^2. Evaluate s = 0, 0.5, and 1.0, then report the best s and its score.",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Evaluate supplied sweep and identify best"
+      ],
+      "required_claims": [
+        "Scores are 120, 137.5, and 150 at s=0,0.5,1",
+        "Best s is 1.0 with score 150"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [],
+      "numeric_targets": [
+        {
+          "name": "score_s0",
+          "expected_value": 120.0,
+          "expected_unit": "score",
+          "tolerance": 0.1,
+          "deterministic_expression": "120+40*0-10*0**2"
+        },
+        {
+          "name": "score_s05",
+          "expected_value": 137.5,
+          "expected_unit": "score",
+          "tolerance": 0.1,
+          "deterministic_expression": "120+40*0.5-10*0.5**2"
+        },
+        {
+          "name": "score_s1",
+          "expected_value": 150.0,
+          "expected_unit": "score",
+          "tolerance": 0.1,
+          "deterministic_expression": "120+40*1-10*1**2"
+        },
+        {
+          "name": "best_s",
+          "expected_value": 1.0,
+          "expected_unit": "dimensionless",
+          "tolerance": 0.01,
+          "deterministic_expression": "1"
+        }
+      ],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": false
+    },
+    {
+      "task_id": "V212V3-024",
+      "category": "user_formula",
+      "domain": "production_technology",
+      "question_language": "en",
+      "question": "For a trial separator, define efficiency eta = 100*q_actual/q_nominal. If actual throughput is 47.5 m3/h and nominal throughput is 62.0 m3/h, calculate eta in percent.",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Calculate supplied efficiency"
+      ],
+      "required_claims": [
+        "Efficiency is about 76.61%"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [],
+      "numeric_targets": [
+        {
+          "name": "eta",
+          "expected_value": 76.61290322580645,
+          "expected_unit": "%",
+          "tolerance": 0.2,
+          "deterministic_expression": "100*47.5/62.0"
+        }
+      ],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": false
+    },
+    {
+      "task_id": "V212V3-025",
+      "category": "kb_formula",
+      "domain": "drilling_engineering",
+      "question_language": "en",
+      "question": "For an open-ended casing, use the internal textbook relation for buoyancy force. With external pressure Pe = 2400 psi, outside area Ao = 18.0 in2, and inside area Ai = 12.5 in2, calculate Fbuoy in lbf and cite the actual equation source.",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Find the literal open-ended casing equation and calculate force"
+      ],
+      "required_claims": [
+        "The source formula is Fbuoy = Pe(Ao - Ai)",
+        "Fbuoy is 13200 lbf"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 281,
+          "exact_span": "Fbuoy = Pe (Ao - Ai) \t \t\nopen ended casing\n\t\n\t\n\t\n\t\n\t\n\t\nFbuoy = Pe Ao - PiAi \t          closed ended casing\n\t\n\t\n\t\n(c.) Bending Stress (Fbend)\t\n\t\nWhen designing a casing string in a deviated well the bending stresses must ",
+          "sampled_candidate_order": 35
+        }
+      ],
+      "numeric_targets": [
+        {
+          "name": "Fbuoy",
+          "expected_value": 13200.0,
+          "expected_unit": "lbf",
+          "tolerance": 20,
+          "deterministic_expression": "2400*(18.0-12.5)"
+        }
+      ],
+      "formula_source": {
+        "required": true,
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 281,
+        "exact_formula_span": "Fbuoy = Pe (Ao - Ai)"
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-026",
+      "category": "kb_formula",
+      "domain": "production_technology",
+      "question_language": "ko",
+      "question": "내부 교재의 minifrac 압력 관계식으로 ISIP를 계산해줘. FPP=5700 psi, 천공 압력손실=180 psi, 균열 마찰손실=125 psi야. 실제 식의 출처도 제시해줘.",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Find literal ISIP equation and calculate"
+      ],
+      "required_claims": [
+        "ISIP subtracts perforation and fracture-friction drops from FPP",
+        "ISIP is 5395 psi"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+          "page": 330,
+          "exact_span": "ISIP = FPP - ∆Pperforations - ∆Pfracture friction\nWhere\n∆Pperforation\n= Pressure drop across the perforations and\n∆Pfracture friction = Frictional pressure drop from the perforations to the tip\n   of the fracture\n(iii) The fracture is still open at the ISIP.  Leak off continues at a high rate from the\nopen fracture. The pressure drops until the Fracture Closure Pressure (FCP), equal\nto the minimum insitu st",
+          "sampled_candidate_order": 37
+        }
+      ],
+      "numeric_targets": [
+        {
+          "name": "ISIP",
+          "expected_value": 5395.0,
+          "expected_unit": "psi",
+          "tolerance": 5,
+          "deterministic_expression": "5700-180-125"
+        }
+      ],
+      "formula_source": {
+        "required": true,
+        "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+        "page": 330,
+        "exact_formula_span": "ISIP = FPP - ∆Pperforations - ∆Pfracture friction"
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-027",
+      "category": "kb_formula",
+      "domain": "reservoir_engineering",
+      "question_language": "ko",
+      "question": "내부 교재에서 이동 가능한 원유 체적 식을 찾아 계산해줘. PV=180만 bbl, 잔류유 포화도 Sor=0.23, 불감수 포화도 Swc=0.19야. Sor가 커지면 계산 체적이 어떻게 변하는지도 설명해줘.",
+      "answerable": true,
+      "multi_goal": true,
+      "required_goals": [
+        "Find literal MOV equation and calculate",
+        "Interpret Sor effect"
+      ],
+      "required_claims": [
+        "MOV=(1-Sor-Swc)PV and equals 1,044,000 bbl",
+        "Increasing Sor decreases MOV at fixed PV and Swc"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 749,
+          "exact_span": "If we express the volume of the pores in the core plug as the pore volume, PV, then \nthe oil displaced from the core flood experiment, is the movable oil volume, MOV, \nwhich is;\n\t\nMOV = (1- Sor - Swc) PV\nThe importance of end point relative permeabilities was presented earlier in this \nchapter in the context of mobility ratio, M, where ;\n\t\nM\nk\nk\nrw\nw\nro\no\n=\n′\n′\nµ\nµ\n/\n\t\n\t\n\t\n\t\n\t\n\t\n\t\n(1)\nAt the end point conditions this represents the maximum velocity of the water flow \ncompared to the maximum velocity of the oil.\n3.4 Fractional Flow\nConsidering flow in a core plug o",
+          "sampled_candidate_order": 13
+        }
+      ],
+      "numeric_targets": [
+        {
+          "name": "MOV",
+          "expected_value": 1044000.0000000001,
+          "expected_unit": "bbl",
+          "tolerance": 1000,
+          "deterministic_expression": "(1-0.23-0.19)*1800000"
+        }
+      ],
+      "formula_source": {
+        "required": true,
+        "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+        "page": 749,
+        "exact_formula_span": "MOV = (1- Sor - Swc) PV"
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-028",
+      "category": "kb_formula",
+      "domain": "petrophysics",
+      "question_language": "ko",
+      "question": "내부 formation evaluation 자료에 있는 electron-density 보정식을 사용해 ρe=2.42 g/cm3일 때 bulk density ρb를 계산하고 식이 적힌 페이지를 인용해줘.",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Find literal bulk-density equation and calculate"
+      ],
+      "required_claims": [
+        "The source formula is rho_b=1.0704 rho_e - 0.1883",
+        "Bulk density is about 2.4021 g/cm3"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [
+        {
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 112,
+          "exact_span": "Bulk density ρb = 1.0704 ρe - 0.1883\nTool calibrated in freshwater and limestone\n\t\nCorrections:\nBorehole Size\nHole Rugosity\nLDT Parameters\nVertical Resolution\t\n\t\n18\"",
+          "sampled_candidate_order": 28
+        }
+      ],
+      "numeric_targets": [
+        {
+          "name": "rho_b",
+          "expected_value": 2.402068,
+          "expected_unit": "g/cm3",
+          "tolerance": 0.01,
+          "deterministic_expression": "1.0704*2.42-0.1883"
+        }
+      ],
+      "formula_source": {
+        "required": true,
+        "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+        "page": 112,
+        "exact_formula_span": "Bulk density ρb = 1.0704 ρe - 0.1883"
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-029",
+      "category": "kb_formula",
+      "domain": "reservoir_simulation",
+      "question_language": "en",
+      "question": "Find the internal textbook's specific-surface relation for spherical grains. For grain diameter Dp = 0.0002 m, calculate Ss in 1/m and cite the literal equation span.",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Find literal spherical-grain equation and calculate"
+      ],
+      "required_claims": [
+        "Ss=6/Dp for spherical particles",
+        "Ss is 30000 1/m"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+          "page": 359,
+          "exact_span": "for spherical particles, Ss=6/Dp.  Hence,\n             \nLr\nLt\nLt\nLr\nT =\nv = \nt\nv = \nr\nu = \nr\nR  ∆P\n2\n2µL t\nu = v φ ",
+          "sampled_candidate_order": 25
+        }
+      ],
+      "numeric_targets": [
+        {
+          "name": "Ss",
+          "expected_value": 30000.0,
+          "expected_unit": "1/m",
+          "tolerance": 100,
+          "deterministic_expression": "6/0.0002"
+        }
+      ],
+      "formula_source": {
+        "required": true,
+        "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+        "page": 359,
+        "exact_formula_span": "Ss=6/Dp"
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-030",
+      "category": "kb_formula",
+      "domain": "production_technology",
+      "question_language": "en",
+      "question": "According to the internal production-system pressure-balance relation, what reservoir pressure PR is needed if total system pressure loss is 1740 psi and separator pressure is 160 psi? Cite the formula span.",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Find literal pressure-balance equation and calculate"
+      ],
+      "required_claims": [
+        "PR equals system pressure loss plus separator pressure",
+        "PR is 1900 psi"
+      ],
+      "forbidden_claims": [],
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+          "page": 7,
+          "exact_span": "PR  = ∆PSYSTEM + PSEP\nwhere;\nPR\n= reservoir pressure\n∆PSYSTEM = total system pressure drop\n PSEP\n= separator pressure\nFigure 3\nProduction Technology\nTopics\n",
+          "sampled_candidate_order": 28
+        }
+      ],
+      "numeric_targets": [
+        {
+          "name": "PR",
+          "expected_value": 1900.0,
+          "expected_unit": "psi",
+          "tolerance": 5,
+          "deterministic_expression": "1740+160"
+        }
+      ],
+      "formula_source": {
+        "required": true,
+        "document": "Heriot-Watt_University_-_Production_Technology_I.pdf",
+        "page": 7,
+        "exact_formula_span": "PR  = ∆PSYSTEM + PSEP"
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-031",
+      "category": "false_premise",
+      "domain": "drilling_engineering",
+      "question_language": "ko",
+      "question": "시추 중 시추공 압력을 지층 파쇄압보다 높게 유지해야 유체 손실을 막는다는 설명이 맞지? 내부 자료를 기준으로 바로잡아줘.",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Explicitly reject and correct premise with support"
+      ],
+      "required_claims": [
+        "Borehole pressure should not exceed fracture pressure; exceeding it risks fracture and drilling-fluid losses",
+        "Borehole pressure should not fall below formation pore pressure"
+      ],
+      "forbidden_claims": [
+        "Borehole pressure should be maintained above fracture pressure"
+      ],
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 162,
+          "exact_span": "The magnitude of the pressure in the pores of a formation, known as the formation \npore pressure (or simply formation pressure), is an important consideration in \nmany aspects of well planning and operations.   It will influence the casing design \nand mud weight selection and will increase the chances of stuck pipe and  well \ncontrol problems.  It is particularly important to be able to predict and detect high \npressure zones, where there is the risk of a blow-out.  \nIn addition to predicting the pore pressure in a formation it is also very important to \nbe able to predict the pressure at which the rocks  will fracture.  These fractures \ncan result in losses of large volumes of drilling fluids and, in the case of an influx \nfrom a shallow formation, fluids flowing along the fractures all the way to surface, \npotentially causing a blowout.\nWhen the pore pressure and fracture pressure for all of the formations to be penetrated \nhave been predicted the well will be designed, and the operation conducted,  such \nthat the pressures in the borehole neither exceed the fracture pressure, nor fall below \nthe pore pressure in the formations being drilled.      \n      \n2.  FORMATION  PORE PRESSURES\nDuring a period of erosion and sedimentation, grains of sediment are continuously  \nbuilding up on top of each oth",
+          "sampled_candidate_order": 10
+        }
+      ],
+      "numeric_targets": [],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-032",
+      "category": "false_premise",
+      "domain": "petrophysics",
+      "question_language": "en",
+      "question": "Once a mudcake develops, it increases the rate of further mud-filtrate invasion into a permeable formation, correct? Use the internal source to assess this premise.",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Explicitly reject and correct premise with support"
+      ],
+      "required_claims": [
+        "Low-permeability mudcake considerably reduces further filtrate invasion"
+      ],
+      "forbidden_claims": [
+        "Mudcake increases further invasion"
+      ],
+      "gold_sources": [
+        {
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 87,
+          "exact_span": "During the drilling of the well the hydrostatic pressure of the mud column is usually \ngreater than the pore pressure of the formations.  This prevents the fluids from the \nformations flowing into the well.  The resultant pressure differential between the \nmud column and formation forces mud filtrate into the permeable formation, and \nthe solid particles of the mud are deposited on the borehole wall where they form a \nmudcake.\nMudcake usually has a very low permeability (of the order of 10-2-10-4 mD) and, once \ndeveloped, considerably reduces the rate of further mud filtrate invasion (Figure 19).\n",
+          "sampled_candidate_order": 23
+        }
+      ],
+      "numeric_targets": [],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-033",
+      "category": "false_premise",
+      "domain": "reservoir_simulation",
+      "question_language": "en",
+      "question": "A flat plateau on a capillary-pressure curve means the rock has a very broad pore-size distribution, right? Correct me if the internal material says otherwise.",
+      "answerable": true,
+      "multi_goal": false,
+      "required_goals": [
+        "Explicitly reject and correct premise with support"
+      ],
+      "required_claims": [
+        "A flat plateau suggests relatively homogeneous pore size; steeper curves indicate greater pore-size variance"
+      ],
+      "forbidden_claims": [
+        "Flat capillary plateau proves broad pore-size variance"
+      ],
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+          "page": 310,
+          "exact_span": "We can now use this discussion to infer the type of capillary pressure curve that may\nresult from different samples. For example, how would the pore size distribution\naffect the curve? We already know that the displacement pressure is affected by Rmax\n— the largest pore in the sample — but it should also be clear that the range of pore\nsizes in a sample can greatly affect the shape of the corresponding Pc curve (Figure\n88). Flat plateaux indicate samples that are fairly homogeneous at the pore scale,\nwhilst steeper curves indicate a large variance in the distribution. Moreover, fine\ntextured rocks with small cemented grains can be expected to exhibit higher capillary\npressures at a given saturation  that coarse-textured media — also higher displacement\npressures. So, from our basic understanding of capillary pressure at the microscopic\nscale, we have been able to infer a great deal about how we would expect capillary\npressure curves to vary at the continuum (macroscopic) scale.\n       ",
+          "sampled_candidate_order": 8
+        }
+      ],
+      "numeric_targets": [],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-034",
+      "category": "unanswerable",
+      "domain": "drilling_engineering",
+      "question_language": "en",
+      "question": "Using the internal open-ended casing relation, calculate buoyancy force for Pe=2100 psi and Ao=19.0 in2. I have not measured the inside area.",
+      "answerable": false,
+      "multi_goal": false,
+      "required_goals": [
+        "Identify missing inside area and request it without a numeric force"
+      ],
+      "required_claims": [
+        "Ai is required by Fbuoy=Pe(Ao-Ai); no unique force can be computed without Ai"
+      ],
+      "forbidden_claims": [
+        "An invented inside area or numeric buoyancy force"
+      ],
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 281,
+          "exact_span": "Fbuoy = Pe (Ao - Ai) \t \t\nopen ended casing\n\t\n\t\n\t\n\t\n\t\n\t\nFbuoy = Pe Ao - PiAi \t          closed ended casing\n\t\n\t\n\t\n(c.) Bending Stress (Fbend)\t\n\t\nWhen designing a casing string in a deviated well the bending stresses must ",
+          "sampled_candidate_order": 35
+        }
+      ],
+      "numeric_targets": [],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [
+        "inside area Ai in in2"
+      ],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-035",
+      "category": "unanswerable",
+      "domain": "reservoir_engineering",
+      "question_language": "ko",
+      "question": "내부 교재 식으로 movable oil volume을 구해줘. PV는 92만 bbl이고 Swc는 0.21이지만 Sor 측정값은 아직 없어.",
+      "answerable": false,
+      "multi_goal": false,
+      "required_goals": [
+        "Identify missing residual-oil saturation without fabricating MOV"
+      ],
+      "required_claims": [
+        "Sor is required by MOV=(1-Sor-Swc)PV and is missing"
+      ],
+      "forbidden_claims": [
+        "Invented Sor or numeric movable-oil volume"
+      ],
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 749,
+          "exact_span": "If we express the volume of the pores in the core plug as the pore volume, PV, then \nthe oil displaced from the core flood experiment, is the movable oil volume, MOV, \nwhich is;\n\t\nMOV = (1- Sor - Swc) PV\nThe importance of end point relative permeabilities was presented earlier in this \nchapter in the context of mobility ratio, M, where ;\n\t\nM\nk\nk\nrw\nw\nro\no\n=\n′\n′\nµ\nµ\n/\n\t\n\t\n\t\n\t\n\t\n\t\n\t\n(1)\nAt the end point conditions this represents the maximum velocity of the water flow \ncompared to the maximum velocity of the oil.\n3.4 Fractional Flow\nConsidering flow in a core plug o",
+          "sampled_candidate_order": 13
+        }
+      ],
+      "numeric_targets": [],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [
+        "residual-oil saturation Sor"
+      ],
+      "citation_required_for_agent": true
+    },
+    {
+      "task_id": "V212V3-036",
+      "category": "unanswerable",
+      "domain": "petrophysics",
+      "question_language": "en",
+      "question": "Use the internal electron-density correction to determine bulk density. I can provide the calibration relation but have no measured electron density for this sample.",
+      "answerable": false,
+      "multi_goal": false,
+      "required_goals": [
+        "Identify missing electron-density measurement without numeric output"
+      ],
+      "required_claims": [
+        "The relation requires rho_e; without a measured rho_e there is no unique rho_b"
+      ],
+      "forbidden_claims": [
+        "Invented electron density or numeric bulk density"
+      ],
+      "gold_sources": [
+        {
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 112,
+          "exact_span": "Bulk density ρb = 1.0704 ρe - 0.1883\nTool calibrated in freshwater and limestone\n\t\nCorrections:\nBorehole Size\nHole Rugosity\nLDT Parameters\nVertical Resolution\t\n\t\n18\"",
+          "sampled_candidate_order": 28
+        }
+      ],
+      "numeric_targets": [],
+      "formula_source": {
+        "required": false
+      },
+      "missing_inputs": [
+        "measured electron density rho_e"
+      ],
+      "citation_required_for_agent": true
+    }
+  ],
+  "resume_probes": [
+    {
+      "probe_id": "V212V3-R01",
+      "domain": "drilling_engineering",
+      "turn1": "Use the internal open-ended casing buoyancy relation with Pe=1950 psi and Ao=17.5 in2. Calculate Fbuoy, but I do not yet have Ai.",
+      "turn2": "Ai is 11.0 in2.",
+      "missing_input": "Ai",
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 281,
+          "exact_span": "Fbuoy = Pe (Ao - Ai) \t \t\nopen ended casing\n\t\n\t\n\t\n\t\n\t\n\t\nFbuoy = Pe Ao - PiAi \t          closed ended casing\n\t\n\t\n\t\n(c.) Bending Stress (Fbend)\t\n\t\nWhen designing a casing string in a deviated well the bending stresses must ",
+          "sampled_candidate_order": 35
+        }
+      ],
+      "numeric_target": {
+        "name": "Fbuoy",
+        "expected_value": 12675.0,
+        "expected_unit": "lbf",
+        "tolerance": 20,
+        "deterministic_expression": "1950*(17.5-11.0)"
+      }
+    },
+    {
+      "probe_id": "V212V3-R02",
+      "domain": "production_technology",
+      "turn1": "Find the minifrac ISIP relation in the internal notes. FPP is 6200 psi and perforation pressure loss is 210 psi, but the fracture-friction loss has not been measured yet. Calculate ISIP when possible.",
+      "turn2": "The fracture-friction pressure loss is 135 psi.",
+      "missing_input": "fracture-friction pressure loss",
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt_University_-_Production_Technology_II.pdf",
+          "page": 330,
+          "exact_span": "ISIP = FPP - ∆Pperforations - ∆Pfracture friction\nWhere\n∆Pperforation\n= Pressure drop across the perforations and\n∆Pfracture friction = Frictional pressure drop from the perforations to the tip\n   of the fracture\n(iii) The fracture is still open at the ISIP.  Leak off continues at a high rate from the\nopen fracture. The pressure drops until the Fracture Closure Pressure (FCP), equal\nto the minimum insitu st",
+          "sampled_candidate_order": 37
+        }
+      ],
+      "numeric_target": {
+        "name": "ISIP",
+        "expected_value": 5855.0,
+        "expected_unit": "psi",
+        "tolerance": 5,
+        "deterministic_expression": "6200-210-135"
+      }
+    },
+    {
+      "probe_id": "V212V3-R03",
+      "domain": "reservoir_engineering",
+      "turn1": "Using the internal movable-oil-volume relation, calculate MOV for PV=1.1 million bbl and Swc=0.16. I still need to provide Sor.",
+      "turn2": "Sor is 0.28.",
+      "missing_input": "Sor",
+      "gold_sources": [
+        {
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 749,
+          "exact_span": "If we express the volume of the pores in the core plug as the pore volume, PV, then \nthe oil displaced from the core flood experiment, is the movable oil volume, MOV, \nwhich is;\n\t\nMOV = (1- Sor - Swc) PV\nThe importance of end point relative permeabilities was presented earlier in this \nchapter in the context of mobility ratio, M, where ;\n\t\nM\nk\nk\nrw\nw\nro\no\n=\n′\n′\nµ\nµ\n/\n\t\n\t\n\t\n\t\n\t\n\t\n\t\n(1)\nAt the end point conditions this represents the maximum velocity of the water flow \ncompared to the maximum velocity of the oil.\n3.4 Fractional Flow\nConsidering flow in a core plug o",
+          "sampled_candidate_order": 13
+        }
+      ],
+      "numeric_target": {
+        "name": "MOV",
+        "expected_value": 615999.9999999999,
+        "expected_unit": "bbl",
+        "tolerance": 1000,
+        "deterministic_expression": "(1-0.28-0.16)*1100000"
+      }
+    },
+    {
+      "probe_id": "V212V3-R04",
+      "domain": "petrophysics",
+      "turn1": "Use the bulk-density/electron-density relation from the internal formation-evaluation notes, but I do not have electron density yet. What is needed to calculate rho_b?",
+      "turn2": "The measured electron density rho_e is 2.31 g/cm3.",
+      "missing_input": "rho_e",
+      "gold_sources": [
+        {
+          "document": "Heriot_Watt_University_-_Formation_Evaluation.pdf",
+          "page": 112,
+          "exact_span": "Bulk density ρb = 1.0704 ρe - 0.1883\nTool calibrated in freshwater and limestone\n\t\nCorrections:\nBorehole Size\nHole Rugosity\nLDT Parameters\nVertical Resolution\t\n\t\n18\"",
+          "sampled_candidate_order": 28
+        }
+      ],
+      "numeric_target": {
+        "name": "rho_b",
+        "expected_value": 2.2843240000000002,
+        "expected_unit": "g/cm3",
+        "tolerance": 0.01,
+        "deterministic_expression": "1.0704*2.31-0.1883"
+      }
+    }
+  ]
+}
