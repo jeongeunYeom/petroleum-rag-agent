@@ -138,6 +138,39 @@ class FormulaSelectionRecord:
     unit_score: int = 0
 
 
+@dataclass(frozen=True)
+class FormulaTargetContract:
+    """Requested output and supplied inputs, fixed before source inspection."""
+    requested_quantity: str | None
+    requested_unit: str | None
+    known_inputs: tuple[str, ...]
+    semantic_dimension: str | None = None
+
+
+def formula_target_contract(text: str, fact_names: list[str], requested_target: str | None = None
+                            ) -> FormulaTargetContract:
+    semantic = requested_semantic_target(text)
+    target = requested_target
+    if not target:
+        if re.search(r"\bAPI\s*gravity(?![A-Za-z])|API도|SG\s*[-–]\s*API", text, re.I):
+            target = "API"
+        match = re.search(r"\b(?:calculate|compute|determine|derive|solve)\s+(?:the\s+)?"
+                          r"([A-Za-z][A-Za-z0-9_]{0,30})"
+                          r"(?=\s+(?:using|from|for|with|by|via|in)\b|[.,;?]|$)", text, re.I)
+        if match and not target:
+            target = match.group(1)
+        elif not target:
+            match = re.search(r"\b([A-Za-z][A-Za-z0-9_]{0,30})\s*(?:값|을|를)?\s*"
+                              r"(?:계산|구해|구하)", text, re.I)
+            target = match.group(1) if match else None
+    if target and normalize_symbol(target) in {"the", "a", "value", "result", "formula", "equation",
+                                                "pressure", "relation"}:
+        target = None
+    unit_match = re.search(rf"\b(?:in|단위(?:는|로)?)\s+(?P<unit>{UNIT})\b", text, re.I)
+    return FormulaTargetContract(target, unit_match["unit"] if unit_match else None,
+                                 tuple(dict.fromkeys(fact_names)), semantic)
+
+
 def _unit_signature(unit: str) -> dict[str, int] | None:
     """A ranking hint only; this never authorizes a unit conversion."""
     families = {"g": "mass", "kg": "mass", "mg": "mass", "lb": "mass",
@@ -204,7 +237,8 @@ def _additive_terms(formula: str) -> int:
 
 
 def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
-                            fact_names: list[str], fact_units: dict[str, str] | None = None
+                            fact_names: list[str], fact_units: dict[str, str] | None = None,
+                            target_contract: FormulaTargetContract | None = None
                             ) -> tuple[FormulaSourceRecord | None, FormulaSelectionRecord]:
     """Rank literal source spans; weak or conflicting matches remain unresolved."""
     # Unrelated commentary is not an extra model-name constraint. Keep every actual
@@ -227,7 +261,12 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
                                    "values", "input", "units", "source", "sourced", "relation",
                                    "please", "expression", "number", "without", "known", "needed"}
     source_by_id = {str(row.get("evidence_id")): str(row.get("text") or "") for row in evidence}
-    semantic_target = requested_semantic_target(intent)
+    contract = target_contract or formula_target_contract(intent, fact_names)
+    semantic_target = contract.semantic_dimension
+    target_name = normalize_symbol(contract.requested_quantity or "")
+    target_aliases = ({"api", "apigravity"} if target_name in {"api", "apigravity"} else
+                      {"p", "ph", "hydrostaticpressure"} if semantic_target == "hydrostatic_pressure" else
+                      {target_name} if target_name and len(target_name) <= 2 else set())
     requested_terms = _requested_term_count(intent)
     excludes_reduced = bool(re.search(r"축약식\s*말고|두\s*성분.{0,12}혼동하지\s*마|"
                                       r"not\s+(?:the\s+)?(?:two[- ]term|reduced\s+form)|simplified\s+form\s*말고|"
@@ -262,6 +301,10 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
                 continue
         elif semantic_target == "ecd" and lhs != "ecd":
             continue
+        if target_aliases and lhs not in target_aliases:
+            # A shared input variable is not evidence that this equation produces
+            # the quantity requested by the user.
+            continue
         local_tokens = {normalize_symbol(word) for word in
                         re.findall(r"[A-Za-z][A-Za-z0-9_]*|[가-힣]{2,}", local_context)}
         raw_lhs = record.expression_candidate.split("=", 1)[0].strip()
@@ -272,6 +315,9 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
             # A matching output symbol alone cannot identify a named engineering model.
             continue
         lhs_score = 6 if lhs in tokens else 0
+        target_context_score = (5 if target_name and len(target_name) > 2 and
+                                (lhs == target_name or target_name in nearby_tokens) else
+                                -5 if target_name and len(target_name) > 2 else 0)
         variable_score = 2 * overlap
         heading_score = min(4, len(context_tokens & heading_tokens))
         context_score = min(4, len(context_tokens & nearby_tokens))
@@ -290,7 +336,13 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
                          for variable in variables
                          if (hint := source_variable_unit(local_context, variable))
                          and normalize_symbol(variable) in units)
-        score = lhs_score + variable_score + heading_score + context_score + structure + unit_score - negative - alias_penalty
+        if contract.requested_unit and (output_hint := source_variable_unit(local_context, record.lhs)):
+            output_match = unit_compatibility_score(output_hint, contract.requested_unit)
+            if output_match < 0:
+                continue
+            unit_score += output_match
+        score = (lhs_score + variable_score + heading_score + context_score + structure + unit_score
+                 + target_context_score - negative - alias_penalty)
         details = {"lhs_match": bool(lhs_score), "required_variable_match": overlap,
                    "unit_score": unit_score,
                    "extra_variable_penalty": extra, "term_count_match": term_match,

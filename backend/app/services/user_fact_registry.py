@@ -50,6 +50,12 @@ ROLE_FACT = re.compile(
     rf"(?P<label>(?:[가-힣]{{1,12}}\s+)?(?:변경\s*전|변경\s*후|초기|최종|투입|회수|입구|출구|시작|종료|전|후)"
     rf"(?:\s+[가-힣]{{1,12}})?)\s*(?:은|는|이|가|[:=])?\s*"
     rf"(?P<value>{NUMBER})\s*(?P<unit>{UNIT})", re.I)
+POSTPOSED_ROLE_FACT = re.compile(
+    rf"(?P<value>{NUMBER})\s*(?P<unit>{UNIT})\s*(?:을|를)?\s*"
+    rf"(?P<role>회수|생산|주입)(?:했|하였|한다|함)", re.I)
+ORDINAL_ROLE_FACT = re.compile(
+    rf"(?P<role>첫|두)\s*번째\s*(?P<label>[가-힣]{{1,12}})\s*"
+    rf"(?:은|는|이|가|[:=])?\s*(?P<value>{NUMBER})\s*(?P<unit>{UNIT})", re.I)
 ENGLISH_IS_VALUE = re.compile(rf"\b(?P<label>[A-Za-z][A-Za-z0-9_]*)\s+(?:is|was)\s+"
                               rf"(?P<value>[-+]?\d+(?:\.\d+)?)(?:\s*(?P<unit>{UNIT}))?(?=$|[.,;\s])", re.I)
 DIMENSIONLESS_NAMED = re.compile(
@@ -153,8 +159,8 @@ def operand_role(name: str) -> str | None:
     """Keep order-bearing labels separate from physical dimensions."""
     label = name.casefold().replace("_", " ")
     roles = (
-        ("initial", r"\b(?:initial|before|starting|start)\b|초기|변경\s*전|투입\s*전"),
-        ("final", r"\b(?:final|after|ending|end)\b|최종|변경\s*후|종료"),
+        ("initial", r"\b(?:initial|before|starting|start|baseline|first)\b|초기|변경\s*전|투입\s*전|첫\s*번째|이전"),
+        ("final", r"\b(?:final|after|ending|end|changed|second)\b|최종|변경\s*후|종료|두\s*번째|이후"),
         ("inlet", r"\b(?:inlet|input)\b|입구|유입"),
         ("outlet", r"\b(?:outlet|output)\b|출구|유출"),
         ("produced", r"\b(?:produced|recovered)\b|생산|회수"),
@@ -584,6 +590,18 @@ class UserFactRegistry(BaseModel):
                 if any(start < found.end() and found.start() < end for start, end in protected_spans):
                     continue
                 add(_natural_name(found["label"]), found["value"], found["unit"],
+                    found.group(), None, offset + found.start())
+                protected_spans.append(found.span())
+            for found in ORDINAL_ROLE_FACT.finditer(text):
+                if any(start < found.end() and found.start() < end for start, end in protected_spans):
+                    continue
+                name = ("initial" if found["role"] == "첫" else "final") + "_" + _natural_name(found["label"])
+                add(name, found["value"], found["unit"], found.group(), None, offset + found.start())
+                protected_spans.append(found.span())
+            for found in POSTPOSED_ROLE_FACT.finditer(text):
+                if any(start < found.end() and found.start() < end for start, end in protected_spans):
+                    continue
+                add(_natural_name(found["role"]), found["value"], found["unit"],
                     found.group(), None, offset + found.start())
                 protected_spans.append(found.span())
             for found in NATURAL_FACT.finditer(text):

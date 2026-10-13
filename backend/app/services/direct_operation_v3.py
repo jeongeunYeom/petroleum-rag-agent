@@ -7,7 +7,7 @@ import re
 
 
 OPERATIONS = {"unit_conversion", "finite_difference", "centered_difference",
-              "linear_regression_slope", "percentage_decrease", "percentage_increase", "percent_change", "net_difference",
+              "linear_regression_slope", "percentage_decrease", "percentage_increase", "percent_change", "net_difference", "recovery_percent",
               "cylinder_volume", "power_times_duration", "concentration_mass_per_volume",
               "weighted_average_by_duration"}
 
@@ -15,6 +15,14 @@ OPERATIONS = {"unit_conversion", "finite_difference", "centered_difference",
 def build(operation: str, text: str, values: dict[str, float],
           units: dict[str, str]) -> tuple[str, dict[str, float], dict[str, str | None]]:
     """Return executable code and separately checked expected outputs; reject ambiguity."""
+    if operation == "recovery_percent":
+        if not {"produced", "injected"} <= set(values) or units["produced"] != units["injected"]:
+            raise ValueError("recovered and injected amounts with matching units required")
+        if values["injected"] <= 0 or values["produced"] < 0:
+            raise ValueError("recovery inputs must be nonnegative with positive injection")
+        value = values["produced"] / values["injected"] * 100
+        code = "result['recovery_percent'] = values['produced'] / values['injected'] * 100\n"
+        return code, {"recovery_percent": value}, {"recovery_percent": "%"}
     if operation == "unit_conversion":
         supplied = [(name, unit) for name, unit in units.items() if unit and "factor" not in name]
         if len(supplied) != 1:

@@ -8,12 +8,14 @@ from app.models.goal_research_schemas import GoalResearchRequest
 from app.services.goal_execution_state import GoalAction, GoalActionType, GoalExecutionState, SimulationSpec
 from app.services.goal_intent import (GoalIntent, GoalIntentKind, SourceRequirement,
                                       asks_for_api_gravity_calculation)
+from app.services.goal_knowledge_retrieval import TERMS
+from app.services.calculation_requirements import formula_target_contract
 
 
-CALC_WORDS = re.compile(r"\b(?:calculat\w*|comput\w*|derive|mean|average|sum|rank\w*|compare\s+numeric|difference|ratio)\b|계산|산출|평균|합계|총합|비율|차이|순위|그래프", re.I)
+CALC_WORDS = re.compile(r"\b(?:calculat\w*|comput\w*|derive|mean|average|sum|rank\w*|compare\s+numeric|difference|ratio|pressure\s+drop|recovery\s+rate)\b|계산|산출|평균|합계|총합|비율|차이|강하량|회수율|증가율|순위|그래프", re.I)
 ANALYZE_WORDS = re.compile(r"\b(?:rank\w*|best|worst|maximum|minimum|optim\w*|sensitiv\w*|compare|plot|graph|chart)\b|순위|정렬|(?:큰|작은)\s*순서|내림차순|오름차순|최적|최대|최소|최댓|최솟|민감도|그래프|도표", re.I)
 SIMULATE_WORDS = re.compile(r"\b(?:sweep|parameter\s+range|vary\w*|sensitiv\w*|optim\w*)\b|매개변수\s*변화|범위\s*탐색|범위로\s*계산|바꿔가며|바꾸면서|변화시키(?:며|면서|고|면|기|다|는|ㄴ)?|간격으로|부터.{0,30}까지", re.I)
-ENGINEERING_TERMS = {
+ENGINEERING_TERMS = {**TERMS,
     "공극률": "porosity", "공극 부피": "pore volume", "공극부피": "pore volume",
     "벌크 부피": "bulk volume", "벌크부피": "bulk volume",
     "상대투과도": "relative permeability", "상대 투과도": "relative permeability",
@@ -22,6 +24,14 @@ ENGINEERING_TERMS = {
     "압력 도함수": "pressure derivative", "모세관압": "capillary pressure",
     "모세관 진입압": "capillary entry pressure", "밀봉 성능": "seal capacity",
     "저류층 밀봉": "reservoir seal",
+}
+
+# Standard variable-name expansions are retrieval hints only, not formula evidence.
+FORMATION_SYMBOL_TERMS = {
+    "rt": "true formation resistivity",
+    "rw": "formation water resistivity",
+    "sw": "water saturation",
+    "phi": "porosity",
 }
 
 
@@ -243,15 +253,21 @@ class GoalActionPlanner:
                                fact_names: list[str], fact_units: dict[str, str],
                                source_context: list[str], attempt: int) -> str:
         """Search for the requested relation, without proposing an equation."""
-        text = " ".join(filter(None, (request.goal, request.topic)))
-        translated = [english for korean, english in ENGINEERING_TERMS.items() if korean in text]
+        text = " ".join(dict.fromkeys(filter(None, (request.goal, request.topic))))
+        contract = formula_target_contract(text, fact_names)
+        translated = [english for korean, english in sorted(ENGINEERING_TERMS.items(), key=lambda row: -len(row[0]))
+                      if korean in text]
+        symbol_terms = ([term for symbol, term in FORMATION_SYMBOL_TERMS.items()
+                         if re.search(rf"(?<![A-Za-z0-9_]){re.escape(symbol)}(?![A-Za-z0-9_])", text, re.I)]
+                        if re.search(r"지층\s*평가|formation evaluation|formation factor|"
+                                     r"resistiv|\b(?:Sw|Rw|Rt)\b", text, re.I) else [])
         names = " ".join(dict.fromkeys(fact_names))
         units = " ".join(dict.fromkeys(unit for unit in fact_units.values() if unit))
-        documents = " ".join(dict.fromkeys(source_context[:2]))
         qualifiers = ("equation formula relation definition variables units" if attempt == 1 else
                       "governing equation calculation model source expression variable definitions")
         return "\n".join(part for part in (
-            text, names, units, " ".join(translated), documents, qualifiers,
+            contract.requested_quantity or "", names, units,
+            " ".join(dict.fromkeys([*translated, *symbol_terms])), qualifiers, text,
         ) if part)[:4000]
 
     @staticmethod
@@ -271,7 +287,7 @@ class GoalActionPlanner:
                                                  f"{request.topic} {request.goal or ''}")))[:16]
             terms += "\nequation formula variables units " + " ".join(symbols)
         text = f"{request.topic} {request.goal or ''}"
-        translated = list(dict.fromkeys(english for korean, english in ENGINEERING_TERMS.items()
+        translated = list(dict.fromkeys(english for korean, english in sorted(ENGINEERING_TERMS.items(), key=lambda row: -len(row[0]))
                                         if korean in text))
         if translated:
             terms += "\n" + " ".join(translated)

@@ -37,11 +37,18 @@ TERMS = {
     "저항도 검층": "resistivity well log", "물 포화도": "water saturation",
     "모세관 진입압": "capillary entry pressure", "밀봉 성능": "seal capacity",
     "모세관압": "capillary pressure", "상대투과도": "relative permeability",
+    "다상 유체 흐름": "multiphase fluid flow", "다상 흐름": "multiphase flow",
     "생산 설비": "production equipment", "생산 분리기": "production separator",
     "가스 분리": "gas separation", "분리기": "separator",
     "케이싱": "casing", "물질수지": "material balance", "대수층": "aquifer",
     "물 유입": "water influx", "압력 유지": "pressure support",
     "저류층 압력": "reservoir pressure", "압력": "pressure",
+    "진비저항": "true formation resistivity", "지층 비저항": "formation resistivity",
+    "비중": "specific gravity", "압력 강하": "pressure drop",
+    "생산 지수": "productivity index", "유정 생산 지수": "well productivity index",
+    "지층 평가": "formation evaluation", "지층 인자": "formation factor",
+    "회수율": "recovery factor", "주입량": "injected volume", "생산량": "produced volume",
+    "유입 압력": "inlet pressure", "출구 압력": "outlet pressure",
 }
 DOMAIN_ALIASES = (
     (re.compile(r"\bmonel\b", re.I),
@@ -74,6 +81,7 @@ class QueryPlan:
     domain: str | None
     concepts: tuple[str, ...]
     relation_terms: tuple[str, ...]
+    translated_concepts: tuple[str, ...] = ()
 
     @property
     def search_text(self) -> str:
@@ -83,7 +91,8 @@ class QueryPlan:
 def plan_query(question: str, *, premise: bool = False, refined: bool = False) -> QueryPlan:
     """Use only user terms and fixed domain synonyms; never inject an answer."""
     cleaned = PREMISE_NOISE.sub(" ", question) if premise else question
-    translations = [english for korean, english in TERMS.items() if korean in cleaned]
+    translations = [english for korean, english in sorted(TERMS.items(), key=lambda row: -len(row[0]))
+                    if korean in cleaned]
     aliases = [term for cue, terms in DOMAIN_ALIASES if cue.search(cleaned) for term in terms]
     domain = domain_hint(cleaned)
     if domain:
@@ -109,7 +118,8 @@ def plan_query(question: str, *, premise: bool = False, refined: bool = False) -
         queries = (core[:220],)
     # Terms supplied in a relation question receive extra weight during reranking.
     relation = tuple(word for word in english if word not in _tokens(domain_words))[:8]
-    return QueryPlan(queries[:3], domain, tuple(concepts[:16]), relation)
+    return QueryPlan(queries[:3], domain, tuple(concepts[:16]), relation,
+                     tuple(english[:10]))
 
 
 def _document_domain(document: str) -> str | None:

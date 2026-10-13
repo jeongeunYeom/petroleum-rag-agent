@@ -70,6 +70,7 @@ OPERATIONS = {
     "weighted_average_by_duration": r"\b(?:time[- ]weighted|duration[- ]weighted)\s+(?:average|mean)\b|시간\s*가중\s*평균|가중\s*시간\s*평균",
     "percentage_decrease": r"\bpercent(?:age)?\s+decrease\b|감소율|몇\s*퍼센트\s*감소",
     "percentage_increase": r"\bpercent(?:age)?\s+increase\b|증가율",
+    "recovery_percent": r"\b(?:recovery|recovered)\s+(?:rate|percent(?:age)?)\b|회수율",
     "net_difference": r"\bnet\s+(?:difference|change)\b|순\s*변화|순\s*차이",
     "add": r"\b(?:add|addition)\b|더하기",
     "subtract": r"\b(?:subtract|subtraction)\b|빼기",
@@ -91,7 +92,7 @@ OPERATIONS = {
     "ranking": r"\b(?:ranking|rank|order(?:ing)?)\b|순위|정렬",
     "percent_change": r"\b(?:percent(?:age)? change|percent(?:age)? difference)\b|변화율",
     "ratio": r"\bratio\b|비율",
-    "difference": r"\b(?:difference|subtract)\b|차이|차감",
+    "difference": r"\b(?:difference|subtract|pressure\s+drop)\b|차이|차감|압력\s*강하량",
     "normalize_by_max": r"\bnormaliz\w*\s+by\s+(?:the\s+)?max\w*|최대값\s*정규화",
     "linear_regression": r"\b(?:linear regression|least[- ]squares line)\b|선형회귀",
     "weighted_average": r"\bweighted\s+(?:average|mean)\b|가중\s*평균",
@@ -239,7 +240,8 @@ def parse_request_ir(request: GoalResearchRequest, criteria: list[GoalCriterion]
             if output.output_type == "numeric":
                 output.unit = unit_match.group("unit")
     for output in outputs:
-        if output.semantic_name in {"coefficient_of_variation", "percent_change"}:
+        if output.semantic_name in {"coefficient_of_variation", "percent_change", "recovery_percent",
+                                    "percentage_increase", "percentage_decrease"}:
             output.unit = "percent"
         elif output.semantic_name in {"ratio", "normalize_by_max", "r_squared"}:
             output.unit = "dimensionless"

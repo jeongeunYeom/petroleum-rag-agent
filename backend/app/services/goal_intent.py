@@ -43,13 +43,13 @@ class GoalIntent:
     formula_origin: FormulaOrigin = FormulaOrigin.UNKNOWN
 
 
-_CALC = re.compile(r"\b(?:calculat\w*|comput\w*|determine|mean|average|sum|ratio|difference|slope|multiplication|division|rank\w*|median|variance|deviation|interpolat\w*|integrat\w*|percentage?\s+(?:increase|decrease))\b|계산|산출|구해|구하|평균|합계|총합|비율|차이|순위|중앙값|표준편차|분산|보간|적분|경과\s*시간|배정|할당|증가율|감소율|얼마(?:인가|야|입니까|니)|몇(?:인가|이야|입니까|니)|값은", re.I)
+_CALC = re.compile(r"\b(?:calculat\w*|comput\w*|determine|mean|average|sum|ratio|difference|slope|multiplication|division|rank\w*|median|variance|deviation|interpolat\w*|integrat\w*|percentage?\s+(?:increase|decrease)|pressure\s+drop|recovery\s+rate)\b|계산|산출|구해|구하|평균|합계|총합|비율|차이|순위|중앙값|표준편차|분산|보간|적분|경과\s*시간|배정|할당|증가율|감소율|강하량|회수율|얼마(?:인가|야|입니까|니)|몇(?:인가|이야|입니까|니)|값은", re.I)
 _EXPLICIT_CALC = re.compile(r"\b(?:calculat\w*|comput\w*|convert|determine|solve)\b|계산|산출|구해|구하|환산", re.I)
 _SIMULATION = re.compile(r"\b(?:sweep|vary\w*|sensitiv\w*|optim\w*|parameter\s+range|over\s+(?:a|the)\s+range)\b|"
                          r"\bfrom\s+[-+]?\d+(?:\.\d+)?\s+to\s+[-+]?\d+(?:\.\d+)?\b|"
                          r"최적|간격|변화시키|바꿔가며|바꾸면서|여러\s*값으로|매개변수\s*변화|부터.{0,30}까지", re.I)
-_FORMULA_REQUEST = re.compile(r"(?<![A-Za-z0-9_])(?:formula|equation|correlation|relation|law|model|coupling)(?![A-Za-z0-9_])|공식|수식|관계식|식(?:을|이|의)?\s*(?:찾|확인)|관계(?:를|식을)?\s*찾|내부\s*식|원문\s*식|(?:교재|자료)에\s*나온\s*(?:식|관계)|모델", re.I)
-_KB_ORIGIN = re.compile(r"내부\s*(?:자료|식|교재)|교재(?:의|에)|문서에서|자료에서\s*확인|원문|식(?:을|이|의)?\s*(?:찾|확인)|관계(?:를|식을)?\s*찾|(?:교재|자료)에\s*나온|\b(?:textbook|internal source|cited relation|source equation)\b", re.I)
+_FORMULA_REQUEST = re.compile(r"(?<![A-Za-z0-9_])(?:formula|equation|correlation|relation|law|model|coupling)s?(?![A-Za-z0-9_])|공식|수식|관계식|식(?:을|이|의)?\s*(?:찾|확인)|관계(?:를|식을)?\s*찾|내부\s*식|원문\s*식|(?:교재|자료)에\s*나온\s*(?:식|관계)|모델", re.I)
+_KB_ORIGIN = re.compile(r"내부\s*(?:자료|식|교재)|교재(?:의|에)|문서에서|자료에서\s*확인|원문|식(?:을|이|의)?\s*(?:찾|확인)|관계(?:를|식을)?\s*찾|(?:교재|자료)에\s*나온|\b(?:textbook|internal source|internal (?:equation|formula|relation)s?|cited relation|source equation)\b", re.I)
 _USER_ORIGIN = re.compile(r"내가\s*(?:정의한|준|지정한)(?:\s*식)?|사용자\s*식|\b(?:my formula|use this equation|scenario equation|user[- ]defined equation)\b", re.I)
 _PREMISE = re.compile(r"(?:맞(?:지|나요|습니까|아)?|옳(?:지|나요)?|(?:되|하|인|없|않)는?\s*거지|"
                       r"보면\s*되나|보면\s*되지|거지\s*\?|없지|않지|항상|언제나|필요\s*없지|무관하지|단점\s*없지|"
@@ -60,7 +60,7 @@ _DIRECT = re.compile(r"\b(?:calculate|compute|range|ratio|difference|convert|con
                      r"rank|std|interpolate|trapezoid|geometric\s+mean|elapsed\s+time|allocate|weighted\s+average|"
                      r"combined\s+rate|repeated\s+percent|percent\s+change|piecewise\s+cost|"
                      r"percent\s+to\s+fraction|fraction\s+to\s+percent|percent(?:age)?\s+decrease)\b|"
-                     r"평균|중앙값|범위|비율|차이|표준편차|분산|합계|총합|순위|보간|사다리꼴|기하평균|경과\s*시간|비례\s*배분|"
+                     r"평균|중앙값|범위|비율|차이|강하량|회수율|증가율|표준편차|분산|합계|총합|순위|보간|사다리꼴|기하평균|경과\s*시간|비례\s*배분|"
                      r"몇\s*개|얼마|이\s*값들로|사용자\s*값만|자료\s*검색하지\s*마|"
                      r"단위\s*변환|시간당|원기둥\s*부피|소비\s*에너지|질량\s*농도|중심\s*차분|압력\s*변화율|감소율|순\s*변화|"
                      r"%\s*(?:증가|감소|increase|decrease)", re.I)

@@ -69,6 +69,19 @@ def direct_operation_operands(text: str, facts: UserFactRegistry,
     for operation in ("ratio", "difference", "divide", "subtract"):
         if operation not in operations:
             continue
+        role_order = (
+            ("produced", "injected") if operation == "ratio" and re.search(r"회수율|recovery\s+rate", text, re.I) else
+            ("inlet", "outlet") if operation in {"difference", "subtract"} and
+            re.search(r"pressure\s+drop|압력\s*강하", text, re.I) else
+            ("final", "initial") if operation in {"difference", "subtract"} and
+            re.search(r"change|변화량|증감", text, re.I) else None)
+        if role_order:
+            matched = [[row for row in facts.records if row.semantic_role == role] for role in role_order]
+            if all(len(rows) == 1 for rows in matched) and matched[0][0].unit == matched[1][0].unit:
+                selected[operation] = (matched[0][0].name, matched[1][0].name)
+                continue
+            missing.append("역할이 명확하고 단위가 호환되는 두 입력값")
+            continue
         candidates = []
         for left in names:
             for right in names:
@@ -104,10 +117,29 @@ def direct_operation_operands(text: str, facts: UserFactRegistry,
                     candidates.append((left, right))
         candidates = list(dict.fromkeys(candidates))
         if len(candidates) == 1:
-            selected[operation] = candidates[0]
+            units = {row.name: row.unit for row in facts.records}
+            if units[candidates[0][0]] == units[candidates[0][1]]:
+                selected[operation] = candidates[0]
+            else:
+                missing.append("단위가 호환되는 두 입력값")
         else:
             missing.append("비율의 분자/분모 순서" if operation in {"ratio", "divide"} else "차이를 낼 값의 순서")
     return selected, missing
+
+
+def direct_role_values(facts: UserFactRegistry, operations: list[str]
+                       ) -> tuple[dict[str, float], dict[str, str]]:
+    """Map unique temporal facts to the existing bounded percent-change primitive."""
+    values = {row.name: row.value for row in facts.records}
+    units = {row.name: row.unit for row in facts.records}
+    if set(operations) & {"percentage_increase", "percentage_decrease", "percent_change", "net_difference", "recovery_percent"}:
+        roles = (("produced", "produced"), ("injected", "injected")) if "recovery_percent" in operations else (
+            ("initial", "initial"), ("final", "final"))
+        for target, role in roles:
+            matches = [row for row in facts.records if row.semantic_role == role]
+            if target not in values and len(matches) == 1:
+                values[target], units[target] = matches[0].value, matches[0].unit
+    return values, units
 
 
 def _special_direct(operation: str, text: str, values: dict[str, float],
@@ -206,8 +238,8 @@ def direct_readiness(text: str, facts: UserFactRegistry, operations: list[str]) 
     if len(operations) != 1:
         return ["요청한 직접 계산의 연산 구분"]
     try:
-        _special_direct(operations[0], text, {row.name: row.value for row in facts.records},
-                        {row.name: row.unit for row in facts.records})
+        values, units = direct_role_values(facts, operations)
+        _special_direct(operations[0], text, values, units)
     except ValueError as exc:
         return [str(exc)]
     return []
@@ -400,13 +432,13 @@ async def run_direct_arithmetic(settings: Settings, request: GoalResearchRequest
     permissions = PermissionManager(scoped)
     permissions.require_tool_level(AgentPermissionLevel.APPROVED_EXECUTION, AgentToolName.RUN_PYTHON)
     python = PythonTools(scoped, permissions)
-    values = {row.name: row.value for row in facts.records}
+    values, calculation_units = direct_role_values(facts, selected)
     special_code = ""
     special_expected: dict[str, float] = {}
     special_units: dict[str, str | None] = {}
     if set(selected) & special:
         special_code, special_expected, special_units = _special_direct(
-            selected[0], request.goal or request.topic, values, {row.name: row.unit for row in facts.records})
+            selected[0], request.goal or request.topic, values, calculation_units)
     if "elapsed_time" in selected and not {"start_time", "end_time"} <= set(values):
         raise ValueError("elapsed time needs explicit start and end")
     if "geometric_mean" in selected and any(value <= 0 for value in values.values()):
