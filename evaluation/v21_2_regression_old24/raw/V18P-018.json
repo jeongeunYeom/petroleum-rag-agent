@@ -1,0 +1,599 @@
+{
+  "task_id": "V18P-018",
+  "question": "내부 시추 교재의 순환 중 등가 밀도 관계를 찾아 적용해줘. 이수 밀도 MW는 10.1 ppg, 환상부 마찰압력 손실 Pd는 260 psi, 수직깊이 D는 8000 ft야. ECD를 ppg로 계산해줘.",
+  "system": "v21_2_agent",
+  "product_sha": "f5182b8ae2907452e1c53373055e66c5182c9b90",
+  "attempt_count": 1,
+  "attempted_at": "2026-10-13T07:07:49.004961+00:00",
+  "status": "completed",
+  "start_http_status": 201,
+  "run_id": "GR-20261013-070749-9A661A",
+  "run": {
+    "run_id": "GR-20261013-070749-9A661A",
+    "topic": "내부 시추 교재의 순환 중 등가 밀도 관계를 찾아 적용해줘. 이수 밀도 MW는 10.1 ppg, 환상부 마찰압력 손실 Pd는 260 psi, 수직깊이 D는 8000 ft야. ECD를 ppg로 계산해줘.",
+    "goal": "내부 시추 교재의 순환 중 등가 밀도 관계를 찾아 적용해줘. 이수 밀도 MW는 10.1 ppg, 환상부 마찰압력 손실 Pd는 260 psi, 수직깊이 D는 8000 ft야. ECD를 ppg로 계산해줘.",
+    "expected_result": null,
+    "run_status": "waiting_for_user_input",
+    "status": "pending",
+    "stop_reason": null,
+    "final_answer": "",
+    "clarification_question": "계산을 계속하려면 TVD 값과 단위이(가) 필요합니다. 값과 단위를 한 번에 알려주세요.",
+    "required_inputs": [
+      "TVD 값과 단위"
+    ],
+    "final_limitations": [],
+    "goal_coverage": 0.0,
+    "goal_coverage_percent": 0.0,
+    "criteria_source": "inferred",
+    "criteria_hash": "a2555623f8f742f522c0e35ea1f6bb59e83e73515cc8fd4839bcbb637ceac73b",
+    "criteria": [],
+    "frozen_criteria": [
+      {
+        "criterion_id": "C1",
+        "description": "요청한 P 관계식의 실제 출처를 검증",
+        "required": true
+      },
+      {
+        "criterion_id": "C2",
+        "description": "제공된 입력으로 P를 계산하고 검증된 결과와 단위를 제시",
+        "required": true
+      }
+    ],
+    "expected_result_status": "not_provided",
+    "iterations_completed": 2,
+    "current_iteration": 2,
+    "max_iterations": 8,
+    "current_stage": "waiting_for_user_input",
+    "current_action": null,
+    "action_history": [
+      {
+        "iteration": 1,
+        "action_id": "ACT-1",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "completed",
+        "reason_code": "formula_source_missing",
+        "started_at": "2026-10-13T07:07:49.046776Z",
+        "finished_at": "2026-10-13T07:08:05.117320Z",
+        "new_evidence_count": 5,
+        "evidence_added": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": null,
+        "details": {
+          "new_evidence_count": 5,
+          "retrieval_mode": "hybrid",
+          "query": "내부 시추 교재의 순환 중 등가 밀도 관계를 찾아 적용해줘. 이수 밀도 MW는 10.1 ppg, 환상부 마찰압력 손실 Pd는 260 psi, 수직깊이 D는 8000 ft야. ECD를 ppg로 계산해줘.\nMissing: 요청한 P 관계식의 실제 출처를 검증; 제공된 입력으로 P를 계산하고 검증된 결과와 단위를 제시\nequation formula variables units ppg psi\nmud density pressure",
+          "cache_hit": false
+        }
+      },
+      {
+        "iteration": 2,
+        "action_id": "ACT-2",
+        "action_type": "retrieve",
+        "target_criteria": [
+          "C1",
+          "C2"
+        ],
+        "status": "blocked",
+        "reason_code": "dependency_formula_recovery",
+        "started_at": "2026-10-13T07:08:05.486693Z",
+        "finished_at": "2026-10-13T07:08:25.167969Z",
+        "new_evidence_count": 0,
+        "evidence_added": [],
+        "computation_ids": [],
+        "coverage_before": 0.0,
+        "coverage_after": 0.0,
+        "failure_reason": "retrieve_no_progress",
+        "details": {
+          "new_evidence_count": 0,
+          "retrieval_mode": "hybrid",
+          "query": "TVD\nmud density pressure\nequation formula relation definition variables units\n내부 시추 교재의 순환 중 등가 밀도 관계를 찾아 적용해줘. 이수 밀도 MW는 10.1 ppg, 환상부 마찰압력 손실 Pd는 260 psi, 수직깊이 D는 8000 ft야. ECD를 ppg로 계산해줘.",
+          "cache_hit": false
+        }
+      }
+    ],
+    "state_history": [
+      {
+        "iteration": 1,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2",
+          "USERF3",
+          "EFACT1",
+          "EFACT2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6",
+          "KB7",
+          "KB8",
+          "KB9",
+          "KB10",
+          "KB11"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2",
+          "USERF3",
+          "EFACT1",
+          "EFACT2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "retrieve_no_progress"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      },
+      {
+        "iteration": 2,
+        "criteria": {
+          "C1": "unmet",
+          "C2": "unmet"
+        },
+        "evidence_ids": [
+          "KB1",
+          "KB2",
+          "KB3",
+          "KB4",
+          "KB5",
+          "KB6",
+          "KB7",
+          "KB8",
+          "KB9",
+          "KB10",
+          "KB11"
+        ],
+        "computation_ids": [],
+        "known_fact_ids": [
+          "USERF1",
+          "USERF2",
+          "USERF3",
+          "EFACT1",
+          "EFACT2"
+        ],
+        "generated_artifacts": [],
+        "unresolved_information": [
+          "TVD 값과 단위"
+        ],
+        "coverage": 0.0,
+        "goal_achieved": false,
+        "blocked_reasons": [],
+        "source_complete": null,
+        "formula_ready": false
+      }
+    ],
+    "iterations": [],
+    "internal_sources": [
+      {
+        "evidence_id": "KB1",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 360,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p360:c0",
+        "score": 0.08066995,
+        "excerpt": "Drilling Fluids\n5\nInstitute of Petroleum Engineering,  Heriot-Watt University  \nThe pressure in the wellbore will be equal to: \nP\t =  0.052 x MW x TVD\nwhere,   \nP\t = hydrostatic pressure (psi)       \nMW \t = mud density of the mud or mud weight (ppg)      \nTVD \t = true vertical depth of point of interest  = vertical height of mud column \n(ft)\nThe density of the mud may be expressed in either of the following units:\nTo obtain the following Units of density multiply the Units in the first \ncolom by:\n \n\t\n\t\n\t\n\t\nS.G.\t\n\t\npsi/ft\t\n\t\nppg\n\t\nS.G.\t\n\t\n1.0\t\n\t\n0.433\t \t\n8.33\n\t\npsi/ft\t\n\t\n2.31\t\n\t\n1.0\t\n\t\n19.23\n\t\nppg\t\n\t\n0.12\t\n\t\n0.052\t \t\n1.0\nTable 2  Conversion of Commonly used Units of Density\n \nExample:\nA mudweight of 12 ppg is equivalent to a mudweight of 12 x 0.052 = 0.624 psi/ft\nA mudweight of 1.4 S.G. is equivalent to a mudweight of 1.4 x 0.433 = 0.606 psi/ft\nThe mud weight must be selected so that it exceeds the pore pressures but does not \nexceed the fracture pressures of the formations being penetrated.  Barite, and in \nsome cases Haemitite, is added to viscosified mud as a weighting material.  These \nminerals are used because of their high density:\n\t\n     Mineral\t\n\t\nDensity (S.G.)\n\t\n\t\n\t\nSilica"
+      },
+      {
+        "evidence_id": "KB2",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 214,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p214:c1",
+        "score": 0.04573041,
+        "excerpt": "ed to 8000ft using mud with a density of 12 ppg.  If the \n \t\nformation pore pressure at this depth was 4700 psi what would be the mud pressure \n \t\noverbalance, above the pore pressure.  \nb.  If the mud density were 10 ppg what would be the overbalance?\nc.  If the fluid level in the annulus in a. above dropped to 200 ft due to inadequate hole \n \t\nfill up during tripping, what would be the effect on bottom hole pressure?"
+      },
+      {
+        "evidence_id": "KB3",
+        "document": "Heriot-Watt_University_-_Well_Test_Analysis.pdf",
+        "page": 394,
+        "chunk_id": "01155892bc533f0bcead8df919b991f143103406ac5f138350fe32296fe15462:p394:c0",
+        "score": 0.04553196,
+        "excerpt": "Department of Petroleum Engineering,  Heriot-Watt University  \n5\n7\nExploration Applications of Distributed Pressure Measurement7\n(brine) density, ρw .  In field units this equation may be written:\n              pw = pFWL - 0.4335 ρwh \n(2b)\n              p : psi\n              ρw : g/cc\n              h : ft\nSimilarly the oil phase pressure, denoted po , is given by:\n              po = pFWL - ρogh \n(3a)\nor in field units:\n              po = pFWL - 0.4335 ρoh \n(3b)\n                      \nx\nx\nxx\nx\nx\nx\nx\nx\nx\nxxx\nx\nx\nx\nx\nxxx\nx\nxx\nxx\nx\nxxx xxx\nx\nxx\nx\nx\nx\nx\nx\nxx\nx\nx x\nx\nx\nx\nx\nxx\nx\nx\nx\nxx\nxx\nx\nxx\nTVD\n(m)\nMud Pressure (psi)\nReservoir Pressure (psi)\n2190\n2200\n2210\n2220\n2230\n2240\n2250\n2260\n2270\n4250         4300          4350          4400        4440\n3440     3460       3480       3500\nSurface mud density = 1.34 g/cc\nAverage mud column density\nat 2230 m = 1.36 g/cc\nBottom hole temperature = 75°C\n1.15 g/cc\n0.17 g/cc\nGas - Oil\nContact\n2.05 g/cc\n0.59 g/cc\nOil - Water\nContact\n1.12 g/cc\nAn RFT survey from an unproduced reservoir is shown in Figure 2 where both the \nformation and mud hydrostatic pressures are plotted on a pressure - depth diagram.  \nFigure 2."
+      },
+      {
+        "evidence_id": "KB4",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 202,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p202:c0",
+        "score": 0.04209077,
+        "excerpt": "43\nInstitute of Petroleum Engineering,  Heriot-Watt University  \nThe maximum allowable mudweight that can be used in the next hole section is:\n  \n 5076/7000  \n= 0.73 psi/ft\n  \n  \n \n= 13.95 ppg\n If it is anticipated that a mudweight  greater than this is required then consideration \nshould be given to setting another string of casing prior to entering the zone that will \nrequire this higher mudweight.  A safety margin of 0.5 ppg underweight is generally \nsubtracted from the allowable mudweight calculated above.   \n                           \n                      \nFigure 3.1   FST Results\nExercise 4  Equivalent Circulating Density - ECD\nIf the circulating pressure losses in the annulus of the above well are 300 psi when \ndrilling at 7500ft, the ECD of a 9.5 ppg mud at 7500ft would be:\n  \n 9.5 + (300/7500)/0.052 = 10.27 ppg\n55\nFormation Pressures"
+      },
+      {
+        "evidence_id": "KB5",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 225,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p225:c1",
+        "score": 0.03301792,
+        "excerpt": "SPM                   BBL/MIN                               PSI\n1   SIDPP x  20                           = (                ) x  20  =                                                PPG  \n     DEPTH (TVD)                        = (                ) \n2   SAFETY OR TRIP MARGIN (WHEN NEEDED)   =                                                 PPG  \n3   ORIGINAL MUD WEIGHT  \n \n  =                                                 PPG  \n4   KILL  WEIGHT MUD (1+2+3)  \n \n  =                                                 PPG  \n1  DRILLSTRING CAPACITY  \n \n \n \n \n \n2  ANNULAR VOLUME OF OPEN HOLE  \n3  ANNULAR VOLUME OF CASING  \n4  ACTIVE SURFACE VOLUME\n5  TOTAL ACTIVE SYSTEM VOLUME\n(1+2+3+4)  \nFCP = (SLOW PUMP PRESSURE) x (NEW MUD WEIGHT)          =                        PSI\n (ORIGINAL MUD WEIGHT)\nFCP = (                      ) x (                              )          =                                                PSI\n (                              )\nKICK DATA:\nCALCULATE : INITIAL CIRCULATING PRESSURE :\nSHUT IN DRILLPIPE PRSSURE  \n \n \nPSI\n1 SLOW PUMP RATE AT \n        SPM  \n \nPSI\n2 SHUT IN DRILL PIPE PRESSURE  \n \n \nPSI\n3 INITIAL CIRCULATING PRESSURE (1+2) \n \nPSI\nSHUT IN CASING"
+      },
+      {
+        "evidence_id": "KB6",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 360,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p360:c1",
+        "score": 0.08066995,
+        "excerpt": "n \nsome cases Haemitite, is added to viscosified mud as a weighting material.  These \nminerals are used because of their high density:\n\t\n     Mineral\t\n\t\nDensity (S.G.)\n\t\n\t\n\t\nSilica (Sand)\t\n\t\n2.5\n\t\n\t\nCa CO3\t\t\n\t\n2.5\n\t\n\t\nBarite\t \t\n\t\n4.2\n\t\n\t\nHaemitite\t\n\t\n5.6\nThe relatively high density of Barite and Haemitite means that a much lower volume \nof these minerals needs to be added to the mud to increase the overall density of the \nmud.  This will mean that the impact of this weighting material on the rheological \nproperties of the mud will be minimised. \nWhen drilling through permeable formations (e.g. sand) the mud will seep into the \nformation.  This is not the same as the large losses of fluid which occurs in fractured \nformations, discussed above.  As the fluid seeps into the formation a filter cake \nwill be deposited on the wall of the borehole.   Some fluid will however continue \nto filter through the filter cake into the formation.  The mud and the filtrate can \ndamage the productive formations in a number of ways.  The loss of mud can result"
+      },
+      {
+        "evidence_id": "KB7",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 359,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p359:c0",
+        "score": 0.08066995,
+        "excerpt": "4\n          \nFunction  \n \n \n \n \nPhysical/Chemical Property\nTransport cuttings from the Wellbore  \nYield Point, Apparent Viscosity, \n \n \n \n \n \n \nVelocity, Gel Strength\nPrevent Formation Fluids Flowing into \nDensity\n the Wellbore \nMaintain Wellbore Stability  \n \nDensity, Reactivity with Clay\nCool and Lubricate the Bit   \n \nDensity, velocity,\nTransmit Hydraulic Horsepower to Bit  \nVelocity, Density, Viscosity\n  \nTable 1 Function and Physical Properties of Drilling Fluid\na.  Remove cuttings from the Wellbore\nThe primary function of drilling fluid is to ensure that the rock cuttings generated \nby the drilllbit are continuously removed from the wellbore.  If these cuttings are \nnot removed from the bit face the drilling efficiency will decrease.  It these cuttings \nare not transported up the annulus between the drillstring and wellbore efficiently \nthe drillstring will become stuck in the wellbore. The mud must be designed such \nthat it can:\n•\t  Carry the cuttings to surface while circulating\n•\t  Suspend the cuttings while not circulating\n•\t  Drop the cuttings out of suspension at surface.\nThe rheological  properties of the mud must be carefully engineered to fulfil these \nrequirements. "
+      },
+      {
+        "evidence_id": "KB8",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 361,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p361:c0",
+        "score": 0.08066995,
+        "excerpt": "6\nin the deposition of solid particles or hydration of clays in the pore space.  The loss \nof filtrate can also result in the hydration of clays.  This will result in a reduction in \nthe permeability of the formation.  In addition to damaging the productivity of the \nformations the filter cake can become so thick it may cause stuck pipe.  The ideal \nfilter cake is therefore thin and impermeable.  \nc.  Maintain Wellbore Stability\nData from adjacent wells will be useful in predicting borehole stability problems \nthat can occur in troublesome formations (eg unstable shales, highly permeable \nzones, lost circulation, overpressured zones)\nShale instability is one of the most common problems in drilling operations.  This \ninstability may be caused by either one or both of the following two mechanisms:\n \n•\t the pressure differential between the bottomhole pressure in the borehole and  \n \nthe pore pressures in the shales and/or, \n• hydration of the clay within the shale by mud filtrate containing water.  \nThe instability caused by the pressure differential between the borehole and the pore \npressure can be overcome by increasing the mudweight.  The hydration of the \nclays can only be overc"
+      },
+      {
+        "evidence_id": "KB9",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 359,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p359:c1",
+        "score": 0.08066995,
+        "excerpt": "ttings while not circulating\n•\t  Drop the cuttings out of suspension at surface.\nThe rheological  properties of the mud must be carefully engineered to fulfil these \nrequirements.  The carrying capacity of the mud depends on the annular velocity, \ndensity and viscosity of the mud.  The ability to suspend the cuttings depends on \nthe gelling (thixotropic) properties of the mud.  This gel forms when circulation \nis stopped and the mud is static.  The drilled solids are removed from the mud at \nsurface by mechanical devices such as shale shakers, desanders and desilters \n(see Section 5 below).  It is not economically feasible to remove all the drilled solids \nbefore re-circulating the mud.  However, if the drilled solids are not removed the \nmud may require a lot of chemical treatment and dilution to control the rheological \nproperties of the mud.  For a thorough treatment of the rheology of drilling fluids \nrefer to the chapter on Drilling Hydraulics.\nb.  Prevent Formation Fluids Flowing into the Wellbore\nThe hydrostatic pressure exerted by the mud colom must be high enough to prevent \nan influx of formation fluids into the wellbore.  However, the pressure in the wellbore \nmust not b"
+      },
+      {
+        "evidence_id": "KB10",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 361,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p361:c1",
+        "score": 0.08066995,
+        "excerpt": "tability caused by the pressure differential between the borehole and the pore \npressure can be overcome by increasing the mudweight.  The hydration of the \nclays can only be overcome by using non water-based muds, or partially addressed \nby treating the mud with chemicals which will reduce the ability of the water in the \nmud to hydrate the clays in the formation.  These muds are known as inhibited \nmuds.  \nd.  Cool and Lubricate the Bit\nThe rock cutting process will, in particular with PDC bits, generate a great deal \nof heat at the bit.  Unless the bit is cooled, it will overheat and quickly wear out. \nThe circulation of the drilling fluid will cool the bit down and help lubricate the \ncutting process.\ne.  Transmit Hydraulic Horsepower to Bit\nAs fluid is circulated through the drillstring, across the bit and up the annulus of \nthe wellbore the power of the mud pumps will be expended in frictional pressure \nlosses.  The efficiency of the drilling process can be significantly enhanced if \napproximately. 65% of this power is expended at the bit. The pressure losses in \nthe system are a function of the  geometry of the system and the mud properties \nsuch as viscosity, yield point an"
+      },
+      {
+        "evidence_id": "KB11",
+        "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+        "page": 359,
+        "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p359:c2",
+        "score": 0.08066995,
+        "excerpt": "he hydrostatic pressure exerted by the mud colom must be high enough to prevent \nan influx of formation fluids into the wellbore.  However, the pressure in the wellbore \nmust not be too high or it may cause the formation to fracture and this will result in \nthe loss of expensive mud into the formation.  The flow of mud into the formation \nwhilst drilling is known as lost circulation.  This is because a certain proportion \nof the mud is not returning to surface but flowing into the formation."
+      }
+    ],
+    "web_sources": [],
+    "figures": [],
+    "computations": [],
+    "artifacts": [],
+    "deliverable_status": {},
+    "deliverable_errors": {},
+    "python_calls_total": 0,
+    "python_attempts_total": 0,
+    "python_failures": 0,
+    "python_call_budget_exhausted": false,
+    "timing": {
+      "planning_seconds": 0.0981,
+      "retrieval_seconds": 35.526912,
+      "llm_generation_seconds": 0.000135,
+      "python_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "evaluation_seconds": 0.0,
+      "synthesis_seconds": 0.0,
+      "retrieve_action_seconds": 35.751547,
+      "elapsed_seconds": 36.325025,
+      "total_seconds": 36.325209,
+      "message_parsing_seconds": 0.000184
+    },
+    "telemetry": {
+      "python_authorization_source": "autonomous_execution_mode",
+      "claim_support_checked": false,
+      "required_claim_count": 0,
+      "supported_claim_count": 0,
+      "partially_supported_claim_count": 0,
+      "answerability_status": "NOT_CHECKED",
+      "extractive_fallback_attempted": false,
+      "extractive_fallback_used": false,
+      "extractive_fallback_failure_reason": null,
+      "refusal_generated": false,
+      "refusal_reason": null,
+      "relevant_evidence_present": false,
+      "final_answer_kind": "clarification",
+      "operands_expected": 2,
+      "operands_bound": 1,
+      "operand_validation_passed": false,
+      "formula_selected": true,
+      "formula_ready": false,
+      "calculation_ready": false,
+      "calculation_executed": false,
+      "calculation_validated": false,
+      "formula_variables_expected": [
+        "MW",
+        "TVD"
+      ],
+      "formula_variables_bound": [
+        "MW"
+      ],
+      "formula_variables_missing": [
+        "TVD 값과 단위",
+        "TVD 값"
+      ],
+      "formula_source_verified": true,
+      "route_forced_by_deterministic_readiness": false,
+      "deterministic_calc_finalizer_used": false,
+      "grounded_fast_path_used": false,
+      "clarification_generated": true,
+      "clarification_reasons": [
+        "TVD 값과 단위"
+      ],
+      "formula_recovery_attempted": false,
+      "formula_recovery_attempt_count": 0,
+      "formula_recovery_success": false,
+      "formula_local_expansion_used": false,
+      "formula_local_expansion_attempted": false,
+      "formula_local_expansion_success": false,
+      "operands_complete": false,
+      "forced_calculate_transition": false,
+      "pre_stop_guard_checked": true,
+      "pre_stop_guard_prevented_refusal": false,
+      "partial_grounded_answer_used": false,
+      "clarification_guard_checked": true,
+      "clarification_suppressed_existing_input": false,
+      "resume_readiness_recomputed": false,
+      "resume_block_cleared": false,
+      "formula_dependency_resolution_attempted": true,
+      "formula_dependency_resolution_success": false,
+      "formula_dependency_depth": 0,
+      "formula_dependency_formula_ids": [
+        "FORMULA1"
+      ],
+      "formula_dependency_computation_ids": [],
+      "formula_dependency_derived_fact_ids": [],
+      "formula_dependency_cycle_detected": false,
+      "formula_dependency_block_reason": null,
+      "clarification_avoided_by_dependency_resolution": false,
+      "formula_layout_normalization_attempted": true,
+      "formula_layout_normalization_used": true,
+      "formula_layout_transformations": [
+        "spaced_multiplication_x"
+      ],
+      "formula_layout_candidate_count": 1,
+      "formula_layout_ambiguous": false,
+      "formula_layout_rejection_reason": null,
+      "unit_propagation_attempted": true,
+      "unit_propagation_success": false,
+      "unit_propagation_inputs": {
+        "MW": "ppg"
+      },
+      "unit_propagation_result": null,
+      "unit_propagation_failure_reason": "TVD 값",
+      "required_target_outputs": [
+        "P"
+      ],
+      "target_output_satisfied": false,
+      "target_output_computation_ids": [],
+      "target_formula_id": "FORMULA1",
+      "target_formula_source_verified": true,
+      "target_calculation_ready": false,
+      "target_completion_guard_checked": false,
+      "target_completion_guard_blocked_success": false,
+      "target_formula_layout_ambiguous": false,
+      "target_unit_propagation_result": null,
+      "intent_route": "kb_formula_calc",
+      "required_goals": [
+        {
+          "goal_id": "G1",
+          "goal_type": "numeric_calculation",
+          "semantic_target": "P",
+          "source_text_span": "내부 시추 교재의 순환 중 등가 밀도 관계를 찾아 적용해줘. 이수 밀도 MW는 10.1 ppg, 환상부 마찰압력 손실 Pd는 260 psi, 수직깊이 D는 8000 ft야. ECD를 ppg로 계산해줘.",
+          "required": true,
+          "requested_unit": "ppg",
+          "requires_evidence": false,
+          "requires_calculation": true,
+          "scenario_id": null,
+          "status": "UNMET",
+          "supporting_ids": []
+        }
+      ],
+      "synthesis_missing_goal_ids": [],
+      "synthesis_repair_attempted": false,
+      "synthesis_repair_success": false,
+      "request_computation_class": "kb_formula",
+      "calculation_intent_detected": true,
+      "calculation_intent_type": "kb_formula",
+      "calculation_intent_reason": "explicit_source_required_calculation",
+      "requested_semantic_target": "hydrostatic_pressure",
+      "requested_target_contract": {
+        "requested_quantity": "P",
+        "requested_unit": null,
+        "known_inputs": [
+          "밀도_mw",
+          "손실_pd",
+          "수직깊이_d"
+        ],
+        "semantic_dimension": "hydrostatic_pressure"
+      },
+      "requested_target_dimension": "hydrostatic_pressure",
+      "group_unit_propagation_used": false,
+      "group_unit_propagation_unit": null,
+      "intent": {
+        "selected_intent": "kb_formula_calc",
+        "intent_reason": "explicit_source_required_calculation",
+        "premise_cue_detected": false,
+        "formula_origin": "kb_referenced"
+      },
+      "source_requirement": "kb_formula",
+      "fact_extraction": {
+        "deterministic_fact_count": 3,
+        "fallback_fact_count": 0,
+        "rejected_fact_count": 0,
+        "fact_rejection_reasons": [],
+        "normalized_units": {
+          "USERF1": {
+            "raw": "ppg",
+            "canonical": "ppg"
+          },
+          "USERF2": {
+            "raw": "psi",
+            "canonical": "psi"
+          },
+          "USERF3": {
+            "raw": "ft",
+            "canonical": "ft"
+          }
+        }
+      },
+      "required_operand_roles": [],
+      "candidate_operand_bindings": {},
+      "selected_operand_bindings": {},
+      "selected_operand_fact_ids": [],
+      "operand_binding_confidence": 0.0,
+      "operand_binding_rejection_reason": null,
+      "calculation": {
+        "requested_operation_family": "",
+        "direct_calc_ready": false,
+        "missing_operands": [],
+        "selected_input_fact_ids": [
+          "USERF1",
+          "USERF2",
+          "USERF3"
+        ]
+      },
+      "formula_layout_reconstructed": false,
+      "formula_layout_source_spans": [],
+      "formula_layout_confidence": null,
+      "formula": {
+        "candidates_found": 1,
+        "selected_formula_id": "FORMULA1",
+        "selection_scores": {
+          "total": 6,
+          "lhs": 0,
+          "variable_overlap": 2,
+          "context": 0,
+          "heading": 0,
+          "unit": 4
+        },
+        "ambiguity_reason": "unique_structural_match",
+        "candidate_scores": {
+          "FORMULA1": 6
+        }
+      },
+      "formula_candidates_considered": 1,
+      "formula_target_match": false,
+      "formula_variable_match": 1,
+      "formula_unit_match": 4,
+      "formula_selection_margin": 6,
+      "dependency_graph_depth": 0,
+      "derived_variables": [],
+      "selected_formula_semantic_target": "hydrostatic_pressure",
+      "transition": {
+        "formula_ready": false,
+        "calculation_ready": false,
+        "blocking_reason": "calculation_blocked"
+      },
+      "any_validated_calculation_exists": false,
+      "retrieval_original_concepts": [
+        "mud",
+        "density",
+        "pressure",
+        "drilling",
+        "시추",
+        "교재의",
+        "순환",
+        "등가",
+        "밀도",
+        "관계를",
+        "찾아",
+        "적용해줘",
+        "이수",
+        "ppg",
+        "환상부",
+        "마찰압력"
+      ],
+      "retrieval_translated_concepts": [
+        "mud",
+        "density",
+        "pressure",
+        "drilling"
+      ],
+      "source_conflict_count": 0,
+      "formula_dependency_target": {
+        "source_id": "KB1",
+        "equation_ast": "p=Expression(body=BinOp(left=BinOp(left=Constant(value=0.052), op=Mult(), right=Name(id='MW', ctx=Load())), op=Mult(), right=Name(id='TVD', ctx=Load())))",
+        "formula_id": "FORMULA1",
+        "lhs": "P"
+      },
+      "formula_definition_expansion_attempted": true,
+      "formula_source_local_aliases": [],
+      "dimension_inference": [],
+      "formula_recovery_query": "TVD\nmud density pressure\nequation formula relation definition variables units\n내부 시추 교재의 순환 중 등가 밀도 관계를 찾아 적용해줘. 이수 밀도 MW는 10.1 ppg, 환상부 마찰압력 손실 Pd는 260 psi, 수직깊이 D는 8000 ft야. ECD를 ppg로 계산해줘.",
+      "formula_query_concepts": [
+        "P",
+        "밀도_mw",
+        "손실_pd",
+        "수직깊이_d",
+        "mud",
+        "density",
+        "pressure",
+        "drilling"
+      ],
+      "recovery_action_before_stop": "calculation_blocked",
+      "entrypoint": "unified_chat",
+      "conversation_context_used": false,
+      "conversation_context_message_count": 0,
+      "hidden_iteration_ceiling": 8,
+      "actual_iterations_used": 2,
+      "actions_executed": [
+        "retrieve",
+        "retrieve"
+      ],
+      "adaptive_stop_reason": "waiting_for_user_input",
+      "target_completed": false,
+      "clarification_turns": 0
+    },
+    "validation": {},
+    "cancel_requested": false,
+    "error": null
+  },
+  "answer": "",
+  "run_status": "waiting_for_user_input",
+  "finished_at": "2026-10-13T07:08:26.151485+00:00",
+  "latency_seconds": 37.156
+}
