@@ -1,0 +1,55 @@
+{
+  "version": "v21.2-final-unseen-v2-frozen",
+  "primary_denominator": 36,
+  "numeric_denominator": 16,
+  "resume_denominator_separate": 4,
+  "judge_model": "gpt-5.4-2026-03-05",
+  "judge_temperature": 0,
+  "judge_calls_per_task": 1,
+  "anonymous_label_seed": 20261013,
+  "claim_coverage": {
+    "atomic_values": [0, 0.5, 1],
+    "definitions": {
+      "0": "Absent, materially wrong, or contradicted",
+      "0.5": "Substantively partial but not fully correct",
+      "1": "Fully correct and supported"
+    },
+    "aggregation": "mean of atomic required claims per task, then unweighted mean across primary tasks"
+  },
+  "goal_success": "All materially required goals and claims fulfilled. Numerical tasks additionally require all critical values and units within frozen tolerance. Agent source-dependent tasks require semantic citation support. Agent KB-formula tasks additionally require the correct literal formula source span, complete validated calculation provenance, and an appropriate retrieve-to-calculate sequence. False premises require explicit rejection, correction, and supporting evidence. Unanswerable tasks succeed by identifying the actual insufficiency and requesting the missing input, without inventing a value.",
+  "hallucination_free": "No material fabricated fact, unsupported source claim, wrong formula, wrong calculation or unit, fabricated citation or provenance, or unjustified certainty. Safe omission alone is not hallucination.",
+  "numerical_accuracy": "Exactly 16 primary numeric tasks. A task is correct only when every requested critical numeric output is within max(absolute_tolerance, relative_tolerance*abs(expected_value)) and has compatible units.",
+  "numeric_unit_equivalences": {
+    "dimensionless": ["dimensionless", "unitless", "무차원", "", "1"],
+    "percentage points": ["percentage points", "percentage point", "pp", "퍼센트포인트", "%p"],
+    "%": ["%", "percent", "퍼센트"],
+    "bbl/d": ["bbl/d", "bbl/day", "barrels per day"],
+    "bbl": ["bbl", "barrels"],
+    "bbl/h": ["bbl/h", "bbl/hour", "barrels per hour"],
+    "min": ["min", "minute", "minutes", "분"],
+    "kg": ["kg", "kilogram", "kilograms"],
+    "m3": ["m3", "m^3", "m³", "cubic metres", "cubic meters"],
+    "hp": ["hp", "horsepower"],
+    "cm3/s": ["cm3/s", "cm^3/s", "cm³/s", "cubic centimetres per second"],
+    "Mscf/d": ["mscf/d", "mscf/day"],
+    "kg/m3": ["kg/m3", "kg/m^3", "kg/m³"],
+    "psi": ["psi"]
+  },
+  "paired_bootstrap": {"method": "paired percentile", "resamples": 10000, "seed": 20261013, "confidence": 0.95},
+  "judge_output_schema": {
+    "responses": {
+      "anonymous_label": {
+        "claim_scores": "list of 0, 0.5, or 1 in required_claim order",
+        "goal_success": "boolean, semantic goals before deterministic agent gates",
+        "hallucination_free": "boolean",
+        "error_labels": "list of short error codes",
+        "unnecessary_refusal": "boolean",
+        "citation_semantic_support": "boolean or null",
+        "source_span_correct": "boolean or null",
+        "explicit_false_premise_rejection": "boolean or null",
+        "final_numeric_outputs": "list of {name,value,unit}",
+        "brief_rationale": "one short sentence, no private reasoning"
+      }
+    }
+  }
+}
