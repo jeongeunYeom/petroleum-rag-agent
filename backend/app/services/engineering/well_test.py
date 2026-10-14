@@ -39,7 +39,7 @@ _REGIME_PATTERNS = {
         re.IGNORECASE,
     ),
     "radial": re.compile(
-        r"(?:infinite[- ]?acting\s+)?radial\s*flow|"
+        r"(?:infinite[- ]?acting\s+)?radial[-\s]*flow|"
         r"middle[- ]?time(?:\s+region)?|\bmtr\b|중기|"
         r"방사\s*유동|방사형",
         re.IGNORECASE,
@@ -155,7 +155,7 @@ class WellTestValidator:
     name = "WellTestValidator"
     _QUERY_RE = re.compile(
         r"well\s*test|pressure\s*transient|pressure\s*derivative|"
-        r"wellbore\s*storage|radial\s*flow|linear\s*flow|spherical\s*flow|"
+        r"wellbore\s*storage|radial[-\s]*flow|linear\s*flow|spherical\s*flow|"
         r"boundary\s*(?:behavior|flow|effect)|recharge|unit[- ]?slope|"
         r"semilog|log[- ]?log|buildup|drawdown|horner|\bmtr\b|\brft\b|"
         r"skin\s+(?:factor|effect)|유정\s*시험|압력\s*천이|압력\s*도함수|"
@@ -775,6 +775,7 @@ class WellTestValidator:
     @staticmethod
     def _normalize(value: str) -> str:
         value = (value or "").translate(_DASH_TRANSLATION).lower()
+        value = re.sub(r"(?<=[a-z])-(?=[a-z])", " ", value)
         return re.sub(r"\s+", " ", value).strip()
 
     @staticmethod
@@ -913,7 +914,7 @@ class WellTestValidator:
         ]
         regime_start = (
             r"(?:wellbore\s*storage|유정\s*저장|웰보어\s*스토리지|"
-            r"(?:infinite[- ]?acting\s+)?radial\s*flow|방사\s*유동|방사형|"
+            r"(?:infinite[- ]?acting\s+)?radial[-\s]*flow|방사\s*유동|방사형|"
             r"linear\s*flow|선형\s*유동|spherical\s*flow|구형\s*유동|"
             r"지구형\s*흐름|boundary|closed\s+boundary|no[- ]?flow\s+boundary|"
             r"recharge|경계|재충전)"
@@ -964,6 +965,26 @@ class WellTestValidator:
                             - ((match.start() + match.end()) / 2)
                         ),
                     )
+                    # Source prose may name the feature before its regime:
+                    # "a horizontal derivative during early radial flow". The
+                    # explicit temporal attachment outranks raw character distance.
+                    attached = [item for item in attributable_regimes
+                                if item[1].start() >= match.end() and re.fullmatch(
+                                    r"\s*(?:(?:pressure\s+)?derivative\s+)?(?:during|in)\s+"
+                                    r"(?:(?:early|late|middle)\s+)?",
+                                    segment[match.end():item[1].start()], re.I)]
+                    if attached:
+                        nearest_regime, regime_match = min(attached, key=lambda item: item[1].start())
+                    # In "X has the same slope as Y", X is the claim's
+                    # subject; the later comparison object must not steal the
+                    # feature merely because it is closer in character count.
+                    subjects = [item for item in attributable_regimes
+                                if item[1].end() <= match.start() and
+                                re.search(r"\b(?:has|shows?|exhibits?|produces?|gives?|"
+                                          r"(?:must|should|can)\s+be|is|are)\b",
+                                          segment[item[1].end():match.start()], re.I)]
+                    if subjects:
+                        nearest_regime, regime_match = max(subjects, key=lambda item: item[1].start())
                     pairs.append(
                         {
                             "regime": nearest_regime,

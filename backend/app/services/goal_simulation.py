@@ -32,11 +32,21 @@ from app.services.formula_units import formula_output_unit as _formula_output_un
 def _named_heterogeneous_ratio(text: str, left: str, right: str, units: dict[str, str]) -> bool:
     """Only explicit fluid-volume ratios may use two unlike volume units."""
     volume = {"scf", "stb", "bbl", "m3", "L", "ft3"}
-    concepts = {"gas", "oil", "water", "produced", "injected"}
-    return (left.casefold() in concepts and right.casefold() in concepts and
+    concepts = {"gas": "gas", "가스": "gas", "oil": "oil", "오일": "oil", "원유": "oil",
+                "water": "water", "물": "water", "produced": "produced", "생산": "produced",
+                "injected": "injected", "주입": "injected"}
+    a, b = concepts.get(left.casefold()), concepts.get(right.casefold())
+    labels = {"gas": ("gas", "가스"), "oil": ("oil", "오일", "원유"),
+              "water": ("water", "물"), "produced": ("produced", "생산"),
+              "injected": ("injected", "주입")}
+    left_terms = labels.get(a, (left,))
+    right_terms = labels.get(b, (right,))
+    return (a is not None and b is not None and a != b and
             units[left] in volume and units[right] in volume and
-            bool(re.search(rf"\b{re.escape(left)}[-\s]+to[-\s]+{re.escape(right)}\s+ratio\b",
-                           text, re.I)))
+            ((a, b) == ("gas", "oil") and bool(re.search(r"\bGOR\b", text, re.I)) or
+             any(re.search(rf"(?<![A-Za-z0-9_]){re.escape(x)}(?:[-\s]+to[-\s]+|\s+divided\s+by\s+|\s*/\s*)"
+                          rf"{re.escape(y)}(?:\s+ratio|\s*비)?(?![A-Za-z0-9_])", text, re.I)
+                for x in left_terms for y in right_terms)))
 
 
 def user_formula_bindings(equation: str, facts: UserFactRegistry,
@@ -82,10 +92,20 @@ def direct_operation_operands(text: str, facts: UserFactRegistry,
     for operation in ("ratio", "difference", "divide", "subtract"):
         if operation not in operations:
             continue
+        if operation == "ratio" and re.search(r"\bGOR\b", text, re.I):
+            gas = [row for row in facts.records if row.name.casefold() in {"gas", "가스"}]
+            oil = [row for row in facts.records if row.name.casefold() in {"oil", "오일", "원유"}]
+            if len(gas) == len(oil) == 1:
+                selected[operation] = (gas[0].name, oil[0].name)
+                continue
+            missing.append("명시된 가스 부피와 원유 부피")
+            continue
         role_order = (
             ("produced", "injected") if operation == "ratio" and re.search(r"회수율|recovery\s+rate", text, re.I) else
             ("inlet", "outlet") if operation in {"difference", "subtract"} and
             re.search(r"pressure\s+drop|압력\s*강하", text, re.I) else
+            ("initial", "final") if operation in {"difference", "subtract"} and
+            re.search(r"\b(?:decreas\w*|declin\w*|drop)\b|감소", text, re.I) else
             ("final", "initial") if operation in {"difference", "subtract"} and
             re.search(r"change|변화량|증감", text, re.I) else None)
         if role_order:
@@ -103,6 +123,10 @@ def direct_operation_operands(text: str, facts: UserFactRegistry,
                 def aliases(name):
                     row = next(row for row in facts.records if row.name == name)
                     labels = [name.replace("_", " ")]
+                    if name.casefold() in {"원유", "오일"}:
+                        labels.extend(("oil", "오일", "원유"))
+                    elif name.casefold() == "가스":
+                        labels.append("gas")
                     if row.semantic_role in {"initial", "final", "inlet", "outlet", "produced", "injected"}:
                         labels.append(row.semantic_role)
                         labels.extend({
@@ -283,16 +307,23 @@ def direct_readiness(text: str, facts: UserFactRegistry, operations: list[str]) 
             "mean", "median", "sum", "minimum", "maximum", "weighted_average", "ranking", "range"}))
     except ValueError as exc:
         return [str(exc)]
+    comparable = {"mean", "median", "sum", "minimum", "maximum", "ranking", "range",
+                  "std_population", "std_sample", "variance_population", "variance",
+                  "geometric_mean", "add", "difference", "subtract"}
+    if set(operations) & comparable and len({row.unit.casefold() for row in facts.records}) > 1:
+        return ["호환 가능한 동일 단위의 입력값"]
     special = {"weighted_average", "combined_rate", "amount_per_time", "multi_difference", "interpolation", "trapezoid",
                "repeated_percent", "allocation", "piecewise_cost"} | V3_OPERATIONS
     chosen = set(operations) & special
     if not chosen:
         return []
-    if len(operations) != 1:
+    compatible_percent_difference = (len(operations) == 2 and "difference" in operations and
+                                     chosen <= {"percentage_decrease", "percentage_increase"} and len(chosen) == 1)
+    if len(operations) != 1 and not compatible_percent_difference:
         return ["요청한 직접 계산의 연산 구분"]
     try:
         values, units = direct_role_values(facts, operations)
-        _special_direct(operations[0], text, values, units)
+        _special_direct(next(iter(chosen)), text, values, units)
     except ValueError as exc:
         return [str(exc)]
     return []
@@ -468,8 +499,12 @@ async def run_direct_arithmetic(settings: Settings, request: GoalResearchRequest
     operand_orders = operand_orders or {}
     special = {"weighted_average", "combined_rate", "amount_per_time", "multi_difference", "interpolation", "trapezoid",
                "repeated_percent", "allocation", "piecewise_cost"} | V3_OPERATIONS
+    compatible_percent_difference = (len(selected) == 2 and "difference" in selected and
+                                     set(selected) & special <= {"percentage_decrease", "percentage_increase"} and
+                                     len(set(selected) & special) == 1)
     if (not selected or set(selected) - allowed or len(facts.records) < (1 if selected in (["percent_conversion"], ["unit_conversion"]) else 2)
-            or len(facts.records) > 30 or (set(selected) & special and len(selected) != 1)):
+            or len(facts.records) > 30 or (set(selected) & special and len(selected) != 1
+                                         and not compatible_percent_difference)):
         raise ValueError("direct arithmetic inputs or operations are unsupported")
     if any(name not in operand_orders for name in set(selected) & {"ratio", "difference", "divide", "subtract"}):
         raise ValueError("direct arithmetic operand order missing")
@@ -499,7 +534,8 @@ async def run_direct_arithmetic(settings: Settings, request: GoalResearchRequest
     special_units: dict[str, str | None] = {}
     if set(selected) & special:
         special_code, special_expected, special_units = _special_direct(
-            selected[0], original_text or request.goal or request.topic, values, calculation_units)
+            next(item for item in selected if item in special),
+            original_text or request.goal or request.topic, values, calculation_units)
     if "elapsed_time" in selected and not {"start_time", "end_time"} <= set(values):
         raise ValueError("elapsed time needs explicit start and end")
     if "geometric_mean" in selected and any(value <= 0 for value in values.values()):

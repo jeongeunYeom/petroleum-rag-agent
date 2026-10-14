@@ -17,6 +17,7 @@ STOP.update({"requested", "result", "supported", "answer", "validated"})
 STOP.update("state discuss tell me us please briefly according using cited material materials text explain explanation describe description identify give precise can be could would should when which required unavailable information engineering grounded citation citations correctly include whether between affects affect".split())
 STOP.update("relates relate relating relationship linked link links to using used source internal well fluid petroleum".split())
 STOP.update("relat control controls determine determines reduce reduces".split())
+STOP.update("locate textbook compare".split())
 RELATIONS = {
     "definition": r"\b(?:means|defined|refers|is|are)\b|정의|의미|이다|입니다",
     "function": r"\b(?:prevents?|reduces?|separates?|removes?|protects?|measures?|controls?|allows?|function|purpose)\b|방지|측정|제거|보호|분리|역할|기능",
@@ -26,11 +27,14 @@ RELATIONS = {
 
 
 def _terms(text):
+    text = text.replace("경험식", "formula")
+    text = re.sub(r"\bpurpose\s+of\s+adding\b", "purpose of", text, flags=re.I)
     for korean, english in sorted(ENGINEERING_TERMS.items(), key=lambda item: -len(item[0])):
         text = text.replace(korean, english)
     text = verification_view(text)
     text = re.sub(r"설명해(?:줘|주세요)|알려(?:줘|주세요)|무엇인가요|무엇|기능|역할|정의|의미|"
-                  r"내부\s*자료|근거|필요한|입력|정확한|최적|구해줘|미치는|미쳐|영향|관계", " ", text)
+                  r"내부\s*자료|교재(?:\s*근거로)?|근거(?:로)?|어떻게|다른지|비교해(?:줘|주세요)|"
+                  r"필요한|입력|정확한|최적|구해줘|미치는|미쳐|영향|관계", " ", text)
     text = re.sub(r"\b([a-z]+)ies\b", r"\1y", text.casefold())
     text = re.sub(r"\b([a-z]{4,})(?:s|ed|ing)\b", r"\1", text)
     words = re.findall(r"[A-Za-z][A-Za-z0-9]*|[가-힣]+", text)

@@ -18,12 +18,14 @@ DOMAINS = {
                  r"well control|\bkick\b|시추|케이싱|이수압|킥", "drilling"),
     "production": (r"production|separator|gravel pack|pump intake|cavitation|\bESP\b|"
                    r"생산\s*설비|분리기|인공\s*채유", "production"),
-    "petrophysics": (r"petrophys|formation evaluation|well log|porosity|permeability|"
+    "petrophysics": (r"petrophys|formation evaluation|formation factor|well log|porosity|permeability|"
                      r"water saturation|resistivity|검층|공극률|투과도|암석\s*물성", "formation evaluation"),
     "reservoir_engineering": (r"reservoir engineering|material balance|aquifer|reserves|"
                               r"reservoir pore volume|compressibility|저류층\s*공학|물질\s*수지|매장량|대수층", "reservoir engineering"),
 }
 TERMS = {
+    "비자성": "nonmagnetic drill collar", "자기 왜곡": "magnetic distortion",
+    "자기 간섭": "magnetic interference", "드릴 칼라": "drill collar",
     "방향 측정기": "directional survey instrument", "방향 측정": "directional survey",
     "저류층 시뮬레이션": "reservoir simulation", "수치 격자": "numerical grid discretization",
     "격자 블록": "grid block", "격자 크기": "grid size", "수치 해상도": "numerical resolution",
@@ -51,7 +53,9 @@ TERMS = {
     "유입 압력": "inlet pressure", "출구 압력": "outlet pressure",
 }
 DOMAIN_ALIASES = (
-    (re.compile(r"\bmonel\b", re.I),
+    (re.compile(r"\bformation\s+(?:resistivity\s+)?factor\b|지층\s*(?:저항\s*)?인자", re.I),
+     ("electrical formation factor", "formation resistivity factor", "porosity", "resistivity")),
+    (re.compile(r"\bmonel\b|\bnon[- ]?magnetic\s+(?:drill\s+)?collar\b|비자성\s*(?:드릴\s*)?(?:collar|칼라)", re.I),
      ("Monel drill collar", "non-magnetic drill collar", "nonmagnetic drill collar",
       "directional survey", "magnetic survey", "survey instrument", "magnetic interference")),
 )
@@ -65,7 +69,7 @@ PREMISE_NOISE = re.compile(
 
 
 def _tokens(text: str) -> list[str]:
-    return list(dict.fromkeys(word.casefold() for word in re.findall(r"[A-Za-z][A-Za-z0-9_-]{2,}|[가-힣]{2,}", text)
+    return list(dict.fromkeys(word.casefold() for word in re.findall(r"[A-Za-z][A-Za-z0-9_]{2,}|[가-힣]{2,}", text.replace("-", " "))
                               if word.casefold() not in STOP))
 
 
@@ -88,6 +92,18 @@ class QueryPlan:
         return "\n".join(self.queries)
 
 
+def bilingual_recovery_query(plan: QueryPlan) -> str:
+    """Keep explicit English concepts when retrying a Korean/mixed KB query."""
+    terms: list[str] = []
+    for token in [*plan.relation_terms[:6], *plan.translated_concepts[:6]]:
+        if not token.isascii() or (token.endswith("s") and token[:-1] in terms) or token in terms:
+            continue
+        terms.append(token)
+        if len(terms) >= 8:
+            break
+    return " ".join(terms)
+
+
 def plan_query(question: str, *, premise: bool = False, refined: bool = False) -> QueryPlan:
     """Use only user terms and fixed domain synonyms; never inject an answer."""
     cleaned = PREMISE_NOISE.sub(" ", question) if premise else question
@@ -99,12 +115,21 @@ def plan_query(question: str, *, premise: bool = False, refined: bool = False) -
         translations.append(DOMAINS[domain][1])
     english = _tokens(" ".join([*translations, *aliases]))
     original = _tokens(cleaned)
+    original_ascii = [word for word in original if re.fullmatch(r"[a-z][a-z0-9_-]+", word)]
+    # Textbook prose commonly uses plural lithologies while visitors use the
+    # singular. Keep both lexical forms without asserting any relation.
+    lithology_forms = {"carbonate": "carbonates", "sand": "sands", "sandstone": "sandstones"}
+    original_ascii = list(dict.fromkeys(
+        form for word in original_ascii for form in (word, lithology_forms.get(word, word))))
     # Korean clauses are kept as-is for retrieval, while fixed translations make
     # bilingual document titles and technical paragraphs reachable.
-    concepts = list(dict.fromkeys([*english, *original]))
+    # Preserve the visitor's explicit English engineering nouns ahead of broad
+    # domain expansions; otherwise a short mixed-language question can lose
+    # its discriminating terms before the bounded query is built.
+    concepts = list(dict.fromkeys([*original_ascii, *english, *original]))
     core = " ".join(concepts[:10]) or cleaned.strip()[:180]
     domain_words = DOMAINS[domain][1] if domain else ""
-    secondary = " ".join(dict.fromkeys([*english[:7], *original[:4]]))
+    secondary = " ".join(dict.fromkeys([*original_ascii[:6], *english[:7], *original[:4]]))
     if premise:
         secondary = (secondary + " relationship definition").strip()
     elif domain_words:
@@ -117,7 +142,8 @@ def plan_query(question: str, *, premise: bool = False, refined: bool = False) -
     if not queries:
         queries = (core[:220],)
     # Terms supplied in a relation question receive extra weight during reranking.
-    relation = tuple(word for word in english if word not in _tokens(domain_words))[:8]
+    relation = tuple(dict.fromkeys(word for word in [*original_ascii, *english]
+                                   if word not in _tokens(domain_words)))[:8]
     return QueryPlan(queries[:3], domain, tuple(concepts[:16]), relation,
                      tuple(english[:10]))
 

@@ -21,6 +21,9 @@ STACKED_FRACTION = re.compile(
 STACKED_POWER = re.compile(
     rf"(?m)^(?P<block>(?P<base>{SYMBOL})[ \t]*\r?\n[ \t]*(?P<power>{SYMBOL}|[0-8])"
     rf"[ \t]*=[ \t]*(?P<rhs>{SYMBOL}|[0-9.]+))[ \t]*$")
+TRAILING_DENOMINATOR_POWER = re.compile(
+    rf"(?P<lhs>{SYMBOL})[ \t]*=[ \t]*(?P<num>{SYMBOL})[ \t]*/[ \t]*"
+    rf"(?P<den>{SYMBOL})[ \t]*\r?\n[ \t]*(?P<power>[2-5])")
 WRAPPED_ADD_FRACTION = re.compile(
     rf"(?m)^(?P<block>(?P<lhs>{SYMBOL})[ \t]*=[ \t]*(?P<base>{SYMBOL})"
     rf"[ \t]*(?P<operator>[+\-])[ \t]*(?P<numerator>{SYMBOL})[ \t]*\r?\n"
@@ -117,6 +120,27 @@ def normalize_extracted_equation(raw_span: str, local_context: str,
     cue = bool(re.search(r"\b(?:equation|formula|relation|where|denominator|fraction|quotient)\b", context, re.I))
     units = known_units or _source_units(context)
 
+    # OCR may drop a denominator superscript onto the next text row. Accept
+    # that interpretation only when a separate, literal worked example in
+    # the same source confirms the inverse power numerically.
+    if match := TRAILING_DENOMINATOR_POWER.fullmatch(raw):
+        den, power = match["den"], int(match["power"])
+        example = re.search(
+            rf"\b{re.escape(den)}\s*=\s*(?P<value>\d+(?:\.\d+)?)\s*(?P<pct>%)?"
+            rf".{{0,120}}?\b1\s*/\s*{re.escape(den)}\s*\r?\n\s*{power}\s*=\s*"
+            r"(?P<ratio>\d+(?:\.\d+)?)\b", context, re.I | re.S)
+        if example:
+            value = float(example["value"]) / (100 if example["pct"] else 1)
+            ratio = float(example["ratio"])
+            if value > 0 and abs(value ** (-power) - ratio) <= max(1e-8, abs(ratio) * .005):
+                candidate = f"{match['lhs']} = {match['num']}/({den}**{power})"
+                if _safe_equation(candidate):
+                    return LayoutNormalizationResult(raw_span, candidate,
+                        ("worked_example_validated_trailing_exponent",),
+                        (match["lhs"], match["num"], den), candidate_count=1)
+        return LayoutNormalizationResult(raw_span, None, is_ambiguous=True,
+                                         candidate_count=2, reason="trailing_exponent_not_verified")
+
     if match := WRAPPED_OPERATOR_FRACTION.fullmatch(raw):
         if not re.search(r"\b(?:divided\s+by|denominator|fraction|quotient)\b", context, re.I):
             return LayoutNormalizationResult(raw_span, None, reason="fraction_relation_not_sourced")
@@ -172,7 +196,8 @@ def normalize_extracted_equation(raw_span: str, local_context: str,
     # the glyph and raw source span remain untouched for provenance.
     exponent = re.fullmatch(
         rf"\s*(?P<lhs>{SYMBOL})\s*=\s*(?P<numerator>\d+(?:\.\d+)?)\s*/\s*"
-        r"(?P<base>φ|phi)(?P<power>[2-5])\s*", raw, re.I)
+        r"(?P<base>φ|phi)(?P<power>[2-5](?:\.\d{1,2})?)"
+        r"(?:\s*\([A-Za-z -]{1,40}formula\))?\s*", raw, re.I)
     if exponent:
         example = re.search(
             rf"\bfor\s+(?:the\s+)?(?:same\s+)?(?:porosity\s+as\s+before\s*\()?"
@@ -181,7 +206,7 @@ def normalize_extracted_equation(raw_span: str, local_context: str,
             local_context.split(raw_span, 1)[1][:160], re.I | re.S)
         if example:
             base_value = float(example['value']) / (100 if example['pct'] else 1)
-            expected = float(exponent['numerator']) / base_value ** int(exponent['power']) if base_value else float('inf')
+            expected = float(exponent['numerator']) / base_value ** float(exponent['power']) if base_value else float('inf')
             observed = float(example['result'])
             if observed > 0 and abs(expected - observed) <= max(1e-8, observed * 0.005):
                 candidate = (f"{exponent['lhs']} = {exponent['numerator']}/"
@@ -190,6 +215,23 @@ def normalize_extracted_equation(raw_span: str, local_context: str,
                     return LayoutNormalizationResult(raw_span, candidate,
                         ("worked_example_validated_exponent",),
                         (exponent['lhs'], "phi"), candidate_count=1)
+            return LayoutNormalizationResult(raw_span, None, reason="worked_example_disagrees")
+        # A printed Greek phi with an adjacent numeric superscript can be
+        # flattened by PDF text extraction. Require a local source sentence
+        # relating porosity to formation factor; ASCII `phi2` remains untouched.
+        porosity_relation = re.search(r"porosity.{0,180}formation\s+factor|"
+                                      r"formation\s+factor.{0,180}porosity", local_context, re.I | re.S)
+        suffix_defined = re.search(r"(?:variable|parameter)\s+φ[2-5](?:\.\d{1,2})?|"
+                                   r"φ[2-5](?:\.\d{1,2})?\s+(?:denotes|means|represents|"
+                                   r"is\s+(?:a\s+)?(?:variable|parameter))\b",
+                                   local_context, re.I)
+        if exponent["base"] == "φ" and porosity_relation and not suffix_defined:
+            candidate = (f"{exponent['lhs']} = {exponent['numerator']}/"
+                         f"(phi**{exponent['power']})")
+            if _safe_equation(candidate):
+                return LayoutNormalizationResult(raw_span, candidate,
+                    ("source_context_validated_greek_exponent",),
+                    (exponent['lhs'], "phi"), candidate_count=1)
 
     if match := STACKED_POWER_FRACTION.fullmatch(raw):
         base, power = match["base"].translate(SUBSCRIPT_TRANSLATION), match["power"].translate(SUBSCRIPT_TRANSLATION)

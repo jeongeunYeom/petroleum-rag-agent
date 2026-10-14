@@ -11,7 +11,7 @@ from app.services.compound_units import UNIT, unit_factors
 from app.services.formula_units import formula_output_unit
 
 from app.services.formula_layout_normalizer import (
-    STACKED_FRACTION, STACKED_POWER, STACKED_POWER_FRACTION, WRAPPED_ADD_FRACTION,
+    STACKED_FRACTION, STACKED_POWER, STACKED_POWER_FRACTION, SYMBOL, WRAPPED_ADD_FRACTION,
     WRAPPED_OPERATOR_FRACTION, WRAPPED_OPERATOR,
     isolate_equation, normalize_extracted_equation,
 )
@@ -39,6 +39,12 @@ ALLOWED = (ast.Expression, ast.BinOp, ast.UnaryOp, ast.Name, ast.Constant,
 
 def normalize_formula(value: str) -> str:
     return re.sub(r"\s+", "", value.translate(TRANSLATION)).casefold()
+
+
+def _local_equation_context(text: str, start: int, end: int, raw: str) -> str:
+    # Only a Greek numeric suffix needs the longer same-chunk definition span.
+    tail = 1200 if re.search(r"φ[2-5](?:\.\d{1,2})?", raw) else 350
+    return text[max(0, start - 350):min(len(text), end + tail)]
 
 
 def expression_variables(formula: str) -> set[str] | None:
@@ -92,7 +98,7 @@ def source_contains_equation(record: "FormulaSourceRecord", text: str,
     if _unconsumed_continuation(text, record.span_end):
         return False
     if record.layout_transformations:
-        local = text[max(0, record.span_start - 350):min(len(text), record.span_end + 350)]
+        local = _local_equation_context(text, record.span_start, record.span_end, record.raw_span)
         layout = normalize_extracted_equation(record.raw_span, local)
         source_equation = layout.normalized_expression
         expected = (isolate_equation(source_equation, record.target_variable)
@@ -120,6 +126,8 @@ def _unconsumed_continuation(text: str, end: int) -> bool:
     A prose sentence or a separately labeled equation is not attached. This
     rejects a clipped prefix; the full layout block must be reconstructed first.
     """
+    if re.match(r"[ \t]*\r?\n[ \t]*[2-5](?=[ \t]*[.,;])", text[end:]):
+        return True
     return bool(re.match(r"[ \t]*\r?\n[ \t]*[+\-*/×÷−][ \t]*"
                          r"(?:[A-Za-zφρμλ][A-Za-z0-9_φρμλ]*|\d+(?:\.\d+)?)"
                          r"(?=[ \t]*(?:\r?\n|$|[+\-*/×÷−]))", text[end:]))
@@ -148,7 +156,7 @@ def _source_expression(raw: str, text: str, start: int, end: int) -> str:
         operator = "/" if definition.group("ratio_a") else "-"
         return f"{definition['lhs']} = {numerator} {operator} {denominator}"
     candidate = raw.translate(TRANSLATION)
-    local = text[max(0, start - 350):min(len(text), end + 350)]
+    local = _local_equation_context(text, start, end, raw)
     layout = normalize_extracted_equation(raw, local)
     if layout.normalized_expression:
         return layout.normalized_expression
@@ -268,6 +276,16 @@ class FormulaSourceRegistry(BaseModel):
                     # Never promote the middle row of a stacked equation to n=F.
                     continue
                 raw = match.group("equation").rstrip(" .\t")
+                # A denominator exponent can be on the next OCR row. Extend
+                # the literal span only if the source's own worked example
+                # proves the power; otherwise reject the clipped quotient.
+                trailing = re.match(r"(?P<suffix>[ \t]*\r?\n[ \t]*[2-5])(?=[ \t]*[.,;])",
+                                    text[match.start() + len(raw):])
+                if trailing and re.fullmatch(rf"{SYMBOL}\s*=\s*{SYMBOL}\s*/\s*{SYMBOL}", raw):
+                    proposed = raw + trailing["suffix"]
+                    local = _local_equation_context(text, match.start(), match.start() + len(proposed), proposed)
+                    if normalize_extracted_equation(proposed, local).normalized_expression:
+                        raw = proposed
                 # A PDF definition can be clipped by the equation regex at a
                 # prose word boundary (e.g. "SG = specific gravity"). A bare
                 # symbol followed by another noun is not an executable span.
@@ -308,7 +326,7 @@ class FormulaSourceRegistry(BaseModel):
                                      r"[A-Za-z][A-Za-z-]*", text[end:], re.I)):
                     continue
                 layout = normalize_extracted_equation(
-                    raw, text[max(0, start - 350):min(len(text), end + 350)])
+                    raw, _local_equation_context(text, start, end, raw))
                 if layout.transformations or layout.is_ambiguous:
                     layout_events.append({"source_id": source["evidence_id"],
                                           "span_start": start, "span_end": end,

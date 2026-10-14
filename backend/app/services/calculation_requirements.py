@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import re
 from dataclasses import dataclass, field
 from typing import Any
@@ -55,6 +56,9 @@ def normalize_symbol(name: str) -> str:
 
 def requested_semantic_target(text: str) -> str | None:
     """Distinguish a requested pressure output from related drilling quantities."""
+    if (re.search(r"\bformation\s+(?:resistivity\s+)?factor\b|지층\s*(?:저항\s*)?인자", text, re.I)
+            and re.search(r"\b(?:calculat\w*|comput\w*|report|derive|evaluate|find)\b|계산|구해|산출", text, re.I)):
+        return "F"
     if re.search(r"\bECD\b|equivalent\s+circulating\s+density|등가\s*순환\s*밀도", text, re.I):
         return "ecd"
     if re.search(r"hydrostatic\s+(?:pressure|head)|mud\s+hydrostatic|정수압(?:력)?|이수압", text, re.I):
@@ -144,6 +148,8 @@ class FormulaSelectionRecord:
     same_paragraph_match: bool = False
     equation_number: str | None = None
     unit_score: int = 0
+    requested_literal_equation_match: bool = False
+    named_model_score: int = 0
 
 
 @dataclass(frozen=True)
@@ -251,6 +257,20 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
     """Rank literal source spans; weak or conflicting matches remain unresolved."""
     # Unrelated commentary is not an extra model-name constraint. Keep every actual
     # request/assignment clause, including negative constraints, for disambiguation.
+    from app.services.goal_intent import user_equation
+
+    def equation_key(formula: str) -> tuple[str, str] | None:
+        try:
+            lhs, rhs = (part.strip() for part in formula.split("=", 1))
+            return normalize_symbol(lhs), ast.dump(ast.parse(rhs, mode="eval"), include_attributes=False)
+        except (ValueError, SyntaxError):
+            return None
+
+    literal_request = equation_key(user_equation(intent) or "")
+    model_match = re.search(r"\b([A-Za-z][A-Za-z0-9-]*)\s+(?:formula|equation|correlation)\b", intent, re.I)
+    model_name = (model_match.group(1).casefold() if model_match and
+                  model_match.group(1).casefold() not in {"the", "a", "an", "textbook", "internal", "source"}
+                  else None)
     clauses = re.split(r"(?<=[.!?])\s+|\n+", intent)
     requested = [clause for clause in clauses if re.search(
         r"[=:]|\b(?:calculate|compute|find|equation|formula|model|relation|use|not|without)\b|"
@@ -320,6 +340,7 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
         descriptor_tokens = context_tokens - generic_context - facts - {lhs} - {
             normalize_symbol(variable) for variable in variables}
         local_context = source_text[max(0, record.span_start - 180):record.span_end + 180]
+        exact_structure = bool(literal_request and equation_key(record.expression_candidate) == literal_request)
         if semantic_target == "hydrostatic_pressure":
             if (lhs not in {"p", "ph", "pressure", "hydrostaticpressure", "mudhydrostaticpressure"}
                     or not re.search(r"hydrostatic|정수압|이수압", local_context, re.I)):
@@ -336,7 +357,7 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
         explicit_symbol_binding = ((raw_lhs.isupper() or "_" in raw_lhs) and len(lhs) >= 3 and lhs in tokens
                                    and overlap == len(variables))
         if (len(descriptor_tokens) >= 2 and not (descriptor_tokens & local_tokens)
-                and not explicit_symbol_binding):
+                and not explicit_symbol_binding and not exact_structure):
             # A matching output symbol alone cannot identify a named engineering model.
             continue
         lhs_score = 6 if lhs in tokens else 0
@@ -346,6 +367,18 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
         variable_score = 2 * overlap
         heading_score = min(4, len(context_tokens & heading_tokens))
         context_score = min(4, len(context_tokens & nearby_tokens))
+        # An equation quoted by the user is a disambiguation key, never its
+        # provenance: the selected executable expression must still be an
+        # independently verified literal source span.
+        model_score = 0
+        if model_name:
+            following = source_text[record.span_end:record.span_end + 150]
+            following = re.split(r"\b[A-Za-z][A-Za-z0-9_]*\s*=", following, maxsplit=1)[0]
+            label = record.raw_span + following
+            if re.search(rf"\b{re.escape(model_name)}\b", label, re.I):
+                model_score = (-3 if re.search(r"\b(?:equivalent|simpler|approximate|alternative)\b", label, re.I)
+                               and not re.search(r"\b(?:equivalent|simpler|approximate|alternative)\b", intent, re.I)
+                               else 5)
         terms = _additive_terms(record.expression_candidate)
         term_match = requested_terms is not None and terms == requested_terms
         extra = (sum(not any(name in symbol_names(variable) for name in facts)
@@ -367,8 +400,10 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
                 continue
             unit_score += output_match
         score = (lhs_score + variable_score + heading_score + context_score + structure + unit_score
+                 + (12 if exact_structure else 0) + model_score
                  + target_context_score - negative - alias_penalty)
         details = {"lhs_match": bool(lhs_score), "required_variable_match": overlap,
+                   "requested_literal_equation_match": exact_structure, "named_model_score": model_score,
                    "unit_score": unit_score,
                    "extra_variable_penalty": extra, "term_count_match": term_match,
                    "requested_structure_match": term_match, "negative_constraint_penalty": negative,

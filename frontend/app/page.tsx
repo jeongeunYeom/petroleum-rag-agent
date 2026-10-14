@@ -527,9 +527,13 @@ export default function Home() {
         const completed = await waitForGoalRun(started.run_id, updateAssistant);
         updateAssistant(completed);
       } catch (error) {
-        const message = error instanceof Error ? error.message : "요청을 처리하지 못했습니다.";
+        // Transport and server details belong in diagnostics, never in the chat transcript.
+        console.error("Goal research request failed", error);
+        const message = /[가-힣]/.test(submittedQuestion)
+          ? "작업을 완료하지 못했습니다. 잠시 후 다시 시도해 주세요."
+          : "The request could not be completed. Please try again.";
         setMessages((previous) => previous.map((item) => item.id === assistantId
-          ? { ...item, goalRun: undefined, content: `오류: ${message}` } : item));
+          ? { ...item, goalRun: undefined, content: message } : item));
       } finally {
         setBusy(false);
       }

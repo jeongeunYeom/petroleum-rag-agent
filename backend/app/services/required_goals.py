@@ -20,8 +20,11 @@ _UNIT = re.compile(r"(?<![A-Za-z])(?:psi|psia|kPa|ppg|mD|cP|stb/d|ohm-m)(?![A-Za
 
 def _goal(kind: str, target: str, span: str, index: int) -> RequiredGoal:
     unit = _UNIT.search(span)
+    requested_unit = ("%" if kind == "numeric_calculation" and
+                      re.search(r"\bpercent(?:age)?\s+(?:increase|decrease|decline|change)\b|증가율|감소율", span, re.I)
+                      else unit.group() if unit else None)
     return RequiredGoal(goal_id=f"G{index}", goal_type=kind, semantic_target=target.strip(" .,:;"),
-                        source_text_span=span.strip(), requested_unit=unit.group() if unit else None,
+                        source_text_span=span.strip(), requested_unit=requested_unit,
                         requires_evidence=kind.startswith("knowledge"),
                         requires_calculation=kind == "numeric_calculation")
 

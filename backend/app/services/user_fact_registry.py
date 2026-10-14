@@ -106,6 +106,9 @@ TEMPORAL_PAIR = re.compile(
     rf"(?P<final>{NUMBER})\s*(?P<final_unit>{UNIT})|"
     rf"(?:begins?|starts?)\s+at\s+(?P<start>{NUMBER})\s*(?P<start_unit>{UNIT})?\s*"
     rf"(?:and\s+)?ends?\s+at\s+(?P<end>{NUMBER})\s*(?P<end_unit>{UNIT})", re.I)
+ENGLISH_WAS_NOW = re.compile(
+    rf"\b[A-Za-z][A-Za-z\s]{{0,35}}?\s+was\s+(?P<initial>{NUMBER})\s*(?P<initial_unit>{UNIT})?"
+    rf"\s+and\s+is\s+now\s+(?P<final>{NUMBER})\s*(?P<final_unit>{UNIT})", re.I)
 TEMPORAL_TRIPLE = re.compile(
     rf"(?:begins?|starts?)\s+at\s+(?P<start>{NUMBER})\s*(?P<unit>{UNIT})?\s*[,;]?\s*"
     rf"(?:falls?|fell|drops?|dropped|declines?|declined)\s+to\s+(?P<trough>{NUMBER})\s*(?P<trough_unit>{UNIT})?\s*[,;]?\s*"
@@ -447,6 +450,14 @@ class UserFactRegistry(BaseModel):
                     add(name, found[value_key], found[unit_key] or found[last_unit],
                         text[found.start(value_key):found.end(unit_key)] if found[unit_key]
                         else found[value_key], found.group(), offset + found.start(value_key))
+                protected_spans.append(found.span())
+            for found in ENGLISH_WAS_NOW.finditer(text):
+                if any(start < found.end() and found.start() < end for start, end in protected_spans):
+                    continue
+                for name in ("initial", "final"):
+                    unit = found[name + "_unit"] or found["final_unit"]
+                    span = text[found.start(name):found.end(name + "_unit")] if found[name + "_unit"] else found[name]
+                    add(name, found[name], unit, span, found.group(), offset + found.start(name))
                 protected_spans.append(found.span())
             for found in KOREAN_TEMPORAL_PAIR.finditer(text):
                 if any(start < found.end() and found.start() < end for start, end in protected_spans):

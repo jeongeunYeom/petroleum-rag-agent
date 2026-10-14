@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import json
 import re
 from dataclasses import dataclass
@@ -10,8 +11,10 @@ from typing import Any
 from app.models.goal_research_schemas import GoalResearchRequest
 from app.models.research_schemas import InternalEvidence
 from app.services.engineering_validator import EngineeringValidator
+from app.services.engineering.drilling import DrillingValidator
 from app.services.goal_intent import prefers_korean
 from app.services.goal_knowledge_retrieval import plan_query
+from app.services.formula_source_registry import FormulaSourceRegistry, source_contains_equation
 
 
 SCHEMA = {
@@ -191,6 +194,9 @@ def _sourced_ratio_correction(question: str, sources: dict[str, str], korean: bo
 def derive_safe_relation_from_equation(question: str, sources: dict[str, str],
                                        korean: bool) -> PremiseAssessment:
     """Correct only a literal two-variable monotonic relation with explicit sign/fixed inputs."""
+    inverse = _sourced_inverse_power_correction(question, sources, korean)
+    if inverse.verdict == "contradicts":
+        return inverse
     for source_id, text in sources.items():
         for match in re.finditer(r"\b(?P<y>[A-Za-z][A-Za-z0-9_]*)\s*=\s*"
                                  r"(?P<a>[A-Za-z][A-Za-z0-9_]*)\s*(?P<op>[*/+-])\s*"
@@ -244,6 +250,123 @@ def derive_safe_relation_from_equation(question: str, sources: dict[str, str],
     return PremiseAssessment()
 
 
+def _sourced_inverse_power_correction(question: str, sources: dict[str, str],
+                                      korean: bool) -> PremiseAssessment:
+    """Use only an exact source equation C/x**p with proven positive C, x and p."""
+    if not re.search(r"increas|증가|커지|높아", question, re.I):
+        return PremiseAssessment()
+    evidence = [{"evidence_id": source_id, "source_type": "knowledge_base", "text": text}
+                for source_id, text in sources.items()]
+    for record in FormulaSourceRegistry.from_evidence(evidence).records:
+        source = sources[record.source_id]
+        if not record.expression_candidate or not source_contains_equation(record, source):
+            continue
+        try:
+            tree = ast.parse(record.expression_candidate.split("=", 1)[1].strip(), mode="eval").body
+        except SyntaxError:
+            continue
+        if not isinstance(tree, ast.BinOp) or not isinstance(tree.op, ast.Div):
+            continue
+        if not isinstance(tree.left, ast.Constant) or type(tree.left.value) not in {int, float} or tree.left.value <= 0:
+            continue
+        denominator = tree.right
+        if not isinstance(denominator, ast.BinOp) or not isinstance(denominator.op, ast.Pow):
+            continue
+        if not isinstance(denominator.left, ast.Name) or not isinstance(denominator.right, ast.Constant):
+            continue
+        x, power = denominator.left.id, denominator.right.value
+        if type(power) not in {int, float} or power <= 0:
+            continue
+        y = record.lhs or record.expression_candidate.split("=", 1)[0].strip()
+        x_query = r"(?:phi|φ|porosity|공극률)" if x.casefold() == "phi" else re.escape(x)
+        y_query = r"(?:\bF\b|formation\s+factor)" if y.casefold() == "f" and x.casefold() == "phi" else rf"\b{re.escape(y)}\b"
+        if not re.search(y_query, question, re.I) or not re.search(x_query, question, re.I):
+            continue
+        claimed_positive = bool(re.search(
+            rf"(?:{y_query}.{{0,65}}(?:increas|증가|커지|높아).{{0,80}}{x_query}.{{0,65}}"
+            rf"(?:increas|증가|커지|높아)|{x_query}.{{0,65}}(?:increas|증가|커지|높아).{{0,80}}"
+            rf"{y_query}.{{0,65}}(?:increas|증가|커지|높아))", question, re.I))
+        if not claimed_positive:
+            continue
+        local = source[max(0, record.span_start - 250):record.span_end + 350]
+        positive_domain = bool(re.search(rf"(?:{x_query})\s*=\s*\d+(?:\.\d+)?\s*%|"
+                                         rf"\b{re.escape(x)}\s*>\s*0\b", local, re.I)
+                               or (x.casefold() == "phi" and re.search(r"\bporosity\b", local, re.I)))
+        if not positive_domain:
+            continue
+        x_label = f"porosity {x}" if x.casefold() == "phi" else x
+        y_label = f"formation factor {y}" if y.casefold() == "f" and x.casefold() == "phi" else y
+        relation = (f"양의 {x_label} 값에서 {x_label}가 증가하면 {y_label}는 감소합니다" if korean else
+                    f"For positive {x_label}, {y_label} decreases as {x_label} increases")
+        answer = (f"그 전제는 맞지 않습니다. {relation}. 원문 식: " if korean else
+                  f"That premise is incorrect. {relation}. Source equation: ")
+        answer += f'"{record.raw_span}" [{record.source_id}]'
+        return PremiseAssessment("contradicts", record.source_id, record.raw_span, answer,
+                                 "sourced_inverse_power", (record.source_id,), (record.raw_span,),
+                                 "equation", relation, "deterministic")
+    return PremiseAssessment()
+
+
+def _sourced_engineering_rule_correction(question: str, sources: dict[str, str],
+                                         korean: bool) -> PremiseAssessment:
+    """Apply existing engineering rules only when an exact source span supports them."""
+    validator = EngineeringValidator()
+    spans = [(source_id, sentence.strip()) for source_id, source in sources.items()
+             for sentence in re.split(r"(?<=[.!?])\s+", source)
+             if 30 <= len(sentence.strip()) <= 500]
+    for premise in validator.detect_false_premises(question):
+        if premise.get("domain") != "well_test":
+            continue
+        relation = str(premise.get("expected_engineering_relation") or "")
+        if not relation:
+            continue
+        for source_id, quote in spans:
+            if not validator.validate_claim(relation, quote, query=question).passed:
+                continue
+            support = [(source_id, quote)]
+            corrected_relation = relation
+            if premise.get("regime") == "radial" and premise.get("incorrect_feature") in {"unit_slope", "overlap"}:
+                storage = next(((sid, span) for sid, span in spans if validator.validate_claim(
+                    "Wellbore storage pressure and derivative overlap on a unit-slope line",
+                    span, query=question).passed), None)
+                if storage is None:
+                    continue
+                support.append(storage)
+                corrected_relation = (("방사형 유동(radial flow)에서는 압력 도함수가 수평 평탄부를 보이고, "
+                                       "wellbore storage에서는 압력과 도함수가 단위 기울기에서 겹칩니다") if korean else
+                                      ("radial flow has a horizontal pressure-derivative plateau; "
+                                       "wellbore storage has pressure/derivative overlap on a unit-slope line"))
+            if korean:
+                answer = (f"그 전제는 잘못되었습니다. {corrected_relation}." if
+                          corrected_relation.endswith("겹칩니다") else
+                          f"그 전제는 잘못되었습니다. 올바른 관계는 {corrected_relation}입니다.")
+            else:
+                answer = f"That premise is incorrect. The supported relation is {corrected_relation}."
+            displayed = [(sid, re.sub(r"\s+", " ", span).strip()) for sid, span in support]
+            answer += " " + " ".join(f'"{span}" [{sid}]' for sid, span in displayed)
+            detected, corrected, _ = validator.false_premise_correction(question, answer)
+            if detected and corrected:
+                ids = tuple(dict.fromkeys(sid for sid, _ in support))
+                return PremiseAssessment("contradicts", source_id, quote, answer,
+                                         "engineering_rule_source", ids,
+                                         tuple(span for _, span in support),
+                                         "explicit_prose", corrected_relation, "deterministic")
+    drilling = DrillingValidator()
+    if drilling.detect_false_premises(question):
+        rows = [{"source_type": "knowledge_base", "evidence_id": source_id, "text": text}
+                for source_id, text in sources.items()]
+        answer = drilling.grounded_correction(question, rows, korean)
+        if answer:
+            source_id = next((sid for sid in sources if f"[{sid}]" in answer), "")
+            source = sources.get(source_id, "")
+            corrected = drilling.false_premise_correction(question, answer)[1]
+            if corrected and validator.validate_claim(answer, source, query=question).passed:
+                return PremiseAssessment("contradicts", source_id, source, answer,
+                                         "engineering_rule_source", (source_id,), (source,),
+                                         "explicit_prose", answer, "deterministic")
+    return PremiseAssessment()
+
+
 async def assess_premise(ollama: Any, request: GoalResearchRequest,
                          evidence: list[dict[str, Any]]) -> PremiseAssessment:
     sources = {str(row.get("evidence_id")): str(row.get("text") or "")
@@ -255,6 +378,9 @@ async def assess_premise(ollama: Any, request: GoalResearchRequest,
     equation = derive_safe_relation_from_equation(question, sources, prefers_korean(request))
     if equation.verdict == "contradicts":
         return equation
+    engineering = _sourced_engineering_rule_correction(question, sources, prefers_korean(request))
+    if engineering.verdict == "contradicts":
+        return engineering
     if not sources or not callable(getattr(ollama, "chat_structured", None)):
         return PremiseAssessment(failure_reason="no_sources_or_model")
     messages = [

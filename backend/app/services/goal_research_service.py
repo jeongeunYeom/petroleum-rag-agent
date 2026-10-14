@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import re
 import time
 from datetime import datetime, timezone
@@ -21,6 +22,9 @@ from app.models.goal_research_schemas import (
 from app.services.goal_research_agent import GoalResearchAgent
 from app.services.goal_execution_agent import GoalExecutionAgent
 from app.services.deliverables.service import DeliverableService
+
+
+logger = logging.getLogger(__name__)
 
 
 class GoalResearchRunNotFound(KeyError):
@@ -188,8 +192,9 @@ class GoalResearchService:
                         ))
                         result.deliverable_status[kind] = "completed"
                     except Exception as exc:
+                        logger.exception("Deliverable %s failed for run %s", kind, run_id)
                         result.deliverable_status[kind] = "failed"
-                        result.deliverable_errors[kind] = str(exc)[:500]
+                        result.deliverable_errors[kind] = "File generation failed. Please retry."
                     self._write(run_id, request, result)
                 result.timing["deliverable_generation_seconds"] = round(time.perf_counter() - started, 6)
                 result.timing["total_seconds"] = round(
@@ -212,12 +217,16 @@ class GoalResearchService:
                                        GoalRunStatus.FAILED, GoalRunStatus.CANCELED} and request.deliverables:
                 result.deliverable_status = {kind: "skipped" for kind in dict.fromkeys(request.deliverables)}
         except Exception as exc:
+            logger.exception("Goal research run %s failed", run_id)
             _, result = self._read(run_id)
             result.run_status = GoalRunStatus.FAILED
             result.status = GoalStatus.FAILED
             result.stop_reason = GoalStopReason.ERROR
             result.current_stage = "finalize"
-            result.error = str(exc)
+            korean = bool(re.search(r"[가-힣]", request.topic))
+            result.error = ("작업을 완료하지 못했습니다. 잠시 후 다시 시도해 주세요." if korean else
+                            "The request could not be completed. Please try again.")
+            result.final_answer = result.error
         self._write(run_id, request, result, checkpoint=(result.resume_checkpoint
                     if result.run_status == GoalRunStatus.WAITING_FOR_USER_INPUT else {}))
 

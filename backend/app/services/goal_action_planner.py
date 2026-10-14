@@ -12,7 +12,7 @@ from app.services.goal_knowledge_retrieval import TERMS
 from app.services.calculation_requirements import formula_target_contract
 
 
-CALC_WORDS = re.compile(r"\b(?:calculat\w*|comput\w*|derive|mean|average|sum|rank\w*|compare\s+numeric|difference|ratio|pressure\s+drop|recovery\s+rate)\b|계산|산출|평균|합계|총합|비율|차이|강하량|회수율|증가율|순위|그래프", re.I)
+CALC_WORDS = re.compile(r"\b(?:calculat\w*|comput\w*|derive|mean|average|sum|rank\w*|compare\s+numeric|difference|ratio|pressure\s+drop|recovery\s+rate)\b|계산|산출|평균|합계|총합|총\s*(?:유량|생산량)|전체\s*유량|합쳐\s*줘|비율|차이|강하량|회수율|증가율|순위|그래프", re.I)
 ANALYZE_WORDS = re.compile(r"\b(?:rank\w*|best|worst|maximum|minimum|optim\w*|sensitiv\w*|compare|plot|graph|chart)\b|순위|정렬|(?:큰|작은)\s*순서|내림차순|오름차순|최적|최대|최소|최댓|최솟|민감도|그래프|도표", re.I)
 SIMULATE_WORDS = re.compile(r"\b(?:sweep|parameter\s+range|vary\w*|sensitiv\w*|optim\w*)\b|매개변수\s*변화|범위\s*탐색|범위로\s*계산|바꿔가며|바꾸면서|변화시키(?:며|면서|고|면|기|다|는|ㄴ)?|간격으로|부터.{0,30}까지", re.I)
 ENGINEERING_TERMS = {**TERMS,
@@ -254,7 +254,7 @@ class GoalActionPlanner:
     def formula_recovery_query(request: GoalResearchRequest, intent: GoalIntent,
                                fact_names: list[str], fact_units: dict[str, str],
                                source_context: list[str], attempt: int) -> str:
-        """Search for the requested relation, without proposing an equation."""
+        """Two distinct bounded searches for a literal relation, never a guessed equation."""
         text = " ".join(dict.fromkeys(filter(None, (request.goal, request.topic))))
         contract = formula_target_contract(text, fact_names)
         translated = [english for korean, english in sorted(ENGINEERING_TERMS.items(), key=lambda row: -len(row[0]))
@@ -265,13 +265,19 @@ class GoalActionPlanner:
                                      r"resistiv|\b(?:Sw|Rw|Rt)\b", text, re.I) else [])
         if re.search(r"formation factor|formation resistivity factor", text, re.I):
             symbol_terms.extend(["measured porosity", "cementation factor"])
-        names = " ".join(dict.fromkeys(fact_names))
+        target = contract.requested_quantity or ""
+        # Registry keys can be canonicalized/lowercased. Keep the user's literal
+        # symbol spelling in the retrieval query for equation-span matching.
+        literal_names = re.findall(r"(?<![A-Za-z0-9_])([A-Za-z][A-Za-z0-9_]*)\s*=", text)
+        names = " ".join(dict.fromkeys([*literal_names, *fact_names]))
         units = " ".join(dict.fromkeys(unit for unit in fact_units.values() if unit))
-        qualifiers = ("equation formula relation definition variables units" if attempt == 1 else
-                      "governing equation calculation model source expression variable definitions")
-        return "\n".join(part for part in (
-            contract.requested_quantity or "", names, units,
-            " ".join(dict.fromkeys([*translated, *symbol_terms])), qualifiers, text,
+        concepts = " ".join(dict.fromkeys([*translated, *symbol_terms]))
+        if attempt == 1:
+            return " ".join(part for part in (
+                target, concepts, names, units, "equation formula relation definition",
+            ) if part)[:4000]
+        return " ".join(part for part in (
+            target, names, concepts, "formula equation variables",
         ) if part)[:4000]
 
     @staticmethod

@@ -31,12 +31,12 @@ from app.services.evidence_fact_registry import EvidenceFactRegistry
 from app.services.calc_claim_grounding import NUMERIC, _matches_reported_value, validate_calc_claim
 from app.services.citation_semantics import ground_research_claims
 from app.services.premise_grounding import PremiseAssessment, assess_premise, expand_premise_context
-from app.services.goal_knowledge_retrieval import plan_query, rerank_sources
+from app.services.goal_knowledge_retrieval import bilingual_recovery_query, plan_query, rerank_sources
 from app.services.goal_action_planner import (CALC_WORDS, ENGINEERING_TERMS, SIMULATE_WORDS,
                                               GoalActionPlanner)
 from app.services.goal_intent import (FormulaOrigin, GoalIntentKind, SourceRequirement, asks_for_api_gravity_calculation,
                                       ambiguous_premise_candidate, classify_goal_intent, prefers_korean,
-                                      formula_origin, user_equation,
+                                      formula_origin, user_equation, clearly_out_of_domain,
                                       GoalIntent)
 from app.services.engineering.drilling import DrillingValidator
 from app.services.engineering_validator import EngineeringValidator
@@ -265,6 +265,12 @@ class GoalExecutionAgent(GoalResearchAgent):
               and not re.search(r"계산|시뮬레이션|\b(?:calculat\w*|simulat\w*)\b", goal, re.I)):
             descriptions.append("요청한 관계를 확인 가능한 근거와 함께 설명" if prefers_korean(request)
                                 else "Explain the requested relationship with identifiable evidence")
+        if not descriptions and classify_goal_intent(request, has_user_facts=bool(users.records)).kind == GoalIntentKind.DIRECT_CALC:
+            requested = parse_request_ir(request, []).requested_operation_types
+            if requested:
+                descriptions.append(("제공된 값으로 요청한 " + ", ".join(requested) + " 계산을 검증하여 제시")
+                                    if prefers_korean(request) else
+                                    ("Compute and validate the requested " + ", ".join(requested) + " outputs"))
         return [GoalCriterion(criterion_id=f"C{index}", description=description)
                 for index, description in enumerate(descriptions, 1)]
 
@@ -278,6 +284,8 @@ class GoalExecutionAgent(GoalResearchAgent):
             return "P"
         if semantic_target == "ecd":
             return "ECD"
+        if semantic_target == "F":
+            return "F"
         equation = user_equation(text)
         if equation:
             return equation.split("=", 1)[0].strip()
@@ -870,7 +878,11 @@ class GoalExecutionAgent(GoalResearchAgent):
             # Never substitute a topical quote for an explicit premise assessment.
             result.telemetry["claim_support_checked"] = True
             result.telemetry["extractive_fallback_attempted"] = True
-            if state.verified or result.telemetry.get("source_conflict_count", 0):
+            # A failed VERIFY may still leave an exact, source-grounded premise
+            # correction available. Reassess that evidence before safe-stop;
+            # the premise assessor independently checks literal spans and the
+            # engineering relation, so prior verification alone is not a veto.
+            if result.telemetry.get("source_conflict_count", 0):
                 result.telemetry["extractive_fallback_failure_reason"] = "premise_requires_verified_correction"
                 return None
             premise = await assess_premise(self.ollama, request, accumulator.records())
@@ -912,6 +924,32 @@ class GoalExecutionAgent(GoalResearchAgent):
     @staticmethod
     def _finish(result, run_status, status, stop_reason, answer, started):
         telemetry = result.telemetry
+        if not str(answer or "").strip():
+            korean = bool(re.search(r"[가-힣]", result.topic))
+            validated = [calc for calc in result.computations if calc.validation_passed
+                         and calc.contract_validation_passed]
+            lines = []
+            for calc in validated:
+                for row in calc.output_manifest.values():
+                    value = row.get("value")
+                    if isinstance(value, bool) or not isinstance(value, (int, float, str)):
+                        continue
+                    name = str(row.get("name") or "result")
+                    unit = str(row.get("unit") or "").strip()
+                    sources = list(dict.fromkeys([calc.computation_id, *calc.input_fact_ids,
+                        *[source for source in calc.formula_source_ids if source != "USER_REQUEST"]]))
+                    lines.append(f"{name}: {value} {unit}".strip() + " " +
+                                 " ".join(f"[{source}]" for source in sources))
+            if lines:
+                answer = ("검증된 계산 결과:\n" if korean else "Validated calculation results:\n") + "\n".join(lines)
+                telemetry["empty_answer_recovered_from_validated_calc"] = True
+            else:
+                answer = ("검증 가능한 답변을 생성하지 못했습니다. 값을 추측하지 않았습니다." if korean else
+                          "A verified answer could not be produced. No value was guessed.")
+                if status == GoalStatus.ACHIEVED:
+                    run_status, status, stop_reason = (GoalRunStatus.STOPPED, GoalStatus.STOPPED,
+                                                       GoalStopReason.INSUFFICIENT_EVIDENCE)
+                telemetry["empty_answer_safe_stop"] = True
         calculated = any(c.validation_passed for c in result.computations)
         kind = telemetry.get("final_answer_kind")
         if kind not in {"partial_grounded", "extractive_grounded", "underdetermined"}:
@@ -1221,6 +1259,18 @@ class GoalExecutionAgent(GoalResearchAgent):
         for reply in (resume_state or {}).get("user_replies", []):
             users.merge_message(reply)
         user_text = "\n".join([*user_messages, *((resume_state or {}).get("user_replies", []))])
+        if clearly_out_of_domain(user_text, has_user_facts=bool(users.records)):
+            korean = prefers_korean(request)
+            answer = ("이 시스템은 석유공학 연구 질문에 맞춰져 있습니다. 저류층·시추·생산·물성·시험 또는 관련 계산을 질문해 주세요."
+                      if korean else "This system is configured for petroleum-engineering research. "
+                      "Please ask about reservoirs, drilling, production, petrophysics, well testing, or related calculations.")
+            return GoalResearchResponse(
+                run_id=run_id, topic=request.topic, goal=request.goal,
+                run_status=GoalRunStatus.STOPPED, status=GoalStatus.STOPPED,
+                stop_reason=GoalStopReason.INSUFFICIENT_EVIDENCE, final_answer=answer,
+                current_stage="finalize", max_iterations=request.max_iterations,
+                telemetry={"intent_route": "out_of_domain", "final_answer_kind": "domain_guidance"},
+                timing={"elapsed_seconds": round(time.perf_counter() - started, 6)})
         simulation_spec = self._simulation_spec(request) or parse_user_simulation_spec(user_text)
         intent = classify_goal_intent(request, has_user_facts=bool(users.records),
                                       has_simulation_spec=simulation_spec is not None)
@@ -2076,7 +2126,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                                 # The first mixed-language pass produced no verified
                                 # relation. Search the same user concepts in the KB's
                                 # English terminology before deciding evidence is absent.
-                                query = " ".join(query_plan.translated_concepts[:10])
+                                query = bilingual_recovery_query(query_plan)
                             result.telemetry["retrieval_refinement_used"] = True
                             result.telemetry["retrieval_refinement_query"] = query
                     cache_key = (query, request.use_internal, request.use_external, request.model)

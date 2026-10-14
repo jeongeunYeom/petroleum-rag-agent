@@ -13,20 +13,20 @@ class DrillingValidator:
     _topic = re.compile(r"\bkick(?:\b|[가-힣])|\bwell\s*control\b|\bmud\s*(?:pressure|weight|hydrostatic)\b|킥|이수압", re.I)
     _wrong = re.compile(
         r"(?:mud|hydrostatic|이수압|정수압).{0,75}(?:higher|greater|above|exceed|높|크).{0,75}"
-        r"(?:formation|pore|지층압|공극압)|"
-        r"(?:formation|pore|지층압|공극압).{0,75}(?:lower|less|below|낮|작).{0,75}"
+        r"(?:formation|pore|지층\s*압(?:력)?|공극\s*압(?:력)?)|"
+        r"(?:formation|pore|지층\s*압(?:력)?|공극\s*압(?:력)?).{0,75}(?:lower|less|below|낮|작).{0,75}"
         r"(?:mud|hydrostatic|이수압|정수압)|"
-        r"(?:mud|hydrostatic|이수압|정수압).{0,75}(?:formation|pore|지층압|공극압)"
-        r".{0,15}(?:보다|than).{0,20}(?:높|크|higher|greater)", re.I)
+        r"(?:mud|hydrostatic|이수압|정수압).{0,75}(?:formation|pore|지층\s*압(?:력)?|공극\s*압(?:력)?)"
+        r".{0,15}(?:보다|than).{0,20}(?:높|크|클|큰|higher|greater)", re.I)
     _correct = re.compile(
-        r"(?:formation|pore|지층압|공극압).{0,75}(?:higher|greater|above|exceed|높|크).{0,75}"
+        r"(?:formation|pore|지층\s*압(?:력)?|공극\s*압(?:력)?).{0,75}(?:higher|greater|above|exceed|높|크).{0,75}"
         r"(?:mud|hydrostatic|이수압|정수압)|"
         r"(?:mud|hydrostatic|이수압|정수압).{0,75}(?:lower|less|below|낮|작).{0,75}"
-        r"(?:formation|pore|지층압|공극압)|"
-        r"(?:formation|pore|지층압|공극압).{0,75}(?:mud|hydrostatic|이수압|정수압)"
+        r"(?:formation|pore|지층\s*압(?:력)?|공극\s*압(?:력)?)|"
+        r"(?:formation|pore|지층\s*압(?:력)?|공극\s*압(?:력)?).{0,75}(?:mud|hydrostatic|이수압|정수압)"
         r".{0,15}(?:보다|than).{0,20}(?:높|크|higher|greater)|"
         r"(?:underbalanced|압력이\s*부족|정수압이\s*공극압보다\s*낮)", re.I)
-    _rejection = re.compile(r"\b(?:not|incorrect|false|wrong|rather\s+than)\b|아니|틀|잘못|반대", re.I)
+    _rejection = re.compile(r"\b(?:no|not|incorrect|false|wrong|rather\s+than)\b|아니|틀|잘못|반대", re.I)
 
     def matches_query(self, query: str) -> bool:
         return bool(self._topic.search(query or ""))
@@ -54,7 +54,10 @@ class DrillingValidator:
             if row.get("source_type") not in {"knowledge_base", "web", "figure"}:
                 continue
             source_text = str(row.get("text") or "")
-            if not self._topic.search(source_text) or not self._correct.search(source_text):
+            # PDF extraction wraps the pressure inequality over several lines.
+            # Whitespace folding is display-only: citation keeps the raw span.
+            folded = re.sub(r"\s+", " ", source_text)
+            if not self._topic.search(folded) or not self._correct.search(folded):
                 continue
             source_id = str(row["evidence_id"])
             if korean:
@@ -73,7 +76,8 @@ class DrillingValidator:
                                          unsupported_engineering_claim_count=0)
         wrong = bool(self._wrong.search(claim) and not self._rejection.search(claim))
         correct = bool(self._correct.search(claim))
-        unsupported = bool(correct and require_evidence_support and not self._correct.search(evidence))
+        unsupported = bool(correct and require_evidence_support and not self._correct.search(
+            re.sub(r"\s+", " ", evidence)))
         reasons = []
         if wrong:
             reasons.append({"code": "DRILL-KICK-REVERSED", "type": "engineering_contradiction",
