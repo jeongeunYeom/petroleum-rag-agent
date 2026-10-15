@@ -35,7 +35,13 @@ def _named_heterogeneous_ratio(text: str, left: str, right: str, units: dict[str
     concepts = {"gas": "gas", "가스": "gas", "oil": "oil", "오일": "oil", "원유": "oil",
                 "water": "water", "물": "water", "produced": "produced", "생산": "produced",
                 "injected": "injected", "주입": "injected"}
-    a, b = concepts.get(left.casefold()), concepts.get(right.casefold())
+    def commodity(name: str) -> str | None:
+        tokens = set(re.split(r"[_\s]+", name.casefold()))
+        for group in ("gas", "oil", "water"):
+            if group in tokens:
+                return group
+        return concepts.get(name.casefold())
+    a, b = commodity(left), commodity(right)
     labels = {"gas": ("gas", "가스"), "oil": ("oil", "오일", "원유"),
               "water": ("water", "물"), "produced": ("produced", "생산"),
               "injected": ("injected", "주입")}
@@ -92,13 +98,17 @@ def direct_operation_operands(text: str, facts: UserFactRegistry,
     for operation in ("ratio", "difference", "divide", "subtract"):
         if operation not in operations:
             continue
-        if operation == "ratio" and re.search(r"\bGOR\b", text, re.I):
-            gas = [row for row in facts.records if row.name.casefold() in {"gas", "가스"}]
-            oil = [row for row in facts.records if row.name.casefold() in {"oil", "오일", "원유"}]
+        if operation == "ratio" and re.search(
+                r"\bGOR\b|\bgas\s*(?:/|[- ]to[- ])\s*oil\b|가스\s*/\s*(?:오일|원유)", text, re.I):
+            gas = [row for row in facts.records if "gas" in row.name.casefold().split("_")
+                   or row.name.casefold() == "가스"]
+            oil = [row for row in facts.records if "oil" in row.name.casefold().split("_")
+                   or row.name.casefold() in {"오일", "원유"}]
             if len(gas) == len(oil) == 1:
                 selected[operation] = (gas[0].name, oil[0].name)
                 continue
-            missing.append("명시된 가스 부피와 원유 부피")
+            missing.append("가스 부피" if not gas else "원유 부피" if not oil else
+                           "가스·원유 부피의 고유한 값")
             continue
         role_order = (
             ("produced", "injected") if operation == "ratio" and re.search(r"회수율|recovery\s+rate", text, re.I) else
@@ -307,6 +317,15 @@ def direct_readiness(text: str, facts: UserFactRegistry, operations: list[str]) 
             "mean", "median", "sum", "minimum", "maximum", "weighted_average", "ranking", "range"}))
     except ValueError as exc:
         return [str(exc)]
+    if set(operations) & {"sum", "difference", "subtract", "add", "ratio", "divide"}:
+        supplied = {row.name for row in facts.records}
+        required = {name for match in re.finditer(
+            r"(?<![A-Za-z0-9_])([A-Z][A-Za-z0-9_]{0,20})\s*[+\-*/]\s*"
+            r"([A-Z][A-Za-z0-9_]{0,20})(?![A-Za-z0-9_])", text)
+            for name in match.groups()}
+        missing_symbols = sorted(required - supplied)
+        if missing_symbols:
+            return [f"{name} 값" for name in missing_symbols]
     comparable = {"mean", "median", "sum", "minimum", "maximum", "ranking", "range",
                   "std_population", "std_sample", "variance_population", "variance",
                   "geometric_mean", "add", "difference", "subtract"}

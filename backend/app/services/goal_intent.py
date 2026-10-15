@@ -50,15 +50,16 @@ _SIMULATION = re.compile(r"\b(?:sweep|vary\w*|sensitiv\w*|optim\w*|parameter\s+r
                          r"최적|간격|변화시키|바꿔가며|바꾸면서|여러\s*값으로|매개변수\s*변화|부터.{0,30}까지", re.I)
 _FORMULA_REQUEST = re.compile(r"(?<![A-Za-z0-9_])(?:formula|equation|correlation|relation|law|model|coupling)s?(?![A-Za-z0-9_])|공식|수식|관계식|식(?:을|이|의)?\s*(?:찾|확인)|관계(?:를|식을)?\s*찾|내부\s*식|원문\s*식|(?:교재|자료)에\s*나온\s*(?:식|관계)|모델", re.I)
 _APPLY_SOURCE = re.compile(r"\bapply\s+(?:it|this|that|the\s+(?:sourced\s+)?(?:relation|formula|equation|conversion))\s+to\b", re.I)
-_KB_ORIGIN = re.compile(r"내부\s*(?:자료|식|교재)|교재(?:의|에)|문서에서|자료에서\s*확인|원문|식(?:을|이|의)?\s*(?:찾|확인)|관계(?:를|식을)?\s*찾|(?:교재|자료)에\s*나온|\b(?:textbook|internal source|internal (?:equation|formula|relation)s?|cited relation|source equation|(?:find|locate|retrieve)\s+(?:the\s+)?internal)\b", re.I)
+_KB_ORIGIN = re.compile(r"내부\s*(?:자료|식|교재)|교재(?:의|에)|(?:교재|문헌|핸드북)\s*(?:의\s*)?(?:식|공식|관계식)(?:으로|을|에|의)?|문서에서|자료에서\s*확인|원문|식(?:을|이|의)?\s*(?:찾|확인)|관계(?:를|식을)?\s*찾|(?:교재|자료)에\s*나온|\b(?:textbook|internal source|internal (?:equation|formula|relation)s?|cited relation|source equation|(?:find|locate|retrieve)\s+(?:the\s+)?internal)\b", re.I)
 _USER_ORIGIN = re.compile(r"내가\s*(?:정의한|준|지정한)(?:\s*식)?|사용자\s*식|\b(?:my formula|use this equation|scenario equation|user[- ]defined equation)\b", re.I)
-_PREMISE = re.compile(r"(?:맞(?:지|나요|습니까|아)?|옳(?:지|나요)?|(?:되|하|인|없|않)는?\s*거지|"
+_PREMISE = re.compile(r"(?:맞(?:지|나요|습니까|아|죠)(?![가-힣])|옳(?:지|나요)?|(?:되|하|인|없|않)는?\s*거지|"
                       r"보면\s*되나|보면\s*되지|거지\s*\?|없지|않지|항상|언제나|필요\s*없지|무관하지|단점\s*없지|"
                       r"라고\s*보면\s*되지|그렇(?:지|습니까)|"
-                      r"\b(?:is\s+it\s+(?:true|correct)|isn['’]?t\s+it\s+true\s+that|"
+                      r"\b(?:is\s+(?:it|this|that)\s+(?:true|correct)|"
+                      r"doesn['’]?t\s+it\??|isn['’]?t\s+it\s+true\s+that|"
                       r"can\s+i\s+assume|always|does\s+.{1,100}\s+(?:have|show|exhibit)|"
-                      r"does\s+.{1,100}?\s+(?:occur|happen|increase|decrease)\s+because)\b|\b(?:right|correct)\s*\?)", re.I)
-_DIRECT = re.compile(r"\b(?:calculate|compute|range|ratio|difference|convert|conversion|cylinder\s+volume|energy\s+use|mass\s+concentration|linear\s+regression\s+slope|finite\s+difference|centered\s+difference|sum|total|average|mean|median|variance|standard\s+deviation|"
+                      r"does\s+.{1,100}?\s+(?:occur|happen|increase|decrease)\s+because)\b|\b(?:yes|right|correct)\s*\?)", re.I)
+_DIRECT = re.compile(r"\b(?:calculate|compute|range|ratio|difference|convert|conversion|extrema|cylinder\s+volume|energy\s+use|mass\s+concentration|linear\s+regression\s+slope|finite\s+difference|centered\s+difference|sum|total|average|mean|median|variance|standard\s+deviation|"
                      r"rank|std|interpolate|trapezoid|geometric\s+mean|elapsed\s+time|allocate|weighted\s+average|"
                      r"combined\s+rate|repeated\s+percent|percent\s+change|percent(?:age)?\s+(?:increase|decrease|decline)|drawdown|per\s+day|piecewise\s+cost|"
                      r"percent\s+to\s+fraction|fraction\s+to\s+percent|percent(?:age)?\s+decrease)\b|"
@@ -167,6 +168,12 @@ def classify_goal_intent(request: GoalResearchRequest, *, has_user_facts: bool,
     if equation and (_CALC.search(text) or origin == FormulaOrigin.USER_DEFINED or has_user_facts) and origin != FormulaOrigin.KB_REFERENCED:
         return GoalIntent(GoalIntentKind.USER_FORMULA_CALC, SourceRequirement.USER_FORMULA,
                           equation, "literal_user_formula", formula_origin=origin)
+    if (has_user_facts and not equation and _FORMULA_REQUEST.search(text) and not _PREMISE.search(text) and
+            (re.search(r"\b(?:apply|use|evaluate|obtain|determine|solve|calculate|compute|get|find)\b|산출|구해|구하", text, re.I)
+             or re.search(r"(?<![A-Za-z0-9_])[A-Z][A-Za-z0-9_]{0,2}(?![A-Za-z0-9_])", text))):
+        return GoalIntent(GoalIntentKind.KB_FORMULA_CALC, SourceRequirement.KB_FORMULA,
+                          reason="apply_sourced_relation_to_supplied_values",
+                          formula_origin=FormulaOrigin.KB_REFERENCED)
     premise = bool(_PREMISE.search(text)) and not bool(re.search(
         r"몇|얼마|무엇|어떻게|\b(?:how\s+many|how\s+much|what\s+is)\b", text, re.I))
     if premise:
@@ -187,10 +194,10 @@ def classify_goal_intent(request: GoalResearchRequest, *, has_user_facts: bool,
              and not kb_formula and not sweep)):
         return GoalIntent(GoalIntentKind.DIRECT_CALC, SourceRequirement.NONE,
                           reason="user_requested_generic_operation")
-    if has_user_facts and re.search(r"\b(?:minimum|maximum|min|max)\b|최댓값|최솟값", text, re.I) and not kb_formula and not sweep:
+    if has_user_facts and re.search(r"\b(?:minimum|maximum|min|max|largest|smallest|highest|lowest)\b|최댓값|최솟값", text, re.I) and not kb_formula and not sweep:
         return GoalIntent(GoalIntentKind.DIRECT_CALC, SourceRequirement.NONE, reason="user_requested_extremum")
     if kb_formula and (_CALC.search(text) or sweep or asks_for_api_gravity_calculation(request)
-                       or (has_user_facts and re.search(r"\b(?:report|give|obtain|find)\s+[A-Za-z][A-Za-z0-9_]*\b", text, re.I))
+                       or (has_user_facts and re.search(r"\b(?:report|give|obtain|find|get|evaluate|derive)\s+[A-Za-z][A-Za-z0-9_]*\b", text, re.I))
                        or _APPLY_SOURCE.search(text)):
         return GoalIntent(GoalIntentKind.KB_FORMULA_CALC, SourceRequirement.KB_FORMULA,
                           reason="requested_sourced_relation", formula_origin=origin)

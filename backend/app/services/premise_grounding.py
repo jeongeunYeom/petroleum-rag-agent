@@ -164,17 +164,22 @@ def _sourced_ratio_correction(question: str, sources: dict[str, str], korean: bo
         return PremiseAssessment()
     if re.search(r"\b(?:not|doesn['’]?t|isn['’]?t)\b|않|아니|틀|잘못", q):
         return PremiseAssessment()
-    inverse = bool((re.search(r"decreas|lower|less|작아|낮아|감소", q)
-                    and re.search(r"increas|larger|greater|늘어|커지|증가", q)) or
-                   (re.search(r"increas|higher|larger|늘어|커지|증가", q)
-                    and re.search(r"decreas|lower|smaller|줄어|작아|감소", q)))
+    inverse = bool(re.search(r"decreas|lower|less|smaller|줄어|작아|낮아|감소", q)
+                   and re.search(r"increas|higher|larger|greater|늘어|커지|증가", q))
     if not inverse:
         return PremiseAssessment()
     for source_id, text in sources.items():
         for sentence in re.split(r"(?<=[.!?])\s+", text):
             quote = sentence.strip()
-            if not re.search(r"porosity.{0,80}(?:defined|ratio).{0,100}"
-                             r"(?:pores?|pore\s*volume).{0,80}bulk", quote, re.I | re.S):
+            # The source may call pore volume the fluid-filled, non-solid
+            # volume. Require the complete numerator/denominator relation in
+            # one literal sentence before drawing a fixed-denominator result.
+            numerator = (r"(?:pore\s+volume|void\s+volume|"
+                         r"volume\s+of\s+(?:the\s+)?non[-\s]*solid\s+part)")
+            if (not re.search(r"\bporosity\b", quote, re.I) or
+                    re.search(r"\b(?:not|never|unrelated|incorrect|false)\b", quote, re.I) or
+                    not re.search(rf"{numerator}.{{0,160}}(?:divided\s+by|/|to)\s+"
+                                  r"(?:the\s+)?bulk\s+volume\b", quote, re.I | re.S)):
                 continue
             literal_quote = quote
             quote = re.sub(r"\s+", " ", quote)
@@ -194,6 +199,9 @@ def _sourced_ratio_correction(question: str, sources: dict[str, str], korean: bo
 def derive_safe_relation_from_equation(question: str, sources: dict[str, str],
                                        korean: bool) -> PremiseAssessment:
     """Correct only a literal two-variable monotonic relation with explicit sign/fixed inputs."""
+    signed_power = _sourced_signed_power_correction(question, sources, korean)
+    if signed_power.verdict == "contradicts":
+        return signed_power
     inverse = _sourced_inverse_power_correction(question, sources, korean)
     if inverse.verdict == "contradicts":
         return inverse
@@ -250,10 +258,90 @@ def derive_safe_relation_from_equation(question: str, sources: dict[str, str],
     return PremiseAssessment()
 
 
+def _sourced_signed_power_correction(question: str, sources: dict[str, str],
+                                    korean: bool) -> PremiseAssessment:
+    """Derive the sign of d(k*x**n)/dx only with proved signs and positive x."""
+    if not re.search(r"increas|ris(?:e|es)|grow|증가|커지|높아", question, re.I):
+        return PremiseAssessment()
+
+    def sign_of(name: str, source: str) -> int | None:
+        numbers = [float(match.group(1)) for match in re.finditer(
+            rf"(?<![A-Za-z0-9_]){re.escape(name)}\s*=\s*([-+]?\d+(?:\.\d+)?)\b", source)]
+        signs = {1 if value > 0 else -1 if value < 0 else 0 for value in numbers}
+        inequalities = [1 if match.group(1) == ">" else -1 for match in re.finditer(
+            rf"(?<![A-Za-z0-9_]){re.escape(name)}\s*([<>])\s*0\b", source)]
+        signs.update(inequalities)
+        return next(iter(signs)) if len(signs) == 1 and 0 not in signs else None
+
+    evidence = [{"evidence_id": sid, "source_type": "knowledge_base", "text": text}
+                for sid, text in sources.items()]
+    for record in FormulaSourceRegistry.from_evidence(evidence).records:
+        source = sources[record.source_id]
+        if not record.expression_candidate or not source_contains_equation(record, source):
+            continue
+        try:
+            tree = ast.parse(record.expression_candidate.split("=", 1)[1].strip(), mode="eval").body
+        except SyntaxError:
+            continue
+        if not isinstance(tree, ast.BinOp) or not isinstance(tree.op, ast.Mult):
+            continue
+        coefficient, power = ((tree.left, tree.right) if isinstance(tree.right, ast.BinOp)
+                              and isinstance(tree.right.op, ast.Pow) else (tree.right, tree.left))
+        if not isinstance(power, ast.BinOp) or not isinstance(power.op, ast.Pow):
+            continue
+        if not isinstance(power.left, ast.Name):
+            continue
+        x = power.left.id
+        if isinstance(coefficient, ast.Constant) and type(coefficient.value) in {int, float}:
+            k_sign = 1 if coefficient.value > 0 else -1 if coefficient.value < 0 else None
+        elif (isinstance(coefficient, ast.UnaryOp) and isinstance(coefficient.op, ast.USub)
+              and isinstance(coefficient.operand, ast.Constant)
+              and type(coefficient.operand.value) in {int, float}):
+            k_sign = -1 if coefficient.operand.value > 0 else 1 if coefficient.operand.value < 0 else None
+        elif isinstance(coefficient, ast.Name):
+            k_sign = sign_of(coefficient.id, source)
+        else:
+            continue
+        exponent = power.right
+        if isinstance(exponent, ast.UnaryOp) and isinstance(exponent.op, ast.USub) and isinstance(
+                exponent.operand, ast.Constant) and type(exponent.operand.value) in {int, float}:
+            n_sign = -1 if exponent.operand.value > 0 else 1 if exponent.operand.value < 0 else None
+        elif isinstance(exponent, ast.Constant) and type(exponent.value) in {int, float}:
+            n_sign = 1 if exponent.value > 0 else -1 if exponent.value < 0 else None
+        elif isinstance(exponent, ast.Name):
+            n_sign = sign_of(exponent.id, source)
+        else:
+            continue
+        if not k_sign or not n_sign or not re.search(
+                rf"(?<![A-Za-z0-9_]){re.escape(x)}\s*>\s*0\b|"
+                rf"\bpositive\s+{re.escape(x)}\b", source + " " + question, re.I):
+            continue
+        y = record.lhs or record.expression_candidate.split("=", 1)[0].strip()
+        if not re.search(rf"\b{re.escape(x)}\b", question, re.I) or not re.search(
+                rf"\b{re.escape(y)}\b", question, re.I):
+            continue
+        claimed_increase = re.search(
+            rf"(?:{re.escape(x)}.{{0,50}}(?:increas|grow|증가|커지).{{0,70}}"
+            rf"{re.escape(y)}.{{0,30}}(?:increas|ris|grow|증가|커지)|"
+            rf"{re.escape(y)}.{{0,40}}(?:increas|ris|grow|증가|커지).{{0,70}}"
+            rf"{re.escape(x)}.{{0,40}}(?:increas|grow|증가|커지))", question, re.I)
+        if not claimed_increase or k_sign * n_sign >= 0:
+            continue
+        correction = (f"양의 {x}에서 {x}가 증가하면 {y}는 감소합니다" if korean else
+                      f"For positive {x}, {y} decreases as {x} increases")
+        answer = (("그 전제는 잘못되었습니다. " if korean else "That premise is incorrect. ") +
+                  correction + ('. 근거 식: ' if korean else '. Source equation: ') +
+                  f'"{record.raw_span}" [{record.source_id}]')
+        return PremiseAssessment("contradicts", record.source_id, record.raw_span, answer,
+                                 "sourced_signed_power", (record.source_id,), (record.raw_span,),
+                                 "equation", correction, "deterministic")
+    return PremiseAssessment()
+
+
 def _sourced_inverse_power_correction(question: str, sources: dict[str, str],
                                       korean: bool) -> PremiseAssessment:
     """Use only an exact source equation C/x**p with proven positive C, x and p."""
-    if not re.search(r"increas|증가|커지|높아", question, re.I):
+    if not re.search(r"increas|grow|ris(?:e|es)|증가|커지|높아", question, re.I):
         return PremiseAssessment()
     evidence = [{"evidence_id": source_id, "source_type": "knowledge_base", "text": text}
                 for source_id, text in sources.items()]
@@ -283,9 +371,9 @@ def _sourced_inverse_power_correction(question: str, sources: dict[str, str],
         if not re.search(y_query, question, re.I) or not re.search(x_query, question, re.I):
             continue
         claimed_positive = bool(re.search(
-            rf"(?:{y_query}.{{0,65}}(?:increas|증가|커지|높아).{{0,80}}{x_query}.{{0,65}}"
-            rf"(?:increas|증가|커지|높아)|{x_query}.{{0,65}}(?:increas|증가|커지|높아).{{0,80}}"
-            rf"{y_query}.{{0,65}}(?:increas|증가|커지|높아))", question, re.I))
+            rf"(?:{y_query}.{{0,65}}(?:increas|grow|ris(?:e|es)|증가|커지|높아).{{0,80}}{x_query}.{{0,65}}"
+            rf"(?:increas|grow|ris(?:e|es)|증가|커지|높아)|{x_query}.{{0,65}}(?:increas|grow|ris(?:e|es)|증가|커지|높아).{{0,80}}"
+            rf"{y_query}.{{0,65}}(?:increas|grow|ris(?:e|es)|증가|커지|높아))", question, re.I))
         if not claimed_positive:
             continue
         local = source[max(0, record.span_start - 250):record.span_end + 350]

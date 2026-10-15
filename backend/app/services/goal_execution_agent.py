@@ -19,13 +19,13 @@ from app.models.goal_research_schemas import (
     GoalResearchResponse, GoalRunStatus, GoalStatus, GoalStopReason,
 )
 from app.models.research_schemas import EvidenceCounts, InternalEvidence, ResearchRequest, ResearchResponse, ResearchTiming
-from app.services.formula_source_registry import FormulaSourceRegistry, equation_ast, expression_variables, normalize_formula, source_contains_equation
+from app.services.formula_source_registry import FormulaSourceRegistry, equation_ast, expression_variables, isolated_source_formula, normalize_formula, source_contains_equation
 from app.services.formula_dependency import resolve_formula_dependencies
 from app.services.formula_units import formula_output_unit
 from app.services.calculation_requirements import infer_dimensionless, normalize_symbol, rank_formula_candidates, requested_semantic_target, select_formula_candidate, source_variable_unit, formula_target_contract
 from app.services.calculation_request_ir import OPERATIONS, parse_request_ir, validate_ir
 from app.services.goal_clarification import (calculation_missing, calculation_readiness, clarification_question,
-                                             parse_user_simulation_spec, simulation_readiness,
+                                             parse_user_simulation_spec, public_missing_inputs, simulation_readiness,
                                              user_simulation_missing)
 from app.services.evidence_fact_registry import EvidenceFactRegistry
 from app.services.calc_claim_grounding import NUMERIC, _matches_reported_value, validate_calc_claim
@@ -289,13 +289,19 @@ class GoalExecutionAgent(GoalResearchAgent):
         equation = user_equation(text)
         if equation:
             return equation.split("=", 1)[0].strip()
+        source_target = re.search(
+            r"\b(?:equation|formula|relation|correlation)\s+for\s+"
+            r"(?:the\s+)?([A-Za-z][A-Za-z0-9_]{0,30})\b", text, re.I)
+        if source_target and source_target.group(1).casefold() not in {"the", "value", "result"}:
+            return source_target.group(1)
         matches = list(re.finditer(
             r"\b(?:calculate|compute|determine|solve|find|derive|report)\s+(?:the\s+)?([A-Za-z][A-Za-z0-9_]*)"
             r"(?=\s*(?:[.,;?]|$|\b(?:using|from|with|by|via|equation|formula|value|result)\b))|"
             r"\b([A-Za-z][A-Za-z0-9_]*)\s*(?:값|을|를|의)?\s*(?:계산|구해|구하)", text, re.I))
         targets = [match.group(1) or match.group(2) for match in matches]
         targets = [item for item in targets if item.casefold() not in {
-            "it", "this", "that", "value", "result", "formula", "equation"}]
+            "it", "this", "that", "value", "result", "formula", "equation",
+            "internal", "textbook", "source", "sourced", "cited"}]
         return targets[-1] if targets else None
 
     @staticmethod
@@ -589,6 +595,11 @@ class GoalExecutionAgent(GoalResearchAgent):
         if any(source_id not in sources for source_id in computation.formula_source_ids):
             return False
         records = FormulaSourceRegistry.from_evidence(evidence).records
+        if computation.formula_derivation == "algebraic_isolation":
+            target = (computation.source_formula or computation.formula or "").split("=", 1)[0].strip()
+            records = [*records, *(candidate for record in records
+                if (candidate := isolated_source_formula(
+                    record, target, str(sources.get(record.source_id, {}).get("text") or ""))))]
         return all((bool(equation_ast(computation.source_formula or "")) and
                     normalize_formula(computation.source_formula or "") in
                     normalize_formula(str(sources[source_id].get("text") or "")))
@@ -748,6 +759,14 @@ class GoalExecutionAgent(GoalResearchAgent):
                     name = {"ratio": "비율 ratio", "difference": "차이 difference",
                             "sum": "합계 sum", "maximum": "최댓값 maximum",
                             "minimum": "최솟값 minimum", "range": "범위 range"}.get(name, name)
+                if (str(row.get("name")) in {"maximum", "minimum"} and
+                        isinstance(value, (int, float)) and calc.analysis_id.startswith("DIRECT-")):
+                    leaders = [str(fact["name"]) for fact in calc.input_facts
+                               if isinstance(fact.get("value"), (int, float)) and
+                               not isinstance(fact.get("value"), bool) and
+                               float(fact["value"]) == float(value)]
+                    if leaders:
+                        name += f" ({', '.join(leaders)})"
                 printed = " > ".join(map(str, value)) if isinstance(value, list) else str(value)
                 claim = f"{name}: {printed} {row.get('unit') or ''}".strip()
                 if validate_calc_claim(claim, citations, [output_id],
@@ -840,15 +859,32 @@ class GoalExecutionAgent(GoalResearchAgent):
 
     @staticmethod
     def _support_evaluation(criteria, support, korean):
-        ids = list(dict.fromkeys(sid for c in support.claims for sid in c.supporting_evidence_ids))
         reason = ("관련 원문 관계와 인용 연결을 검증했습니다." if korean else
                   "The literal relation spans and citation links were verified.")
-        return [CriterionEvaluation(criterion_id=c.criterion_id,
-                    status=CriterionStatus.MET if support.all_required_supported else CriterionStatus.PARTIAL,
-                    reason=reason, supporting_evidence=ids) for c in criteria]
+        evaluations = []
+        for index, criterion in enumerate(criteria):
+            if len(support.claims) == len(criteria):
+                matched = [support.claims[index]]
+            elif len(criteria) == 1:
+                matched = support.claims
+            else:
+                matched = [claim for claim in support.claims
+                           if claim.description.casefold() == criterion.description.casefold()]
+            statuses = [claim.support_status for claim in matched]
+            status = (CriterionStatus.MET if statuses and all(value == SupportStatus.SUPPORTED
+                                                              for value in statuses)
+                      else CriterionStatus.PARTIAL if any(value in {SupportStatus.SUPPORTED,
+                                                                   SupportStatus.PARTIALLY_SUPPORTED}
+                                                          for value in statuses)
+                      else CriterionStatus.UNMET)
+            ids = list(dict.fromkeys(sid for claim in matched for sid in claim.supporting_evidence_ids))
+            evaluations.append(CriterionEvaluation(criterion_id=criterion.criterion_id,
+                status=status, reason=reason if ids else "근거상 확인되지 않았습니다." if korean else
+                "Not established by the available evidence.", supporting_evidence=ids))
+        return evaluations
 
     def _expand_formula_neighbors(self, sources: list[InternalEvidence],
-                                  accumulator: EvidenceAccumulator) -> list[str]:
+                                  accumulator: EvidenceAccumulator, *, per_source: int = 6) -> list[str]:
         """One bounded read of original indexed neighbors; every returned span keeps its chunk ID."""
         store = getattr(self.research_agent, "vector_store", None)
         getter = getattr(store, "get_local_chunks", None)
@@ -858,7 +894,7 @@ class GoalExecutionAgent(GoalResearchAgent):
         for source in sources[:2]:
             if source.page is None:
                 continue
-            for row in getter(source.document, source.page, source.chunk_id, limit=6):
+            for row in getter(source.document, source.page, source.chunk_id, limit=per_source):
                 metadata = row.get("metadata") or {}
                 if (metadata.get("document") != source.document or
                         abs(int(metadata.get("page") or -100) - source.page) > 1):
@@ -867,7 +903,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                     evidence_id="", document=source.document, page=int(metadata["page"]),
                     chunk_id=str(row["id"]), score=source.score,
                     excerpt=str(row.get("text") or "")))
-        return accumulator.add_internal(neighbors[:8])
+        return accumulator.add_internal(neighbors[:min(8, 2 * per_source)])
 
     async def _pre_stop_answer(self, request, intent, criteria, accumulator, result, state, started,
                                verified=None):
@@ -1029,10 +1065,10 @@ class GoalExecutionAgent(GoalResearchAgent):
         result.telemetry.update({"final_answer_kind": "clarification", "refusal_generated": False,
                                  "refusal_reason": None, "clarification_generated": True,
                                  "clarification_reasons": list(dict.fromkeys(missing))})
-        result.required_inputs = list(dict.fromkeys(missing))
+        result.required_inputs = public_missing_inputs(missing)
         result.clarification_question = clarification_question(result.required_inputs, korean)
         result.final_answer = ""
-        state.unresolved_information = result.required_inputs.copy()
+        state.unresolved_information = list(dict.fromkeys(missing))
         result.resume_checkpoint = {
             "state": state.model_dump(mode="json"),
             "seen_actions": sorted(seen_actions),
@@ -1618,7 +1654,12 @@ class GoalExecutionAgent(GoalResearchAgent):
                         normalize_symbol(selected_formula.lhs or "") == normalize_symbol(pinned_formula.lhs or ""))
                     pinned_missing = calculation_readiness(pinned_formula, evidence_rows, users, [])
                     candidate_missing = (calculation_readiness(selected_formula, evidence_rows, users, [])
-                                         if same_literal else [])
+                                         if selected_formula else [])
+                    better_specific = bool(selected_formula and not same_literal and
+                        normalize_symbol(selected_formula.lhs or "") == normalize_symbol(pinned_formula.lhs or "") and
+                        pinned_missing and not candidate_missing and
+                        source_contains_equation(selected_formula, next((str(item.get("text") or "")
+                            for item in evidence_rows if item.get("evidence_id") == selected_formula.source_id), "")))
                     better_layout = bool(same_literal and selected_formula.layout_transformations
                                          and not pinned_formula.layout_transformations and
                                          len(candidate_missing) <= len(pinned_missing))
@@ -1630,7 +1671,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                             (expression_variables(pinned_formula.expression_candidate) or set())} & known)
                         better_layout = bool(new_overlap > old_overlap and
                                              len(candidate_missing) <= len(pinned_missing))
-                    if same_literal and (pinned_missing and not candidate_missing or better_layout):
+                    if better_specific or (same_literal and (pinned_missing and not candidate_missing or better_layout)):
                         pinned = {"source_id": selected_formula.source_id,
                                   "equation_ast": selected_formula.equation_ast,
                                   "formula_id": selected_formula.formula_id,
@@ -1669,6 +1710,24 @@ class GoalExecutionAgent(GoalResearchAgent):
                         if added_definitions:
                             state.evidence_ids.extend(added_definitions)
                             evidence_rows = accumulator.records()
+                            # A neighboring literal model can be more specific and
+                            # fully bound than the first generic relation. It is
+                            # still ranked and provenance-checked independently.
+                            reranked, _ = rank_formula_candidates(
+                                evidence_rows, f"{request.goal or ''} {request.topic}",
+                                [item.name for item in users.records],
+                                {item.name: item.unit for item in users.records if item.unit},
+                                target_contract)
+                            if (reranked and selected_formula and
+                                    normalize_symbol(reranked.lhs or "") == normalize_symbol(selected_formula.lhs or "") and
+                                    calculation_readiness(selected_formula, evidence_rows, formula_users, []) and
+                                    not calculation_readiness(reranked, evidence_rows, formula_users, [])):
+                                selected_formula = reranked
+                                target_formula = reranked
+                                result.telemetry["formula_dependency_target"] = {
+                                    "source_id": reranked.source_id, "equation_ast": reranked.equation_ast,
+                                    "formula_id": reranked.formula_id, "lhs": reranked.lhs}
+                                result.telemetry["formula_pin_upgraded_with_context"] = True
                             # Neighbor chunks can contain the definition lost at
                             # the initial chunk boundary. Reinterpret only the
                             # exact same raw equation on the same document/page.
@@ -1688,6 +1747,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                                     for item in evidence_rows if item.get("evidence_id") == row.source_id), ""))), None)
                             if expanded:
                                 selected_formula = expanded
+                                target_formula = expanded
                                 result.telemetry["formula_dependency_target"] = {
                                     "source_id": expanded.source_id, "equation_ast": expanded.equation_ast,
                                     "formula_id": expanded.formula_id, "lhs": expanded.lhs}
@@ -1740,7 +1800,10 @@ class GoalExecutionAgent(GoalResearchAgent):
             if dependency_plan and dependency_plan.missing_inputs:
                 selected_rhs = {normalize_symbol(name) for name in
                                 (expression_variables(selected_formula.expression_candidate) or set())}
-                formula_missing = [f"{name} 값과 단위" for name in dependency_plan.missing_inputs
+                selected_source_text = next((str(row.get("text") or "") for row in evidence_rows
+                    if selected_formula and row.get("evidence_id") == selected_formula.source_id), "")
+                formula_missing = [f"{name} 값" if infer_dimensionless(name, selected_source_text)
+                                   else f"{name} 값과 단위" for name in dependency_plan.missing_inputs
                                    if name not in source_alias_bindings and
                                    (dependency_plan.depth > 0 or normalize_symbol(name) in selected_rhs)]
             state.formula_ready = bool(selected_formula and not formula_missing)
@@ -2118,6 +2181,14 @@ class GoalExecutionAgent(GoalResearchAgent):
                     if alias_plan:
                         result.telemetry["retrieval_original_concepts"] = list(alias_plan.concepts)
                         result.telemetry["retrieval_translated_concepts"] = list(alias_plan.translated_concepts)
+                    if (intent.kind == GoalIntentKind.KB_FORMULA_CALC and alias_plan
+                            and request.use_internal and
+                            getattr(self.research_agent, "vector_store", None) is not None):
+                        # Search the user's named relation and supplied symbols
+                        # together. This changes retrieval only; the source span
+                        # must still pass literal-formula provenance validation.
+                        query = (alias_plan.search_text + "\n" + query)[:600]
+                        result.telemetry["formula_retrieval_expanded"] = True
                     if query_plan:
                         query = query_plan.search_text
                         if action.reason_code == "missing_claim_support":
@@ -2136,7 +2207,8 @@ class GoalExecutionAgent(GoalResearchAgent):
                         use_internal=request.use_internal, use_external=request.use_external,
                         engineering_validation=request.engineering_validation, evidence_only=True,
                         model=request.model,
-                        internal_top_k=min(20, max(request.internal_top_k * 3, 12)) if query_plan
+                        internal_top_k=min(20, max(request.internal_top_k * 3, 12)) if query_plan or
+                        intent.kind == GoalIntentKind.KB_FORMULA_CALC
                         else request.internal_top_k, external_top_k=request.external_top_k,
                         temperature=request.temperature, seed=request.seed,
                     ))
@@ -2185,15 +2257,35 @@ class GoalExecutionAgent(GoalResearchAgent):
                         result.telemetry["retrieval_rerank"] = rerank_debug
                         result.telemetry.setdefault("retrieval_rerank_history", []).append(rerank_debug)
                     added = accumulator.add(response)
-                    if (requires_sourced_formula and not result.telemetry["formula_local_expansion_attempted"]
-                            and response.internal_sources and not rank_formula_candidates(
+                    if (intent.kind == GoalIntentKind.KNOWLEDGE_QA and response.internal_sources and
+                            not result.telemetry.get("knowledge_context_expansion_used") and
+                            (not rerank_debug or rerank_debug.get("confidence") != "LOW")):
+                        try:
+                            context_ids = self._expand_formula_neighbors(
+                                response.internal_sources, accumulator, per_source=2)
+                        except (ValueError, OSError, RuntimeError, TypeError, AttributeError):
+                            context_ids = []
+                        if context_ids:
+                            added.extend(context_ids)
+                            result.telemetry["knowledge_context_expansion_used"] = True
+                            result.telemetry["knowledge_context_evidence_ids"] = context_ids
+                    expansion_seen = set(result.telemetry.get("formula_local_expansion_source_chunks", []))
+                    expandable = [source for source in response.internal_sources
+                                  if source.chunk_id not in expansion_seen]
+                    if (requires_sourced_formula and
+                            result.telemetry.get("formula_local_expansion_attempt_count", 0) < 2
+                            and expandable and not rank_formula_candidates(
                                 accumulator.records(), f"{request.goal or ''} {request.topic}",
                                 [item.name for item in users.records],
                                 {item.name: item.unit for item in users.records if item.unit},
                                 target_contract)[0]):
                         result.telemetry["formula_local_expansion_attempted"] = True
+                        result.telemetry["formula_local_expansion_attempt_count"] = (
+                            result.telemetry.get("formula_local_expansion_attempt_count", 0) + 1)
+                        result.telemetry["formula_local_expansion_source_chunks"] = [
+                            *expansion_seen, *(source.chunk_id for source in expandable)]
                         try:
-                            neighbor_ids = self._expand_formula_neighbors(response.internal_sources, accumulator)
+                            neighbor_ids = self._expand_formula_neighbors(expandable[:2], accumulator, per_source=2)
                         except (ValueError, OSError, RuntimeError, TypeError, AttributeError):
                             neighbor_ids = []
                         if neighbor_ids:

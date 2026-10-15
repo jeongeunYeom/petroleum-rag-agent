@@ -52,9 +52,22 @@ TERMS = {
     "회수율": "recovery factor", "주입량": "injected volume", "생산량": "produced volume",
     "유입 압력": "inlet pressure", "출구 압력": "outlet pressure",
 }
+PRESSURE_SYMBOLS = re.compile(r"(?=.*(?<![A-Za-z0-9_])Po(?![A-Za-z0-9_]))"
+                              r"(?=.*(?<![A-Za-z0-9_])Pf(?![A-Za-z0-9_]))"
+                              r"(?=.*(?<![A-Za-z0-9_])Pc(?![A-Za-z0-9_]))", re.I)
 DOMAIN_ALIASES = (
-    (re.compile(r"\bformation\s+(?:resistivity\s+)?factor\b|지층\s*(?:저항\s*)?인자", re.I),
+    (PRESSURE_SYMBOLS,
+     ("overburden pressure", "fluid pressure", "compacting stress")),
+    (re.compile(r"\bfractional\s+flow\b.{0,100}\bwaterflood\b|"
+                r"\bwaterflood\b.{0,100}\bfractional\s+flow\b", re.I),
+     ("water-oil fractional flow", "water injection", "relative permeability",
+      "Buckley-Leverett")),
+    (re.compile(r"\bformation[-\s]+(?:resistivity[-\s]+)?factor\b|지층\s*(?:저항\s*)?인자", re.I),
      ("electrical formation factor", "formation resistivity factor", "porosity", "resistivity")),
+    (re.compile(r"\bmagnetic\s+(?:directional\s+)?survey\b.{0,100}\bsteel\b|"
+                r"\bsteel\b.{0,100}\bmagnetic\s+(?:directional\s+)?survey\b", re.I),
+     ("directional survey instrument", "steel drillstring", "magnetic distortion",
+      "nonmagnetic drill collar")),
     (re.compile(r"\bmonel\b|\bnon[- ]?magnetic\s+(?:drill\s+)?collar\b|비자성\s*(?:드릴\s*)?(?:collar|칼라)", re.I),
      ("Monel drill collar", "non-magnetic drill collar", "nonmagnetic drill collar",
       "directional survey", "magnetic survey", "survey instrument", "magnetic interference")),
@@ -66,6 +79,26 @@ STOP = {"explain", "describe", "confirm", "evidence", "source", "sources", "find
 PREMISE_NOISE = re.compile(
     r"맞지|거지|되나|보면\s*되|무관하지|필요\s*없지|단점\s*없지|항상|언제나|"
     r"\b(?:right|correct|always|isn.t it true that|can i assume)\b|[?？]", re.I)
+PRESENTATION_WORDS = {"use", "only", "the", "a", "local", "textbook", "source", "sources",
+                      "please", "give", "provide", "short", "brief", "cited", "citation",
+                      "explanation", "answer", "focus", "on", "exact", "relation", "with",
+                      "evidence", "one", "paragraph", "in", "include", "including",
+                      "check", "this", "against", "explicitly", "correct", "my", "premise",
+                      "cite", "literal", "internal"}
+
+
+def substantive_question(text: str) -> str:
+    """Discard a colon-separated *presentation* instruction, never a technical clause."""
+    prefix, separator, question = text.partition(":")
+    if not separator or not question.strip() or len(prefix) > 100 or "=" in prefix:
+        return text
+    words = re.findall(r"[A-Za-z]+", prefix.casefold())
+    english_presentation = (bool(words) and set(words) <= PRESENTATION_WORDS
+                            and bool(set(words) & {"use", "give", "provide", "focus",
+                                                     "check", "correct", "cite"}))
+    korean_presentation = (bool(re.search(r"한\s*문단|간단히|짧게|근거.{0,8}(?:포함|대조)|답해(?:줘|주세요)", prefix))
+                           and not domain_hint(prefix))
+    return question.strip() if english_presentation or korean_presentation else text
 
 
 def _tokens(text: str) -> list[str]:
@@ -106,6 +139,7 @@ def bilingual_recovery_query(plan: QueryPlan) -> str:
 
 def plan_query(question: str, *, premise: bool = False, refined: bool = False) -> QueryPlan:
     """Use only user terms and fixed domain synonyms; never inject an answer."""
+    question = substantive_question(question)
     cleaned = PREMISE_NOISE.sub(" ", question) if premise else question
     translations = [english for korean, english in sorted(TERMS.items(), key=lambda row: -len(row[0]))
                     if korean in cleaned]
@@ -113,20 +147,58 @@ def plan_query(question: str, *, premise: bool = False, refined: bool = False) -
     domain = domain_hint(cleaned)
     if domain:
         translations.append(DOMAINS[domain][1])
+    if domain == "petrophysics" and re.search(r"(?<![A-Za-z0-9_])F(?![A-Za-z0-9_])", cleaned):
+        # The established symbol expands a search term; it supplies no equation.
+        translations.insert(0, "formation factor")
     english = _tokens(" ".join([*translations, *aliases]))
     original = _tokens(cleaned)
+    # Short equation symbols disappear from prose tokenization, yet are often
+    # the only discriminating terms in an indexed literal formula span.
+    formula_symbols = []
+    if re.search(r"\b(?:equation|formula|correlation|relation)\b|공식|수식|관계식|교재\s*식", cleaned, re.I):
+        formula_symbols = list(dict.fromkeys(re.findall(
+            r"\b([A-Za-z][A-Za-z0-9_]{0,2})\s*(?==)|"
+            r"\b(?:for|calculate|compute|find|derive)\s+(?:the\s+)?([A-Za-z][A-Za-z0-9_]{0,2})\b",
+            cleaned, re.I)))
+        formula_symbols = [part.casefold() for pair in formula_symbols for part in pair if part]
     original_ascii = [word for word in original if re.fullmatch(r"[a-z][a-z0-9_-]+", word)]
     # Textbook prose commonly uses plural lithologies while visitors use the
     # singular. Keep both lexical forms without asserting any relation.
     lithology_forms = {"carbonate": "carbonates", "sand": "sands", "sandstone": "sandstones"}
     original_ascii = list(dict.fromkeys(
         form for word in original_ascii for form in (word, lithology_forms.get(word, word))))
+    # "Informs" is a request for a relation, not a source keyword. A short
+    # synonym query preserves the user's engineering nouns while avoiding
+    # lengthy presentation wording that can dominate the original query.
+    relation_query = (" ".join("determines" if word in {"inform", "informs"} else word
+                               for word in original_ascii if word not in {"text", "internal", "material"})[:180]
+                      if re.search(r"\binforms?\b", cleaned, re.I) else "")
+    # A comparison is often printed as parallel source-local clauses ("in X ...;
+    # in Y ..."). Search that relationship before broad domain expansions.
+    compared = re.search(
+        r"\b([A-Za-z][A-Za-z-]{2,})\s*(?:와|과|and|vs\.?|versus)\s*"
+        r"([A-Za-z][A-Za-z-]{2,})(?=$|[^A-Za-z])", cleaned, re.I)
+    comparative_query = ""
+    if compared:
+        left, right = (part.casefold() for part in compared.groups())
+        comparison_noise = STOP | {"relation", "formula", "equation", "model", "evaluate",
+                                   "calculate", "compute", "obtain", "determine", "derive"}
+        if left not in comparison_noise and right not in comparison_noise and left != right:
+            relation_nouns = [word for word in original_ascii if word not in {
+                left, right, left + "s", right + "s"}][:3]
+            if domain == "petrophysics" and re.search(
+                    r"(?<![A-Za-z0-9_])F(?![A-Za-z0-9_])", cleaned):
+                relation_nouns = ["formation", "factor", *relation_nouns]
+            if relation_nouns:
+                plural = lambda word: word if word.endswith("s") else word + "s"
+                comparative_query = (f"in {plural(left)} in {plural(right)} "
+                                     + " ".join(relation_nouns))
     # Korean clauses are kept as-is for retrieval, while fixed translations make
     # bilingual document titles and technical paragraphs reachable.
     # Preserve the visitor's explicit English engineering nouns ahead of broad
     # domain expansions; otherwise a short mixed-language question can lose
     # its discriminating terms before the bounded query is built.
-    concepts = list(dict.fromkeys([*original_ascii, *english, *original]))
+    concepts = list(dict.fromkeys([*formula_symbols, *original_ascii, *english, *original]))
     core = " ".join(concepts[:10]) or cleaned.strip()[:180]
     domain_words = DOMAINS[domain][1] if domain else ""
     secondary = " ".join(dict.fromkeys([*original_ascii[:6], *english[:7], *original[:4]]))
@@ -138,7 +210,20 @@ def plan_query(question: str, *, premise: bool = False, refined: bool = False) -
         secondary = (secondary + " " + ("relationship" if premise else "chapter concepts")).strip()
         if aliases:
             secondary = " ".join(aliases)[:220]
-    queries = tuple(dict.fromkeys(value[:220] for value in (core, secondary) if value))
+    pressure_query = ("overburden pressure fluid pressure compacting stress Po Pf Pc"
+                      if PRESSURE_SYMBOLS.search(cleaned) else "")
+    factor_query = ("formation factor porosity cementation factor constant a m"
+                    if re.search(r"\bformation[-\s]+(?:resistivity[-\s]+)?factor\b", cleaned, re.I)
+                    and re.search(r"(?<![A-Za-z0-9_])a\s*[:=]", cleaned)
+                    and re.search(r"(?<![A-Za-z0-9_])m\s*[:=]", cleaned) else "")
+    lithology_query = ("in carbonates formation factor porosity" if
+                       re.search(r"\bcarbonate\b", cleaned, re.I) and
+                       re.search(r"\bformation[-\s]+(?:resistivity[-\s]+)?factor\b", cleaned, re.I)
+                       else "")
+    queries = tuple(dict.fromkeys(value[:220] for value in
+                                  (comparative_query, pressure_query, factor_query, lithology_query,
+                                   relation_query,
+                                   core, secondary) if value))
     if not queries:
         queries = (core[:220],)
     # Terms supplied in a relation question receive extra weight during reranking.

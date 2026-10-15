@@ -593,14 +593,15 @@ class UserFactRegistry(BaseModel):
                 if any(start < found.end() and found.start() < end for start, end in coordinate_spans):
                     continue
                 label = found.group("label").strip()
-                label = re.split(r"\b(?:has|have|with|where|given|and|at|using|use)\b", label, flags=re.I)[-1].strip()
+                label = re.split(r"\b(?:has|have|know|knows|with|where|given|and|at|using|use)\b", label, flags=re.I)[-1].strip()
                 tokens = label.split()
                 if (len(tokens) > 1 and re.fullmatch(r"[A-Za-zφρΔμλ][A-Za-z0-9φρΔμλ_]*", tokens[-1])
                         and ("_" in tokens[-1] or len(tokens[-1]) <= 3
                              and (any(char.isupper() for char in tokens[-1]) or
                                   any(char in "φρΔμλ" for char in tokens[-1]) or
                                   tokens[-1].casefold() in {"phi", "sg", "sor", "swc"} or
-                                  tokens[-2].casefold() in {"for", "when", "where", "with", "using", "given"}))):
+                                  tokens[-2].casefold() in {"for", "when", "where", "with", "using", "given",
+                                                           "values", "inputs", "parameters"}))):
                     # A prose descriptor before a literal symbol is not part of its name.
                     label = tokens[-1]
                 if label.casefold().startswith("well "):
@@ -609,7 +610,9 @@ class UserFactRegistry(BaseModel):
                     continue
                 if (not found.group("unit") and not found.group("value").endswith(".")
                         and re.match(r"\s+[A-Za-z]", text[found.end():])
-                        and not re.match(r"\s*(?:\r?\n|and\b|[A-Za-z_]\w*\s*=)", text[found.end():])):
+                        and not re.match(r"\s*(?:\r?\n|and\b|but\b|to\s+(?:find|calculate|compute|determine|get|obtain|derive|report|evaluate)\b|"
+                                         r"(?:is|are)\s+(?:known|given|provided|specified)\b|"
+                                         r"[A-Za-z_]\w*\s*=)", text[found.end():])):
                     # A following word may be an unsupported unit; do not erase it.
                     continue
                 prefix = f"Well_{well}_" if well and label.casefold() not in {"well", "layer"} else ""

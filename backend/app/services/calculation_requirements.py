@@ -11,7 +11,8 @@ from pydantic import BaseModel, Field
 
 from app.services.evidence_fact_registry import EvidenceFactRegistry
 from app.services.formula_source_registry import (FormulaSourceRegistry, FormulaSourceRecord,
-                                                  expression_variables, porosity_exponent_layout_context)
+                                                  expression_variables, isolated_source_formula,
+                                                  porosity_exponent_layout_context)
 from app.services.goal_tool_planner import InputFact, PythonAnalysisPlan
 from app.services.user_fact_registry import UNIT, normalize_unit
 from app.services.compound_units import unit_factors
@@ -56,8 +57,12 @@ def normalize_symbol(name: str) -> str:
 
 def requested_semantic_target(text: str) -> str | None:
     """Distinguish a requested pressure output from related drilling quantities."""
-    if (re.search(r"\bformation\s+(?:resistivity\s+)?factor\b|지층\s*(?:저항\s*)?인자", text, re.I)
-            and re.search(r"\b(?:calculat\w*|comput\w*|report|derive|evaluate|find)\b|계산|구해|산출", text, re.I)):
+    explicit_output = re.search(
+        r"(?i:\b(?:calculate|compute|determine|derive|evaluate|get|obtain)\s+(?:the\s+)?)"
+        r"([A-Z][A-Za-z0-9_]{0,5})(?=\s*[.,;?]|$|\s+(?:from|with|using|for|at)\b)", text)
+    if (re.search(r"\bformation[-\s]+(?:resistivity[-\s]+)?factor\b|지층\s*(?:저항\s*)?인자", text, re.I)
+            and re.search(r"\b(?:calculat\w*|comput\w*|report|derive|evaluate|find|get|apply|use|known|provided|missing)\b|계산|구해|산출|알고|부족", text, re.I)
+            and (not explicit_output or normalize_symbol(explicit_output.group(1)) == "f")):
         return "F"
     if re.search(r"\bECD\b|equivalent\s+circulating\s+density|등가\s*순환\s*밀도", text, re.I):
         return "ecd"
@@ -168,17 +173,23 @@ def formula_target_contract(text: str, fact_names: list[str], requested_target: 
     if not target:
         if re.search(r"\bAPI\s*gravity(?![A-Za-z])|API도|SG\s*[-–]\s*API", text, re.I):
             target = "API"
-        match = re.search(r"\b(?:calculate|compute|determine|derive|solve)\s+(?:the\s+)?"
+        match = re.search(r"\b(?:calculate|compute|determine|derive|solve|evaluate|find|obtain|get)\s+(?:the\s+)?"
                           r"([A-Za-z][A-Za-z0-9_]{0,30})"
-                          r"(?=\s+(?:using|from|for|with|by|via|in|when)\b|[.,;?]|$)", text, re.I)
+                          r"(?=\s+(?:using|from|for|with|by|via|in|at|when)\b|[.,;?]|$)", text, re.I)
         if match and not target:
             target = match.group(1)
         elif not target:
+            named_output = re.search(r"\b(?:relation|equation|formula|factor)\s+([A-Z][A-Za-z0-9_]{0,2})\b", text)
+            if named_output:
+                target = named_output.group(1)
+        if not target:
             match = re.search(r"\b([A-Za-z][A-Za-z0-9_]{0,30})\s*(?:값|을|를)?\s*"
                               r"(?:계산|구해|구하)", text, re.I)
             target = match.group(1) if match else None
-    if target and normalize_symbol(target) in {"the", "a", "it", "this", "that", "value", "result", "formula", "equation",
+    if target and normalize_symbol(target) in {"the", "it", "this", "that", "value", "result", "formula", "equation",
                                                 "pressure", "relation"}:
+        target = None
+    if target == "a":  # an article is not a target; the literal symbol A is.
         target = None
     unit_match = re.search(rf"\b(?:in|단위(?:는|로)?)\s+(?P<unit>{UNIT})\b", text, re.I)
     return FormulaTargetContract(target, unit_match["unit"] if unit_match else None,
@@ -267,10 +278,21 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
             return None
 
     literal_request = equation_key(user_equation(intent) or "")
-    model_match = re.search(r"\b([A-Za-z][A-Za-z0-9-]*)\s+(?:formula|equation|correlation)\b", intent, re.I)
+    model_match = (re.search(r"\b(?:cited|named|called)\s+([A-Z][a-z][A-Za-z0-9-]*)\s+"
+                             r"(?:[a-z]+\s+){0,2}(?:formula|equation|correlation|relation)\b", intent)
+                   or re.search(r"\b([A-Za-z][A-Za-z0-9-]*)\s+(?:formula|equation|correlation)\b", intent, re.I))
     model_name = (model_match.group(1).casefold() if model_match and
-                  model_match.group(1).casefold() not in {"the", "a", "an", "textbook", "internal", "source"}
+                  model_match.group(1).casefold() not in {"the", "a", "an", "textbook", "internal", "source",
+                                                            "factor", "formation", "resistivity", "porosity"}
                   else None)
+    named_context = re.search(
+        r"\b([A-Za-z][A-Za-z-]{2,})\s+(?:formation[-\s]+(?:resistivity[-\s]+)?factor|"
+        r"(?:rock|material|flow|reservoir)\s+(?:model|formula|equation|relation)|"
+        r"rock|material|relation)\b", intent, re.I)
+    context_name = (named_context.group(1).casefold() if named_context and
+                    named_context.group(1).casefold() not in {"the", "internal", "textbook", "cited", "sourced",
+                                                             "porosity", "formation", "factor", "general"}
+                    else None)
     clauses = re.split(r"(?<=[.!?])\s+|\n+", intent)
     requested = [clause for clause in clauses if re.search(
         r"[=:]|\b(?:calculate|compute|find|equation|formula|model|relation|use|not|without)\b|"
@@ -287,7 +309,9 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
     context_tokens = {token for token in tokens if len(token) > 2 and token not in stopwords}
     generic_context = stopwords | {"internal", "textbook", "use", "locate", "model", "assume", "result", "value",
                                    "values", "input", "units", "source", "sourced", "relation",
-                                   "please", "expression", "number", "without", "known", "needed"}
+                                   "please", "expression", "number", "without", "known", "needed",
+                                   "citation", "citations", "cited", "psi", "psia", "psig", "kpa",
+                                   "stb", "scf", "bbl", "dimensionless", "determine", "report", "material"}
     source_by_id = {str(row.get("evidence_id")): str(row.get("text") or "") for row in evidence}
     contract = target_contract or formula_target_contract(intent, fact_names)
     semantic_target = contract.semantic_dimension
@@ -301,6 +325,10 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
                                       r"exclude\s+.{0,20}form|do\s+not\s+use", intent, re.I))
     ranked: list[tuple[tuple[int, ...], FormulaSourceRecord, dict[str, Any]]] = []
     source_records = FormulaSourceRegistry.from_evidence(evidence).records
+    if target_name:
+        source_records = [*source_records, *(candidate for record in source_records
+            if (candidate := isolated_source_formula(
+                record, contract.requested_quantity or "", source_by_id.get(record.source_id, ""))))]
     for record in source_records:
         if not record.expression_candidate:
             continue
@@ -337,9 +365,17 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
                           re.findall(r"[A-Za-z][A-Za-z0-9_]*|[가-힣]{2,}", line)}
         nearby_tokens = {normalize_symbol(word) for word in
                          re.findall(r"[A-Za-z][A-Za-z0-9_]*|[가-힣]{2,}", nearby)}
+        heading_tokens |= {word[:-1] for word in heading_tokens if len(word) >= 6 and word.endswith("s")}
+        nearby_tokens |= {word[:-1] for word in nearby_tokens if len(word) >= 6 and word.endswith("s")}
         descriptor_tokens = context_tokens - generic_context - facts - {lhs} - {
             normalize_symbol(variable) for variable in variables}
         local_context = source_text[max(0, record.span_start - 180):record.span_end + 180]
+        clause_prefix = source_text[max(0, record.span_start - 180):record.span_start]
+        clause_prefix = re.split(r"[;\n]", clause_prefix)[-1]
+        named_context_score = (9 if context_name and re.search(
+                                   rf"\b{re.escape(context_name)}s?\b", clause_prefix, re.I)
+                               else -3 if context_name and re.search(r"\bin\s+[A-Za-z-]+", clause_prefix, re.I)
+                               else 0)
         exact_structure = bool(literal_request and equation_key(record.expression_candidate) == literal_request)
         if semantic_target == "hydrostatic_pressure":
             if (lhs not in {"p", "ph", "pressure", "hydrostaticpressure", "mudhydrostaticpressure"}
@@ -353,6 +389,7 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
             continue
         local_tokens = {normalize_symbol(word) for word in
                         re.findall(r"[A-Za-z][A-Za-z0-9_]*|[가-힣]{2,}", local_context)}
+        local_tokens |= {word[:-1] for word in local_tokens if len(word) >= 6 and word.endswith("s")}
         raw_lhs = record.expression_candidate.split("=", 1)[0].strip()
         explicit_symbol_binding = ((raw_lhs.isupper() or "_" in raw_lhs) and len(lhs) >= 3 and lhs in tokens
                                    and overlap == len(variables))
@@ -364,7 +401,10 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
         target_context_score = (5 if target_name and len(target_name) > 2 and
                                 (lhs == target_name or target_name in nearby_tokens) else
                                 -5 if target_name and len(target_name) > 2 else 0)
-        variable_score = 2 * overlap
+        # Explicitly supplied, named operands distinguish a general sourced
+        # relation from a numerically convenient special case. They are only
+        # ranking evidence, never substituted into an absent source equation.
+        variable_score = 4 * overlap
         heading_score = min(4, len(context_tokens & heading_tokens))
         context_score = min(4, len(context_tokens & nearby_tokens))
         # An equation quoted by the user is a disambiguation key, never its
@@ -401,9 +441,10 @@ def rank_formula_candidates(evidence: list[dict[str, Any]], intent: str,
             unit_score += output_match
         score = (lhs_score + variable_score + heading_score + context_score + structure + unit_score
                  + (12 if exact_structure else 0) + model_score
-                 + target_context_score - negative - alias_penalty)
+                 + named_context_score + target_context_score - negative - alias_penalty - 3 * extra)
         details = {"lhs_match": bool(lhs_score), "required_variable_match": overlap,
-                   "requested_literal_equation_match": exact_structure, "named_model_score": model_score,
+                   "requested_literal_equation_match": exact_structure,
+                   "named_model_score": model_score + named_context_score,
                    "unit_score": unit_score,
                    "extra_variable_penalty": extra, "term_count_match": term_match,
                    "requested_structure_match": term_match, "negative_constraint_penalty": negative,

@@ -7,6 +7,7 @@ from enum import Enum
 
 from app.services.goal_action_planner import ENGINEERING_TERMS
 from app.services.goal_intent import explicitly_underdetermined, prefers_korean
+from app.services.goal_knowledge_retrieval import substantive_question
 from app.services.source_verification_text import verification_view
 from app.services.formula_source_registry import EQUATION, expression_variables
 from app.services.formula_layout_normalizer import normalize_extracted_equation
@@ -27,6 +28,7 @@ RELATIONS = {
 
 
 def _terms(text):
+    text = substantive_question(text)
     text = text.replace("경험식", "formula")
     text = re.sub(r"\bpurpose\s+of\s+adding\b", "purpose of", text, flags=re.I)
     for korean, english in sorted(ENGINEERING_TERMS.items(), key=lambda item: -len(item[0])):
@@ -38,8 +40,16 @@ def _terms(text):
     text = re.sub(r"\b([a-z]+)ies\b", r"\1y", text.casefold())
     text = re.sub(r"\b([a-z]{4,})(?:s|ed|ing)\b", r"\1", text)
     words = re.findall(r"[A-Za-z][A-Za-z0-9]*|[가-힣]+", text)
-    terms = {stem for w in words if w not in STOP and len(w) > 1
-             if len(stem := re.sub(r"(?:에서|으로|에는|이란|의|은|는|을|를|가)$", "", w)) > 1}
+    terms = set()
+    for word in words:
+        if word in STOP or len(word) <= 1:
+            continue
+        stem = re.sub(r"(?:에서|으로|에는|이란|의|은|는|을|를|가)$", "", word)
+        if re.fullmatch(r"[a-z]+", stem) and len(stem) > 4 and stem.endswith("s") and not stem.endswith(
+                ("ss", "us", "is", "ics")):
+            stem = stem[:-1]
+        if len(stem) > 1:
+            terms.add(stem)
     phases = set(re.findall(r"relative\s+permeability\s+to\s+(oil|gas|water)", text, re.I))
     if len(phases) >= 2:
         terms.add("multiphase")
@@ -93,6 +103,7 @@ class ClaimSupport:
 
 
 def _parts(text):
+    text = substantive_question(text)
     sentences = re.split(r"(?<=[.!?])\s+|\n+", text)
     requested = [s for s in sentences if s.rstrip().endswith("?") or re.search(
         r"\b(?:what|why|how|explain|describe|define|state|identify|determine|find|provide|compare)\b|"
@@ -130,12 +141,33 @@ def _relation(question, underdetermined):
             else "definition" if re.search(r"define|definition|means|what\s+is|정의|의미", question, re.I) else "relation")
 
 
+def _context_windows(raw: str):
+    """Literal single and adjacent-sentence spans, never cross-source stitching."""
+    boundaries = [0, *(match.end() for match in re.finditer(
+        r"(?<=[.!?])\s+|\n(?=[A-Z])", raw)), len(raw)]
+    for index in range(len(boundaries) - 1):
+        single = raw[boundaries[index]:boundaries[index + 1]].strip()
+        if 20 <= len(single) <= 650:
+            yield single
+        if index + 2 < len(boundaries):
+            pair = raw[boundaries[index]:boundaries[index + 2]].strip()
+            if 35 <= len(pair) <= 750:
+                yield pair
+
+
+def _instructional_span(text: str) -> bool:
+    """An exercise prompt or learning objective is not evidence of its answer."""
+    return bool(re.search(r"\blearning\s+objectives?\b", text[:160], re.I) or re.search(
+        r"(?im)^\s*(?:[•●*\-]|\d+[.)])?\s*"
+        r"(?:present|comment|generate|plot|define|determine|calculate|describe|explain|"
+        r"list|identify|show|compare|derive|give)\b", text))
+
+
 def _literal_windows(raw: str):
     """Short raw excerpts; a formula plus its adjacent definitions is one local window."""
     seen = set()
-    for quote in re.split(r"(?<=[.!?])\s+|\n(?=[A-Z])", raw):
-        quote = quote.strip()
-        if 20 <= len(quote) <= 650 and quote not in seen:
+    for quote in _context_windows(raw):
+        if quote not in seen:
             seen.add(quote)
             yield quote
     for match in EQUATION.finditer(raw):
@@ -217,7 +249,7 @@ def evaluate_claim_support(request, evidence, requirements=None):
                     or not re.fullmatch(r"(?:KB|WEB|FIG)\d+", str(row.get("evidence_id") or ""))):
                 continue
             for quote in _literal_windows(str(row.get("text") or "")):
-                if not 20 <= len(quote) <= 650:
+                if not 20 <= len(quote) <= 650 or _instructional_span(quote):
                     continue
                 if underdetermined and re.search(r"\b(?:not|never)\s+(?:depend|require)|필요하지\s*않|의존하지\s*않", quote, re.I):
                     continue
@@ -318,7 +350,10 @@ async def atomic_claims(request, ollama):
             return claims
         cursor = 0
         for clause in clauses:
-            if not isinstance(clause, str) or len(clause.strip()) < 4:
+            if (not isinstance(clause, str) or len(clause.strip()) < 4
+                    or len(_terms(clause)) < 2):
+                # A lone noun or connective is not an independent factual
+                # obligation, even if a model returns exact text offsets.
                 return claims
             index = request.topic.find(clause, cursor)
             if index < 0:
@@ -353,11 +388,10 @@ async def semantic_claim_support(request, evidence, requirements, ollama, embed=
         if row.get("source_type") not in {"knowledge_base", "web", "figure"} or not re.fullmatch(r"(?:KB|FIG|WEB)\d+", sid):
             continue
         # Span IDs select literal text; the model never authors the quotation.
-        for quote in re.split(r"(?<=[.!?])\s+|\n(?=[A-Z])", text):
-            quote = quote.strip()
-            if 15 <= len(quote) <= 1200:
+        for quote in _context_windows(text):
+            if 15 <= len(quote) <= 750 and not _instructional_span(quote):
                 passages.append({"span_id": f"SPAN{len(passages)+1}", "source_id": sid, "text": quote})
-                if sum(p["source_id"] == sid for p in passages) >= 8:
+                if sum(p["source_id"] == sid for p in passages) >= 12:
                     break
     support.diagnostics = {
         "claim_language": "ko" if prefers_korean(request) else "en",
@@ -374,6 +408,15 @@ async def semantic_claim_support(request, evidence, requirements, ollama, embed=
             for vector in vectors[:len(support.claims)]:
                 scores = [sum(a*b for a, b in zip(vector, other)) for other in vectors[len(support.claims):]]
                 indexes.update(sorted(range(len(scores)), key=scores.__getitem__, reverse=True)[:4])
+            # Embeddings may favor a topically similar definition while dropping
+            # the literal adjacent sentence that states the requested relation.
+            # Keep a few lexical candidates as well; the semantic judge still
+            # decides support from exact supplied spans, with no lower threshold.
+            query_terms = set().union(*(_terms(c.description) for c in support.claims))
+            lexical = sorted(range(len(passages)), key=lambda i: (
+                -len(query_terms & _terms(passages[i]["text"])),
+                len(passages[i]["text"]), i))
+            indexes.update(lexical[:4])
             chosen = [p for i, p in enumerate(passages) if i in indexes]
         except (RuntimeError, ValueError, OSError):
             pass  # Already-retrieved passages remain usable without an extra embedding call.

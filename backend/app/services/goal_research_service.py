@@ -300,12 +300,17 @@ class GoalResearchService:
                 "checkpoint": current.get("checkpoint", {}) if checkpoint is None else checkpoint,
                 "updated_at": datetime.now(timezone.utc).isoformat(),
             }
-            temporary = path.with_suffix(".json.tmp")
-            temporary.write_text(
-                json.dumps(payload, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
-            temporary.replace(path)
+            # A per-write temporary name also keeps an independent worker or
+            # process from moving another writer's temporary file away.
+            temporary = path.with_name(f"{path.name}.{uuid4().hex}.tmp")
+            try:
+                temporary.write_text(
+                    json.dumps(payload, ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
+                temporary.replace(path)
+            finally:
+                temporary.unlink(missing_ok=True)
 
     @staticmethod
     def _new_run_id() -> str:

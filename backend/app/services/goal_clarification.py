@@ -206,13 +206,28 @@ def simulation_readiness(text: str, evidence: list[dict[str, Any]],
                                input_ids=input_ids, formula_equation=formula.expression_candidate)
 
 
+def public_missing_inputs(missing: list[str]) -> list[str]:
+    """Keep internal contract/error codes out of the visitor's question."""
+    safe = []
+    for value in missing:
+        item = str(value).strip()
+        if not item:
+            continue
+        if re.fullmatch(r"[a-z][a-z0-9_]*(?::[a-z0-9_]+)?", item) and (
+                "_" in item or item.endswith(("_missing", "_failed"))):
+            item = "계산에 필요한 입력값 확인"
+        safe.append(item)
+    return list(dict.fromkeys(safe)) or ["계산에 필요한 입력값 확인"]
+
+
 def clarification_question(missing: list[str], korean: bool) -> str:
-    items = list(dict.fromkeys(missing))
+    items = public_missing_inputs(missing)
     needs_units = any("단위" in item or "unit" in item.casefold() for item in items)
     if korean:
         return ("계산을 계속하려면 " + ", ".join(items) + "이(가) 필요합니다. " +
                 ("값과 단위를 한 번에 알려주세요." if needs_units else "필요한 값을 알려주세요."))
-    items = [item.replace("값과 단위", "value and unit").replace("값 확인", "unambiguous value")
+    items = [("a required calculation input" if item == "계산에 필요한 입력값 확인" else item)
+             .replace("값과 단위", "value and unit").replace("값 확인", "unambiguous value")
              .replace("값", "value").replace("단위", "unit") for item in items]
     return ("To continue, please provide: " + ", ".join(items) + ". " +
             ("Include units where applicable." if needs_units else ""))

@@ -113,6 +113,13 @@ def source_contains_equation(record: "FormulaSourceRecord", text: str,
     # Recreate the candidate from the literal span and its local source context.
     # A record whose executable formula was changed after extraction is not evidence.
     expected = _source_expression(record.raw_span, text, record.span_start, record.span_end)
+    if record.formula_derivation == "algebraic_isolation" and record.target_variable:
+        derived = isolate_equation(expected, record.target_variable)
+        return bool(derived and not _clipped_addition(text, expected) and
+                    record.source_equation == expected and
+                    equation_ast(derived) == record.equation_ast and
+                    record.equation_ast == equation_ast(record.expression_candidate or "") and
+                    record.equation_ast == equation_ast(formula or record.expression_candidate or ""))
     return bool(record.expression_candidate and record.equation_ast
                 and not _clipped_addition(text, expected)
                 and equation_ast(expected) == record.equation_ast
@@ -126,6 +133,9 @@ def _unconsumed_continuation(text: str, end: int) -> bool:
     A prose sentence or a separately labeled equation is not attached. This
     rejects a clipped prefix; the full layout block must be reconstructed first.
     """
+    if re.match(r"[ \t]*[+\-*/×÷−][ \t]*"
+                r"(?:[A-Za-zφρμλ][A-Za-z0-9_φρμλ]*|\d+(?:\.\d+)?)", text[end:]):
+        return True
     if re.match(r"[ \t]*\r?\n[ \t]*[2-5](?=[ \t]*[.,;])", text[end:]):
         return True
     return bool(re.match(r"[ \t]*\r?\n[ \t]*[+\-*/×÷−][ \t]*"
@@ -190,6 +200,30 @@ class FormulaSourceRecord(BaseModel):
     source_document: str | None = None
     source_page: int | str | None = None
     context: str = ""
+
+
+def isolated_source_formula(record: FormulaSourceRecord, target: str,
+                            text: str) -> FormulaSourceRecord | None:
+    """Produce an executable inverse, retaining the original literal source span."""
+    original = record.expression_candidate or ""
+    if not original or not source_contains_equation(record, text):
+        return None
+    variables = expression_variables(original) or set()
+    matches = [name for name in variables if name.casefold() == target.casefold()]
+    if len(matches) != 1:
+        return None
+    solved = isolate_equation(original, matches[0])
+    if not solved or not expression_variables(solved):
+        return None
+    result = record.model_copy(update={
+        "formula_id": f"{record.formula_id}-ISOLATE-{matches[0]}",
+        "expression_candidate": solved, "normalized_expression": solved,
+        "source_equation": original, "formula_derivation": "algebraic_isolation",
+        "target_variable": matches[0], "equation_ast": equation_ast(solved),
+        "lhs": matches[0], "rhs": solved.split("=", 1)[1].strip(),
+        "required_variables": sorted(expression_variables(solved) or ()),
+    })
+    return result if source_contains_equation(result, text) else None
 
 
 class FormulaSourceRegistry(BaseModel):
