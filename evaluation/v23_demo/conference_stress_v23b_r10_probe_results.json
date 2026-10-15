@@ -1,0 +1,171 @@
+{
+  "model": "qwen3:8b",
+  "rows": [
+    {
+      "id": "VBST126",
+      "category": "kb_formula",
+      "run_id": "GR-20261015-060632-B2FB19",
+      "turn1_run_id": "GR-20261015-060632-B2FB19",
+      "turn1_status": "completed",
+      "turn1_clarification": null,
+      "final_status": "completed",
+      "final_clarification": null,
+      "visible_answer": "Po: 1825.0 psi [CALC1] [USERF2] [USERF1] [KB1]",
+      "error": null,
+      "actions": [
+        "retrieve",
+        "calculate",
+        "verify",
+        "synthesize",
+        "stop"
+      ],
+      "computations": [
+        {
+          "validation_passed": true,
+          "formula_source_ids": [
+            "KB1"
+          ],
+          "input_fact_ids": [
+            "USERF2",
+            "USERF1"
+          ],
+          "normalized_formula": "po=pf+pc",
+          "output_manifest": {
+            "OUT_RESULT": {
+              "name": "Po",
+              "value": 1825.0,
+              "unit": "psi",
+              "unit_origin": "inferred",
+              "semantic_type": "numeric",
+              "source_fact_ids": [
+                "USERF2",
+                "USERF1"
+              ],
+              "required": true
+            }
+          }
+        }
+      ],
+      "sources": [
+        {
+          "id": "KB1",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 242,
+          "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p242:c0",
+          "excerpt": "32\n               \nEnlarged view of the pore space\nGrains\nPore space filled with fluid\nReservoir\nCap Rock\nDepth\nPf and Pc\nPo\nSurface\nPc\nPc\nPf\nPc\nPc\nPc\nPc\nFigure 21  The balance between overburden & rock stress and fluid pressure\nPo = Pf + Pc\t\nPo = overburden pressure\n\t \t\n\t \t\nPf = fluid pressure\n\t \t\n\t \t\nPc = compacting stress\nThe effect of the change in the balance between the overburden stress and the pore \npressure is to change the compacting stress. If there is an increase in pore pressure, \nthen the pore volume will increase, however, this is rare and in the main, pore \npressure declines during production and the pore spaces compact under the increasing \ncompact stress. Two issues are significant: the initial porosity in the reservoir (i.e. \nto correctly define the volume of oil in place) and the reduction in that porosity (or \npore volume) as the pressure declines (for material balance and simulation studies). \nFigure 22 shows the relationship between porosity and depth (or stress). As the depth \n(and stress) increases, the porosity declines. Care needs to be taken when assessing \nporosity values: were they measured under overburden or at ambient conditions? \nThe shale sample s"
+        },
+        {
+          "id": "KB2",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 194,
+          "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p194:c1",
+          "excerpt": "ion of σ2 and σ2 > σ3\n \n  \n \nFBP = 3σ3 - σ2 - (σ1 - σ3)sin2θz - po\nwhere,\n FBP  =  Formation Breakdown Pressure\n\t σ1      =  Overburden Stress (psi)\n\t σ2      =  Horizontal stress (psi)\n\t σ3      =  Horizontal stress (psi)\n po         =  Pore Pressure (psi)\n\t θz  =  Hole Deviation \n \n  \n  \nIf the conservative assumption that the formation is already fractured is made then \nthe equations used to calculate the fracture pressure of the formations are simplified \nsignificantly.\nEaton proposed the following equation for fracture gradients :\n  \n \nG\nG\nG\nG\nf\no\np\np\n=\n−\n[\n]\n−\n\n\n\n+\nν\nν\n1\n  \nwhere,  \n Gf  =  fracture gradient (psi/ft)                                                                   \n Go  =  overburden gradient (psi/ft)                                                               \n Gp  =  pore pressure gradient (observed or predicted) (psi/ft)                     \n\t ν\t  =  Poisson’s ratio                                        \n55\nFormation Pressures"
+        },
+        {
+          "id": "KB3",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 241,
+          "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p241:c2",
+          "excerpt": "re\nwhere Pcompacting is the grain-to-grain stress, Poverburden is the stress produced by the \nweight of the overburden at a particular depth and Ppore pressure is the pressure of the \nfluids in the pores. The expression shows the balance between the overburden and \nthe pore pressure in compacting the rock matrix: if the pore pressure declines, the \ncompacting stress increases and the pore volume declines. This assumes that the \noverburden remains constant which is logical over the time period of a producing \nreservoir. The balance can be represented by figure 21:"
+        },
+        {
+          "id": "KB4",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_I.pdf",
+          "page": 604,
+          "chunk_id": "d12ce466a48cb5673a034b1d47421cc7b19c9fcbec716c1b8ab9381a05ed00c2:p604:c0",
+          "excerpt": "Confining pressure\n= Pc\n= Overburden pressure on rock frame\nPore pressure\n= P p\n= Fluid pressure inside pore space\nDifferential (or net) pressure\n= Pd\n= Difference between Pc and P p\nEffective pressure\n= Pe\n= Combination of Pc and P p controlling a property\nIncreasing  confining  pressure  (Pc)  alone  will  result  in  a  decrease  of  rock  volume,  or  com-\npaction.  In  contrast,  increasing  the  pore  pressure  (Pp)  tends  to  increase  rock  volume.  Pp\ncounteracts the effects of Pc. Thus, rock properties are controlled largely by the difference be-\ntween  Pc  and  Pp,  or  the  differential  pressure  Pd.  A  more  exact  form  will  account  for  the\ninteraction  of  the  fluid  pressure  with  the  pore  space  and  minerals  and  result  in  an  effective\nstress (Pe) law\nPe = Pc −nP p, ........................................................... (13.35)\nwhere n is a term that can be derived theoretically or defined experimentally for each property.\n13.5.2 Deformation, Strain, and Modulus.  Application of a single (vertical) stress is one typi-\ncal  experiment  run  to  measure  material  mechanical  properties  (Fig.  13.22).  If  this  stress\ncontinues to increase, even"
+        },
+        {
+          "id": "KB5",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 241,
+          "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p241:c1",
+          "excerpt": "perty\nHydrostatic stresses\t\nThe effect of the magnitude of the stresses are measured\nTriaxial stresses  \nThe effect of stresses resolved in the three principal  \n \n\t \t\n\t \t\n\t\ndirections are measured\nReal stress behaviour\t\nThe effect of the magnitude and direction of the stresses \t\t\n\t \t\n\t \t\n\t\nare measured\nThis topic is covered in more detail in the subsequent chapter.\n5.2 Compressibility Of Porous Rock\nAs the rock matrix is subjected to a stress, it will deform and alter the pore space \nvolume as the rock is compressed. For simplicity, the overburden will be considered \nto produce hydrostatic stress (called the compacting stress) on the reservoir, i.e. a \ngrain-to-grain stress in the rock. Within the pores, fluid pressure acts on the surface \nof the grains and reduces the grain-to-grain (or compacting) stress. Therefore in a \nreal reservoir there is a balance between the effect of the overburden stress and the \npore pressure. This can be described by the relationship\nPcompacting = Poverburden - Ppore pressure\nwhere Pcompacting is the grain-to-grain stress, Poverburden is the stress produced by the \nweight of the overburden at a particular depth and Ppore pressure is the pressure of t"
+        },
+        {
+          "id": "KB6",
+          "document": "Heriot-Watt_University_-_Reservoir_Simulation.pdf",
+          "page": 249,
+          "chunk_id": "3f863132a97e940476166548c7f88e2b3bc6107e5ec06778061c39cdd0646e94:p249:c1",
+          "excerpt": "erence.  (Potential is defi ned as Φ = P-ρgz, so that the\nfl ow rate is proportional to ∇Φ.)\n∆Φ\n∆\n∆\nf\n∆\nf\nP\ng\nP\ng\nf\nPff\nPf\nD\n= ∆\n= ∆P −\nPf\nPf\nPf\nρ\n,\n(26)\nwhere ΔD is the depth difference between the two coarse grid centres.  Then:\nk\nq\nX\nrf\nf\nf\nI\nI\n= −µ\n∆\n∆\n∆\nZk\nZkI∆\nI Φ\n(27)\n6. Calculate the pseudo capillary pressure using:\nP\nP\nP\nc\no\nP\nc\nP I\nw\nP\nI\n−\nP\n= Po\nP\n= P I −\nI\n(28)\nThe Eclipse PSEUDO package can be used for calculating Kyte and Berry\npseudos.\nFigure 46\nThe cells used for averaging \nthe phase pressures"
+        },
+        {
+          "id": "KB7",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+          "page": 332,
+          "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p332:c0",
+          "excerpt": "liner is assumed to be cemented in 10-lbm/gal mud with an internal mix-water pressure gradi-\nent of 0.45.\npo= (10 lbm / gal) (.052 psi / ft / lbm / gal ft) + 0.45 psi / ft (12,000 −8,000 ft)\n= 5,960 psi.\nAn equivalent pressure is calculated from pi and po for comparison with the collapse pres-\nsure, pc, through use of Eq. 7.6.\npe = 5,960 psi −(1 −2 / 22.08)(1,200 psi) = 4,869 psi.\nBecause  pe  exceeds  pc  (4,440  psi),  the  liner  is  predicted  to  collapse.  It  is  not  appropriate  to\ncalculate a von Mises stress for collapse in this case because collapse in the transitional region\nis not strictly a plastic yield condition.\nExample 7.3: Sample Uniaxial Tension Calculation.  For this example, consider a 9⅝-\nin. 43.5-lbm/ft N-80 production casing in an 11,000-ft vertical well, with TOC at 8,000 ft. The\ncasing is run in 11-lbm/gal water-based mud. The hanging weight in air for the casing is\nFair = 43.5 lbm / ft (11,000 ft) = 478,500 lbm.\nThe casing stress at the surface is Fair divided by the cross-sectional area of the casing, less\nthe hydrostatic pressure at the bottom of the casing when cemented. If we assume 15-lbm/gal\ncement and 11-lbm/gal displaced mud, this bottomhole pre"
+        },
+        {
+          "id": "KB8",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 860,
+          "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p860:c0",
+          "excerpt": "18\nPc = h∆pg\np lb\nn\nh ft\np lbm\nft\ng\nc\nf\n1\n2\n3\n= ( )\n×\n∆\nlbf = lbm x g\n=\n×\n×\n=\n×\n−\n(\n) ×\n×\nP lb\ng\nin\nin\nft\nh ft\ng\nlb\nft\nc\nm\nm\n2\n2\n2\n3\n144\n1 03\n0 8\n62 4\n \n.\n.\n.\nh\nPc\n=\n×\n−\n(\n) ×\n144\n1 03\n0 8\n62 4\n.\n.\n.\n= 2 30\n0 23\n.\n.\nh = 10.03 Pc oil water\nPc oil water = Pc air/Hg ÷ 10\nh ft = Pc air/Hg psi\nRescale capillary pressure to this:"
+        },
+        {
+          "id": "KB9",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 166,
+          "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p166:c1",
+          "excerpt": "Underpressure\n         \nFigure 6   Underpressured (Subnormal pressured) formation\nThe compaction process can be described by a simplified model (Figure7) consisting \nof a vessel containing a fluid (representing the pore fluid) and a spring (representing \nthe rock matrix).  The overburden stress can be simulated by a piston being forced \ndown on the vessel.  The overburden (S) is supported by the stress in the spring (σ) \nand the fluid pressure (p).  Thus:\n55\nFormation Pressures"
+        },
+        {
+          "id": "KB10",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 64,
+          "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p64:c0",
+          "excerpt": "4\n                      \nPressure  (psia)\nDepth (Ft.)\nFP\nGP\nOverburden\nPressure (OP)\nUnderpressure\nOverpressure\nNormal\n14.7\n(FP = Fluid Pressure, GP = Grain Pressure)\n0\nFigure 1  Gives the relationship between the lithostatic pressure and the hydrostatic \npressure. 1\nFluid pressure in hydrocarbon accumulations are dictated by the prevailing water \npressure in the vicinity of the reservoir.  In a normal situation the water pressure at \nany depth is:\n \nP\ndP\ndD\nx D\n14.7psia\nw\nwater\n= \n\n\n\n+\n \n \n \n \n \n(3)\nwhere dP/dD is the hydrostatic pressure gradient \nThis equation assumes continuity of water pressure from the surface and constant \nsalinity.  In most cases even though the water bearing sands are divided between \nimpermeable shales, any break of such sealing systems will lead to hydrostatic pres-\nsure continuity, but the salinity can vary with depth.\nReservoirs whose water pressure gradient when extrapolated to zero depth give an \nabsolute pressure equivalent to atmospheric pressure are called normal pressured \nreservoirs.\nEXERCISE 1\nIf the average pressure gradient in a region is 0.47 psi/ft, calculate the pore \npressure in a normally pressurised formation at 7400ft. Convert the"
+        },
+        {
+          "id": "KB11",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 196,
+          "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p196:c0",
+          "excerpt": "37\nInstitute of Petroleum Engineering,  Heriot-Watt University  \nwhere:     \n Gf   =  fracture gradient (psi/ft)     \n Gp   =  pore pressure gradient psi/ft     \n Ki  =  matrix stress coefficient     \n\t σ\t  =  matrix stress (psi)     \n D    =  depth of interest (ft)\nThe matrix stress (σ) can be calculated as the difference between overburden \npressure, S and pore pressure, P.   \n     \n             i.e.   σ  =  S - P\nThe coefficient Ki relates the actual matrix stress to the “normal” matrix stress and \ncan be obtained from charts.\nExercise 6   Fracture Pressure Prediction - Eaton Equation\nThe following information has been gathered together in an attempt to predict the \nfracture pressure of a formation to be drilled at 8500ft:\nVertical Depth of formation\t\n=  8500 ft.\nPore Pressure\t\n\t\n=  5300 psi\nOverburden pressure\t\n\t\n=  7800 psi\nPoissons Ratio\t\n\t\n=  0.28  (Determined from laboratory tests on core)\na.  Calculate the fracture pressure of the formation at 8500ft.   \nb.  How would the fracture pressure of the formation at 8500ft be confirmed or otherwise \n \t\nwhen the formation has been drilled ?\n8.4  Summary of Procedures\nWhen planning a well the formation pore pressures and fracture p"
+        },
+        {
+          "id": "KB12",
+          "document": "Heriot-Watt University - Reservoir Engineering.pdf",
+          "page": 628,
+          "chunk_id": "f9156c6016ef3dddce387aa3703983f4ed164713a72b96823d4e2480c2ad1d12:p628:c0",
+          "excerpt": "16\n                      \n- sand grains\n- pore space\nPore pressure\nOverburden pressure\nFigure 11  Cross Section of Sandstone Influence of Overburden and Pore Pressure2.\n4.4.2 Overburden Pressure\nA reservoir is subjected to an overburden pressure caused by the weight of the forma-\ntion above the reservoir. It is equivalent to about 1 psi/ft of depth. These pressures \nsimply apply a compressive force to the reservoir rock.  The pressure in the pore \nspace, the pore pressure, does not normally approach that of the overburden pressure \nand is normally about 0.5 psi/ft.  If the reservoir sands are highly unconsolidated \nthen this pressure could be higher as the overburden pressure is transmitted to the \nfluids in the pore space.\nWhen the pore pressure is reduced then the effective opposing pressure is increased \nand the bulk volume is slightly reduced.  At the same time since the rock grains are \ncompressible albeit only slightly the effect of a reduction in reservoir pressure will \nbe to expand the rock grains.\nhence reduce Vb)\n\t \t\n\t \t\n)\t\n-  decrease in porosity ø\nand increase Vs\t)\nCompressibility of rock cf =  \n1\nV\nV\np\npr\np\n. ∆\n∆\n\t ∆Vpr = Cf∆pVp\t\n\t\n\t\n\t\n\t\n\t\n\t\n(15)\nWhere Vp is the volum"
+        },
+        {
+          "id": "KB13",
+          "document": "Heriot-Watt_University_-_Drilling_Engineering.pdf",
+          "page": 165,
+          "chunk_id": "9e9150687093041945dd35416d75403d1915c9164abc8db06c320e8ff0568412:p165:c1",
+          "excerpt": "be :\n                 2.3 x 0.433 psi/ft  =  0.9959 psi/ft\nThis figure is normally rounded up to 1 psi/ft and is commonly quoted as the \nmaximum possible overburden pressure gradient, from which the maximum \noverburden pressure, at any depth, can be calculated. It is unlikely that the pore \npressure could exceed the overburden pressure.  However, it should be remembered \nthat the overburden pressure may vary  with depth, due to compaction and changing \nlithology, and so the gradient cannot be assumed to be constant."
+        },
+        {
+          "id": "KB14",
+          "document": "Larry W. Lake - Petroleum Engineering Handbook, Volume V (1).pdf",
+          "page": 862,
+          "chunk_id": "779ed04201882344620f9332ecb57c58a34eeb3ed30cfd86d7adffe58d7048fc:p862:c2",
+          "excerpt": "lly, first calculate the pseudopressure at pb and compute\nΔpp = pp(ps) −pp(pb) = 9.9715 × 106 −2,098.7 = 9.969 × 106 .\nV-854\nPetroleum Engineering Handbook—Vol. V\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 7\nChapter 9"
+        },
+        {
+          "id": "KB15",
+          "document": "Larry_W._Lake_-_Petroleum_Engineering_Handbook,_Volume_II.pdf",
+          "page": 344,
+          "chunk_id": "121c52a48ab3aaa98d30723c36362ac41692b158b000fc2fb78460ccb78169d2:p344:c1",
+          "excerpt": "L = dogleg severity (°/unit length)\nγi = the density of the fluid inside the tubing, lbm/ft3\nγo = the density of the fluid outside the tubing, lbm/ft3\nΔFbal = incremental force caused by ballooning, lbf\nΔFtemp = incremental force caused by temperature change, lbf\nΔLb = buckling length change, ft\nΔp = po – pi, psi\nΔpi = change in surface internal pressure, psi\nΔpo = change in surface external pressure, psi\nΔT = average change in temperature over free length, °F\nΔρi = change in internal fluid density, lbm/ft3\nΔρo = change in external fluid density, lbm/ft3\nθ´ = rate of change of helix angle with respect to pipe length, radians/ft\nθ = helix angle, radians\nκ = curvature, radians/ft\nσb = stress at the pipe’s outer surface, psi\nσr = radial stress, psi\nσVME = triaxial stress, psi\nσz = axial stress, psi\nσθ = tangential or hoop stress, psi\nυ = Poisson’s ratio (0.30 for steel), dimensionless\nφ = wellbore angle with the vertical, radians\nChapter 7—Casing Design\nII-337\nSHORTMAN UTT\nPrint\nSearch\nHome\nBookmarks\nHelp\nChapter 8\nChapter 6"
+        }
+      ],
+      "validation": {
+        "engineering_validation_passed": true,
+        "engineering_contradiction_count": 0,
+        "unsupported_engineering_claim_count": 0,
+        "citation_semantic_passed": true,
+        "unsupported_citation_claim_count": 0,
+        "unsupported_numeric_claim_count": 0,
+        "criteria_frozen": true
+      },
+      "stop_reason": "goal_achieved",
+      "seconds": 37.141,
+      "handled": true,
+      "failure_reasons": []
+    }
+  ]
+}

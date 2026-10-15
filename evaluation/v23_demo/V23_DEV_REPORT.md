@@ -1,6 +1,6 @@
-# V23 conference-demo development report — NOT FROZEN
+# V23 conference-demo development report — initial candidate (historical)
 
-This is a **development** result, not an unseen final evaluation. The acceptance gate failed. No V23 freeze SHA exists and no final V4 benchmark was authored or run.
+This preserves the **initial V23 candidate's development results**: at that time its acceptance gate failed and no freeze existed. The later V23.1 candidate passed a new V23B development gate; see [V23B_REPAIR_REPORT.md](V23B_REPAIR_REPORT.md) and [V23_FREEZE_NOTE.md](V23_FREEZE_NOTE.md). The historical figures below were not rewritten and are not unseen final evaluation. No V4 benchmark was authored or run here.
 
 | Item | Value |
 |---|---|
@@ -110,4 +110,4 @@ The same 40 fresh development queries were run read-only at top-5; 17 included a
 3. Resolve the two missing-input routes that stop instead of entering `WAITING_FOR_USER_INPUT`, and reach at least 9/10 same-run completions.
 4. Independently audit semantic fabrication and unnecessary refusals before certifying safety thresholds.
 
-**Freeze decision: NOT READY.** No `V23_FREEZE_NOTE.md` was created.
+**Initial-candidate freeze decision at that time: NOT READY.** The subsequent V23.1 freeze is documented separately above.

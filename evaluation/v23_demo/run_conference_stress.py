@@ -59,7 +59,9 @@ def assess(case: dict, row: dict) -> tuple[bool, list[str]]:
     if category == "knowledge" and not cited:
         failures.append("unnecessary_refusal_or_uncited_answer")
     if category == "false_premise":
-        if not cited or not re.search(r"\b(?:no|not|incorrect|false|contradict\w*)\b|아니|잘못|틀린|반대", answer, re.I):
+        if not cited or not re.search(
+                r"\b(?:no|not|incorrect|false|contradict\w*)\b|아니|잘못|틀린|반대|"
+                r"맞지\s*않|옳지\s*않|정확하지\s*않|사실이\s*아니", answer, re.I):
             failures.append("premise_not_corrected_with_citation")
     if category == "out_of_domain" and (row["computations"] or cited):
         failures.append("out_of_domain_unsafe_action")
@@ -83,6 +85,10 @@ def main() -> None:
     parser.add_argument("--limit", type=int)
     parser.add_argument("--timeout", type=int, default=180)
     parser.add_argument("--retry-failed", action="store_true", help="append another attempt only for failed development prompts")
+    parser.add_argument("--catalog", default="conference_stress.json")
+    parser.add_argument("--output", default="conference_stress_results.json")
+    parser.add_argument("--case-id")
+    parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
     data_dir = os.getenv("DATA_DIR")
     if not data_dir:
@@ -98,19 +104,23 @@ def main() -> None:
     collection = chromadb.PersistentClient(path=str(db)).get_collection("petroleum_knowledge")
     if collection.count() != 18976:
         raise SystemExit("Unexpected KB count; refusing to proceed")
-    all_cases = json.loads((HERE / "conference_stress.json").read_text(encoding="utf-8"))["cases"]
+    all_cases = json.loads((HERE / args.catalog).read_text(encoding="utf-8"))["cases"]
     cases = all_cases
     if len(cases) < 200:
         raise SystemExit("Stress suite requires at least 200 fresh prompts")
     if args.category:
         cases = [case for case in cases if case["category"] == args.category]
+    if args.case_id:
+        cases = [case for case in cases if case["id"] == args.case_id]
+        if not cases:
+            raise SystemExit("Unknown development case ID")
     if args.limit is not None:
         cases = cases[:args.limit]
-    output = HERE / "conference_stress_results.json"
+    output = HERE / args.output
     rows = json.loads(output.read_text(encoding="utf-8"))["rows"] if output.exists() else []
     latest = {row["id"]: row for row in rows}
     case_by_id = {case["id"]: case for case in all_cases}
-    done = ({row_id for row_id, row in latest.items()
+    done = (set() if args.force else {row_id for row_id, row in latest.items()
              if assess(case_by_id[row_id], row)[0]}
             if args.retry_failed else set(latest))
     with TestClient(app) as client:
@@ -150,11 +160,15 @@ def main() -> None:
                        "error": final.get("error"),
                        "actions": [item.get("action_type") for item in final.get("action_history", [])],
                        "computations": [{"validation_passed": item.get("validation_passed"),
-                                         "formula_source_ids": item.get("formula_source_ids") or []}
+                                         "formula_source_ids": item.get("formula_source_ids") or [],
+                                         "input_fact_ids": item.get("input_fact_ids") or [],
+                                         "normalized_formula": item.get("normalized_formula"),
+                                         "output_manifest": item.get("output_manifest")}
                                         for item in final.get("computations", [])],
                        "sources": [{"id": source.get("evidence_id"), "document": source.get("document"),
-                                    "page": source.get("page")}
-                                   for source in final.get("internal_sources", [])],
+                                    "page": source.get("page"), "chunk_id": source.get("chunk_id"),
+                                    "excerpt": str(source.get("excerpt") or "")[:3000]}
+                                   for source in [*final.get("internal_sources", []), *final.get("figures", [])]],
                        "validation": final.get("validation"), "stop_reason": final.get("stop_reason"),
                        "seconds": round(time.monotonic() - started, 3)}
             except Exception as exc:
@@ -172,8 +186,9 @@ def main() -> None:
                   f"{row['seconds']}s {row['failure_reasons']}", flush=True)
     if collection.count() != 18976:
         raise SystemExit("KB count changed during stress run")
-    latencies = sorted(row["seconds"] for row in rows)
-    print(json.dumps({"completed": len(rows), "handled": sum(row["handled"] for row in rows),
+    latest = {row["id"]: row for row in rows}
+    latencies = sorted(row["seconds"] for row in latest.values())
+    print(json.dumps({"completed": len(latest), "handled": sum(row["handled"] for row in latest.values()),
                       "median_seconds": statistics.median(latencies) if latencies else None}, indent=2))
 
 

@@ -123,6 +123,8 @@ def main() -> None:
     parser.add_argument("--retry-failed", action="store_true", help="append a new attempt for failed development cases")
     parser.add_argument("--case-id", help="run one development case")
     parser.add_argument("--force", action="store_true", help="append another attempt even if already handled")
+    parser.add_argument("--catalog", default="real_kb_dev.json")
+    parser.add_argument("--output", default="real_kb_dev_results.json")
     args = parser.parse_args()
     data_dir = os.getenv("DATA_DIR")
     if not data_dir:
@@ -138,7 +140,7 @@ def main() -> None:
     collection = chromadb.PersistentClient(path=str(db_path)).get_collection("petroleum_knowledge")
     if collection.count() != 18976:
         raise SystemExit("Unexpected Chroma count; refusing to run")
-    catalog = json.loads((HERE / "real_kb_dev.json").read_text(encoding="utf-8"))
+    catalog = json.loads((HERE / args.catalog).read_text(encoding="utf-8"))
     if len(catalog["cases"]) != 50 or len(catalog["resume_probes"]) != 10:
         raise SystemExit("Expected exactly 50 development tasks and 10 resume probes")
     cases = [*catalog["cases"], *catalog["resume_probes"]]
@@ -150,7 +152,7 @@ def main() -> None:
         cases = [case for case in cases if case["category"] == args.category]
     if args.limit is not None:
         cases = cases[:args.limit]
-    output = HERE / "real_kb_dev_results.json"
+    output = HERE / args.output
     rows = json.loads(output.read_text(encoding="utf-8"))["rows"] if output.exists() else []
     latest = {row["id"]: row for row in rows}
     case_by_id = {case["id"]: case for case in [*catalog["cases"], *catalog["resume_probes"]]}
@@ -198,7 +200,7 @@ def main() -> None:
                                         for c in final.get("computations", [])],
                        "sources": [{"id": s.get("evidence_id"), "document": s.get("document"),
                                     "page": s.get("page"), "excerpt": str(s.get("excerpt") or "")}
-                                   for s in final.get("internal_sources", [])],
+                                   for s in [*final.get("internal_sources", []), *final.get("figures", [])]],
                        "validation": final.get("validation"),
                        "goal_status": final.get("goal_status"),
                        "stop_reason": final.get("stop_reason"),
