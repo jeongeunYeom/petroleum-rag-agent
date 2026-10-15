@@ -81,7 +81,11 @@ def preflight(condition: str) -> tuple[dict, str]:
         if not sqlite.is_file():
             raise RuntimeError("Existing production KB missing")
         import chromadb
-        collection = chromadb.PersistentClient(path=str(sqlite.parent)).get_collection("petroleum_knowledge")
+        from chromadb.config import Settings as ChromaSettings
+        collection = chromadb.PersistentClient(
+            path=str(sqlite.parent),
+            settings=ChromaSettings(anonymized_telemetry=settings.anonymized_telemetry),
+        ).get_collection("petroleum_knowledge")
         if collection.count() != 18976:
             raise RuntimeError("Existing KB is not 18,976 chunks")
     return data, actual
@@ -184,8 +188,18 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("condition", choices=["agent", "closed_book"])
     parser.add_argument("--validate-only", action="store_true")
+    parser.add_argument("--validate-app", action="store_true",
+                        help="initialize the Agent app without submitting any V4 prompt")
     args = parser.parse_args()
     catalog, catalog_hash = preflight(args.condition)
+    if args.validate_app:
+        if args.condition != "agent":
+            raise RuntimeError("--validate-app applies only to the Agent condition")
+        from fastapi.testclient import TestClient
+        from app.main import app
+        with TestClient(app):
+            print("Agent app initialized with the preflight Chroma settings; no V4 task submitted")
+        return
     if args.validate_only:
         print(json.dumps({"condition": args.condition, "tasks": len(catalog["tasks"]),
                           "catalog_sha256": catalog_hash, "web": "off", "product": FROZEN_PRODUCT}))
@@ -235,8 +249,12 @@ def main() -> None:
         raise RuntimeError("One-shot result is incomplete")
     if args.condition == "agent":
         import chromadb
+        from chromadb.config import Settings as ChromaSettings
+        from app.core.config import Settings
         sqlite = Path(os.environ["DATA_DIR"]).resolve() / "vector_db" / "chroma.sqlite3"
-        if chromadb.PersistentClient(path=str(sqlite.parent)).get_collection("petroleum_knowledge").count() != 18976:
+        if chromadb.PersistentClient(path=str(sqlite.parent), settings=ChromaSettings(
+                anonymized_telemetry=Settings().anonymized_telemetry)).get_collection(
+                    "petroleum_knowledge").count() != 18976:
             raise RuntimeError("KB count changed after one-shot Agent execution")
 
 
