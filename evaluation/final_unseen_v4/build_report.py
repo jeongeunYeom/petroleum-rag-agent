@@ -114,7 +114,8 @@ def main() -> None:
               "## Integrity and conditions", "",
               f"- Frozen product SHA: `{FROZEN}`. Evaluation branch: `eval/v23-final-unseen-v4`."
               " Catalog/harness commit: `2de2ab847e30d245089ae57930e44cd3d014f5ff`;"
-              " evaluation-only harness repair: `0c97f3ca4f91ad9509495d2709955c3927a950f5`.",
+              " evaluation-only harness repair: `0c97f3ca4f91ad9509495d2709955c3927a950f5`;"
+              " report-code commit: `6b354b339bcc2fc9a133151e2855e83da77b4280`.",
               f"- Sealed catalog SHA-256: `{catalog_hash}`. Rubric SHA-256: `{sha('V4_SCORING_RUBRIC.md')}`.",
               "- Existing read-only KB: `petroleum_knowledge`, 12 documents / 18,976 chunks;"
               " `chroma.sqlite3` precheck SHA-256 `1b389044d7efec1273a5d4d52a999d4831188e08a808d4a956a72ba816659fea`.",
@@ -125,6 +126,13 @@ def main() -> None:
               " The initial harness-only Chroma settings incident is preserved separately in `HARNESS_INCIDENT.md`."
               " Its 60 zero-time infrastructure rows were not model answers; the same immutable catalog was rerun"
               " after an evaluation-only settings fix. No task was silently excluded.",
+              "- Both conditions completed all 60 catalog rows. A post-run read-only KB check still found"
+              " 12 documents / 18,976 chunks, and the SQLite SHA-256 matched the precheck hash above."
+              " The sealed catalog hash also matched exactly.",
+              "- After execution, a deterministic reporting flag was corrected to count repeated"
+              " clarification only after a follow-up turn; the previous flag counted single-turn"
+              " pending clarifications. This evaluation-only correction changed the count from 10"
+              " to 0; it did not change prompts, model outputs, rubric, or semantic task verdicts.",
               "", "## Frozen Agent metrics", "", *["- " + line for line in metric_lines(agent)],
               f"- Citation Support Rate: **{agent['supported_cited_claims']}/{agent['cited_claims']}"
               f" ({pct(agent['supported_cited_claims'],agent['cited_claims'])})**;"
@@ -153,6 +161,8 @@ def main() -> None:
               "| ID | Category | Failure class | Task-level rationale |", "|---|---|---|---|",
               *(failure_lines or ["| None | — | — | — |"]),
               "", "## Scoring method and limitations", "",
+              "Claim Coverage counts each required atomic claim and each requested numeric output"
+              " as one item, following the pre-execution frozen rubric.",
               "Automatic flags checked status, numeric tolerance/unit candidates, citation IDs, technical"
               " events and latency. One frozen rubric then guided **single-reviewer AI-assisted semantic"
               " adjudication** of every task, preserving task-level rationale in `semantic_scores.json`."
@@ -160,11 +170,26 @@ def main() -> None:
               " were reviewed against target attribution and units. There was no human multi-reviewer"
               " consensus, no equal-information-access baseline, and only one catalog/model seed.",
               "", "## Poster-safe conclusions", "",
-              "- Quote observed numerators and denominators, not aspirational protocol targets.",
-              "- Interpret the closed-book comparison as a product-plus-KB/tools contrast, not a"
-              " pure model-quality comparison.",
-              "- The V4 results are final for this frozen SHA. Any product repair motivated by V4"
-              " would require a new unseen V5 for a new final claim.", ""]
+              f"- On this sealed 60-task set, the frozen Agent achieved {agent['goal_success']}/60 goals"
+              f" versus {qwen['goal_success']}/60 for the same local Qwen model closed-book."
+              " The result does **not** support a claim of superior Agent task completion."
+              " The conditions differ in KB/tool access, so this is not a pure model comparison.",
+              f"- The Agent avoided materially false assertions on {agent['hallucination_free']}/60"
+              f" tasks versus {qwen['hallucination_free']}/60 for Qwen closed-book, but many of its"
+              " safe/incomplete answers failed the requested goal. Safety and completion must be"
+              " reported together, not conflated.",
+              f"- Agent citation support was {agent['supported_cited_claims']}/{agent['cited_claims']}"
+              " reviewed cited claims. This narrow denominator cannot establish that all needed"
+              " claims were surfaced or cited.",
+              f"- Agent median/P95 latency was"
+              f" {automatic['summary']['agent_latency']['overall']['median_seconds']:.3f}/"
+              f"{automatic['summary']['agent_latency']['overall']['p95_seconds']:.3f} s, compared with"
+              f" {automatic['summary']['closed_book_latency']['overall']['median_seconds']:.3f}/"
+              f"{automatic['summary']['closed_book_latency']['overall']['p95_seconds']:.3f} s"
+              " for the closed-book condition. The Agent's retrieval/verification path carries"
+              " a substantial latency cost in this local setup.",
+              "- These are final results only for the frozen product SHA and this one catalog."
+              " Repairs after seeing V4 would require a new unseen V5 for another final claim.", ""]
     (HERE / "V4_FINAL_REPORT.md").write_text("\n".join(report), encoding="utf-8")
 
     poster = ["# V4 poster numbers — frozen product", "",

@@ -87,7 +87,8 @@ def agent_flags(task: dict, row: dict) -> dict:
         correct_state = row.get("final_status") == "completed"
     crash = bool(row.get("error") or row.get("final_status") in
                  {"failed", "canceled", "timeout", "harness_error"})
-    repeated_clarification = bool(row.get("first_turn_clarification")
+    repeated_clarification = bool(row.get("follow_up_sent")
+                                  and row.get("first_turn_clarification")
                                   and row.get("first_turn_clarification") == row.get("final_clarification")
                                   and row.get("final_status") == "waiting_for_user_input")
     return {"id": task["id"], "category": category, "language": task["language"],
