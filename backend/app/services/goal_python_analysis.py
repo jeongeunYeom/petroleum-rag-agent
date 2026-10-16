@@ -512,7 +512,13 @@ class GoalPythonAnalysis:
                     and all(item.name in aggregate_ops for item in aggregate)):
                 values = {fact.canonical_fact_id or fact.evidence_id: {"value": fact.value, "unit": fact.unit}
                           for fact in plan.input_facts}
-                lines = ["import json, math, statistics", f"facts = {values!r}", "results = {}", "outputs = {}"]
+                lines = [
+                    "import json, math, statistics",
+                    "sqrt = math.sqrt",
+                    f"facts = {values!r}",
+                    "results = {}",
+                    "outputs = {}",
+                ]
                 for scenario, bindings in scenarios.items():
                     for variable in sorted(expression_variables(plan.formula) or ()):
                         if variable in bindings:
