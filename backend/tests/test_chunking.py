@@ -194,3 +194,31 @@ def test_overlap_prefers_newline_before_equation_instead_of_mid_equation():
         chunk.startswith(("Sw =", "Rw =", "Rt =", "phi ="))
         for chunk in texts[1:]
     )
+
+
+
+def test_figure_note_text_does_not_split_on_incidental_figure_sentence():
+    page_text = (
+        "[Extracted figure notes]\n"
+        "Figure 1: [Figure Note Metadata]\n"
+        "image_path: one.png\n"
+        "analysis: Main description.\n"
+        "Figure 3 shows a comparison mentioned inside the same analysis.\n"
+        "engineering_meaning: still belongs to Figure 1"
+    )
+
+    chunks = chunk_pages(
+        [{"page": 5, "text": page_text}],
+        "doc.pdf",
+        "doc-incidental-figure",
+        chunk_size=100,
+        chunk_overlap=10,
+    )
+
+    figure_chunks = [
+        chunk for chunk in chunks
+        if chunk["metadata"]["chunk_type"] == "figure"
+    ]
+    assert len(figure_chunks) == 1
+    assert "Figure 3 shows" in figure_chunks[0]["text"]
+    assert "engineering_meaning" in figure_chunks[0]["text"]
