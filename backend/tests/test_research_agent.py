@@ -677,6 +677,7 @@ def test_equation_bm25_uses_page_context_but_returns_literal_verified_span() -> 
 
     assert [hit["id"] for hit in hits] == ["law"]
     assert hits[0]["text"] == literal
+    assert "Darcy's law" in hits[0]["equation_context"]
 
 
 def test_verified_equation_overrides_conflicting_extracted_text(tmp_path: Path) -> None:
@@ -721,6 +722,87 @@ def test_source_verified_equation_is_not_lost_when_model_omits_it(tmp_path: Path
     assert unknown_validation["valid_citations"] == []
 
 
+def test_unrelated_verified_equation_does_not_override_safety_refusal(tmp_path: Path) -> None:
+    agent = make_agent(tmp_path)
+    empty = json.dumps({
+        "internal": [], "external": [], "synthesis": [], "limitations": [],
+    })
+    evidence = {"KB1": "equation_text: Z = alpha*beta\nequation_verified: true"}
+
+    answer, validation, _ = agent.validate_structured_answer(
+        empty, evidence, [], "What is the porosity equation?"
+    )
+
+    assert "Z = alpha*beta" not in answer
+    assert validation["valid_citations"] == []
+
+
+def test_named_relation_needs_matching_page_context_for_auto_equation(
+    tmp_path: Path,
+) -> None:
+    agent = make_agent(tmp_path)
+    empty = json.dumps({
+        "internal": [], "external": [], "synthesis": [], "limitations": [],
+    })
+    evidence = {"KB1": "equation_text: Q = k*A*DeltaP/(l*mu)\nequation_verified: true"}
+
+    answer, validation, _ = agent.validate_structured_answer(
+        empty,
+        evidence,
+        [],
+        "Explain Darcy's law.",
+        equation_context={"KB1": "Darcy's law defines permeability from flow rate and pressure gradient."},
+    )
+
+    assert "Q = k*A*DeltaP/(l*mu) [KB1]" in answer
+    assert validation["valid_citations"] == ["KB1"]
+
+
+def test_auto_equation_skips_unrelated_verified_hit_before_relevant_one(
+    tmp_path: Path,
+) -> None:
+    agent = make_agent(tmp_path)
+    empty = json.dumps({
+        "internal": [], "external": [], "synthesis": [], "limitations": [],
+    })
+    evidence = {
+        "KB1": "equation_text: Z = alpha*beta\nequation_verified: true",
+        "KB2": "equation_text: Q = k*A*DeltaP/(l*mu)\nequation_verified: true",
+    }
+
+    answer, validation, _ = agent.validate_structured_answer(
+        empty,
+        evidence,
+        [],
+        "Explain Darcy's law.",
+        equation_context={
+            "KB1": "A separate relation for Z.",
+            "KB2": "Darcy's law relates permeability to flow rate and pressure gradient.",
+        },
+    )
+
+    assert "Z = alpha*beta" not in answer
+    assert "Q = k*A*DeltaP/(l*mu) [KB2]" in answer
+    assert validation["valid_citations"] == ["KB2"]
+
+
+def test_page_topic_alone_does_not_verify_an_unrelated_equation(tmp_path: Path) -> None:
+    agent = make_agent(tmp_path)
+    empty = json.dumps({
+        "internal": [], "external": [], "synthesis": [], "limitations": [],
+    })
+    answer, validation, _ = agent.validate_structured_answer(
+        empty,
+        {"KB1": "equation_text: Z = alpha*beta\nequation_verified: true"},
+        [],
+        "Explain Darcy's law.",
+        equation_context={"KB1": "Darcy permeability discussion. A separate formula defines Z."},
+    )
+
+    assert "Z = alpha*beta" not in answer
+    assert validation["valid_citations"] == []
+
+
 def test_figure_locator_allows_cited_text_value_but_visual_claim_still_needs_fig(
     tmp_path: Path,
 ) -> None:
@@ -741,6 +823,35 @@ def test_figure_locator_allows_cited_text_value_but_visual_claim_still_needs_fig
     assert "0.08 ohm-m" in answer
     assert validation["figure_citation_rejections"] == 0
     assert visual_validation["figure_citation_rejections"] == 1
+
+
+def test_figure_shown_locator_value_is_not_visual_reading(tmp_path: Path) -> None:
+    agent = make_agent(tmp_path)
+    raw = json.dumps({
+        "internal": [{"claim": "Interval C has Rw of 0.08 ohm-m.", "citations": ["KB1"]}],
+        "external": [], "synthesis": [], "limitations": [],
+    })
+    evidence = {"KB1": "Figure 4: Interval C indicates Rw of 0.08 ohm-m."}
+
+    answer, validation, _ = agent.validate_structured_answer(
+        raw, evidence, [], "Figure 4에 나타난 Interval C의 Rw 값은?"
+    )
+    shown_answer, shown_validation, _ = agent.validate_structured_answer(
+        raw, evidence, [], "What Rw value is shown for Interval C in Figure 4?"
+    )
+    _, curve_validation, _ = agent.validate_structured_answer(
+        raw, evidence, [], "Figure 4의 curve에 표시된 점을 직접 읽어 값 알려줘"
+    )
+    _, point_validation, _ = agent.validate_structured_answer(
+        raw, evidence, [], "Read the plotted point in Figure 4 directly."
+    )
+
+    assert "0.08 ohm-m" in answer
+    assert validation["figure_citation_rejections"] == 0
+    assert "0.08 ohm-m" in shown_answer
+    assert shown_validation["figure_citation_rejections"] == 0
+    assert curve_validation["figure_citation_rejections"] == 1
+    assert point_validation["figure_citation_rejections"] == 1
 
 
 def test_external_search_normalizes_and_deduplicates_urls(tmp_path: Path) -> None:

@@ -63,9 +63,10 @@ EQUATION_RELATION_RE = re.compile(
 )
 VISUAL_FIGURE_RE = re.compile(
     r"x[- ]?axis|y[- ]?axis|\baxis\b|\blegend\b|\bcurve\b|\btrend\b|"
-    r"\bshape\b|\bplott?ed\b|\bdisplayed\b|\bshown\b|\bvisual\b|"
+    r"\bshape\b|\bplott?ed\b|\bvisual\b|\bread(?:ing)?\b|"
+    r"\bdigitiz(?:e|ed|ing)\b|\btrace(?:d|ing)?\b|"
     r"pressure\s*gradient|supercharg|그래프|도표|플롯|축|곡선|형태|추세|시각|"
-    r"그림.{0,12}(?:해석|설명)|표시된|나타난",
+    r"그림.{0,12}(?:해석|설명)|직접\s*(?:읽|판독)|점.{0,8}(?:읽|판독)",
     re.IGNORECASE,
 )
 FIGURE_NUMBER_RE = re.compile(
@@ -263,6 +264,16 @@ class ResearchAgent:
         raw_internal, web_result = await asyncio.gather(internal_task, web_task)
         web_sources = web_result.evidence
         internal_sources, figures = self.normalize_internal_evidence(raw_internal)
+        equation_context_by_chunk = {
+            str(hit.get("id") or ""): str(hit.get("equation_context") or "")
+            for hit in raw_internal
+            if hit.get("equation_channel")
+        }
+        equation_context = {
+            source.evidence_id: equation_context_by_chunk[source.chunk_id]
+            for source in internal_sources
+            if source.chunk_id in equation_context_by_chunk
+        }
         figures, figure_vision_calls = await self.enrich_figure_evidence(
             request.query,
             figures,
@@ -314,6 +325,7 @@ class ResearchAgent:
                     conflicts,
                     request.query,
                     request.engineering_validation,
+                    equation_context,
                 )
             else:
                 raw_answer = await self.ollama.chat(
@@ -366,6 +378,7 @@ class ResearchAgent:
                                 conflicts,
                                 request.query,
                                 request.engineering_validation,
+                                equation_context,
                             )
                         )
                     else:
@@ -2288,6 +2301,7 @@ class ResearchAgent:
         conflicts: list[dict[str, str]],
         query: str = "",
         engineering_validation: bool = True,
+        equation_context: dict[str, str] | None = None,
     ) -> tuple[str, dict[str, Any], list[str]]:
         """Validate claim-level provenance before deterministic answer rendering."""
         try:
@@ -2314,7 +2328,7 @@ class ResearchAgent:
         engineering_validation_reasons: list[dict[str, Any]] = []
         candidates: list[tuple[str, str, list[str], str]] = []
         verified_equation = (
-            self._first_verified_equation(evidence_text)
+            self._first_verified_equation(evidence_text, query, equation_context)
             if self._equation_intent(query)
             else None
         )
@@ -2759,13 +2773,52 @@ class ResearchAgent:
         return True
 
     @staticmethod
-    def _first_verified_equation(evidence_text: dict[str, str]) -> tuple[str, str] | None:
+    def _first_verified_equation(
+        evidence_text: dict[str, str],
+        query: str,
+        equation_context: dict[str, str] | None = None,
+    ) -> tuple[str, str] | None:
+        query_symbols = {
+            token.replace("_", "").casefold()
+            for token in re.findall(r"[A-Za-z][A-Za-z0-9_]*", query)
+        }
+        generic = {
+            "what", "which", "where", "explain", "describe", "give", "tell", "from",
+            "about", "between", "using", "equation", "formula", "relationship",
+            "relation", "law", "formation", "evaluation", "figure", "document",
+            "source", "page", "internal", "value", "values", "unit", "units",
+            "pressure", "porosity", "saturation", "permeability", "temperature",
+            "density", "water", "fluid", "reservoir", "engineering", "calculation",
+        }
+        relation_terms = {token for token in query_symbols if len(token) >= 4 and token not in generic}
         for evidence_id, text in evidence_text.items():
             if not evidence_id.startswith("KB") or "equation_verified: true" not in text.lower():
                 continue
             match = re.search(r"(?im)^equation_text:\s*(.+)$", text)
             if match and "=" in match.group(1):
-                return evidence_id, match.group(1).strip()
+                equation = match.group(1).strip()
+                symbols = {
+                    token.replace("_", "").casefold()
+                    for token in re.findall(r"[A-Za-z][A-Za-z0-9_]*", equation)
+                } - {"sqrt", "log", "ln", "exp", "sin", "cos", "tan"}
+                lhs = re.match(r"\s*([A-Za-z][A-Za-z0-9_]*)\s*=", equation)
+                lhs_symbol = lhs.group(1).replace("_", "").casefold() if lhs else ""
+                lhs_in_query = bool(
+                    lhs_symbol and lhs_symbol not in {"a", "i"}
+                    and lhs_symbol in query_symbols
+                )
+                symbol_overlap = len(query_symbols & symbols)
+                context = (equation_context or {}).get(evidence_id, "").casefold()
+                named_relation = any(
+                    re.search(
+                        rf"\b{re.escape(term)}(?:['’]s)?\W{{0,20}}"
+                        rf"(?:law|equation|formula|relationship|relation)\b",
+                        context,
+                    )
+                    for term in relation_terms
+                )
+                if lhs_in_query or symbol_overlap >= 2 or named_relation:
+                    return evidence_id, equation
         return None
 
     @staticmethod

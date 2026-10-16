@@ -393,11 +393,17 @@ class VectorStore:
                 if key in pages and metadata.get("chunk_type") not in {"equation", "figure"}:
                     context.setdefault(key, []).append(str(text or ""))
 
+        page_context = {
+            chunk_id: " ".join(
+                context.get((metadata.get("document_id"), metadata.get("page")), [])
+            )[:3500]
+            for chunk_id, _, metadata in verified
+        }
         augmented = {
             "ids": [chunk_id for chunk_id, _, _ in verified],
             "documents": [
-                f"{text}\n{' '.join(context.get((metadata.get('document_id'), metadata.get('page')), []))[:3500]}"
-                for _, text, metadata in verified
+                f"{text}\n{page_context[chunk_id]}"
+                for chunk_id, text, _ in verified
             ],
             "metadatas": [metadata for _, _, metadata in verified],
         }
@@ -405,6 +411,7 @@ class VectorStore:
         hits = self._bm25_search_data(question, top_k, augmented)
         for hit in hits:
             hit["text"] = originals[hit["id"]]
+            hit["equation_context"] = page_context[hit["id"]]
         return hits
 
     def search(
