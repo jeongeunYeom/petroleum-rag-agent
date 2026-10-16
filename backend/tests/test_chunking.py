@@ -42,3 +42,101 @@ def test_chunk_pages_adds_ontology_metadata():
     assert "absolute_permeability" in metadata["concepts"]
     assert "radial_flow" in metadata["concepts"]
     assert "bottomhole_pressure" in metadata["concepts"]
+
+
+
+def test_chunk_pages_keeps_figure_note_complete_and_separate():
+    long_analysis = "pressure gradient " * 120
+    page_text = (
+        "Body paragraph explaining formation pressure.\n\n"
+        "[Extracted figure notes]\n"
+        "Figure 2: [Figure Note Metadata]\n"
+        "image_path: figure2.png\n"
+        "title: Appraisal Well RFT Survey\n"
+        f"analysis: {long_analysis}\n"
+        "x_axis: Pressure\n"
+        "y_axis: Depth"
+    )
+
+    chunks = chunk_pages(
+        [{"page": 10, "text": page_text}],
+        "well-test.pdf",
+        "doc-figure",
+        chunk_size=120,
+        chunk_overlap=20,
+    )
+
+    body_chunks = [
+        chunk for chunk in chunks
+        if chunk["metadata"]["chunk_type"] == "text"
+    ]
+    figure_chunks = [
+        chunk for chunk in chunks
+        if chunk["metadata"]["chunk_type"] == "figure"
+    ]
+
+    assert body_chunks
+    assert len(figure_chunks) == 1
+    figure_text = figure_chunks[0]["text"]
+    assert figure_text.startswith("[Extracted figure notes]")
+    assert "[Figure Note Metadata]" in figure_text
+    assert "Appraisal Well RFT Survey" in figure_text
+    assert "x_axis: Pressure" in figure_text
+    assert "y_axis: Depth" in figure_text
+    assert len(figure_text) > 120
+    assert all("[Figure Note Metadata]" not in chunk["text"] for chunk in body_chunks)
+
+
+def test_chunk_pages_keeps_multiple_figure_notes_as_individual_chunks():
+    page_text = (
+        "Related page body.\n"
+        "[Extracted figure notes]\n"
+        "Figure 1: [Figure Note Metadata]\n"
+        "image_path: one.png\n"
+        "analysis: first graph\n"
+        "Figure 2: [Figure Note Metadata]\n"
+        "image_path: two.png\n"
+        "analysis: second graph"
+    )
+
+    chunks = chunk_pages(
+        [{"page": 4, "text": page_text}],
+        "doc.pdf",
+        "doc-multi-figure",
+        chunk_size=80,
+        chunk_overlap=10,
+    )
+
+    figure_chunks = [
+        chunk for chunk in chunks
+        if chunk["metadata"]["chunk_type"] == "figure"
+    ]
+    assert len(figure_chunks) == 2
+    assert "one.png" in figure_chunks[0]["text"]
+    assert "two.png" not in figure_chunks[0]["text"]
+    assert "two.png" in figure_chunks[1]["text"]
+    assert all(
+        chunk["text"].startswith("[Extracted figure notes]")
+        for chunk in figure_chunks
+    )
+
+
+def test_body_chunking_prefers_readable_boundaries():
+    text = (
+        "Archie equation relates resistivity and saturation. "
+        "Formation factor depends on porosity. "
+        "Water saturation uses formation water resistivity."
+    )
+
+    chunks = chunk_pages(
+        [{"page": 1, "text": text}],
+        "formation.pdf",
+        "doc-boundaries",
+        chunk_size=70,
+        chunk_overlap=10,
+    )
+
+    assert len(chunks) > 1
+    assert all(chunk["metadata"]["chunk_type"] == "text" for chunk in chunks)
+    assert all(not chunk["text"].startswith("quation") for chunk in chunks)
+    assert all(not chunk["text"].startswith("esistivity") for chunk in chunks)
