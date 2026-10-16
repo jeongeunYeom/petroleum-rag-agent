@@ -164,3 +164,33 @@ def test_body_chunking_keeps_readable_overlap():
         set(left.split()) & set(right.split())
         for left, right in zip(texts, texts[1:])
     )
+
+
+
+def test_overlap_prefers_newline_before_equation_instead_of_mid_equation():
+    text = (
+        "Equation definitions:\n"
+        "Sw = (a * Rw / (phi^m * Rt))^(1/n)\n"
+        "Rw = formation water resistivity\n"
+        "Rt = true formation resistivity\n"
+        "phi = porosity"
+    )
+
+    chunks = chunk_pages(
+        [{"page": 2, "text": text}],
+        "formation.pdf",
+        "doc-equation-overlap",
+        chunk_size=85,
+        chunk_overlap=25,
+    )
+
+    texts = [str(chunk["text"]) for chunk in chunks]
+    assert len(texts) >= 2
+    assert all(
+        not chunk.startswith(("* Rt", "Rt))", "water resistivity"))
+        for chunk in texts[1:]
+    )
+    assert any(
+        chunk.startswith(("Sw =", "Rw =", "Rt =", "phi ="))
+        for chunk in texts[1:]
+    )
