@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from app.core.config import PROJECT_ROOT, resolve_data_dir, resolve_retrieval_mode
+from app.core.config import PROJECT_ROOT, Settings, resolve_data_dir, resolve_retrieval_mode
 
 
 def test_default_data_dir_resolves_to_project_root_data(monkeypatch):
@@ -25,3 +25,12 @@ def test_retrieval_mode_defaults_to_legacy_and_validates(monkeypatch):
     assert resolve_retrieval_mode("HYBRID_RERANK") == "hybrid_rerank"
     with pytest.raises(ValueError, match="RETRIEVAL_MODE"):
         resolve_retrieval_mode("unknown")
+
+
+
+def test_pdfplumber_fallback_is_opt_in(monkeypatch):
+    monkeypatch.delenv("PDFPLUMBER_FALLBACK_ENABLED", raising=False)
+    assert Settings().pdfplumber_fallback_enabled is False
+
+    monkeypatch.setenv("PDFPLUMBER_FALLBACK_ENABLED", "1")
+    assert Settings().pdfplumber_fallback_enabled is True
