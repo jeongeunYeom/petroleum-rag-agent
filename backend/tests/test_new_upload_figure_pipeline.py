@@ -8,6 +8,7 @@ from PIL import Image, ImageDraw
 
 from app.services.figure_analysis import (
     FigureAnalysisService,
+    equation_source_conflicts,
     figure_priority,
     parse_key_values,
 )
@@ -88,6 +89,14 @@ def test_small_equation_crop_reaches_vision(tmp_path: Path) -> None:
     assert result.vision_calls == 1
     assert result.status == "valid"
     assert "Q = k*A*dP/(l*mu)" in (result.note_text or "")
+
+
+def test_equation_source_grounding_accepts_equivalent_greek_glyphs() -> None:
+    source = "Q = k A ∆P l µ"
+    assert equation_source_conflicts("Q = k*A*δP/(l*μ)", source) == []
+    assert equation_source_conflicts("Q = k*A*δP/(l*μ*Z)", source) == [
+        "equation symbols absent from PDF text: z"
+    ]
 
 
 def test_hallucinated_equation_is_not_indexed(tmp_path: Path) -> None:

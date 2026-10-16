@@ -488,6 +488,47 @@ def test_vector_store_figure_search_filters_existing_collection() -> None:
         call["where_document"]["$contains"]
         for call in store.collection.get_args
     } == expected_markers
+
+
+def test_legacy_figure_marker_does_not_return_equation_chunks() -> None:
+    documents = [
+        "image_path: legacy_figure.png RFT pressure gradient",
+        "image_path: equation.png RFT pressure gradient",
+        "[Equation Note Metadata]\nimage_path: equation_old.png RFT pressure gradient",
+    ]
+    metadatas = [{"page": 1}, {"page": 2, "chunk_type": "equation"}, {"page": 3}]
+
+    class Collection:
+        def query(self, **kwargs):
+            return {
+                "ids": [["figure", "equation", "old-equation"]],
+                "documents": [documents],
+                "metadatas": [metadatas],
+                "distances": [[0.1, 0.2, 0.3]],
+            }
+
+        def get(self, **kwargs):
+            return {
+                "ids": ["figure", "equation", "old-equation"],
+                "documents": documents,
+                "metadatas": metadatas,
+            }
+
+    store = VectorStore.__new__(VectorStore)
+    store.collection = Collection()
+    store.embed = lambda texts: [[0.1, 0.2]]
+
+    assert [hit["id"] for hit in store.search_figures("RFT pressure gradient", 3)] == [
+        "figure"
+    ]
+    assert [hit["id"] for hit in store.bm25_search_figures("RFT pressure gradient", 3)] == [
+        "figure"
+    ]
+    assert ResearchAgent._is_figure_hit(documents[0], metadatas[0])
+    assert not ResearchAgent._is_figure_hit(documents[1], metadatas[1])
+    assert not ResearchAgent._is_figure_hit(documents[2], metadatas[2])
+
+
 def test_external_search_normalizes_and_deduplicates_urls(tmp_path: Path) -> None:
     raw = [
         {

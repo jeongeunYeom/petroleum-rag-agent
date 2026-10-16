@@ -1469,10 +1469,16 @@ class ResearchAgent:
     @staticmethod
     def _is_figure_hit(text: str, metadata: dict[str, Any]) -> bool:
         kind = str(metadata.get("chunk_type") or metadata.get("type") or "").lower()
+        lower = text.lower()
+        if kind == "equation" or any(
+            marker in lower
+            for marker in ("[equation note metadata]", "[extracted equation notes]")
+        ):
+            return False
         return (
             "figure" in kind
-            or "image_path:" in text.lower()
-            or "[extracted figure notes]" in text.lower()
+            or "image_path:" in lower
+            or "[extracted figure notes]" in lower
         )
 
     @staticmethod

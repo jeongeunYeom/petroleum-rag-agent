@@ -1065,10 +1065,17 @@ def equation_source_conflicts(equation_text: str, source_text: str) -> list[str]
     the variables themselves should still be present. This is a conservative
     grounding check, not a proof that every surviving transcription is correct.
     """
-    source = str(source_text or "").casefold().replace("_", "")
-    for glyph, name in (("∆", "delta"), ("δ", "delta"), ("µ", "mu"), ("μ", "mu"), ("φ", "phi"), ("ρ", "rho")):
-        source = source.replace(glyph, name)
-    proposed = str(equation_text or "").casefold().replace("_", "")
+    def normalized_symbols(value: str) -> str:
+        value = str(value or "").casefold().replace("_", "")
+        for glyph, name in (
+            ("∆", "delta"), ("δ", "delta"), ("µ", "mu"),
+            ("μ", "mu"), ("φ", "phi"), ("ρ", "rho"),
+        ):
+            value = value.replace(glyph, name)
+        return value
+
+    source = normalized_symbols(source_text)
+    proposed = normalized_symbols(equation_text)
     symbols = lambda value: set(re.findall(r"[a-zΑ-ωΔ∆φρµ]+[0-9]*", value))
     source_symbols = symbols(source)
     proposed_symbols = symbols(proposed) - {"sqrt"}

@@ -142,6 +142,14 @@ FIGURE_DOCUMENT_MARKERS = (
 )
 
 
+def _is_equation_chunk(text: str, metadata: dict[str, Any]) -> bool:
+    lower = text.lower()
+    return metadata.get("chunk_type") == "equation" or (
+        "[equation note metadata]" in lower
+        or "[extracted equation notes]" in lower
+    )
+
+
 def _contains_term(text: str, term: str) -> bool:
     escaped = re.escape(term.lower())
     return re.search(rf"(?<![a-z0-9]){escaped}(?![a-z0-9])", text) is not None
@@ -339,10 +347,14 @@ class VectorStore:
         for marker in FIGURE_DOCUMENT_MARKERS:
             result = self.collection.query(
                 query_embeddings=[query_embedding],
-                n_results=top_k,
+                n_results=top_k * 3 if marker == "image_path:" else top_k,
                 where_document={"$contains": marker},
             )
             for hit in self._query_result_to_hits(result):
+                if _is_equation_chunk(
+                    str(hit.get("text") or ""), hit.get("metadata") or {}
+                ):
+                    continue
                 chunk_id = str(hit.get("id") or "")
                 current = merged.get(chunk_id)
                 hit_distance = (
@@ -567,6 +579,8 @@ class VectorStore:
                 data.get("documents", []),
                 data.get("metadatas", []),
             ):
+                if _is_equation_chunk(str(document or ""), metadata or {}):
+                    continue
                 rows[str(chunk_id)] = (str(document or ""), metadata or {})
         return {
             "ids": list(rows),
