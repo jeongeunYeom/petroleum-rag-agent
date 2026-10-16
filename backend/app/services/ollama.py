@@ -217,6 +217,9 @@ class OllamaClient:
                 "num_predict": num_predict if num_predict is not None else 160,
             },
         }
+        vision_num_gpu = getattr(self.settings, "vision_num_gpu", None)
+        if vision_num_gpu is not None:
+            payload["options"]["num_gpu"] = vision_num_gpu
 
         image_timeout = httpx.Timeout(
             connect=15.0,

@@ -21,3 +21,11 @@ def test_delete_document_removes_matching_chroma_ids() -> None:
 
     assert deleted == 2
     assert store.collection.deleted_ids == ["chunk-1", "chunk-2"]
+
+
+def test_equation_image_index_is_not_treated_as_book_index() -> None:
+    store = VectorStore.__new__(VectorStore)
+    text = "[Equation Note Metadata]\nimage_index: 2\nequation_text: S_w = sqrt(R_w/R_wa)"
+    score = store._keyword_score(text, ["sqrt", "Rwa"], {}, None)
+
+    assert score >= 0.65

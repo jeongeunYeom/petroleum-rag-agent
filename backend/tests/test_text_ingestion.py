@@ -177,6 +177,7 @@ def test_equation_regions_detect_vector_math_but_skip_plain_equations(tmp_path: 
     assert risky
     assert "S_w" in str(risky[0]["raw_text"])
     assert int(risky[0]["vector_element_count"]) >= 1
+    assert risky[0]["has_radical"] is False
 
     plain_document = fitz.open()
     plain_page = plain_document.new_page()
@@ -186,6 +187,40 @@ def test_equation_regions_detect_vector_math_but_skip_plain_equations(tmp_path: 
 
     document.close()
     plain_document.close()
+
+
+def test_equation_crop_includes_adjacent_rhs_text_block(tmp_path: Path):
+    processor = DocumentProcessor(_settings(tmp_path), object())
+    document = fitz.open()
+    page = document.new_page()
+    page.insert_text((72, 120), "Rwa = Rt", fontsize=12)
+    page.insert_text((140, 120), "F approx RID", fontsize=12)
+    page.draw_line((120, 108), (138, 108))
+
+    regions = processor._equation_regions(page)
+
+    assert len(regions) == 1
+    assert "RID" in regions[0]["raw_text"]
+    assert regions[0]["rect"][2] > 190
+    document.close()
+
+
+def test_unverified_vector_equation_is_removed_from_body_chunks(tmp_path: Path):
+    pdf_path = tmp_path / "radical.pdf"
+    document = fitz.open()
+    page = document.new_page()
+    page.insert_text((72, 80), "Water saturation requires visual verification.")
+    page.insert_text((72, 120), "Sw = Rw / Rwa (8)")
+    page.draw_line((104, 108), (165, 108))
+    document.save(pdf_path)
+    document.close()
+
+    processor = DocumentProcessor(_settings(tmp_path), object())
+    pages, _ = asyncio.run(processor._extract_pdf(pdf_path, "c" * 64, False))
+
+    assert "Water saturation requires visual verification" in pages[0]["text"]
+    assert "Sw = Rw / Rwa" not in pages[0]["text"]
+    assert "[Visual equation awaiting verification]" in pages[0]["text"]
 
 
 

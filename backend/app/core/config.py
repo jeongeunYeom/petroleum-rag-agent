@@ -79,6 +79,14 @@ class Settings:
         )
     )
 
+    vision_num_gpu: int | None = field(
+        default_factory=lambda: (
+            int(os.getenv("VISION_NUM_GPU"))
+            if os.getenv("VISION_NUM_GPU") is not None
+            else None
+        )
+    )
+
     embedding_model: str = field(
         default_factory=lambda: os.getenv(
             "EMBEDDING_MODEL",

@@ -67,6 +67,75 @@ def make_graph_image(path: Path) -> None:
     image.save(path, format="PNG")
 
 
+def test_small_equation_crop_reaches_vision(tmp_path: Path) -> None:
+    image_path = tmp_path / "source_p28_eq1.png"
+    image = Image.new("RGB", (250, 170), "white")
+    ImageDraw.Draw(image).text((20, 50), "Q = k A dP / l mu", fill="black")
+    image.save(image_path)
+    ollama = FakeOllama([
+        "image_type: equation\nconfidence: 0.9\nreadable_labels: true\n"
+        "equation_text: Q = k*A*dP/(l*mu)\nanalysis: Visible equation."
+    ])
+    service = FigureAnalysisService(DummySettings(tmp_path), ollama)
+
+    result = asyncio.run(service.analyze_figure(
+        document_name="source.pdf", document_id="a" * 64,
+        page_number=28, image_index=1, image_path=image_path,
+        forced_classification="equation", remaining_vision_calls=1,
+        source_equation_text="Q = k A dP l mu",
+    ))
+
+    assert result.vision_calls == 1
+    assert result.status == "valid"
+    assert "Q = k*A*dP/(l*mu)" in (result.note_text or "")
+
+
+def test_hallucinated_equation_is_not_indexed(tmp_path: Path) -> None:
+    image_path = tmp_path / "source_p28_eq1.png"
+    image = Image.new("RGB", (250, 170), "white")
+    ImageDraw.Draw(image).text((20, 50), "Q = k A dP / l mu", fill="black")
+    image.save(image_path)
+    ollama = FakeOllama([
+        "image_type: equation\nconfidence: 1.0\nreadable_labels: true\n"
+        "equation_text: Q = Q_0 + integral(Ka-Q)dt\n"
+        "analysis: A differential equation."
+    ])
+    service = FigureAnalysisService(DummySettings(tmp_path), ollama)
+
+    result = asyncio.run(service.analyze_figure(
+        document_name="source.pdf", document_id="a" * 64,
+        page_number=28, image_index=1, image_path=image_path,
+        forced_classification="equation", remaining_vision_calls=1,
+        source_equation_text="Q = k A dP l mu",
+    ))
+
+    assert result.status == "review_required"
+    assert result.should_index is False
+    assert any("absent from PDF" in reason for reason in result.candidate["manual_review_reasons"])
+
+
+def test_detected_radical_requires_sqrt_in_equation_note(tmp_path: Path) -> None:
+    image_path = tmp_path / "source_p171_eq2.png"
+    Image.new("RGB", (350, 170), "white").save(image_path)
+    ollama = FakeOllama([
+        "image_type: equation\nconfidence: 0.99\nreadable_labels: true\n"
+        "equation_text: S_w = R_w/R_wa\nanalysis: Visible equation."
+    ])
+    service = FigureAnalysisService(DummySettings(tmp_path), ollama)
+
+    result = asyncio.run(service.analyze_figure(
+        document_name="source.pdf", document_id="a" * 64,
+        page_number=171, image_index=2, image_path=image_path,
+        forced_classification="equation", remaining_vision_calls=1,
+        source_equation_text="Sw = Rw / Rwa",
+        source_equation_has_radical=True,
+    ))
+
+    assert result.status == "review_required"
+    assert not result.should_index
+    assert "visible radical missing from equation transcription" in result.candidate["manual_review_reasons"]
+
+
 def test_valid_graph_is_saved_and_indexable(tmp_path: Path) -> None:
     image_path = tmp_path / "sample_p1_fig1.png"
     make_graph_image(image_path)

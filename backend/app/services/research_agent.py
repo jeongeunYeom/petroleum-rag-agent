@@ -27,6 +27,7 @@ from app.services.figure_analysis import (
     FigureAnalysisService,
     normalize_list,
     nullable_text,
+    parse_bool,
     parse_key_values,
 )
 from app.services.refusal_policy import NO_EVIDENCE_REFUSAL

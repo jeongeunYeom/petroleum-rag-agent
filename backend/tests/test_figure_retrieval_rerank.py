@@ -71,6 +71,18 @@ def test_log_log_figure_note_beats_learning_outcomes():
     assert "Figure Note Metadata" in service.vector_store.calls[0]["question"]
 
 
+def test_equation_note_is_not_reranked_as_figure():
+    service = make_service([
+        hit("equation", "[Extracted equation notes] [Equation Note Metadata] "
+            "image_type: equation equation_text: S_w = sqrt(R_w/R_wa)", 0.75),
+    ])
+    results = service._retrieve(
+        "Figure 4 water saturation", QueryType.LOCAL_FACT_SEARCH, 1,
+        original_question="Figure 4 water saturation",
+    )
+    assert results[0]["is_figure_note"] is False
+
+
 def test_rft_figure_note_beats_general_chapter_text():
     service = make_service([
         hit("general", "RFT pressure gradients and supercharged points are discussed.", 0.88),

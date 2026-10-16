@@ -292,6 +292,9 @@ KEY_VALUE_KEYS = {
     "page_number",
     "image_index",
     "image_path",
+    "figure_number",
+    "source_caption",
+    "source_caption_verified",
     "image_type",
     "confidence",
     "readable_labels",
@@ -334,6 +337,7 @@ KEY_VALUE_KEYS = {
     "flow_directions",
     "annotations",
     "equation_text",
+    "equation_verified",
     "variables",
     "units",
     "assumptions",
@@ -1014,7 +1018,7 @@ def equation_metadata(
     variables = normalize_list(fields.get("variables"))
     units = normalize_list(fields.get("units"))
     assumptions = normalize_list(fields.get("assumptions"))
-    engineering = nullable_text(fields.get("engineering_meaning"))
+    engineering = nullable_text(str(fields.get("engineering_meaning") or "").split("\n\n", 1)[0])
 
     if not equation_text or "=" not in equation_text:
         errors.append("equation_text must contain one visible equation")
@@ -1052,6 +1056,29 @@ def equation_metadata(
     metadata["_semantic_grounding"] = equation_verified
     metadata["_trend_grounding"] = True
     return metadata, errors, reasons
+
+
+def equation_source_conflicts(equation_text: str, source_text: str) -> list[str]:
+    """Reject Vision symbols absent from the PDF's own equation text.
+
+    Vector fraction bars and radicals may be missing from extracted text, but
+    the variables themselves should still be present. This is a conservative
+    grounding check, not a proof that every surviving transcription is correct.
+    """
+    source = str(source_text or "").casefold().replace("_", "")
+    for glyph, name in (("∆", "delta"), ("δ", "delta"), ("µ", "mu"), ("μ", "mu"), ("φ", "phi"), ("ρ", "rho")):
+        source = source.replace(glyph, name)
+    proposed = str(equation_text or "").casefold().replace("_", "")
+    symbols = lambda value: set(re.findall(r"[a-zΑ-ωΔ∆φρµ]+[0-9]*", value))
+    source_symbols = symbols(source)
+    proposed_symbols = symbols(proposed) - {"sqrt"}
+    unexpected = proposed_symbols - source_symbols
+    reasons = []
+    if unexpected:
+        reasons.append("equation symbols absent from PDF text: " + ", ".join(sorted(unexpected)))
+    if "∫" in proposed and "∫" not in source:
+        reasons.append("integral absent from PDF text")
+    return reasons
 
 
 def serialize_note_data(metadata: dict[str, Any]) -> str:
@@ -1133,9 +1160,21 @@ class FigureAnalysisService:
         forced_classification: str | None = None,
         source_figure_number: str | None = None,
         source_caption: str | None = None,
+        source_equation_text: str | None = None,
+        source_equation_has_radical: bool = False,
     ) -> FigureAnalysisResult:
         metrics = image_metrics(image_path)
-        analyze, reason = should_analyze(metrics)
+        # Equation crops are intentionally tight and may be much smaller than a
+        # full technical figure. Do not reject legible math as a thumbnail.
+        if normalize_classification(forced_classification or "") == "equation":
+            analyze = (
+                int(metrics.get("width") or 0) >= 100
+                and int(metrics.get("height") or 0) >= 80
+                and int(metrics.get("file_size") or 0) >= 100
+            )
+            reason = "invalid_or_tiny_equation_crop"
+        else:
+            analyze, reason = should_analyze(metrics)
         if not analyze:
             return FigureAnalysisResult(
                 status="ignored",
@@ -1215,6 +1254,23 @@ class FigureAnalysisService:
                     first = second
                     first["fallback_used"] = True
                     first["fallback_path"] = str(fallback_image_path)
+
+        if source_equation_text and normalized_forced == "equation":
+            metadata = first.get("metadata")
+            if isinstance(metadata, dict):
+                conflicts = equation_source_conflicts(
+                    str(metadata.get("equation_text") or ""), source_equation_text
+                )
+                if source_equation_has_radical and "sqrt(" not in str(
+                    metadata.get("equation_text") or ""
+                ).lower():
+                    conflicts.append("visible radical missing from equation transcription")
+                if conflicts:
+                    first["status"] = "review_required"
+                    first["semantic_grounding_passed"] = False
+                    first["manual_review_reasons"] = list(
+                        first.get("manual_review_reasons") or []
+                    ) + conflicts
 
         return self._persist_result(
             document_name=document_name,

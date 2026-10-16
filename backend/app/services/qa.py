@@ -28,7 +28,6 @@ SHA256_PREFIX = re.compile(r"^[0-9a-fA-F]{64}_")
 FIGURE_MARKERS = (
     "[extracted figure notes]",
     "[figure note metadata]",
-    "image_type:",
     "trend_summary:",
     "series_descriptions:",
 )

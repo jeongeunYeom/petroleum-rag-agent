@@ -138,7 +138,6 @@ HIGH_VALUE_MARKERS = (
 FIGURE_DOCUMENT_MARKERS = (
     "[Extracted figure notes]",
     "[Figure Note Metadata]",
-    "image_path:",
 )
 
 
@@ -152,6 +151,19 @@ def _matches_token(text: str, token: str) -> bool:
     if re.fullmatch(r"[a-z0-9]+", normalized):
         return _contains_term(text, normalized)
     return normalized in text
+
+
+def _equation_symbol_matches(text: str, tokens: list[str]) -> int:
+    compact = text.lower().replace("_", "")
+    return sum(
+        _matches_token(compact, token.replace("_", ""))
+        for token in tokens
+        if len(token) <= 12 and " " not in token
+    )
+
+
+def _math_query(question: str) -> bool:
+    return bool(re.search(r"sqrt|[=/^]|\b(?:equation|formula)\b|수식", question, re.I))
 
 
 def expand_query_terms(question: str) -> list[str]:
@@ -277,7 +289,9 @@ class VectorStore:
             key=lambda row: int(row[1].get("chunk_index") or 0),
         )
         parts: list[str] = []
-        for text, _ in rows:
+        for text, metadata in rows:
+            if metadata.get("chunk_type") in {"figure", "equation"}:
+                continue
             metadata_lines = sum(
                 bool(re.search(rf"(?im)^\s*{key}\s*:", text))
                 for key in (
@@ -292,7 +306,7 @@ class VectorStore:
             if "[Extracted figure notes]" not in text and metadata_lines >= 2:
                 continue
             body = re.split(
-                r"\[\s*extracted\s+f(?:igure\s+notes)?",
+                r"\[\s*extracted\s+(?:figure|equation)\s+notes\s*\]",
                 text,
                 maxsplit=1,
                 flags=re.IGNORECASE,
@@ -403,6 +417,7 @@ class VectorStore:
                 hit["rank_bonus"] = 1 / (rank + 1)
                 merged[hit["id"]] = hit
 
+        equation_tokens = self._keyword_tokens(question) if _math_query(question) else []
         for hit in merged.values():
             vector_score = float(
                 hit.get("vector_score") or 0.0
@@ -423,6 +438,11 @@ class VectorStore:
                 blended_score,
                 min(1.0, keyword_score + metadata_boost),
             )
+            if (
+                (hit.get("metadata") or {}).get("chunk_type") == "equation"
+                and _equation_symbol_matches(str(hit.get("text") or ""), equation_tokens) >= 2
+            ):
+                hit["score"] += 0.12
 
         hits = [
             hit
@@ -478,10 +498,13 @@ class VectorStore:
                 }
             )
 
+        equation_tokens = tokens if _math_query(question) else []
         return sorted(
             hits,
-            key=lambda item: float(
-                item.get("keyword_score") or 0.0
+            key=lambda item: (
+                float(item.get("keyword_score") or 0.0),
+                (item.get("metadata") or {}).get("chunk_type") == "equation"
+                and _equation_symbol_matches(str(item.get("text") or ""), equation_tokens) >= 2,
             ),
             reverse=True,
         )[:top_k]
@@ -903,6 +926,13 @@ class VectorStore:
     ) -> float:
         lower = text.lower()
         exact_matches = sum(1 for token in tokens if _matches_token(lower, token))
+        if metadata.get("chunk_type") == "equation":
+            compact = lower.replace("_", "")
+            exact_matches = sum(
+                1 for token in tokens
+                if _matches_token(lower, token)
+                or (" " not in token and _matches_token(compact, token.replace("_", "")))
+            )
 
         if exact_matches == 0:
             return 0.0
@@ -925,7 +955,10 @@ class VectorStore:
         )
         if any(marker in lower for marker in HIGH_VALUE_MARKERS):
             score = min(1.0, score + 0.12)
-        if any(marker in lower for marker in LOW_VALUE_MARKERS):
+        if any(
+            re.search(rf"(?<![a-z0-9_]){re.escape(marker)}(?![a-z0-9_])", lower)
+            for marker in LOW_VALUE_MARKERS
+        ):
             score *= 0.35
         return score
 

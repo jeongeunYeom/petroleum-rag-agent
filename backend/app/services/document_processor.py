@@ -775,7 +775,8 @@ class DocumentProcessor:
 
             candidates: list[dict[str, object]] = []
             page_width = float(page.rect.width)
-            for block in page.get_text("blocks", sort=True):
+            text_blocks = list(page.get_text("blocks", sort=True))
+            for block in text_blocks:
                 x0, y0, x1, y1, block_text = block[:5]
                 if not self._is_equation_block_candidate(
                     str(block_text),
@@ -789,6 +790,30 @@ class DocumentProcessor:
                         "raw_text": re.sub(r"\s+", " ", str(block_text)).strip(),
                     }
                 )
+
+            # PDF text extraction often puts the right-hand side of a fraction
+            # in another block without an equals sign. Keep short neighbouring
+            # math on the same line in the crop (e.g. Rwa = Rt/F ≈ RID/F).
+            for candidate in candidates:
+                rect = fitz.Rect(candidate["rect"])
+                for block in text_blocks:
+                    x0, y0, x1, y1, block_text = block[:5]
+                    neighbour = fitz.Rect(x0, y0, x1, y1)
+                    value = re.sub(r"\s+", " ", str(block_text)).strip()
+                    if not value or "=" in value or len(value) > 80:
+                        continue
+                    if neighbour.width > 120 or len(value.split()) > 8:
+                        continue
+                    if abs((neighbour.y0 + neighbour.y1 - rect.y0 - rect.y1) / 2) > 25:
+                        continue
+                    gap = max(0.0, neighbour.x0 - rect.x1, rect.x0 - neighbour.x1)
+                    if gap > 60:
+                        continue
+                    if not re.search(r"[A-Za-zΑ-ωΔ∆φρµ]", value):
+                        continue
+                    candidate["rect"] = rect | neighbour
+                    candidate["raw_text"] = f"{candidate['raw_text']} {value}"
+                    rect = fitz.Rect(candidate["rect"])
 
             merged: list[dict[str, object]] = []
             for item in candidates:
@@ -854,6 +879,22 @@ class DocumentProcessor:
                 if not related_drawings:
                     continue
 
+                # A radical is commonly drawn as a short steep stroke joined
+                # to a long horizontal overbar. Its symbol can disappear from
+                # both PDF text extractors, so retain this visual requirement.
+                has_radical = any(
+                    steep.width <= 8
+                    and steep.height >= 6
+                    and any(
+                        bar.height < 1.5
+                        and bar.width >= 15
+                        and abs(bar.x0 - steep.x1) <= 3
+                        and abs(bar.y0 - steep.y0) <= 3
+                        for bar in related_drawings
+                    )
+                    for steep in related_drawings
+                )
+
                 x0, y0, x1, y1 = rect.x0, rect.y0, rect.x1, rect.y1
                 for drawing_rect in related_drawings:
                     x0 = min(x0, drawing_rect.x0)
@@ -872,6 +913,7 @@ class DocumentProcessor:
                         "rect": (crop.x0, crop.y0, crop.x1, crop.y1),
                         "raw_text": item["raw_text"],
                         "vector_element_count": len(related_drawings),
+                        "has_radical": has_radical,
                     }
                 )
             return risky
@@ -908,6 +950,30 @@ class DocumentProcessor:
                 f"{type(exc).__name__}: {exc}"
             )
             return None
+
+    @staticmethod
+    def _body_without_risky_equations(
+        page: object, regions: list[dict[str, object]]
+    ) -> str:
+        """Keep prose but exclude visually damaged math from text chunks."""
+        import fitz
+
+        crops = [fitz.Rect(*region["rect"]) for region in regions]
+        body: list[str] = []
+        removed = 0
+        for block in page.get_text("blocks", sort=True):
+            x0, y0, x1, y1, value = block[:5]
+            if not isinstance(value, str) or not value.strip():
+                continue
+            rect = fitz.Rect(x0, y0, x1, y1)
+            center = (rect.tl + rect.br) / 2
+            if len(value.strip()) <= 180 and any(center in crop for crop in crops):
+                removed += 1
+                continue
+            body.append(value.strip())
+        if removed:
+            body.append("[Visual equation awaiting verification]")
+        return "\n\n".join(body)
 
     async def _extract_pdf(
         self,
@@ -986,8 +1052,12 @@ class DocumentProcessor:
                     }
                 )
 
+                equation_regions = self._equation_regions(page)
+                if equation_regions:
+                    pages[-1]["text"] = self._body_without_risky_equations(
+                        page, equation_regions
+                    )
                 if analyze_figures:
-                    equation_regions = self._equation_regions(page)
                     for equation_index, region in enumerate(equation_regions, start=1):
                         equation_path = (
                             self.settings.figure_analysis_inputs_dir
@@ -1011,6 +1081,7 @@ class DocumentProcessor:
                                 "vector_element_count": int(
                                     region.get("vector_element_count") or 0
                                 ),
+                                "has_radical": bool(region.get("has_radical")),
                             }
                         )
 
@@ -1098,6 +1169,8 @@ class DocumentProcessor:
                             image_path=equation_path,
                             remaining_vision_calls=remaining_calls,
                             forced_classification="equation",
+                            source_equation_text=str(job.get("raw_text") or ""),
+                            source_equation_has_radical=bool(job.get("has_radical")),
                         )
                     except Exception as exc:
                         print(
@@ -1118,6 +1191,7 @@ class DocumentProcessor:
                             "vector_element_count": int(
                                 job.get("vector_element_count") or 0
                             ),
+                            "has_radical": bool(job.get("has_radical")),
                         }
                     )
                     if result.should_index and result.note_text:
