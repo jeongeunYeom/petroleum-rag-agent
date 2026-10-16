@@ -1495,12 +1495,14 @@ class ResearchAgent:
     ) -> list[tuple[str | None, str]]:
         marker = FIGURE_NOTE_MARKER_RE.search(text)
         note_text = text[marker.end() :] if marker else text
-        matches = list(
-            re.finditer(
-                r"(?im)(?:^|\n)\s*figure\s+([0-9]+[A-Za-z]?)\s*:\s*",
-                note_text,
-            )
+        structured = "[figure note metadata]" in note_text.casefold()
+        pattern = (
+            r"(?im)(?:^|\n)\s*figure\s+([0-9]+[A-Za-z]?)\s*:\s*"
+            r"(?=\[figure note metadata\])"
+            if structured
+            else r"(?im)(?:^|\n)\s*figure\s+([0-9]+[A-Za-z]?)\s*:\s*"
         )
+        matches = list(re.finditer(pattern, note_text))
         if not matches:
             return [(cls._figure_number(text, metadata), text)]
         if len(matches) == 1:
@@ -1521,10 +1523,14 @@ class ResearchAgent:
             return value
         note_marker = FIGURE_NOTE_MARKER_RE.search(text)
         note_text = text[note_marker.end() :] if note_marker else text
-        match = re.search(
-            r"(?im)(?:^|\n)\s*figure\s+([0-9]+[A-Za-z]?)\s*:",
-            note_text,
+        structured = "[figure note metadata]" in note_text.casefold()
+        pattern = (
+            r"(?im)(?:^|\n)\s*figure\s+([0-9]+[A-Za-z]?)\s*:\s*"
+            r"(?=\[figure note metadata\])"
+            if structured
+            else r"(?im)(?:^|\n)\s*figure\s+([0-9]+[A-Za-z]?)\s*:"
         )
+        match = re.search(pattern, note_text)
         if not match:
             return None
         fields = parse_key_values(note_text)
