@@ -109,7 +109,10 @@ async def upload_document(
         update_job(job_id, 1, "[1/6] PDF 저장 중")
         saved_path, digest = await processor.save_upload(file)
         existing = processor.load_existing(digest)
-        if existing and processor.is_current_record(existing):
+        if existing and processor.is_current_record(
+            existing,
+            analyze_figures=analyze_figures,
+        ):
             update_job(
                 job_id,
                 6,
