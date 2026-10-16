@@ -590,6 +590,159 @@ def test_equation_page_lookup_excludes_other_and_unverified_spans() -> None:
     ]
 
 
+def test_equation_channel_finds_named_law_without_text_page_seed(tmp_path: Path) -> None:
+    equation = {
+        "id": "verified-flow-law",
+        "text": "equation_text: Q = k*A*DeltaP/(l*mu)\nequation_verified: true",
+        "metadata": {"document": "generic-flow.pdf", "page": 12, "chunk_type": "equation"},
+        "keyword_score": 7.0,
+    }
+    unrelated = {
+        "id": "unrelated-text",
+        "text": "Darcy law is mentioned without its equation.",
+        "metadata": {"document": "other.pdf", "page": 1, "chunk_type": "text"},
+        "distance": 0.2,
+    }
+
+    class Store(FakeVectorStore):
+        def search_equations(self, query, top_k):
+            return []
+
+        def bm25_search_equations(self, query, top_k):
+            return [equation]
+
+    agent = make_agent(
+        tmp_path,
+        vector_store=Store(dense=[unrelated], bm25=[unrelated]),
+        retrieval_mode="hybrid",
+    )
+    hits = agent.search_knowledge_base("Explain Darcy's law in porous rock.", 5)
+
+    assert hits[0]["id"] == "verified-flow-law"
+    assert hits[0]["text"] == equation["text"]
+    assert "permeability" in agent.engineering_retrieval_queries("다르시 식을 설명해줘")[1]
+
+
+def test_equation_channel_prefers_requested_output_and_inputs(tmp_path: Path) -> None:
+    def equation(chunk_id, formula, score):
+        return {
+            "id": chunk_id,
+            "text": f"equation_text: {formula}\nequation_verified: true",
+            "metadata": {"document": "generic-petrophysics.pdf", "page": 4, "chunk_type": "equation"},
+            "keyword_score": score,
+        }
+
+    distractor = equation("apparent-water", "R_wa = R_t/F", 10.0)
+    target = equation("saturation", "S_w = sqrt(R_w/R_wa)", 9.0)
+
+    class Store(FakeVectorStore):
+        def search_equations(self, query, top_k):
+            return [distractor]
+
+        def bm25_search_equations(self, query, top_k):
+            return [distractor, target]
+
+    agent = make_agent(tmp_path, vector_store=Store(), retrieval_mode="hybrid")
+    hits = agent.search_knowledge_base("What relates Sw, Rw and Rwa?", 5)
+
+    assert hits[0]["id"] == "saturation"
+    assert hits[0]["equation_channel"] is True
+
+
+def test_equation_bm25_uses_page_context_but_returns_literal_verified_span() -> None:
+    literal = "equation_text: Q = k*A*DeltaP/(l*mu)\nequation_verified: true"
+
+    class Collection:
+        def get(self, **kwargs):
+            if kwargs["where"] == {"chunk_type": "equation"}:
+                return {
+                    "ids": ["law", "unverified"],
+                    "documents": [literal, "equation_text: X = Y\nequation_verified: false"],
+                    "metadatas": [
+                        {"document_id": "generic", "page": 12, "chunk_type": "equation"},
+                        {"document_id": "generic", "page": 13, "chunk_type": "equation"},
+                    ],
+                }
+            assert kwargs["where"] == {"document_id": "generic"}
+            return {
+                "ids": ["context"],
+                "documents": ["Darcy's law describes permeability and fluid flow."],
+                "metadatas": [{"document_id": "generic", "page": 12, "chunk_type": "text"}],
+            }
+
+    store = VectorStore.__new__(VectorStore)
+    store.collection = Collection()
+
+    hits = store.bm25_search_equations("Darcy law", 5)
+
+    assert [hit["id"] for hit in hits] == ["law"]
+    assert hits[0]["text"] == literal
+
+
+def test_verified_equation_overrides_conflicting_extracted_text(tmp_path: Path) -> None:
+    agent = make_agent(tmp_path)
+    evidence = {
+        "KB1": "equation_text: S_w = sqrt(R_w/R_wa)\nequation_verified: true",
+        "KB2": "Sw = Rw / Rwa",
+    }
+    raw = json.dumps({
+        "internal": [{"claim": "Sw = Rw / Rwa.", "citations": ["KB2"]}],
+        "external": [], "synthesis": [], "limitations": [],
+    })
+
+    answer, validation, _ = agent.validate_structured_answer(
+        raw, evidence, [], "Give the Sw, Rw, Rwa relationship."
+    )
+
+    assert "Sw = Rw / Rwa" not in answer
+    assert validation["equation_rejections"] == 1
+    assert validation["engineering_validation_reasons"][0]["rule_id"] == "EQ-VERIFIED-001"
+
+
+def test_source_verified_equation_is_not_lost_when_model_omits_it(tmp_path: Path) -> None:
+    agent = make_agent(tmp_path)
+    empty = json.dumps({
+        "internal": [], "external": [], "synthesis": [], "limitations": [],
+    })
+    evidence = {
+        "KB1": "equation_text: Z = alpha*beta\nequation_verified: true",
+    }
+
+    answer, validation, _ = agent.validate_structured_answer(
+        empty, evidence, [], "What is the Z equation?"
+    )
+    unknown_answer, unknown_validation, _ = agent.validate_structured_answer(
+        empty, {}, [], "What is the Z equation?"
+    )
+
+    assert "Z = alpha*beta [KB1]" in answer
+    assert validation["valid_citations"] == ["KB1"]
+    assert "Z = alpha*beta" not in unknown_answer
+    assert unknown_validation["valid_citations"] == []
+
+
+def test_figure_locator_allows_cited_text_value_but_visual_claim_still_needs_fig(
+    tmp_path: Path,
+) -> None:
+    agent = make_agent(tmp_path)
+    raw = json.dumps({
+        "internal": [{"claim": "Interval C has Rw of 0.08 ohm-m.", "citations": ["KB1"]}],
+        "external": [], "synthesis": [], "limitations": [],
+    })
+    evidence = {"KB1": "Figure 4 example: Interval C indicates Rw of 0.08 ohm-m."}
+
+    answer, validation, _ = agent.validate_structured_answer(
+        raw, evidence, [], "In Figure 4's example, what is Interval C's Rw value?"
+    )
+    _, visual_validation, _ = agent.validate_structured_answer(
+        raw, evidence, [], "What value is displayed on Figure 4's curve at Interval C?"
+    )
+
+    assert "0.08 ohm-m" in answer
+    assert validation["figure_citation_rejections"] == 0
+    assert visual_validation["figure_citation_rejections"] == 1
+
+
 def test_external_search_normalizes_and_deduplicates_urls(tmp_path: Path) -> None:
     raw = [
         {

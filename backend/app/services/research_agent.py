@@ -57,7 +57,15 @@ FIGURE_RE = re.compile(
     re.IGNORECASE,
 )
 EQUATION_RELATION_RE = re.compile(
-    r"\b(?:equation|formula|relationship|relation|law)\b|수식|관계식|계산식|공식|법칙",
+    r"\b(?:equation|formula|relationship|relation|law)\b|수식|관계식|계산식|공식|법칙|"
+    r"(?<![가-힣])식(?:을|를|이|의|은|는)?(?:\b|(?=[\s.,?!]))",
+    re.IGNORECASE,
+)
+VISUAL_FIGURE_RE = re.compile(
+    r"x[- ]?axis|y[- ]?axis|\baxis\b|\blegend\b|\bcurve\b|\btrend\b|"
+    r"\bshape\b|\bplott?ed\b|\bdisplayed\b|\bshown\b|\bvisual\b|"
+    r"pressure\s*gradient|supercharg|그래프|도표|플롯|축|곡선|형태|추세|시각|"
+    r"그림.{0,12}(?:해석|설명)|표시된|나타난",
     re.IGNORECASE,
 )
 FIGURE_NUMBER_RE = re.compile(
@@ -540,11 +548,21 @@ class ResearchAgent:
     def engineering_retrieval_queries(query: str) -> list[str]:
         """Return narrow relation queries so one long expansion cannot dilute recall."""
         query = query.strip()
-        if not query or not WELL_TEST_QUERY_RE.search(query):
+        if not query:
             return [query]
-
         lower = query.casefold()
         variants = [query]
+        if ResearchAgent._equation_intent(query):
+            if re.search(r"darcy|다르시", lower, re.IGNORECASE):
+                variants.append(
+                    "Darcy law permeability flow rate pressure gradient porous media"
+                )
+            if re.search(r"r_?wa|apparent\s+water\s+resistivity", lower):
+                variants.append(
+                    "water saturation formation water resistivity apparent water resistivity"
+                )
+        if not WELL_TEST_QUERY_RE.search(query):
+            return list(dict.fromkeys(variants))
         if re.search(
             r"wellbore|radial|unit[- ]?slope|overlap|plateau|log[- ]?log|"
             r"semilog|type\s*curve|유정\s*저장|방사\s*유동|단위\s*기울기|겹|평탄",
@@ -567,6 +585,34 @@ class ResearchAgent:
         if re.search(r"boundary|recharge|경계|재충전", lower, re.IGNORECASE):
             variants.append("late time boundary recharge conditional unit slope")
         return list(dict.fromkeys(variants))
+
+    @staticmethod
+    def _equation_intent(query: str) -> bool:
+        if EQUATION_RELATION_RE.search(query):
+            return True
+        if re.search(r"\b(?:value|values|unit|units|example)\b|값|수치|단위|예제", query, re.I):
+            return False
+        symbols = {
+            token.casefold() for token in re.findall(
+                r"\b(?:[A-Z][a-z]{0,4}|[A-Za-z]_[A-Za-z0-9_]+)\b", query
+            )
+            if token.casefold() not in {"what", "where", "when", "which", "figure", "level"}
+        }
+        return len(symbols) >= 2
+
+    @staticmethod
+    def _visual_figure_intent(query: str) -> bool:
+        if not FIGURE_RE.search(query):
+            return False
+        return bool(
+            VISUAL_FIGURE_RE.search(query)
+            or re.fullmatch(
+                r"\s*(?:explain|describe|interpret|설명(?:해줘|해주세요)?)\s*"
+                r"(?:the\s*)?(?:figure|그림)\s*\d+\s*[?.!]?\s*",
+                query,
+                re.IGNORECASE,
+            )
+        )
 
     @staticmethod
     def figure_retrieval_queries(query: str) -> list[str]:
@@ -646,6 +692,16 @@ class ResearchAgent:
         )
         if self.settings.retrieval_mode == "hybrid_rerank":
             ranked = self._rerank_hits(query, ranked)
+        if self._equation_intent(query):
+            equations = self._search_equation_channel(query, candidate_count)
+            if equations:
+                budget = min(2, max(1, top_k // 4))
+                selected = equations[:budget]
+                selected_ids = {str(hit.get("id") or "") for hit in selected}
+                return [
+                    *selected,
+                    *(hit for hit in ranked if str(hit.get("id") or "") not in selected_ids),
+                ][:top_k]
         if not FIGURE_RE.search(query):
             return self._attach_page_equations(query, ranked, top_k)
 
@@ -664,6 +720,58 @@ class ResearchAgent:
             )
         ][: max(top_k - figure_budget, 0)]
         return [*selected_text, *selected_figures]
+
+    def _search_equation_channel(
+        self, query: str, candidate_count: int
+    ) -> list[dict[str, Any]]:
+        dense_search = getattr(self.vector_store, "search_equations", None)
+        sparse_search = getattr(self.vector_store, "bm25_search_equations", None)
+        if not callable(sparse_search):
+            return []
+        sparse = sparse_search(query, candidate_count)
+        if not sparse:
+            return []
+        dense_ranks = {
+            str(hit.get("id") or ""): rank
+            for rank, hit in enumerate(
+                dense_search(query, candidate_count) if callable(dense_search) else [], 1
+            )
+        }
+        max_score = float(sparse[0].get("keyword_score") or 0)
+        query_tokens = {
+            token.replace("_", "").casefold()
+            for token in re.findall(r"[A-Za-z][A-Za-z0-9_]*", query)
+        }
+        ranked = []
+        for rank, hit in enumerate(sparse, 1):
+            score = float(hit.get("keyword_score") or 0)
+            if score < max(0.5, max_score * 0.25):
+                continue
+            if "equation_verified: true" not in str(hit.get("text") or "").lower():
+                continue
+            equation = re.search(r"(?im)^equation_text:\s*(.+)$", str(hit["text"]))
+            if not equation:
+                continue
+            symbols = {
+                token.replace("_", "").casefold()
+                for token in re.findall(r"[A-Za-z][A-Za-z0-9_]*", equation.group(1))
+            }
+            item = dict(hit)
+            item["equation_channel"] = True
+            item["equation_symbol_overlap"] = len(query_tokens & symbols)
+            item["rrf_score"] = 1 / (60 + rank) + (
+                1 / (60 + dense_ranks[item["id"]]) if item["id"] in dense_ranks else 0
+            )
+            ranked.append(item)
+        return sorted(
+            ranked,
+            key=lambda hit: (
+                int(hit["equation_symbol_overlap"]),
+                float(hit["keyword_score"]),
+                float(hit["rrf_score"]),
+            ),
+            reverse=True,
+        )
 
     def _attach_page_equations(
         self,
@@ -1801,7 +1909,12 @@ class ResearchAgent:
             "unless the supplied evidence resolves the different conditions. Do not reveal chain "
             "of thought. Preserve petroleum engineering terms in English when translation could "
             "change their meaning. Copy equations and numeric values exactly as rendered in the "
-            "evidence. If PDF extraction makes an exponent, fraction, symbol, or unit ambiguous, "
+            "evidence. When a verified equation chunk is supplied for the requested relation, "
+            "prefer its literal equation and cite that KB ID over conflicting PDF body text. "
+            "A Figure number may only locate a source: if the requested value and unit are "
+            "explicit in KB page text, cite that KB text; require FIG for actual visual "
+            "interpretation of axes, curves, trends, legends, or displayed measurements. "
+            "If PDF extraction makes an exponent, fraction, symbol, or unit ambiguous, "
             "state that it cannot be transcribed unambiguously instead of reconstructing it. Show "
             "only concise conclusions, evidence links, calculations, and checks. "
             "Return JSON only. Each claim must be independently verifiable from its cited "
@@ -2200,6 +2313,11 @@ class ResearchAgent:
         unsupported_engineering_claim_count = 0
         engineering_validation_reasons: list[dict[str, Any]] = []
         candidates: list[tuple[str, str, list[str], str]] = []
+        verified_equation = (
+            self._first_verified_equation(evidence_text)
+            if self._equation_intent(query)
+            else None
+        )
         for section in ANSWER_SECTIONS:
             items = payload.get(section)
             if not isinstance(items, list):
@@ -2279,6 +2397,21 @@ class ResearchAgent:
                 if not self._equations_are_grounded(claim, evidence):
                     equation_rejections += 1
                     continue
+                if verified_equation and self._contradicts_verified_equation(
+                    claim, verified_equation[1]
+                ):
+                    equation_rejections += 1
+                    engineering_validation_reasons.append(
+                        {
+                            "rule_id": "EQ-VERIFIED-001",
+                            "category": "equation_provenance",
+                            "failed_claim": claim,
+                            "message": "The cited equation conflicts with a retrieved verified equation for the same output.",
+                            "relevant_evidence_ids": [verified_equation[0]],
+                            "expected_engineering_relation": verified_equation[1],
+                        }
+                    )
+                    continue
                 evidence_conflict = any(
                     bool(
                         set(ids)
@@ -2345,6 +2478,21 @@ class ResearchAgent:
                 query_relevance_rejections += 1
                 continue
             accepted[section].append((claim, ids))
+
+        if verified_equation:
+            evidence_id, equation = verified_equation
+            normalized = re.sub(r"\s+|_", "", equation).casefold()
+            if not any(
+                evidence_id in ids
+                and normalized in re.sub(r"\s+|_", "", claim).casefold()
+                for claim, ids in accepted["internal"]
+            ):
+                claim = (
+                    f"원문에서 검증된 관계식: {equation}"
+                    if re.search(r"[가-힣]", query)
+                    else f"The source-verified equation is {equation}"
+                )
+                accepted["internal"].insert(0, (claim, [evidence_id]))
 
         disclosed = self._add_conflict_claims(accepted, conflicts, evidence_text)
         answer, used_ids = self._render_structured_answer(accepted, evidence_text)
@@ -2482,6 +2630,8 @@ class ResearchAgent:
     def _claim_requires_figure_citation(query: str, claim: str) -> bool:
         if not FIGURE_RE.search(query):
             return False
+        if not ResearchAgent._visual_figure_intent(query) and not VISUAL_FIGURE_RE.search(claim):
+            return False
         return bool(
             FIGURE_DERIVED_CLAIM_RE.search(claim)
             or QUANTITY_RE.search(claim)
@@ -2607,6 +2757,33 @@ class ResearchAgent:
             if expression not in compact_evidence:
                 return False
         return True
+
+    @staticmethod
+    def _first_verified_equation(evidence_text: dict[str, str]) -> tuple[str, str] | None:
+        for evidence_id, text in evidence_text.items():
+            if not evidence_id.startswith("KB") or "equation_verified: true" not in text.lower():
+                continue
+            match = re.search(r"(?im)^equation_text:\s*(.+)$", text)
+            if match and "=" in match.group(1):
+                return evidence_id, match.group(1).strip()
+        return None
+
+    @staticmethod
+    def _contradicts_verified_equation(claim: str, verified: str) -> bool:
+        def compact(value: str) -> str:
+            return re.sub(r"[^a-z0-9=+*/^().-]", "", value.casefold())
+
+        verified_left = compact(verified.split("=", 1)[0])
+        verified_full = compact(verified)
+        for equation in EQUATION_RE.findall(claim):
+            left, _ = equation.split("=", 1)
+            symbol = re.search(r"([A-Za-z][A-Za-z0-9_]*)(?:\W*)$", left)
+            if not symbol or compact(symbol.group(1)) != verified_left:
+                continue
+            candidate = compact(equation[equation.rfind(symbol.group(1)):])
+            if verified_full not in candidate:
+                return True
+        return False
 
     def _semantic_similarities(
         self,

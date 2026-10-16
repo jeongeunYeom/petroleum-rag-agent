@@ -350,6 +350,63 @@ class VectorStore:
             and "equation_verified: true" in str(text or "").lower()
         ]
 
+    def search_equations(self, question: str, top_k: int) -> list[dict[str, Any]]:
+        """Dense-search verified equations independently of retrieved text pages."""
+        result = self.collection.query(
+            query_embeddings=[self.embed([question])[0]],
+            n_results=top_k,
+            where={"chunk_type": "equation"},
+        )
+        return [
+            hit for hit in self._query_result_to_hits(result)
+            if "equation_verified: true" in str(hit.get("text") or "").lower()
+        ]
+
+    def bm25_search_equations(self, question: str, top_k: int) -> list[dict[str, Any]]:
+        """Rank literal verified equations using their same-page text as search context."""
+        equations = self.collection.get(
+            where={"chunk_type": "equation"},
+            include=["documents", "metadatas"],
+        )
+        verified = [
+            (str(chunk_id), str(text or ""), metadata or {})
+            for chunk_id, text, metadata in zip(
+                equations.get("ids", []),
+                equations.get("documents", []),
+                equations.get("metadatas", []),
+            )
+            if "equation_verified: true" in str(text or "").lower()
+        ]
+        if not verified:
+            return []
+
+        pages = {(metadata.get("document_id"), metadata.get("page")) for _, _, metadata in verified}
+        context: dict[tuple[str, int], list[str]] = {}
+        for document_id in {str(value[0]) for value in pages if value[0]}:
+            rows = self.collection.get(
+                where={"document_id": document_id},
+                include=["documents", "metadatas"],
+            )
+            for text, metadata in zip(rows.get("documents", []), rows.get("metadatas", [])):
+                metadata = metadata or {}
+                key = (document_id, metadata.get("page"))
+                if key in pages and metadata.get("chunk_type") not in {"equation", "figure"}:
+                    context.setdefault(key, []).append(str(text or ""))
+
+        augmented = {
+            "ids": [chunk_id for chunk_id, _, _ in verified],
+            "documents": [
+                f"{text}\n{' '.join(context.get((metadata.get('document_id'), metadata.get('page')), []))[:3500]}"
+                for _, text, metadata in verified
+            ],
+            "metadatas": [metadata for _, _, metadata in verified],
+        }
+        originals = {chunk_id: text for chunk_id, text, _ in verified}
+        hits = self._bm25_search_data(question, top_k, augmented)
+        for hit in hits:
+            hit["text"] = originals[hit["id"]]
+        return hits
+
     def search(
         self,
         question: str,
