@@ -85,6 +85,11 @@ def test_formula_registry_normalizes_only_literal_equations():
     ambiguous = FormulaSourceRegistry.from_evidence([source("X = a/(b -)")]).records
     assert len(ambiguous) == 1 and ambiguous[0].expression_candidate is None
     assert FormulaSourceRegistry.from_evidence([source("pressure = 147 mD")]).records == []
+    sqrt_formula = FormulaSourceRegistry.from_evidence(
+        [source("equation_text: S_w = sqrt(R_w / R_wa)")]
+    ).records
+    assert len(sqrt_formula) == 1
+    assert sqrt_formula[0].expression_candidate == "S_w = sqrt(R_w / R_wa)"
 
 
 def test_plan_schema_has_ids_only_and_materialization_is_canonical():
