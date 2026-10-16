@@ -222,3 +222,53 @@ def test_figure_note_text_does_not_split_on_incidental_figure_sentence():
     assert len(figure_chunks) == 1
     assert "Figure 3 shows" in figure_chunks[0]["text"]
     assert "engineering_meaning" in figure_chunks[0]["text"]
+
+
+
+def test_equation_notes_are_complete_dedicated_chunks():
+    page_text = (
+        "Rwa method discussion and source context.\n"
+        "[Extracted equation notes]\n"
+        "Equation 1: [Equation Note Metadata]\n"
+        "image_type: equation\n"
+        "confidence: 0.99\n"
+        "equation_text: R_wa = R_t / F\n"
+        "equation_verified: true\n"
+        "Equation 2: [Equation Note Metadata]\n"
+        "image_type: equation\n"
+        "confidence: 0.99\n"
+        "equation_text: S_w = sqrt(R_w / R_wa)\n"
+        "equation_verified: true\n"
+        "[Extracted figure notes]\n"
+        "Figure 4: [Figure Note Metadata]\n"
+        "image_path: rwa_curve.png\n"
+        "analysis: Rwa curve"
+    )
+
+    chunks = chunk_pages(
+        [{"page": 171, "text": page_text}],
+        "formation-evaluation.pdf",
+        "doc-equations",
+        chunk_size=80,
+        chunk_overlap=10,
+    )
+
+    equation_chunks = [
+        chunk for chunk in chunks
+        if chunk["metadata"]["chunk_type"] == "equation"
+    ]
+    figure_chunks = [
+        chunk for chunk in chunks
+        if chunk["metadata"]["chunk_type"] == "figure"
+    ]
+    body_chunks = [
+        chunk for chunk in chunks
+        if chunk["metadata"]["chunk_type"] == "text"
+    ]
+
+    assert len(equation_chunks) == 2
+    assert len(figure_chunks) == 1
+    assert body_chunks
+    assert "R_wa = R_t / F" in equation_chunks[0]["text"]
+    assert "S_w = sqrt(R_w / R_wa)" in equation_chunks[1]["text"]
+    assert all("[Equation Note Metadata]" not in chunk["text"] for chunk in body_chunks)
