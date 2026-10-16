@@ -75,21 +75,29 @@ def _overlap_start(text: str, chunk_start: int, chunk_end: int, overlap: int) ->
     if candidate >= chunk_end:
         return chunk_end
 
-    boundary_re = r"(?:\n\n|\n|(?<=[.!?;:])\s+|\s+)"
+    boundary_patterns = (
+        r"\n\n",
+        r"\n",
+        r"(?<=[.!?;:])\s+",
+        r"\s+",
+    )
 
-    # Prefer the last complete boundary before the requested overlap point.
-    # This gives at least the requested overlap without starting mid-token.
+    # Prefer structural boundaries even when they create slightly more overlap.
+    # In particular, a newline is safer than beginning halfway through an
+    # equation or variable definition.
     before = text[chunk_start:candidate]
-    matches = list(re.finditer(boundary_re, before))
-    if matches:
-        return chunk_start + matches[-1].end()
+    for boundary_re in boundary_patterns:
+        matches = list(re.finditer(boundary_re, before))
+        if matches:
+            return chunk_start + matches[-1].end()
 
     # For a very long token/equation with no earlier boundary, move forward
     # rather than starting in the middle of that token.
     after = text[candidate:chunk_end]
-    match = re.search(boundary_re, after)
-    if match:
-        return min(chunk_end, candidate + match.end())
+    for boundary_re in boundary_patterns:
+        match = re.search(boundary_re, after)
+        if match:
+            return min(chunk_end, candidate + match.end())
     return chunk_end
 
 
