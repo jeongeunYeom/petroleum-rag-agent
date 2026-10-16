@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 SUPPORTED_EXTENSIONS = {".pdf", ".txt", ".png", ".jpg", ".jpeg", ".ppt", ".pptx"}
 DOCUMENT_ID_PATTERN = re.compile(r"^[0-9a-f]{64}$")
-INGESTION_VERSION = "kb-text-ingestion-v1"
+INGESTION_VERSION = "kb-ingestion-v2"
 
 
 def delete_document_files(settings: Settings, document_id: str) -> int:
@@ -187,8 +187,16 @@ class DocumentProcessor:
         return DocumentRecord(**json.loads(path.read_text(encoding="utf-8")))
 
     @staticmethod
-    def is_current_record(record: DocumentRecord) -> bool:
-        return record.ingestion_version == INGESTION_VERSION
+    def is_current_record(
+        record: DocumentRecord,
+        *,
+        analyze_figures: bool = True,
+    ) -> bool:
+        if record.ingestion_version != INGESTION_VERSION:
+            return False
+        if analyze_figures and record.figure_analysis_enabled is not True:
+            return False
+        return True
 
     @staticmethod
     def text_extraction_quality(text: str) -> dict[str, int | float]:
@@ -481,6 +489,7 @@ class DocumentProcessor:
             figures_failed=self._figure_stats["failed"],
             figures_ignored=self._figure_stats["ignored"],
             figure_vision_calls=self._figure_stats["vision_calls"],
+            figure_analysis_enabled=analyze_figures,
             title=document_info.get("title"),
             document_type=document_info.get("document_type"),
             contents_pages=document_info.get("contents_pages", []),
