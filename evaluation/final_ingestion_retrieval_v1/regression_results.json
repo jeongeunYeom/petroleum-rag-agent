@@ -1,0 +1,15 @@
+{
+  "set_type": "known_development_regression_not_unseen",
+  "run_source": "regression_raw.jsonl",
+  "pass_count": 3,
+  "fail_count": 4,
+  "cases": [
+    {"question_id":"REG-PH-RE-024","result":"PASS","before":"documented safe refusal","after":"completed/achieved; retrieved FE p171 and p172; final gave Rw=0.08 ohm-m and Rwa=0.6 ohm-m with KB2 (p172)","top_pages":[171,172,172,256,174],"run_status":"completed","stop_reason":"goal_achieved"},
+    {"question_id":"REG-DARCY-P28","result":"FAIL","before":"documented equation retrieval/answering failure","after":"completed/achieved with a plausible Darcy relation but cited Handbook Volume I p70 instead of requested Formation Evaluation p28; p28 was absent from selected top five, so source-specific grounding failed","top_pages":[151,212,87,70,374],"run_status":"completed","stop_reason":"goal_achieved"},
+    {"question_id":"REG-SQRT-P171","result":"FAIL","before":"radical lost by PDF text extraction","after":"final answer correctly stated Sw=sqrt(Rw/Rwa) with KB1 (FE p171), but run stopped for insufficient evidence rather than achieving goal","top_pages":[171,194,164,153,44],"run_status":"stopped","stop_reason":"insufficient_evidence","partial_answer_success":true},
+    {"question_id":"REG-RWA-LOCATOR","result":"FAIL","before":"Figure keyword caused unnecessary visual-evidence requirement","after":"final answer correctly gave both p172 text values with KB2, yet run stopped for insufficient evidence; FIG1 p172 was present but the task did not complete","top_pages":[174,172,171,174,182],"run_status":"stopped","stop_reason":"insufficient_evidence","partial_answer_success":true},
+    {"question_id":"REG-RWA-VISUAL","result":"FAIL","before":"actual visual interpretation must require relevant FIG evidence","after":"no visual trend was fabricated, but retrieved FIG pages 189/103/57 rather than the intended Figure 4 and stopped with a generic formula/input refusal; this prompt's Figure 4 locator is also ambiguous across chapters","top_pages":[220,651,459],"run_status":"stopped","stop_reason":"insufficient_evidence","safety_pass":true,"visual_task_success":false},
+    {"question_id":"REG-UNSUPPORTED","result":"PASS","before":"potential unrelated verified-equation insertion","after":"stopped without inventing the fictional relation or a numeric result","top_pages":[178],"run_status":"stopped","stop_reason":"no_progress"},
+    {"question_id":"REG-SOURCE-CALC","result":"PASS","before":"documented historical source-backed calculation success","after":"completed/achieved; selected Reservoir Engineering p90 literal API-SG equation; validated CALC1 returned 22.64 °API","top_pages":[214,89,90,298,87],"run_status":"completed","stop_reason":"goal_achieved","validated_calculations":1}
+  ]
+}
