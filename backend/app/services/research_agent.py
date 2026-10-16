@@ -1545,17 +1545,23 @@ class ResearchAgent:
 
     @staticmethod
     def _figure_title(text: str, metadata: dict[str, Any]) -> str | None:
-        title = str(metadata.get("title") or "").strip()
+        title = nullable_text(metadata.get("title"))
         if title:
             return title
-        match = re.search(
-            r"(?:^|\s)title\s*:\s*(.+?)"
-            r"(?=\s+(?:analysis|x_axis|y_axis|series_descriptions|trend_summary|"
-            r"image_path|image_type|confidence|engineering_meaning|reference_lines)\s*:|$)",
-            text,
-            re.IGNORECASE | re.DOTALL,
-        )
-        return match.group(1).strip() if match else None
+
+        fields = parse_key_values(text)
+        title = nullable_text(fields.get("title"))
+        if title:
+            return title
+
+        source_caption = nullable_text(fields.get("source_caption"))
+        if source_caption:
+            return re.sub(
+                r"(?i)^figure\s+[0-9]+[A-Za-z]?\s*[:.\-]?\s*",
+                "",
+                source_caption,
+            ).strip() or source_caption
+        return None
 
     @staticmethod
     def _optional_int(value: Any) -> int | None:
