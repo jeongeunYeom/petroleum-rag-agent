@@ -19,8 +19,8 @@ if TYPE_CHECKING:
 
 CANDIDATE_SCHEMA_VERSION = 2
 CLASSIFIER_VERSION = "new-upload-one-pass-classifier-v2"
-ANALYSIS_PROMPT_VERSION = "new-upload-one-pass-grounding-v2"
-SERIALIZER_VERSION = "figure-note-v2"
+ANALYSIS_PROMPT_VERSION = "new-upload-equation-grounding-v3"
+SERIALIZER_VERSION = "visual-note-v3"
 
 UNKNOWN_TEXT = "확인할 수 없음"
 UNKNOWN_MARKERS = {
@@ -111,6 +111,30 @@ DIAGRAM_SCHEMA_FIELDS = [
     "legacy_note_backup",
 ]
 
+
+EQUATION_SCHEMA_FIELDS = [
+    "document_name",
+    "document_id",
+    "page_number",
+    "image_index",
+    "image_path",
+    "image_type",
+    "confidence",
+    "title",
+    "title_verified",
+    "analysis",
+    "equation_text",
+    "equation_verified",
+    "variables",
+    "units",
+    "assumptions",
+    "engineering_meaning",
+    "engineering_meaning_verified",
+    "vision_model",
+    "created_at",
+    "legacy_note_backup",
+]
+
 GRAPH_PROMPT = """Analyze only what is directly visible in this graph or chart.
 Return concise ASCII English key-value lines with exactly these keys:
 image_type, confidence, readable_labels, title, analysis, x_axis, x_axis_unit, x_axis_scale, y_axis, y_axis_unit, y_axis_scale, series_count, series_count_verified, series_descriptions, legend, reference_lines, plateau, peak, decline, slope_changes, trend, engineering_meaning.
@@ -148,10 +172,24 @@ Rules:
 - If a value is unreadable, write unknown.
 """
 
-EQUATION_PROMPT = """Analyze only what is directly visible in this equation image.
+EQUATION_PROMPT = """Transcribe only the equation that is directly visible in this cropped equation image.
 Return concise ASCII English key-value lines with exactly these keys:
 image_type, confidence, readable_labels, title, analysis, equation_text, variables, units, assumptions, engineering_meaning.
-Do not reconstruct unreadable symbols. If uncertain, write unknown.
+Rules:
+- image_type must be equation.
+- confidence must be a number from 0.0 to 1.0.
+- readable_labels is true only if every equation symbol needed for the formula is clearly visible.
+- equation_text must preserve the mathematical meaning exactly in retrieval-safe ASCII.
+- Represent a visible radical as sqrt(...), a fraction as numerator/denominator with parentheses
+  when needed, subscripts with underscores (R_w, R_wa, S_w), and powers with **.
+- Do not algebraically rearrange, simplify, complete, or infer a formula from surrounding knowledge.
+- Ignore an equation number such as (7) or (8); do not include it in equation_text.
+- If any required symbol, radical scope, numerator, denominator, or subscript is unreadable,
+  set readable_labels to false and equation_text to unknown.
+- variables lists only symbols visibly present in the equation, separated by semicolons.
+- units, assumptions, engineering_meaning, and title must be unknown unless literally visible
+  inside the crop.
+- analysis must briefly state what is visibly transcribed; do not add domain interpretation.
 """
 
 ONE_PASS_PROMPT = """Analyze only what is directly visible in this image in one pass.
@@ -953,9 +991,75 @@ def diagram_metadata(
     return metadata, errors, reasons
 
 
+def equation_metadata(
+    text: str,
+    *,
+    settings: Settings,
+    readable_labels: bool,
+) -> tuple[dict[str, Any], list[str], list[str]]:
+    fields = parse_key_values(text)
+    errors: list[str] = []
+    reasons: list[str] = []
+
+    confidence = parse_confidence(fields.get("confidence"))
+    equation_text = nullable_text(fields.get("equation_text"))
+    analysis = nullable_text(fields.get("analysis")) or equation_text
+    title = nullable_text(fields.get("title"))
+    variables = normalize_list(fields.get("variables"))
+    units = normalize_list(fields.get("units"))
+    assumptions = normalize_list(fields.get("assumptions"))
+    engineering = nullable_text(fields.get("engineering_meaning"))
+
+    if not equation_text or "=" not in equation_text:
+        errors.append("equation_text must contain one visible equation")
+
+    equation_verified = bool(
+        equation_text
+        and "=" in equation_text
+        and readable_labels
+        and confidence >= 0.5
+    )
+    if equation_text and not readable_labels:
+        reasons.append("equation symbols are not fully readable")
+    if equation_text and confidence < 0.5:
+        reasons.append("equation confidence below verification threshold")
+
+    metadata = {
+        "image_type": "equation",
+        "confidence": confidence,
+        "title": title,
+        "title_verified": bool(title and readable_labels),
+        "analysis": analysis,
+        "equation_text": equation_text,
+        "equation_verified": equation_verified,
+        "variables": variables,
+        "units": units,
+        "assumptions": assumptions,
+        "engineering_meaning": engineering or UNKNOWN_TEXT,
+        "engineering_meaning_verified": bool(engineering and readable_labels),
+        "vision_model": settings.vision_model,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "legacy_note_backup": None,
+    }
+    metadata["_schema_valid"] = not errors
+    metadata["_information_quality"] = bool(equation_text)
+    metadata["_semantic_grounding"] = equation_verified
+    metadata["_trend_grounding"] = True
+    return metadata, errors, reasons
+
+
 def serialize_note_data(metadata: dict[str, Any]) -> str:
-    order = DIAGRAM_SCHEMA_FIELDS if metadata.get("image_type") in DIAGRAM_TYPES else GRAPH_SCHEMA_FIELDS
-    lines = ["[Figure Note Metadata]"]
+    image_type = str(metadata.get("image_type") or "")
+    if image_type == "equation":
+        order = EQUATION_SCHEMA_FIELDS
+        header = "[Equation Note Metadata]"
+    elif image_type in DIAGRAM_TYPES:
+        order = DIAGRAM_SCHEMA_FIELDS
+        header = "[Figure Note Metadata]"
+    else:
+        order = GRAPH_SCHEMA_FIELDS
+        header = "[Figure Note Metadata]"
+    lines = [header]
     for key in order:
         value = metadata.get(key)
         if isinstance(value, list):
@@ -1259,19 +1363,11 @@ class FigureAnalysisService:
                     readable_labels=readable_labels,
                 )
             else:
-                return {
-                    "status": "review_required",
-                    "classification": classification,
-                    "confidence": classification_confidence,
-                    "vision_calls": vision_calls,
-                    "classification_text": classification_text,
-                    "raw_vision_text": raw_text,
-                    "manual_review_reasons": ["equation figures require exact symbol verification"],
-                    "schema_valid": True,
-                    "information_quality_passed": bool(raw_text),
-                    "semantic_grounding_passed": False,
-                    "trend_grounding_passed": True,
-                }
+                metadata, errors, reasons = equation_metadata(
+                    raw_text,
+                    settings=self.settings,
+                    readable_labels=readable_labels,
+                )
 
             schema_valid = bool(metadata.pop("_schema_valid"))
             information_quality = bool(metadata.pop("_information_quality"))
