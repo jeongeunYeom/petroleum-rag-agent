@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 SUPPORTED_EXTENSIONS = {".pdf", ".txt", ".png", ".jpg", ".jpeg", ".ppt", ".pptx"}
 DOCUMENT_ID_PATTERN = re.compile(r"^[0-9a-f]{64}$")
-INGESTION_VERSION = "kb-ingestion-v3"
+INGESTION_VERSION = "kb-ingestion-v4"
 
 
 def delete_document_files(settings: Settings, document_id: str) -> int:
@@ -233,6 +233,13 @@ class DocumentProcessor:
         pymupdf_text: str,
         pdfplumber_text: str,
     ) -> tuple[str, str, dict[str, object]]:
+        """Prefer compact reading-order text unless the fallback is clearly better.
+
+        pdfplumber layout text is useful when PyMuPDF extraction is damaged,
+        but it can split subscripts such as Rwa into separate spatial tokens and
+        inflate the simple quality score with extra lines. That hurts retrieval
+        even when the raw score is higher.
+        """
         candidates = [
             ("pymupdf_sorted", str(pymupdf_text or "")),
             ("pdfplumber_layout", str(pdfplumber_text or "")),
@@ -241,15 +248,47 @@ class DocumentProcessor:
             name: cls.text_extraction_quality(text)
             for name, text in candidates
         }
-        best_name, best_text = max(
-            candidates,
-            key=lambda item: (
-                float(diagnostics[item[0]]["score"]),
-                1 if item[0] == "pymupdf_sorted" else 0,
-            ),
-        )
-        return best_text.strip(), best_name, diagnostics
 
+        pymupdf = candidates[0][1]
+        plumber = candidates[1][1]
+        pymupdf_quality = diagnostics["pymupdf_sorted"]
+        plumber_quality = diagnostics["pdfplumber_layout"]
+
+        if not pymupdf.strip():
+            return plumber.strip(), "pdfplumber_layout", diagnostics
+        if not plumber.strip():
+            return pymupdf.strip(), "pymupdf_sorted", diagnostics
+
+        pymupdf_damage = int(pymupdf_quality["replacement_chars"]) + int(
+            pymupdf_quality["control_chars"]
+        )
+        plumber_damage = int(plumber_quality["replacement_chars"]) + int(
+            plumber_quality["control_chars"]
+        )
+        if (
+            plumber_damage < pymupdf_damage
+            and float(plumber_quality["score"]) > float(pymupdf_quality["score"])
+        ):
+            return plumber.strip(), "pdfplumber_layout", diagnostics
+
+        pymupdf_alnum = int(pymupdf_quality["alnum"])
+        plumber_alnum = int(plumber_quality["alnum"])
+        pymupdf_tokens = int(pymupdf_quality["tokens"])
+        plumber_tokens = int(plumber_quality["tokens"])
+        materially_more_content = (
+            plumber_alnum
+            >= max(pymupdf_alnum + 80, int(pymupdf_alnum * 1.08))
+            and plumber_tokens
+            >= max(pymupdf_tokens + 12, int(pymupdf_tokens * 1.05))
+        )
+
+        if (
+            materially_more_content
+            and float(plumber_quality["score"]) > float(pymupdf_quality["score"])
+        ):
+            return plumber.strip(), "pdfplumber_layout", diagnostics
+
+        return pymupdf.strip(), "pymupdf_sorted", diagnostics
     def persist_record(self, record: DocumentRecord) -> None:
         self.metadata_path(record.sha256).write_text(
             record.model_dump_json(indent=2),
