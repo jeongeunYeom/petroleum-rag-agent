@@ -138,6 +138,7 @@ HIGH_VALUE_MARKERS = (
 FIGURE_DOCUMENT_MARKERS = (
     "[Extracted figure notes]",
     "[Figure Note Metadata]",
+    "image_path:",
 )
 
 
