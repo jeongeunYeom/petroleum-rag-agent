@@ -676,6 +676,14 @@ class DocumentProcessor:
                 rects,
                 key=lambda item: float(item.width * item.height),
             )
+            # Repeated chapter/header emblems can sit immediately above prose
+            # that begins "Figure 12 is ..." without depicting that Figure.
+            if (
+                image_rect.width < 120
+                and image_rect.height < 120
+                and image_rect.y0 < 120
+            ):
+                return None
             image_center = (float(image_rect.x0) + float(image_rect.x1)) / 2.0
 
             candidates: list[tuple[float, dict[str, object]]] = []

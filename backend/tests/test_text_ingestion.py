@@ -267,3 +267,19 @@ def test_source_figure_caption_ignores_distant_unrelated_caption(tmp_path: Path)
 
     assert DocumentProcessor._source_figure_caption(page, xref) is None
     document.close()
+
+
+def test_source_figure_caption_does_not_attach_to_header_logo(tmp_path: Path):
+    image_path = tmp_path / "chapter_logo.png"
+    Image.new("RGB", (254, 265), "white").save(image_path)
+    document = fitz.open()
+    page = document.new_page()
+    xref = page.insert_image(fitz.Rect(34, 14, 125, 106), filename=str(image_path))
+    page.insert_textbox(
+        fitz.Rect(42, 130, 415, 210),
+        "Figure 12 is an example of a shaly gas sand with several water zones.",
+        fontsize=9,
+    )
+
+    assert DocumentProcessor._source_figure_caption(page, xref) is None
+    document.close()
