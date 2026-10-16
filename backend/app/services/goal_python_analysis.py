@@ -630,6 +630,7 @@ class GoalPythonAnalysis:
                     "Use only the supplied numeric facts; do not invent inputs. Write only the supplied relative outputs. "
                     "Allowed imports: csv, json, math, statistics, collections, datetime, decimal, fractions, "
                     "itertools, functools, numpy, pandas, matplotlib. "
+                    "When a supplied source formula uses sqrt(x), implement it as math.sqrt(x). "
                     "When a calculation_contract is supplied, return every required output ID exactly once; "
                     "Use every numeric input by canonical facts[\"FACT_ID\"][\"value\"] access; "
                     "define facts from resolved_inputs and use resolved_formula_bindings exactly. "
