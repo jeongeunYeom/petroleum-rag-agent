@@ -24,6 +24,7 @@ if TYPE_CHECKING:
 
 SUPPORTED_EXTENSIONS = {".pdf", ".txt", ".png", ".jpg", ".jpeg", ".ppt", ".pptx"}
 DOCUMENT_ID_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+INGESTION_VERSION = "kb-text-ingestion-v1"
 
 
 def delete_document_files(settings: Settings, document_id: str) -> int:
@@ -75,6 +76,54 @@ def delete_document_files(settings: Settings, document_id: str) -> int:
     if metadata_path.is_file():
         metadata_path.unlink()
         deleted_files += 1
+
+    return deleted_files
+
+
+def delete_document_derived_files(settings: Settings, document_id: str) -> int:
+    """Delete generated artifacts for reprocessing while preserving the raw upload."""
+    if not DOCUMENT_ID_PATTERN.fullmatch(document_id):
+        raise ValueError("Invalid document ID.")
+
+    deleted_files = 0
+    prefixed_directories = [
+        settings.figures_dir,
+        settings.figure_notes_dir,
+        settings.figure_analysis_inputs_dir,
+        settings.data_dir / "figure_display_previews",
+    ]
+    exact_files = [
+        settings.extracted_dir / f"{document_id}.json",
+        settings.ontology_dir / f"{document_id}.jsonl",
+        settings.metadata_dir / f"{document_id}.json",
+    ]
+
+    for directory in prefixed_directories:
+        root = directory.resolve()
+        if not root.is_dir():
+            continue
+        for path in root.glob(f"{document_id}_*"):
+            resolved = path.resolve()
+            if resolved.parent != root or not resolved.is_file():
+                continue
+            resolved.unlink()
+            deleted_files += 1
+
+    for path in exact_files:
+        if path.is_file():
+            path.unlink()
+            deleted_files += 1
+
+    candidates_root = settings.figure_candidates_dir.resolve()
+    candidate_directory = (candidates_root / document_id).resolve()
+    if (
+        candidate_directory.parent == candidates_root
+        and candidate_directory.is_dir()
+    ):
+        deleted_files += sum(
+            1 for path in candidate_directory.rglob("*") if path.is_file()
+        )
+        shutil.rmtree(candidate_directory)
 
     return deleted_files
 
@@ -136,6 +185,62 @@ class DocumentProcessor:
         if not path.exists():
             return None
         return DocumentRecord(**json.loads(path.read_text(encoding="utf-8")))
+
+    @staticmethod
+    def is_current_record(record: DocumentRecord) -> bool:
+        return record.ingestion_version == INGESTION_VERSION
+
+    @staticmethod
+    def text_extraction_quality(text: str) -> dict[str, int | float]:
+        """Cheap diagnostics for deciding whether an extracted page is obviously damaged."""
+        value = str(text or "")
+        alnum = sum(ch.isalnum() for ch in value)
+        replacements = value.count("\ufffd")
+        controls = sum(
+            ord(ch) < 32 and ch not in {"\n", "\r", "\t"}
+            for ch in value
+        )
+        lines = sum(1 for line in value.splitlines() if line.strip())
+        tokens = len(re.findall(r"\b\w+\b", value, flags=re.UNICODE))
+        score = (
+            alnum
+            + min(tokens, 1000) * 2
+            + min(lines, 200) * 2
+            - replacements * 80
+            - controls * 80
+        )
+        return {
+            "score": float(score),
+            "characters": len(value),
+            "alnum": alnum,
+            "tokens": tokens,
+            "lines": lines,
+            "replacement_chars": replacements,
+            "control_chars": controls,
+        }
+
+    @classmethod
+    def select_page_text(
+        cls,
+        pymupdf_text: str,
+        pdfplumber_text: str,
+    ) -> tuple[str, str, dict[str, object]]:
+        candidates = [
+            ("pymupdf_sorted", str(pymupdf_text or "")),
+            ("pdfplumber_layout", str(pdfplumber_text or "")),
+        ]
+        diagnostics = {
+            name: cls.text_extraction_quality(text)
+            for name, text in candidates
+        }
+        best_name, best_text = max(
+            candidates,
+            key=lambda item: (
+                float(diagnostics[item[0]]["score"]),
+                1 if item[0] == "pymupdf_sorted" else 0,
+            ),
+        )
+        return best_text.strip(), best_name, diagnostics
 
     def persist_record(self, record: DocumentRecord) -> None:
         self.metadata_path(record.sha256).write_text(
@@ -366,6 +471,7 @@ class DocumentProcessor:
             filename=display_filename,
             sha256=digest,
             status="processed",
+            ingestion_version=INGESTION_VERSION,
             pages=len(pages),
             chunks=len(chunks),
             figures=figure_count,
@@ -519,7 +625,7 @@ class DocumentProcessor:
                     print(f"[PDF 텍스트 추출] {page_number}/{total_pages}페이지")
 
                 try:
-                    text = page.get_text("text").strip()
+                    text = page.get_text("text", sort=True).strip()
                 except Exception as exc:
                     print(
                         f"[PyMuPDF 텍스트 추출 실패] {page_number}페이지: "
@@ -528,14 +634,10 @@ class DocumentProcessor:
                     text = ""
 
                 plumber_text = ""
-                if (
-                    not text
-                    and plumber_pdf is not None
-                    and index < len(plumber_pdf.pages)
-                ):
+                if plumber_pdf is not None and index < len(plumber_pdf.pages):
                     try:
                         plumber_text = (
-                            plumber_pdf.pages[index].extract_text() or ""
+                            plumber_pdf.pages[index].extract_text(layout=True) or ""
                         ).strip()
                     except Exception as exc:
                         print(
@@ -543,12 +645,16 @@ class DocumentProcessor:
                             f"{type(exc).__name__}: {exc}"
                         )
 
-                combined = text or plumber_text
+                combined, text_extractor, extraction_diagnostics = (
+                    self.select_page_text(text, plumber_text)
+                )
                 pages.append(
                     {
                         "page": page_number,
                         "text": combined,
                         "document_id": digest,
+                        "text_extractor": text_extractor,
+                        "text_extraction_diagnostics": extraction_diagnostics,
                     }
                 )
 
