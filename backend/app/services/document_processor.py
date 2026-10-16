@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 SUPPORTED_EXTENSIONS = {".pdf", ".txt", ".png", ".jpg", ".jpeg", ".ppt", ".pptx"}
 DOCUMENT_ID_PATTERN = re.compile(r"^[0-9a-f]{64}$")
-INGESTION_VERSION = "kb-ingestion-v6"
+INGESTION_VERSION = "kb-ingestion-v7"
 
 
 def delete_document_files(settings: Settings, document_id: str) -> int:
@@ -916,7 +916,6 @@ class DocumentProcessor:
         analyze_figures: bool,
     ) -> tuple[list[dict[str, object]], int]:
         import fitz
-        import pdfplumber
 
         pages: list[dict[str, object]] = []
         figure_jobs: list[dict[str, object]] = []
@@ -929,14 +928,17 @@ class DocumentProcessor:
 
         doc = fitz.open(file_path)
 
-        try:
-            plumber_pdf = pdfplumber.open(file_path)
-        except Exception as exc:
-            print(
-                f"[pdfplumber 비활성화] {file_path.name}: "
-                f"{type(exc).__name__}: {exc}"
-            )
-            plumber_pdf = None
+        if self.settings.pdfplumber_fallback_enabled:
+            try:
+                import pdfplumber
+
+                plumber_pdf = pdfplumber.open(file_path)
+            except Exception as exc:
+                print(
+                    f"[pdfplumber fallback 비활성화] {file_path.name}: "
+                    f"{type(exc).__name__}: {exc}"
+                )
+                plumber_pdf = None
 
         try:
             total_pages = len(doc)
