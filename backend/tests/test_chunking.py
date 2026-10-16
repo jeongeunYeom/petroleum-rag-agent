@@ -140,3 +140,27 @@ def test_body_chunking_prefers_readable_boundaries():
     assert all(chunk["metadata"]["chunk_type"] == "text" for chunk in chunks)
     assert all(not chunk["text"].startswith("quation") for chunk in chunks)
     assert all(not chunk["text"].startswith("esistivity") for chunk in chunks)
+
+
+
+def test_body_chunking_keeps_readable_overlap():
+    text = (
+        "Archie equation relates resistivity and saturation. "
+        "Formation factor depends on porosity. "
+        "Water saturation uses formation water resistivity."
+    )
+
+    chunks = chunk_pages(
+        [{"page": 1, "text": text}],
+        "formation.pdf",
+        "doc-overlap",
+        chunk_size=70,
+        chunk_overlap=10,
+    )
+
+    texts = [str(chunk["text"]) for chunk in chunks]
+    assert len(texts) >= 2
+    assert any(
+        set(left.split()) & set(right.split())
+        for left, right in zip(texts, texts[1:])
+    )
