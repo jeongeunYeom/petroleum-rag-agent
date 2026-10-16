@@ -8,13 +8,18 @@ from app.models.schemas import DocumentRecord
 from app.services.document_processor import DocumentProcessor, INGESTION_VERSION
 
 
-def _record(version: str | None) -> DocumentRecord:
+def _record(
+    version: str | None,
+    *,
+    figure_analysis_enabled: bool | None = True,
+) -> DocumentRecord:
     return DocumentRecord(
         document_id="a" * 64,
         filename="book.pdf",
         sha256="a" * 64,
         status="processed",
         ingestion_version=version,
+        figure_analysis_enabled=figure_analysis_enabled,
     )
 
 
@@ -58,6 +63,22 @@ def test_ingestion_version_marks_old_records_stale():
     assert DocumentProcessor.is_current_record(_record(INGESTION_VERSION))
     assert not DocumentProcessor.is_current_record(_record(None))
     assert not DocumentProcessor.is_current_record(_record("legacy"))
+
+
+def test_text_only_record_is_reprocessed_when_figure_analysis_is_requested():
+    text_only = _record(
+        INGESTION_VERSION,
+        figure_analysis_enabled=False,
+    )
+
+    assert DocumentProcessor.is_current_record(
+        text_only,
+        analyze_figures=False,
+    )
+    assert not DocumentProcessor.is_current_record(
+        text_only,
+        analyze_figures=True,
+    )
 
 
 
