@@ -738,40 +738,6 @@ class DocumentProcessor:
             return None
 
     @staticmethod
-    def _enrich_figure_note_with_source_caption(
-        note_text: str,
-        caption_info: dict[str, object] | None,
-    ) -> str:
-        if not caption_info:
-            return note_text
-        number = str(caption_info.get("figure_number") or "").strip()
-        caption = re.sub(
-            r"\s+",
-            " ",
-            str(caption_info.get("source_caption") or ""),
-        ).strip()
-        if not number or not caption:
-            return note_text
-
-        lines = note_text.splitlines()
-        try:
-            marker_index = next(
-                index
-                for index, line in enumerate(lines)
-                if line.strip().casefold() == "[figure note metadata]"
-            )
-        except StopIteration:
-            return note_text
-
-        fields = [
-            f"figure_number: {number}",
-            f"source_caption: {caption}",
-            "source_caption_verified: true",
-        ]
-        lines[marker_index + 1 : marker_index + 1] = fields
-        return "\n".join(lines).rstrip() + "\n"
-
-    @staticmethod
     def _is_equation_block_candidate(
         text: str,
         *,
@@ -1235,6 +1201,18 @@ class DocumentProcessor:
                             fallback_image_path=fallback_path,
                             remaining_vision_calls=remaining_calls,
                             forced_classification=forced_classification,
+                            source_figure_number=(
+                                str(job["source_caption"].get("figure_number"))
+                                if isinstance(job.get("source_caption"), dict)
+                                and job["source_caption"].get("figure_number")
+                                else None
+                            ),
+                            source_caption=(
+                                str(job["source_caption"].get("source_caption"))
+                                if isinstance(job.get("source_caption"), dict)
+                                and job["source_caption"].get("source_caption")
+                                else None
+                            ),
                         )
                     except Exception as exc:
                         print(
@@ -1253,19 +1231,8 @@ class DocumentProcessor:
                     )
 
                     if result.should_index and result.note_text:
-                        indexed_note = self._enrich_figure_note_with_source_caption(
-                            result.note_text,
-                            job.get("source_caption")
-                            if isinstance(job.get("source_caption"), dict)
-                            else None,
-                        )
-                        if result.note_path is not None:
-                            result.note_path.write_text(
-                                indexed_note,
-                                encoding="utf-8",
-                            )
                         page_notes.setdefault(page_number, []).append(
-                            (image_index, indexed_note)
+                            (image_index, result.note_text)
                         )
 
                 for page_record in pages:
