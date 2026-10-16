@@ -2,6 +2,7 @@ import asyncio
 from pathlib import Path
 
 import fitz
+from PIL import Image
 
 from app.core.config import Settings
 from app.models.schemas import DocumentRecord
@@ -185,3 +186,69 @@ def test_equation_regions_detect_vector_math_but_skip_plain_equations(tmp_path: 
 
     document.close()
     plain_document.close()
+
+
+
+def test_source_figure_caption_uses_image_geometry_and_preserves_source_text(tmp_path: Path):
+    image_path = tmp_path / "figure.png"
+    Image.new("RGB", (600, 400), "white").save(image_path)
+
+    document = fitz.open()
+    page = document.new_page()
+    xref = page.insert_image(
+        fitz.Rect(120, 100, 480, 340),
+        filename=str(image_path),
+    )
+    page.insert_textbox(
+        fitz.Rect(90, 355, 520, 395),
+        "Figure 19 (Upper) - Inasion and Resistivity Profile in water bearing zone.",
+        fontsize=9,
+    )
+
+    matched = DocumentProcessor._source_figure_caption(page, xref)
+
+    assert matched is not None
+    assert matched["figure_number"] == "19"
+    assert matched["caption_position"] == "below"
+    assert "Inasion" in str(matched["source_caption"])
+    document.close()
+
+
+def test_source_figure_caption_ignores_distant_unrelated_caption(tmp_path: Path):
+    image_path = tmp_path / "logo.png"
+    Image.new("RGB", (300, 160), "white").save(image_path)
+
+    document = fitz.open()
+    page = document.new_page()
+    xref = page.insert_image(
+        fitz.Rect(20, 20, 120, 75),
+        filename=str(image_path),
+    )
+    page.insert_textbox(
+        fitz.Rect(80, 500, 520, 540),
+        "Figure 7 Deep reservoir response.",
+        fontsize=9,
+    )
+
+    assert DocumentProcessor._source_figure_caption(page, xref) is None
+    document.close()
+
+
+def test_figure_note_enrichment_adds_verified_source_caption():
+    note = (
+        "[Figure Note Metadata]\n"
+        "image_type: graph\n"
+        "confidence: 0.95\n"
+        "title: null\n"
+    )
+    enriched = DocumentProcessor._enrich_figure_note_with_source_caption(
+        note,
+        {
+            "figure_number": "19",
+            "source_caption": "Figure 19 (Upper) - Inasion and Resistivity Profile.",
+        },
+    )
+
+    assert "figure_number: 19" in enriched
+    assert "source_caption_verified: true" in enriched
+    assert "Inasion and Resistivity Profile" in enriched
