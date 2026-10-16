@@ -228,6 +228,12 @@ class Settings:
         )
     )
 
+    equation_analysis_max_vision_calls: int = field(
+        default_factory=lambda: int(
+            os.getenv("EQUATION_ANALYSIS_MAX_VISION_CALLS", "120")
+        )
+    )
+
     figure_page_render_fallback: bool = field(
         default_factory=lambda: os.getenv(
             "FIGURE_PAGE_RENDER_FALLBACK", "1"
