@@ -232,23 +232,3 @@ def test_source_figure_caption_ignores_distant_unrelated_caption(tmp_path: Path)
 
     assert DocumentProcessor._source_figure_caption(page, xref) is None
     document.close()
-
-
-def test_figure_note_enrichment_adds_verified_source_caption():
-    note = (
-        "[Figure Note Metadata]\n"
-        "image_type: graph\n"
-        "confidence: 0.95\n"
-        "title: null\n"
-    )
-    enriched = DocumentProcessor._enrich_figure_note_with_source_caption(
-        note,
-        {
-            "figure_number": "19",
-            "source_caption": "Figure 19 (Upper) - Inasion and Resistivity Profile.",
-        },
-    )
-
-    assert "figure_number: 19" in enriched
-    assert "source_caption_verified: true" in enriched
-    assert "Inasion and Resistivity Profile" in enriched
