@@ -75,13 +75,22 @@ def _overlap_start(text: str, chunk_start: int, chunk_end: int, overlap: int) ->
     if candidate >= chunk_end:
         return chunk_end
 
-    # Move forward to the next natural boundary so the next chunk does not
-    # begin halfway through a word or equation token.
-    tail = text[candidate:chunk_end]
-    matches = list(re.finditer(r"(?:\n\n|\n|(?<=[.!?;:])\s+|\s+)", tail))
+    boundary_re = r"(?:\n\n|\n|(?<=[.!?;:])\s+|\s+)"
+
+    # Prefer the last complete boundary before the requested overlap point.
+    # This gives at least the requested overlap without starting mid-token.
+    before = text[chunk_start:candidate]
+    matches = list(re.finditer(boundary_re, before))
     if matches:
-        return min(chunk_end, candidate + matches[0].end())
-    return candidate
+        return chunk_start + matches[-1].end()
+
+    # For a very long token/equation with no earlier boundary, move forward
+    # rather than starting in the middle of that token.
+    after = text[candidate:chunk_end]
+    match = re.search(boundary_re, after)
+    if match:
+        return min(chunk_end, candidate + match.end())
+    return chunk_end
 
 
 def _chunk_text(text: str, chunk_size: int, chunk_overlap: int) -> list[str]:
