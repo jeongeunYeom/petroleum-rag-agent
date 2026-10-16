@@ -144,3 +144,14 @@ def test_technical_term_expansion_keeps_core_terms():
     assert "archie's equation" in terms
     assert "formation resistivity factor" in terms
     assert "설명해줘" not in terms
+
+
+
+def test_invasion_query_expands_to_source_typo_without_rewriting_source():
+    terms = {term.lower() for term in expand_query_terms(
+        "Explain the invasion and resistivity profile."
+    )}
+
+    assert "invasion" in terms
+    assert "inasion" in terms
+    assert "resistivity profile" in terms
