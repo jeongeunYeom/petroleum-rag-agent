@@ -59,6 +59,33 @@ def test_select_page_text_prefers_pymupdf_on_equal_quality():
     assert extractor == "pymupdf_sorted"
 
 
+def test_select_page_text_rejects_layout_fragmentation_for_subscripts():
+    pymupdf = (
+        "Rwa Comparison\n"
+        "Rwa = Rt / F ≈ RID / F\n"
+        "Rw is water resistivity. Rwa reaches 0.6 ohm-m."
+    )
+    pdfplumber = (
+        "R\n"
+        "  wa Comparison\n"
+        "R     R\n"
+        " wa =  t / F ≈ R\n"
+        "              ID / F\n"
+        "R\n"
+        " w is water resistivity. R\n"
+        "                         wa reaches 0.6 ohm-m."
+    )
+
+    selected, extractor, diagnostics = DocumentProcessor.select_page_text(
+        pymupdf,
+        pdfplumber,
+    )
+
+    assert extractor == "pymupdf_sorted"
+    assert selected == pymupdf
+    assert diagnostics["pdfplumber_layout"]["lines"] > diagnostics["pymupdf_sorted"]["lines"]
+
+
 def test_ingestion_version_marks_old_records_stale():
     assert DocumentProcessor.is_current_record(_record(INGESTION_VERSION))
     assert not DocumentProcessor.is_current_record(_record(None))
