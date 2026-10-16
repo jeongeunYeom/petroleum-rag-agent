@@ -19,7 +19,7 @@ from app.services.goal_research_agent import GoalResearchAgent
 from app.services.goal_research_service import GoalResearchService
 from app.services.evidence_fact_registry import EvidenceFactRegistry
 from app.services.formula_source_registry import FormulaSourceRegistry, normalize_formula
-from app.services.goal_python_analysis import GoalPythonAnalysis
+from app.services.goal_python_analysis import GoalPythonAnalysis, _basic_formula_values
 from app.services.goal_tool_planner import (
     AnalysisPlanSelection, GoalToolPlanner, PLAN_SCHEMA, ToolNeedDecision,
     materialize_analysis_plan_v4, PlanMaterializationError,
@@ -90,6 +90,14 @@ def test_formula_registry_normalizes_only_literal_equations():
     ).records
     assert len(sqrt_formula) == 1
     assert sqrt_formula[0].expression_candidate == "S_w = sqrt(R_w / R_wa)"
+
+
+def test_square_root_formula_evaluates_from_verified_source_text():
+    result = _basic_formula_values(
+        "S_w = sqrt(R_w / R_wa)",
+        {"R_w": 0.08, "R_wa": 0.6},
+    )
+    assert result["S_w"] == pytest.approx((0.08 / 0.6) ** 0.5)
 
 
 def test_plan_schema_has_ids_only_and_materialization_is_canonical():
