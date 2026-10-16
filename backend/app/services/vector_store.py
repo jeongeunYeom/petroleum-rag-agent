@@ -324,6 +324,32 @@ class VectorStore:
                 parts.append(body)
         return "\n".join(parts)[:6000]
 
+    def equation_hits_for_pages(
+        self,
+        pages: list[tuple[str, int]],
+    ) -> list[dict[str, Any]]:
+        """Return verified equation chunks co-located with retrieved page text."""
+        if not pages:
+            return []
+        wanted = set(pages)
+        data = self.collection.get(
+            where={"chunk_type": "equation"},
+            include=["documents", "metadatas"],
+        )
+        return [
+            {"id": str(chunk_id), "text": str(text or ""), "metadata": metadata or {}}
+            for chunk_id, text, metadata in zip(
+                data.get("ids", []),
+                data.get("documents", []),
+                data.get("metadatas", []),
+            )
+            if (
+                str((metadata or {}).get("document_id") or ""),
+                int((metadata or {}).get("page") or 0),
+            ) in wanted
+            and "equation_verified: true" in str(text or "").lower()
+        ]
+
     def search(
         self,
         question: str,

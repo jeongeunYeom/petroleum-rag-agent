@@ -529,6 +529,67 @@ def test_legacy_figure_marker_does_not_return_equation_chunks() -> None:
     assert not ResearchAgent._is_figure_hit(documents[2], metadatas[2])
 
 
+def test_formula_question_attaches_verified_equation_from_retrieved_page(tmp_path: Path) -> None:
+    context = {
+        "id": "text-171",
+        "text": "Water saturation relationship between Rw and Rwa is discussed here.",
+        "metadata": {"document_id": "a" * 64, "page": 171, "chunk_type": "text"},
+    }
+    equations = [
+        {
+            "id": "rwa-equation",
+            "text": "equation_text: R_wa = R_t/F\nequation_verified: true",
+            "metadata": {"document_id": "a" * 64, "page": 171, "chunk_type": "equation"},
+        },
+        {
+            "id": "saturation-equation",
+            "text": "equation_text: S_w = sqrt(R_w/R_wa)\nequation_verified: true",
+            "metadata": {"document_id": "a" * 64, "page": 171, "chunk_type": "equation"},
+        },
+    ]
+
+    class Store(FakeVectorStore):
+        def equation_hits_for_pages(self, pages):
+            self.pages = pages
+            return list(equations)
+
+    store = Store(dense=[context], bm25=[context])
+    agent = make_agent(tmp_path, vector_store=store, retrieval_mode="hybrid")
+
+    hits = agent.search_knowledge_base(
+        "What is the water saturation relationship between Rw and Rwa?", 5
+    )
+
+    assert [hit["id"] for hit in hits] == ["saturation-equation", "text-171"]
+    assert store.pages == [("a" * 64, 171)]
+
+
+def test_equation_page_lookup_excludes_other_and_unverified_spans() -> None:
+    class Collection:
+        def get(self, **kwargs):
+            assert kwargs["where"] == {"chunk_type": "equation"}
+            return {
+                "ids": ["verified", "other-page", "unverified"],
+                "documents": [
+                    "equation_text: S_w = sqrt(R_w/R_wa)\nequation_verified: true",
+                    "equation_text: X = Y\nequation_verified: true",
+                    "equation_text: S_w = R_w/R_wa\nequation_verified: false",
+                ],
+                "metadatas": [
+                    {"document_id": "a" * 64, "page": 171, "chunk_type": "equation"},
+                    {"document_id": "a" * 64, "page": 172, "chunk_type": "equation"},
+                    {"document_id": "a" * 64, "page": 171, "chunk_type": "equation"},
+                ],
+            }
+
+    store = VectorStore.__new__(VectorStore)
+    store.collection = Collection()
+
+    assert [hit["id"] for hit in store.equation_hits_for_pages([("a" * 64, 171)])] == [
+        "verified"
+    ]
+
+
 def test_external_search_normalizes_and_deduplicates_urls(tmp_path: Path) -> None:
     raw = [
         {

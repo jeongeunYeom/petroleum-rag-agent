@@ -1590,7 +1590,12 @@ class FigureAnalysisService:
             if status == "review_required"
             else ".failed.json"
         )
-        candidate_path = candidate_dir / f"{image_path.stem}{suffix}"
+        # The parent directory already names the document. Repeating its
+        # 64-character digest in the filename can exceed Windows path limits.
+        candidate_stem = image_path.stem.removeprefix(f"{document_id}_")
+        if len(candidate_stem) > 64:
+            candidate_stem = hashlib.sha256(image_path.stem.encode()).hexdigest()[:16]
+        candidate_path = candidate_dir / f"{candidate_stem}{suffix}"
         candidate_path.write_text(
             json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",

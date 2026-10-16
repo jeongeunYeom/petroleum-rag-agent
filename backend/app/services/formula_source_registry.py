@@ -11,11 +11,13 @@ from pydantic import BaseModel, Field
 
 EQUATION = re.compile(
     r"(?P<equation>\b[A-Za-z][A-Za-z0-9_₀-₉]*\s*=\s*"
-    r"(?:(?!\.\s+[A-Za-z]|,\s*[A-Za-z][A-Za-z0-9_₀-₉]*\s*=)[A-Za-z0-9_₀-₉+\-*/().×÷−· \t])+)"
+    r"(?:(?!\.\s+[A-Za-z]|,\s*[A-Za-z][A-Za-z0-9_₀-₉]*\s*=)[A-Za-z0-9_₀-₉Δ∆δμµφρ+\-*/().×÷−· \t])+)"
 )
 TRANSLATION = str.maketrans({"×": "*", "÷": "/", "−": "-", "–": "-", "·": "*",
                             "₀": "0", "₁": "1", "₂": "2", "₃": "3", "₄": "4", "₅": "5",
-                            "₆": "6", "₇": "7", "₈": "8", "₉": "9"})
+                            "₆": "6", "₇": "7", "₈": "8", "₉": "9",
+                            "Δ": "Delta", "∆": "Delta", "δ": "delta",
+                            "μ": "mu", "µ": "mu", "φ": "phi", "ρ": "rho"})
 ALLOWED = (
     ast.Expression,
     ast.BinOp,

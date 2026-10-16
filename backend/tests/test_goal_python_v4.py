@@ -92,6 +92,17 @@ def test_formula_registry_normalizes_only_literal_equations():
     assert sqrt_formula[0].expression_candidate == "S_w = sqrt(R_w / R_wa)"
 
 
+def test_formula_registry_preserves_vision_greek_equation_span():
+    text = "[Equation Note Metadata]\nequation_text: Q = k * A * ΔP / (l * μ)"
+    records = FormulaSourceRegistry.from_evidence([source(text)]).records
+
+    assert len(records) == 1
+    assert records[0].raw_span == "Q = k * A * ΔP / (l * μ)"
+    assert records[0].expression_candidate == "Q = k * A * DeltaP / (l * mu)"
+    assert records[0].normalized_span == normalize_formula(records[0].raw_span)
+    assert text[records[0].span_start:records[0].span_end] == records[0].raw_span
+
+
 def test_square_root_formula_evaluates_from_verified_source_text():
     result = _basic_formula_values(
         "S_w = sqrt(R_w / R_wa)",

@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 SUPPORTED_EXTENSIONS = {".pdf", ".txt", ".png", ".jpg", ".jpeg", ".ppt", ".pptx"}
 DOCUMENT_ID_PATTERN = re.compile(r"^[0-9a-f]{64}$")
-INGESTION_VERSION = "kb-ingestion-v8"
+INGESTION_VERSION = "kb-ingestion-v9"
 REVIEWED_EQUATIONS_DIR = Path(__file__).resolve().parents[2] / "reviewed_equations"
 
 

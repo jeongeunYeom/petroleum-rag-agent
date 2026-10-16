@@ -56,6 +56,10 @@ FIGURE_RE = re.compile(
     r"압력\s*(?:기울기|구배)",
     re.IGNORECASE,
 )
+EQUATION_RELATION_RE = re.compile(
+    r"\b(?:equation|formula|relationship|relation|law)\b|수식|관계식|계산식|공식|법칙",
+    re.IGNORECASE,
+)
 FIGURE_NUMBER_RE = re.compile(
     r"(?<![A-Za-z0-9])figure\s*([0-9]+[A-Za-z]?)(?![A-Za-z0-9])",
     re.IGNORECASE,
@@ -643,7 +647,7 @@ class ResearchAgent:
         if self.settings.retrieval_mode == "hybrid_rerank":
             ranked = self._rerank_hits(query, ranked)
         if not FIGURE_RE.search(query):
-            return ranked[:top_k]
+            return self._attach_page_equations(query, ranked, top_k)
 
         figures = self._search_figure_channel(query, candidate_count)
         if not figures:
@@ -660,6 +664,82 @@ class ResearchAgent:
             )
         ][: max(top_k - figure_budget, 0)]
         return [*selected_text, *selected_figures]
+
+    def _attach_page_equations(
+        self,
+        query: str,
+        ranked: list[dict[str, Any]],
+        top_k: int,
+    ) -> list[dict[str, Any]]:
+        getter = getattr(self.vector_store, "equation_hits_for_pages", None)
+        if (
+            top_k < 2
+            or not ranked
+            or not EQUATION_RELATION_RE.search(query)
+            or not callable(getter)
+        ):
+            return ranked[:top_k]
+
+        pages: list[tuple[str, int]] = []
+        for hit in ranked[:top_k]:
+            metadata = hit.get("metadata") or {}
+            document_id = str(metadata.get("document_id") or "")
+            page = self._optional_int(metadata.get("page"))
+            if document_id and page is not None:
+                key = (document_id, page)
+                if key not in pages:
+                    pages.append(key)
+        if not pages:
+            return ranked[:top_k]
+
+        query_symbols = set(re.findall(r"[A-Za-z][A-Za-z0-9_]*", query.casefold()))
+        equations = getter(pages)
+        page_positions = {key: index for index, key in enumerate(pages)}
+        page_scores: dict[tuple[str, int | None], float] = {}
+        for hit in ranked:
+            metadata = hit.get("metadata") or {}
+            key = (
+                str(metadata.get("document_id") or ""),
+                self._optional_int(metadata.get("page")),
+            )
+            if key in page_positions:
+                page_scores[key] = max(
+                    page_scores.get(key, 0.0), float(hit.get("rrf_score") or 0.0)
+                )
+
+        def equation_rank(hit: dict[str, Any]) -> tuple[int, int]:
+            metadata = hit.get("metadata") or {}
+            page_key = (
+                str(metadata.get("document_id") or ""),
+                self._optional_int(metadata.get("page")),
+            )
+            formula = (
+                str(hit.get("text") or "").split("equation_text:", 1)[-1].splitlines()[0]
+            )
+            symbols = {
+                symbol.replace("_", "").casefold()
+                for symbol in re.findall(r"[A-Za-z][A-Za-z0-9_]*", formula)
+            }
+            return (
+                len(query_symbols & symbols),
+                -page_positions.get(page_key, len(pages)),
+            )
+
+        equations.sort(key=equation_rank, reverse=True)
+        budget = min(2, max(1, top_k // 4))
+        selected = equations[:budget]
+        for hit in selected:
+            metadata = hit.get("metadata") or {}
+            key = (
+                str(metadata.get("document_id") or ""),
+                self._optional_int(metadata.get("page")),
+            )
+            hit["rrf_score"] = page_scores.get(key, 0.0)
+        selected_ids = {str(hit.get("id") or "") for hit in selected}
+        return [
+            *selected,
+            *(hit for hit in ranked if str(hit.get("id") or "") not in selected_ids),
+        ][:top_k]
 
     def _search_figure_channel(
         self,

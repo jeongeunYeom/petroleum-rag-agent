@@ -253,6 +253,43 @@ def test_unverified_vector_equation_is_removed_from_body_chunks(tmp_path: Path):
     assert "[Visual equation awaiting verification]" in pages[0]["text"]
 
 
+def test_new_pdf_automatically_creates_verified_equation_chunk(tmp_path: Path):
+    pdf_path = tmp_path / "new-upload.pdf"
+    document = fitz.open()
+    page = document.new_page()
+    page.insert_text((72, 120), "Q = k A dP", fontsize=12)
+    page.insert_text((125, 140), "l mu", fontsize=12)
+    page.draw_line((115, 126), (172, 126))
+    document.save(pdf_path)
+    document.close()
+
+    class Vision:
+        calls = 0
+
+        async def describe_image(self, image_path, prompt=None, num_predict=None):
+            self.calls += 1
+            return (
+                "image_type: equation\nconfidence: 0.99\nreadable_labels: true\n"
+                "equation_text: Q = k*A*dP/(l*mu)\n"
+                "analysis: Visible fraction equation."
+            )
+
+    vision = Vision()
+    settings = _settings(tmp_path)
+    processor = DocumentProcessor(settings, vision)
+    digest = hashlib.sha256(pdf_path.read_bytes()).hexdigest()
+    record, chunks = asyncio.run(processor.extract(pdf_path, digest, True))
+
+    equations = [chunk for chunk in chunks if chunk["metadata"]["chunk_type"] == "equation"]
+    assert vision.calls == 1
+    assert record.equations_valid == 1
+    assert len(equations) == 1
+    assert "equation_verified: true" in equations[0]["text"]
+    assert "Q = k*A*dP/(l*mu)" in equations[0]["text"]
+    assert equations[0]["metadata"]["page"] == 1
+    assert (settings.figure_candidates_dir / digest / "p1_eq1.json").is_file()
+
+
 
 def test_source_figure_caption_uses_image_geometry_and_preserves_source_text(tmp_path: Path):
     image_path = tmp_path / "figure.png"
