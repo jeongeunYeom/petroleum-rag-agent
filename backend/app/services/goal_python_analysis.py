@@ -83,6 +83,14 @@ def _basic_formula_values(formula: str, facts: dict[str, float]) -> dict[str, fl
             return -operand if isinstance(node.op, ast.USub) else operand
         if isinstance(node, ast.BinOp):
             return operations[type(node.op)](calculate(node.left), calculate(node.right))
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "sqrt"
+            and len(node.args) == 1
+            and not node.keywords
+        ):
+            return math.sqrt(calculate(node.args[0]))
         raise ValueError("Unsupported arithmetic formula")
 
     for statement in re.split(r"[;\n]", formula):
