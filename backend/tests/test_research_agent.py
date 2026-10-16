@@ -680,6 +680,36 @@ def test_equation_bm25_uses_page_context_but_returns_literal_verified_span() -> 
     assert "Darcy's law" in hits[0]["equation_context"]
 
 
+def test_equation_channel_withholds_ambiguous_same_page_context() -> None:
+    class Collection:
+        def get(self, **kwargs):
+            if kwargs["where"] == {"chunk_type": "equation"}:
+                return {
+                    "ids": ["law", "other"],
+                    "documents": [
+                        "equation_text: Q = k*A*DeltaP/(l*mu)\nequation_verified: true",
+                        "equation_text: Z = alpha*beta\nequation_verified: true",
+                    ],
+                    "metadatas": [
+                        {"document_id": "generic", "page": 12, "chunk_type": "equation"},
+                        {"document_id": "generic", "page": 12, "chunk_type": "equation"},
+                    ],
+                }
+            return {
+                "ids": ["context"],
+                "documents": ["Darcy's law: Q is flow rate, k is permeability, A is area."],
+                "metadatas": [{"document_id": "generic", "page": 12, "chunk_type": "text"}],
+            }
+
+    store = VectorStore.__new__(VectorStore)
+    store.collection = Collection()
+
+    hits = store.bm25_search_equations("Darcy law", 5)
+
+    assert {hit["id"] for hit in hits} == {"law", "other"}
+    assert all(hit["equation_context"] == "" for hit in hits)
+
+
 def test_verified_equation_overrides_conflicting_extracted_text(tmp_path: Path) -> None:
     agent = make_agent(tmp_path)
     evidence = {
@@ -751,7 +781,9 @@ def test_named_relation_needs_matching_page_context_for_auto_equation(
         evidence,
         [],
         "Explain Darcy's law.",
-        equation_context={"KB1": "Darcy's law defines permeability from flow rate and pressure gradient."},
+        equation_context={
+            "KB1": "Darcy's law defines permeability: Q is flow rate, k is permeability, A is area."
+        },
     )
 
     assert "Q = k*A*DeltaP/(l*mu) [KB1]" in answer
@@ -777,7 +809,7 @@ def test_auto_equation_skips_unrelated_verified_hit_before_relevant_one(
         "Explain Darcy's law.",
         equation_context={
             "KB1": "A separate relation for Z.",
-            "KB2": "Darcy's law relates permeability to flow rate and pressure gradient.",
+            "KB2": "Darcy's law: Q is flow rate, k is permeability, A is area.",
         },
     )
 
@@ -786,7 +818,7 @@ def test_auto_equation_skips_unrelated_verified_hit_before_relevant_one(
     assert validation["valid_citations"] == ["KB2"]
 
 
-def test_page_topic_alone_does_not_verify_an_unrelated_equation(tmp_path: Path) -> None:
+def test_same_page_relation_does_not_verify_an_unrelated_equation(tmp_path: Path) -> None:
     agent = make_agent(tmp_path)
     empty = json.dumps({
         "internal": [], "external": [], "synthesis": [], "limitations": [],
@@ -796,7 +828,10 @@ def test_page_topic_alone_does_not_verify_an_unrelated_equation(tmp_path: Path) 
         {"KB1": "equation_text: Z = alpha*beta\nequation_verified: true"},
         [],
         "Explain Darcy's law.",
-        equation_context={"KB1": "Darcy permeability discussion. A separate formula defines Z."},
+        equation_context={
+            "KB1": "Darcy's law: Q is flow rate, k is permeability, A is area. "
+            "A separate formula defines Z from alpha and beta."
+        },
     )
 
     assert "Z = alpha*beta" not in answer

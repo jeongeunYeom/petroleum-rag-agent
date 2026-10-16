@@ -380,6 +380,10 @@ class VectorStore:
         if not verified:
             return []
 
+        page_equation_counts: dict[tuple[str | None, int | None], int] = {}
+        for _, _, metadata in verified:
+            key = (metadata.get("document_id"), metadata.get("page"))
+            page_equation_counts[key] = page_equation_counts.get(key, 0) + 1
         pages = {(metadata.get("document_id"), metadata.get("page")) for _, _, metadata in verified}
         context: dict[tuple[str, int], list[str]] = {}
         for document_id in {str(value[0]) for value in pages if value[0]}:
@@ -411,7 +415,11 @@ class VectorStore:
         hits = self._bm25_search_data(question, top_k, augmented)
         for hit in hits:
             hit["text"] = originals[hit["id"]]
-            hit["equation_context"] = page_context[hit["id"]]
+            metadata = hit.get("metadata") or {}
+            page_key = (metadata.get("document_id"), metadata.get("page"))
+            hit["equation_context"] = (
+                page_context[hit["id"]] if page_equation_counts[page_key] == 1 else ""
+            )
         return hits
 
     def search(

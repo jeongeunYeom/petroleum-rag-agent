@@ -2809,14 +2809,25 @@ class ResearchAgent:
                 )
                 symbol_overlap = len(query_symbols & symbols)
                 context = (equation_context or {}).get(evidence_id, "").casefold()
-                named_relation = any(
-                    re.search(
+                named_relation = False
+                for term in relation_terms:
+                    relation = re.search(
                         rf"\b{re.escape(term)}(?:['’]s)?\W{{0,20}}"
                         rf"(?:law|equation|formula|relationship|relation)\b",
                         context,
                     )
-                    for term in relation_terms
-                )
+                    if not relation:
+                        continue
+                    preceding = context[max(0, relation.start() - 500):relation.start()]
+                    following = context[relation.end():relation.end() + 250].split(".", 1)[0]
+                    nearby = preceding + context[relation.start():relation.end()] + following
+                    nearby_symbols = {
+                        token.replace("_", "").casefold()
+                        for token in re.findall(r"[A-Za-z][A-Za-z0-9_]*", nearby)
+                    }
+                    if lhs_symbol in nearby_symbols and len(symbols & nearby_symbols) >= 2:
+                        named_relation = True
+                        break
                 if lhs_in_query or symbol_overlap >= 2 or named_relation:
                     return evidence_id, equation
         return None
