@@ -75,6 +75,7 @@ class DocumentRecord(BaseModel):
     filename: str
     sha256: str
     status: str
+    ingestion_version: str | None = None
     pages: int = 0
     chunks: int = 0
     figures: int = 0
