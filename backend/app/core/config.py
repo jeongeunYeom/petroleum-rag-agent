@@ -158,6 +158,13 @@ class Settings:
         )
     )
 
+    pdfplumber_fallback_enabled: bool = field(
+        default_factory=lambda: os.getenv(
+            "PDFPLUMBER_FALLBACK_ENABLED",
+            "0",
+        ) == "1"
+    )
+
     top_k: int = field(
         default_factory=lambda: int(
             os.getenv("TOP_K", "10")
