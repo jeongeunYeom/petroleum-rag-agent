@@ -54,6 +54,9 @@ GRAPH_SCHEMA_FIELDS = [
     "page_number",
     "image_index",
     "image_path",
+    "figure_number",
+    "source_caption",
+    "source_caption_verified",
     "image_type",
     "confidence",
     "title",
@@ -92,6 +95,9 @@ DIAGRAM_SCHEMA_FIELDS = [
     "page_number",
     "image_index",
     "image_path",
+    "figure_number",
+    "source_caption",
+    "source_caption_verified",
     "image_type",
     "confidence",
     "title",
@@ -1125,6 +1131,8 @@ class FigureAnalysisService:
         fallback_image_path: Path | None = None,
         remaining_vision_calls: int | None = None,
         forced_classification: str | None = None,
+        source_figure_number: str | None = None,
+        source_caption: str | None = None,
     ) -> FigureAnalysisResult:
         metrics = image_metrics(image_path)
         analyze, reason = should_analyze(metrics)
@@ -1152,6 +1160,8 @@ class FigureAnalysisService:
                 image_path=image_path,
                 reason="vision_call_limit_reached",
                 metrics=metrics,
+                source_figure_number=source_figure_number,
+                source_caption=source_caption,
             )
 
         try:
@@ -1215,6 +1225,8 @@ class FigureAnalysisService:
             analysis=first,
             vision_calls=used_calls,
             metrics=metrics,
+            source_figure_number=source_figure_number,
+            source_caption=source_caption,
         )
 
     async def _analyze_input(
@@ -1420,6 +1432,8 @@ class FigureAnalysisService:
         analysis: dict[str, Any],
         vision_calls: int,
         metrics: dict[str, Any],
+        source_figure_number: str | None = None,
+        source_caption: str | None = None,
     ) -> FigureAnalysisResult:
         status = str(analysis.get("status") or "failed")
         classification = str(analysis.get("classification") or "unknown")
@@ -1452,6 +1466,11 @@ class FigureAnalysisService:
                     "page_number": page_number,
                     "image_index": image_index,
                     "image_path": str(image_path),
+                    "figure_number": source_figure_number,
+                    "source_caption": source_caption,
+                    "source_caption_verified": bool(
+                        source_figure_number and source_caption
+                    ),
                     "vision_model": self.settings.vision_model,
                     "legacy_note_backup": None,
                 }
@@ -1470,6 +1489,11 @@ class FigureAnalysisService:
             "document_name": document_name,
             "page_number": page_number,
             "image_index": image_index,
+            "source_figure_number": source_figure_number,
+            "source_caption": source_caption,
+            "source_caption_verified": bool(
+                source_figure_number and source_caption
+            ),
             "created_at": datetime.now(timezone.utc).isoformat(),
             "vision_model": self.settings.vision_model,
             "automatic_classification": classification,
@@ -1540,6 +1564,8 @@ class FigureAnalysisService:
         image_path: Path,
         reason: str,
         metrics: dict[str, Any],
+        source_figure_number: str | None = None,
+        source_caption: str | None = None,
     ) -> FigureAnalysisResult:
         return self._persist_result(
             document_name=document_name,
@@ -1559,6 +1585,8 @@ class FigureAnalysisService:
             },
             vision_calls=0,
             metrics=metrics,
+            source_figure_number=source_figure_number,
+            source_caption=source_caption,
         )
 
     @staticmethod
