@@ -1,4 +1,5 @@
 import asyncio
+import hashlib
 from pathlib import Path
 
 import fitz
@@ -107,6 +108,35 @@ def test_text_only_record_is_reprocessed_when_figure_analysis_is_requested():
         text_only,
         analyze_figures=True,
     )
+
+
+def test_reviewed_equations_require_matching_pdf_and_crop(tmp_path: Path):
+    digest = "d3d33e53ea2478fe3729bba7019d8604095c5b6c2c2d3dc0bd7e9608a9931ebb"
+    reviews = DocumentProcessor._reviewed_equations(digest)
+    assert len(reviews) == 3
+    assert not DocumentProcessor._reviewed_equations("a" * 64)
+
+    image_path = tmp_path / "equation.png"
+    image_path.write_bytes(b"reviewed crop")
+    job = {
+        "page_number": 171, "equation_index": 2,
+        "image_path": image_path,
+        "raw_text": "Sw = Rw / Rwa . (8)", "has_radical": True,
+    }
+    review = {
+        **reviews[(171, 2)],
+        "crop_sha256": hashlib.sha256(image_path.read_bytes()).hexdigest(),
+    }
+    note = DocumentProcessor._verified_equation_note(job, review, digest, "book.pdf")
+    assert note is not None
+    assert "S_w = sqrt(R_w/R_wa)" in note
+
+    image_path.write_bytes(b"a different crop")
+    assert DocumentProcessor._verified_equation_note(job, review, digest, "book.pdf") is None
+    image_path.write_bytes(b"reviewed crop")
+    assert DocumentProcessor._verified_equation_note(
+        {**job, "has_radical": False}, review, digest, "book.pdf"
+    ) is None
 
 
 

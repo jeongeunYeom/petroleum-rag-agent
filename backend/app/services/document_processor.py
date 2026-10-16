@@ -24,7 +24,8 @@ if TYPE_CHECKING:
 
 SUPPORTED_EXTENSIONS = {".pdf", ".txt", ".png", ".jpg", ".jpeg", ".ppt", ".pptx"}
 DOCUMENT_ID_PATTERN = re.compile(r"^[0-9a-f]{64}$")
-INGESTION_VERSION = "kb-ingestion-v7"
+INGESTION_VERSION = "kb-ingestion-v8"
+REVIEWED_EQUATIONS_DIR = Path(__file__).resolve().parents[2] / "reviewed_equations"
 
 
 def delete_document_files(settings: Settings, document_id: str) -> int:
@@ -181,6 +182,63 @@ class DocumentProcessor:
             if file_path.name.startswith(prefix)
             else file_path.name
         )
+
+    @staticmethod
+    def _reviewed_equations(digest: str) -> dict[tuple[int, int], dict[str, object]]:
+        """Load image-checked transcriptions only for the exact PDF hash."""
+        if not DOCUMENT_ID_PATTERN.fullmatch(digest):
+            return {}
+        path = REVIEWED_EQUATIONS_DIR / f"{digest}.json"
+        if not path.is_file():
+            return {}
+        try:
+            manifest = json.loads(path.read_text(encoding="utf-8"))
+            if (
+                manifest.get("pdf_sha256") != digest
+                or manifest.get("verification_method") != "manual_visual_audit"
+            ):
+                return {}
+            entries = manifest["equations"]
+            return {
+                (int(item["page"]), int(item["index"])): item
+                for item in entries
+                if isinstance(item, dict)
+            }
+        except (OSError, ValueError, KeyError, TypeError, AttributeError):
+            return {}
+
+    @staticmethod
+    def _verified_equation_note(
+        job: dict[str, object], review: dict[str, object] | None,
+        digest: str, display_filename: str,
+    ) -> str | None:
+        if review is None:
+            return None
+        image_path = Path(str(job["image_path"]))
+        equation_text = review.get("equation_text")
+        expected_sha = review.get("crop_sha256")
+        if (
+            not isinstance(equation_text, str) or "=" not in equation_text
+            or not isinstance(expected_sha, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", expected_sha)
+            or review.get("raw_text") != job.get("raw_text")
+            or review.get("has_radical") is not job.get("has_radical")
+            or hashlib.sha256(image_path.read_bytes()).hexdigest() != expected_sha
+        ):
+            return None
+        return "\n".join([
+            "[Equation Note Metadata]",
+            f"document_name: {display_filename}",
+            f"document_id: {digest}",
+            f"page_number: {job['page_number']}",
+            f"image_index: {job['equation_index']}",
+            f"image_path: {image_path}",
+            f"crop_sha256: {expected_sha}",
+            "image_type: equation",
+            f"equation_text: {equation_text}",
+            "equation_verified: true",
+            "verification_method: manual_visual_audit",
+        ])
 
     async def save_upload(self, upload: UploadFile) -> tuple[Path, str]:
         suffix = Path(upload.filename or "uploaded").suffix.lower()
@@ -999,6 +1057,11 @@ class DocumentProcessor:
         equation_vision_calls = 0
         plumber_pdf = None
         display_filename = self._display_filename(file_path, digest)
+        reviewed_equations = (
+            self._reviewed_equations(digest)
+            if hashlib.sha256(file_path.read_bytes()).hexdigest() == digest
+            else {}
+        )
 
         doc = fitz.open(file_path)
 
@@ -1065,33 +1128,37 @@ class DocumentProcessor:
                     pages[-1]["text"] = self._body_without_risky_equations(
                         page, equation_regions
                     )
-                if analyze_figures:
-                    for equation_index, region in enumerate(equation_regions, start=1):
-                        equation_path = (
-                            self.settings.figure_analysis_inputs_dir
-                            / f"{digest}_p{page_number}_eq{equation_index}.png"
-                        )
-                        rendered = self._render_equation_crop(
-                            page,
-                            tuple(region["rect"]),
-                            equation_path,
-                        )
-                        if rendered is None:
-                            continue
-                        self._equation_stats["detected"] += 1
-                        equation_jobs.append(
-                            {
-                                "page_index": index,
-                                "page_number": page_number,
-                                "equation_index": equation_index,
-                                "image_path": rendered,
-                                "raw_text": str(region.get("raw_text") or ""),
-                                "vector_element_count": int(
-                                    region.get("vector_element_count") or 0
-                                ),
-                                "has_radical": bool(region.get("has_radical")),
-                            }
-                        )
+                for equation_index, region in enumerate(equation_regions, start=1):
+                    if (
+                        not analyze_figures
+                        and (page_number, equation_index) not in reviewed_equations
+                    ):
+                        continue
+                    equation_path = (
+                        self.settings.figure_analysis_inputs_dir
+                        / f"{digest}_p{page_number}_eq{equation_index}.png"
+                    )
+                    rendered = self._render_equation_crop(
+                        page,
+                        tuple(region["rect"]),
+                        equation_path,
+                    )
+                    if rendered is None:
+                        continue
+                    self._equation_stats["detected"] += 1
+                    equation_jobs.append(
+                        {
+                            "page_index": index,
+                            "page_number": page_number,
+                            "equation_index": equation_index,
+                            "image_path": rendered,
+                            "raw_text": str(region.get("raw_text") or ""),
+                            "vector_element_count": int(
+                                region.get("vector_element_count") or 0
+                            ),
+                            "has_radical": bool(region.get("has_radical")),
+                        }
+                    )
 
                 try:
                     page_images = page.get_images(full=True)
@@ -1153,7 +1220,7 @@ class DocumentProcessor:
                         }
                     )
 
-            if analyze_figures and equation_jobs:
+            if equation_jobs:
                 # Pass 2a: verify equations whose fraction bars, radicals, or
                 # other vector geometry cannot be trusted in plain PDF text.
                 page_equation_notes: dict[int, list[tuple[int, str]]] = {}
@@ -1163,6 +1230,28 @@ class DocumentProcessor:
                     page_number = int(job["page_number"])
                     equation_index = int(job["equation_index"])
                     equation_path = Path(str(job["image_path"]))
+                    reviewed_note = self._verified_equation_note(
+                        job,
+                        reviewed_equations.get((page_number, equation_index)),
+                        digest,
+                        display_filename,
+                    )
+                    if reviewed_note:
+                        self._equation_stats["valid"] += 1
+                        page_equation_assets.setdefault(page_number, []).append({
+                            "equation_index": equation_index,
+                            "image_path": str(equation_path),
+                            "status": "valid",
+                            "verification_method": "manual_visual_audit",
+                            "raw_text": str(job.get("raw_text") or ""),
+                            "has_radical": bool(job.get("has_radical")),
+                        })
+                        page_equation_notes.setdefault(page_number, []).append(
+                            (equation_index, reviewed_note)
+                        )
+                        continue
+                    if not analyze_figures:
+                        continue
                     remaining_calls = max(
                         0,
                         self.settings.equation_analysis_max_vision_calls
