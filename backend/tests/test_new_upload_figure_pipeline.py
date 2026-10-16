@@ -602,3 +602,67 @@ def test_uncertain_equation_is_not_indexed(tmp_path: Path) -> None:
 
     assert result.status in {"failed", "review_required"}
     assert result.should_index is False
+
+
+
+def test_source_caption_provenance_is_persisted_in_canonical_figure_note(tmp_path: Path) -> None:
+    image_path = tmp_path / "source_caption_p88_fig2.png"
+    make_graph_image(image_path)
+    ollama = FakeOllama(
+        [
+            "\n".join(
+                [
+                    "image_type: graph",
+                    "confidence: 0.96",
+                    "readable_labels: true",
+                    "title: unknown",
+                    "analysis: A resistivity profile diagram is visible.",
+                    "x_axis: unknown",
+                    "x_axis_unit: unknown",
+                    "x_axis_scale: unknown",
+                    "y_axis: unknown",
+                    "y_axis_unit: unknown",
+                    "y_axis_scale: unknown",
+                    "series_count: 1",
+                    "series_count_verified: true",
+                    "series_descriptions: One visible profile series.",
+                    "legend: unknown",
+                    "reference_lines: unknown",
+                    "plateau: unknown",
+                    "peak: unknown",
+                    "decline: unknown",
+                    "slope_changes: unknown",
+                    "trend: One visible profile series is shown.",
+                    "engineering_meaning: unknown",
+                ]
+            )
+        ]
+    )
+    service = FigureAnalysisService(DummySettings(tmp_path), ollama)  # type: ignore[arg-type]
+
+    result = asyncio.run(
+        service.analyze_figure(
+            document_name="formation-evaluation.pdf",
+            document_id="abc123",
+            page_number=88,
+            image_index=2,
+            image_path=image_path,
+            remaining_vision_calls=1,
+            forced_classification="graph",
+            source_figure_number="19",
+            source_caption=(
+                "Figure 19 (Upper) - Inasion and Resistivity Profile "
+                "in water bearing zone."
+            ),
+        )
+    )
+
+    assert result.status == "valid"
+    assert result.note_text is not None
+    assert "figure_number: 19" in result.note_text
+    assert "source_caption_verified: true" in result.note_text
+    assert "Inasion and Resistivity Profile" in result.note_text
+    assert result.candidate["source_figure_number"] == "19"
+    assert result.candidate["source_caption_verified"] is True
+    assert result.candidate["final_note_data"]["figure_number"] == "19"
+    assert "Inasion" in result.candidate["final_note_data"]["source_caption"]
