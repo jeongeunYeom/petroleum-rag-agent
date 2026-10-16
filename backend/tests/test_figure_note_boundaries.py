@@ -48,3 +48,21 @@ def test_legacy_figure_note_blocks_remain_supported():
     blocks = ResearchAgent._figure_note_blocks(text, {})
 
     assert [number for number, _ in blocks] == ["1", "2"]
+
+
+
+def test_figure_title_falls_back_to_verified_source_caption():
+    note = (
+        "[Figure Note Metadata]\n"
+        "figure_number: 19\n"
+        "source_caption: Figure 19 (Upper) - Inasion and Resistivity Profile in water bearing zone.\n"
+        "source_caption_verified: true\n"
+        "title: null\n"
+        "analysis: Visible resistivity profile diagram."
+    )
+
+    title = ResearchAgent._figure_title(note, {})
+
+    assert title is not None
+    assert title.startswith("(Upper) - Inasion")
+    assert not title.startswith("Figure 19")
