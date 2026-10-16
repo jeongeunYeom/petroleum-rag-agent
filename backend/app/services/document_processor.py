@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 SUPPORTED_EXTENSIONS = {".pdf", ".txt", ".png", ".jpg", ".jpeg", ".ppt", ".pptx"}
 DOCUMENT_ID_PATTERN = re.compile(r"^[0-9a-f]{64}$")
-INGESTION_VERSION = "kb-ingestion-v4"
+INGESTION_VERSION = "kb-ingestion-v5"
 
 
 def delete_document_files(settings: Settings, document_id: str) -> int:
@@ -134,6 +134,7 @@ class DocumentProcessor:
         self.ollama = ollama
         self.figure_analyzer = FigureAnalysisService(settings, ollama)
         self._figure_stats = self._empty_figure_stats()
+        self._equation_stats = self._empty_equation_stats()
 
     @staticmethod
     def _empty_figure_stats() -> dict[str, int]:
@@ -152,6 +153,25 @@ class DocumentProcessor:
             self._figure_stats[result.status] += 1
         if result.status != "ignored":
             self._figure_stats["analyzed"] += 1
+
+
+    @staticmethod
+    def _empty_equation_stats() -> dict[str, int]:
+        return {
+            "detected": 0,
+            "analyzed": 0,
+            "valid": 0,
+            "review_required": 0,
+            "failed": 0,
+            "vision_calls": 0,
+        }
+
+    def _record_equation_result(self, result: FigureAnalysisResult) -> None:
+        self._equation_stats["vision_calls"] += result.vision_calls
+        if result.status in {"valid", "review_required", "failed"}:
+            self._equation_stats[result.status] += 1
+        if result.vision_calls > 0:
+            self._equation_stats["analyzed"] += 1
 
     @staticmethod
     def _display_filename(file_path: Path, digest: str) -> str:
@@ -478,6 +498,7 @@ class DocumentProcessor:
         analyze_figures: bool = True,
     ) -> tuple[DocumentRecord, list[dict[str, object]]]:
         self._figure_stats = self._empty_figure_stats()
+        self._equation_stats = self._empty_equation_stats()
         suffix = file_path.suffix.lower()
 
         # 실제 저장 파일명에서 SHA-256 접두사 제거
@@ -529,6 +550,12 @@ class DocumentProcessor:
             figures_ignored=self._figure_stats["ignored"],
             figure_vision_calls=self._figure_stats["vision_calls"],
             figure_analysis_enabled=analyze_figures,
+            equations_detected=self._equation_stats["detected"],
+            equations_analyzed=self._equation_stats["analyzed"],
+            equations_valid=self._equation_stats["valid"],
+            equations_review_required=self._equation_stats["review_required"],
+            equations_failed=self._equation_stats["failed"],
+            equation_vision_calls=self._equation_stats["vision_calls"],
             title=document_info.get("title"),
             document_type=document_info.get("document_type"),
             contents_pages=document_info.get("contents_pages", []),
@@ -633,6 +660,178 @@ class DocumentProcessor:
             )
             return None
 
+    @staticmethod
+    def _is_equation_block_candidate(
+        text: str,
+        *,
+        rect_width: float,
+        page_width: float,
+    ) -> bool:
+        value = re.sub(r"\s+", " ", str(text or "")).strip()
+        if "=" not in value or not value:
+            return False
+        if len(value) > 180 or value.count("=") > 2:
+            return False
+        if rect_width > page_width * 0.78:
+            return False
+        word_count = len(re.findall(r"[A-Za-z]{2,}", value))
+        if word_count > 20:
+            return False
+
+        lhs = bool(
+            re.search(
+                r"^[A-Za-zΑ-ωΔ∆φρµ][A-Za-z0-9_Α-ωΔ∆φρµ]{0,12}\s*=",
+                value,
+            )
+        )
+        numbered = bool(re.search(r"\(\s*\d{1,3}[A-Za-z]?\s*\)", value))
+        math_signal = any(
+            symbol in value
+            for symbol in ("∆", "Δ", "φ", "ρ", "µ", "√", "≈", "≤", "≥", "^", "/")
+        )
+        return lhs or numbered or math_signal
+
+    def _equation_regions(self, page: object) -> list[dict[str, object]]:
+        """Find equations whose visual math contains non-text vector geometry."""
+        try:
+            import fitz
+
+            candidates: list[dict[str, object]] = []
+            page_width = float(page.rect.width)
+            for block in page.get_text("blocks", sort=True):
+                x0, y0, x1, y1, block_text = block[:5]
+                if not self._is_equation_block_candidate(
+                    str(block_text),
+                    rect_width=float(x1 - x0),
+                    page_width=page_width,
+                ):
+                    continue
+                candidates.append(
+                    {
+                        "rect": fitz.Rect(x0, y0, x1, y1),
+                        "raw_text": re.sub(r"\s+", " ", str(block_text)).strip(),
+                    }
+                )
+
+            merged: list[dict[str, object]] = []
+            for item in candidates:
+                rect = fitz.Rect(item["rect"])
+                attached = False
+                for existing in merged:
+                    current = fitz.Rect(existing["rect"])
+                    vertical_gap = max(
+                        0.0,
+                        rect.y0 - current.y1,
+                        current.y0 - rect.y1,
+                    )
+                    horizontal_overlap = min(rect.x1, current.x1) - max(
+                        rect.x0,
+                        current.x0,
+                    )
+                    horizontal_gap = max(
+                        0.0,
+                        rect.x0 - current.x1,
+                        current.x0 - rect.x1,
+                    )
+                    if vertical_gap <= 8 and (
+                        horizontal_overlap > 0 or horizontal_gap <= 60
+                    ):
+                        existing["rect"] = fitz.Rect(
+                            min(current.x0, rect.x0),
+                            min(current.y0, rect.y0),
+                            max(current.x1, rect.x1),
+                            max(current.y1, rect.y1),
+                        )
+                        existing["raw_text"] = (
+                            f"{existing['raw_text']} {item['raw_text']}"
+                        ).strip()
+                        attached = True
+                        break
+                if not attached:
+                    merged.append(item)
+
+            drawings = list(page.get_drawings())
+            risky: list[dict[str, object]] = []
+            for item in merged:
+                rect = fitz.Rect(item["rect"])
+                probe = fitz.Rect(
+                    max(0.0, rect.x0 - 12),
+                    max(0.0, rect.y0 - 12),
+                    min(float(page.rect.width), rect.x1 + 12),
+                    min(float(page.rect.height), rect.y1 + 12),
+                )
+                related_drawings = []
+                for drawing in drawings:
+                    drawing_rect = fitz.Rect(drawing.get("rect"))
+                    if drawing_rect.width > page_width * 0.70:
+                        continue
+                    expanded = fitz.Rect(
+                        drawing_rect.x0 - 1,
+                        drawing_rect.y0 - 1,
+                        drawing_rect.x1 + 1,
+                        drawing_rect.y1 + 1,
+                    )
+                    if expanded.intersects(probe):
+                        related_drawings.append(drawing_rect)
+
+                if not related_drawings:
+                    continue
+
+                x0, y0, x1, y1 = rect.x0, rect.y0, rect.x1, rect.y1
+                for drawing_rect in related_drawings:
+                    x0 = min(x0, drawing_rect.x0)
+                    y0 = min(y0, drawing_rect.y0)
+                    x1 = max(x1, drawing_rect.x1)
+                    y1 = max(y1, drawing_rect.y1)
+
+                crop = fitz.Rect(
+                    max(0.0, x0 - 18),
+                    max(0.0, y0 - 18),
+                    min(float(page.rect.width), x1 + 18),
+                    min(float(page.rect.height), y1 + 18),
+                )
+                risky.append(
+                    {
+                        "rect": (crop.x0, crop.y0, crop.x1, crop.y1),
+                        "raw_text": item["raw_text"],
+                        "vector_element_count": len(related_drawings),
+                    }
+                )
+            return risky
+        except Exception as exc:
+            print(
+                f"[수식 후보 감지 건너뜀] {type(exc).__name__}: {exc}"
+            )
+            return []
+
+    def _render_equation_crop(
+        self,
+        page: object,
+        rect_values: tuple[float, float, float, float],
+        target: Path,
+    ) -> Path | None:
+        try:
+            import fitz
+
+            rect = fitz.Rect(*rect_values)
+            if rect.width <= 1 or rect.height <= 1:
+                return None
+            if not target.exists():
+                scale = max(2.0, self.settings.figure_page_render_scale)
+                pixmap = page.get_pixmap(
+                    matrix=fitz.Matrix(scale, scale),
+                    clip=rect,
+                    alpha=False,
+                )
+                pixmap.save(str(target))
+            return target if target.is_file() else None
+        except Exception as exc:
+            print(
+                f"[수식 crop 렌더링 건너뜀] {target.name}: "
+                f"{type(exc).__name__}: {exc}"
+            )
+            return None
+
     async def _extract_pdf(
         self,
         file_path: Path,
@@ -644,8 +843,10 @@ class DocumentProcessor:
 
         pages: list[dict[str, object]] = []
         figure_jobs: list[dict[str, object]] = []
+        equation_jobs: list[dict[str, object]] = []
         figure_count = 0
         vision_calls = 0
+        equation_vision_calls = 0
         plumber_pdf = None
         display_filename = self._display_filename(file_path, digest)
 
@@ -706,6 +907,34 @@ class DocumentProcessor:
                     }
                 )
 
+                if analyze_figures:
+                    equation_regions = self._equation_regions(page)
+                    for equation_index, region in enumerate(equation_regions, start=1):
+                        equation_path = (
+                            self.settings.figure_analysis_inputs_dir
+                            / f"{digest}_p{page_number}_eq{equation_index}.png"
+                        )
+                        rendered = self._render_equation_crop(
+                            page,
+                            tuple(region["rect"]),
+                            equation_path,
+                        )
+                        if rendered is None:
+                            continue
+                        self._equation_stats["detected"] += 1
+                        equation_jobs.append(
+                            {
+                                "page_index": index,
+                                "page_number": page_number,
+                                "equation_index": equation_index,
+                                "image_path": rendered,
+                                "raw_text": str(region.get("raw_text") or ""),
+                                "vector_element_count": int(
+                                    region.get("vector_element_count") or 0
+                                ),
+                            }
+                        )
+
                 try:
                     page_images = page.get_images(full=True)
                 except Exception as exc:
@@ -764,8 +993,81 @@ class DocumentProcessor:
                         }
                     )
 
+            if analyze_figures and equation_jobs:
+                # Pass 2a: verify equations whose fraction bars, radicals, or
+                # other vector geometry cannot be trusted in plain PDF text.
+                page_equation_notes: dict[int, list[tuple[int, str]]] = {}
+                page_equation_assets: dict[int, list[dict[str, object]]] = {}
+
+                for job in equation_jobs:
+                    page_number = int(job["page_number"])
+                    equation_index = int(job["equation_index"])
+                    equation_path = Path(str(job["image_path"]))
+                    remaining_calls = max(
+                        0,
+                        self.settings.equation_analysis_max_vision_calls
+                        - equation_vision_calls,
+                    )
+                    try:
+                        result = await self.figure_analyzer.analyze_figure(
+                            document_name=display_filename,
+                            document_id=digest,
+                            page_number=page_number,
+                            image_index=equation_index,
+                            image_path=equation_path,
+                            remaining_vision_calls=remaining_calls,
+                            forced_classification="equation",
+                        )
+                    except Exception as exc:
+                        print(
+                            f"[PDF 수식 분석 실패] {equation_path.name}: "
+                            f"{type(exc).__name__}: {exc}"
+                        )
+                        continue
+
+                    equation_vision_calls += result.vision_calls
+                    self._record_equation_result(result)
+                    page_equation_assets.setdefault(page_number, []).append(
+                        {
+                            "equation_index": equation_index,
+                            "image_path": str(equation_path),
+                            "status": result.status,
+                            "confidence": result.confidence,
+                            "raw_text": str(job.get("raw_text") or ""),
+                            "vector_element_count": int(
+                                job.get("vector_element_count") or 0
+                            ),
+                        }
+                    )
+                    if result.should_index and result.note_text:
+                        page_equation_notes.setdefault(page_number, []).append(
+                            (equation_index, result.note_text)
+                        )
+
+                for page_record in pages:
+                    page_number = int(page_record.get("page") or 0)
+                    assets = sorted(
+                        page_equation_assets.get(page_number, []),
+                        key=lambda item: int(item["equation_index"]),
+                    )
+                    if assets:
+                        page_record["equation_assets"] = assets
+                    notes = sorted(
+                        page_equation_notes.get(page_number, []),
+                        key=lambda item: item[0],
+                    )
+                    if notes:
+                        page_record["text"] = (
+                            str(page_record.get("text") or "")
+                            + "\n\n[Extracted equation notes]\n"
+                            + "\n".join(
+                                f"Equation {equation_index}: {note_text}"
+                                for equation_index, note_text in notes
+                            )
+                        )
+
             if analyze_figures and figure_jobs:
-                # Pass 2: analyze likely graphs/technical figures first.
+                # Pass 2b: analyze likely graphs/technical figures first.
                 # Stable page/figure ordering is used as a tie breaker.
                 figure_jobs.sort(
                     key=lambda job: (
@@ -867,11 +1169,12 @@ class DocumentProcessor:
 
         print(
             f"[PDF 처리 완료] 추출 이미지 {figure_count}개, "
-            f"Vision 호출 {vision_calls}개, "
-            f"valid={self._figure_stats['valid']}, "
-            f"review_required={self._figure_stats['review_required']}, "
-            f"failed={self._figure_stats['failed']}, "
-            f"ignored={self._figure_stats['ignored']}"
+            f"Figure Vision 호출 {vision_calls}개, "
+            f"수식 후보 {self._equation_stats['detected']}개, "
+            f"Equation Vision 호출 {equation_vision_calls}개, "
+            f"figure_valid={self._figure_stats['valid']}, "
+            f"equation_valid={self._equation_stats['valid']}, "
+            f"equation_review={self._equation_stats['review_required']}"
         )
         return pages, figure_count
 
