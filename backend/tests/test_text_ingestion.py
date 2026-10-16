@@ -1,3 +1,9 @@
+import asyncio
+from pathlib import Path
+
+import fitz
+
+from app.core.config import Settings
 from app.models.schemas import DocumentRecord
 from app.services.document_processor import DocumentProcessor, INGESTION_VERSION
 
@@ -52,3 +58,56 @@ def test_ingestion_version_marks_old_records_stale():
     assert DocumentProcessor.is_current_record(_record(INGESTION_VERSION))
     assert not DocumentProcessor.is_current_record(_record(None))
     assert not DocumentProcessor.is_current_record(_record("legacy"))
+
+
+
+def _settings(tmp_path: Path) -> Settings:
+    data_dir = tmp_path / "data"
+    settings = Settings(
+        data_dir=data_dir,
+        agent_workspace_dir=tmp_path / "workspace",
+    )
+    for directory in [
+        settings.raw_dir,
+        settings.extracted_dir,
+        settings.figures_dir,
+        settings.figure_notes_dir,
+        settings.figure_candidates_dir,
+        settings.figure_analysis_inputs_dir,
+        settings.metadata_dir,
+        settings.ontology_dir,
+    ]:
+        directory.mkdir(parents=True, exist_ok=True)
+    return settings
+
+
+def test_extract_pdf_preserves_visual_reading_order_and_diagnostics(tmp_path: Path):
+    pdf_path = tmp_path / "reading-order.pdf"
+    document = fitz.open()
+    page = document.new_page()
+
+    # Deliberately insert the lower line first. Plain extraction can preserve
+    # insertion order, while sort=True should recover visual top-to-bottom order.
+    page.insert_text((72, 220), "BOTTOM: Rt is true formation resistivity.", fontsize=11)
+    page.insert_text((72, 72), "TOP: Rw is water resistivity.", fontsize=11)
+    document.save(pdf_path)
+    document.close()
+
+    processor = DocumentProcessor(_settings(tmp_path), object())
+    pages, figure_count = asyncio.run(
+        processor._extract_pdf(
+            pdf_path,
+            "b" * 64,
+            analyze_figures=False,
+        )
+    )
+
+    assert figure_count == 0
+    assert len(pages) == 1
+    text = str(pages[0]["text"])
+    assert text.index("TOP:") < text.index("BOTTOM:")
+    assert pages[0]["text_extractor"] in {"pymupdf_sorted", "pdfplumber_layout"}
+    diagnostics = pages[0]["text_extraction_diagnostics"]
+    assert "pymupdf_sorted" in diagnostics
+    assert "pdfplumber_layout" in diagnostics
+    assert diagnostics["pymupdf_sorted"]["characters"] > 0
