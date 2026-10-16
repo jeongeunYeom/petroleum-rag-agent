@@ -8,6 +8,7 @@ from app.services.ontology import concept_metadata
 FIGURE_NOTES_RE = re.compile(r"\[\s*extracted\s+figure\s+notes\s*\]", re.IGNORECASE)
 FIGURE_BLOCK_RE = re.compile(
     r"(?im)(?:^|\n)\s*figure\s+([0-9]+[A-Za-z]?)\s*:\s*"
+    r"(?=\[figure note metadata\])"
 )
 
 
