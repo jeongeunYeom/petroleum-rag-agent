@@ -22,6 +22,7 @@ from app.models.schemas import (
 from app.services.document_processor import (
     DOCUMENT_ID_PATTERN,
     DocumentProcessor,
+    delete_document_derived_files,
     delete_document_files,
 )
 from app.services.jobs import create_job, get_job, update_job
@@ -108,7 +109,7 @@ async def upload_document(
         update_job(job_id, 1, "[1/6] PDF 저장 중")
         saved_path, digest = await processor.save_upload(file)
         existing = processor.load_existing(digest)
-        if existing:
+        if existing and processor.is_current_record(existing):
             update_job(
                 job_id,
                 6,
@@ -116,6 +117,11 @@ async def upload_document(
                 status="completed",
             )
             return UploadResponse(document=existing, skipped=True)
+
+        if existing:
+            update_job(job_id, 2, "[2/6] 이전 ingestion 결과 초기화 중")
+            vector_store.delete_document(digest)
+            delete_document_derived_files(settings, digest)
 
         update_job(job_id, 2, "[2/6] 텍스트 추출 중")
         record, chunks = await processor.extract(
