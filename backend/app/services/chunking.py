@@ -5,39 +5,69 @@ import re
 from app.services.ontology import concept_metadata
 
 
-FIGURE_NOTES_RE = re.compile(r"\[\s*extracted\s+figure\s+notes\s*\]", re.IGNORECASE)
+STRUCTURED_MARKER_RE = re.compile(
+    r"\[\s*extracted\s+(figure|equation)\s+notes\s*\]",
+    re.IGNORECASE,
+)
 FIGURE_BLOCK_RE = re.compile(
     r"(?im)(?:^|\n)\s*figure\s+([0-9]+[A-Za-z]?)\s*:\s*"
     r"(?=\[figure note metadata\])"
 )
+EQUATION_BLOCK_RE = re.compile(
+    r"(?im)(?:^|\n)\s*equation\s+([0-9]+[A-Za-z]?)\s*:\s*"
+    r"(?=\[equation note metadata\])"
+)
+
+
+def _structured_blocks(
+    chunk_type: str,
+    value: str,
+) -> list[tuple[str, str]]:
+    value = value.strip()
+    if not value:
+        return []
+
+    if chunk_type == "figure":
+        block_re = FIGURE_BLOCK_RE
+        marker_text = "[Extracted figure notes]"
+    elif chunk_type == "equation":
+        block_re = EQUATION_BLOCK_RE
+        marker_text = "[Extracted equation notes]"
+    else:
+        return [(chunk_type, value)]
+
+    matches = list(block_re.finditer(value))
+    if not matches:
+        return [(chunk_type, f"{marker_text}\n{value}")]
+
+    blocks: list[tuple[str, str]] = []
+    for index, match in enumerate(matches):
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(value)
+        block = value[match.start() : end].strip()
+        if block:
+            blocks.append((chunk_type, f"{marker_text}\n{block}"))
+    return blocks
 
 
 def _page_sections(text: str) -> list[tuple[str, str]]:
-    """Separate ordinary page text from complete Figure Note blocks."""
-    marker = FIGURE_NOTES_RE.search(text)
-    if marker is None:
+    """Separate body text, Figure Notes, and verified Equation Notes."""
+    markers = list(STRUCTURED_MARKER_RE.finditer(text))
+    if not markers:
         return [("text", text.strip())] if text.strip() else []
 
     sections: list[tuple[str, str]] = []
-    body = text[: marker.start()].strip()
-    if body:
-        sections.append(("text", body))
+    cursor = 0
+    for index, marker in enumerate(markers):
+        body = text[cursor:marker.start()].strip()
+        if body:
+            sections.append(("text", body))
 
-    figure_text = text[marker.end() :].strip()
-    if not figure_text:
-        return sections
+        end = markers[index + 1].start() if index + 1 < len(markers) else len(text)
+        value = text[marker.end():end].strip()
+        chunk_type = marker.group(1).casefold()
+        sections.extend(_structured_blocks(chunk_type, value))
+        cursor = end
 
-    matches = list(FIGURE_BLOCK_RE.finditer(figure_text))
-    marker_text = "[Extracted figure notes]"
-    if not matches:
-        sections.append(("figure", f"{marker_text}\n{figure_text}"))
-        return sections
-
-    for index, match in enumerate(matches):
-        end = matches[index + 1].start() if index + 1 < len(matches) else len(figure_text)
-        block = figure_text[match.start() : end].strip()
-        if block:
-            sections.append(("figure", f"{marker_text}\n{block}"))
     return sections
 
 
@@ -149,11 +179,11 @@ def chunk_pages(
 
         chunk_index = 0
         for chunk_type, section_text in _page_sections(text):
-            # Figure Notes are structured evidence. Keep one complete note in one
-            # chunk even when it is longer than the ordinary body chunk size.
+            # Structured visual evidence must remain whole so a verified equation
+            # or Figure Note cannot be separated from its metadata.
             section_chunks = (
                 [section_text]
-                if chunk_type == "figure"
+                if chunk_type in {"figure", "equation"}
                 else _chunk_text(section_text, chunk_size, chunk_overlap)
             )
             for chunk_text in section_chunks:
