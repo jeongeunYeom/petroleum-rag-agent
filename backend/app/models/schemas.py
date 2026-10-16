@@ -86,6 +86,12 @@ class DocumentRecord(BaseModel):
     figures_ignored: int = 0
     figure_vision_calls: int = 0
     figure_analysis_enabled: bool | None = None
+    equations_detected: int = 0
+    equations_analyzed: int = 0
+    equations_valid: int = 0
+    equations_review_required: int = 0
+    equations_failed: int = 0
+    equation_vision_calls: int = 0
     title: str | None = None
     document_type: str | None = None
     contents_pages: list[int] = Field(default_factory=list)
