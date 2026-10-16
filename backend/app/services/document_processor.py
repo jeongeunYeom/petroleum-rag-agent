@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 SUPPORTED_EXTENSIONS = {".pdf", ".txt", ".png", ".jpg", ".jpeg", ".ppt", ".pptx"}
 DOCUMENT_ID_PATTERN = re.compile(r"^[0-9a-f]{64}$")
-INGESTION_VERSION = "kb-ingestion-v5"
+INGESTION_VERSION = "kb-ingestion-v6"
 
 
 def delete_document_files(settings: Settings, document_id: str) -> int:
@@ -661,6 +661,117 @@ class DocumentProcessor:
             return None
 
     @staticmethod
+    def _source_figure_caption(
+        page: object,
+        xref: int,
+    ) -> dict[str, object] | None:
+        """Match an embedded image to the nearest literal Figure caption."""
+        try:
+            import fitz
+
+            rects = list(page.get_image_rects(xref))
+            if not rects:
+                return None
+            image_rect = max(
+                rects,
+                key=lambda item: float(item.width * item.height),
+            )
+            image_center = (float(image_rect.x0) + float(image_rect.x1)) / 2.0
+
+            candidates: list[tuple[float, dict[str, object]]] = []
+            for block in page.get_text("blocks", sort=True):
+                x0, y0, x1, y1, block_text = block[:5]
+                caption = re.sub(r"\s+", " ", str(block_text or "")).strip()
+                match = re.match(
+                    r"(?i)^figure\s+([0-9]+[A-Za-z]?)\b\s*[:.\-]?\s*(.*)$",
+                    caption,
+                )
+                if not match:
+                    continue
+
+                block_rect = fitz.Rect(x0, y0, x1, y1)
+                if block_rect.y0 >= image_rect.y1 - 3:
+                    vertical_gap = max(0.0, float(block_rect.y0 - image_rect.y1))
+                    if vertical_gap > 150:
+                        continue
+                    position_penalty = 0.0
+                elif block_rect.y1 <= image_rect.y0 + 3:
+                    vertical_gap = max(0.0, float(image_rect.y0 - block_rect.y1))
+                    if vertical_gap > 90:
+                        continue
+                    position_penalty = 35.0
+                else:
+                    vertical_gap = 0.0
+                    position_penalty = 20.0
+
+                block_center = (float(block_rect.x0) + float(block_rect.x1)) / 2.0
+                center_delta = abs(block_center - image_center)
+                score = vertical_gap + position_penalty + center_delta * 0.20
+
+                candidates.append(
+                    (
+                        score,
+                        {
+                            "figure_number": match.group(1),
+                            "source_caption": caption,
+                            "caption_position": (
+                                "below"
+                                if block_rect.y0 >= image_rect.y1 - 3
+                                else "above"
+                                if block_rect.y1 <= image_rect.y0 + 3
+                                else "overlap"
+                            ),
+                            "caption_distance": round(vertical_gap, 3),
+                            "caption_match_score": round(score, 3),
+                        },
+                    )
+                )
+
+            if not candidates:
+                return None
+            return min(candidates, key=lambda item: item[0])[1]
+        except Exception as exc:
+            print(
+                f"[Figure 캡션 연결 건너뜀] xref={xref}: "
+                f"{type(exc).__name__}: {exc}"
+            )
+            return None
+
+    @staticmethod
+    def _enrich_figure_note_with_source_caption(
+        note_text: str,
+        caption_info: dict[str, object] | None,
+    ) -> str:
+        if not caption_info:
+            return note_text
+        number = str(caption_info.get("figure_number") or "").strip()
+        caption = re.sub(
+            r"\s+",
+            " ",
+            str(caption_info.get("source_caption") or ""),
+        ).strip()
+        if not number or not caption:
+            return note_text
+
+        lines = note_text.splitlines()
+        try:
+            marker_index = next(
+                index
+                for index, line in enumerate(lines)
+                if line.strip().casefold() == "[figure note metadata]"
+            )
+        except StopIteration:
+            return note_text
+
+        fields = [
+            f"figure_number: {number}",
+            f"source_caption: {caption}",
+            "source_caption_verified: true",
+        ]
+        lines[marker_index + 1 : marker_index + 1] = fields
+        return "\n".join(lines).rstrip() + "\n"
+
+    @staticmethod
     def _is_equation_block_candidate(
         text: str,
         *,
@@ -971,6 +1082,7 @@ class DocumentProcessor:
                     if not analyze_figures:
                         continue
 
+                    caption_info = self._source_figure_caption(page, xref)
                     priority = self.figure_analyzer.priority_for_image(
                         figure_path,
                         combined,
@@ -983,6 +1095,7 @@ class DocumentProcessor:
                             "xref": xref,
                             "image_path": figure_path,
                             "page_text": combined,
+                            "source_caption": caption_info,
                             "priority_score": float(priority.get("score") or 0.0),
                             "forced_classification": priority.get(
                                 "forced_classification"
@@ -1140,8 +1253,19 @@ class DocumentProcessor:
                     )
 
                     if result.should_index and result.note_text:
+                        indexed_note = self._enrich_figure_note_with_source_caption(
+                            result.note_text,
+                            job.get("source_caption")
+                            if isinstance(job.get("source_caption"), dict)
+                            else None,
+                        )
+                        if result.note_path is not None:
+                            result.note_path.write_text(
+                                indexed_note,
+                                encoding="utf-8",
+                            )
                         page_notes.setdefault(page_number, []).append(
-                            (image_index, result.note_text)
+                            (image_index, indexed_note)
                         )
 
                 for page_record in pages:
