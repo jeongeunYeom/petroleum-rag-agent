@@ -159,3 +159,29 @@ def test_extract_pdf_preserves_visual_reading_order_and_diagnostics(tmp_path: Pa
     assert "pymupdf_sorted" in diagnostics
     assert "pdfplumber_layout" in diagnostics
     assert diagnostics["pymupdf_sorted"]["characters"] > 0
+
+
+
+def test_equation_regions_detect_vector_math_but_skip_plain_equations(tmp_path: Path):
+    processor = DocumentProcessor(_settings(tmp_path), object())
+
+    document = fitz.open()
+    page = document.new_page()
+    page.insert_text((72, 120), "S_w = R_w / R_wa (8)", fontsize=12)
+    page.draw_line((105, 106), (210, 106))
+    page.draw_line((90, 112), (96, 118))
+    page.draw_line((96, 118), (102, 102))
+
+    risky = processor._equation_regions(page)
+    assert risky
+    assert "S_w" in str(risky[0]["raw_text"])
+    assert int(risky[0]["vector_element_count"]) >= 1
+
+    plain_document = fitz.open()
+    plain_page = plain_document.new_page()
+    plain_page.insert_text((72, 120), "Z = X + Y", fontsize=12)
+
+    assert processor._equation_regions(plain_page) == []
+
+    document.close()
+    plain_document.close()
