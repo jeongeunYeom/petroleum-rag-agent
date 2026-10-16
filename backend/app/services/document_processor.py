@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 SUPPORTED_EXTENSIONS = {".pdf", ".txt", ".png", ".jpg", ".jpeg", ".ppt", ".pptx"}
 DOCUMENT_ID_PATTERN = re.compile(r"^[0-9a-f]{64}$")
-INGESTION_VERSION = "kb-ingestion-v2"
+INGESTION_VERSION = "kb-ingestion-v3"
 
 
 def delete_document_files(settings: Settings, document_id: str) -> int:
