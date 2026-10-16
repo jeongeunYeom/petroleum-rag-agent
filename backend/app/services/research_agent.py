@@ -1555,7 +1555,8 @@ class ResearchAgent:
             return title
 
         source_caption = nullable_text(fields.get("source_caption"))
-        if source_caption:
+        source_caption_verified = parse_bool(fields.get("source_caption_verified"))
+        if source_caption and source_caption_verified:
             return re.sub(
                 r"(?i)^figure\s+[0-9]+[A-Za-z]?\s*[:.\-]?\s*",
                 "",
