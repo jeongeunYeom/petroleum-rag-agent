@@ -517,3 +517,88 @@ def test_semicolon_collapsed_diagram_response_is_parsed(tmp_path: Path) -> None:
         "Observation Well",
     ]
     assert result.candidate["final_note_data"]["analysis"].startswith("Schematic")
+
+
+
+def test_forced_equation_is_verified_and_indexable(tmp_path: Path) -> None:
+    image_path = tmp_path / "equation_p171_eq2.png"
+    make_graph_image(image_path)
+
+    ollama = FakeOllama(
+        [
+            "\n".join(
+                [
+                    "image_type: equation",
+                    "confidence: 0.99",
+                    "readable_labels: true",
+                    "title: unknown",
+                    "analysis: The visible equation is transcribed exactly.",
+                    "equation_text: S_w = sqrt(R_w / R_wa)",
+                    "variables: S_w; R_w; R_wa",
+                    "units: unknown",
+                    "assumptions: unknown",
+                    "engineering_meaning: unknown",
+                ]
+            )
+        ]
+    )
+    service = FigureAnalysisService(DummySettings(tmp_path), ollama)  # type: ignore[arg-type]
+
+    result = asyncio.run(
+        service.analyze_figure(
+            document_name="formation-evaluation.pdf",
+            document_id="abc123",
+            page_number=171,
+            image_index=2,
+            image_path=image_path,
+            remaining_vision_calls=1,
+            forced_classification="equation",
+        )
+    )
+
+    assert result.status == "valid"
+    assert result.should_index is True
+    assert result.vision_calls == 1
+    assert result.note_text is not None
+    assert result.note_text.startswith("[Equation Note Metadata]")
+    assert "equation_text: S_w = sqrt(R_w / R_wa)" in result.note_text
+    assert "equation_verified: true" in result.note_text
+
+
+def test_uncertain_equation_is_not_indexed(tmp_path: Path) -> None:
+    image_path = tmp_path / "uncertain_equation.png"
+    make_graph_image(image_path)
+    ollama = FakeOllama(
+        [
+            "\n".join(
+                [
+                    "image_type: equation",
+                    "confidence: 0.80",
+                    "readable_labels: false",
+                    "title: unknown",
+                    "analysis: A fraction is visible but the radical scope is unclear.",
+                    "equation_text: unknown",
+                    "variables: unknown",
+                    "units: unknown",
+                    "assumptions: unknown",
+                    "engineering_meaning: unknown",
+                ]
+            )
+        ]
+    )
+    service = FigureAnalysisService(DummySettings(tmp_path), ollama)  # type: ignore[arg-type]
+
+    result = asyncio.run(
+        service.analyze_figure(
+            document_name="formation-evaluation.pdf",
+            document_id="abc123",
+            page_number=171,
+            image_index=2,
+            image_path=image_path,
+            remaining_vision_calls=1,
+            forced_classification="equation",
+        )
+    )
+
+    assert result.status in {"failed", "review_required"}
+    assert result.should_index is False
