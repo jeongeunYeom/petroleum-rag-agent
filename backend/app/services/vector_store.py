@@ -53,6 +53,8 @@ TECHNICAL_TERM_EXPANSIONS: dict[str, list[str]] = {
     "pounds per gallon": ["ppg", "mud weight"],
     "psi/ft": ["pressure gradient", "mud weight", "specific gravity", "SG"],
     "formation resistivity factor": ["Archie", "Archie's equation", "resistivity"],
+    "invasion": ["inasion", "invaded zone", "flushed zone", "resistivity profile"],
+    "inasion": ["invasion", "invaded zone", "resistivity profile"],
 }
 
 ENGLISH_STOPWORDS = {
@@ -128,6 +130,9 @@ HIGH_VALUE_MARKERS = (
     "mud weight",
     "pressure gradient",
     "formation resistivity factor",
+    "[equation note metadata]",
+    "equation_text:",
+    "equation_verified: true",
 )
 
 FIGURE_DOCUMENT_MARKERS = (
