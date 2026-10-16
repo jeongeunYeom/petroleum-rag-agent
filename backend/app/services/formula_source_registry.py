@@ -16,8 +16,23 @@ EQUATION = re.compile(
 TRANSLATION = str.maketrans({"×": "*", "÷": "/", "−": "-", "–": "-", "·": "*",
                             "₀": "0", "₁": "1", "₂": "2", "₃": "3", "₄": "4", "₅": "5",
                             "₆": "6", "₇": "7", "₈": "8", "₉": "9"})
-ALLOWED = (ast.Expression, ast.BinOp, ast.UnaryOp, ast.Name, ast.Constant,
-           ast.Add, ast.Sub, ast.Mult, ast.Div, ast.Pow, ast.USub, ast.UAdd, ast.Load)
+ALLOWED = (
+    ast.Expression,
+    ast.BinOp,
+    ast.UnaryOp,
+    ast.Name,
+    ast.Constant,
+    ast.Call,
+    ast.Add,
+    ast.Sub,
+    ast.Mult,
+    ast.Div,
+    ast.Pow,
+    ast.USub,
+    ast.UAdd,
+    ast.Load,
+)
+ALLOWED_FUNCTIONS = {"sqrt"}
 
 
 def normalize_formula(value: str) -> str:
@@ -30,11 +45,27 @@ def expression_variables(formula: str) -> set[str] | None:
         if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", lhs):
             return None
         tree = ast.parse(rhs, mode="eval")
-        if not all(isinstance(node, ALLOWED) and (
-            not isinstance(node, ast.Constant) or isinstance(node.value, (int, float))
-        ) for node in ast.walk(tree)):
-            return None
-        return {node.id for node in ast.walk(tree) if isinstance(node, ast.Name)}
+        for node in ast.walk(tree):
+            if not isinstance(node, ALLOWED):
+                return None
+            if (
+                isinstance(node, ast.Constant)
+                and not isinstance(node.value, (int, float))
+            ):
+                return None
+            if isinstance(node, ast.Call):
+                if (
+                    not isinstance(node.func, ast.Name)
+                    or node.func.id not in ALLOWED_FUNCTIONS
+                    or len(node.args) != 1
+                    or node.keywords
+                ):
+                    return None
+        return {
+            node.id
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Name) and node.id not in ALLOWED_FUNCTIONS
+        }
     except (ValueError, SyntaxError):
         return None
 
