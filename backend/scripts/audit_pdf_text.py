@@ -8,7 +8,6 @@ import json
 from pathlib import Path
 
 import fitz
-import pdfplumber
 
 from app.services.document_processor import DocumentProcessor
 
@@ -42,6 +41,14 @@ def main() -> int:
         default=None,
         help="Optional JSON report path.",
     )
+    parser.add_argument(
+        "--compare-pdfplumber",
+        action="store_true",
+        help=(
+            "Opt in to pdfplumber comparison. Some malformed-xref PDFs can make "
+            "pdfminer fallback scanning very slow, so this is disabled by default."
+        ),
+    )
     args = parser.parse_args()
 
     pdf_path = args.pdf.expanduser().resolve()
@@ -53,34 +60,46 @@ def main() -> int:
         "pages": [],
     }
 
-    with fitz.open(pdf_path) as pymupdf_doc, pdfplumber.open(pdf_path) as plumber_doc:
-        wanted = parse_pages(args.pages, len(pymupdf_doc))
-        for page_number in wanted:
-            index = page_number - 1
-            page = pymupdf_doc[index]
-            pymupdf_text = (page.get_text("text", sort=True) or "").strip()
-            plumber_text = (
-                plumber_doc.pages[index].extract_text(layout=True) or ""
-            ).strip()
-            selected, extractor, diagnostics = DocumentProcessor.select_page_text(
-                pymupdf_text,
-                plumber_text,
-            )
+    plumber_doc = None
+    if args.compare_pdfplumber:
+        import pdfplumber
 
-            entry = {
-                "page": page_number,
-                "selected_extractor": extractor,
-                "diagnostics": diagnostics,
-                "selected_text": selected,
-                "pymupdf_sorted_text": pymupdf_text,
-                "pdfplumber_layout_text": plumber_text,
-            }
-            report["pages"].append(entry)
-            print(
-                f"p{page_number}: {extractor} "
-                f"(PyMuPDF={diagnostics['pymupdf_sorted']['score']:.0f}, "
-                f"pdfplumber={diagnostics['pdfplumber_layout']['score']:.0f})"
-            )
+        plumber_doc = pdfplumber.open(pdf_path)
+
+    try:
+        with fitz.open(pdf_path) as pymupdf_doc:
+            wanted = parse_pages(args.pages, len(pymupdf_doc))
+            for page_number in wanted:
+                index = page_number - 1
+                page = pymupdf_doc[index]
+                pymupdf_text = (page.get_text("text", sort=True) or "").strip()
+                plumber_text = ""
+                if plumber_doc is not None:
+                    plumber_text = (
+                        plumber_doc.pages[index].extract_text(layout=True) or ""
+                    ).strip()
+                selected, extractor, diagnostics = DocumentProcessor.select_page_text(
+                    pymupdf_text,
+                    plumber_text,
+                )
+
+                entry = {
+                    "page": page_number,
+                    "selected_extractor": extractor,
+                    "diagnostics": diagnostics,
+                    "selected_text": selected,
+                    "pymupdf_sorted_text": pymupdf_text,
+                    "pdfplumber_layout_text": plumber_text,
+                }
+                report["pages"].append(entry)
+                print(
+                    f"p{page_number}: {extractor} "
+                    f"(PyMuPDF={diagnostics['pymupdf_sorted']['score']:.0f}, "
+                    f"pdfplumber={diagnostics['pdfplumber_layout']['score']:.0f})"
+                )
+    finally:
+        if plumber_doc is not None:
+            plumber_doc.close()
 
     output = args.output or pdf_path.with_name(f"{pdf_path.stem}_text_audit.json")
     output.write_text(
