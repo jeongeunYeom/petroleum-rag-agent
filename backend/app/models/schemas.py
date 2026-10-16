@@ -85,6 +85,7 @@ class DocumentRecord(BaseModel):
     figures_failed: int = 0
     figures_ignored: int = 0
     figure_vision_calls: int = 0
+    figure_analysis_enabled: bool | None = None
     title: str | None = None
     document_type: str | None = None
     contents_pages: list[int] = Field(default_factory=list)
