@@ -15,7 +15,7 @@ from app.models.goal_research_schemas import (
 from app.models.research_schemas import (
     EvidenceCounts, FigureEvidence, InternalEvidence, ResearchRequest, ResearchResponse, ResearchTiming,
 )
-from app.services.goal_action_planner import GoalActionPlanner, SIMULATE_WORDS
+from app.services.goal_action_planner import GoalActionPlanner, SIMULATE_WORDS, calculation_requested
 from app.services.goal_intent import requests_sourced_formula
 from app.services.goal_evaluator import GoalEvaluationResult, GoalEvaluator
 from app.services.calculation_request_ir import parse_request_ir
@@ -293,6 +293,34 @@ def test_sourced_formula_request_is_distinct_from_plain_arithmetic(message, expe
         selected = GoalActionPlanner.select(req, state(), user_fact_ids=["USERF1"],
                                             formula_ready=False, simulation_spec=None)
         assert selected.action_type == GoalActionType.RETRIEVE
+
+
+@pytest.mark.parametrize("message,expected", [
+    ("Handbook에서 유량과 면적으로 유속을 계산하는 field-unit 식을 찾아줘", False),
+    ("Find the cited equation used to calculate velocity from flow rate and area", False),
+    ("What is the formula to calculate pore volume?", False),
+    ("교재의 식을 찾아 계산해줘", True),
+    ("Find the equation and then calculate the value", True),
+])
+def test_formula_lookup_does_not_request_python_without_a_numeric_goal(message, expected):
+    assert calculation_requested(message) is expected
+    assert calculation_requested(f"{message} {message}") is expected
+
+
+def test_formula_lookup_does_not_wait_for_unprovided_variables():
+    message = "Handbook에서 유량 q와 면적 A로 유속을 계산하는 식을 찾아줘"
+    request = GoalResearchRequest(topic=message, goal=message,
+                                  execution_mode="autonomous_goal_execution", max_iterations=4)
+    source = "equation_text: v = q/A\nequation_verified: true"
+    async def sourced_answer(*_args, **_kwargs):
+        return "The sourced relation is v = q/A. [KB1]"
+
+    result = asyncio.run(GoalExecutionAgent(StaticResearch(source), object(),
+                                             evaluator=PassingEvaluator(),
+                                             synthesizer=sourced_answer).run("GR-LOOKUP-ONLY", request))
+    assert result.python_calls_total == 0
+    assert result.status != GoalStatus.PENDING
+    assert result.clarification_question is None
 
 
 def test_sourced_calculation_criteria_do_not_add_unrequested_conversion_steps():

@@ -11,10 +11,32 @@ from app.services.goal_intent import asks_for_api_gravity_calculation, requests_
 
 CALC_WORDS = re.compile(r"\b(?:calculat\w*|comput\w*|derive|mean|average|rank\w*|compare\s+numeric)\b|계산|산출|평균|순위|그래프", re.I)
 NUMERIC_RESULT_WORDS = re.compile(r"(?:값|결과|수치)\s*(?:을|를)?\s*구하|(?:값|결과|수치)\s*(?:을|를)?\s*구해|\b(?:determine|find)\s+(?:the\s+)?(?:value|result)\b", re.I)
+FORMULA_LOOKUP = re.compile(
+    r"(?:관계식|계산식|공식|수식|(?<![가-힣])식)(?:을|를|이|의)?[^.!?\n]{0,45}(?:찾아|알려|보여|제시|설명)|"
+    r"\b(?:find|show|state|give|explain|what\s+is)\b[^.!?\n]{0,70}\b(?:formula|equation|relation(?:ship)?)\b",
+    re.I,
+)
+ACTIVE_CALC_AFTER_LOOKUP = re.compile(
+    r"\b(?:calculat\w*|comput\w*|derive|determine\s+(?:the\s+)?value)\b|"
+    r"계산\s*(?:해|하|하세요|하여|해서)|산출\s*(?:해|하)|"
+    r"(?:값|결과)\s*(?:을|를)?\s*구(?:해|하)", re.I,
+)
+RELATIVE_FORMULA_PURPOSE = re.compile(r"^\s*(?:used\s+to|for|to)\s+calculat\w*\b", re.I)
 
 
 def calculation_requested(text: str, has_input_facts: bool = False) -> bool:
     """A requested equation or conceptual ratio alone is not a Python task."""
+    # From-message requests commonly copy the same utterance into topic and goal.
+    # Treat that as one request, so a descriptive "used to calculate" in the
+    # second copy cannot masquerade as a later imperative to run Python.
+    text = text.strip()
+    midpoint = (len(text) - 1) // 2
+    if len(text) % 2 and text[midpoint] == " " and text[:midpoint] == text[midpoint + 1:]:
+        text = text[:midpoint]
+    lookup = FORMULA_LOOKUP.search(text) if not has_input_facts else None
+    trailing_request = RELATIVE_FORMULA_PURPOSE.sub("", text[lookup.end():], count=1) if lookup else ""
+    if lookup and not ACTIVE_CALC_AFTER_LOOKUP.search(trailing_request):
+        return False
     return bool(CALC_WORDS.search(text) or NUMERIC_RESULT_WORDS.search(text) or
                 (has_input_facts and re.search(r"\b(?:ratio|difference)\b|구해|구하", text, re.I)))
 ANALYZE_WORDS = re.compile(r"\b(?:rank\w*|best|worst|maximum|minimum|optim\w*|sensitiv\w*|compare|plot|graph|chart)\b|순위|최적|민감도|최대|최소|그래프|도표", re.I)
