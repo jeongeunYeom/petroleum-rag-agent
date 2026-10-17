@@ -213,7 +213,7 @@ class OllamaClient:
             "keep_alive": "30m",
             "options": {
                 "temperature": 0,
-                "num_ctx": 4096,
+                "num_ctx": 8192,
                 "num_predict": num_predict if num_predict is not None else 160,
             },
         }
