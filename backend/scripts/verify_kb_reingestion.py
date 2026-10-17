@@ -43,6 +43,8 @@ def main() -> None:
     parser.add_argument("--stage", type=Path, required=True)
     parser.add_argument("--backup", type=Path, required=True)
     parser.add_argument("--report-dir", type=Path, required=True)
+    parser.add_argument("--manual-blocker", action="append", default=[],
+                        help="Document a source-versus-index quality blocker; keep production unchanged")
     args = parser.parse_args()
     source, stage, backup, out = (
         args.source.resolve(), args.stage.resolve(), args.backup.resolve(), args.report_dir.resolve()
@@ -220,7 +222,8 @@ def main() -> None:
     sha = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     manifest = {
         "baseline": "full-reingestion-v1",
-        "status": "STAGED_AUTOMATED_PASS_MANUAL_QA_PENDING" if ready else "STAGED_BLOCKED",
+        "status": ("STAGED_AUTOMATED_PASS_MANUAL_QA_PENDING"
+                   if ready and not args.manual_blocker else "STAGED_BLOCKED"),
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "product_git_sha": sha, "ingestion_version": "kb-ingestion-v9",
         "analyze_figures": True, "embedding_model": settings.embedding_model,
@@ -231,6 +234,7 @@ def main() -> None:
         "per_document": comparison,
         "retrieval_document_top5_count": sum(item["document_top5"] for item in retrieval),
         "retrieval_page_top5_count": sum(item["page_top5"] for item in retrieval),
+        "manual_blockers": args.manual_blocker,
         "production_switched": False,
     }
     write_json(out / "manifest.json", manifest)
