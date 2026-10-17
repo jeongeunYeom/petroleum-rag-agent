@@ -1,0 +1,28 @@
+{
+  "label": "Supplemental development smoke, not an unseen benchmark",
+  "product_sha": "b5b18cbc268f86bef5c683fe2867a30ab06b5643",
+  "model": "qwen3:8b",
+  "retrieval_mode": "hybrid",
+  "runs": [
+    {
+      "run_id": "GR-20261017-075619-08B498",
+      "query": "Formation Evaluation에서 water saturation S_w와 R_w/R_wa의 관계식을 찾아줘.",
+      "status": "achieved",
+      "stop_reason": "goal_achieved",
+      "verdict": "FAIL: requested R_w/R_wa relation was not returned; p171 was absent from retrieved sources",
+      "answer": "Formation Evaluation에서 water saturation S_w와 R_w/R_wa의 관계식은 S_w = sqrt(R0 / Rt)로 표현된다. [KB1]\n100% 물을 포함하는 형성물에서의 R_w는 R_w = Rt / F로 계산된다. [KB2]\nArchie의 물 포화도 방정식은 S_w = (φ * R_w)^(1/2) / (Rt)^(1/2)로 표현된다. [KB3]",
+      "retrieved_pages": [235, 196, 166, 235, 194],
+      "action_sequence": ["retrieve", "verify", "synthesize", "stop"]
+    },
+    {
+      "run_id": "GR-20261017-075633-23B1AC",
+      "query": "Formation Evaluation Figure 4 example에서 Interval C의 Rw와 Level B의 Rwa 값과 단위를 알려줘.",
+      "status": "achieved",
+      "stop_reason": "goal_achieved",
+      "verdict": "PASS: both requested text-locator values and units were cited from p172",
+      "answer": "Interval C Rw = 0.08 ohm-m [KB1]\nLevel B Rwa = 0.6 ohm-m [KB1]",
+      "retrieved_pages": [172, 171, 174, 173, 172],
+      "action_sequence": ["retrieve", "verify", "synthesize", "stop"]
+    }
+  ]
+}
