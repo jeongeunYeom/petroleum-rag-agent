@@ -16,7 +16,9 @@ EQUATION_QUESTION = re.compile(r"\b(?:relationship|relation|equation|formula|law
 VALUE_QUESTION = re.compile(r"\b(?:values?|units?)\b|값|단위", re.I)
 QUANTITY = re.compile(rf"(?<![A-Za-z0-9])(?P<value>[-+]?\d+(?:\.\d+)?)\s*(?P<unit>{UNIT})(?=$|[\s.,;])", re.I)
 NON_SYMBOLS = {"what", "when", "where", "which", "the", "this", "that", "from", "with", "well", "case", "level"}
-VISUAL_READ = re.compile(r"(?:figure|fig\.?|그림)\s*\w*.*(?:curve|axis|trend|trace|plot|곡선|축|추세|직접\s*읽|눈금)", re.I)
+VISUAL_READ = re.compile(
+    r"(?:figure|fig\.?|그림)\s*\w*.*(?:curve|axis|trend|trace|plot|곡선|축|추세|직접\s*읽|눈금|단면도|그림으로\s*확인)"
+    r"|그림으로\s*확인|단면도", re.I)
 NAMED_RELATION = re.compile(
     r"\b([A-Za-z][A-Za-z0-9_-]{2,})\s*(?:'s\s*)?(?:equation|formula|law|relation(?:ship)?|식(?:을|를|이|의)?|법칙)", re.I)
 

@@ -131,8 +131,18 @@ def _source_output_unit(plan: PythonAnalysisPlan) -> str | None:
     lhs = plan.formula.split("=", 1)[0].strip()
 
     def options(symbol: str) -> list[str]:
-        match = re.search(rf"\b{re.escape(symbol)}\s*=\s*[^()]{{3,120}}\(([^()]{{1,80}})\)", context, re.I)
-        return [part.strip() for part in re.split(r"\s+or\s+|\s+또는\s+", match.group(1), flags=re.I)] if match else []
+        names = (symbol, symbol.replace("_", "")) if "_" in symbol else (symbol,)
+        found = []
+        for name in names:
+            match = re.search(rf"\b{re.escape(name)}\s*=\s*[^()]{{3,120}}\(([^()]{{1,80}})\)", context, re.I)
+            if match:
+                parts = [part.strip() for part in re.split(
+                    r"\s+or\s+|\s+또는\s+", match.group(1), flags=re.I)]
+                normalized = [part.replace(".2", "2") for part in parts]
+                if all(re.fullmatch(UNIT, part, re.I) or part.casefold() == "dimensionless"
+                       for part in normalized):
+                    found.append(parts)
+        return found[0] if found and all(value == found[0] for value in found) else []
 
     output = options(lhs)
     if len(output) == 1:
@@ -171,7 +181,9 @@ def source_formula_contract(request: GoalResearchRequest, plan: PythonAnalysisPl
         terms = [word.rstrip("s") for word in re.findall(r"[a-z]{4,}", item.semantic_name.casefold())]
         source_words = {word.rstrip("s") for word in re.findall(r"[a-z]{4,}",
                         definition.group(1).casefold())} if definition else set()
-        if not terms or not all(word in source_words for word in terms):
+        sourced_average = (item.semantic_name == "mean" and "average" in source_words
+                           and set(graph.scenario_bindings) == {"default"})
+        if not terms or (not sourced_average and not all(word in source_words for word in terms)):
             return None
         output_name = item.semantic_name
     if not graph.scenario_bindings or not graph.formula_variables:
@@ -181,6 +193,8 @@ def source_formula_contract(request: GoalResearchRequest, plan: PythonAnalysisPl
     unit = explicit_unit.group(1) if explicit_unit and (
         re.fullmatch(UNIT, explicit_unit.group(1), re.I) or "/" in explicit_unit.group(1)
         or explicit_unit.group(1).casefold() == "dimensionless") else None
+    if unit is None:
+        unit = _source_output_unit(plan)
     if unit is None:
         rhs = plan.formula.split("=", 1)[1].strip()
         try:
@@ -192,8 +206,6 @@ def source_formula_contract(request: GoalResearchRequest, plan: PythonAnalysisPl
             return None
         units = {fact.unit for fact in plan.input_facts}
         unit = next(iter(units)) if len(units) == 1 else None
-    if unit is None:
-        unit = _source_output_unit(plan)
     if not unit:
         return None
     selected = {fact.canonical_fact_id or fact.evidence_id for fact in plan.input_facts}

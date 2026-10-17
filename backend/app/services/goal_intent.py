@@ -11,6 +11,13 @@ def prefers_korean(request: GoalResearchRequest) -> bool:
     return bool(re.search(r"[가-힣]", " ".join((request.topic, request.goal or ""))))
 
 
+def requests_sourced_formula(text: str) -> bool:
+    """Recognize a request for a source's formula, not the formula itself."""
+    source = r"(?:\b(?:source|sourced|cited|manual|handbook|textbook|document|internal|kb)\b|내부|교재|문서|자료|근거|출처)"
+    formula = r"(?:\b(?:equation|formula|relation(?:ship)?|correlation)\b|관계식|계산식|공식|수식|(?<![가-힣])식(?:을|를|으로|에서|이|의)?)"
+    return bool(re.search(rf"{source}.{{0,100}}{formula}|{formula}.{{0,40}}{source}", text, re.I))
+
+
 def asks_for_api_gravity(request: GoalResearchRequest) -> bool:
     text = " ".join((request.topic, request.goal or ""))
     return bool(re.search(r"(?<![A-Za-z0-9])API(?:\s+gravity)?(?![A-Za-z0-9])|API도", text, re.I)

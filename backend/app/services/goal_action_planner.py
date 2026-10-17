@@ -6,7 +6,7 @@ import re
 
 from app.models.goal_research_schemas import GoalResearchRequest
 from app.services.goal_execution_state import GoalAction, GoalActionType, GoalExecutionState, SimulationSpec
-from app.services.goal_intent import asks_for_api_gravity_calculation
+from app.services.goal_intent import asks_for_api_gravity_calculation, requests_sourced_formula
 
 
 CALC_WORDS = re.compile(r"\b(?:calculat\w*|comput\w*|derive|mean|average|rank\w*|compare\s+numeric)\b|계산|산출|평균|순위|그래프", re.I)
@@ -18,7 +18,12 @@ def calculation_requested(text: str, has_input_facts: bool = False) -> bool:
     return bool(CALC_WORDS.search(text) or NUMERIC_RESULT_WORDS.search(text) or
                 (has_input_facts and re.search(r"\b(?:ratio|difference)\b|구해|구하", text, re.I)))
 ANALYZE_WORDS = re.compile(r"\b(?:rank\w*|best|worst|maximum|minimum|optim\w*|sensitiv\w*|compare|plot|graph|chart)\b|순위|최적|민감도|최대|최소|그래프|도표", re.I)
-SIMULATE_WORDS = re.compile(r"\b(?:simulat\w*|sweep|parameter\s+range|vary\w*)\b|시뮬레이션|매개변수\s*변화|범위\s*탐색|범위로\s*계산|바꿔가며|바꾸면서|변화시키(?:며|면서|고|면|기|다|는|ㄴ)?|간격으로", re.I)
+SIMULATE_WORDS = re.compile(
+    r"\b(?:simulate|simulating|simulated|run\s+(?:a\s+)?simulation|"
+    r"perform\s+(?:a\s+)?simulation|sweep|parameter\s+range|vary\w*)\b|"
+    r"시뮬레이션\s*(?:해|하|실행|수행|돌려|을\s*(?:해|실행|수행|돌려))|"
+    r"매개변수\s*변화|범위\s*탐색|범위로\s*계산|바꿔가며|바꾸면서|"
+    r"변화시키(?:며|면서|고|면|기|다|는|ㄴ)?|간격으로", re.I)
 
 
 class GoalActionPlanner:
@@ -43,7 +48,7 @@ class GoalActionPlanner:
                              asks_for_api_gravity_calculation(request)) and not wants_simulation
         wants_analysis = bool(ANALYZE_WORDS.search(text))
         specialist = bool(re.search(r"\b(?:formula|equation|relation|correlation|productivity\s+index)\b|공식|수식|관계식|관계|식(?:을|이|의)?\s*찾", text, re.I)
-                          or asks_for_api_gravity_calculation(request))
+                          or asks_for_api_gravity_calculation(request) or requests_sourced_formula(text))
         permission = request.allow_python_execution and request.python_execution_approved
         numeric_inputs_ready = bool(user_fact_ids or (evidence_fact_ids and not specialist))
         required = [item.criterion_id for item in state.criteria if item.required and item.status.value != "met"]

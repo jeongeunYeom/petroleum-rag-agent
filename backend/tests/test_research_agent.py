@@ -141,6 +141,17 @@ def test_left_to_right_question_needs_focused_visual_position_evidence():
     assert not ResearchAgent._vision_needed(query, supported)
 
 
+def test_near_to_far_question_needs_spatial_figure_evidence_not_label_list():
+    figure = FigureEvidence(evidence_id="FIG1", document="source.pdf", page=8,
+                            figure_number="Figure 19", excerpt="components: Rxo, Rt",
+                            source_note="component_labels: Rxo, Rt")
+    query = "Figure 19 단면도에서 Rxo와 Rt 중 어느 쪽이 borehole에 더 가까운지 그림으로 확인해줘"
+    assert ResearchAgent._vision_needed(query, figure)
+    assert "near_to_far" in ResearchAgent._focused_vision_prompt(query)
+    supported = figure.model_copy(update={"source_note": "analysis: near_to_far: Rxo | Rt"})
+    assert not ResearchAgent._vision_needed(query, supported)
+
+
 class FakeOllama:
     def __init__(self, answer: str = "종합 결과입니다. [KB1][WEB1]"):
         self.answer = answer

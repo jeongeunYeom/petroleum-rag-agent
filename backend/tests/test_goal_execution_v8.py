@@ -15,7 +15,8 @@ from app.models.goal_research_schemas import (
 from app.models.research_schemas import (
     EvidenceCounts, InternalEvidence, ResearchRequest, ResearchResponse, ResearchTiming,
 )
-from app.services.goal_action_planner import GoalActionPlanner
+from app.services.goal_action_planner import GoalActionPlanner, SIMULATE_WORDS
+from app.services.goal_intent import requests_sourced_formula
 from app.services.goal_evaluator import GoalEvaluationResult, GoalEvaluator
 from app.services.calculation_request_ir import parse_request_ir
 from app.services.calculation_requirements import assess_formula_readiness, select_formula_candidate
@@ -27,7 +28,8 @@ from app.services.goal_execution_agent import GoalExecutionAgent, _EvidenceSnaps
 from app.services.goal_execution_state import (
     ActionRecord, DerivedFact, GoalActionType, GoalExecutionState, SimulationParameter, SimulationSpec,
 )
-from app.services.goal_research_agent import EvidenceAccumulator
+from app.services.goal_research_agent import EvidenceAccumulator, GoalResearchAgent
+from app.services.research_agent import ResearchAgent
 from app.services.goal_research_service import GoalResearchService
 from app.services.goal_simulation import validate_expression
 from app.services.goal_message_parser import GoalMessageRequest, parse_goal_message
@@ -36,7 +38,7 @@ from app.services.goal_tool_planner import ToolDecision
 from app.services.goal_tool_planner import InputFact, PythonAnalysisPlan
 from app.services.calculation_contract import _source_output_unit, source_formula_contract, validate_contract
 from app.services.calculation_requirements import build_requirement_graph
-from app.services.required_outputs import RequiredOutputIntent
+from app.services.required_outputs import RequiredOutputIntent, required_output_checklist
 from app.services.user_fact_registry import UserFactRegistry
 
 
@@ -196,6 +198,112 @@ def test_output_unit_uses_only_aligned_literal_source_alternatives():
     mismatched = plan.model_copy(update={"input_facts": [plan.input_facts[0],
         plan.input_facts[1].model_copy(update={"unit": "unknown"})]})
     assert _source_output_unit(mismatched) is None
+
+
+def test_sourced_unit_accepts_only_unambiguous_subscript_layout_alias():
+    context = ("vj = (0.32086q) / An, where vj = average jet velocity "
+               "(ft/sec or m/s) and An = total nozzle area (in.2 or cm2).")
+    plan = PythonAnalysisPlan(purpose="Calculate jet velocity", formula="vj = (0.32086*q) / An",
+                              formula_description=context, input_facts=[
+                                  InputFact(name="q", value=450, unit="gal/min", evidence_id="USERF1",
+                                            source_excerpt="q=450 gal/min"),
+                                  InputFact(name="A_n", value=0.6, unit="in2", evidence_id="USERF2",
+                                            source_excerpt="A_n=0.60 in2")])
+    assert _source_output_unit(plan) == "ft/sec"
+    conflicting = plan.model_copy(update={"formula_description":
+        context + " A_n = a different area (cm2 or in.2)."})
+    assert _source_output_unit(conflicting) is None
+
+
+def test_parenthesized_formula_denominator_is_not_mistaken_for_a_unit():
+    plan = PythonAnalysisPlan(purpose="Calculate index", formula="PI = q / (pr - pwf)",
+                              formula_description="The sourced relation is PI = q / (pr - pwf).",
+                              input_facts=[InputFact(name="q", value=620, unit="stb/d", evidence_id="USERF1",
+                                                     source_excerpt="q=620 stb/d")])
+    assert _source_output_unit(plan) is None
+
+
+def test_planner_formula_attachment_uses_its_literal_source_for_unit_readiness():
+    source = {"evidence_id": "KB8", "source_type": "knowledge_base", "locator": "manual p.6",
+              "text": ("vj = (0.32086q) / An, where vj = average jet velocity "
+                       "(ft/sec or m/s), q = flow rate (gal/min or L/min), "
+                       "and An = total bit nozzle area (in2 or cm2).")}
+    formula = select_formula_candidate([source], "calculate bit jet velocity", ["q", "An"])
+    assert formula is not None
+    plan = PythonAnalysisPlan(purpose="Calculate bit jet velocity",
+                              formula_source_id="FORMULA-PLANNER", formula_description="Planner summary without literal units", input_facts=[
+                                  InputFact(name="q", value=450, unit="gal/min", evidence_id="USERF1",
+                                            source_excerpt="q=450 gal/min"),
+                                  InputFact(name="An", value=0.6, unit="in2", evidence_id="USERF2",
+                                            source_excerpt="An=0.60 in2")])
+    decision = SimpleNamespace(plan=plan, selected_formula_id=None)
+    GoalResearchAgent._attach_source_formula(decision, formula, [
+        {"evidence_id": "KB7", "text": "Unrelated output (m/s or ft/sec)."}, source])
+    assert decision.plan.formula_source_id == formula.formula_id
+    assert decision.plan.formula_source_span == formula.raw_span
+    assert decision.plan.formula_description == source["text"]
+    assert _source_output_unit(decision.plan) == "ft/sec"
+
+
+def test_sourced_average_quantity_is_not_reinterpreted_as_aggregate_mean():
+    req = GoalResearchRequest(topic="q=450 gal/min; A_n=0.60 in2",
+                              goal="내부 교재의 식으로 평균 jet velocity를 q=450 gal/min, A_n=0.60 in2에서 계산해줘")
+    source = {"evidence_id": "KB1", "source_type": "knowledge_base", "locator": "manual p.6",
+              "text": ("vj = (0.32086q) / An, where vj = average jet velocity "
+                       "(ft/sec or m/s), q = flow rate (gal/min or L/min), "
+                       "and An = total bit nozzle area (in2 or cm2).")}
+    users = UserFactRegistry.from_topic(req.topic).evidence()
+    formula = select_formula_candidate([source], req.goal, [row["name"] for row in users])
+    assert formula is not None
+    plan = PythonAnalysisPlan(purpose=req.goal, target_criteria=["Calculate velocity"],
+                              input_facts=[InputFact(name=row["name"], value=row["value"], unit=row["unit"],
+                                                     evidence_id=row["evidence_id"],
+                                                     canonical_fact_id=row["evidence_id"],
+                                                     source_excerpt=row["source_span"], source_type="user_fact")
+                                           for row in users])
+    decision = SimpleNamespace(plan=plan, selected_formula_id=None)
+    GoalResearchAgent._attach_source_formula(decision, formula, [source, *users])
+    graph = build_requirement_graph(plan, [source, *users], formula_id=formula.formula_id,
+                                    formula_required=True)
+    assert graph.source_complete, graph
+    assert set(graph.scenario_bindings) == {"default"}, graph.scenario_bindings
+    assert _source_output_unit(plan) == "ft/sec"
+    assert plan.formula.startswith("vj =")
+    assert {fact.canonical_fact_id or fact.evidence_id for fact in plan.input_facts} == {
+        fact_id for binding in graph.scenario_bindings.values() for fact_id in binding.values()}
+    checklist = required_output_checklist(req, graph)
+    assert [item.semantic_name for item in checklist] == ["mean"]
+    contract = source_formula_contract(req, plan, graph, checklist)
+    assert contract is not None, (plan.formula, plan.formula_description, graph.scenario_bindings)
+    assert validate_contract(contract, plan, graph, checklist) is None
+    assert contract.required_outputs[0].unit == "ft/sec"
+
+
+@pytest.mark.parametrize("message,expected", [
+    ("교재의 bit jet 평균 유속 식으로 q=450 gal/min, A_n=0.60 in2를 계산해줘", True),
+    ("Find the velocity equation in the handbook and calculate from q and An", True),
+    ("A=187, B=234, C=163의 평균을 계산해줘", False),
+    ("Explain what a reservoir simulation study examines", False),
+])
+def test_sourced_formula_request_is_distinct_from_plain_arithmetic(message, expected):
+    assert requests_sourced_formula(message) is expected
+    if expected:
+        req = GoalResearchRequest(topic=message, goal=message,
+                                  execution_mode="autonomous_goal_execution")
+        selected = GoalActionPlanner.select(req, state(), user_fact_ids=["USERF1"],
+                                            formula_ready=False, simulation_spec=None)
+        assert selected.action_type == GoalActionType.RETRIEVE
+
+
+def test_sourced_calculation_criteria_do_not_add_unrequested_conversion_steps():
+    message = "교재의 bit nozzle 평균 유속 관계식으로 q=450 gal/min, A_n=0.60 in2에서 값을 산출하고 출처를 알려줘"
+    req = GoalResearchRequest(topic=message, goal=message,
+                              execution_mode="autonomous_goal_execution")
+    criteria = GoalExecutionAgent._explicit_numeric_criteria(
+        req, UserFactRegistry.from_topic(message), None)
+    assert len(criteria) == 1
+    assert "검증된 계산 결과" in criteria[0].description
+    assert "단위 변환" not in criteria[0].description
 
 
 @pytest.mark.parametrize("topic,goal", [
@@ -610,6 +718,35 @@ def test_visual_question_without_figure_evidence_cannot_claim_completion():
     assert "Figure 근거" in result.final_answer
 
 
+def test_korean_visual_cross_section_requires_figure_but_numeric_locator_does_not():
+    visual = "Formation Evaluation Figure 19의 맨 위 수평 단면도에서 어느 영역이 가까운지 그림으로 확인해줘"
+    locator = "Figure 4에 나타난 Interval C의 Rw 값을 단위와 함께 알려줘"
+    assert ResearchAgent._visual_figure_intent(visual)
+    assert not ResearchAgent._visual_figure_intent(locator)
+    req = GoalResearchRequest(topic=visual, goal=visual, max_iterations=3,
+                              execution_mode="autonomous_goal_execution",
+                              success_criteria=[GoalCriterion(criterion_id="C1", description="Identify region position")])
+
+    async def tempting_synthesis(*_args, **_kwargs):
+        return "Rxo가 borehole에 더 가깝습니다. [KB1]"
+
+    result = asyncio.run(GoalExecutionAgent(StaticResearch(
+        "Rxo is close to the borehole while Rt is outside the transition zone."), object(),
+        evaluator=PassingEvaluator(), synthesizer=tempting_synthesis).run("GR-CROSS-SECTION", req))
+    assert result.status != GoalStatus.ACHIEVED
+    assert "Rxo가 borehole" not in result.final_answer
+    assert "Figure 근거" in result.final_answer
+
+
+def test_visual_proximity_criteria_request_only_grounded_spatial_relationship():
+    message = "Figure 19 단면도에서 Rxo와 Rt 중 어느 쪽이 borehole에 더 가까운지 그림으로 확인해줘"
+    req = GoalResearchRequest(topic=message, goal=message,
+                              execution_mode="autonomous_goal_execution")
+    criteria = GoalExecutionAgent._explicit_numeric_criteria(req, UserFactRegistry.from_topic(message), None)
+    assert len(criteria) == 1
+    assert "Figure 근거" in criteria[0].description
+
+
 def test_independent_partial_fact_answer_does_not_complete_goal():
     message = "Interval C의 Rw와 Level B의 Rwa 값과 단위를 알려줘."
     req = GoalResearchRequest(topic=message, goal=message,
@@ -839,6 +976,20 @@ def test_missing_simulation_model_searches_kb_before_clarification():
     current.completed_actions.extend([record(GoalActionType.RETRIEVE), record(GoalActionType.RETRIEVE)])
     assert GoalActionPlanner.select(req, current, user_fact_ids=[], formula_ready=False,
                                     simulation_spec=None).reason_code == "simulation_spec_missing"
+
+
+@pytest.mark.parametrize("message", [
+    "Compare what a pressure build-up observation and a near-well coning simulation describe.",
+    "정지 후 pressure build-up 관측과 near-well coning 시뮬레이션은 각각 무엇을 관찰하는지 요약해줘.",
+])
+def test_simulation_as_research_subject_is_not_execution_request(message):
+    assert not SIMULATE_WORDS.search(message)
+    req = GoalResearchRequest(topic=message, goal=message,
+                              execution_mode="autonomous_goal_execution")
+    selected = GoalActionPlanner.select(req, state(), user_fact_ids=[], formula_ready=False,
+                                        simulation_spec=None)
+    assert selected.action_type == GoalActionType.RETRIEVE
+    assert selected.reason_code == "initial_evidence_needed"
 
 
 def test_clarification_batches_missing_step_and_all_sourced_formula_inputs():

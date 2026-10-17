@@ -37,7 +37,7 @@ def required_output_checklist(request: GoalResearchRequest, graph: CalculationRe
     patterns = {
         "mean": r"\b(?:mean|average|averaged)\b|평균",
         "maximum": r"\b(?:max(?:imum)?|largest|highest)\b|최대",
-        "minimum": r"\b(?:min(?:imum)?|smallest|lowest)\b|최소",
+        "minimum": r"\b(?:minimum|smallest|lowest)\b|(?<![/\w])min\s+(?:value|of|across|among|result)\b|최소",
         "ranking": r"\b(?:rank(?:ing|ed)?|order(?:ing)?)\b|순위|정렬",
         "rms": r"\b(?:rms|root[- ]mean[- ]square)\b|제곱평균제곱근",
         "sum": r"\b(?:sum|total)\b|합계|총합",

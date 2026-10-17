@@ -33,7 +33,8 @@ from app.services.goal_evaluator import GoalEvaluationResult, GoalEvaluator
 from app.services.goal_planner import GoalPlanner
 from app.services.goal_tool_planner import GoalToolPlanner
 from app.services.goal_python_analysis import GoalPythonAnalysis
-from app.services.calculation_contract import CalculationContractBuilder, validate_contract
+from app.services.calculation_contract import (CalculationContractBuilder, _source_output_unit,
+                                               source_formula_contract, validate_contract)
 from app.services.calculation_requirements import (
     CalculationRequirementGraph, _catalog, augment_plan_with_bindings, build_requirement_graph,
     normalize_symbol, required_recovery_gain, scenario_fact_match, select_formula_candidate,
@@ -42,7 +43,7 @@ from app.services.required_outputs import checklist_from_ir, required_output_che
 from app.services.calculation_request_ir import parse_request_ir, resolve_request_ir, validate_ir
 from app.services.calculation_contract_skeleton import build_contract_skeleton, skeleton_diff
 from app.services.formula_resolver import FormulaIntent, resolve_formula
-from app.services.goal_intent import prefers_korean
+from app.services.goal_intent import prefers_korean, requests_sourced_formula
 from app.services.goal_tool_planner import PythonAnalysisPlan
 from app.services.evidence_fact_registry import EvidenceFactRegistry
 from app.services.formula_source_registry import FormulaSourceRegistry
@@ -350,11 +351,20 @@ class GoalResearchAgent:
                         python_trace.request_ir = ir.model_dump(mode="json")
                         python_trace.computation_class = ir.computation_class
                         python_trace.required_output_checklist = [item.model_dump() for item in checklist]
+                    sourced_formula_requested = requests_sourced_formula(request.goal or request.topic)
+                    if ir and sourced_formula_requested and not ir.specialist_relation_required:
+                        # "Average jet velocity" names one source-defined quantity;
+                        # a generic mean over readings is not what the user asked for.
+                        ir = None
+                        checklist = []
+                        python_trace.request_ir = None
+                        python_trace.computation_class = None
+                        python_trace.required_output_checklist = []
                     ir_errors = validate_ir(ir) if ir else []
-                    formula_required = ir.specialist_relation_required if ir else bool(re.search(
+                    formula_required = ir.specialist_relation_required if ir else (sourced_formula_requested or bool(re.search(
                         r"(?:source|cited|published|documented)\s+(?:equation|formula)|(?:근거|출처)\s*(?:수식|공식)|"
                         r"(?:equation|formula|관계식|공식|수식)\s*(?:for|from|based|을|를|으로)",
-                        " ".join(value for value in (request.goal, request.topic) if value), re.I))
+                        " ".join(value for value in (request.goal, request.topic) if value), re.I)))
                     if decision.tool_needed and ir and not formula_required:
                         # For ordinary arithmetic the canonical registry, not a retrieved equation,
                         # supplies the method. Never let a planner-selected KB formula override it.
@@ -388,7 +398,7 @@ class GoalResearchAgent:
                             decision.plan.formula_source_id = None
                             decision.plan.supporting_evidence_ids = []
                         if selected_record:
-                            self._attach_source_formula(decision, selected_record)
+                            self._attach_source_formula(decision, selected_record, analysis_evidence)
                     elif not ir:
                         selected_formula = decision.selected_formula_id or (
                             (decision.plan_summary or {}).get("formula_ref") if decision.plan_summary else None)
@@ -398,12 +408,12 @@ class GoalResearchAgent:
                                 [fact.name for fact in decision.plan.input_facts] if decision.plan else [item.name for item in user_registry.records])
                             if chosen:
                                 selected_formula = chosen.formula_id
-                                self._attach_source_formula(decision, chosen)
-                        if selected_formula and decision.plan and not decision.plan.formula_source_id:
+                                self._attach_source_formula(decision, chosen, analysis_evidence)
+                        if selected_formula and decision.plan:
                             selected_record = next((item for item in FormulaSourceRegistry.from_evidence(analysis_evidence).records
                                 if item.formula_id == selected_formula), None)
                             if selected_record:
-                                self._attach_source_formula(decision, selected_record)
+                                self._attach_source_formula(decision, selected_record, analysis_evidence)
                     graph = build_requirement_graph(decision.plan, analysis_evidence,
                         formula_id=selected_formula, formula_required=formula_required,
                         require_all_scenarios=bool(ir and ir.scenarios))
@@ -477,7 +487,7 @@ class GoalResearchAgent:
                                 decision.plan.formula_source_id = None
                                 decision.plan.supporting_evidence_ids = []
                             if selected_record:
-                                self._attach_source_formula(decision, selected_record)
+                                self._attach_source_formula(decision, selected_record, analysis_evidence)
                         else:
                             new_formula = decision.selected_formula_id or selected_formula
                             if formula_required and not new_formula:
@@ -486,12 +496,12 @@ class GoalResearchAgent:
                                     [fact.name for fact in decision.plan.input_facts] if decision.plan else [item.name for item in user_registry.records])
                                 if chosen:
                                     new_formula = chosen.formula_id
-                                    self._attach_source_formula(decision, chosen)
-                            if new_formula and decision.plan and not decision.plan.formula_source_id:
+                                    self._attach_source_formula(decision, chosen, analysis_evidence)
+                            if new_formula and decision.plan:
                                 selected_record = next((item for item in FormulaSourceRegistry.from_evidence(analysis_evidence).records
                                     if item.formula_id == new_formula), None)
                                 if selected_record:
-                                    self._attach_source_formula(decision, selected_record)
+                                    self._attach_source_formula(decision, selected_record, analysis_evidence)
                         refreshed = build_requirement_graph(decision.plan, analysis_evidence,
                             formula_id=new_formula, formula_required=formula_required,
                             require_all_scenarios=bool(ir.scenarios) if ir else bool(re.search(
@@ -581,6 +591,18 @@ class GoalResearchAgent:
                         if all(fact.canonical_fact_id for fact in decision.plan.input_facts):
                             checklist = checklist_from_ir(ir) if ir else required_output_checklist(request, graph)
                             python_trace.required_output_checklist = [item.model_dump() for item in checklist]
+                            if graph.formula_id:
+                                python_trace.contract_preflight = {
+                                    "formula_id": graph.formula_id,
+                                    "source_id": decision.plan.supporting_evidence_ids[:1],
+                                    "source_description_present": bool(decision.plan.formula_description),
+                                    "source_output_unit": _source_output_unit(decision.plan),
+                                    "selected_fact_ids": [fact.canonical_fact_id or fact.evidence_id
+                                                          for fact in decision.plan.input_facts],
+                                    "bindings": graph.scenario_bindings,
+                                    "deterministic_candidate": bool(source_formula_contract(
+                                        request, decision.plan, graph, checklist)),
+                                }
                             skeleton = build_contract_skeleton(ir, checklist, decision.plan, graph) if ir else None
                             if skeleton:
                                 python_trace.contract_skeleton = skeleton.model_dump(mode="json")
@@ -832,13 +854,19 @@ class GoalResearchAgent:
         )
 
     @staticmethod
-    def _attach_source_formula(decision: Any, record: Any) -> None:
+    def _attach_source_formula(decision: Any, record: Any,
+                               evidence: list[dict[str, Any]]) -> None:
         if decision.plan is None:
             return
         decision.plan.formula = record.expression_candidate
         decision.plan.formula_source_id = record.formula_id
         decision.plan.formula_source_span = record.raw_span
         decision.plan.supporting_evidence_ids = [record.source_id]
+        # Unit and output definitions must come from the same literal source
+        # as the equation, not from a planner paraphrase.
+        decision.plan.formula_description = next(
+            (str(item.get("text") or "") for item in evidence
+             if item.get("evidence_id") == record.source_id), None)
         decision.selected_formula_id = record.formula_id
 
     @staticmethod

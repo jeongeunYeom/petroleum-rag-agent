@@ -200,6 +200,7 @@ class PythonExecutionTrace(BaseModel):
     contract_skeleton: dict[str, Any] | None = None
     contract_final: dict[str, Any] | None = None
     contract_skeleton_diff: list[str] = Field(default_factory=list)
+    contract_preflight: dict[str, Any] = Field(default_factory=dict)
     execution_path: str | None = None
     input_ready: bool | None = None
     method_ready: bool | None = None

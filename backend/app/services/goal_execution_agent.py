@@ -28,7 +28,7 @@ from app.services.evidence_fact_registry import EvidenceFactRegistry
 from app.services.calc_claim_grounding import validate_calc_claim
 from app.services.citation_semantics import ground_research_claims
 from app.services.goal_action_planner import SIMULATE_WORDS, GoalActionPlanner, calculation_requested
-from app.services.goal_intent import asks_for_api_gravity_calculation, prefers_korean
+from app.services.goal_intent import asks_for_api_gravity_calculation, prefers_korean, requests_sourced_formula
 from app.services.goal_evaluator import GoalEvaluator
 from app.services.engineering_validator import EngineeringValidator
 from app.services.goal_execution_state import (
@@ -225,6 +225,9 @@ class GoalExecutionAgent(GoalResearchAgent):
             elif VALUE_QUESTION.search(goal):
                 descriptions.append((f"요청한 {names} 값과 단위를 근거와 함께 제시" if prefers_korean(request)
                                      else f"Report the requested {names} values and units with sources"))
+        elif ResearchAgent._visual_figure_intent(goal):
+            descriptions.append("요청한 시각적 관계를 해당 Figure 근거로 제시" if prefers_korean(request)
+                                else "State the requested visual relationship from the identified Figure")
         elif simulation_spec:
             descriptions.append("Report all simulated cases from the validated parameter sweep")
             for word, phrase in ((r"\bbest\b|\bmaxim", "Identify the best case"),
@@ -232,8 +235,9 @@ class GoalExecutionAgent(GoalResearchAgent):
                                  (r"\brange\b|\bsensitiv", "Report the sensitivity range")):
                 if re.search(word, goal, re.I):
                     descriptions.append(phrase)
-        elif users.records and re.search(r"공식|수식|관계식|\b(?:formula|equation|correlation)\b", goal, re.I) and re.search(
-                r"계산|구해|\b(?:calculat\w*|comput\w*)\b", goal, re.I):
+        elif (users.records and calculation_requested(goal, True) and
+              (requests_sourced_formula(goal) or re.search(
+                  r"공식|수식|관계식|\b(?:formula|equation|correlation)\b", goal, re.I))):
             descriptions.append("출처 있는 관계식과 제공된 입력으로 검증된 계산 결과를 제시" if prefers_korean(request)
                                 else "Provide a validated result from a sourced equation and supplied inputs")
         elif users.records and re.search(r"\b(?:calculat|comput|determine|find)\w*\b|계산|구해|구하", goal, re.I):
@@ -247,7 +251,8 @@ class GoalExecutionAgent(GoalResearchAgent):
             descriptions.append("요청한 주제의 조사 결과를 확인 가능한 근거와 함께 제시" if prefers_korean(request)
                                 else "Present the requested research with identifiable evidence")
         elif (not request.deliverables and re.search(r"설명해|\b(?:explain|describe)\b", goal, re.I)
-              and not re.search(r"계산|시뮬레이션|\b(?:calculat\w*|simulat\w*)\b", goal, re.I)):
+              and not calculation_requested(goal, bool(users.records))
+              and not SIMULATE_WORDS.search(goal)):
             descriptions.append("요청한 관계를 확인 가능한 근거와 함께 설명" if prefers_korean(request)
                                 else "Explain the requested relationship with identifiable evidence")
         return [GoalCriterion(criterion_id=f"C{index}", description=description)
@@ -818,7 +823,13 @@ class GoalExecutionAgent(GoalResearchAgent):
                                "formula_id": selected_formula.formula_id if selected_formula else None,
                                "calculation_readiness": calculation_readiness.diagnostics(),
                                "missing_variables": trace.missing_variables if trace else [],
-                               "unit_mismatch_variables": trace.unit_mismatch_variables if trace else []}
+                               "unit_mismatch_variables": trace.unit_mismatch_variables if trace else [],
+                               "contract_status": trace.contract_status if trace else None,
+                               "required_output_checklist": trace.required_output_checklist if trace else [],
+                               "binding_map": trace.binding_map if trace else {},
+                               "request_ir": trace.request_ir if trace else None,
+                               "contract_preflight": trace.contract_preflight if trace else {},
+                               "plan_summary": trace.plan_summary if trace else None}
                     state.source_complete = trace.source_complete if trace else None
                     source_map = {
                         item.evidence_id: original.evidence_id
@@ -914,9 +925,16 @@ class GoalExecutionAgent(GoalResearchAgent):
                     order_required = bool(re.search(
                         r"left.{0,12}right|왼쪽.{0,20}오른쪽|그림\s*기준|트랙.{0,8}순서",
                         request.goal or request.topic, re.I))
+                    proximity_required = bool(re.search(
+                        r"closer|nearest|nearer|farther|near.{0,15}borehole|"
+                        r"더\s*가깝|어느\s*쪽|borehole.{0,15}쪽",
+                        request.goal or request.topic, re.I))
                     figure_support_missing = (visual_required and (not accumulator.figures or
                         (order_required and not any(re.search(
                             r"(?im)^analysis:\s*left_to_right:\s*(?!unknown)", item.source_note)
+                            for item in accumulator.figures)) or
+                        (proximity_required and not any(re.search(
+                            r"(?im)^analysis:\s*near_to_far:\s*(?!unknown)", item.source_note)
                             for item in accumulator.figures))))
                     literal_claim = (literal_source_answer(request.goal or request.topic, evidence, korean=korean)
                                      if not result.computations and not calculation_requested(

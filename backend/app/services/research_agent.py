@@ -67,7 +67,7 @@ VISUAL_FIGURE_RE = re.compile(
     r"\bshape\b|\bplott?ed\b|\bvisual\b|\bread(?:ing)?\b|"
     r"\bdigitiz(?:e|ed|ing)\b|\btrace(?:d|ing)?\b|"
     r"pressure\s*gradient|supercharg|left[- ]to[- ]right|그래프|도표|플롯|축|곡선|형태|추세|시각|"
-    r"그림\s*기준|왼쪽.{0,20}오른쪽|"
+    r"그림\s*기준|그림으로\s*확인|단면도|왼쪽.{0,20}오른쪽|"
     r"그림.{0,12}(?:해석|설명)|직접\s*(?:읽|판독)|점.{0,8}(?:읽|판독)",
     re.IGNORECASE,
 )
@@ -1626,6 +1626,14 @@ class ResearchAgent:
                 "position of every label is visible; otherwise write 'analysis: unknown'. "
                 "Do not infer order from a legend or series list."
             )
+        elif re.search(r"closer|nearest|nearer|farther|near.{0,15}borehole|"
+                       r"더\s*가깝|어느\s*쪽|borehole.{0,15}쪽", query, re.I):
+            task = (
+                "For the requested diagram, read only the visibly labeled radial zones "
+                "from the borehole outward. Write 'analysis: near_to_far: label1 | label2 | ...' "
+                "only if the positions and labels are visible; otherwise write 'analysis: unknown'. "
+                "Do not infer spatial order from a component list."
+            )
         elif re.search(
             r"x[- ]?axis|y[- ]?axis|type\s*curve|축|계열|series|derivative|미분",
             query,
@@ -1680,8 +1688,11 @@ class ResearchAgent:
         supercharged = bool(re.search(r"supercharg|제외|제거", query, re.IGNORECASE))
         order = bool(re.search(r"left.{0,12}right|왼쪽.{0,20}오른쪽|그림\s*기준|트랙.{0,8}순서",
                                query, re.I))
+        proximity = bool(re.search(r"closer|nearest|nearer|farther|near.{0,15}borehole|"
+                                   r"더\s*가깝|어느\s*쪽|borehole.{0,15}쪽", query, re.I))
         return bool(
             (order and not re.search(r"(?im)^analysis:\s*left_to_right:\s*(?!unknown)", figure.source_note))
+            or (proximity and not re.search(r"(?im)^analysis:\s*near_to_far:\s*(?!unknown)", figure.source_note))
             or
             (numeric and not figure.quantities)
             or (
