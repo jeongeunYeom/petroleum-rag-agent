@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import time
+from types import SimpleNamespace
 
 import pytest
 
@@ -18,7 +19,9 @@ from app.services.goal_action_planner import GoalActionPlanner
 from app.services.goal_evaluator import GoalEvaluationResult, GoalEvaluator
 from app.services.calculation_request_ir import parse_request_ir
 from app.services.calculation_requirements import assess_formula_readiness, select_formula_candidate
+from app.services.formula_source_registry import FormulaSourceRegistry
 from app.services.goal_clarification import calculation_missing, simulation_readiness
+from app.services.goal_claim_support import literal_source_answer
 from app.services.citation_semantics import ground_research_claims
 from app.services.goal_execution_agent import GoalExecutionAgent, _EvidenceSnapshot, _V8ToolPlanner
 from app.services.goal_execution_state import (
@@ -30,6 +33,10 @@ from app.services.goal_simulation import validate_expression
 from app.services.goal_message_parser import GoalMessageRequest, parse_goal_message
 from app.services.goal_python_analysis import GoalPythonAnalysis
 from app.services.goal_tool_planner import ToolDecision
+from app.services.goal_tool_planner import InputFact, PythonAnalysisPlan
+from app.services.calculation_contract import _source_output_unit, source_formula_contract, validate_contract
+from app.services.calculation_requirements import build_requirement_graph
+from app.services.required_outputs import RequiredOutputIntent
 from app.services.user_fact_registry import UserFactRegistry
 
 
@@ -160,6 +167,35 @@ def test_complete_non_api_sourced_formula_overrides_planner_none_but_missing_fac
     missing = [item for item in evidence if item.get("name") != "T2"]
     declined = asyncio.run(_V8ToolPlanner(DecliningOllama()).decide(req, criteria, missing, None))
     assert not declined.tool_needed
+
+
+def test_literal_scalar_juxtaposition_keeps_raw_provenance_and_safely_parses():
+    source = [{"evidence_id": "KB1", "source_type": "knowledge_base", "locator": "manual p.6",
+               "text": "Average nozzle velocity: vj = (0.32086q) / An, where q is flow rate and An is area."}]
+    record = FormulaSourceRegistry.from_evidence(source).records[0]
+    assert record.raw_span == "vj = (0.32086q) / An"
+    assert record.expression_candidate == "vj = (0.32086*q) / An"
+    assert record.normalized_span != record.expression_candidate
+    ordinary = FormulaSourceRegistry.from_evidence([{**source[0],
+        "text": "A separate valid factor is fm = 1e-3 * m."}]).records[0]
+    assert ordinary.expression_candidate == "fm = 1e-3 * m"
+
+
+def test_output_unit_uses_only_aligned_literal_source_alternatives():
+    description = ("vj = (0.32086q) / An,\nwhere vj = average jet velocity (ft/sec or m/s) "
+                   "and An = total nozzle area (in.2\n or cm2).")
+    plan = PythonAnalysisPlan(purpose="Calculate jet velocity", formula="vj = (0.32086*q) / An",
+                              formula_description=description, input_facts=[
+                                  InputFact(name="q", value=450, unit="gal/min", evidence_id="USERF1",
+                                            source_excerpt="q=450 gal/min"),
+                                  InputFact(name="An", value=0.6, unit="in2", evidence_id="USERF2",
+                                            source_excerpt="An=0.60 in2")])
+    assert _source_output_unit(plan) == "ft/sec"
+    ambiguous = plan.model_copy(update={"input_facts": [plan.input_facts[0]]})
+    assert _source_output_unit(ambiguous) is None
+    mismatched = plan.model_copy(update={"input_facts": [plan.input_facts[0],
+        plan.input_facts[1].model_copy(update={"unit": "unknown"})]})
+    assert _source_output_unit(mismatched) is None
 
 
 @pytest.mark.parametrize("topic,goal", [
@@ -447,6 +483,22 @@ def test_research_snapshot_keeps_only_exact_retrieved_formula_span():
     assert accumulator.internal[0].excerpt.endswith("SG = 0.8.")
 
 
+def test_literal_claim_support_rejects_unrelated_equation_and_swapped_numeric_values():
+    equation = [{"evidence_id": "KB1", "source_type": "knowledge_base",
+                 "text": "equation_text: S_w = sqrt(R_w/R_wa)\nequation_verified: true"}]
+    assert literal_source_answer("What is the relationship between Rw and Rwa?", equation,
+                                 korean=False).complete
+    assert literal_source_answer("What is the relationship between P1 and P2?", equation,
+                                 korean=False) is None
+    values = [{"evidence_id": "KB2", "source_type": "knowledge_base",
+               "text": "Rw is about 0.08 ohm-m over Interval C. Rwa reaches 0.6 ohm-m at Level B."}]
+    supported = literal_source_answer("Interval C의 Rw와 Level B의 Rwa 값과 단위는?", values, korean=True)
+    assert supported.complete and "Rw = 0.08 ohm-m" in supported.answer
+    assert "Rwa = 0.6 ohm-m" in supported.answer
+    assert literal_source_answer("Interval C의 Rw와 Level B의 Rwa 값과 단위는?",
+        [{**values[0], "text": "Rw is about 0.08 ohm-m over Interval C."}], korean=True).complete is False
+
+
 class NoResearch:
     async def research(self, _request):
         raise AssertionError("research must not run")
@@ -502,6 +554,114 @@ class StaticResearch:
                                 routing_mode="internal_only", retrieval_mode="hybrid",
                                 timing=ResearchTiming(retrieval_seconds=0, reasoning_seconds=0, elapsed_seconds=0),
                                 validation={})
+
+
+def test_literal_equation_completes_goal_without_unrequested_theory():
+    message = "What is the saturation relationship between Rw and Rwa?"
+    req = GoalResearchRequest(topic=message, goal=message,
+                              execution_mode="autonomous_goal_execution", max_iterations=4)
+    source = "equation_text: S_w = sqrt(R_w/R_wa)\nequation_verified: true"
+    result = asyncio.run(GoalExecutionAgent(StaticResearch(source), object(),
+                         evaluator=PassingEvaluator()).run("GR-TEST-LITERAL-EQUATION", req))
+    assert [item["action_type"] for item in result.action_history] == [
+        "retrieve", "verify", "synthesize", "stop"]
+    assert result.status == GoalStatus.ACHIEVED
+    assert result.final_answer == "The sourced relationship: S_w = sqrt(R_w/R_wa) [KB1]"
+    assert len(result.frozen_criteria) == 1
+    assert result.telemetry["iteration_diagnostics"][1]["new_claims_satisfied"] == ["C1"]
+    assert result.telemetry["iteration_diagnostics"][1]["missing_claims"] == []
+
+
+def test_named_equation_uses_verified_literal_and_same_page_relation_context_only():
+    formula = {"evidence_id": "KB1", "source_type": "knowledge_base",
+               "locator": "manual.pdf p.28 chunk e1",
+               "text": "equation_text: Q = k*A*DeltaP/(l*mu)\nequation_verified: true"}
+    context = {"evidence_id": "KB2", "source_type": "knowledge_base",
+               "locator": "manual.pdf p.28 chunk t1", "text": "Darcy's Law describes linear laminar flow."}
+    answer = literal_source_answer("manual에서 Darcy 식을 알려줘", [formula, context], korean=True)
+    assert answer and answer.complete
+    assert "Q = k*A*DeltaP/(l*mu)" in answer.answer
+    assert answer.supporting_ids == ("KB1", "KB2")
+    unrelated = {**context, "locator": "manual.pdf p.29 chunk t1"}
+    assert literal_source_answer("manual에서 Darcy 식을 알려줘", [formula, unrelated], korean=True) is None
+    conflicting = {**formula, "evidence_id": "KB3", "locator": "manual.pdf p.28 chunk e2",
+                   "text": "equation_text: V = q/A\nequation_verified: true"}
+    assert literal_source_answer("manual에서 Darcy 식을 알려줘", [formula, context, conflicting],
+                                 korean=True) is None
+
+
+def test_visual_question_without_figure_evidence_cannot_claim_completion():
+    message = "Figure 4의 curve shape를 직접 읽고 설명해줘"
+    req = GoalResearchRequest(topic=message, goal=message, max_iterations=3,
+                              execution_mode="autonomous_goal_execution",
+                              success_criteria=[GoalCriterion(criterion_id="C1", description="Describe the plotted curve")])
+
+    async def hallucinated(*_args, **_kwargs):
+        return "The curve rises from left to right. [KB1]"
+
+    class GroundingUnexpected:
+        async def chat_structured(self, *_args, **_kwargs):
+            raise AssertionError("A safe missing-Figure notice must not be rewritten as a claim")
+
+    result = asyncio.run(GoalExecutionAgent(StaticResearch("Figure 4 is discussed on this page."),
+                         GroundingUnexpected(), evaluator=PassingEvaluator(), synthesizer=hallucinated).run("GR-NO-FIG", req))
+    assert result.status != GoalStatus.ACHIEVED
+    assert "curve rises" not in result.final_answer
+    assert "Figure 근거" in result.final_answer
+
+
+def test_independent_partial_fact_answer_does_not_complete_goal():
+    message = "Interval C의 Rw와 Level B의 Rwa 값과 단위를 알려줘."
+    req = GoalResearchRequest(topic=message, goal=message,
+                              execution_mode="autonomous_goal_execution", max_iterations=4,
+                              max_retrieval_actions=1, max_verification_actions=1)
+    result = asyncio.run(GoalExecutionAgent(StaticResearch("Rw is about 0.08 ohm-m over Interval C."),
+                         object(), evaluator=PassingEvaluator()).run("GR-TEST-PARTIAL-FACT", req))
+    assert result.status != GoalStatus.ACHIEVED
+    assert "Rw = 0.08 ohm-m [KB1]" in result.final_answer
+    assert "Rwa 값과 단위는 현재 근거에서 확인할 수 없습니다" in result.final_answer
+    assert result.goal_coverage == 0.5
+
+
+def test_two_named_documents_receive_distinct_retrieval_queries():
+    class TwoDocuments:
+        def named_documents(self, _query):
+            return [SimpleNamespace(title="University - Formation Evaluation.pdf"),
+                    SimpleNamespace(title="Institute - Well Test Analysis.pdf")]
+
+        async def research(self, request):
+            document = "Formation Evaluation.pdf" if "Formation Evaluation" in request.query else "Well Test Analysis.pdf"
+            source = InternalEvidence(evidence_id="KB1", document=document, page=1,
+                                      chunk_id=document, score=1, excerpt=f"Fact in {document}")
+            return ResearchResponse(query=request.query, answer="", internal_sources=[source],
+                                    web_sources=[], figures=[], provenance=[], model=request.model,
+                                    inference_used=False, evidence_counts=EvidenceCounts(internal=1, external=0),
+                                    routing_mode="internal_only", retrieval_mode="hybrid",
+                                    timing=ResearchTiming(retrieval_seconds=0, reasoning_seconds=0,
+                                                          elapsed_seconds=0), validation={})
+
+    async def synthesis(*_args, **_kwargs):
+        return "First source [KB1]. Second source [KB2]."
+
+    message = "Compare Formation Evaluation and Well Test Analysis on their pressure methods."
+    req = GoalResearchRequest(topic=message, goal=message, execution_mode="autonomous_goal_execution",
+                              success_criteria=[GoalCriterion(criterion_id="C1", description="Compare the sources")])
+    result = asyncio.run(GoalExecutionAgent(TwoDocuments(), object(), evaluator=PassingEvaluator(),
+                                             synthesizer=synthesis).run("GR-MULTIDOC", req))
+    first = result.action_history[0]
+    assert first["action_type"] == "retrieve"
+    assert len(first["details"]["generated_retrieval_queries"]) == 2
+    assert {item.document for item in result.internal_sources} == {
+        "Formation Evaluation.pdf", "Well Test Analysis.pdf"}
+    assert result.status == GoalStatus.ACHIEVED
+
+    async def incomplete(*_args, **_kwargs):
+        return "Only the first source is summarized. [KB1]"
+
+    incomplete_result = asyncio.run(GoalExecutionAgent(TwoDocuments(), object(), evaluator=PassingEvaluator(),
+                                                        synthesizer=incomplete).run("GR-MULTIDOC-MISSING", req))
+    assert incomplete_result.status != GoalStatus.ACHIEVED
+    assert any("Well Test Analysis" in gap for gap in incomplete_result.state_history[-1]["unresolved_information"])
 
 
 async def synthetic_synthesis(*_args):
@@ -995,3 +1155,36 @@ def test_research_goal_can_finish_after_unsupported_line_is_pruned():
     assert result.validation["unsupported_citation_claim_count"] == 1
     assert "Unresolved" not in result.final_answer
     assert result.final_answer.endswith("[KB1]")
+
+
+def test_explicit_single_letter_fact_after_natural_language_prefix_is_bound():
+    message = ("Use the sourced velocity relation to calculate the result "
+               "for q=450 gal/min and A_n=0.60 in2.")
+    facts = UserFactRegistry.from_topic(message).records
+    assert [(fact.name, fact.value, fact.unit) for fact in facts] == [
+        ("q", 450.0, "gal/min"), ("A_n", 0.6, "in2")]
+
+
+def test_sourced_output_definition_can_name_single_requested_quantity():
+    req = GoalResearchRequest(topic="q=450 gal/min, A_n=0.60 in2",
+                              goal="Use the cited relation to calculate nozzle velocity in ft/sec")
+    users = UserFactRegistry.from_topic(req.topic).evidence()
+    source = {"evidence_id": "KB1", "source_type": "knowledge_base", "locator": "manual p.6",
+              "text": ("vj = (0.32086q) / An, where vj = average jet velocity of bit nozzles "
+                       "(ft/sec or m/s) and An = nozzle area (in2 or cm2).")}
+    formula = select_formula_candidate([source], req.goal, [item["name"] for item in users])
+    assert formula is not None
+    facts = [InputFact(name=item["name"], value=item["value"], unit=item["unit"],
+                       evidence_id=item["evidence_id"], canonical_fact_id=item["evidence_id"],
+                       source_excerpt=item["source_span"], source_type="user_fact") for item in users]
+    plan = PythonAnalysisPlan(purpose=req.goal, target_criteria=["C1"], input_facts=facts,
+                              formula=formula.expression_candidate, formula_source_id=formula.formula_id,
+                              formula_description=source["text"])
+    graph = build_requirement_graph(plan, [source, *users], formula_id=formula.formula_id,
+                                    formula_required=True)
+    checklist = [RequiredOutputIntent(semantic_name="nozzle_velocity", output_type="numeric",
+                                      requested_unit="ft/sec")]
+    contract = source_formula_contract(req, plan, graph, checklist)
+    assert contract is not None
+    assert validate_contract(contract, plan, graph, checklist) is None
+    assert contract.required_outputs[0].unit == "ft/sec"

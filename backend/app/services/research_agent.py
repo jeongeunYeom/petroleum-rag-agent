@@ -23,6 +23,7 @@ from app.models.research_schemas import (
     WebEvidence,
 )
 from app.services.engineering_validator import EngineeringValidator
+from app.services.document_constraint import DocumentConstraint, explicit_document_constraints
 from app.services.figure_analysis import (
     FigureAnalysisService,
     normalize_list,
@@ -65,7 +66,8 @@ VISUAL_FIGURE_RE = re.compile(
     r"x[- ]?axis|y[- ]?axis|\baxis\b|\blegend\b|\bcurve\b|\btrend\b|"
     r"\bshape\b|\bplott?ed\b|\bvisual\b|\bread(?:ing)?\b|"
     r"\bdigitiz(?:e|ed|ing)\b|\btrace(?:d|ing)?\b|"
-    r"pressure\s*gradient|supercharg|그래프|도표|플롯|축|곡선|형태|추세|시각|"
+    r"pressure\s*gradient|supercharg|left[- ]to[- ]right|그래프|도표|플롯|축|곡선|형태|추세|시각|"
+    r"그림\s*기준|왼쪽.{0,20}오른쪽|"
     r"그림.{0,12}(?:해석|설명)|직접\s*(?:읽|판독)|점.{0,8}(?:읽|판독)",
     re.IGNORECASE,
 )
@@ -654,12 +656,63 @@ class ResearchAgent:
             )
         return list(dict.fromkeys(variants))
 
+    def named_documents(self, query: str) -> list[DocumentConstraint]:
+        catalog = []
+        for path in self.settings.metadata_dir.glob("*.json"):
+            try:
+                catalog.append(json.loads(path.read_text(encoding="utf-8")))
+            except (OSError, ValueError):
+                continue
+        return explicit_document_constraints(query, catalog)
+
+    def named_document(self, query: str) -> DocumentConstraint | None:
+        matches = self.named_documents(query)
+        return matches[0] if len(matches) == 1 else None
+
+    def _scoped_document_hits(self, query: str, top_k: int,
+                              constraint: DocumentConstraint) -> list[dict[str, Any]]:
+        dense = getattr(self.vector_store, "search_scoped", None)
+        sparse = getattr(self.vector_store, "keyword_search_scoped" if self.settings.retrieval_mode == "legacy"
+                         else "bm25_search_scoped", None)
+        if not callable(dense) or not callable(sparse):
+            return []
+        count = min(top_k * 4, 80)
+        title = constraint.title.replace("_", " ").removesuffix(".pdf")
+        subject = re.sub(re.escape(title.split(" - ")[-1]), " ", query, flags=re.I)
+        focus = {token.casefold() for token in re.findall(r"[A-Za-z]{3,}|[가-힣]{2,}", subject)
+                 if token.casefold() not in RETRIEVAL_STOPWORDS
+                 and token.casefold() not in {"from", "within", "source", "document", "pdf", "에서", "알려줘", "설명해줘", "식을"}}
+        if not focus:
+            return []
+        merged: dict[str, dict[str, Any]] = {}
+        for channel, hits in (("dense", dense(query, count, constraint.document_id)),
+                              ("sparse", sparse(query, count, constraint.document_id))):
+            for rank, hit in enumerate(hits, 1):
+                if channel == "dense" and not self._passes_similarity_threshold(hit):
+                    continue
+                searchable = str(hit.get("text") or "").casefold()
+                if not any(re.search(rf"(?<![a-z0-9]){re.escape(token)}(?![a-z0-9])", searchable)
+                           for token in focus):
+                    continue
+                chunk_id = str(hit.get("id") or "")
+                if not chunk_id:
+                    continue
+                row = merged.setdefault(chunk_id, dict(hit))
+                row["rrf_score"] = float(row.get("rrf_score") or 0) + 1 / (60 + rank)
+        ranked = sorted(merged.values(), key=lambda hit: float(hit.get("rrf_score") or 0), reverse=True)
+        return self._attach_page_equations(query, ranked, top_k) if ranked else []
+
     def search_knowledge_base(self, query: str, top_k: int) -> list[dict[str, Any]]:
         query = query.strip()
         if not query:
             raise ValueError("query must not be blank")
         if not 1 <= top_k <= 20:
             raise ValueError("top_k must be between 1 and 20")
+
+        constraint = self.named_document(query)
+        if constraint and not self._visual_figure_intent(query) and (
+                scoped := self._scoped_document_hits(query, top_k, constraint)):
+            return scoped
 
         candidate_count = min(top_k * 4, 80)
         query_variants = self.engineering_retrieval_queries(query)
@@ -718,9 +771,11 @@ class ResearchAgent:
         if not FIGURE_RE.search(query):
             return self._attach_page_equations(query, ranked, top_k)
 
-        figures = self._search_figure_channel(query, candidate_count)
+        figures = self._resolve_figure_identity(query, self._search_figure_channel(query, candidate_count))
         if not figures:
-            return ranked[:top_k]
+            return ([hit for hit in ranked if not self._is_figure_hit(
+                str(hit.get("text") or ""), hit.get("metadata") or {})][:top_k]
+                    if self._visual_figure_intent(query) else ranked[:top_k])
         figure_budget = min(2, top_k, len(figures))
         selected_figures = figures[:figure_budget]
         figure_ids = {str(hit.get("id") or "") for hit in selected_figures}
@@ -733,6 +788,40 @@ class ResearchAgent:
             )
         ][: max(top_k - figure_budget, 0)]
         return [*selected_text, *selected_figures]
+
+    def _resolve_figure_identity(self, query: str, hits: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Withhold visual Figure hits when repeated numbers remain ambiguous."""
+        if not self._visual_figure_intent(query) or not hits:
+            return hits
+        requested = {number.casefold() for number in FIGURE_NUMBER_RE.findall(query)}
+        constraint = self.named_document(query)
+        groups: dict[tuple[str, str, str], list[dict[str, Any]]] = {}
+        for hit in hits:
+            metadata = hit.get("metadata") or {}
+            number = (self._figure_number(str(hit.get("text") or ""), metadata) or "").casefold()
+            document_id = str(metadata.get("document_id") or "")
+            if requested and number not in requested:
+                continue
+            if constraint and document_id != constraint.document_id:
+                continue
+            key = (document_id or str(metadata.get("document") or ""),
+                   str(metadata.get("page") or ""), number)
+            groups.setdefault(key, []).append(hit)
+        if len(groups) == 1:
+            return next(iter(groups.values()))
+        if not groups:
+            return []
+        terms = self._identity_tokens(FIGURE_NUMBER_RE.sub(" ", query)) - {
+            "curve", "axis", "trend", "trace", "shape", "plot", "read", "value", "values"}
+        ranked = []
+        for key, group in groups.items():
+            metadata = group[0].get("metadata") or {}
+            fields = parse_key_values(str(group[0].get("text") or ""))
+            caption = " ".join(str(value or "") for value in (
+                metadata.get("title"), metadata.get("caption"), fields.get("title"), fields.get("caption")))
+            ranked.append((len(terms & self._identity_tokens(caption)), key, group))
+        ranked.sort(key=lambda item: item[0], reverse=True)
+        return ranked[0][2] if ranked[0][0] > 0 and ranked[0][0] > ranked[1][0] else []
 
     def _search_equation_channel(
         self, query: str, candidate_count: int
@@ -1530,6 +1619,13 @@ class ResearchAgent:
                 "Report only visible indications of supercharged points and how they "
                 "are marked or excluded."
             )
+        elif re.search(r"left.{0,12}right|왼쪽.{0,20}오른쪽|그림\s*기준|트랙.{0,8}순서", query, re.I):
+            task = (
+                "Read only visibly labeled tracks or panels from left to right. "
+                "Write 'analysis: left_to_right: label1 | label2 | ...' only when the "
+                "position of every label is visible; otherwise write 'analysis: unknown'. "
+                "Do not infer order from a legend or series list."
+            )
         elif re.search(
             r"x[- ]?axis|y[- ]?axis|type\s*curve|축|계열|series|derivative|미분",
             query,
@@ -1582,7 +1678,11 @@ class ResearchAgent:
             )
         )
         supercharged = bool(re.search(r"supercharg|제외|제거", query, re.IGNORECASE))
+        order = bool(re.search(r"left.{0,12}right|왼쪽.{0,20}오른쪽|그림\s*기준|트랙.{0,8}순서",
+                               query, re.I))
         return bool(
+            (order and not re.search(r"(?im)^analysis:\s*left_to_right:\s*(?!unknown)", figure.source_note))
+            or
             (numeric and not figure.quantities)
             or (
                 axes
@@ -1732,6 +1832,16 @@ class ResearchAgent:
         note_marker = FIGURE_NOTE_MARKER_RE.search(text)
         note_text = text[note_marker.end() :] if note_marker else text
         structured = "[figure note metadata]" in note_text.casefold()
+        if structured:
+            fields = parse_key_values(note_text)
+            literal = str(fields.get("figure_number") or "").strip()
+            caption = str(fields.get("source_caption") or "")
+            if re.fullmatch(r"[0-9]+[A-Za-z]?", literal) and (
+                    parse_bool(fields.get("figure_number_verified")) or
+                    (parse_bool(fields.get("source_caption_verified")) and
+                     re.search(rf"(?<![A-Za-z0-9])Figure\s*{re.escape(literal)}(?![A-Za-z0-9])",
+                               caption, re.I))):
+                return literal
         pattern = (
             r"(?im)(?:^|\n)\s*figure\s+([0-9]+[A-Za-z]?)\s*:\s*"
             r"(?=\[figure note metadata\])"

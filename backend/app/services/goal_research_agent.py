@@ -378,14 +378,17 @@ class GoalResearchAgent:
                         resolution = resolve_formula(analysis_evidence, intent)
                         python_trace.formula_candidates = resolution.candidates
                         python_trace.formula_resolution_reason = resolution.reason
-                        selected_formula = resolution.record.formula_id if resolution.record else None
+                        selected_record = resolution.record or select_formula_candidate(
+                            analysis_evidence, request.goal or request.topic,
+                            [fact.name for fact in user_registry.records])
+                        selected_formula = selected_record.formula_id if selected_record else None
                         python_trace.resolved_formula_id = selected_formula
                         if decision.plan:
                             decision.plan.formula = None
                             decision.plan.formula_source_id = None
                             decision.plan.supporting_evidence_ids = []
-                        if resolution.record:
-                            self._attach_source_formula(decision, resolution.record)
+                        if selected_record:
+                            self._attach_source_formula(decision, selected_record)
                     elif not ir:
                         selected_formula = decision.selected_formula_id or (
                             (decision.plan_summary or {}).get("formula_ref") if decision.plan_summary else None)
@@ -464,14 +467,17 @@ class GoalResearchAgent:
                             resolution = resolve_formula(analysis_evidence, intent)
                             python_trace.formula_candidates = resolution.candidates
                             python_trace.formula_resolution_reason = resolution.reason
-                            new_formula = resolution.record.formula_id if resolution.record else None
+                            selected_record = resolution.record or select_formula_candidate(
+                                analysis_evidence, request.goal or request.topic,
+                                [fact.name for fact in user_registry.records])
+                            new_formula = selected_record.formula_id if selected_record else None
                             python_trace.resolved_formula_id = new_formula
                             if decision.plan:
                                 decision.plan.formula = None
                                 decision.plan.formula_source_id = None
                                 decision.plan.supporting_evidence_ids = []
-                            if resolution.record:
-                                self._attach_source_formula(decision, resolution.record)
+                            if selected_record:
+                                self._attach_source_formula(decision, selected_record)
                         else:
                             new_formula = decision.selected_formula_id or selected_formula
                             if formula_required and not new_formula:

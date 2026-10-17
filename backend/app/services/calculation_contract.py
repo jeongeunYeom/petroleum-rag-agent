@@ -119,13 +119,61 @@ def paired_reading_contract(request: GoalResearchRequest, plan: PythonAnalysisPl
                                scenarios=scenarios, required_outputs=outputs)
 
 
+def _source_output_unit(plan: PythonAnalysisPlan) -> str | None:
+    """Use a literal source unit, or a uniquely aligned unit alternative.
+
+    This does not infer physical dimensions from a coefficient. If source
+    alternatives cannot be paired with supplied input units, leave it unknown.
+    """
+    if not plan.formula or not plan.formula_description:
+        return None
+    context = plan.formula_description
+    lhs = plan.formula.split("=", 1)[0].strip()
+
+    def options(symbol: str) -> list[str]:
+        match = re.search(rf"\b{re.escape(symbol)}\s*=\s*[^()]{{3,120}}\(([^()]{{1,80}})\)", context, re.I)
+        return [part.strip() for part in re.split(r"\s+or\s+|\s+또는\s+", match.group(1), flags=re.I)] if match else []
+
+    output = options(lhs)
+    if len(output) == 1:
+        return output[0]
+    if len(output) < 2:
+        return None
+    positions = set()
+    for fact in plan.input_facts:
+        alternatives = options(fact.name)
+        if len(alternatives) != len(output):
+            continue
+        unit = re.sub(r"[^a-z0-9]", "", fact.unit.casefold())
+        matches = [index for index, value in enumerate(alternatives)
+                   if re.sub(r"[^a-z0-9]", "", value.casefold()) == unit]
+        if len(matches) != 1:
+            return None
+        positions.add(matches[0])
+    return output[next(iter(positions))] if len(positions) == 1 else None
+
+
 def source_formula_contract(request: GoalResearchRequest, plan: PythonAnalysisPlan,
                             graph: CalculationRequirementGraph,
                             checklist: list[RequiredOutputIntent]) -> CalculationContract | None:
-    """Compile simple source equations when every requested output is per-scenario."""
-    if not graph.source_complete or not graph.formula_id or not plan.formula or any(
-        item.semantic_name != "per_case" for item in checklist):
+    """Compile a source equation only when output shape and unit are explicit."""
+    if not graph.source_complete or not graph.formula_id or not plan.formula:
         return None
+    lhs = plan.formula.split("=", 1)[0].strip()
+    output_name = lhs
+    for item in checklist:
+        if item.semantic_name in {"per_case", "result", lhs}:
+            continue
+        if len(checklist) != 1 or item.output_type != "numeric" or item.scenario_id:
+            return None
+        definition = re.search(rf"\bwhere\s+{re.escape(lhs)}\s*=\s*([^.;\n]{{3,120}})",
+                               plan.formula_description or "", re.I)
+        terms = [word.rstrip("s") for word in re.findall(r"[a-z]{4,}", item.semantic_name.casefold())]
+        source_words = {word.rstrip("s") for word in re.findall(r"[a-z]{4,}",
+                        definition.group(1).casefold())} if definition else set()
+        if not terms or not all(word in source_words for word in terms):
+            return None
+        output_name = item.semantic_name
     if not graph.scenario_bindings or not graph.formula_variables:
         return None
     goal = request.goal or request.topic
@@ -144,15 +192,16 @@ def source_formula_contract(request: GoalResearchRequest, plan: PythonAnalysisPl
             return None
         units = {fact.unit for fact in plan.input_facts}
         unit = next(iter(units)) if len(units) == 1 else None
+    if unit is None:
+        unit = _source_output_unit(plan)
     if not unit:
         return None
-    lhs = plan.formula.split("=", 1)[0].strip()
     selected = {fact.canonical_fact_id or fact.evidence_id for fact in plan.input_facts}
     bindings = graph.scenario_bindings
     if selected != {fact_id for scenario in bindings.values() for fact_id in scenario.values()}:
         return None
     scenarios = [CalculationScenario(scenario_id=key, input_bindings=value) for key, value in bindings.items()]
-    outputs = [CalculationOutputSpec(output_id=f"OUT_{key}_{lhs}", name=f"{key}_{lhs}",
+    outputs = [CalculationOutputSpec(output_id=f"OUT_{key}_{output_name}", name=f"{key}_{output_name}",
         semantic_type="numeric", unit=unit, scenario_id=key,
         source_fact_ids=list(dict.fromkeys(value.values())), formula_id=graph.formula_id)
         for key, value in bindings.items()]

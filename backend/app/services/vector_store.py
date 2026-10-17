@@ -434,6 +434,12 @@ class VectorStore:
         )
         return self._query_result_to_hits(result)
 
+    def search_scoped(self, question: str, top_k: int, document_id: str) -> list[dict[str, Any]]:
+        """Read-only dense search constrained to one indexed document."""
+        result = self.collection.query(query_embeddings=[self.embed([question])[0]],
+                                       n_results=top_k, where={"document_id": document_id})
+        return self._query_result_to_hits(result)
+
     def search_figures(
         self,
         question: str,
@@ -620,6 +626,17 @@ class VectorStore:
             reverse=True,
         )[:top_k]
 
+    def keyword_search_scoped(self, question: str, top_k: int, document_id: str) -> list[dict[str, Any]]:
+        data = self.collection.get(where={"document_id": document_id}, include=["documents", "metadatas"])
+        tokens = self._keyword_tokens(question)
+        hits = []
+        for chunk_id, document, metadata in zip(data.get("ids", []), data.get("documents", []), data.get("metadatas", [])):
+            score = self._keyword_score(str(document or ""), tokens, metadata or {}, None)
+            if score > 0:
+                hits.append({"id": chunk_id, "text": str(document or ""), "metadata": metadata or {},
+                             "distance": None, "keyword_score": score})
+        return sorted(hits, key=lambda hit: float(hit["keyword_score"]), reverse=True)[:top_k]
+
     def keyword_search_figures(
         self,
         question: str,
@@ -655,6 +672,10 @@ class VectorStore:
 
     def bm25_search(self, question: str, top_k: int) -> list[dict[str, Any]]:
         data = self.collection.get(include=["documents", "metadatas"])
+        return self._bm25_search_data(question, top_k, data)
+
+    def bm25_search_scoped(self, question: str, top_k: int, document_id: str) -> list[dict[str, Any]]:
+        data = self.collection.get(where={"document_id": document_id}, include=["documents", "metadatas"])
         return self._bm25_search_data(question, top_k, data)
 
     def bm25_search_figures(

@@ -12,6 +12,7 @@ from app.core.config import Settings
 from app.core.error_mapping import ExternalServiceError
 from app.models.research_schemas import FigureEvidence, InternalEvidence, ResearchRequest
 from app.services.research_agent import ResearchAgent
+from app.services.document_constraint import explicit_document_constraint, explicit_document_constraints
 from app.services.vector_store import VectorStore
 
 
@@ -61,6 +62,83 @@ class FakeVectorStore:
     def add_chunks(self, chunks):
         self.write_attempted = True
         raise AssertionError("research must never write to ChromaDB")
+
+
+def test_named_document_constraint_prefers_scoped_hits_then_falls_back(tmp_path):
+    settings = Settings(data_dir=tmp_path / "data", retrieval_mode="hybrid")
+    settings.metadata_dir.mkdir(parents=True)
+    (settings.metadata_dir / "doc-a.json").write_text(json.dumps({
+        "document_id": "doc-a", "filename": "University_-_Formation_Evaluation.pdf"}), encoding="utf-8")
+
+    class ScopedStore(FakeVectorStore):
+        def __init__(self):
+            super().__init__(dense=[{"id": "broad", "text": "Darcy equation from handbook",
+                                     "metadata": {"document_id": "doc-b"}, "distance": 0.1}])
+            self.scoped = [{"id": "scoped", "text": "Darcy flow equation from this chapter",
+                            "metadata": {"document_id": "doc-a"}, "distance": 0.1}]
+
+        def search_scoped(self, _query, _top_k, document_id):
+            self.calls.append(f"scoped:{document_id}")
+            return self.scoped
+
+        def bm25_search_scoped(self, _query, _top_k, document_id):
+            self.calls.append(f"scoped-bm25:{document_id}")
+            return self.scoped
+
+    store = ScopedStore()
+    agent = ResearchAgent(settings, store, FakeOllama())
+    query = "Formation Evaluation에서 Darcy 식을 알려줘"
+    assert agent.named_document(query).document_id == "doc-a"
+    assert agent.search_knowledge_base(query, 3)[0]["id"] == "scoped"
+    assert "dense" not in store.calls
+    store.scoped = [{"id": "off-topic", "text": "A different topic", "metadata": {"document_id": "doc-a"},
+                     "distance": 0.1}]
+    assert agent.search_knowledge_base(query, 3)[0]["id"] == "broad"
+    assert "dense" in store.calls
+
+
+def test_document_constraint_requires_source_context_and_unambiguous_title():
+    catalog = [{"document_id": "a", "filename": "University_-_Formation_Evaluation.pdf"},
+               {"document_id": "b", "filename": "Institute_-_Well_Test_Analysis.pdf"}]
+    assert explicit_document_constraint("In Formation Evaluation, find the Darcy law", catalog).document_id == "a"
+    assert explicit_document_constraint("Well Test Analysis에서 derivative를 설명해줘", catalog).document_id == "b"
+    assert explicit_document_constraint("Explain formation evaluation concepts", catalog) is None
+    named = explicit_document_constraints("Compare Formation Evaluation and Well Test Analysis", catalog)
+    assert {item.document_id for item in named} == {"a", "b"}
+
+
+def test_visual_figure_identity_disambiguates_caption_and_withholds_ties(tmp_path):
+    agent = ResearchAgent(Settings(data_dir=tmp_path / "data"), FakeVectorStore(), FakeOllama())
+    def hit(chunk_id, title, doc):
+        return {"id": chunk_id, "text": f"[Extracted figure notes]\ntitle: {title}",
+                "metadata": {"document_id": doc, "document": doc, "page": int(chunk_id[-1]),
+                             "figure_number": "4", "title": title}}
+    pressure = hit("fig1", "Pressure derivative curve", "doc-a")
+    saturation = hit("fig2", "Water saturation curve", "doc-b")
+    assert agent._resolve_figure_identity("Figure 4 pressure derivative curve shape", [pressure, saturation]) == [pressure]
+    assert agent._resolve_figure_identity("Figure 4 curve shape", [pressure, saturation]) == []
+    assert not agent._visual_figure_intent("Figure 4에 나타난 Interval C의 Rw 값과 단위는?")
+    assert agent._visual_figure_intent("Figure 4의 curve에 표시된 점을 직접 읽어줘")
+
+
+def test_verified_structured_figure_number_beats_image_index_wrapper():
+    note = ("[Extracted figure notes]\nFigure 2: [Figure Note Metadata]\n"
+            "image_index: 2\nfigure_number: 7\n"
+            "source_caption: Figure 7 Detection by sonic log\nsource_caption_verified: true")
+    assert ResearchAgent._figure_number(note, {"chunk_type": "figure"}) == "7"
+    unverified = note.replace("source_caption_verified: true", "source_caption_verified: false")
+    assert ResearchAgent._figure_number(unverified, {"chunk_type": "figure"}) is None
+
+
+def test_left_to_right_question_needs_focused_visual_position_evidence():
+    figure = FigureEvidence(evidence_id="FIG1", document="source.pdf", page=7,
+                            figure_number="Figure 4", excerpt="series list: A, B, C",
+                            source_note="series_descriptions: A, B, C")
+    query = "Figure 4의 세 track을 왼쪽에서 오른쪽 순서로 알려줘"
+    assert ResearchAgent._vision_needed(query, figure)
+    assert "left_to_right" in ResearchAgent._focused_vision_prompt(query)
+    supported = figure.model_copy(update={"source_note": "analysis: left_to_right: A | B | C"})
+    assert not ResearchAgent._vision_needed(query, supported)
 
 
 class FakeOllama:

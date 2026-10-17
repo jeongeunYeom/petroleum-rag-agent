@@ -35,10 +35,19 @@ ALLOWED = (
     ast.Load,
 )
 ALLOWED_FUNCTIONS = {"sqrt"}
+IMPLICIT_SCALAR_PRODUCT = re.compile(
+    r"(?<![A-Za-z0-9_])(?P<number>\d+(?:\.\d+)?)(?P<symbol>(?![eE][+-]?\d)[A-Za-z_][A-Za-z0-9_]*)"
+)
 
 
 def normalize_formula(value: str) -> str:
     return re.sub(r"\s+", "", value.translate(TRANSLATION)).casefold()
+
+
+def executable_source_expression(raw: str) -> str:
+    """Interpret only literal scalar juxtaposition, retaining the raw span separately."""
+    translated = raw.translate(TRANSLATION)
+    return IMPLICIT_SCALAR_PRODUCT.sub(r"\g<number>*\g<symbol>", translated)
 
 
 def expression_variables(formula: str) -> set[str] | None:
@@ -96,7 +105,7 @@ class FormulaSourceRegistry(BaseModel):
             text = str(source.get("text") or "")
             for match in EQUATION.finditer(text):
                 raw = match.group("equation").rstrip(" .\t")
-                candidate = raw.translate(TRANSLATION)
+                candidate = executable_source_expression(raw)
                 variables = expression_variables(candidate)
                 rhs = raw.split("=", 1)[1]
                 if variables is None and not (re.search(r"[+\-*/×÷−·]", rhs) and re.search(r"[A-Za-z_]", rhs)):

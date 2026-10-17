@@ -59,6 +59,15 @@ def test_request_ir_scenarios_statistics_and_mixed_relation():
     assert "PV" in named.target_concepts and named.requested_outputs[0].semantic_name == "pore_volume"
 
 
+def test_single_subscripted_symbol_does_not_create_a_spurious_case():
+    req = request("q=450 gal/min, A_n=0.60 in2",
+                  "Use the sourced nozzle relation to calculate velocity in ft/sec")
+    ir = parse_request_ir(req, CRITERIA)
+    assert ir.scenarios == []
+    assert ir.specialist_relation_required
+    assert "minimum" not in ir.requested_operation_types
+
+
 def test_dimensionless_aggregate_does_not_inherit_input_unit():
     req = request("A_value=12 psi, B_value=18 psi.",
                   "For each case A-B report result in psi, mean and coefficient of variation.")

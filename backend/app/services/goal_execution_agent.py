@@ -13,7 +13,7 @@ from typing import Any
 
 from app.core.config import get_settings
 from app.models.goal_research_schemas import (
-    CriterionStatus, ExpectedResultStatus, GoalCriterion, GoalResearchRequest,
+    CriterionEvaluation, CriterionStatus, ExpectedResultStatus, GoalCriterion, GoalResearchRequest,
     GoalResearchResponse, GoalRunStatus, GoalStatus, GoalStopReason,
 )
 from app.models.research_schemas import EvidenceCounts, ResearchRequest, ResearchResponse, ResearchTiming
@@ -22,16 +22,20 @@ from app.services.calculation_requirements import (assess_formula_readiness, nor
                                                     select_formula_candidate, symbol_names)
 from app.services.goal_clarification import (calculation_missing, clarification_question,
                                              parse_user_simulation_spec, simulation_readiness)
+from app.services.goal_claim_support import (EQUATION_QUESTION, VALUE_QUESTION,
+                                             literal_source_answer, requested_symbols)
 from app.services.evidence_fact_registry import EvidenceFactRegistry
 from app.services.calc_claim_grounding import validate_calc_claim
 from app.services.citation_semantics import ground_research_claims
 from app.services.goal_action_planner import SIMULATE_WORDS, GoalActionPlanner, calculation_requested
 from app.services.goal_intent import asks_for_api_gravity_calculation, prefers_korean
 from app.services.goal_evaluator import GoalEvaluator
+from app.services.engineering_validator import EngineeringValidator
 from app.services.goal_execution_state import (
     ActionRecord, DerivedFact, GoalActionType, GoalExecutionState, SimulationParameter, SimulationSpec,
 )
 from app.services.goal_research_agent import EvidenceAccumulator, GoalResearchAgent
+from app.services.research_agent import ResearchAgent
 from app.services.goal_tool_planner import (
     AnalysisPlanSelection, GoalToolPlanner, ToolDecision, materialize_analysis_plan_v4,
 )
@@ -51,6 +55,16 @@ class _EvidenceSnapshot:
         self.formula_span = formula_span
         self.retrieval_mode = retrieval_mode
 
+    @staticmethod
+    def _local_formula_context(text: str, raw_span: str) -> str:
+        """Keep a literal formula and its immediate 'where' definitions, not later examples."""
+        start = text.find(raw_span)
+        if start < 0:
+            return raw_span
+        tail = text[start + len(raw_span):start + len(raw_span) + 450]
+        boundary = re.search(r"\.(?=\s+(?:[A-Z][A-Za-z0-9_]*\s*=|[A-Z][a-z]))", tail)
+        return raw_span + (tail[:boundary.start()] if boundary else tail)
+
     async def research(self, request: ResearchRequest) -> ResearchResponse:
         internal = self.evidence.internal
         web = self.evidence.web
@@ -58,9 +72,9 @@ class _EvidenceSnapshot:
             # The span is copied verbatim from a retrieved passage.  This avoids
             # treating worked-example equations on the same page as alternate
             # dependencies of an already supplied input.
-            internal = [item.model_copy(update={"excerpt": self.formula_span}) for item in internal
+            internal = [item.model_copy(update={"excerpt": self._local_formula_context(item.excerpt, self.formula_span)}) for item in internal
                         if item.evidence_id == self.formula_source_id]
-            web = [item.model_copy(update={"passage": self.formula_span}) for item in web
+            web = [item.model_copy(update={"passage": self._local_formula_context(item.passage, self.formula_span)}) for item in web
                    if item.evidence_id == self.formula_source_id]
         return ResearchResponse(
             query=request.query, answer="", internal_sources=internal,
@@ -115,6 +129,8 @@ class _V8ToolPlanner(GoalToolPlanner):
                     except ValueError:
                         pass
                     else:
+                        plan.formula_description = next((str(item.get("text") or "") for item in evidence
+                                                         if item.get("evidence_id") == formula.source_id), None)
                         return ToolDecision(
                             tool_needed=True, tool_type="python_calculation",
                             reason="Complete sourced equation and explicit input bindings",
@@ -174,6 +190,19 @@ class GoalExecutionAgent(GoalResearchAgent):
         result.timing[stage] = round(result.timing.get(stage, 0.0) + seconds, 6)
 
     @staticmethod
+    def _missing_named_source_citations(answer: str, sources: list[Any], documents: list[Any]) -> list[str]:
+        """A multi-document request is incomplete if an asked-for source is absent or uncited."""
+        missing = []
+        for document in documents:
+            short = str(document.title).replace("_", " ").split(" - ")[-1].removesuffix(".pdf")
+            needle = re.sub(r"[^a-z0-9]", "", short.casefold())
+            ids = [item.evidence_id for item in sources if needle in re.sub(
+                r"[^a-z0-9]", "", item.document.casefold())]
+            if not ids or not any(f"[{source_id}]" in answer for source_id in ids):
+                missing.append(str(document.title))
+        return missing
+
+    @staticmethod
     def _explicit_numeric_criteria(request: GoalResearchRequest,
                                    users: UserFactRegistry,
                                    simulation_spec: SimulationSpec | None) -> list[GoalCriterion]:
@@ -185,6 +214,17 @@ class GoalExecutionAgent(GoalResearchAgent):
                             if prefers_korean(request) else
                             ["Cite the source-backed specific gravity to API gravity equation",
                              "Calculate API gravity from the supplied specific gravity with a validated result"])
+        elif (not users.records and not calculation_requested(goal) and
+              (symbols := requested_symbols(goal)) and
+              (VALUE_QUESTION.search(goal) or
+               (EQUATION_QUESTION.search(goal) and len(symbols) >= 2))):
+            names = ", ".join(symbols)
+            if EQUATION_QUESTION.search(goal) and not VALUE_QUESTION.search(goal) and len(symbols) >= 2:
+                descriptions.append((f"요청한 {names} 관계식을 실제 출처와 함께 제시" if prefers_korean(request)
+                                     else f"State the requested {names} relationship with its literal source"))
+            elif VALUE_QUESTION.search(goal):
+                descriptions.append((f"요청한 {names} 값과 단위를 근거와 함께 제시" if prefers_korean(request)
+                                     else f"Report the requested {names} values and units with sources"))
         elif simulation_spec:
             descriptions.append("Report all simulated cases from the validated parameter sweep")
             for word, phrase in ((r"\bbest\b|\bmaxim", "Identify the best case"),
@@ -307,8 +347,9 @@ class GoalExecutionAgent(GoalResearchAgent):
             return None
         source_ids = {str(item["evidence_id"]) for item in evidence
                       if item.get("source_type") in {"knowledge_base", "figure", "web"}}
-        sourced_spans = {(item.source_id, item.normalized_span)
-                         for item in FormulaSourceRegistry.from_evidence(evidence).records}
+        sourced_spans = {(item.source_id, normalize_formula(item.expression_candidate))
+                         for item in FormulaSourceRegistry.from_evidence(evidence).records
+                         if item.expression_candidate}
         for calc in computations:
             if not calc.validation_passed or not calc.formula or not set(calc.formula_evidence_ids) & source_ids:
                 continue
@@ -580,6 +621,12 @@ class GoalExecutionAgent(GoalResearchAgent):
             clarification_attempts = 0
         if autonomous_python:
             result.telemetry["python_authorization_source"] = "autonomous_execution_mode"
+        result.telemetry.setdefault("original_user_query", request.goal or request.topic)
+        result.telemetry.setdefault("detected_intent", "simulate" if simulation_spec or SIMULATE_WORDS.search(
+            request.goal or request.topic) else "calculate" if calculation_requested(
+                request.goal or request.topic, bool(users.records)) else "research")
+        result.telemetry.setdefault("required_claims", [
+            {"criterion_id": item.criterion_id, "description": item.description} for item in criteria if item.required])
         for stage in ("planning_seconds", "retrieval_seconds", "llm_generation_seconds",
                       "python_seconds", "verification_seconds", "evaluation_seconds",
                       "synthesis_seconds"):
@@ -669,6 +716,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                                                                   korean=korean), started)
             seen_actions.add(signature)
             before = state.fingerprint()
+            satisfied_before = {item.criterion_id for item in state.criteria if item.status == CriterionStatus.MET}
             action_started = datetime.now(timezone.utc)
             action_clock = time.perf_counter()
             coverage_before = state.current_coverage
@@ -685,31 +733,54 @@ class GoalExecutionAgent(GoalResearchAgent):
             try:
                 if action.action_type == GoalActionType.RETRIEVE:
                     query = action.query or request.goal or request.topic
-                    cache_key = (query, request.use_internal, request.use_external, request.model)
-                    cached = retrieval_cache.get(cache_key)
-                    response = cached.model_copy(deep=True) if cached else await self.research_agent.research(ResearchRequest(
-                        query=query,
-                        use_internal=request.use_internal, use_external=request.use_external,
-                        engineering_validation=request.engineering_validation, evidence_only=True,
-                        model=request.model,
-                        internal_top_k=request.internal_top_k, external_top_k=request.external_top_k,
-                        temperature=request.temperature, seed=request.seed,
-                    ))
-                    if cached is None:
-                        retrieval_cache[cache_key] = response.model_copy(deep=True)
-                        self._add_time(result, "retrieval_seconds", response.timing.retrieval_seconds)
-                        self._add_time(result, "llm_generation_seconds", response.timing.reasoning_seconds)
-                    added = accumulator.add(response)
+                    identify_documents = getattr(self.research_agent, "named_documents", None)
+                    named_documents = identify_documents(request.goal or request.topic) if callable(identify_documents) else []
+                    queries = [query]
+                    if (request.use_internal and not request.use_external and len(named_documents) >= 2
+                            and not any(item.action_type == GoalActionType.RETRIEVE
+                                                             for item in state.completed_actions)):
+                        subject = request.goal or request.topic
+                        for document in named_documents:
+                            short = document.title.replace("_", " ").split(" - ")[-1].removesuffix(".pdf")
+                            subject = re.sub(re.escape(short), " ", subject, flags=re.I)
+                        queries = [f"In {document.title.replace('_', ' ').split(' - ')[-1]}, {subject}"
+                                   for document in named_documents]
+                    top_hits = []
+                    cache_hits = []
+                    modes = []
+                    for retrieval_query in queries:
+                        cache_key = (retrieval_query, request.use_internal, request.use_external, request.model)
+                        cached = retrieval_cache.get(cache_key)
+                        response = cached.model_copy(deep=True) if cached else await self.research_agent.research(ResearchRequest(
+                            query=retrieval_query,
+                            use_internal=request.use_internal, use_external=request.use_external,
+                            engineering_validation=request.engineering_validation, evidence_only=True,
+                            model=request.model,
+                            internal_top_k=request.internal_top_k, external_top_k=request.external_top_k,
+                            temperature=request.temperature, seed=request.seed,
+                        ))
+                        if cached is None:
+                            retrieval_cache[cache_key] = response.model_copy(deep=True)
+                            self._add_time(result, "retrieval_seconds", response.timing.retrieval_seconds)
+                            self._add_time(result, "llm_generation_seconds", response.timing.reasoning_seconds)
+                        cache_hits.append(cached is not None)
+                        modes.append(response.retrieval_mode)
+                        added.extend(accumulator.add(response))
+                        top_hits.extend({"evidence_id": item.evidence_id, "document": item.document,
+                                         "page": item.page, "chunk_id": item.chunk_id}
+                                        for item in response.internal_sources[:request.internal_top_k])
+                        research_validation = response.validation
                     state.evidence_ids.extend(added)
                     state.known_facts = list(dict.fromkeys(
                         state.known_facts + [item.fact_id for item in
                                              EvidenceFactRegistry.from_evidence(accumulator.records()).records]))
-                    research_validation = response.validation
+                    identify_document = getattr(self.research_agent, "named_document", None)
+                    named_document = identify_document(query) if callable(identify_document) else None
                     details = {"query": query, "new_evidence_count": len(added),
-                               "retrieval_mode": response.retrieval_mode, "cache_hit": cached is not None,
-                               "top_hits": [{"evidence_id": item.evidence_id, "document": item.document,
-                                             "page": item.page, "chunk_id": item.chunk_id}
-                                            for item in response.internal_sources[:request.internal_top_k]]}
+                               "generated_retrieval_queries": queries,
+                               "retrieval_mode": modes[-1], "cache_hit": all(cache_hits),
+                               "explicit_document_constraint": (named_document.title if named_document else None),
+                               "top_hits": top_hits}
                     state.verified = False
                     if not added:
                         status, failure = "blocked", "retrieve_no_progress"
@@ -762,8 +833,9 @@ class GoalExecutionAgent(GoalResearchAgent):
                         for original in accumulator.web
                         if item.url == original.url
                     })
-                    source_formulas = {(item.source_id, item.normalized_span)
-                                       for item in FormulaSourceRegistry.from_evidence(accumulator.records()).records}
+                    source_formulas = {(item.source_id, normalize_formula(item.expression_candidate))
+                                       for item in FormulaSourceRegistry.from_evidence(accumulator.records()).records
+                                       if item.expression_candidate}
                     for computation in subresult.computations:
                         computation.source_evidence_ids = [source_map.get(value, value)
                                                            for value in computation.source_evidence_ids]
@@ -838,6 +910,17 @@ class GoalExecutionAgent(GoalResearchAgent):
                 elif action.action_type == GoalActionType.VERIFY:
                     evidence = self._evidence(accumulator, users, result.computations,
                                               simulation_spec, simulation_source_id)
+                    visual_required = ResearchAgent._visual_figure_intent(request.goal or request.topic)
+                    order_required = bool(re.search(
+                        r"left.{0,12}right|왼쪽.{0,20}오른쪽|그림\s*기준|트랙.{0,8}순서",
+                        request.goal or request.topic, re.I))
+                    figure_support_missing = (visual_required and (not accumulator.figures or
+                        (order_required and not any(re.search(
+                            r"(?im)^analysis:\s*left_to_right:\s*(?!unknown)", item.source_note)
+                            for item in accumulator.figures))))
+                    literal_claim = (literal_source_answer(request.goal or request.topic, evidence, korean=korean)
+                                     if not result.computations and not calculation_requested(
+                                         request.goal or request.topic, bool(users.records)) else None)
                     simulation = next((item for item in result.computations
                                        if item.validation_passed and item.analysis_id.startswith("SIM-")), None)
                     synthesis_started = time.perf_counter()
@@ -848,8 +931,13 @@ class GoalExecutionAgent(GoalResearchAgent):
                                         if simulation and simulation_spec else
                                         self._api_gravity_answer(request, result.computations, evidence)
                                         or self._simple_user_fact_answer(request, result.computations, evidence)
+                                        or (literal_claim.answer if literal_claim else None)
                                         or await self._synthesize(request, criteria, evidence, [],
                                                                   computations=result.computations))
+                    if figure_support_missing:
+                        latest_candidate = ("요청한 그림의 시각적 위치 또는 순서를 확인할 수 있는 Figure 근거가 부족합니다."
+                                            if korean else
+                                            "The available Figure evidence does not verify the requested visual layout or order.")
                     synthesis_seconds = time.perf_counter() - synthesis_started
                     self._add_time(result, "synthesis_seconds", synthesis_seconds)
                     self._add_time(result, "llm_generation_seconds", synthesis_seconds)
@@ -858,7 +946,8 @@ class GoalExecutionAgent(GoalResearchAgent):
                     if not result.computations:
                         latest_candidate = self._focus_research_answer(latest_candidate, criteria)
                     rejected_claims: list[str] = []
-                    if not result.computations and callable(getattr(self.ollama, "chat_structured", None)):
+                    if (not result.computations and literal_claim is None and not figure_support_missing
+                            and callable(getattr(self.ollama, "chat_structured", None))):
                         latest_candidate, rejected_claims = await ground_research_claims(
                             self.ollama, request, latest_candidate, evidence)
                     evaluation_started = time.perf_counter()
@@ -871,6 +960,36 @@ class GoalExecutionAgent(GoalResearchAgent):
                     if simulation:
                         evaluation = self._deterministic_simulation_criteria(
                             evaluation, criteria, latest_candidate, simulation, korean)
+                    if (literal_claim and result.criteria_source == "inferred" and len(criteria) == 1
+                            and evaluation.engineering_validation_passed):
+                        validator = getattr(self.evaluator, "engineering_validator", None) or EngineeringValidator()
+                        detected, corrected, _ = validator.false_premise_correction(
+                            request.goal or request.topic, latest_candidate)
+                        if not detected or corrected:
+                            complete = literal_claim.complete
+                            criterion_status = CriterionStatus.MET if complete else CriterionStatus.PARTIAL
+                            supported = CriterionEvaluation(
+                                criterion_id=criteria[0].criterion_id, status=criterion_status,
+                                reason=("요청한 출처의 식 또는 수치가 직접 확인되었습니다." if korean else
+                                        "The requested relation or quantity is directly present in the cited source."),
+                                supporting_evidence=list(literal_claim.supporting_ids))
+                            evaluation = replace(evaluation, criteria=[supported],
+                                                 coverage=1.0 if complete else 0.5,
+                                                 achieved=complete, gaps=[] if complete else evaluation.gaps)
+                    identify_documents = getattr(self.research_agent, "named_documents", None)
+                    named_sources = (identify_documents(request.goal or request.topic)
+                                     if callable(identify_documents) and request.use_internal else [])
+                    if len(named_sources) >= 2:
+                        missing_sources = self._missing_named_source_citations(
+                            latest_candidate, accumulator.internal, named_sources)
+                        if missing_sources:
+                            evaluation = replace(evaluation, achieved=False,
+                                                 coverage=min(evaluation.coverage, 0.75),
+                                                 gaps=[*evaluation.gaps, *[f"Missing cited source: {title}"
+                                                                          for title in missing_sources]])
+                    if figure_support_missing:
+                        evaluation = replace(evaluation, achieved=False, coverage=0.0,
+                                             gaps=[*evaluation.gaps, "Figure visual layout evidence missing or ambiguous"])
                     citation_semantic_passed = bool(latest_candidate.strip())
                     if not citation_semantic_passed:
                         evaluation = replace(evaluation, achieved=False,
@@ -929,6 +1048,18 @@ class GoalExecutionAgent(GoalResearchAgent):
                                   coverage_after=state.current_coverage, failure_reason=failure,
                                   details=details)
             state.completed_actions.append(record)
+            satisfied_after = {item.criterion_id for item in state.criteria if item.status == CriterionStatus.MET}
+            result.telemetry.setdefault("iteration_diagnostics", []).append({
+                "iteration": iteration, "action": action.action_type.value,
+                "query": details.get("query") or action.query,
+                "new_evidence_count": len(added),
+                "new_claims_satisfied": sorted(satisfied_after - satisfied_before),
+                "goal_coverage_before": coverage_before,
+                "goal_coverage_after": state.current_coverage,
+                "missing_claims": [item.criterion_id for item in state.criteria
+                                   if item.required and item.status != CriterionStatus.MET],
+                "stop_candidate": "goal_achieved" if state.goal_achieved else failure,
+            })
             state.no_progress_count = 0 if state.fingerprint() != before else state.no_progress_count + 1
             result.action_history.append(record.model_dump(mode="json"))
             result.state_history.append(state.snapshot())
@@ -939,7 +1070,7 @@ class GoalExecutionAgent(GoalResearchAgent):
             result.final_answer = latest_candidate
             self._notify(result, on_progress)
             if (action.action_type == GoalActionType.CALCULATE and status == "blocked" and
-                    failure in {"calculation_contract_unit_missing", "missing_required_input",
+                    failure in {"missing_required_input",
                                 "variable_binding_missing", "simulation_input_missing"} and
                     any(item.action_type == GoalActionType.RETRIEVE for item in state.completed_actions) and
                     clarification_attempts < 3):

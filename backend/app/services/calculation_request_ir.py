@@ -57,7 +57,7 @@ OPERATIONS = {
     "range": r"\brange\b|범위",
     "sum": r"\b(?:sum|total)\b|합계|총합",
     "maximum": r"\b(?:maximum|max|highest|largest)\b|최댓값|최대",
-    "minimum": r"\b(?:minimum|min|lowest|smallest)\b|최솟값|최소",
+    "minimum": r"(?<!/)\b(?:minimum|min|lowest|smallest)\b|최솟값|최소",
     "ranking": r"\b(?:ranking|rank|order(?:ing)?)\b|순위|정렬",
     "percent_change": r"\b(?:percent(?:age)? change|percent(?:age)? difference)\b|변화율",
     "ratio": r"\bratio\b|비율",
@@ -105,10 +105,13 @@ def _scenarios(topic: str, goal: str) -> list[str]:
         values = [chr(code) for code in range(ord(first), ord(last) + 1)] if last and ord(last) - ord(first) <= 12 else [first]
         labels.extend(values)
     if not labels:
+        inferred: dict[str, set[str]] = {}
         for fact in UserFactRegistry.from_topic(topic).records:
             match = re.match(r"^(?:Well_|Case_|Layer_)?([A-Z])_", fact.name)
             if match:
-                labels.append(match.group(1))
+                inferred.setdefault(fact.name[match.end():].casefold(), set()).add(match.group(1))
+        # A single symbol such as A_n denotes nozzle area, not scenario A.
+        labels.extend(sorted(set().union(*(group for group in inferred.values() if len(group) >= 2))))
     return list(dict.fromkeys(labels))
 
 

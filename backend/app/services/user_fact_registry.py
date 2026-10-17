@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 
 
 NUMBER = r"[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d*)?(?:[eE][-+]?\d+)?|[-+]?\.\d+(?:[eE][-+]?\d+)?|[-+]?\d+\s*/\s*\d+"
-UNIT = r"(?:kg/m\^?3|g/mol|kg/kmol|lb/lbmol|gal/min|in\^?2|cm\^?2|m\^?3/d|m\^?3|stb/d|bbl/d|acres?|feet|ft|mD|md|psi|psia|psig|kPa|Pa|bbl|stb|days?|hours?|hr|kmol|lbmol|mol|kg|cm|in|K|m|%|cP)"
+UNIT = r"(?:kg/m\^?3|g/mol|kg/kmol|lb/lbmol|gal/min|ft/sec|ft/min|L/min|m/s|ohm-m|in\^?2|cm\^?2|m\^?3/d|m\^?3|stb/d|bbl/d|acres?|feet|ft|mD|md|psi|psia|psig|kPa|Pa|bbl|stb|days?|hours?|hr|kmol|lbmol|mol|kg|cm|in|K|m|%|cP)"
 ASSIGNMENT = re.compile(
     rf"(?P<label>[A-Za-z][A-Za-z0-9 _/\-]{{0,48}}?)\s*[:=]\s*(?P<value>{NUMBER})\s*(?P<unit>{UNIT})?(?=$|[,;\s]|\.(?!\d)|[가-힣])",
     re.IGNORECASE,
@@ -50,8 +50,10 @@ def _name(value: str) -> str:
     value = value.strip()
     # A descriptive lead-in may precede an explicit symbol ("nozzle area A_n").
     # Keep ordinary multi-word property names such as "reservoir pressure" intact.
-    trailing = re.search(r"(?:^|\s)([A-Za-z](?:_[A-Za-z0-9]+|[0-9]+))$", value)
-    if trailing:
+    trailing = re.search(r"(?:^|\s)([A-Za-z](?:_[A-Za-z0-9]+|[0-9]+)?)$", value)
+    prefix = value[:trailing.start()].strip() if trailing else ""
+    if trailing and (len(trailing.group(1)) > 1 or not prefix or re.search(
+            r"\b(?:for|and|with|using|area|nozzle|variable|symbol)\s*$", prefix, re.I)):
         value = trailing.group(1)
     return re.sub(r"[^A-Za-z0-9]+", "_", value).strip("_")
 
