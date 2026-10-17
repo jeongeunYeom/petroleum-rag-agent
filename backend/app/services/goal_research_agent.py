@@ -415,7 +415,7 @@ class GoalResearchAgent:
                         python_trace.method_ready = graph.formula_source_available if formula_required else bool(ir.requested_operation_types)
                         graph.source_complete = bool(python_trace.input_ready and python_trace.method_ready)
                         python_trace.initial_readiness_snapshot = self._readiness_snapshot(graph, resolution, checklist, analysis_evidence)
-                    calculation_goal = bool(re.search(r"\b(?:calculat|comput|derive|estimate)\w*\b|계산|산출",
+                    calculation_goal = bool(re.search(r"\b(?:calculat|comput|derive|estimate)\w*\b|계산|산출|구해|구하",
                                                       request.goal or request.topic, re.I))
                     while (((formula_required and (decision.tool_needed or calculation_goal)) if ir else
                             (decision.tool_needed or (formula_required and calculation_goal and not graph.formula_source_available)))

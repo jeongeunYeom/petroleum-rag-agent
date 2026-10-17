@@ -17,7 +17,7 @@ from app.models.research_schemas import (
 from app.services.goal_action_planner import GoalActionPlanner
 from app.services.goal_evaluator import GoalEvaluationResult, GoalEvaluator
 from app.services.calculation_request_ir import parse_request_ir
-from app.services.calculation_requirements import select_formula_candidate
+from app.services.calculation_requirements import assess_formula_readiness, select_formula_candidate
 from app.services.goal_clarification import calculation_missing, simulation_readiness
 from app.services.citation_semantics import ground_research_claims
 from app.services.goal_execution_agent import GoalExecutionAgent, _EvidenceSnapshot, _V8ToolPlanner
@@ -79,6 +79,87 @@ def test_missing_specialist_formula_chooses_retrieve_then_calculate():
     second = GoalActionPlanner.select(req, current, user_fact_ids=["USERF1"],
                                       formula_ready=True, simulation_spec=None)
     assert second.action_type == GoalActionType.CALCULATE
+
+
+def test_sourced_formula_readiness_routes_to_calculation_with_complete_bindings():
+    req = GoalResearchRequest(topic="P1=1000 kPa, V1=2.0 m3, T1=300 K, V2=2.5 m3, T2=350 K",
+                              goal="Find the ideal-gas relation and calculate P2",
+                              allow_python_execution=True, python_execution_approved=True)
+    source = [{"evidence_id": "KB1", "source_type": "knowledge_base", "locator": "textbook p.12",
+               "text": "P2 = P1 * V1 * T2 / (T1 * V2)"}]
+    facts = [type("Fact", (), {"name": name, "unit": ""})() for name in ("P1", "V1", "T1", "V2", "T2")]
+    formula = select_formula_candidate(source, req.goal, [fact.name for fact in facts])
+    assert formula is not None
+    readiness = assess_formula_readiness(formula, source, facts)
+    assert readiness.calculation_ready and readiness.missing_variables == ()
+    current = state()
+    current.completed_actions.append(record(GoalActionType.RETRIEVE))
+    current.evidence_ids.append("KB1")
+    action = GoalActionPlanner.select(req, current, user_fact_ids=["USERF1"],
+                                      formula_ready=True, formula_id=formula.formula_id,
+                                      calculation_ready=readiness.calculation_ready, simulation_spec=None)
+    assert action.action_type == GoalActionType.CALCULATE
+
+
+def test_formula_readiness_blocks_missing_variable_without_guessing():
+    source = [{"evidence_id": "KB1", "source_type": "knowledge_base", "locator": "textbook p.12",
+               "text": "P2 = P1 * V1 * T2 / (T1 * V2)"}]
+    formula = select_formula_candidate(source, "calculate P2 with P1", ["P1"])
+    assert formula is not None
+    fact = type("Fact", (), {"name": "P1", "unit": "kPa"})()
+    readiness = assess_formula_readiness(formula, source, [fact])
+    assert not readiness.calculation_ready
+    assert set(readiness.missing_variables) == {"V1", "T1", "V2", "T2"}
+    assert readiness.blocked_reason == "missing_required_variable"
+    current = state()
+    current.completed_actions.append(record(GoalActionType.RETRIEVE))
+    action = GoalActionPlanner.select(request("Find the relation and calculate P2"), current,
+                                      user_fact_ids=["USERF1"], formula_ready=True,
+                                      calculation_ready=readiness.calculation_ready, simulation_spec=None)
+    assert action.action_type != GoalActionType.CALCULATE
+
+
+def test_equation_explanation_is_not_a_calculation_but_korean_numeric_request_is():
+    concept = GoalResearchRequest(topic="What is the Darcy equation?", goal="Explain the Darcy equation",
+                                  allow_python_execution=True, python_execution_approved=True)
+    action = GoalActionPlanner.select(concept, state(), user_fact_ids=[], formula_ready=False,
+                                      simulation_spec=None)
+    assert action.action_type == GoalActionType.RETRIEVE
+    numeric = GoalResearchRequest(topic="P1=1000 kPa. P2를 구해줘.", goal="P2를 구해줘.",
+                                  allow_python_execution=True, python_execution_approved=True)
+    action = GoalActionPlanner.select(numeric, state(), user_fact_ids=["USERF1"],
+                                      formula_ready=False, simulation_spec=None)
+    assert (action.action_type, action.reason_code) == (GoalActionType.CALCULATE, "calculation_inputs_ready")
+
+
+def test_numeric_fact_parser_preserves_engineering_units_and_explicit_symbols():
+    facts = UserFactRegistry.from_topic(
+        "P1=1000 kPa, V1=2.0 m3, T1=300 K, V2=2.5 m3, T2=350 K; "
+        "q=450 gal/min, nozzle area A_n=0.60 in2")
+    assert {(item.name, item.unit) for item in facts.records} == {
+        ("P1", "kPa"), ("V1", "m3"), ("T1", "K"), ("V2", "m3"),
+        ("T2", "K"), ("q", "gal/min"), ("A_n", "in2")}
+
+
+def test_complete_non_api_sourced_formula_overrides_planner_none_but_missing_fact_does_not():
+    class DecliningOllama:
+        async def chat_structured(self, *_args, **_kwargs):
+            return '{"tool_needed":false,"tool_type":"none","reason":"No tool needed"}'
+
+    req = GoalResearchRequest(topic="P1=1000 kPa, V1=2.0 m3, T1=300 K, V2=2.5 m3, T2=350 K",
+                              goal="Find the ideal-gas relation and calculate P2",
+                              allow_python_execution=True, python_execution_approved=True)
+    criteria = [GoalCriterion(criterion_id="C1", description="Calculate P2 using the cited equation")]
+    evidence = UserFactRegistry.from_topic(req.topic).evidence() + [{
+        "evidence_id": "KB1", "source_type": "knowledge_base", "locator": "textbook p.12",
+        "text": "P2 = P1 * V1 * T2 / (T1 * V2)"}]
+    decision = asyncio.run(_V8ToolPlanner(DecliningOllama()).decide(req, criteria, evidence, None))
+    assert decision.tool_needed and decision.plan is not None
+    assert decision.selected_formula_id
+    assert len(decision.selected_user_fact_ids) == 5
+    missing = [item for item in evidence if item.get("name") != "T2"]
+    declined = asyncio.run(_V8ToolPlanner(DecliningOllama()).decide(req, criteria, missing, None))
+    assert not declined.tool_needed
 
 
 @pytest.mark.parametrize("topic,goal", [

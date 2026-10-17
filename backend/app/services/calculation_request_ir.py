@@ -129,11 +129,12 @@ def parse_request_ir(request: GoalResearchRequest, criteria: list[GoalCriterion]
         found = [name for name in found if name != "std_unspecified"]
     scenarios = _scenarios(request.topic, goal)
     target_match = re.search(r"\b(?:calculate|compute|estimate|derive|report)\s+(?:the\s+)?([A-Za-z][A-Za-z0-9_]*)(?:\s+(?:for|in|per|using|then)\b|\s*[,.;]|$)", goal, re.I)
-    target = target_match.group(1) if target_match else "result"
+    korean_target = re.search(r"\b([A-Za-z][A-Za-z0-9_]*)\s*(?:의\s*값)?\s*(?:을|를)?\s*구(?:해|하)", goal, re.I)
+    target = target_match.group(1) if target_match else korean_target.group(1) if korean_target else "result"
     phrase_match = re.search(r"\b(?:calculate|compute|estimate|derive|report)\s+(?:the\s+)?"
                              r"([A-Za-z][A-Za-z0-9_]*(?:\s+[A-Za-z][A-Za-z0-9_]*){0,2})"
                              r"(?=\s+(?:using|from|for|in|then|with)\b|[,.;]|$)", goal, re.I)
-    explicit_specialist = bool(re.search(r"\b(?:equation|formula|correlation|scientific relation|productivity index|dimensionless pressure)\b|공식|수식|관계식", goal, re.I))
+    explicit_specialist = bool(re.search(r"\b(?:equation|formula|relation|correlation|scientific relation|productivity index|dimensionless pressure)\b|공식|수식|관계식|관계", goal, re.I))
     specialist = explicit_specialist or (target != "result" and target.casefold() not in GENERIC
                                           and target.casefold() not in {"values", "measurements", "statistics", "results",
                                                                           "addition", "subtraction", "multiplication", "division",

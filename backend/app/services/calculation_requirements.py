@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -70,6 +71,74 @@ def select_formula_candidate(evidence: list[dict[str, Any]], intent: str,
     ranked.sort(key=lambda pair: pair[0], reverse=True)
     return ranked[0][1] if ranked and (len(ranked) == 1 or ranked[0][0] > ranked[1][0] or
                                      ranked[0][1].normalized_span == ranked[1][1].normalized_span) else None
+
+
+@dataclass(frozen=True)
+class FormulaReadiness:
+    formula_id: str | None
+    formula_found: bool
+    required_variables: tuple[str, ...]
+    available_variables: tuple[str, ...]
+    missing_variables: tuple[str, ...]
+    ambiguous_variables: tuple[str, ...]
+    unit_status: str
+    calculation_ready: bool
+    blocked_reason: str | None
+
+    def diagnostics(self) -> dict[str, Any]:
+        return {
+            "formula_id": self.formula_id,
+            "formula_found": self.formula_found,
+            "required_variables": list(self.required_variables),
+            "available_variables": list(self.available_variables),
+            "missing_variables": list(self.missing_variables),
+            "ambiguous_variables": list(self.ambiguous_variables),
+            "unit_status": self.unit_status,
+            "calculation_ready": self.calculation_ready,
+            "blocked_reason": self.blocked_reason,
+        }
+
+
+def assess_formula_readiness(formula: FormulaSourceRecord | None, evidence: list[dict[str, Any]],
+                             input_facts: list[Any], *, use_source_values: bool = False) -> FormulaReadiness:
+    """Route a sourced calculation only when each RHS variable has one explicit binding.
+
+    Worked-example values in a textbook are not this user's inputs unless requested.
+    The downstream calculation contract remains the authority for execution and units.
+    """
+    if formula is None or not formula.expression_candidate:
+        return FormulaReadiness(None, False, (), (), (), (), "unknown", False, "formula_source_missing")
+    variables = expression_variables(formula.expression_candidate)
+    if variables is None:
+        return FormulaReadiness(formula.formula_id, True, (), (), (), (), "unknown", False,
+                                "formula_not_parseable")
+    facts = list(input_facts)
+    if use_source_values:
+        facts.extend(EvidenceFactRegistry.from_evidence(evidence).records)
+    source_text = next((str(row.get("text") or "") for row in evidence
+                        if row.get("evidence_id") == formula.source_id), "")
+    available, missing, ambiguous = [], [], []
+    unit_mismatch = False
+    for variable in sorted(variables):
+        names = symbol_names(variable)
+        matched = [fact for fact in facts if normalize_symbol(fact.name) in names]
+        if not matched:
+            missing.append(variable)
+            continue
+        if len(matched) != 1:
+            ambiguous.append(variable)
+            continue
+        expected = re.search(rf"\b{re.escape(variable)}\s*\((?P<unit>{UNIT})\)", source_text, re.I)
+        if expected and normalize_symbol(str(matched[0].unit or "")) != normalize_symbol(expected.group("unit")):
+            unit_mismatch = True
+            continue
+        available.append(variable)
+    blocked = ("missing_required_variable" if missing else "ambiguous_variable" if ambiguous else
+               "unit_mismatch" if unit_mismatch else None)
+    return FormulaReadiness(formula.formula_id, True, tuple(sorted(variables)), tuple(available),
+                            tuple(missing), tuple(ambiguous),
+                            "mismatch" if unit_mismatch else "valid" if not missing and not ambiguous else "unknown",
+                            blocked is None, blocked)
 
 
 class FormulaVariableRequirement(BaseModel):

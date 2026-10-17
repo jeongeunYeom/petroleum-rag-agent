@@ -9,7 +9,14 @@ from app.services.goal_execution_state import GoalAction, GoalActionType, GoalEx
 from app.services.goal_intent import asks_for_api_gravity_calculation
 
 
-CALC_WORDS = re.compile(r"\b(?:calculat\w*|comput\w*|derive|mean|average|rank\w*|compare\s+numeric|difference|ratio)\b|계산|산출|평균|순위|그래프", re.I)
+CALC_WORDS = re.compile(r"\b(?:calculat\w*|comput\w*|derive|mean|average|rank\w*|compare\s+numeric)\b|계산|산출|평균|순위|그래프", re.I)
+NUMERIC_RESULT_WORDS = re.compile(r"(?:값|결과|수치)\s*(?:을|를)?\s*구하|(?:값|결과|수치)\s*(?:을|를)?\s*구해|\b(?:determine|find)\s+(?:the\s+)?(?:value|result)\b", re.I)
+
+
+def calculation_requested(text: str, has_input_facts: bool = False) -> bool:
+    """A requested equation or conceptual ratio alone is not a Python task."""
+    return bool(CALC_WORDS.search(text) or NUMERIC_RESULT_WORDS.search(text) or
+                (has_input_facts and re.search(r"\b(?:ratio|difference)\b|구해|구하", text, re.I)))
 ANALYZE_WORDS = re.compile(r"\b(?:rank\w*|best|worst|maximum|minimum|optim\w*|sensitiv\w*|compare|plot|graph|chart)\b|순위|최적|민감도|최대|최소|그래프|도표", re.I)
 SIMULATE_WORDS = re.compile(r"\b(?:simulat\w*|sweep|parameter\s+range|vary\w*)\b|시뮬레이션|매개변수\s*변화|범위\s*탐색|범위로\s*계산|바꿔가며|바꾸면서|변화시키(?:며|면서|고|면|기|다|는|ㄴ)?|간격으로", re.I)
 
@@ -26,14 +33,16 @@ class GoalActionPlanner:
         evidence_fact_ids: list[str] | None = None,
         formula_ready: bool,
         formula_id: str | None = None,
+        calculation_ready: bool | None = None,
         python_calls_used: int = 0,
         simulation_spec: SimulationSpec | None,
     ) -> GoalAction:
         text = " ".join(filter(None, (request.topic, request.goal)))
         wants_simulation = bool(SIMULATE_WORDS.search(text) or simulation_spec)
-        wants_calculation = bool(CALC_WORDS.search(text) or asks_for_api_gravity_calculation(request)) and not wants_simulation
+        wants_calculation = (calculation_requested(text, bool(user_fact_ids)) or
+                             asks_for_api_gravity_calculation(request)) and not wants_simulation
         wants_analysis = bool(ANALYZE_WORDS.search(text))
-        specialist = bool(re.search(r"\b(?:formula|equation|correlation|productivity\s+index)\b|공식|수식|관계식|식(?:을|이|의)?\s*찾", text, re.I)
+        specialist = bool(re.search(r"\b(?:formula|equation|relation|correlation|productivity\s+index)\b|공식|수식|관계식|관계|식(?:을|이|의)?\s*찾", text, re.I)
                           or asks_for_api_gravity_calculation(request))
         permission = request.allow_python_execution and request.python_execution_approved
         numeric_inputs_ready = bool(user_fact_ids or (evidence_fact_ids and not specialist))
@@ -60,12 +69,6 @@ class GoalActionPlanner:
                           "goal_achieved")
         if state.no_progress_count >= request.no_progress_patience:
             return action(GoalActionType.STOP, "no_progress")
-        if state.verified and last and last.action_type == GoalActionType.VERIFY:
-            if (not wants_simulation and not state.computation_ids and state.unresolved_information
-                    and counts[GoalActionType.RETRIEVE] < request.max_retrieval_actions):
-                return action(GoalActionType.RETRIEVE, "missing_requirement",
-                              GoalActionPlanner.query(request, state))
-            return action(GoalActionType.STOP, "insufficient_evidence")
         if wants_simulation and not counts[GoalActionType.SIMULATE]:
             if not permission:
                 return action(GoalActionType.STOP, "simulation_permission_required")
@@ -99,9 +102,14 @@ class GoalActionPlanner:
                 return action(GoalActionType.STOP, "calculation_permission_required")
             if python_calls_used >= request.max_python_calls:
                 return action(GoalActionType.STOP, "python_call_budget_exhausted")
+            if specialist and formula_ready and calculation_ready is False:
+                if counts[GoalActionType.RETRIEVE] < request.max_retrieval_actions:
+                    return action(GoalActionType.RETRIEVE, "calculation_inputs_missing",
+                                  GoalActionPlanner.query(request, state))
+                return action(GoalActionType.STOP, "calculation_blocked")
             if specialist and formula_ready and not numeric_inputs_ready:
                 return action(GoalActionType.STOP, "calculation_blocked")
-            if numeric_inputs_ready and (not specialist or formula_ready):
+            if numeric_inputs_ready and (not specialist or (formula_ready and calculation_ready is not False)):
                 return action(GoalActionType.CALCULATE, "calculation_inputs_ready")
             if counts[GoalActionType.RETRIEVE] < request.max_retrieval_actions:
                 return action(GoalActionType.RETRIEVE, "calculation_source_missing",
@@ -114,6 +122,12 @@ class GoalActionPlanner:
                 return action(GoalActionType.RETRIEVE, "calculation_failed_replan",
                               GoalActionPlanner.query(request, state))
             return action(GoalActionType.STOP, "calculation_blocked")
+        if state.verified and last and last.action_type == GoalActionType.VERIFY:
+            if (not wants_simulation and not state.computation_ids and state.unresolved_information
+                    and counts[GoalActionType.RETRIEVE] < request.max_retrieval_actions):
+                return action(GoalActionType.RETRIEVE, "missing_requirement",
+                              GoalActionPlanner.query(request, state))
+            return action(GoalActionType.STOP, "insufficient_evidence")
         if not state.evidence_ids and not state.computation_ids and counts[GoalActionType.RETRIEVE] < request.max_retrieval_actions:
             return action(GoalActionType.RETRIEVE, "initial_evidence_needed",
                           GoalActionPlanner.query(request, state))

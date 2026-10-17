@@ -8,6 +8,7 @@ import json
 from dataclasses import replace
 from datetime import datetime, timezone
 from collections.abc import Callable
+from types import SimpleNamespace
 from typing import Any
 
 from app.core.config import get_settings
@@ -16,14 +17,15 @@ from app.models.goal_research_schemas import (
     GoalResearchResponse, GoalRunStatus, GoalStatus, GoalStopReason,
 )
 from app.models.research_schemas import EvidenceCounts, ResearchRequest, ResearchResponse, ResearchTiming
-from app.services.formula_source_registry import FormulaSourceRegistry, normalize_formula
-from app.services.calculation_requirements import select_formula_candidate
+from app.services.formula_source_registry import FormulaSourceRegistry, expression_variables, normalize_formula
+from app.services.calculation_requirements import (assess_formula_readiness, normalize_symbol,
+                                                    select_formula_candidate, symbol_names)
 from app.services.goal_clarification import (calculation_missing, clarification_question,
                                              parse_user_simulation_spec, simulation_readiness)
 from app.services.evidence_fact_registry import EvidenceFactRegistry
 from app.services.calc_claim_grounding import validate_calc_claim
 from app.services.citation_semantics import ground_research_claims
-from app.services.goal_action_planner import CALC_WORDS, SIMULATE_WORDS, GoalActionPlanner
+from app.services.goal_action_planner import SIMULATE_WORDS, GoalActionPlanner, calculation_requested
 from app.services.goal_intent import asks_for_api_gravity_calculation, prefers_korean
 from app.services.goal_evaluator import GoalEvaluator
 from app.services.goal_execution_state import (
@@ -78,35 +80,49 @@ class _V8ToolPlanner(GoalToolPlanner):
                      evidence: list[dict[str, Any]], previous_coverage: float | None,
                      prior_evaluations: list[Any] | None = None) -> Any:
         result = await super().decide(request, criteria, evidence, previous_coverage, prior_evaluations)
-        if (not result.tool_needed and asks_for_api_gravity_calculation(request)
-                and request.allow_python_execution and request.python_execution_approved):
-            # A phrasing-sensitive LLM "none" must not veto an explicit calculation
-            # when both canonical inputs and a parsed source formula are present.
-            sg_facts = [item for item in evidence if item.get("source_type") == "user_fact"
-                        and str(item.get("name", "")).casefold() == "sg"]
-            formula = select_formula_candidate(evidence, f"{request.goal} {request.topic}", ["SG"])
-            if len(sg_facts) == 1 and formula:
-                selection = AnalysisPlanSelection(
-                    purpose=request.goal or request.topic,
-                    target_criteria=[item.description for item in criteria if item.required],
-                    fact_refs=[str(sg_facts[0]["evidence_id"])], formula_ref=formula.formula_id,
-                    operation_hint=None, expected_outputs=["API_gravity"], create_chart=False,
-                )
-                try:
-                    plan = materialize_analysis_plan_v4(
-                        selection, evidence, EvidenceFactRegistry.from_evidence(evidence),
-                        FormulaSourceRegistry.from_evidence(evidence), allow_unbound=True)
-                except ValueError:
-                    pass
-                else:
-                    return ToolDecision(
-                        tool_needed=True, tool_type="python_calculation",
-                        reason="Explicit calculation with sourced formula and user SG",
-                        plan=plan, decision_status="selected", plan_status="materialized",
-                        plan_parsed=True, selected_fact_ids=selection.fact_refs,
-                        selected_user_fact_ids=selection.fact_refs,
-                        selected_formula_id=formula.formula_id,
+        if ((not result.tool_needed or result.plan is None) and
+                request.allow_python_execution and request.python_execution_approved and
+                calculation_requested(f"{request.goal or ''} {request.topic}",
+                                      any(item.get("source_type") == "user_fact" for item in evidence))):
+            # LLM refusal cannot veto a complete, uniquely bound literal source
+            # equation. This only selects a plan; the contract and Python result
+            # still undergo their normal provenance and output validation.
+            users = [item for item in evidence if item.get("source_type") == "user_fact"
+                     and "name" in item and str(item.get("evidence_id", "")).startswith("USERF")]
+            formula = select_formula_candidate(evidence, f"{request.goal or ''} {request.topic}",
+                                               [str(item["name"]) for item in users])
+            if formula and expression_variables(formula.expression_candidate or ""):
+                readiness = assess_formula_readiness(formula, evidence, [
+                    SimpleNamespace(name=str(item["name"]), unit=str(item.get("unit") or ""))
+                    for item in users])
+                refs = []
+                for variable in sorted(expression_variables(formula.expression_candidate or "") or set()):
+                    matches = [item for item in users if normalize_symbol(str(item["name"])) in symbol_names(variable)]
+                    if len(matches) == 1:
+                        refs.append(str(matches[0]["evidence_id"]))
+                if readiness.calculation_ready and len(refs) == len(readiness.required_variables):
+                    selection = AnalysisPlanSelection(
+                        purpose=request.goal or request.topic,
+                        target_criteria=[item.description for item in criteria if item.required],
+                        fact_refs=refs, formula_ref=formula.formula_id,
+                        operation_hint=None, expected_outputs=[formula.expression_candidate.split("=", 1)[0].strip()],
+                        create_chart=False,
                     )
+                    try:
+                        plan = materialize_analysis_plan_v4(
+                            selection, evidence, EvidenceFactRegistry.from_evidence(evidence),
+                            FormulaSourceRegistry.from_evidence(evidence), allow_unbound=True)
+                    except ValueError:
+                        pass
+                    else:
+                        return ToolDecision(
+                            tool_needed=True, tool_type="python_calculation",
+                            reason="Complete sourced equation and explicit input bindings",
+                            plan=plan, decision_status="selected", plan_status="materialized",
+                            plan_parsed=True, selected_fact_ids=refs,
+                            selected_user_fact_ids=refs,
+                            selected_formula_id=formula.formula_id,
+                        )
         if (result.plan_status != "materialization_failed" or
                 result.verification_failures != ["fact_id_unknown"] or
                 not result.selected_formula_id or
@@ -583,8 +599,17 @@ class GoalExecutionAgent(GoalResearchAgent):
             evidence_fact_ids = [item.fact_id for item in EvidenceFactRegistry.from_evidence(evidence_rows).records]
             selected_formula = select_formula_candidate(
                 evidence_rows, f"{request.goal or ''} {request.topic}",
-                [item.name for item in users.records],
+                [item.name for item in users.records] + [item.name for item in state.derived_facts],
             ) if formula_available else None
+            source_case_requested = bool(re.search(
+                r"자료의\s*값|문서에\s*나온\s*값|교재\s*예시|"
+                r"(?:use|using)\s+(?:the\s+)?(?:source|document|example)\s+values",
+                request.goal or request.topic, re.I))
+            calculation_readiness = assess_formula_readiness(
+                selected_formula, evidence_rows, [*users.records, *state.derived_facts],
+                use_source_values=source_case_requested)
+            result.telemetry.setdefault("calculation_readiness", []).append({
+                "iteration": iteration, **calculation_readiness.diagnostics()})
             simulation_source = None
             simulation_inputs: list[str] = []
             missing_simulation: list[str] = []
@@ -600,12 +625,14 @@ class GoalExecutionAgent(GoalResearchAgent):
                                                 evidence_fact_ids=evidence_fact_ids,
                                                 formula_ready=selected_formula is not None,
                                                 formula_id=selected_formula.formula_id if selected_formula else None,
+                                                calculation_ready=calculation_readiness.calculation_ready,
                                                 python_calls_used=result.python_calls_total,
                                                 simulation_spec=simulation_spec)
             self._add_time(result, "planning_seconds", time.perf_counter() - selection_started)
             if action.action_type == GoalActionType.STOP:
                 calculation_stalled = (action.reason_code == "no_progress" and not state.computation_ids
-                                       and bool(CALC_WORDS.search(f"{request.topic} {request.goal or ''}")))
+                                       and calculation_requested(f"{request.topic} {request.goal or ''}",
+                                                                 bool(users.records)))
                 needs_clarification = action.reason_code in {"simulation_spec_missing", "calculation_blocked"} or (
                     action.reason_code == "no_progress" and (bool(missing_simulation) or calculation_stalled))
                 if needs_clarification and request.use_internal and clarification_attempts < 3:
@@ -678,8 +705,11 @@ class GoalExecutionAgent(GoalResearchAgent):
                         state.known_facts + [item.fact_id for item in
                                              EvidenceFactRegistry.from_evidence(accumulator.records()).records]))
                     research_validation = response.validation
-                    details = {"new_evidence_count": len(added), "retrieval_mode": response.retrieval_mode,
-                               "cache_hit": cached is not None}
+                    details = {"query": query, "new_evidence_count": len(added),
+                               "retrieval_mode": response.retrieval_mode, "cache_hit": cached is not None,
+                               "top_hits": [{"evidence_id": item.evidence_id, "document": item.document,
+                                             "page": item.page, "chunk_id": item.chunk_id}
+                                            for item in response.internal_sources[:request.internal_top_k]]}
                     state.verified = False
                     if not added:
                         status, failure = "blocked", "retrieve_no_progress"
@@ -715,6 +745,7 @@ class GoalExecutionAgent(GoalResearchAgent):
                                "user_fact_ids": [item.fact_id for item in users.records],
                                "evidence_fact_ids": evidence_fact_ids,
                                "formula_id": selected_formula.formula_id if selected_formula else None,
+                               "calculation_readiness": calculation_readiness.diagnostics(),
                                "missing_variables": trace.missing_variables if trace else [],
                                "unit_mismatch_variables": trace.unit_mismatch_variables if trace else []}
                     state.source_complete = trace.source_complete if trace else None
@@ -854,8 +885,9 @@ class GoalExecutionAgent(GoalResearchAgent):
                             item.status = value.status
                             item.support_ids = value.supporting_evidence
                             item.missing_requirements = [] if value.status == CriterionStatus.MET else evaluation.gaps[:3]
-                    requires_computation = bool(re.search(r"\b(?:calculat|comput|simulat|sweep)\w*\b|계산|시뮬레이션",
-                                                          request.goal or request.topic, re.I)
+                    requires_computation = bool(calculation_requested(request.goal or request.topic,
+                                                                      bool(users.records))
+                                                or SIMULATE_WORDS.search(request.goal or request.topic)
                                                 or asks_for_api_gravity_calculation(request))
                     state.goal_achieved = bool(evaluation.achieved and
                                                (not requires_computation or state.computation_ids))
