@@ -107,6 +107,18 @@ def test_document_constraint_requires_source_context_and_unambiguous_title():
     assert {item.document_id for item in named} == {"a", "b"}
 
 
+def test_numbered_volume_short_title_is_a_generic_document_constraint():
+    catalog = [
+        {"document_id": "volume-two", "filename": "Author_-_Petroleum_Engineering_Handbook,_Volume_II.pdf"},
+        {"document_id": "volume-five", "filename": "Author_-_Petroleum_Engineering_Handbook,_Volume_V.pdf"},
+        {"document_id": "drilling", "filename": "University_-_Drilling_Engineering.pdf"},
+    ]
+    assert explicit_document_constraint("Handbook II의 nozzle relation을 찾아줘", catalog).document_id == "volume-two"
+    assert explicit_document_constraint("Handbook Volume V에서 설명해줘", catalog).document_id == "volume-five"
+    named = explicit_document_constraints("Handbook II의 설명과 Drilling Engineering의 기준을 비교해줘", catalog)
+    assert {item.document_id for item in named} == {"volume-two", "drilling"}
+
+
 def test_visual_figure_identity_disambiguates_caption_and_withholds_ties(tmp_path):
     agent = ResearchAgent(Settings(data_dir=tmp_path / "data"), FakeVectorStore(), FakeOllama())
     def hit(chunk_id, title, doc):

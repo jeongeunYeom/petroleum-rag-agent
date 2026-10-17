@@ -1339,3 +1339,26 @@ def test_sourced_output_definition_can_name_single_requested_quantity():
     assert contract is not None
     assert validate_contract(contract, plan, graph, checklist) is None
     assert contract.required_outputs[0].unit == "ft/sec"
+
+
+def test_single_sourced_calculation_uses_validated_result_without_speculative_caveat():
+    request = GoalResearchRequest(topic="q=450 gal/min, A_n=0.60 in2",
+                                  goal="내부 문서의 bit jet velocity 식으로 평균 속도를 계산해줘")
+    evidence = UserFactRegistry.from_topic(request.topic).evidence() + [
+        {"evidence_id": "KB1", "source_type": "knowledge_base", "locator": "manual p.6",
+         "text": "vj = (0.32086*q) / An, where vj is average jet velocity in ft/sec."}]
+    calc = ComputationRecord(
+        computation_id="CALC1", analysis_id="PA-1", purpose="calculate",
+        source_input_ids=["USERF1", "USERF2"], formula_evidence_ids=["KB1"],
+        formula="vj = (0.32086*q) / An", validation_passed=True,
+        output_manifest={"OUT_default_mean": {"name": "default_mean", "value": 240.645,
+                                              "unit": "ft/sec", "source_fact_ids": ["USERF1", "USERF2"],
+                                              "semantic_type": "numeric"}},
+    )
+    answer = GoalExecutionAgent._single_sourced_calculation_answer(request, [calc], evidence)
+    assert answer and "vj = 240.645 ft/sec" in answer
+    assert all(f"[{source}]" in answer for source in ("KB1", "USERF1", "USERF2", "CALC1"))
+    assert GoalExecutionAgent._single_sourced_calculation_answer(
+        request, [calc], [*evidence[:-1], {**evidence[-1], "text": "u = q / A"}]) is None
+    assert GoalExecutionAgent._single_sourced_calculation_answer(
+        request, [calc.model_copy(update={"validation_passed": False})], evidence) is None

@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 import time
 import json
+import math
 from dataclasses import replace
 from datetime import datetime, timezone
 from collections.abc import Callable
@@ -422,6 +423,44 @@ class GoalExecutionAgent(GoalResearchAgent):
             else:
                 return "\n\n".join(lines)
         return None
+
+    @staticmethod
+    def _single_sourced_calculation_answer(request: GoalResearchRequest, computations: list[Any],
+                                           evidence: list[dict[str, Any]]) -> str | None:
+        """Do not let free-form synthesis cast doubt on one validated, literal sourced result."""
+        if len(computations) != 1 or not calculation_requested(request.goal or request.topic, True):
+            return None
+        calc = computations[0]
+        if (not calc.validation_passed or not calc.formula or not calc.formula_evidence_ids
+                or len(calc.output_manifest) != 1):
+            return None
+        sourced = {(row.source_id, normalize_formula(row.expression_candidate))
+                   for row in FormulaSourceRegistry.from_evidence(evidence).records
+                   if row.expression_candidate}
+        source_ids = [source_id for source_id in calc.formula_evidence_ids
+                      if (source_id, normalize_formula(calc.formula)) in sourced]
+        if not source_ids:
+            return None
+        output_id, output = next(iter(calc.output_manifest.items()))
+        value = output.get("value")
+        if not isinstance(value, (int, float)) or isinstance(value, bool) or not math.isfinite(value):
+            return None
+        symbol = re.match(r"\s*([A-Za-z_][A-Za-z0-9_]*)\s*=", calc.formula)
+        label = symbol.group(1) if symbol else str(output.get("name") or output_id)
+        unit = str(output.get("unit") or "").strip()
+        claim = f"{label} = {value:g}{' ' + unit if unit else ''}"
+        citations = list(dict.fromkeys([calc.computation_id, *calc.source_input_ids, *source_ids]))
+        issues, _ = validate_calc_claim(claim, citations, [output_id],
+                                        {calc.computation_id: calc}, evidence)
+        if issues:
+            return None
+        formula_citations = " ".join(f"[{source_id}]" for source_id in source_ids)
+        result_citations = " ".join(f"[{source_id}]" for source_id in citations)
+        if prefers_korean(request):
+            return (f"근거 자료의 관계식: {calc.formula} {formula_citations}\n\n"
+                    f"검증된 계산 결과 {claim} {result_citations}")
+        return (f"Source-backed equation: {calc.formula} {formula_citations}\n\n"
+                f"Validated calculation: {claim} {result_citations}")
 
     @staticmethod
     def _simulation_answer(computation: Any, spec: SimulationSpec,
@@ -949,6 +988,8 @@ class GoalExecutionAgent(GoalResearchAgent):
                                         if simulation and simulation_spec else
                                         self._api_gravity_answer(request, result.computations, evidence)
                                         or self._simple_user_fact_answer(request, result.computations, evidence)
+                                        or (self._single_sourced_calculation_answer(
+                                            request, result.computations, evidence) if len(criteria) == 1 else None)
                                         or (literal_claim.answer if literal_claim else None)
                                         or await self._synthesize(request, criteria, evidence, [],
                                                                   computations=result.computations))

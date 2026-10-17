@@ -30,6 +30,14 @@ def explicit_document_constraints(query: str, catalog: Iterable[dict]) -> list[D
         aliases = {title}
         if " - " in title.replace("_", " "):
             aliases.add(title.replace("_", " ").split(" - ", 1)[1])
+        # A numbered volume is often cited by its final title noun and volume.
+        # Single-document selection below still rejects ambiguous matches.
+        for candidate in list(aliases):
+            volume = re.search(r"(?i)^(.+?),\s*volume\s+([ivxlcdm0-9]+)\b", candidate)
+            if volume:
+                noun = _words(volume.group(1)).split()[-1]
+                aliases.update({f"{noun} {volume.group(2)}",
+                                f"{noun} Volume {volume.group(2)}"})
         for alias in aliases:
             phrase = _words(alias)
             if len(phrase.split()) < 2:
