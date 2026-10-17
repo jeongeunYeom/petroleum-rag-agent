@@ -118,7 +118,8 @@ def legacy_audit(source: Path, report_dir: Path, rows: list[dict]) -> None:
             "id": chunk_id, "metadata": metadata, "text": text,
         })
     targets = ("Well_Test_Analysis", "Drilling_Engineering", "Reservoir Engineering",
-               "Volume_I.", "Volume_II.", "Volume_V")
+               "Reservoir_Simulation", "Volume_I.", "Volume_II.", "Volume_V",
+               "Volume V (1)")
     samples = []
     for row in rows:
         if not any(target in row["filename"] for target in targets):
