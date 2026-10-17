@@ -146,13 +146,13 @@ def main() -> None:
         normalized = re.sub(r"\s+", "", combined.lower()).replace("μ", "mu").replace("µ", "mu")
         terms_present = {term: term in normalized for term in terms}
         equation_chunks = [
-            {"id": chunk_id, "text_prefix": text[:700], "verified": "equation_verified: true" in text.lower()}
+            {"id": chunk_id, "text_prefix": text[:500], "verified": "equation_verified: true" in text.lower()}
             for chunk_id, metadata, text in chunks if metadata.get("chunk_type") == "equation"
         ]
         equations.append({"label": label, "document_id": digest, "page": page,
                           "terms_present": terms_present, "equation_chunks": equation_chunks,
                           "text_chunk_count": sum(metadata.get("chunk_type") == "text" for _, metadata, _ in chunks),
-                          "text_prefix": combined[:1000]})
+                          "text_prefix": combined[:600]})
     write_json(out / "equation_audit.json", {"checks": equations})
 
     figures = []
@@ -177,11 +177,11 @@ def main() -> None:
                 "image_path": str(image_path) if image_path else None,
                 "image_exists": bool(image_path and image_path.is_file()),
                 "page_context_prefix": " ".join(
-                    part[:200] for _, item_meta, part in by_page[
+                    part[:120] for _, item_meta, part in by_page[
                         (str(metadata.get("document_id") or ""), int(metadata.get("page") or 0))
                     ] if item_meta.get("chunk_type") == "text"
-                )[:400],
-                "note_prefix": text[:800],
+                )[:240],
+                "note_prefix": text[:500],
             })
         if not selected:
             figures.append({"document": document, "figure_chunks": 0,
@@ -206,8 +206,8 @@ def main() -> None:
                for rank, hit in enumerate(hits, start=1)]
         retrieval.append({"query": query, "expected_document": document,
                           "expected_page": page, "top5": top,
-                          "source_text_prefix": source_text[:500],
-                          "indexed_text_prefix": indexed_body[:500],
+                          "source_text_prefix": source_text[:320],
+                          "indexed_text_prefix": indexed_body[:320],
                           "source_characters": len(source_text),
                           "indexed_body_characters": len(indexed_body),
                           "document_top5": any(hit["document"] == document for hit in top),
