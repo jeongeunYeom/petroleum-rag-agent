@@ -13,7 +13,7 @@ from app.models.goal_research_schemas import (
     GoalResearchRequest, GoalResearchResponse, GoalRunStatus, GoalStatus, GoalStopReason,
 )
 from app.models.research_schemas import (
-    EvidenceCounts, InternalEvidence, ResearchRequest, ResearchResponse, ResearchTiming,
+    EvidenceCounts, FigureEvidence, InternalEvidence, ResearchRequest, ResearchResponse, ResearchTiming,
 )
 from app.services.goal_action_planner import GoalActionPlanner, SIMULATE_WORDS
 from app.services.goal_intent import requests_sourced_formula
@@ -722,6 +722,8 @@ def test_korean_visual_cross_section_requires_figure_but_numeric_locator_does_no
     visual = "Formation Evaluation Figure 19의 맨 위 수평 단면도에서 어느 영역이 가까운지 그림으로 확인해줘"
     locator = "Figure 4에 나타난 Interval C의 Rw 값을 단위와 함께 알려줘"
     assert ResearchAgent._visual_figure_intent(visual)
+    assert ResearchAgent._visual_figure_intent(
+        "core slab 사진에서 표기된 TOP 깊이를 직접 읽고 비교해줘")
     assert not ResearchAgent._visual_figure_intent(locator)
     req = GoalResearchRequest(topic=visual, goal=visual, max_iterations=3,
                               execution_mode="autonomous_goal_execution",
@@ -735,6 +737,35 @@ def test_korean_visual_cross_section_requires_figure_but_numeric_locator_does_no
         evaluator=PassingEvaluator(), synthesizer=tempting_synthesis).run("GR-CROSS-SECTION", req))
     assert result.status != GoalStatus.ACHIEVED
     assert "Rxo가 borehole" not in result.final_answer
+    assert "Figure 근거" in result.final_answer
+
+
+def test_direct_visual_read_does_not_return_kb_only_numbers_when_figure_is_present():
+    class FigureResearch:
+        async def research(self, request):
+            source = InternalEvidence(evidence_id="KB1", document="manual.pdf", page=9,
+                                      chunk_id="text-1", score=1, excerpt="SLAB 1 TOP 15855 ft")
+            figure = FigureEvidence(evidence_id="FIG1", document="manual.pdf", page=9,
+                                    figure_number="Figure 3", excerpt="Core slab photograph",
+                                    source_note="Figure 3: core slabs")
+            return ResearchResponse(query=request.query, answer="", internal_sources=[source],
+                                    web_sources=[], figures=[figure], provenance=[], model=request.model,
+                                    inference_used=False, evidence_counts=EvidenceCounts(internal=1, external=0),
+                                    routing_mode="internal_only", retrieval_mode="hybrid",
+                                    timing=ResearchTiming(retrieval_seconds=0, reasoning_seconds=0,
+                                                          elapsed_seconds=0), validation={})
+
+    async def kb_only(*_args, **_kwargs):
+        return "SLAB 1의 TOP은 15855 ft입니다. [KB1]"
+
+    message = "Figure 3 사진에서 SLAB 1의 TOP 깊이를 직접 읽어줘."
+    request = GoalResearchRequest(topic=message, goal=message, max_iterations=3,
+                                  execution_mode="autonomous_goal_execution",
+                                  success_criteria=[GoalCriterion(criterion_id="C1", description="Read figure label")])
+    result = asyncio.run(GoalExecutionAgent(FigureResearch(), object(), evaluator=PassingEvaluator(),
+                                             synthesizer=kb_only).run("GR-FIG-KB-ONLY", request))
+    assert result.status != GoalStatus.ACHIEVED
+    assert "15855" not in result.final_answer
     assert "Figure 근거" in result.final_answer
 
 

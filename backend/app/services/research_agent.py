@@ -52,8 +52,8 @@ EXPLICIT_WEB_ONLY_RE = re.compile(
     re.IGNORECASE,
 )
 FIGURE_RE = re.compile(
-    r"graph|plot|figure|chart|curve|type\s*curve|\brft\b|x[- ]?axis|y[- ]?axis|"
-    r"pressure\s*gradient|supercharg(?:ed|ing)|그래프|도표|그림|플롯|축|곡선|"
+    r"graph|plot|figure|chart|curve|type\s*curve|photo(?:graph)?|image|\brft\b|x[- ]?axis|y[- ]?axis|"
+    r"pressure\s*gradient|supercharg(?:ed|ing)|그래프|도표|그림|사진|이미지|플롯|축|곡선|"
     r"압력\s*(?:기울기|구배)",
     re.IGNORECASE,
 )

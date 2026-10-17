@@ -993,6 +993,9 @@ class GoalExecutionAgent(GoalResearchAgent):
                                         or (literal_claim.answer if literal_claim else None)
                                         or await self._synthesize(request, criteria, evidence, [],
                                                                   computations=result.computations))
+                    if visual_required and not any(
+                            f"[{figure.evidence_id}]" in latest_candidate for figure in accumulator.figures):
+                        figure_support_missing = True
                     if figure_support_missing:
                         latest_candidate = ("요청한 그림의 시각적 위치 또는 순서를 확인할 수 있는 Figure 근거가 부족합니다."
                                             if korean else
