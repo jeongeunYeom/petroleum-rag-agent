@@ -33,6 +33,11 @@ SANITY = (
     ("Heriot_Watt_University_-_Formation_Evaluation.pdf", "water saturation Rw Rwa square root relationship", 171),
     ("Heriot-Watt University - Reservoir Engineering.pdf", "API gravity specific gravity 141.5 131.5", 90),
 )
+FIGURE_SANITY = (
+    ("Heriot_Watt_University_-_Formation_Evaluation.pdf", "Formation Evaluation Figure 4 Rwa curve ISF sonic log", 172),
+    ("Heriot-Watt_University_-_Drilling_Engineering.pdf", "Drilling Engineering Figure 2.1 d Exponent Plot depth", 201),
+    ("Heriot-Watt_University_-_Well_Test_Analysis.pdf", "Well Test Analysis Figure 65 radial flow layered system", 75),
+)
 
 
 def main() -> None:
@@ -208,7 +213,21 @@ def main() -> None:
                           "document_top5": any(hit["document"] == document for hit in top),
                           "page_top5": any(hit["document"] == document and hit["page"] == page for hit in top)})
         print(f"[RETRIEVAL] {document}: doc={retrieval[-1]['document_top5']} page={retrieval[-1]['page_top5']}", flush=True)
-    write_json(out / "retrieval_sanity.json", {"checks": retrieval})
+    figure_retrieval = []
+    for document, query, page in FIGURE_SANITY:
+        hits = agent.search_knowledge_base(query, 5)
+        top = [{"rank": rank, "document": (hit.get("metadata") or {}).get("document"),
+                "page": (hit.get("metadata") or {}).get("page"),
+                "chunk_type": (hit.get("metadata") or {}).get("chunk_type")}
+               for rank, hit in enumerate(hits, start=1)]
+        figure_retrieval.append({
+            "query": query, "expected_document": document, "expected_page": page,
+            "top5": top,
+            "figure_page_top5": any(hit["document"] == document and hit["page"] == page
+                                    and hit["chunk_type"] == "figure" for hit in top),
+        })
+        print(f"[FIGURE RETRIEVAL] {document} p{page}: {figure_retrieval[-1]['figure_page_top5']}", flush=True)
+    write_json(out / "retrieval_sanity.json", {"checks": retrieval, "figure_checks": figure_retrieval})
 
     ready = (
         len(comparison) == 12
